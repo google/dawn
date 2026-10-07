@@ -50,7 +50,7 @@ class ErrorSink {
         E maybeError,
         InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
         if (maybeError.IsError()) [[unlikely]] {
-            ConsumeError(UnknownError(maybeError.AcquireError()), additionalAllowedErrors);
+            ConsumeError(maybeError.AcquireError(), additionalAllowedErrors);
             return true;
         }
         return false;
@@ -63,8 +63,7 @@ class ErrorSink {
                                      const char* formatStr,
                                      const Args&... args) {
         if (maybeError.IsError()) [[unlikely]] {
-            ConsumeError(UnknownError(maybeError.AcquireError()), additionalAllowedErrors,
-                         formatStr, args...);
+            ConsumeError(maybeError.AcquireError(), additionalAllowedErrors, formatStr, args...);
             return true;
         }
         return false;
@@ -83,7 +82,7 @@ class ErrorSink {
         T* result,
         InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
         if (resultOrError.IsError()) [[unlikely]] {
-            ConsumeError(UnknownError(resultOrError.AcquireError()), additionalAllowedErrors);
+            ConsumeError(resultOrError.AcquireError(), additionalAllowedErrors);
             return true;
         }
         *result = resultOrError.AcquireSuccess();
@@ -108,24 +107,28 @@ class ErrorSink {
                                      const char* formatStr,
                                      const Args&... args) {
         if (resultOrError.IsError()) [[unlikely]] {
-            ConsumeError(UnknownError(resultOrError.AcquireError()), additionalAllowedErrors,
-                         formatStr, args...);
+            ConsumeError(resultOrError.AcquireError(), additionalAllowedErrors, formatStr, args...);
             return true;
         }
         *result = resultOrError.AcquireSuccess();
         return false;
     }
 
+    template <typename T>
+    void ConsumeError(ErrorAdapter<T> error) {
+        ConsumeErrorImpl(error);
+    }
+
     template <typename T, typename... Args>
-        requires(IsConcreteError<T>)
+        requires(IsConcreteError<T> || std::is_same_v<T, UnknownError>)
     void ConsumeError(std::unique_ptr<T> error) {
-        ConsumeError(UnknownError(std::move(error)), InternalErrorType::None);
+        ConsumeError(std::move(error), InternalErrorType::None);
     }
 
     template <typename T, typename... Args>
         requires(IsConcreteError<T> || std::is_same_v<T, UnknownError>)
     void ConsumeError(std::unique_ptr<T> error, InternalErrorType additionalAllowedErrors) {
-        return ConsumeError(UnknownError(std::move(error)), additionalAllowedErrors);
+        return ConsumeErrorImpl(ErrorAdapter{std::move(error)}, additionalAllowedErrors);
     }
 
     template <typename T, typename... Args>
@@ -140,24 +143,24 @@ class ErrorSink {
                       InternalErrorType additionalAllowedErrors,
                       const char* formatStr,
                       const Args&... args) {
-        ConsumeError(UnknownError(std::move(error)), additionalAllowedErrors, formatStr, args...);
+        ConsumeError(ErrorAdapter{std::move(error)}, additionalAllowedErrors, formatStr, args...);
     }
 
-    template <typename... Args>
-    void ConsumeError(UnknownError error,
+    template <typename T, typename... Args>
+    void ConsumeError(ErrorAdapter<T> error,
                       InternalErrorType additionalAllowedErrors,
                       const char* formatStr,
                       const Args&... args) {
-        if (static_cast<uint32_t>(error.GetType()) &
+        if (static_cast<uint32_t>(error.GetData()->GetType()) &
             (static_cast<uint32_t>(additionalAllowedErrors) |
              static_cast<uint32_t>(InternalErrorType::Validation))) {
-            error.AppendContext(formatStr, args...);
+            error.GetData()->AppendContext(formatStr, args...);
         }
-        ConsumeError(std::move(error), additionalAllowedErrors);
+        ConsumeErrorImpl(std::move(error), additionalAllowedErrors);
     }
 
-    virtual void ConsumeError(
-        UnknownError error,
+    virtual void ConsumeErrorImpl(
+        std::unique_ptr<UnknownError> error,
         InternalErrorType additionalAllowedErrors = InternalErrorType::None) = 0;
 };
 

@@ -28,6 +28,7 @@
 #include <gtest/gtest.h>
 #include <webgpu/webgpu_cpp.h>
 
+#include <memory>
 #include <string_view>
 #include <utility>
 
@@ -81,8 +82,9 @@ class AllowedErrorTests : public DawnMockTest {};
 //
 
 TEST_F(AllowedErrorTests, QueueSubmit) {
+    std::unique_ptr<UnrecoverableError> err = DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage);
     EXPECT_CALL(*(mDeviceMock->GetQueueMock()), SubmitImpl)
-        .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage).TakeAsUnrecoverable())));
+        .WillOnce(Return(ByMove(std::move(err))));
 
     // Expect the device lost because of the error.
     EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
@@ -99,8 +101,9 @@ TEST_F(AllowedErrorTests, QueueWriteBuffer) {
     Ref<BufferMock> bufferMock = AcquireRef(new NiceMock<BufferMock>(mDeviceMock, &desc));
     wgpu::Buffer buffer = wgpu::Buffer::Acquire(ToAPI(ReturnToAPI(std::move(bufferMock))));
 
+    std::unique_ptr<UnrecoverableError> err = DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage);
     EXPECT_CALL(*(mDeviceMock->GetQueueMock()), WriteBufferImpl)
-        .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage).TakeAsUnrecoverable())));
+        .WillOnce(Return(ByMove(std::move(err))));
 
     // Expect the device lost because of the error.
     EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
@@ -120,8 +123,9 @@ TEST_F(AllowedErrorTests, QueueWriteTexture) {
     Ref<TextureMock> textureMock = AcquireRef(new NiceMock<TextureMock>(mDeviceMock, &desc));
     wgpu::Texture texture = wgpu::Texture::Acquire(ToAPI(ReturnToAPI(std::move(textureMock))));
 
+    std::unique_ptr<UnrecoverableError> err = DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage);
     EXPECT_CALL(*(mDeviceMock->GetQueueMock()), WriteTextureImpl)
-        .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage).TakeAsUnrecoverable())));
+        .WillOnce(Return(ByMove(std::move(err))));
 
     // Expect the device lost because of the error.
     EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
@@ -153,8 +157,8 @@ TEST_F(AllowedErrorTests, QueueCopyTextureForBrowserOomBuffer) {
     wgpu::CopyTextureForBrowserOptions options = {};
 
     // Copying texture for browser internally allocates a buffer which we will cause to fail here.
-    EXPECT_CALL(*mDeviceMock, CreateBufferImpl)
-        .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage).TakeAsUnrecoverable())));
+    std::unique_ptr<UnrecoverableError> err = DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage);
+    EXPECT_CALL(*mDeviceMock, CreateBufferImpl).WillOnce(Return(ByMove(std::move(err))));
 
     // Expect the device lost because of the error.
     EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
@@ -195,8 +199,8 @@ TEST_F(AllowedErrorTests, QueueCopyExternalTextureForBrowserOomBuffer) {
     wgpu::CopyTextureForBrowserOptions options = {};
 
     // Copying texture for browser internally allocates a buffer which we will cause to fail here.
-    EXPECT_CALL(*mDeviceMock, CreateBufferImpl)
-        .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage).TakeAsUnrecoverable())));
+    std::unique_ptr<UnrecoverableError> err = DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage);
+    EXPECT_CALL(*mDeviceMock, CreateBufferImpl).WillOnce(Return(ByMove(std::move(err))));
 
     // Expect the device lost because of the error.
     EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
@@ -213,8 +217,9 @@ TEST_F(AllowedErrorTests, CreateComputePipeline) {
     desc.compute.module = csModule.Get();
 
     Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
+    std::unique_ptr<UnknownError> err = DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage);
     EXPECT_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage).TakeAsUnknown())));
+        .WillOnce(Return(ByMove(std::move(err))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl)
         .WillOnce(Return(ByMove(std::move(computePipelineMock))));
 
@@ -239,8 +244,8 @@ TEST_F(AllowedErrorTests, CreateRenderPipeline) {
     desc.depthStencil = &ds;
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
-    EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
-        .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage).TakeAsUnknown())));
+    std::unique_ptr<UnknownError> err = DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage);
+    EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl).WillOnce(Return(ByMove(std::move(err))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl)
         .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
 
@@ -260,10 +265,10 @@ TEST_F(AllowedErrorTests, CreateComputePipelineUnrecoverableError) {
     desc.compute.module = csModule.Get();
 
     Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
+    std::unique_ptr<UnknownError> err =
+        DAWN_PIPELINE_UNCATEGORIZED_ERROR(kPipelineUncategorizedErrorMessage);
     EXPECT_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillOnce(
-            Return(ByMove(DAWN_PIPELINE_UNCATEGORIZED_ERROR(kPipelineUncategorizedErrorMessage)
-                              .TakeAsUnknown())));
+        .WillOnce(Return(ByMove(std::move(err))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl)
         .WillOnce(Return(ByMove(std::move(computePipelineMock))));
 
@@ -290,10 +295,9 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineUnrecoverableError) {
     desc.depthStencil = &ds;
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
-    EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
-        .WillOnce(
-            Return(ByMove(DAWN_PIPELINE_UNCATEGORIZED_ERROR(kPipelineUncategorizedErrorMessage)
-                              .TakeAsUnknown())));
+    std::unique_ptr<UnknownError> err =
+        DAWN_PIPELINE_UNCATEGORIZED_ERROR(kPipelineUncategorizedErrorMessage);
+    EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl).WillOnce(Return(ByMove(std::move(err))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl)
         .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
 
@@ -317,8 +321,9 @@ TEST_F(AllowedErrorTests, CreateComputePipelineAsync) {
     desc.compute.module = csModule.Get();
 
     Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
+    std::unique_ptr<UnknownError> err = DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage);
     EXPECT_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage).TakeAsUnknown())));
+        .WillOnce(Return(ByMove(std::move(err))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl)
         .WillOnce(Return(ByMove(std::move(computePipelineMock))));
 
@@ -346,8 +351,8 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineAsync) {
     desc.depthStencil = &ds;
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
-    EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
-        .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage).TakeAsUnknown())));
+    std::unique_ptr<UnknownError> err = DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage);
+    EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl).WillOnce(Return(ByMove(std::move(err))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl)
         .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
 
@@ -370,9 +375,9 @@ TEST_F(AllowedErrorTests, CreateComputePipelineAsyncUnrecoverableError) {
     desc.compute.module = csModule.Get();
 
     Ref<ComputePipelineMock> computePipelineMock = ComputePipelineMock::Create(mDeviceMock, &desc);
+    std::unique_ptr<UnknownError> err = DAWN_UNRECOVERABLE_ERROR(kUnrecoverableErrorMessage);
     EXPECT_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillOnce(
-            Return(ByMove(DAWN_UNRECOVERABLE_ERROR(kUnrecoverableErrorMessage).TakeAsUnknown())));
+        .WillOnce(Return(ByMove(std::move(err))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl)
         .WillOnce(Return(ByMove(std::move(computePipelineMock))));
 
@@ -401,9 +406,8 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineAsyncUnrecoverableError) {
     desc.depthStencil = &ds;
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
-    EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
-        .WillOnce(
-            Return(ByMove(DAWN_UNRECOVERABLE_ERROR(kUnrecoverableErrorMessage).TakeAsUnknown())));
+    std::unique_ptr<UnknownError> err = DAWN_UNRECOVERABLE_ERROR(kUnrecoverableErrorMessage);
+    EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl).WillOnce(Return(ByMove(std::move(err))));
     EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl)
         .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
 
@@ -423,8 +427,8 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineAsyncUnrecoverableError) {
 
 // OOM error from buffer creation is allowed and surfaced directly.
 TEST_F(AllowedErrorTests, CreateBuffer) {
-    EXPECT_CALL(*mDeviceMock, CreateBufferImpl)
-        .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage).TakeAsUnrecoverable())));
+    std::unique_ptr<UnrecoverableError> err = DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage);
+    EXPECT_CALL(*mDeviceMock, CreateBufferImpl).WillOnce(Return(ByMove(std::move(err))));
 
     // Expect the OOM error.
     EXPECT_CALL(mDeviceErrorCallback, Call(CHandleIs(device.Get()), wgpu::ErrorType::OutOfMemory,
@@ -439,8 +443,8 @@ TEST_F(AllowedErrorTests, CreateBuffer) {
 
 // OOM error from texture creation is allowed and surfaced directly.
 TEST_F(AllowedErrorTests, CreateTexture) {
-    EXPECT_CALL(*mDeviceMock, CreateTextureImpl)
-        .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage).TakeAsUnrecoverable())));
+    std::unique_ptr<UnrecoverableError> err = DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage);
+    EXPECT_CALL(*mDeviceMock, CreateTextureImpl).WillOnce(Return(ByMove(std::move(err))));
 
     // Expect the OOM error.
     EXPECT_CALL(mDeviceErrorCallback, Call(CHandleIs(device.Get()), wgpu::ErrorType::OutOfMemory,
@@ -456,8 +460,8 @@ TEST_F(AllowedErrorTests, CreateTexture) {
 
 // OOM error from query set creation is allowed and surfaced directly.
 TEST_F(AllowedErrorTests, CreateQuerySet) {
-    EXPECT_CALL(*mDeviceMock, CreateQuerySetImpl)
-        .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage).TakeAsUnrecoverable())));
+    std::unique_ptr<UnrecoverableError> err = DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage);
+    EXPECT_CALL(*mDeviceMock, CreateQuerySetImpl).WillOnce(Return(ByMove(std::move(err))));
 
     // Expect the OOM error.
     EXPECT_CALL(mDeviceErrorCallback, Call(CHandleIs(device.Get()), wgpu::ErrorType::OutOfMemory,

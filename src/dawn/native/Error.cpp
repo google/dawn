@@ -33,12 +33,31 @@
 
 namespace dawn::native {
 
-UnrecoverableError::UnrecoverableError(std::unique_ptr<UnknownError> err)
-    : mData(err->ConvertToUnrecoverable()->ReleaseData()) {}
+UnknownError::UnknownError(std::unique_ptr<ErrorData> d) : mData(std::move(d)) {}
+UnknownError::UnknownError(std::unique_ptr<UnrecoverableError> d) : mData(d->ReleaseData()) {}
+UnknownError::UnknownError(std::unique_ptr<ValidationError> d) : mData(d->ReleaseData()) {}
+
+std::unique_ptr<ValidationError> UnknownError::TakeAsVal() {
+    DAWN_CHECK(IsVal());
+    return ValidationError::Create(std::move(mData));
+}
+
+std::unique_ptr<UnrecoverableError> UnknownError::TakeAsUnrecoverable() {
+    DAWN_CHECK(!IsVal());
+    return UnrecoverableError::Create(std::move(mData));
+}
+
+UnrecoverableError::UnrecoverableError(std::unique_ptr<UnknownError> d)
+    : UnknownError(d->ReleaseData()) {
+    if (GetType() == InternalErrorType::Validation) {
+        SetType(InternalErrorType::Unrecoverable);
+    }
+}
 
 void IgnoreErrors(MaybeUnknownError maybeError) {
     if (maybeError.IsError()) {
-        IgnoreErrors(maybeError.AcquireError()->TakeAsUnrecoverable());
+        std::unique_ptr<UnrecoverableError> err = ErrorAdapter(maybeError.AcquireError());
+        IgnoreErrors(std::move(err));
     }
 }
 

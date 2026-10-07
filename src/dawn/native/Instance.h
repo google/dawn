@@ -188,9 +188,9 @@ class InstanceBase final : public ErrorSink, public RefCounted {
     void DisconnectDawnPlatform();
 
     // ErrorSink implementation
-    using ErrorSink::ConsumeError;
-    void ConsumeError(UnknownError error,
-                      InternalErrorType additionalAllowedErrors = InternalErrorType::None) override;
+    void ConsumeErrorImpl(
+        std::unique_ptr<UnknownError> error,
+        InternalErrorType additionalAllowedErrors = InternalErrorType::None) override;
 
   private:
     explicit InstanceBase(const TogglesState& instanceToggles);

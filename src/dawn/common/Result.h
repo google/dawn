@@ -207,6 +207,7 @@ class [[nodiscard]] Result<Ref<T>, E> {
     template <typename U>
         requires std::convertible_to<U*, T*>
     explicit(false) Result(Result<Ref<U>, E>&& other);
+
     template <typename U>
         requires std::convertible_to<U*, T*>
     Result<Ref<U>, E>& operator=(Result<Ref<U>, E>&& other);

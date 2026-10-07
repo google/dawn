@@ -623,19 +623,19 @@ void DeviceBase::HandleDeviceLost(wgpu::DeviceLostReason reason, std::string_vie
     }
 }
 
-void DeviceBase::HandleError(ErrorData* data,
+void DeviceBase::HandleError(std::unique_ptr<ErrorData> data,
                              InternalErrorType additionalAllowedErrors,
                              wgpu::DeviceLostReason lostReason,
                              ForwardToErrorScope forwardToErrorScope) {
     auto deviceGuard = GetGuard();
-    AppendDebugLayerMessages(data);
+    AppendDebugLayerMessages(data.get());
 
     InternalErrorType type = data->GetType();
     if (type != InternalErrorType::Validation) {
         // D3D device can provide additional device removed reason. We would
         // like to query and log the device removed reason if the error is
         // not validation error.
-        AppendDeviceLostMessage(data);
+        AppendDeviceLostMessage(data.get());
     }
 
     InternalErrorType allowedErrors = InternalErrorType::Validation | additionalAllowedErrors;
@@ -707,13 +707,14 @@ void DeviceBase::HandleErrorGeneratingAsyncTask(Ref<ErrorGeneratingAsyncTask> ta
         // representable as wgpu::ErrorType. Forward it to HandleError but disable error scope
         // capturing. This will handle device loss and call the uncaptured error callback if one is
         // set.
-        HandleError(UnknownError(task->AcquireError()), InternalErrorType::None,
+        HandleError(task->AcquireError()->ReleaseData(), InternalErrorType::None,
                     wgpu::DeviceLostReason::Unknown, ForwardToErrorScope::No);
     });
 }
 
-void DeviceBase::ConsumeError(UnknownError err, InternalErrorType additionalAllowedErrors) {
-    HandleError(std::move(err), additionalAllowedErrors);
+void DeviceBase::ConsumeErrorImpl(std::unique_ptr<UnknownError> err,
+                                  InternalErrorType additionalAllowedErrors) {
+    HandleError(err->ReleaseData(), additionalAllowedErrors);
 }
 
 void DeviceBase::APISetLoggingCallback(const WGPULoggingCallbackInfo& callbackInfo) {
@@ -896,8 +897,8 @@ void DeviceBase::APIForceLoss(wgpu::DeviceLostReason reason, StringView messageI
     // Note that since we are passing None as the allowedErrors, an additional message will be
     // appended noting that the error was unexpected. Since this call is for testing only it is not
     // too important, but useful for users to understand where the extra message is coming from.
-    HandleError(DAWN_MAKE_UNRECOVERABLE_ERROR(std::string(message)), InternalErrorType::None,
-                reason);
+    HandleError(DAWN_MAKE_UNRECOVERABLE_ERROR(std::string(message)).ReleaseData(),
+                InternalErrorType::None, reason);
 }
 
 DeviceBase::State DeviceBase::GetState() const {
@@ -1325,8 +1326,7 @@ Future DeviceBase::APICreateComputePipelineAsync(
     if (IsLost()) {
         // Device lost error: create an async event that completes when created.
         return GetFuture(AcquireRef(new CreateComputePipelineAsyncEvent(
-            this, callbackInfo, DAWN_BACKEND_DEVICE_LOST_ERROR("Device lost").TakeAsUnknown(),
-            descriptor->label)));
+            this, callbackInfo, DAWN_BACKEND_DEVICE_LOST_ERROR("Device lost"), descriptor->label)));
     }
 
     ResultOrUnknownError<Ref<ComputePipelineBase>> resultOrError =
@@ -1404,8 +1404,7 @@ Future DeviceBase::APICreateRenderPipelineAsync(
     if (IsLost()) {
         // Device lost error: create an async event that completes when created.
         return GetFuture(AcquireRef(new CreateRenderPipelineAsyncEvent(
-            this, callbackInfo, DAWN_BACKEND_DEVICE_LOST_ERROR("Device lost").TakeAsUnknown(),
-            descriptor->label)));
+            this, callbackInfo, DAWN_BACKEND_DEVICE_LOST_ERROR("Device lost"), descriptor->label)));
     }
 
     auto resultOrError = CreateUninitializedRenderPipeline(descriptor);
@@ -1462,8 +1461,8 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
     TRACE_EVENT(DAWN_TRACE_CATEGORY(), "DeviceBase::APICreateShaderModule", "label", label.label);
 
     Ref<ShaderModuleBase> shaderModule;
-    std::unique_ptr<ValidationError> errorData;
-    ResultOrValError<Ref<ShaderModuleBase>> creationResult =
+    std::unique_ptr<UnknownError> errorData;
+    ResultOrUnknownError<Ref<ShaderModuleBase>> creationResult =
         CreateShaderModule(descriptor, /*internalExtensions=*/{});
     if (creationResult.IsSuccess()) {
         // CreateShaderModule can succeed but still return a shader module which failed compilation.
@@ -1528,8 +1527,7 @@ BufferBase* DeviceBase::APICreateErrorBuffer(const BufferDescriptor* desc) {
         // (pretend there was a mapping OOM), so we don't have to bother mapping the ErrorBuffer
         // (would have to return nullptr anyway if there was actually an OOM).
         std::unique_ptr<UnrecoverableError> error =
-            DAWN_OUT_OF_MEMORY_ERROR("mappedAtCreation is not implemented for CreateErrorBuffer")
-                .TakeAsUnrecoverable();
+            DAWN_OUT_OF_MEMORY_ERROR("mappedAtCreation is not implemented for CreateErrorBuffer");
         error->AppendContext("calling %s.CreateBuffer(%s).", this, desc);
         EmitLog(wgpu::LoggingType::Error, error->GetFormattedMessage());
         return nullptr;
@@ -1541,7 +1539,8 @@ BufferBase* DeviceBase::APICreateErrorBuffer(const BufferDescriptor* desc) {
                        desc)) {
         auto* clientErrorInfo = unpacked.Get<DawnBufferDescriptorErrorInfoFromWireClient>();
         if (clientErrorInfo != nullptr && clientErrorInfo->outOfMemory) {
-            HandleError(DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate memory for buffer mapping"),
+            HandleError(DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate memory for buffer mapping")
+                            .ReleaseData(),
                         InternalErrorType::OutOfMemory);
         }
     }
@@ -1696,7 +1695,7 @@ ResultOrUnknownError<Ref<SharedTextureMemoryBase>> DeviceBase::ImportSharedTextu
 
 ResultOrUnknownError<Ref<SharedTextureMemoryBase>> DeviceBase::ImportSharedTextureMemoryImpl(
     UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) {
-    return UnknownError{DAWN_UNIMPLEMENTED_ERROR("Not implemented")};
+    return DAWN_UNIMPLEMENTED_ERROR("Not implemented");
 }
 
 SharedFenceBase* DeviceBase::APIImportSharedFence(const SharedFenceDescriptor* descriptor) {
@@ -1961,7 +1960,8 @@ void DeviceBase::APIInjectError(wgpu::ErrorType type, StringView message) {
     // the LoseForTesting function that can be used instead.
     if (type != wgpu::ErrorType::Validation && type != wgpu::ErrorType::OutOfMemory) {
         HandleError(
-            DAWN_VALIDATION_ERROR("Invalid injected error, must be Validation or OutOfMemory"));
+            DAWN_VALIDATION_ERROR("Invalid injected error, must be Validation or OutOfMemory")
+                .ReleaseData());
         return;
     }
 
@@ -1969,9 +1969,9 @@ void DeviceBase::APIInjectError(wgpu::ErrorType type, StringView message) {
 
     InternalErrorType errorType = FromWGPUErrorType(type);
     if (errorType == InternalErrorType::Validation) {
-        HandleError(DAWN_MAKE_VALIDATION_ERROR(std::string(message)));
+        HandleError(DAWN_MAKE_VALIDATION_ERROR(std::string(message)).ReleaseData());
     } else {
-        HandleError(DAWN_MAKE_ERROR(errorType, std::string(message)),
+        HandleError(DAWN_MAKE_ERROR(errorType, std::string(message)).ReleaseData(),
                     InternalErrorType::OutOfMemory);
     }
 }
@@ -2301,7 +2301,7 @@ ResultOrUnknownError<Ref<SamplerBase>> DeviceBase::CreateSampler(
     return GetOrCreateSampler(&descriptor);
 }
 
-ResultOrValError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
+ResultOrUnknownError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
     const ShaderModuleDescriptor* descriptor,
     const std::vector<tint::wgsl::Extension>& internalExtensions) {
     DAWN_TRY(ValidateIsAlive());
@@ -2360,7 +2360,7 @@ ResultOrValError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
     // Check in-memory shader module cache first, and if missed create a new ShaderModule which may
     // use the BlobCache.
     return GetOrCreate(
-        mCaches->shaderModules, &blueprint, [&]() -> ResultOrValError<Ref<ShaderModuleBase>> {
+        mCaches->shaderModules, &blueprint, [&]() -> ResultOrError<Ref<ShaderModuleBase>> {
             Ref<ShaderModuleBase> shaderModule;
             DAWN_TRY_ASSIGN(shaderModule, CreateShaderModuleImpl(unpacked, internalExtensions));
             shaderModule->SetContentHash(blueprintHash);
@@ -2802,7 +2802,8 @@ std::pair<std::string, bool> DeviceBase::GetTraceInfo() {
 
 tint::InternalCompilerErrorCallbackInfo DeviceBase::GetTintInternalCompilerErrorCallback() {
     static auto tintInternalCompilerErrorCallback = [](std::string err, void* userdata) {
-        static_cast<DeviceBase*>(userdata)->HandleError(DAWN_MAKE_UNRECOVERABLE_ERROR(err));
+        static_cast<DeviceBase*>(userdata)->HandleError(
+            DAWN_MAKE_UNRECOVERABLE_ERROR(err).ReleaseData());
     };
     return tint::InternalCompilerErrorCallbackInfo{
         .callback = tintInternalCompilerErrorCallback,

@@ -307,6 +307,7 @@ Checks:
   - -google-readability-casting                                 # modernize-avoid-c-style-cast
   - -google-readability-function-size                           # readability-function-size
   - -hicpp-uppercase-literal-suffix                             # readability-uppercase-literal-suffix
+  - -hicpp-explicit-conversions                                 # google-explicit-constructors
   - -llvm-else-after-return                                     # readability-else-after-return
   - -llvm-qualified-auto                                        # readability-qualified-auto
   - -performance-faster-string-find                             # performance-prefer-single-char-overloads

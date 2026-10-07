@@ -67,9 +67,7 @@ namespace dawn::native {
 
 namespace {
 
-UnknownError ConcurrentUseError() {
-    return DAWN_VALIDATION_ERROR("Concurrent buffer operations are not allowed");
-}
+constexpr const char kConcurrentUseError[] = "Concurrent buffer operations are not allowed";
 
 class ErrorBuffer final : public BufferBase {
   public:
@@ -544,8 +542,8 @@ void BufferBase::DestroyImpl(DestroyReason reason) {
             case BufferState::InUse: {
                 // This is never supposed to happen but another operation is happening concurrently
                 // with API Destroy() call.
-                GetDevice()->ConsumeError(ConcurrentUseError().TakeAsVal(), "calling %s.Destroy().",
-                                          this);
+                std::unique_ptr<ValidationError> err = DAWN_VALIDATION_ERROR(kConcurrentUseError);
+                GetDevice()->ConsumeError(std::move(err), "calling %s.Destroy().", this);
                 while (mState.load(std::memory_order::acquire) == BufferState::InUse) {
                     // Spin loop instead of wait() to avoid overhead of signal in map/unmap.
                 }
@@ -781,7 +779,7 @@ ResultOrValError<BufferBase::ScopedUseBuffer> BufferBase::ValidateCanUseOnQueueN
         case BufferState::SharedMemoryNoAccess:
             return DAWN_VALIDATION_ERROR("%s used in submit without shared memory access.", this);
         case BufferState::InUse:
-            return ConcurrentUseError();
+            return DAWN_VALIDATION_ERROR(kConcurrentUseError);
         case BufferState::Unmapped:
             DAWN_TRY(TransitionState(state, BufferState::InUse));
             return ScopedUseBuffer(this);
@@ -822,7 +820,7 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
                 case BufferState::MappedAtCreation:
                     return DAWN_VALIDATION_ERROR("%s is already mapped.", this);
                 case BufferState::InUse:
-                    return ConcurrentUseError();
+                    return DAWN_VALIDATION_ERROR(kConcurrentUseError);
                 case BufferState::PendingMap:
                     return DAWN_VALIDATION_ERROR("%s already has an outstanding map pending.",
                                                  this);
@@ -956,23 +954,16 @@ MaybeError BufferBase::CopyFromStagingBuffer() {
 }
 
 void BufferBase::APIUnmap() {
-    MaybeValError validateUnmapError = [&]() -> MaybeValError {
+    MaybeUnknownError unmapError = [&]() -> MaybeUnknownError {
         DAWN_TRY(ValidateUnmap());
         DAWN_TRY(UnmapInternal(false));
-        return {};
-    }();
-    if (GetDevice()->ConsumedError(std::move(validateUnmapError), "calling %s.Unmap().", this)) {
-        return;
-    }
-
-    MaybeError unmapError = [&]() -> MaybeError {
         DAWN_TRY(GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands());
         return {};
     }();
     std::ignore = GetDevice()->ConsumedError(std::move(unmapError), "calling %s.Unmap().", this);
 }
 
-MaybeValError BufferBase::Unmap(bool forDestroy) {
+MaybeUnknownError BufferBase::Unmap(bool forDestroy) {
     switch (mState.load(std::memory_order::acquire)) {
         case BufferState::Mapped:
             DAWN_TRY(TransitionState(BufferState::Mapped, BufferState::InUse));
@@ -1000,7 +991,7 @@ MaybeValError BufferBase::Unmap(bool forDestroy) {
             }
             break;
         case BufferState::InUse:
-            return ConcurrentUseError();
+            return DAWN_VALIDATION_ERROR(kConcurrentUseError);
         case BufferState::Unmapped:
             return {};
         case BufferState::SharedMemoryNoAccess:
@@ -1009,7 +1000,7 @@ MaybeValError BufferBase::Unmap(bool forDestroy) {
         case BufferState::Destroyed:
             // UnmapInternal() already handled waiting for PendingMap to be done so there must have
             // been a concurrent operation that changes state between the two atomic loads.
-            return ConcurrentUseError();
+            return DAWN_VALIDATION_ERROR(kConcurrentUseError);
     }
 
     mState.store(BufferState::Unmapped, std::memory_order::release);
@@ -1033,7 +1024,7 @@ Ref<BufferBase::MapAsyncEvent> BufferBase::UnmapEarly(BufferState newState,
     return std::move(mPendingMapEvent);
 }
 
-MaybeValError BufferBase::UnmapInternal(bool forDestroy) {
+MaybeUnknownError BufferBase::UnmapInternal(bool forDestroy) {
     BufferState state = mState.load(std::memory_order::acquire);
 
     // If the buffer is already destroyed, we don't need to do anything.
@@ -1281,8 +1272,7 @@ MaybeValError BufferBase::TransitionState(BufferState currentState, BufferState 
     if (mState.compare_exchange_strong(currentState, desiredState, std::memory_order::acq_rel)) {
         return {};
     }
-
-    return ConcurrentUseError();
+    return DAWN_VALIDATION_ERROR(kConcurrentUseError);
 }
 
 BufferBase::ScopedUseBuffer::ScopedUseBuffer() = default;

@@ -140,7 +140,8 @@ class Surface final : public ErrorMonad {
     MaybeUnknownError Configure(const SurfaceConfiguration* config);
     MaybeValError Unconfigure();
 
-    MaybeValError GetCapabilities(AdapterBase* adapter, SurfaceCapabilities* capabilities) const;
+    MaybeUnknownError GetCapabilities(AdapterBase* adapter,
+                                      SurfaceCapabilities* capabilities) const;
     MaybeError GetCurrentTexture(SurfaceTexture* surfaceTexture) const;
 
     Ref<InstanceBase> mInstance;

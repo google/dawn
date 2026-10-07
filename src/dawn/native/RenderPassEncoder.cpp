@@ -167,7 +167,7 @@ void RenderPassEncoder::End() {
 
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeValError {
+        [&](CommandAllocator* allocator) -> MaybeUnknownError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(ValidateProgrammableEncoderEnd());
 

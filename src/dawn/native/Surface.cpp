@@ -557,8 +557,8 @@ MaybeValError Surface::Unconfigure() {
     return {};
 }
 
-MaybeValError Surface::GetCapabilities(AdapterBase* adapter,
-                                       SurfaceCapabilities* capabilities) const {
+MaybeUnknownError Surface::GetCapabilities(AdapterBase* adapter,
+                                           SurfaceCapabilities* capabilities) const {
     DAWN_INVALID_IF(IsError(), "%s is invalid.", this);
 
     DAWN_TRY(mCapabilityCache->WithAdapterCapabilities(
@@ -620,7 +620,7 @@ void Surface::APIConfigure(const SurfaceConfiguration* config) {
 
 wgpu::Status Surface::APIGetCapabilities(AdapterBase* adapter,
                                          SurfaceCapabilities* capabilities) const {
-    MaybeValError maybeError = GetCapabilities(adapter, capabilities);
+    MaybeUnknownError maybeError = GetCapabilities(adapter, capabilities);
     if (!GetCurrentDevice()) {
         return mInstance->ConsumedError(std::move(maybeError)) ? wgpu::Status::Error
                                                                : wgpu::Status::Success;

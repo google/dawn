@@ -55,7 +55,7 @@ class ShaderModule final : public ShaderModuleBase {
         const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
         const std::vector<tint::wgsl::Extension>& internalExtensions);
 
-    ResultOrValError<d3d::CompiledShader> Compile(
+    ResultOrUnknownError<d3d::CompiledShader> Compile(
         const ProgrammableStage& programmableStage,
         SingleShaderStage stage,
         const PipelineLayout* layout,

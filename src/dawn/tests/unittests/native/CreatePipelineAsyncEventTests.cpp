@@ -87,9 +87,9 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationValidationErrorInCreateRende
     Ref<RenderPipelineMock> renderPipelineMock =
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
+    std::unique_ptr<UnknownError> err = DAWN_VALIDATION_ERROR(kErrorMessage);
     ON_CALL(*renderPipelineMock.Get(), InitializeImpl)
-        .WillByDefault(
-            testing::Return(testing::ByMove(DAWN_VALIDATION_ERROR(kErrorMessage).TakeAsUnknown())));
+        .WillByDefault(testing::Return(testing::ByMove(std::move(err))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(renderPipelineMock)));
 
@@ -118,9 +118,9 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationUnrecoverableErrorInCreateRe
     Ref<RenderPipelineMock> renderPipelineMock =
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
+    std::unique_ptr<UnknownError> err = DAWN_MAKE_UNRECOVERABLE_ERROR(std::string(kErrorMessage));
     ON_CALL(*renderPipelineMock.Get(), InitializeImpl)
-        .WillByDefault(testing::Return(testing::ByMove(
-            DAWN_MAKE_UNRECOVERABLE_ERROR(std::string(kErrorMessage)).TakeAsUnknown())));
+        .WillByDefault(testing::Return(testing::ByMove(std::move(err))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(renderPipelineMock)));
 
@@ -174,9 +174,9 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationValidationErrorInCreateCompu
     Ref<ComputePipelineMock> computePipelineMock =
         ComputePipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
+    std::unique_ptr<UnknownError> err = DAWN_VALIDATION_ERROR(kErrorMessage);
     ON_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillByDefault(
-            testing::Return(testing::ByMove(DAWN_VALIDATION_ERROR(kErrorMessage).TakeAsUnknown())));
+        .WillByDefault(testing::Return(testing::ByMove(std::move(err))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedComputePipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(computePipelineMock)));
 
@@ -200,9 +200,9 @@ TEST_F(CreatePipelineAsyncEventTests,
     Ref<ComputePipelineMock> computePipelineMock =
         ComputePipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
+    std::unique_ptr<UnknownError> err = DAWN_MAKE_UNRECOVERABLE_ERROR(std::string(kErrorMessage));
     ON_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillByDefault(testing::Return(testing::ByMove(
-            DAWN_MAKE_UNRECOVERABLE_ERROR(std::string(kErrorMessage)).TakeAsUnknown())));
+        .WillByDefault(testing::Return(testing::ByMove(std::move(err))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedComputePipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(computePipelineMock)));
 

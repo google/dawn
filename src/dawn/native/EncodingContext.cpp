@@ -289,7 +289,7 @@ MaybeUnknownError EncodingContext::Finish() {
     CloseWithStatus(Status::Finished);
 
     if (mError != nullptr) {
-        return UnknownError{std::move(mError)};
+        return UnknownError::Create(mError->ReleaseData());
     }
 
     DAWN_INVALID_IF(currentEncoder != topLevelEncoder,

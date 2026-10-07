@@ -191,7 +191,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     // Internal non-reentrant version of Unmap. This is used in workarounds or additional copies.
     // Note that this will fail if the map event is pending since that should never happen
     // internally.
-    MaybeValError Unmap(bool forDestroy = false);
+    MaybeUnknownError Unmap(bool forDestroy = false);
 
     void DumpMemoryStatistics(dawn::native::MemoryDump* dump, const char* prefix) const;
 
@@ -271,7 +271,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
                                                           bool writable);
     [[nodiscard]] Ref<MapAsyncEvent> UnmapEarly(BufferState newState,
                                                 std::string_view abortMessage);
-    MaybeValError UnmapInternal(bool forDestroy);
+    MaybeUnknownError UnmapInternal(bool forDestroy);
 
     // Updates internal state to reflect that the buffer is now mapped.
     MaybeError FinalizeMap(BufferState newState);

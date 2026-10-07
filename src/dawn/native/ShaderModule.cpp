@@ -250,8 +250,7 @@ wgpu::SamplerBindingType TintSamplerTypeToSamplerBindingType(
     DAWN_UNREACHABLE();
 }
 
-ResultOrError<TextureComponentType> TintComponentTypeToTextureComponentType(
-    tint::inspector::ComponentType type) {
+TextureComponentType TintComponentTypeToTextureComponentType(tint::inspector::ComponentType type) {
     switch (type) {
         case tint::inspector::ComponentType::kF32:
         case tint::inspector::ComponentType::kF16:
@@ -266,8 +265,7 @@ ResultOrError<TextureComponentType> TintComponentTypeToTextureComponentType(
     DAWN_UNREACHABLE();
 }
 
-ResultOrError<VertexFormatBaseType> TintComponentTypeToVertexFormatBaseType(
-    tint::inspector::ComponentType type) {
+VertexFormatBaseType TintComponentTypeToVertexFormatBaseType(tint::inspector::ComponentType type) {
     switch (type) {
         case tint::inspector::ComponentType::kF32:
         case tint::inspector::ComponentType::kF16:
@@ -282,7 +280,7 @@ ResultOrError<VertexFormatBaseType> TintComponentTypeToVertexFormatBaseType(
     DAWN_UNREACHABLE();
 }
 
-ResultOrError<wgpu::BufferBindingType> TintResourceTypeToBufferBindingType(
+wgpu::BufferBindingType TintResourceTypeToBufferBindingType(
     tint::inspector::ResourceBinding::ResourceType resource_type) {
     switch (resource_type) {
         case tint::inspector::ResourceBinding::ResourceType::kUniformBuffer:
@@ -297,7 +295,7 @@ ResultOrError<wgpu::BufferBindingType> TintResourceTypeToBufferBindingType(
     DAWN_UNREACHABLE();
 }
 
-ResultOrError<wgpu::StorageTextureAccess> TintResourceTypeToStorageTextureAccess(
+wgpu::StorageTextureAccess TintResourceTypeToStorageTextureAccess(
     tint::inspector::ResourceBinding::ResourceType resource_type) {
     switch (resource_type) {
         case tint::inspector::ResourceBinding::ResourceType::kWriteOnlyStorageTexture:
@@ -312,7 +310,7 @@ ResultOrError<wgpu::StorageTextureAccess> TintResourceTypeToStorageTextureAccess
     DAWN_UNREACHABLE();
 }
 
-ResultOrError<wgpu::TexelBufferAccess> TintResourceTypeToTexelBufferAccess(
+wgpu::TexelBufferAccess TintResourceTypeToTexelBufferAccess(
     tint::inspector::ResourceBinding::ResourceType resource_type) {
     switch (resource_type) {
         case tint::inspector::ResourceBinding::ResourceType::kReadOnlyTexelBuffer:
@@ -325,7 +323,7 @@ ResultOrError<wgpu::TexelBufferAccess> TintResourceTypeToTexelBufferAccess(
     DAWN_UNREACHABLE();
 }
 
-ResultOrError<InterStageComponentType> TintComponentTypeToInterStageComponentType(
+InterStageComponentType TintComponentTypeToInterStageComponentType(
     tint::inspector::ComponentType type) {
     switch (type) {
         case tint::inspector::ComponentType::kF32:
@@ -342,8 +340,7 @@ ResultOrError<InterStageComponentType> TintComponentTypeToInterStageComponentTyp
     DAWN_UNREACHABLE();
 }
 
-ResultOrError<uint8_t> TintCompositionTypeToInterStageComponentCount(
-    tint::inspector::CompositionType type) {
+uint8_t TintCompositionTypeToInterStageComponentCount(tint::inspector::CompositionType type) {
     switch (type) {
         case tint::inspector::CompositionType::kScalar:
             return 1u;
@@ -359,7 +356,7 @@ ResultOrError<uint8_t> TintCompositionTypeToInterStageComponentCount(
     DAWN_UNREACHABLE();
 }
 
-ResultOrError<InterpolationType> TintInterpolationTypeToInterpolationType(
+InterpolationType TintInterpolationTypeToInterpolationType(
     tint::inspector::InterpolationType type) {
     switch (type) {
         case tint::inspector::InterpolationType::kPerspective:
@@ -374,7 +371,7 @@ ResultOrError<InterpolationType> TintInterpolationTypeToInterpolationType(
     DAWN_UNREACHABLE();
 }
 
-ResultOrError<InterpolationSampling> TintInterpolationSamplingToInterpolationSamplingType(
+InterpolationSampling TintInterpolationSamplingToInterpolationSamplingType(
     tint::inspector::InterpolationSampling type) {
     switch (type) {
         case tint::inspector::InterpolationSampling::kNone:
@@ -435,8 +432,7 @@ EntryPointMetadata::TextureMetadataQuery FromTintLevelSampleInfo(
     return result;
 }
 
-ResultOrError<PixelLocalMemberType> FromTintPixelLocalMemberType(
-    tint::inspector::PixelLocalMemberType type) {
+PixelLocalMemberType FromTintPixelLocalMemberType(tint::inspector::PixelLocalMemberType type) {
     switch (type) {
         case tint::inspector::PixelLocalMemberType::kU32:
             return PixelLocalMemberType::U32;
@@ -892,8 +888,8 @@ ResultOrValError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint
             }
 
             VertexAttributeLocation location(static_cast<uint8_t>(unsanitizedLocation));
-            DAWN_TRY_ASSIGN(metadata->vertexInputBaseTypes[location],
-                            TintComponentTypeToVertexFormatBaseType(inputVar.component_type));
+            metadata->vertexInputBaseTypes[location] =
+                TintComponentTypeToVertexFormatBaseType(inputVar.component_type);
             metadata->usedVertexInputs.set(location);
         }
 
@@ -907,15 +903,14 @@ ResultOrValError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint
         for (const auto& outputVar : entryPoint.output_variables) {
             EntryPointMetadata::InterStageVariableInfo variable;
             variable.name = outputVar.variable_name;
-            DAWN_TRY_ASSIGN(variable.baseType,
-                            TintComponentTypeToInterStageComponentType(outputVar.component_type));
-            DAWN_TRY_ASSIGN(variable.componentCount, TintCompositionTypeToInterStageComponentCount(
-                                                         outputVar.composition_type));
-            DAWN_TRY_ASSIGN(variable.interpolationType,
-                            TintInterpolationTypeToInterpolationType(outputVar.interpolation_type));
-            DAWN_TRY_ASSIGN(variable.interpolationSampling,
-                            TintInterpolationSamplingToInterpolationSamplingType(
-                                outputVar.interpolation_sampling));
+            variable.baseType =
+                TintComponentTypeToInterStageComponentType(outputVar.component_type);
+            variable.componentCount =
+                TintCompositionTypeToInterStageComponentCount(outputVar.composition_type);
+            variable.interpolationType =
+                TintInterpolationTypeToInterpolationType(outputVar.interpolation_type);
+            variable.interpolationSampling = TintInterpolationSamplingToInterpolationSamplingType(
+                outputVar.interpolation_sampling);
 
             uint32_t location = outputVar.attributes.location.value();
             if (location >= minInvalidLocation) {
@@ -974,15 +969,13 @@ ResultOrValError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint
             uint32_t location = inputVar.attributes.location.value();
             EntryPointMetadata::InterStageVariableInfo variable;
             variable.name = inputVar.variable_name;
-            DAWN_TRY_ASSIGN(variable.baseType,
-                            TintComponentTypeToInterStageComponentType(inputVar.component_type));
-            DAWN_TRY_ASSIGN(variable.componentCount, TintCompositionTypeToInterStageComponentCount(
-                                                         inputVar.composition_type));
-            DAWN_TRY_ASSIGN(variable.interpolationType,
-                            TintInterpolationTypeToInterpolationType(inputVar.interpolation_type));
-            DAWN_TRY_ASSIGN(variable.interpolationSampling,
-                            TintInterpolationSamplingToInterpolationSamplingType(
-                                inputVar.interpolation_sampling));
+            variable.baseType = TintComponentTypeToInterStageComponentType(inputVar.component_type);
+            variable.componentCount =
+                TintCompositionTypeToInterStageComponentCount(inputVar.composition_type);
+            variable.interpolationType =
+                TintInterpolationTypeToInterpolationType(inputVar.interpolation_type);
+            variable.interpolationSampling = TintInterpolationSamplingToInterpolationSamplingType(
+                inputVar.interpolation_sampling);
 
             if (DelayedInvalidIf(location >= maxInterStageShaderVariables,
                                  "Fragment input variable \"%s\" has a location (%u) that "
@@ -1056,10 +1049,9 @@ ResultOrValError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint
         uint32_t maxColorAttachments = limits.maxColorAttachments;
         for (const auto& outputVar : entryPoint.output_variables) {
             EntryPointMetadata::FragmentRenderAttachmentInfo variable;
-            DAWN_TRY_ASSIGN(variable.baseType,
-                            TintComponentTypeToTextureComponentType(outputVar.component_type));
-            DAWN_TRY_ASSIGN(variable.componentCount, TintCompositionTypeToInterStageComponentCount(
-                                                         outputVar.composition_type));
+            variable.baseType = TintComponentTypeToTextureComponentType(outputVar.component_type);
+            variable.componentCount =
+                TintCompositionTypeToInterStageComponentCount(outputVar.composition_type);
             DAWN_ASSERT(variable.componentCount <= 4);
 
             uint32_t unsanitizedAttachment = outputVar.attributes.location.value();
@@ -1100,10 +1092,9 @@ ResultOrValError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint
             DAWN_ASSERT(deviceInfo.features.IsEnabled(Feature::FramebufferFetch));
 
             EntryPointMetadata::FragmentRenderAttachmentInfo variable;
-            DAWN_TRY_ASSIGN(variable.baseType,
-                            TintComponentTypeToTextureComponentType(inputVar.component_type));
-            DAWN_TRY_ASSIGN(variable.componentCount, TintCompositionTypeToInterStageComponentCount(
-                                                         inputVar.composition_type));
+            variable.baseType = TintComponentTypeToTextureComponentType(inputVar.component_type);
+            variable.componentCount =
+                TintCompositionTypeToInterStageComponentCount(inputVar.composition_type);
             DAWN_ASSERT(variable.componentCount <= 4);
 
             uint32_t unsanitizedAttachment = inputVar.attributes.color.value();
@@ -1128,7 +1119,7 @@ ResultOrValError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint
 
             for (auto type : entryPoint.pixel_local_members) {
                 PixelLocalMemberType metadataType;
-                DAWN_TRY_ASSIGN(metadataType, FromTintPixelLocalMemberType(type));
+                metadataType = FromTintPixelLocalMemberType(type);
                 metadata->pixelLocalMembers.push_back(metadataType);
             }
         }
@@ -1160,8 +1151,7 @@ ResultOrValError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint
             case BindingInfoType::Buffer: {
                 BufferBindingInfo bindingInfo = {};
                 bindingInfo.minBindingSize = resource.size;
-                DAWN_TRY_ASSIGN(bindingInfo.type,
-                                TintResourceTypeToBufferBindingType(resource.resource_type));
+                bindingInfo.type = TintResourceTypeToBufferBindingType(resource.resource_type);
                 info.bindingInfo = bindingInfo;
                 break;
             }
@@ -1199,8 +1189,7 @@ ResultOrValError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint
 
             case BindingInfoType::StorageTexture: {
                 StorageTextureBindingInfo bindingInfo = {};
-                DAWN_TRY_ASSIGN(bindingInfo.access,
-                                TintResourceTypeToStorageTextureAccess(resource.resource_type));
+                bindingInfo.access = TintResourceTypeToStorageTextureAccess(resource.resource_type);
                 bindingInfo.format = TintImageFormatToTextureFormat(resource.image_format);
                 bindingInfo.viewDimension =
                     TintTextureDimensionToTextureViewDimension(resource.dim);
@@ -1211,8 +1200,7 @@ ResultOrValError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint
 
             case BindingInfoType::TexelBuffer: {
                 TexelBufferBindingInfo bindingInfo = {};
-                DAWN_TRY_ASSIGN(bindingInfo.access,
-                                TintResourceTypeToTexelBufferAccess(resource.resource_type));
+                bindingInfo.access = TintResourceTypeToTexelBufferAccess(resource.resource_type);
                 bindingInfo.format = TintImageFormatToTextureFormat(resource.image_format);
 
                 info.bindingInfo = bindingInfo;
@@ -1429,16 +1417,15 @@ ResultOrValError<Extent3D> ValidateComputeStageWorkgroupSize(
     return Extent3D{workgroupInfo.x, workgroupInfo.y, workgroupInfo.z};
 }
 
-CachedValidationError::CachedValidationError(std::unique_ptr<ValidationError>&& errorData) {
-    DAWN_ASSERT(errorData->GetType() == InternalErrorType::Validation);
+CachedValidationError::CachedValidationError(std::unique_ptr<UnknownError>&& errorData) {
     message = errorData->GetMessage();
     contexts = errorData->GetContexts();
     DAWN_CHECK(!message.empty());
 }
 
-std::unique_ptr<ValidationError> CachedValidationError::ToError() const {
+std::unique_ptr<UnknownError> CachedValidationError::ToError() const {
     DAWN_CHECK(!message.empty());
-    std::unique_ptr<ValidationError> error = DAWN_MAKE_VALIDATION_ERROR(message);
+    std::unique_ptr<UnknownError> error = DAWN_MAKE_VALIDATION_ERROR(message);
     std::for_each(contexts.begin(), contexts.end(), [&error](auto c) { error->AppendContext(c); });
     return error;
 }
@@ -1454,13 +1441,12 @@ bool ShaderModuleParseResult::HasError() const {
     return cachedValidationError.has_value();
 }
 
-std::unique_ptr<ValidationError> ShaderModuleParseResult::ToError() const {
+std::unique_ptr<UnknownError> ShaderModuleParseResult::ToError() const {
     DAWN_ASSERT(HasError());
     return cachedValidationError->ToError();
 }
 
-void ShaderModuleParseResult::SetValidationError(std::unique_ptr<ValidationError>&& errorData) {
-    DAWN_ASSERT(errorData->GetType() == InternalErrorType::Validation);
+void ShaderModuleParseResult::SetValidationError(std::unique_ptr<UnknownError>&& errorData) {
     cachedValidationError = CachedValidationError(std::move(errorData));
     // If validation error occurs, clear the Tint program and metadata table.
     tintProgram.UnsafeGetValue().reset();
@@ -1889,7 +1875,7 @@ void ShaderModuleBase::Initialize() {
 
         CompiledState resultState;
         auto taskMaybeError = [&resultState, shaderModule = static_cast<const ShaderModuleBase*>(
-                                                 this)]() -> MaybeValError {
+                                                 this)]() -> MaybeUnknownError {
             // Check blob cache first before calling ParseShaderModule. ShaderModuleParseResult
             // returned from blob cache or ParseShaderModule will hold compilation messages and
             // validation errors if any. ShaderModuleParseResult from ParseShaderModule also
@@ -1964,7 +1950,7 @@ void ShaderModuleBase::Initialize() {
     DAWN_ASSERT(IsInitialized());
 }
 
-std::unique_ptr<ValidationError> ShaderModuleBase::GetInitializationError() {
+std::unique_ptr<UnknownError> ShaderModuleBase::GetInitializationError() {
     DAWN_ASSERT(mInitializationError.has_value());
     return mInitializationError->ToError();
 }

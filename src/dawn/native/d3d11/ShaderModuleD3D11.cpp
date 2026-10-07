@@ -67,7 +67,7 @@ ShaderModule::ShaderModule(Device* device,
                            std::vector<tint::wgsl::Extension> internalExtensions)
     : ShaderModuleBase(device, descriptor, std::move(internalExtensions)) {}
 
-ResultOrValError<d3d::CompiledShader> ShaderModule::Compile(
+ResultOrUnknownError<d3d::CompiledShader> ShaderModule::Compile(
     const ProgrammableStage& programmableStage,
     SingleShaderStage stage,
     const PipelineLayout* layout,

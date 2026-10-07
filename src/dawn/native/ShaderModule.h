@@ -123,8 +123,8 @@ struct TintProgram : public RefCounted {
 // clang-format off
 DAWN_SERIALIZABLE(struct, CachedValidationError, CACHED_VALIDATION_ERROR_MEMBER){
     CachedValidationError() = default;
-    explicit CachedValidationError(std::unique_ptr<ValidationError>&& errorData);
-    std::unique_ptr<ValidationError> ToError() const;
+    explicit CachedValidationError(std::unique_ptr<UnknownError>&& errorData);
+    std::unique_ptr<UnknownError> ToError() const;
 };
 // clang-format on
 #undef CACHED_VALIDATION_ERROR_MEMBER
@@ -144,9 +144,9 @@ DAWN_SERIALIZABLE(struct, ShaderModuleParseResult, SHADER_MODULE_PARSE_RESULT_ME
     bool HasTintProgram() const;
     // Check if ShaderModuleParseResult holds validation error.
     bool HasError() const;
-    std::unique_ptr<ValidationError> ToError() const;
+    std::unique_ptr<UnknownError> ToError() const;
 
-    void SetValidationError(std::unique_ptr<ValidationError> && errorData);
+    void SetValidationError(std::unique_ptr<UnknownError> && errorData);
 };
 #undef SHADER_MODULE_PARSE_RESULT_MEMBER
 
@@ -375,7 +375,7 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
                                            ParsedCompilationMessages&& compilationMessages);
 
     void Initialize();
-    std::unique_ptr<ValidationError> GetInitializationError();
+    std::unique_ptr<UnknownError> GetInitializationError();
 
     ObjectType GetType() const override;
 
