@@ -1849,7 +1849,7 @@ void CommandEncoder::APICopyBufferToTexture(const TexelCopyBufferInfo* source,
 
     mEncodingContext.TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeValError {
+        [&](CommandAllocator* allocator) -> MaybeUnknownError {
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateTexelCopyBufferInfo(GetDevice(), *source));
                 DAWN_TRY_CONTEXT(ValidateCanUseAs(source->buffer, wgpu::BufferUsage::CopySrc),
@@ -2069,7 +2069,7 @@ void CommandEncoder::APICopyTextureToTexture(const TexelCopyTextureInfo* sourceO
 
     mEncodingContext.TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeValError {
+        [&](CommandAllocator* allocator) -> MaybeUnknownError {
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(source.texture));
                 DAWN_TRY(GetDevice()->ValidateObject(destination.texture));
