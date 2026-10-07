@@ -57,5 +57,170 @@ TEST_F(ProgramToIRBuiltinTest, EmitExpression_Builtin) {
 )");
 }
 
+TEST_F(ProgramToIRBuiltinTest, Print_StringLiteral) {
+    auto m = Build(R"(
+fn foo() {
+    print(`hello world`);
+}
+)");
+    ASSERT_EQ(m, Success);
+
+    EXPECT_EQ(Dis(m.Get()), R"(%foo = func():void {
+  $B1: {
+    %2:void = print "hello world"
+    ret
+  }
+}
+)");
+}
+
+TEST_F(ProgramToIRBuiltinTest, Print_StringLiteral_Empty) {
+    auto m = Build(R"(
+fn foo() {
+    print(``);
+}
+)");
+    ASSERT_EQ(m, Success);
+
+    EXPECT_EQ(Dis(m.Get()), R"(%foo = func():void {
+  $B1: {
+    %2:void = print ""
+    ret
+  }
+}
+)");
+}
+
+TEST_F(ProgramToIRBuiltinTest, Print_InterpolatedString_SingleExpression) {
+    auto m = Build(R"(
+fn foo(x : i32) {
+    print(`${x}`);
+}
+)");
+    ASSERT_EQ(m, Success);
+
+    EXPECT_EQ(Dis(m.Get()), R"(%foo = func(%x:i32):void {
+  $B1: {
+    %3:string = interpolate_string %x
+    %4:void = print %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(ProgramToIRBuiltinTest, Print_InterpolatedString_Expression) {
+    auto m = Build(R"(
+fn foo(x : i32) {
+    print(`x = ${x}`);
+}
+)");
+    ASSERT_EQ(m, Success);
+
+    EXPECT_EQ(Dis(m.Get()), R"(%foo = func(%x:i32):void {
+  $B1: {
+    %3:string = interpolate_string "x = ", %x
+    %4:void = print %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(ProgramToIRBuiltinTest, Print_InterpolatedString_MultipleExpressions) {
+    auto m = Build(R"(
+fn foo(x : i32, y : f32) {
+    print(`x = ${x}, y = ${y}!`);
+}
+)");
+    ASSERT_EQ(m, Success);
+
+    EXPECT_EQ(Dis(m.Get()), R"(%foo = func(%x:i32, %y:f32):void {
+  $B1: {
+    %4:string = interpolate_string "x = ", %x, ", y = ", %y, "!"
+    %5:void = print %4
+    ret
+  }
+}
+)");
+}
+
+TEST_F(ProgramToIRBuiltinTest, Print_InterpolatedString_Vector) {
+    auto m = Build(R"(
+fn foo(v : vec2<f32>) {
+    print(`vec: ${v}`);
+}
+)");
+    ASSERT_EQ(m, Success);
+
+    EXPECT_EQ(Dis(m.Get()), R"(%foo = func(%v:vec2<f32>):void {
+  $B1: {
+    %3:string = interpolate_string "vec: ", %v
+    %4:void = print %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(ProgramToIRBuiltinTest, Print_InterpolatedString_Nested) {
+    auto m = Build(R"(
+fn foo(x : i32) {
+    print(`outer ${`inner ${x}`} end`);
+}
+)");
+    ASSERT_EQ(m, Success);
+
+    EXPECT_EQ(Dis(m.Get()), R"(%foo = func(%x:i32):void {
+  $B1: {
+    %3:string = interpolate_string "inner ", %x
+    %4:string = interpolate_string "outer ", %3, " end"
+    %5:void = print %4
+    ret
+  }
+}
+)");
+}
+
+TEST_F(ProgramToIRBuiltinTest, Print_InterpolatedString_EvaluationOrder) {
+    auto m = Build(R"(
+var<private> a : i32 = 1i;
+
+fn side_effect(x : i32) -> i32 {
+    a = a + x;
+    return a;
+}
+
+fn foo() {
+    print(`${side_effect(1i)} ${side_effect(2i)}`);
+}
+)");
+    ASSERT_EQ(m, Success);
+
+    EXPECT_EQ(Dis(m.Get()), R"($B1: {  # root
+  %a:ptr<private, i32, read_write> = var 1i
+}
+
+%side_effect = func(%x:i32):i32 {
+  $B2: {
+    %4:i32 = load %a
+    %5:i32 = add %4, %x
+    store %a, %5
+    %6:i32 = load %a
+    ret %6
+  }
+}
+%foo = func():void {
+  $B3: {
+    %8:i32 = call %side_effect, 1i
+    %9:i32 = call %side_effect, 2i
+    %10:string = interpolate_string %8, " ", %9
+    %11:void = print %10
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::wgsl::reader

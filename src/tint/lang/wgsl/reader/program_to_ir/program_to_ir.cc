@@ -74,6 +74,7 @@
 #include "src/tint/lang/wgsl/ast/increment_decrement_statement.h"
 #include "src/tint/lang/wgsl/ast/index_accessor_expression.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
+#include "src/tint/lang/wgsl/ast/interpolated_string_expression.h"
 #include "src/tint/lang/wgsl/ast/invariant_attribute.h"
 #include "src/tint/lang/wgsl/ast/let.h"
 #include "src/tint/lang/wgsl/ast/literal_expression.h"
@@ -84,6 +85,7 @@
 #include "src/tint/lang/wgsl/ast/requires.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/statement.h"
+#include "src/tint/lang/wgsl/ast/string_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/struct.h"
 #include "src/tint/lang/wgsl/ast/subgroup_size_attribute.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
@@ -1121,6 +1123,23 @@ class Impl {
                 Bind(lit, val);
             }
 
+            void EmitInterpolatedString(const ast::InterpolatedStringExpression* expr) {
+                Vector<core::ir::Value*, 4> elements;
+                elements.Reserve(expr->elements.Length());
+                for (const auto* el : expr->elements) {
+                    auto val = GetValue(el);
+                    if (!val) {
+                        impl.AddError(el->source)
+                            << "failed to convert interpolated string element";
+                        return;
+                    }
+                    elements.Push(val);
+                }
+                auto* inst = impl.builder_.InterpolateString(std::move(elements));
+                impl.current_block_->Append(inst);
+                Bind(expr, inst->Result());
+            }
+
             std::optional<VectorRefElementAccess> AsVectorRefElementAccess(
                 const ast::Expression* expr) {
                 return AsVectorRefElementAccess(
@@ -1257,6 +1276,12 @@ class Impl {
                         tasks.Push([this, e] { EmitCall(e); });
                         for (auto* arg : tint::Reverse(e->args)) {
                             tasks.Push([this, arg] { Process(arg); });
+                        }
+                    },
+                    [&](const ast::InterpolatedStringExpression* e) {
+                        tasks.Push([this, e] { EmitInterpolatedString(e); });
+                        for (auto* el : tint::Reverse(e->elements)) {
+                            tasks.Push([this, el] { Process(el); });
                         }
                     },
                     [&](const ast::LiteralExpression* e) { EmitLiteral(e); },
