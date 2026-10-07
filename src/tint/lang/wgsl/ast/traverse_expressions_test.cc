@@ -30,6 +30,8 @@
 #include "gmock/gmock.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
+#include "src/tint/lang/wgsl/ast/interpolated_string_expression.h"
+#include "src/tint/lang/wgsl/ast/string_literal_expression.h"
 
 using ::testing::ElementsAre;
 
@@ -280,6 +282,66 @@ TEST_F(TraverseExpressionsTest, Stop) {
         return expr == i[0] ? TraverseAction::Stop : TraverseAction::Descend;
     });
     EXPECT_THAT(order, ElementsAre(root, i[0]));
+}
+
+TEST_F(TraverseExpressionsTest, DescendInterpolatedString) {
+    auto* s1 = create<StringLiteralExpression>("a");
+    auto* e1 = Expr(1_i);
+    auto* s2 = create<StringLiteralExpression>("b");
+    auto* e2 = Add(Expr(2_i), Expr(3_i));
+    auto* s3 = create<StringLiteralExpression>("c");
+    auto* root = create<InterpolatedStringExpression>(Vector{s1, e1, s2, e2, s3});
+    {
+        Vector<const Expression*, 8> l2r;
+        TraverseExpressions<TraverseOrder::LeftToRight>(root, [&](const Expression* expr) {
+            l2r.Push(expr);
+            return TraverseAction::Descend;
+        });
+        EXPECT_THAT(l2r, ElementsAre(root, s1, e1, s2, e2, e2->lhs, e2->rhs, s3));
+    }
+    {
+        Vector<const Expression*, 8> r2l;
+        TraverseExpressions<TraverseOrder::RightToLeft>(root, [&](const Expression* expr) {
+            r2l.Push(expr);
+            return TraverseAction::Descend;
+        });
+        EXPECT_THAT(r2l, ElementsAre(root, s3, e2, e2->rhs, e2->lhs, s2, e1, s1));
+    }
+    {
+        size_t j = 0;
+        constexpr std::array<size_t, 8> depths = {0, 1, 1, 1, 1, 2, 2, 1};
+        TraverseExpressions<TraverseOrder::LeftToRight>(
+            root, [&]([[maybe_unused]] const Expression* expr, size_t depth) {
+                EXPECT_THAT(depth, depths[j++]);
+                return TraverseAction::Descend;
+            });
+    }
+}
+
+TEST_F(TraverseExpressionsTest, InterpolatedString_Skip) {
+    auto* s1 = create<StringLiteralExpression>("a");
+    auto* e1 = Add(Expr(1_i), Expr(2_i));
+    auto* s2 = create<StringLiteralExpression>("b");
+    auto* root = create<InterpolatedStringExpression>(Vector{s1, e1, s2});
+    Vector<const Expression*, 8> order;
+    TraverseExpressions<TraverseOrder::LeftToRight>(root, [&](const Expression* expr) {
+        order.Push(expr);
+        return expr == e1 ? TraverseAction::Skip : TraverseAction::Descend;
+    });
+    EXPECT_THAT(order, ElementsAre(root, s1, e1, s2));
+}
+
+TEST_F(TraverseExpressionsTest, InterpolatedString_Stop) {
+    auto* s1 = create<StringLiteralExpression>("a");
+    auto* e1 = Add(Expr(1_i), Expr(2_i));
+    auto* s2 = create<StringLiteralExpression>("b");
+    auto* root = create<InterpolatedStringExpression>(Vector{s1, e1, s2});
+    Vector<const Expression*, 8> order;
+    TraverseExpressions<TraverseOrder::LeftToRight>(root, [&](const Expression* expr) {
+        order.Push(expr);
+        return expr == e1 ? TraverseAction::Stop : TraverseAction::Descend;
+    });
+    EXPECT_THAT(order, ElementsAre(root, s1, e1));
 }
 
 }  // namespace
