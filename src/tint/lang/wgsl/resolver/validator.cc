@@ -47,6 +47,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/string.h"
 #include "src/tint/lang/core/type/subgroup_matrix.h"
 #include "src/tint/lang/core/type/swizzle_view.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
@@ -595,9 +596,9 @@ bool Validator::LocalVariable(const sem::Variable* local) const {
                 return false;
             }
             return Var(local);
-        },                                            //
-        [&](const ast::Let*) { return Let(local); },  //
-        [&](const ast::Const*) { return true; },      //
+        },                                                //
+        [&](const ast::Let*) { return Let(local); },      //
+        [&](const ast::Const*) { return Const(local); },  //
         TINT_ICE_ON_NO_MATCH);
 }
 
@@ -808,7 +809,14 @@ bool Validator::Override(const sem::GlobalVariable* v,
     return true;
 }
 
-bool Validator::Const(const sem::Variable*) const {
+bool Validator::Const(const sem::Variable* v) const {
+    auto* decl = v->Declaration();
+    auto* storage_ty = v->Type()->UnwrapRef();
+    if (!storage_ty->IsConstructible()) {
+        AddError(decl->source) << sem_.TypeNameOf(storage_ty) << " cannot be used as the type of a "
+                               << style::Keyword("const");
+        return false;
+    }
     return true;
 }
 
@@ -1886,9 +1894,7 @@ bool Validator::BuiltinCall(const sem::Call* call) const {
     // The `print()` builtin requires the chromium_print language feature to be available.
     if (auto* fn = call->Target()->As<sem::BuiltinFn>()) {
         if (fn->Fn() == wgsl::BuiltinFn::kPrint) {
-            if (!allowed_features_.features.contains(wgsl::LanguageFeature::kChromiumPrint)) {
-                AddError(call->Declaration()->source) << "the 'chromium_print' language feature is "
-                                                         "not allowed in the current environment";
+            if (!CheckChromiumPrintEnabled(call->Declaration()->source)) {
                 return false;
             }
         }
@@ -2450,6 +2456,25 @@ bool Validator::CheckU8Enabled(const Source& source) const {
         AddError(source) << style::Type("u8") << " type used without "
                          << style::Code("chromium_experimental_subgroup_matrix")
                          << " extension enabled";
+        return false;
+    }
+    return true;
+}
+
+bool Validator::CheckChromiumPrintEnabled(const Source& source) const {
+    if (!allowed_features_.features.contains(wgsl::LanguageFeature::kChromiumPrint)) {
+        AddError(source) << "the 'chromium_print' language feature is not allowed in the current "
+                            "environment";
+        return false;
+    }
+    return true;
+}
+
+bool Validator::InterpolatedStringElement(const sem::ValueExpression* expr) const {
+    auto* ty = expr->Type();
+    if (!ty->IsAnyOf<core::type::String, core::type::Scalar, core::type::Vector>()) {
+        AddError(expr->Declaration()->source)
+            << sem_.TypeNameOf(expr->Type()) << " cannot be interpolated in a string";
         return false;
     }
     return true;

@@ -139,6 +139,7 @@ if (tint_build_unittests) {
         "increment_decrement_validation_test.cc",
         "inferred_type_test.cc",
         "input_attachments_extension_test.cc",
+        "interpolated_string_test.cc",
         "is_storeable_test.cc",
         "language_features_test.cc",
         "load_test.cc",

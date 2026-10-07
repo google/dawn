@@ -38,9 +38,11 @@ TestHelper::TestHelper()
 
 TestHelper::~TestHelper() = default;
 
-void TestHelper::ExpectError(std::string_view wgsl, std::string_view error) {
+void TestHelper::ExpectError(std::string_view wgsl,
+                             std::string_view error,
+                             wgsl::AllowedFeatures allowed_features) {
     wgsl::reader::Options options{
-        .allowed_features = wgsl::AllowedFeatures::Everything(),
+        .allowed_features = allowed_features,
     };
     auto file = std::make_unique<Source::File>("input.wgsl", wgsl);
     auto result = wgsl::reader::Parse(file.get(), std::move(options));

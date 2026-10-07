@@ -65,6 +65,7 @@ class CaseStatement;
 class ForLoopStatement;
 class Function;
 class IdentifierExpression;
+class InterpolatedStringExpression;
 class LoopStatement;
 class MemberAccessorExpression;
 class ReturnStatement;
@@ -297,6 +298,7 @@ class Resolver {
                            Vector<const sem::ValueExpression*, N>& args);
     sem::ValueExpression* Literal(const ast::LiteralExpression*);
     sem::ValueExpression* MemberAccessor(const ast::MemberAccessorExpression*);
+    sem::ValueExpression* InterpolatedString(const ast::InterpolatedStringExpression*);
     sem::ValueExpression* UnaryOp(const ast::UnaryOpExpression*);
 
     /// Register a memory store to an expression, to track accesses to root identifiers in order to

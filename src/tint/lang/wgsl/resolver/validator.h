@@ -558,6 +558,16 @@ class Validator {
     /// @returns true on success, false otherwise
     bool CheckU8Enabled(const Source& source) const;
 
+    /// Validates that 'chromium_print' language feature is enabled at @p source
+    /// @param source the source of the usage
+    /// @returns true if enabled, false otherwise
+    bool CheckChromiumPrintEnabled(const Source& source) const;
+
+    /// Validates an expression used inside an interpolated string.
+    /// @param expr the expression to validate
+    /// @returns true on success, false otherwise
+    bool InterpolatedStringElement(const sem::ValueExpression* expr) const;
+
     /// Validates there are no duplicate attributes
     /// @param attributes the list of attributes to validate
     /// @returns true on success, false otherwise.

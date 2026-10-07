@@ -52,6 +52,7 @@ class Statement;
 class Struct;
 class StructMember;
 class SwitchStatement;
+class TemplateLiteralExpression;
 class TypeDecl;
 class UnaryOpExpression;
 class Variable;
@@ -103,6 +104,7 @@ struct TypeMappings {
     ValueExpression* operator()(ast::CallExpression*);
     ValueExpression* operator()(ast::LiteralExpression*);
     ValueExpression* operator()(ast::PhonyExpression*);
+    ValueExpression* operator()(ast::TemplateLiteralExpression*);
     ValueExpression* operator()(ast::UnaryOpExpression*);
     Variable* operator()(ast::Variable*);
     WhileStatement* operator()(ast::WhileStatement*);
