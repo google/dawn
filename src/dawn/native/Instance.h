@@ -116,7 +116,7 @@ class InstanceBase final : public ErrorSink, public RefCounted {
     }
 
     template <typename E, typename T>
-        requires(IsResultOrConcreteError<E, T>)
+        requires(IsResultOrError<E, T>)
     [[nodiscard]] bool ConsumedErrorAndWarnOnce(E resultOrError, T* result) {
         if (resultOrError.IsError()) [[unlikely]] {
             return ConsumedErrorAndWarnOnce(resultOrError.AcquireError());

@@ -76,7 +76,7 @@ class ErrorSink {
     }
 
     template <typename E, typename T>
-        requires(IsResultOrConcreteError<E, T> || std::is_same_v<E, ResultOrUnknownError<T>>)
+        requires(IsResultOrError<E, T>)
     [[nodiscard]] bool ConsumedError(
         E resultOrError,
         T* result,
@@ -90,7 +90,7 @@ class ErrorSink {
     }
 
     template <typename E, typename T, typename... Args>
-        requires(IsResultOrConcreteError<E, T> || std::is_same_v<E, ResultOrUnknownError<T>>)
+        requires(IsResultOrError<E, T>)
     [[nodiscard]] bool ConsumedError(E resultOrError,
                                      T* result,
                                      const char* formatStr,
@@ -100,7 +100,7 @@ class ErrorSink {
     }
 
     template <typename E, typename T, typename... Args>
-        requires(IsResultOrConcreteError<E, T> || std::is_same_v<E, ResultOrUnknownError<T>>)
+        requires(IsResultOrError<E, T>)
     [[nodiscard]] bool ConsumedError(E resultOrError,
                                      T* result,
                                      InternalErrorType additionalAllowedErrors,

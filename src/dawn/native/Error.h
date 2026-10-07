@@ -71,8 +71,9 @@ concept IsMaybeError = std::is_same_v<T, MaybeError> || std::is_same_v<T, MaybeV
                        std::is_same_v<T, MaybeUnknownError>;
 
 template <typename E, typename T>
-concept IsResultOrConcreteError =
-    std::is_same_v<E, ResultOrError<T>> || std::is_same_v<E, ResultOrValError<T>>;
+concept IsResultOrError =
+    std::is_same_v<E, ResultOrError<T>> || std::is_same_v<E, ResultOrValError<T>> ||
+    std::is_same_v<E, ResultOrUnknownError<T>>;
 
 template <typename T>
 concept IsConcreteError =
