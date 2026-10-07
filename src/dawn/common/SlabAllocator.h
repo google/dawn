@@ -135,14 +135,17 @@ class SlabAllocatorImpl {
     void Deallocate(void* ptr);
 
   private:
-    // Get the IndexLinkNode |offset| slots away.
-    IndexLinkNode* OffsetFrom(IndexLinkNode* node, std::make_signed_t<Index> offset) const;
+    // Get the byte offset of the block at |index| in a slab.
+    size_t GetBlockOffset(Index index) const;
+
+    // Get the IndexLinkNode at |index| in |slab|.
+    IndexLinkNode* GetNodeAtIndex(Slab* slab, Index index) const;
 
     // Compute the pointer to the IndexLinkNode from an allocated object.
-    IndexLinkNode* NodeFromObject(void* object) const;
+    IndexLinkNode* GetNodeFromBlock(dawn::Span<std::byte> object) const;
 
     // Compute the pointer to the object from an IndexLinkNode.
-    void* ObjectFromNode(IndexLinkNode* node) const;
+    void* GetObjectFromNode(Slab* slab, IndexLinkNode* node) const;
 
     bool IsNodeInSlab(Slab* slab, IndexLinkNode* node) const;
 
