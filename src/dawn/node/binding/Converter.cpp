@@ -2164,7 +2164,7 @@ bool ConvertDynamicOffsetsToSpan(Napi::Env env,
 
     // SAFETY: data provides storage of data.ElementLength() elements.
     auto span = DAWN_UNSAFE_BUFFERS(std::span{data.Data(), data.ElementLength()});
-    *out = span.subspan(data_start, data_length);
+    *out = span.subspan(static_cast<size_t>(data_start), data_length);
     return true;
 }
 

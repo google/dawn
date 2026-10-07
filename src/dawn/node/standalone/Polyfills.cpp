@@ -254,7 +254,7 @@ bool ReadFileUtf8(Napi::Env env, const std::string& path, std::string* out) {
         return false;
     }
     out->resize(static_cast<size_t>(offset));
-    file.read(out->data(), offset);
+    file.read(out->data(), static_cast<std::streamsize>(offset));
     out->resize(static_cast<size_t>(file.gcount()));
     return true;
 }
@@ -284,7 +284,7 @@ Napi::Value ReadFileSync(const Napi::CallbackInfo& info) {
     // Read straight into the object being returned, so the contents are written once.
     // Resize to gcount() in case the file shrank between the seek and the read.
     Napi::ArrayBuffer array_buffer = Napi::ArrayBuffer::New(env, static_cast<size_t>(offset));
-    file.read(static_cast<char*>(array_buffer.Data()), offset);
+    file.read(static_cast<char*>(array_buffer.Data()), static_cast<std::streamsize>(offset));
     return Napi::Uint8Array::New(env, static_cast<size_t>(file.gcount()), array_buffer, 0);
 }
 
