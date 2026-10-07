@@ -127,6 +127,8 @@ tint_add_target(tint_lang_wgsl_ast lib
   lang/wgsl/ast/int_literal_expression.h
   lang/wgsl/ast/interpolate_attribute.cc
   lang/wgsl/ast/interpolate_attribute.h
+  lang/wgsl/ast/interpolated_string_expression.cc
+  lang/wgsl/ast/interpolated_string_expression.h
   lang/wgsl/ast/invariant_attribute.cc
   lang/wgsl/ast/invariant_attribute.h
   lang/wgsl/ast/let.cc
@@ -162,6 +164,8 @@ tint_add_target(tint_lang_wgsl_ast lib
   lang/wgsl/ast/stage_attribute.h
   lang/wgsl/ast/statement.cc
   lang/wgsl/ast/statement.h
+  lang/wgsl/ast/string_literal_expression.cc
+  lang/wgsl/ast/string_literal_expression.h
   lang/wgsl/ast/struct.cc
   lang/wgsl/ast/struct.h
   lang/wgsl/ast/struct_member.cc
@@ -266,6 +270,7 @@ tint_add_target(tint_lang_wgsl_ast_test test
   lang/wgsl/ast/input_attachment_index_attribute_test.cc
   lang/wgsl/ast/int_literal_expression_test.cc
   lang/wgsl/ast/interpolate_attribute_test.cc
+  lang/wgsl/ast/interpolated_string_expression_test.cc
   lang/wgsl/ast/location_attribute_test.cc
   lang/wgsl/ast/loop_statement_test.cc
   lang/wgsl/ast/member_accessor_expression_test.cc
@@ -274,6 +279,7 @@ tint_add_target(tint_lang_wgsl_ast_test test
   lang/wgsl/ast/requires_test.cc
   lang/wgsl/ast/return_statement_test.cc
   lang/wgsl/ast/stage_attribute_test.cc
+  lang/wgsl/ast/string_literal_expression_test.cc
   lang/wgsl/ast/struct_member_align_attribute_test.cc
   lang/wgsl/ast/struct_member_size_attribute_test.cc
   lang/wgsl/ast/struct_member_test.cc
