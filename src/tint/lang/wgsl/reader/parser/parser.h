@@ -558,6 +558,9 @@ class Parser {
     /// Parses a `const_literal` grammar element
     /// @returns the const literal parsed or nullptr if none found
     Maybe<const ast::LiteralExpression*> const_literal();
+    /// Parses a `interpolated_string` grammar element
+    /// @returns the parsed expression or nullptr
+    Maybe<const ast::Expression*> interpolated_string();
     /// Parses a `primary_expression` grammar element
     /// @returns the parsed expression or nullptr
     Maybe<const ast::Expression*> primary_expression();

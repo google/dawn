@@ -26,6 +26,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/wgsl/ast/helper_test.h"
+#include "src/tint/lang/wgsl/ast/interpolated_string_expression.h"
+#include "src/tint/lang/wgsl/ast/string_literal_expression.h"
 #include "src/tint/lang/wgsl/reader/parser/helper_test.h"
 
 namespace tint::wgsl::reader {
@@ -231,6 +233,146 @@ TEST_F(WGSLParserTest, PrimaryExpression_Cast) {
 
     ASSERT_EQ(call->args.Length(), 1u);
     ASSERT_TRUE(call->args[0]->Is<ast::IntLiteralExpression>());
+}
+
+TEST_F(WGSLParserTest, PrimaryExpression_StringLiteral) {
+    auto p = parser("`hello world`");
+    auto e = p->primary_expression();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::StringLiteralExpression>());
+    EXPECT_EQ(e->As<ast::StringLiteralExpression>()->value, "hello world");
+}
+
+TEST_F(WGSLParserTest, PrimaryExpression_StringLiteral_Empty) {
+    auto p = parser("``");
+    auto e = p->primary_expression();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::StringLiteralExpression>());
+    EXPECT_EQ(e->As<ast::StringLiteralExpression>()->value, "");
+}
+
+TEST_F(WGSLParserTest, PrimaryExpression_InterpolatedString_SingleInterpolation) {
+    auto p = parser("`hello ${name}!`");
+    auto e = p->primary_expression();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::InterpolatedStringExpression>());
+    auto* tmpl = e->As<ast::InterpolatedStringExpression>();
+    ASSERT_EQ(tmpl->elements.Length(), 3u);
+    ASSERT_TRUE(tmpl->elements[0]->Is<ast::StringLiteralExpression>());
+    EXPECT_EQ(tmpl->elements[0]->As<ast::StringLiteralExpression>()->value, "hello ");
+    ASSERT_TRUE(tmpl->elements[1]->Is<ast::IdentifierExpression>());
+    ast::CheckIdentifier(tmpl->elements[1], "name");
+    ASSERT_TRUE(tmpl->elements[2]->Is<ast::StringLiteralExpression>());
+    EXPECT_EQ(tmpl->elements[2]->As<ast::StringLiteralExpression>()->value, "!");
+}
+
+TEST_F(WGSLParserTest, PrimaryExpression_InterpolatedString_EmptyHeadAndTail) {
+    auto p = parser("`${x}`");
+    auto e = p->primary_expression();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::InterpolatedStringExpression>());
+    auto* tmpl = e->As<ast::InterpolatedStringExpression>();
+    ASSERT_EQ(tmpl->elements.Length(), 1u);
+    ASSERT_TRUE(tmpl->elements[0]->Is<ast::IdentifierExpression>());
+    ast::CheckIdentifier(tmpl->elements[0], "x");
+}
+
+TEST_F(WGSLParserTest, PrimaryExpression_InterpolatedString_MultipleInterpolations) {
+    auto p = parser("`x: ${x}, y: ${y + 1}`");
+    auto e = p->primary_expression();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::InterpolatedStringExpression>());
+    auto* tmpl = e->As<ast::InterpolatedStringExpression>();
+    ASSERT_EQ(tmpl->elements.Length(), 4u);
+    ASSERT_TRUE(tmpl->elements[0]->Is<ast::StringLiteralExpression>());
+    EXPECT_EQ(tmpl->elements[0]->As<ast::StringLiteralExpression>()->value, "x: ");
+    ASSERT_TRUE(tmpl->elements[1]->Is<ast::IdentifierExpression>());
+    ast::CheckIdentifier(tmpl->elements[1], "x");
+    ASSERT_TRUE(tmpl->elements[2]->Is<ast::StringLiteralExpression>());
+    EXPECT_EQ(tmpl->elements[2]->As<ast::StringLiteralExpression>()->value, ", y: ");
+    ASSERT_TRUE(tmpl->elements[3]->Is<ast::BinaryExpression>());
+}
+
+TEST_F(WGSLParserTest, PrimaryExpression_InterpolatedString_ConsecutiveInterpolations) {
+    auto p = parser("`${a}${b}`");
+    auto e = p->primary_expression();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::InterpolatedStringExpression>());
+    auto* tmpl = e->As<ast::InterpolatedStringExpression>();
+    ASSERT_EQ(tmpl->elements.Length(), 2u);
+    ASSERT_TRUE(tmpl->elements[0]->Is<ast::IdentifierExpression>());
+    ast::CheckIdentifier(tmpl->elements[0], "a");
+    ASSERT_TRUE(tmpl->elements[1]->Is<ast::IdentifierExpression>());
+    ast::CheckIdentifier(tmpl->elements[1], "b");
+}
+
+TEST_F(WGSLParserTest, PrimaryExpression_InterpolatedString_Nested) {
+    auto p = parser("`outer: ${`inner: ${x}`}`");
+    auto e = p->primary_expression();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::InterpolatedStringExpression>());
+    auto* tmpl = e->As<ast::InterpolatedStringExpression>();
+    ASSERT_EQ(tmpl->elements.Length(), 2u);
+    ASSERT_TRUE(tmpl->elements[0]->Is<ast::StringLiteralExpression>());
+    EXPECT_EQ(tmpl->elements[0]->As<ast::StringLiteralExpression>()->value, "outer: ");
+    ASSERT_TRUE(tmpl->elements[1]->Is<ast::InterpolatedStringExpression>());
+    auto* inner = tmpl->elements[1]->As<ast::InterpolatedStringExpression>();
+    ASSERT_EQ(inner->elements.Length(), 2u);
+    ASSERT_TRUE(inner->elements[0]->Is<ast::StringLiteralExpression>());
+    EXPECT_EQ(inner->elements[0]->As<ast::StringLiteralExpression>()->value, "inner: ");
+    ASSERT_TRUE(inner->elements[1]->Is<ast::IdentifierExpression>());
+    ast::CheckIdentifier(inner->elements[1], "x");
+}
+
+TEST_F(WGSLParserTest, PrimaryExpression_InterpolatedString_MissingExpression) {
+    auto p = parser("`hello ${} world`");
+    auto e = p->primary_expression();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_EQ(e.value, nullptr);
+    ASSERT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:10: expected expression for interpolated string");
+}
+
+TEST_F(WGSLParserTest, PrimaryExpression_InterpolatedString_MissingClosingBrace) {
+    auto p = parser("`hello ${x y`");
+    auto e = p->primary_expression();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_EQ(e.value, nullptr);
+    ASSERT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:12: expected '}' for interpolated string");
+}
+
+TEST_F(WGSLParserTest, PrimaryExpression_InterpolatedString_Unterminated) {
+    auto p = parser("`hello ${x ");
+    auto e = p->primary_expression();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_EQ(e.value, nullptr);
+    ASSERT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:1: unterminated interpolated string literal");
 }
 
 }  // namespace
