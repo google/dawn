@@ -2078,7 +2078,7 @@ class Builder {
 
         // The loop index is held in a function variable rather than in a block parameter of the
         // loop body. A block parameter becomes an OpPhi in SPIR-V, and loops with that shape hang
-        // the GPU on some Mali drivers (seen with Mali-G715, driver r54p3).
+        // the GPU on some Mali drivers (see https://crbug.com/568850691).
         auto* loop = Loop();
         ir::Var* idx_var = nullptr;
         Append(loop->Initializer(), [&] {
