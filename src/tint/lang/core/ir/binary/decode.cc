@@ -38,6 +38,7 @@
 #include "src/tint/lang/core/ir/array_count.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/control_instruction.h"
+#include "src/tint/lang/core/ir/format_string.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
@@ -50,6 +51,7 @@
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/string.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/utils/containers/hashset.h"
 #include "src/tint/utils/containers/transform.h"
@@ -472,6 +474,9 @@ struct Decoder {
             case pb::Instruction::KindCase::kExitSwitch:
                 inst_out = CreateInstructionExitSwitch(inst_in.exit_switch());
                 break;
+            case pb::Instruction::KindCase::kFormatString:
+                inst_out = CreateInstructionFormatString(inst_in.format_string());
+                break;
             case pb::Instruction::KindCase::kDiscard:
                 inst_out = CreateInstructionDiscard(inst_in.discard());
                 break;
@@ -626,6 +631,10 @@ struct Decoder {
         auto* exit_out = mod_out_.CreateInstruction<ir::ExitSwitch>();
         exit_switches_.Push(exit_out);
         return exit_out;
+    }
+
+    ir::FormatString* CreateInstructionFormatString(const pb::InstructionFormatString&) {
+        return mod_out_.CreateInstruction<ir::FormatString>();
     }
 
     ir::Discard* CreateInstructionDiscard(const pb::InstructionDiscard&) {
@@ -857,6 +866,8 @@ struct Decoder {
                 return mod_out_.Types().u8();
             case pb::TypeBasic::u64:
                 return mod_out_.Types().u64();
+            case pb::TypeBasic::string:
+                return mod_out_.Types().String();
 
             case pb::TypeBasic::TypeBasic_INT_MIN_SENTINEL_DO_NOT_USE_:
             case pb::TypeBasic::TypeBasic_INT_MAX_SENTINEL_DO_NOT_USE_:
@@ -1435,6 +1446,8 @@ struct Decoder {
                 return CreateConstantComposite(value_in.composite());
             case pb::ConstantValue::KindCase::kSplat:
                 return CreateConstantSplat(value_in.splat());
+            case pb::ConstantValue::KindCase::kString:
+                return b.ConstantValue(value_in.string());
             case pb::ConstantValue::KindCase::KIND_NOT_SET:
                 break;
         }

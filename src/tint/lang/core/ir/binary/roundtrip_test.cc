@@ -494,6 +494,18 @@ TEST_F(IRBinaryRoundtripTest, BuiltinCall) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, FormatString) {
+    auto* x = b.FunctionParam<i32>("x");
+    auto* fn = b.Function("Function", ty.void_());
+    fn->SetParams({x});
+    b.Append(fn->Block(), [&] {
+        auto* str = b.FormatString(b.Constant("x = "), x, b.Constant("!"));
+        b.Call(ty.void_(), core::BuiltinFn::kPrint, str);
+        b.Return(fn);
+    });
+    RUN_TEST();
+}
+
 TEST_F(IRBinaryRoundtripTest, Load) {
     auto p = b.FunctionParam<ptr<function, f32, read_write>>("p");
     auto* fn = b.Function("Function", ty.f32());

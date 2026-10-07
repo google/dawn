@@ -81,6 +81,7 @@ enum TypeBasic {
     i8 = 6;
     u8 = 7;
     u64 = 8;
+    string = 9;
 }
 
 message TypeVector {
@@ -259,6 +260,7 @@ message ConstantValue {
         ConstantValueScalar scalar = 1;
         ConstantValueComposite composite = 2;
         ConstantValueSplat splat = 3;
+        string string = 4;
     }
 }
 
@@ -356,6 +358,7 @@ message Instruction {
         InstructionUnreachable unreachable = 29;
         InstructionOverride override = 30;
         InstructionConstExprIf const_expr_if = 31;
+        InstructionFormatString format_string = 33;
     }
     reserved 9;
     reserved "bitcast";
@@ -460,6 +463,8 @@ message InstructionUnreachable {}
 message InstructionOverride {
     optional uint32 override_id = 1;
 }
+
+message InstructionFormatString {}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Attributes
