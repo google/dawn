@@ -51,9 +51,6 @@ class ClipDistancesTest : public DawnTestWithParams<ClipDistancesTestParams> {
 TEST_P(ClipDistancesTest, UseClipDistances) {
     DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(wgpu::FeatureName::ClipDistances));
 
-    // TODO(chromium:358408571): Investigate why the tests fail on Vulkan Android Pixel 4 bot
-    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsAndroid() && IsQualcomm());
-
     // TODO(crbug.com/518857260): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 

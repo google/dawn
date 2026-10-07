@@ -360,7 +360,9 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::FramebufferFetch);
     }
 
-    if (mDeviceInfo.features.shaderClipDistance == VK_TRUE) {
+    // crbug.com/570632001: Clip distances produce incorrect clipping on Adreno 6xx GPUs (seen on
+    // Pixel 4 / Adreno 640), so don't expose the feature on that GPU generation.
+    if (mDeviceInfo.features.shaderClipDistance == VK_TRUE && !IsAdreno6xx()) {
         EnableFeature(Feature::ClipDistances);
     }
 
@@ -1529,6 +1531,11 @@ bool PhysicalDevice::IsAndroidHuawei() const {
 
 bool PhysicalDevice::IsAndroidImgTec() const {
     return IsAndroid() && gpu_info::IsImgTec(GetVendorId());
+}
+
+bool PhysicalDevice::IsAdreno6xx() const {
+    return gpu_info::IsQualcommPCIAdreno6xx(GetVendorId(), GetDeviceId()) ||
+           gpu_info::IsQualcommACPIAdreno6xx(GetVendorId(), GetDeviceId());
 }
 
 bool PhysicalDevice::IsAdreno7xx() const {
