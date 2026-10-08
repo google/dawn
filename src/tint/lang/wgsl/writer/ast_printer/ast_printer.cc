@@ -58,6 +58,7 @@
 #include "src/tint/lang/wgsl/ast/input_attachment_index_attribute.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
+#include "src/tint/lang/wgsl/ast/interpolated_string_expression.h"
 #include "src/tint/lang/wgsl/ast/invariant_attribute.h"
 #include "src/tint/lang/wgsl/ast/let.h"
 #include "src/tint/lang/wgsl/ast/loop_statement.h"
@@ -68,6 +69,7 @@
 #include "src/tint/lang/wgsl/ast/phony_expression.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
+#include "src/tint/lang/wgsl/ast/string_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/struct_member_align_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_size_attribute.h"
 #include "src/tint/lang/wgsl/ast/subgroup_size_attribute.h"
@@ -92,6 +94,39 @@
 #include "src/tint/utils/text/string.h"
 
 namespace tint::wgsl::writer {
+
+namespace {
+
+void EmitStringLiteralContents(StringStream& out, std::string_view str) {
+    for (size_t i = 0; i < str.length(); ++i) {
+        char c = str[i];
+        switch (c) {
+            case '\\':
+                out << "\\\\";
+                break;
+            case '`':
+                out << "\\`";
+                break;
+            case '\n':
+                out << "\\n";
+                break;
+            case '\r':
+                out << "\\r";
+                break;
+            case '\t':
+                out << "\\t";
+                break;
+            case '$':
+                out << "\\$";
+                break;
+            default:
+                out << c;
+                break;
+        }
+    }
+}
+
+}  // namespace
 
 ASTPrinter::ASTPrinter(const Program& program, const Options& options)
     : program_(program), options_(options) {}
@@ -202,6 +237,7 @@ void ASTPrinter::EmitExpression(StringStream& out, const ast::Expression* expr) 
         [&](const ast::BinaryExpression* b) { EmitBinary(out, b); },
         [&](const ast::CallExpression* c) { EmitCall(out, c); },
         [&](const ast::IdentifierExpression* i) { EmitIdentifier(out, i); },
+        [&](const ast::InterpolatedStringExpression* t) { EmitInterpolatedString(out, t); },
         [&](const ast::LiteralExpression* l) { EmitLiteral(out, l); },
         [&](const ast::MemberAccessorExpression* m) { EmitMemberAccessor(out, m); },
         [&](const ast::PhonyExpression*) { out << "_"; },
@@ -282,8 +318,30 @@ void ASTPrinter::EmitLiteral(StringStream& out, const ast::LiteralExpression* li
                     << l->suffix;
             }
         },
-        [&](const ast::IntLiteralExpression* l) { out << l->value << l->suffix; },  //
+        [&](const ast::IntLiteralExpression* l) { out << l->value << l->suffix; },
+        [&](const ast::StringLiteralExpression* l) { EmitStringLiteral(out, l); },  //
         TINT_ICE_ON_NO_MATCH);
+}
+
+void ASTPrinter::EmitStringLiteral(StringStream& out, const ast::StringLiteralExpression* expr) {
+    out << "`";
+    EmitStringLiteralContents(out, expr->value);
+    out << "`";
+}
+
+void ASTPrinter::EmitInterpolatedString(StringStream& out,
+                                        const ast::InterpolatedStringExpression* expr) {
+    out << "`";
+    for (auto* element : expr->elements) {
+        if (auto* lit = element->As<ast::StringLiteralExpression>()) {
+            EmitStringLiteralContents(out, lit->value);
+        } else {
+            out << "${";
+            EmitExpression(out, element);
+            out << "}";
+        }
+    }
+    out << "`";
 }
 
 void ASTPrinter::EmitIdentifier(StringStream& out, const ast::IdentifierExpression* expr) {

@@ -66,12 +66,14 @@ class IdentifierExpression;
 class IfStatement;
 class IncrementDecrementStatement;
 class IndexAccessorExpression;
+class InterpolatedStringExpression;
 class LiteralExpression;
 class LoopStatement;
 class MemberAccessorExpression;
 class Requires;
 class ReturnStatement;
 class Statement;
+class StringLiteralExpression;
 class Struct;
 class SwitchStatement;
 class TypeDecl;
@@ -157,6 +159,14 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param out the output stream
     /// @param expr the literal expression expression
     void EmitLiteral(StringStream& out, const ast::LiteralExpression* expr);
+    /// Handles generating a string literal expression
+    /// @param out the output stream
+    /// @param expr the string literal expression
+    void EmitStringLiteral(StringStream& out, const ast::StringLiteralExpression* expr);
+    /// Handles generating an interpolated string expression
+    /// @param out the output stream
+    /// @param expr the interpolated string expression
+    void EmitInterpolatedString(StringStream& out, const ast::InterpolatedStringExpression* expr);
     /// Handles a continue statement
     /// @param stmt the statement to emit
     void EmitContinue(const ast::ContinueStatement* stmt);
