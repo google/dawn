@@ -59,7 +59,8 @@
       },
       {
         "args": [
-          "--adapter-vendor-id=0x1414"
+          "--adapter-vendor-id=0x1414",
+          "--assert-developer-mode"
         ],
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"

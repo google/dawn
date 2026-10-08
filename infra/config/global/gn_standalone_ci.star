@@ -1739,20 +1739,6 @@ ci.thin_tester(
     targets = targets.bundle(
         targets = [
             "real_hardware_win_gtests",
-            # TODO(crbug.com/565837005): Temporarily enable WARP on this real
-            # hardware configuration because GCE does not have developer mode enabled.
-            targets.bundle(
-                targets = [
-                    "dawn_end2end_warp_tests",
-                ],
-                mixins = [
-                    targets.mixin(
-                        args = [
-                            "--assert-developer-mode",
-                        ],
-                    ),
-                ],
-            ),
         ],
         mixins = [
             "win11_amd_rx_5500_xt_stable",
