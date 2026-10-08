@@ -44,6 +44,7 @@ class RenderEncoderBase : public ProgrammableEncoder {
     RenderEncoderBase(DeviceBase* device,
                       StringView label,
                       EncodingContext* encodingContext,
+                      RenderPassResourceUsageTracker usageTracker,
                       Ref<AttachmentState> attachmentState,
                       bool depthReadOnly,
                       bool stencilReadOnly);

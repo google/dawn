@@ -125,6 +125,7 @@ RenderBundleEncoder::RenderBundleEncoder(
     : RenderEncoderBase(device,
                         descriptor->label,
                         &mBundleEncodingContext,
+                        RenderPassResourceUsageTracker(device->GetNextPassTrackerID()),
                         device->GetOrCreateAttachmentState(descriptor),
                         descriptor->depthReadOnly,
                         descriptor->stencilReadOnly),

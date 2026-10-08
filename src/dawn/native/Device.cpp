@@ -2525,6 +2525,10 @@ PipelineCompatibilityToken DeviceBase::GetNextPipelineCompatibilityToken() {
     return PipelineCompatibilityToken(mNextPipelineCompatibilityToken++);
 }
 
+PassTrackerID DeviceBase::GetNextPassTrackerID() {
+    return PassTrackerID(mNextPassTrackerID++);
+}
+
 const CacheKey& DeviceBase::GetCacheKey() const {
     return mDeviceCacheKey;
 }

@@ -82,6 +82,7 @@ RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
     : RenderEncoderBase(device,
                         descriptor->label,
                         encodingContext,
+                        std::move(usageTracker),
                         std::move(attachmentState),
                         depthReadOnly,
                         stencilReadOnly),
@@ -89,7 +90,6 @@ RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
       mRenderArea(renderArea),
       mOcclusionQuerySet(descriptor->occlusionQuerySet),
       mEndCallback(std::move(endCallback)) {
-    mUsageTracker = std::move(usageTracker);
     if (auto* maxDrawCountInfo = descriptor.Get<RenderPassMaxDrawCount>()) {
         mMaxDrawCount = maxDrawCountInfo->maxDrawCount;
     }

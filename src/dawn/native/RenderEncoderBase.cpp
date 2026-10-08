@@ -48,10 +48,12 @@ namespace dawn::native {
 RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
                                      StringView label,
                                      EncodingContext* encodingContext,
+                                     RenderPassResourceUsageTracker usageTracker,
                                      Ref<AttachmentState> attachmentState,
                                      bool depthReadOnly,
                                      bool stencilReadOnly)
     : ProgrammableEncoder(device, label, encodingContext),
+      mUsageTracker(std::move(usageTracker)),
       mIndirectDrawMetadata(device->GetLimits()),
       mAttachmentState(std::move(attachmentState)),
       mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),
@@ -65,12 +67,15 @@ RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
                                      ErrorTag errorTag,
                                      StringView label)
     : ProgrammableEncoder(device, encodingContext, errorTag, label),
+      mUsageTracker(kInvalidPassTrackerID),
       mIndirectDrawMetadata(device->GetLimits()),
       mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),
       mDisableBaseInstance(device->IsToggleEnabled(Toggle::DisableBaseInstance)) {}
 
 void RenderEncoderBase::DestroyImpl(DestroyReason reason) {
-    mUsageTracker = {};
+    // Release all tracked usages. No more commands can be encoded after destruction, so the
+    // tracker is reset with an invalid pass tracker ID.
+    mUsageTracker = RenderPassResourceUsageTracker(kInvalidPassTrackerID);
 
     // Remove reference to the attachment state so that we don't have lingering references to
     // it preventing it from being uncached in the device.

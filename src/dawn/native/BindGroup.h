@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_BINDGROUP_H_
 
 #include <array>
+#include <atomic>
 #include <optional>
 #include <span>
 #include <vector>
@@ -96,6 +97,16 @@ class BindGroupBase : public ApiObjectBase {
 
     void ForEachUnverifiedBufferBindingIndex(std::function<void(BindingIndex, uint32_t)> fn) const;
 
+    // Returns true and updates the last recorded pass tracker ID if this bind group has not just
+    // been recorded in the pass tracker identified by `id`.
+    bool ShouldAddToPassTracker(PassTrackerID id) {
+        if (mLastPassTrackerRecordedIn.load(std::memory_order_relaxed) == id) {
+            return false;
+        }
+        mLastPassTrackerRecordedIn.store(id, std::memory_order_relaxed);
+        return true;
+    }
+
   protected:
     // To save memory, the size of a bind group is dynamically determined and the bind group is
     // placement-allocated into memory big enough to hold the bind group with its
@@ -131,6 +142,7 @@ class BindGroupBase : public ApiObjectBase {
 
     Ref<BindGroupLayoutBase> mLayout;
     BindGroupLayoutInternalBase::BindingDataPointers mBindingData;
+    std::atomic<PassTrackerID> mLastPassTrackerRecordedIn = kInvalidPassTrackerID;
 
     // This vector hosts the bound external textures of the bind group of each external texture
     // binding entry.

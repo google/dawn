@@ -151,6 +151,7 @@ ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                        CommandEncoder* commandEncoder,
                                        EncodingContext* encodingContext)
     : ProgrammableEncoder(device, descriptor->label, encodingContext),
+      mUsageTracker(device->GetNextPassTrackerID()),
       mCommandEncoder(commandEncoder) {
     GetObjectTrackingList()->Track(this);
 }
@@ -173,6 +174,7 @@ ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                        ErrorTag errorTag,
                                        StringView label)
     : ProgrammableEncoder(device, encodingContext, errorTag, label),
+      mUsageTracker(kInvalidPassTrackerID),
       mCommandEncoder(commandEncoder) {}
 
 // static
@@ -186,7 +188,7 @@ Ref<ComputePassEncoder> ComputePassEncoder::MakeError(DeviceBase* device,
 
 void ComputePassEncoder::DestroyImpl(DestroyReason reason) {
     mCommandBufferState.End();
-    mUsageTracker = {};
+    mUsageTracker = ComputePassResourceUsageTracker(kInvalidPassTrackerID);
 
     // Ensure that the pass has exited. This is done for passes only since validation requires
     // they exit before destruction while bundles do not.
@@ -440,7 +442,7 @@ void ComputePassEncoder::APIDispatchWorkgroupsIndirect(BufferBase* indirectBuffe
                 }
             }
 
-            SyncScopeUsageTracker scope;
+            DispatchResourceUsageTracker scope;
             mUsageTracker.AddReferencedBuffer(indirectBuffer);
             Ref<BufferBase> indirectBufferRef = indirectBuffer;
 
@@ -606,7 +608,7 @@ void ComputePassEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t quer
         "encoding %s.WriteTimestamp(%s, %u).", this, querySet, queryIndex);
 }
 
-void ComputePassEncoder::AddDispatchSyncScope(SyncScopeUsageTracker scope) {
+void ComputePassEncoder::AddDispatchSyncScope(DispatchResourceUsageTracker scope) {
     PipelineLayoutBase* layout = mCommandBufferState.GetPipelineLayout();
     for (BindGroupIndex i : layout->GetBindGroupLayoutsMask()) {
         scope.AddBindGroup(mCommandBufferState.GetBindGroup(i));

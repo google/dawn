@@ -453,6 +453,7 @@ class DeviceBase : public ErrorSink,
     dawn::platform::WorkerTaskPool* GetWorkerTaskPool() const;
 
     PipelineCompatibilityToken GetNextPipelineCompatibilityToken();
+    PassTrackerID GetNextPassTrackerID();
 
     const CacheKey& GetCacheKey() const;
     const std::string& GetLabel() const;
@@ -686,6 +687,7 @@ class DeviceBase : public ErrorSink,
 
     std::atomic_uint64_t mLazyClearCountForTesting = 0;
     std::atomic_uint64_t mNextPipelineCompatibilityToken;
+    std::atomic_uint64_t mNextPassTrackerID = 1;
 
     CombinedLimits mLimits;
     FeaturesSet mEnabledFeatures;

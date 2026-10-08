@@ -70,13 +70,15 @@ class SyncScopeUsageTracker {
     // Add all usages referenced to this tracker.
     void MergeResourceUsages(const SyncScopeResourceUsage& usages);
 
-    // Walks the bind groups and tracks all its resources.
-    void AddBindGroup(BindGroupBase* group);
-
     void SetUsedResourceTable(ResourceTableBase* table);
 
     // Returns the per-pass usage for use by backends for APIs with explicit barriers.
     SyncScopeResourceUsage AcquireSyncScopeUsage();
+
+  protected:
+    // Walks the bind group and tracks all its resources. Subclasses expose this through their own
+    // AddBindGroup() so that callers can't bypass deduplication where it is expected.
+    void AddBindGroupUsages(BindGroupBase* group);
 
   private:
     void MergeTextureUsage(TextureBase* texture, const TextureSubresourceSyncInfo& textureSyncInfo);
@@ -88,10 +90,17 @@ class SyncScopeUsageTracker {
     raw_ptr<ResourceTableBase> mUsedResourceTable = nullptr;
 };
 
+// Helper class to build the SyncScopeResourceUsage of a single dispatch in a compute pass.
+class DispatchResourceUsageTracker : public SyncScopeUsageTracker {
+  public:
+    // Walks the bind group and tracks all its resources.
+    void AddBindGroup(BindGroupBase* group);
+};
+
 // Helper class to build ComputePassResourceUsages
 class ComputePassResourceUsageTracker {
   public:
-    ComputePassResourceUsageTracker();
+    explicit ComputePassResourceUsageTracker(PassTrackerID passTrackerID);
     ComputePassResourceUsageTracker(ComputePassResourceUsageTracker&&);
     ~ComputePassResourceUsageTracker();
 
@@ -106,16 +115,23 @@ class ComputePassResourceUsageTracker {
 
   private:
     ComputePassResourceUsage mUsage;
+
+    // Unique identifier for this compute pass used by AddResourcesReferencedByBindGroup() to
+    // skip bind groups already referenced in this pass.
+    PassTrackerID mPassTrackerID = kInvalidPassTrackerID;
 };
 
 // Helper class to build RenderPassResourceUsages
 class RenderPassResourceUsageTracker : public SyncScopeUsageTracker {
   public:
-    RenderPassResourceUsageTracker();
+    explicit RenderPassResourceUsageTracker(PassTrackerID passTrackerID);
     RenderPassResourceUsageTracker(RenderPassResourceUsageTracker&&);
     ~RenderPassResourceUsageTracker();
 
     RenderPassResourceUsageTracker& operator=(RenderPassResourceUsageTracker&&);
+
+    // Walks the bind group and tracks all its resources.
+    void AddBindGroup(BindGroupBase* group);
 
     void TrackQueryAvailability(QuerySetBase* querySet, QueryIndex queryIndex);
     const QueryAvailabilityMap& GetQueryAvailabilityMap() const;
@@ -131,6 +147,10 @@ class RenderPassResourceUsageTracker : public SyncScopeUsageTracker {
 
     // Tracks queries used in the render pass to validate that they aren't written twice.
     QueryAvailabilityMap mQueryAvailabilities;
+
+    // Unique identifier for this render pass tracker used by AddBindGroup() to intrusively
+    // deduplicate BindGroup usage tracking without a hash table lookup.
+    PassTrackerID mPassTrackerID = kInvalidPassTrackerID;
 
     bool mFramebufferFetchUsed = false;
 };

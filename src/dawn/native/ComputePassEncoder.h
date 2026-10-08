@@ -41,8 +41,6 @@
 
 namespace dawn::native {
 
-class SyncScopeUsageTracker;
-
 class ComputePassEncoder final : public ProgrammableEncoder {
   public:
     static Ref<ComputePassEncoder> Create(DeviceBase* device,
@@ -105,7 +103,7 @@ class ComputePassEncoder final : public ProgrammableEncoder {
 
     // Adds the bindgroups used for the current dispatch to the SyncScopeResourceUsage and
     // records it in mUsageTracker.
-    void AddDispatchSyncScope(SyncScopeUsageTracker scope = {});
+    void AddDispatchSyncScope(DispatchResourceUsageTracker scope = {});
     ComputePassResourceUsageTracker mUsageTracker;
 
     // For render and compute passes, the encoding context is borrowed from the command encoder.

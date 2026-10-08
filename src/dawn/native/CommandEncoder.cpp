@@ -1468,7 +1468,7 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
     DeviceBase* device = GetDevice();
     DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
 
-    RenderPassResourceUsageTracker usageTracker;
+    RenderPassResourceUsageTracker usageTracker(device->GetNextPassTrackerID());
 
     bool depthReadOnly = false;
     bool stencilReadOnly = false;
