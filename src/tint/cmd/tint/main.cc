@@ -157,6 +157,7 @@ struct Options {
     bool ir_roundtrip = false;
 
     bool treat_samplers_as_filtering = false;
+    bool treat_textures_as_unfilterable = false;
 
 #if TINT_BUILD_SPV_READER
     tint::spirv::reader::Options spirv_reader_options;
@@ -456,6 +457,11 @@ violations that may be produced)",
         "treat-samplers-as-filtering", "Set the ResourceType for any bindful samplers as filtering",
         Default{false});
     TINT_DEFER(opts->treat_samplers_as_filtering = *treat_samplers_as_filtering.value);
+
+    auto& treat_textures_as_unfilterable = options.Add<BoolOption>(
+        "treat-textures-as-unfilterable",
+        "Set the ResourceType for any bindful texture as unfilterable", Default{false});
+    TINT_DEFER(opts->treat_textures_as_unfilterable = *treat_textures_as_unfilterable.value);
 
 #if TINT_BUILD_SPV_WRITER
     auto& use_storage_input_output_16 =
@@ -1037,7 +1043,7 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
     gen_options.bindings =
         tint::GenerateBindings(ir, options.ep_name, false, false, options.ycbcr_bindings);
     gen_options.resource_table = tint::core::ir::transform::GenerateResourceTableConfig(
-        ir, options.treat_samplers_as_filtering);
+        ir, options.treat_samplers_as_filtering, options.treat_textures_as_unfilterable);
 
     // Enable the Vulkan Memory Model if needed.
     for (auto* ty : ir.Types()) {
@@ -1214,7 +1220,7 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
     gen_options.bindings = tint::GenerateBindings(
         ir, options.ep_name, !options.use_argument_buffers, !options.use_argument_buffers);
     gen_options.resource_table = tint::core::ir::transform::GenerateResourceTableConfig(
-        ir, options.treat_samplers_as_filtering);
+        ir, options.treat_samplers_as_filtering, options.treat_textures_as_unfilterable);
     gen_options.immediate_binding_point = tint::BindingPoint{.group = 0u, .binding = 30u};
     gen_options.extensions.disable_demote_to_helper = options.disable_demote_to_helper;
     gen_options.use_argument_buffers = options.use_argument_buffers;
@@ -1309,7 +1315,7 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
                                    : tint::hlsl::writer::Options::Compiler::kDXC_2021;
     gen_options.bindings = tint::GenerateBindings(ir, options.ep_name, false, false);
     gen_options.resource_table = tint::core::ir::transform::GenerateResourceTableConfig(
-        ir, options.treat_samplers_as_filtering);
+        ir, options.treat_samplers_as_filtering, options.treat_textures_as_unfilterable);
 
     auto entry_point = inspector.GetEntryPoint(options.ep_name);
 

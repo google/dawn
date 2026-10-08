@@ -31,6 +31,7 @@
 #include <vector>
 
 #include "src/tint/api/common/resource_type.h"
+#include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/core/type/type.h"
 
 namespace tint::core::type {
@@ -40,6 +41,8 @@ ResourceType TypeToResourceType(const core::type::Type* in_type);
 // Returns the default resource type for `in_type`. If the `in_type` is an `f32`
 // type that could be filterable, the type returns the filterable resource type
 ResourceType DefaultResourceTypeFor(const core::type::Type* in_type);
+// Returns the default unfilterable resource type for `in_type`.
+ResourceType DefaultUnfilterableResourceTypeFor(const type::Texture* in_type);
 
 // Converts a `ResourceType` back into a `core::type::Type`
 const core::type::Type* ResourceTypeToType(core::type::Manager& ty, ResourceType type);

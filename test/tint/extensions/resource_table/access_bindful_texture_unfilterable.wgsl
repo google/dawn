@@ -1,4 +1,4 @@
-// flags: --msl-version 3.2
+// flags: --msl-version 3.2 --treat-textures-as-unfilterable
 
 enable chromium_experimental_resource_table;
 
@@ -6,6 +6,6 @@ enable chromium_experimental_resource_table;
 
 @fragment
 fn fs() -> @location(0) vec4f {
-  let s = getResource<sampler>(0);
+  let s = getResource<sampler>(2);
   return textureSample(t, s, vec2f(0));
 }
