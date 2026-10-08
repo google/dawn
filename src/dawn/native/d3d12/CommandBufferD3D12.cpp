@@ -927,29 +927,19 @@ class IndirectDrawBatcher {
     explicit IndirectDrawBatcher(CommandRecordingContext* commandContext)
         : mCommandContext(commandContext) {}
 
-    void Add(const CommandSignature& signature,
-             Buffer* buffer,
-             uint64_t bufferOffset,
-             const BufferBase* sourceBuffer,
-             uint64_t sourceBufferOffset) {
+    void Add(const CommandSignature& signature, Buffer* buffer, uint64_t bufferOffset) {
         // Dawn frontend indirect draw validation in EncodeIndirectDrawValidationCommands() packs
         // validated arguments from multiple draws into one internal output buffer. Require both
         // the validated arguments and their original source arguments to be consecutive before
         // combining them.
         const bool isAdjacent =
             mCount != 0 && mSignature == signature && mBuffer == buffer &&
-            bufferOffset ==
-                mBufferFirstOffset + static_cast<uint64_t>(mCount) * signature.byteStride &&
-            mSourceBuffer == sourceBuffer &&
-            sourceBufferOffset ==
-                mSourceBufferFirstOffset + static_cast<uint64_t>(mCount) * kDrawIndirectSize;
+            bufferOffset == mFirstDrawOffset + static_cast<uint64_t>(mCount) * signature.byteStride;
         if (!isAdjacent) {
             Flush();
             mSignature = signature;
             mBuffer = buffer;
-            mBufferFirstOffset = bufferOffset;
-            mSourceBuffer = sourceBuffer;
-            mSourceBufferFirstOffset = sourceBufferOffset;
+            mFirstDrawOffset = bufferOffset;
         }
         ++mCount;
     }
@@ -961,12 +951,10 @@ class IndirectDrawBatcher {
         // ExecuteIndirect consumes mCount tightly strided commands starting at the first draw.
         mCommandContext->GetCommandList()->ExecuteIndirect(mSignature.signature.Get(), mCount,
                                                            mBuffer->GetD3D12Resource(),
-                                                           mBufferFirstOffset, nullptr, 0);
+                                                           mFirstDrawOffset, nullptr, 0);
         mSignature = {};
         mBuffer = nullptr;
-        mBufferFirstOffset = 0;  // Offset of the start of the batch.
-        mSourceBuffer = nullptr;
-        mSourceBufferFirstOffset = 0;  // Offset of the start of the batch.
+        mFirstDrawOffset = 0;  // Offset in mBuffer of the start of the batch.
         mCount = 0;
     }
 
@@ -974,9 +962,7 @@ class IndirectDrawBatcher {
     raw_ptr<CommandRecordingContext> mCommandContext;
     CommandSignature mSignature;
     raw_ptr<Buffer> mBuffer = nullptr;
-    uint64_t mBufferFirstOffset = 0;
-    raw_ptr<const BufferBase> mSourceBuffer = nullptr;
-    uint64_t mSourceBufferFirstOffset = 0;
+    uint64_t mFirstDrawOffset = 0;
     uint32_t mCount = 0;
 };
 
@@ -1921,9 +1907,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 DAWN_ASSERT(indirectBuffer != nullptr);
 
                 indirectDrawBatcher.Add(lastPipeline->GetDrawIndirectCommandSignature(),
-                                        indirectBuffer, validatedDraw.indirectOffset,
-                                        validatedDraw.sourceIndirectBuffer.Get(),
-                                        validatedDraw.sourceIndirectOffset);
+                                        indirectBuffer, validatedDraw.indirectOffset);
                 break;
             }
 
