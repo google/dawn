@@ -85,6 +85,7 @@ def run_litert_lm(metric_proto_file_path: Path) -> subprocess.CompletedProcess:
         # a benchmark bug.
         '--num_threads_to_compile=0',
         '--num_threads_to_upload=0',
+        '--num_iterations=6',
         f'--model_path={model_path}',
         f'--metric_proto_file_path={metric_proto_file_path}',
     ]
