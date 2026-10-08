@@ -1,3 +1,5 @@
 per-file roll_chromium_deps.py*=bsheedy@google.com
 per-file roll_chromium_deps.py*=ynovikov@chromium.org
 
+# For LiteRT-LM and other perf test runner and merge scripts.
+chouinard@google.com
