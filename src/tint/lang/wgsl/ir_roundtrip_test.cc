@@ -3671,5 +3671,29 @@ fn foo(p : ptr<workgroup, buffer>) {
 )");
 }
 
+TEST_F(IRToProgramRoundtripTest, Print_StringLiteral) {
+    RUN_TEST(R"(
+fn f() {
+  print(`hello world`);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Print_TemplateLiteral) {
+    RUN_TEST(R"(
+fn f(x : i32) {
+  print(`val: ${x}`);
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, Print_TemplateLiteral_Multiple) {
+    RUN_TEST(R"(
+fn f(x : i32, y : f32) {
+  print(`x: ${x}, y: ${y}!`);
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::wgsl

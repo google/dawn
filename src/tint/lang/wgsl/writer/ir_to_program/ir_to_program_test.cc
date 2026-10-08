@@ -3765,5 +3765,127 @@ fn f() {
 )");
 }
 
+TEST_F(IRToProgramTest, Print_StringLiteral) {
+    auto* fn = b.Function("f", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Call<wgsl::ir::BuiltinCall>(ty.void_(), wgsl::BuiltinFn::kPrint,
+                                      b.Constant("hello world"));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f() {
+  print(`hello world`);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, Print_StringLiteral_Empty) {
+    auto* fn = b.Function("f", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Call<wgsl::ir::BuiltinCall>(ty.void_(), wgsl::BuiltinFn::kPrint, b.Constant(""));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f() {
+  print(``);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, Print_InterpolateString_Single) {
+    auto* fn = b.Function("f", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* is = b.InterpolateString(b.Constant("value: "), 42_i);
+        b.Call<wgsl::ir::BuiltinCall>(ty.void_(), wgsl::BuiltinFn::kPrint, is);
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f() {
+  print(`value: ${42i}`);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, Print_InterpolateString_Multiple) {
+    auto* fn = b.Function("f", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* is = b.InterpolateString(b.Constant("x: "), 42_i, b.Constant(", y: "), 1.5_f,
+                                       b.Constant("!"));
+        b.Call<wgsl::ir::BuiltinCall>(ty.void_(), wgsl::BuiltinFn::kPrint, is);
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f() {
+  print(`x: ${42i}, y: ${1.5f}!`);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, Print_InterpolateString_HeadInterpolation) {
+    auto* fn = b.Function("f", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* is = b.InterpolateString(42_i, b.Constant(" is the answer"));
+        b.Call<wgsl::ir::BuiltinCall>(ty.void_(), wgsl::BuiltinFn::kPrint, is);
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f() {
+  print(`${42i} is the answer`);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, Print_InterpolateString_TailInterpolation) {
+    auto* fn = b.Function("f", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* is = b.InterpolateString(b.Constant("answer is "), 42_i);
+        b.Call<wgsl::ir::BuiltinCall>(ty.void_(), wgsl::BuiltinFn::kPrint, is);
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f() {
+  print(`answer is ${42i}`);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, Print_InterpolateString_AdjacentInterpolations) {
+    auto* fn = b.Function("f", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* is = b.InterpolateString(1_i, 2_i);
+        b.Call<wgsl::ir::BuiltinCall>(ty.void_(), wgsl::BuiltinFn::kPrint, is);
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f() {
+  print(`${1i}${2i}`);
+}
+)");
+}
+
+TEST_F(IRToProgramTest, Print_InterpolateString_Expression) {
+    auto* x = b.FunctionParam("x", ty.i32());
+    auto* fn = b.Function("f", ty.void_());
+    fn->SetParams({x});
+    b.Append(fn->Block(), [&] {
+        auto* is = b.InterpolateString(b.Constant("sum: "), b.Add(x, 1_i));
+        b.Call<wgsl::ir::BuiltinCall>(ty.void_(), wgsl::BuiltinFn::kPrint, is);
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(x : i32) {
+  print(`sum: ${(x + 1i)}`);
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::wgsl::writer

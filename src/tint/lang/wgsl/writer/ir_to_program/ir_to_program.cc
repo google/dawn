@@ -32,6 +32,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/constant/splat.h"
+#include "src/tint/lang/core/constant/string.h"
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/access.h"
@@ -51,6 +52,7 @@
 #include "src/tint/lang/core/ir/exit_switch.h"
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/instruction.h"
+#include "src/tint/lang/core/ir/interpolate_string.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/load_vector_element.h"
@@ -80,7 +82,10 @@
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/string.h"
 #include "src/tint/lang/core/type/type.h"
+#include "src/tint/lang/wgsl/ast/interpolated_string_expression.h"
+#include "src/tint/lang/wgsl/ast/string_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/type.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
@@ -385,6 +390,7 @@ class State {
             [&](const core::ir::ExitLoop* i) { ExitLoop(i); },                      //
             [&](const core::ir::ExitSwitch* i) { ExitSwitch(i); },                  //
             [&](const core::ir::If* i) { If(i); },                                  //
+            [&](const core::ir::InterpolateString* i) { InterpolateString(i); },    //
             [&](const core::ir::Let* i) { Let(i); },                                //
             [&](const core::ir::Load* l) { Load(l); },                              //
             [&](const core::ir::LoadVectorElement* i) { LoadVectorElement(i); },    //
@@ -946,6 +952,15 @@ class State {
         Bind(e->Result(), expr);
     }
 
+    void InterpolateString(const core::ir::InterpolateString* is) {
+        Vector<const ast::Expression*, 4> elements;
+        for (auto* operand : is->Operands()) {
+            elements.Push(Expr(operand));
+        }
+        auto* expr = b.create<ast::InterpolatedStringExpression>(std::move(elements));
+        Bind(is->Result(0), expr);
+    }
+
     const ast::Expression* Expr(const core::ir::Value* value) {
         if (auto* cnst = value->As<core::ir::Constant>()) {
             return Constant(cnst);
@@ -1002,6 +1017,10 @@ class State {
                 return b.Expr(c->ValueAs<f16>());
             },
             [&](const core::type::Bool*) { return b.Expr(c->ValueAs<bool>()); },
+            [&](const core::type::String*) {
+                return b.create<ast::StringLiteralExpression>(
+                    c->As<core::constant::String>()->value);
+            },
             [&](const core::type::Array*) { return composite(/* can_splat */ false); },
             [&](const core::type::Vector*) { return composite(/* can_splat */ true); },
             [&](const core::type::Matrix*) { return composite(/* can_splat */ false); },
@@ -1020,10 +1039,11 @@ class State {
     /// @note May be a semantically-invalid placeholder type on error.
     ast::Type Type(const core::type::Type* ty) {
         return tint::Switch(
-            ty,                                                    //
-            [&](const core::type::Void*) { return ast::Type{}; },  //
-            [&](const core::type::I32*) { return b.ty.i32(); },    //
-            [&](const core::type::U32*) { return b.ty.u32(); },    //
+            ty,                                                      //
+            [&](const core::type::Void*) { return ast::Type{}; },    //
+            [&](const core::type::String*) { return ast::Type{}; },  //
+            [&](const core::type::I32*) { return b.ty.i32(); },      //
+            [&](const core::type::U32*) { return b.ty.u32(); },      //
             [&](const core::type::F16*) {
                 Enable(wgsl::Extension::kF16);
                 return b.ty.f16();
