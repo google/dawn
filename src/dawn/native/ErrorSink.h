@@ -120,25 +120,25 @@ class ErrorSink {
     }
 
     template <typename T, typename... Args>
-        requires(IsConcreteError<T> || std::is_same_v<T, UnknownError>)
+        requires(IsError<T>)
     void ConsumeError(std::unique_ptr<T> error) {
         ConsumeError(std::move(error), InternalErrorType::None);
     }
 
     template <typename T, typename... Args>
-        requires(IsConcreteError<T> || std::is_same_v<T, UnknownError>)
+        requires(IsError<T>)
     void ConsumeError(std::unique_ptr<T> error, InternalErrorType additionalAllowedErrors) {
         return ConsumeErrorImpl(ErrorAdapter{std::move(error)}, additionalAllowedErrors);
     }
 
     template <typename T, typename... Args>
-        requires(IsConcreteError<T> || std::is_same_v<T, UnknownError>)
+        requires(IsError<T>)
     void ConsumeError(std::unique_ptr<T> error, const char* formatStr, const Args&... args) {
         ConsumeError(std::move(error), InternalErrorType::None, formatStr, args...);
     }
 
     template <typename T, typename... Args>
-        requires(IsConcreteError<T> || std::is_same_v<T, UnknownError>)
+        requires(IsError<T>)
     void ConsumeError(std::unique_ptr<T> error,
                       InternalErrorType additionalAllowedErrors,
                       const char* formatStr,

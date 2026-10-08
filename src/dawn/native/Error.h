@@ -78,6 +78,8 @@ concept IsResultOrError =
 template <typename T>
 concept IsConcreteError =
     std::is_same_v<T, UnrecoverableError> || std::is_same_v<T, ValidationError>;
+template <typename T>
+concept IsError = IsConcreteError<T> || std::is_same_v<T, UnknownError>;
 
 class UnknownError {
   public:
