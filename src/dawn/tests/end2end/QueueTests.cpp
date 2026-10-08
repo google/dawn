@@ -604,6 +604,11 @@ TEST_P(QueueWriteTextureTests, VaryingDataOffset) {
 
 // Test writing with rowsPerImage greater than needed.
 TEST_P(QueueWriteTextureTests, VaryingRowsPerImage) {
+    // TODO(crbug.com/571586656): Flaky on Pixel 6.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM() &&
+                          GetParam().mTextureFormat == wgpu::TextureFormat::Stencil8 &&
+                          HasToggleEnabled("use_blit_for_stencil_texture_write"));
+
     constexpr uint32_t kWidth = 65;
     constexpr uint32_t kHeight = 31;
     constexpr uint32_t kDepth = 17;
