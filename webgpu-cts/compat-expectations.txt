@@ -95,7 +95,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-09-29 07:36:31AM
+# Last rolled: 2026-10-08 08:26:25AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -2562,6 +2562,7 @@ crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,texture,s
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="queue-op";first={"op":"storage","in":"render-pass-encoder"};second={"op":"write-texture","in":"queue"} [ Failure ]
 crbug.com/0000 [ compat-min-es31 linux nvidia ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_mip_level:format="bgra8unorm";sameTexture=false [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_mip_level:format="r32float";sameTexture=false [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_mip_level:format="r32float";sameTexture=true [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_mip_level:format="rg32float";sameTexture=false [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_mip_level:format="rg32float";sameTexture=true [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_mip_level:format="rgb10a2unorm";sameTexture=false [ Failure ]
