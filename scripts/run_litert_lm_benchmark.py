@@ -74,6 +74,8 @@ def run_litert_lm(metric_proto_file_path: Path) -> subprocess.CompletedProcess:
     cmd = [
         str(binary_path),
         '--benchmark',
+        '--benchmark_prefill_tokens=1024',
+        '--benchmark_decode_tokens=256',
         '--backend=gpu',
         '--disable_cache=true',
         # Run pipeline compilation and weight upload synchronously during Init
