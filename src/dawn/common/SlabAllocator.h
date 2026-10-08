@@ -111,7 +111,7 @@ class SlabAllocatorImpl {
         // | ---------- allocation --------- |
         // | pad | Slab | data ------------> |
         Slab();
-        Slab(HeapArray<std::byte> allocation, IndexLinkNode* head);
+        explicit Slab(HeapArray<std::byte> allocation);
         Slab(Slab&& rhs);
 
         // Extract the Slab from the linked list.

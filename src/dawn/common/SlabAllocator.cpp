@@ -34,6 +34,7 @@
 #include "src/dawn/common/AlignedAlloc.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/common/MemoryBlockAllocator.h"
+#include "src/dawn/common/Range.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 #include "src/utils/span.h"
@@ -48,8 +49,8 @@ SlabAllocatorImpl::IndexLinkNode::IndexLinkNode(Index index, Index nextIndex)
 // Slab
 
 SlabAllocatorImpl::Slab::Slab() = default;
-SlabAllocatorImpl::Slab::Slab(HeapArray<std::byte> allocation, IndexLinkNode* head)
-    : allocation(std::move(allocation)), freeList(head) {}
+SlabAllocatorImpl::Slab::Slab(HeapArray<std::byte> allocation)
+    : allocation(std::move(allocation)) {}
 
 SlabAllocatorImpl::Slab::Slab(Slab&& rhs) = default;
 
@@ -296,26 +297,21 @@ void SlabAllocatorImpl::GetNewSlab() {
         return;
     }
 
+    // Allocate the slab
     HeapArray<std::byte> allocation = mMemoryBlockAllocator->Allocate(mTotalAllocationSize);
-    std::byte* alignedPtr = allocation.data();
-    DAWN_CHECK(IsPtrAligned(alignedPtr, mAllocationAlignment));
+    std::byte* allocationPtr = allocation.data();
+    DAWN_CHECK(IsPtrAligned(allocationPtr, mAllocationAlignment));
 
-    Span<std::byte> blocks =
-        allocation.subspan(mSlabBlocksOffset, static_cast<size_t>(mBlocksPerSlab) * mBlockStride);
-    // These aren't allocated yet, but they will be in the for loop below.
-    IndexLinkNode* firstNode = GetNodeFromBlock(blocks);
-    IndexLinkNode* lastNode = nullptr;
-    Index i = 0;
-    for (size_t current_node_location = mIndexLinkNodeOffset;
-         current_node_location <= blocks.size() - sizeof(IndexLinkNode);
-         current_node_location += mBlockStride) {
-        lastNode = reinterpret_cast<IndexLinkNode*>(&blocks[current_node_location]);
-        new (lastNode) IndexLinkNode(i, i + 1);
-        ++i;
+    Slab* slab = new (allocationPtr) Slab(std::move(allocation));
+    slab->freeList = GetNodeAtIndex(slab, 0);
+    mAvailableSlabs.Prepend(slab);
+
+    // Initialize all of its nodes
+    for (Index i : Range(mBlocksPerSlab)) {
+        IndexLinkNode* node = GetNodeAtIndex(slab, i);
+        new (node) IndexLinkNode(i, i + 1);
     }
-    lastNode->nextIndex = kInvalidIndex;
-
-    mAvailableSlabs.Prepend(new (alignedPtr) Slab(std::move(allocation), firstNode));
+    GetNodeAtIndex(slab, mBlocksPerSlab - 1)->nextIndex = kInvalidIndex;
 }
 
 }  // namespace dawn
