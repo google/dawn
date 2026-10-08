@@ -675,6 +675,12 @@ TEST_P(DepthCopyTests, FromDepthAspectToBufferAtNonZeroOffset) {
     // TODO(crbug.com/519251261): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
+    // TODO(crbug.com/571358852): Flaky Depth32FloatStencil8 readback on Windows Qualcomm with
+    // D3D11 backend validation.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11() &&
+                          IsBackendValidationEnabled() &&
+                          GetParam().mTextureFormat == wgpu::TextureFormat::Depth32FloatStencil8);
+
     constexpr uint32_t kTestLevel = 0;
     constexpr uint32_t kBufferCopyOffsets[] = {4u, 512u};
     constexpr uint32_t kTestTextureSizes[][2] = {

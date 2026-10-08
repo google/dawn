@@ -622,6 +622,10 @@ TEST_P(MultithreadTests, T2BThenDestroyTexture) {
 
 // Test that copy a texture to a buffer then map that buffer in parallel works.
 TEST_P(MultithreadTests, T2BThenMapInParallel) {
+    // TODO(crbug.com/459848483): Flaky mapping failures on Windows Qualcomm with D3D11
+    // backend validation.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11() && IsBackendValidationEnabled());
+
     constexpr uint32_t kTextureSize = 512;
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
     constexpr uint32_t kBytesPerPixel = 4;
@@ -1144,6 +1148,10 @@ TEST_P(MultithreadTests, DestroyTextureAndViewsAtSameTime) {
 TEST_P(MultithreadTests, SetLabelInParallel) {
     // TODO(crbug.com/451928481): multithread support in GL is incomplete
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    // TODO(crbug.com/571358852): Validation shard exited during this test on Windows Qualcomm
+    // D3D12.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D12() && IsBackendValidationEnabled());
 
     constexpr uint32_t kNumThreads = 20;
     constexpr uint32_t kSize = 1;
