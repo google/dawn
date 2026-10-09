@@ -2169,16 +2169,20 @@ struct State {
                 offset = b.Constant(u32(const_offset->Value()->ValueAs<uint32_t>() * arr_stride /
                                         sm_ty->Type()->Size()));
             } else {
-                offset =
-                    b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, offset)->Result();
+                if (!offset->Type()->Is<core::type::U32>()) {
+                    offset = b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, offset)
+                                 ->Result();
+                }
                 offset = b.Multiply(offset, u32(arr_stride / sm_ty->Type()->Size()));
             }
             if (auto* const_stride = stride->As<core::ir::Constant>()) {
                 stride = b.Constant(u32(const_stride->Value()->ValueAs<uint32_t>() * arr_stride /
                                         sm_ty->Type()->Size()));
             } else {
-                stride =
-                    b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, stride)->Result();
+                if (!stride->Type()->Is<core::type::U32>()) {
+                    stride = b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, stride)
+                                 ->Result();
+                }
                 stride = b.Multiply(stride, u32(arr_stride / sm_ty->Type()->Size()));
             }
 
@@ -2227,16 +2231,20 @@ struct State {
                 offset = b.Constant(u32(const_offset->Value()->ValueAs<uint32_t>() * arr_stride /
                                         sm_ty->Type()->Size()));
             } else {
-                offset =
-                    b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, offset)->Result();
+                if (!offset->Type()->Is<core::type::U32>()) {
+                    offset = b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, offset)
+                                 ->Result();
+                }
                 offset = b.Multiply(offset, u32(arr_stride / sm_ty->Type()->Size()));
             }
             if (auto* const_stride = stride->As<core::ir::Constant>()) {
                 stride = b.Constant(u32(const_stride->Value()->ValueAs<uint32_t>() * arr_stride /
                                         sm_ty->Type()->Size()));
             } else {
-                stride =
-                    b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, stride)->Result();
+                if (!stride->Type()->Is<core::type::U32>()) {
+                    stride = b.Call<hlsl::ir::BuiltinCall>(ty.u32(), BuiltinFn::kAsuint, stride)
+                                 ->Result();
+                }
                 stride = b.Multiply(stride, u32(arr_stride / sm_ty->Type()->Size()));
             }
 
