@@ -35,7 +35,6 @@
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/Queue.h"
 #include "src/utils/compiler.h"
-#include "src/utils/heap_array.h"
 
 namespace dawn::native {
 
@@ -193,8 +192,8 @@ void APISharedBufferMemoryEndAccessStateFreeMembers(WGPUSharedBufferMemoryEndAcc
     for (SharedFenceBase* fence : state->fences) {
         fence->APIRelease();
     }
-    DeleteAllocationFromHeapArray(state->fences.data());
-    DeleteAllocationFromHeapArray(state->signaledValues.data());
+    delete[] state->fences.data();
+    delete[] state->signaledValues.data();
 }
 
 }  // namespace dawn::native

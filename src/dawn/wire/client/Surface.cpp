@@ -143,9 +143,9 @@ void Surface::APIGetCurrentTexture(SurfaceTexture* surfaceTexture) {
 }
 
 void APISurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities capabilities) {
-    DeleteAllocationFromHeapArray(capabilities.presentModes);
-    DeleteAllocationFromHeapArray(capabilities.formats);
-    DeleteAllocationFromHeapArray(capabilities.alphaModes);
+    delete[] capabilities.presentModes;
+    delete[] capabilities.formats;
+    delete[] capabilities.alphaModes;
 }
 
 }  // namespace dawn::wire::client

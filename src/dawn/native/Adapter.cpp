@@ -187,24 +187,24 @@ ResultOrValError<UnpackedPtr<AdapterInfo>> AdapterBase::ValidateGetInfo(AdapterI
 }
 
 void APIAdapterInfoFreeMembers(WGPUAdapterInfo info) {
-    DeleteAllocationFromHeapArray(info.vendor.data);
-    DeleteAllocationFromHeapArray(info.architecture.data);
-    DeleteAllocationFromHeapArray(info.device.data);
-    DeleteAllocationFromHeapArray(info.description.data);
+    delete[] info.vendor.data;
+    delete[] info.architecture.data;
+    delete[] info.device.data;
+    delete[] info.description.data;
 }
 
 void APIAdapterPropertiesMemoryHeapsFreeMembers(
     WGPUAdapterPropertiesMemoryHeaps memoryHeapProperties) {
-    DeleteAllocationFromHeapArray(memoryHeapProperties.heapInfo);
+    delete[] memoryHeapProperties.heapInfo;
 }
 
 void APIDawnDrmFormatCapabilitiesFreeMembers(WGPUDawnDrmFormatCapabilities capabilities) {
-    DeleteAllocationFromHeapArray(capabilities.properties);
+    delete[] capabilities.properties;
 }
 
 void APIAdapterPropertiesSubgroupMatrixConfigsFreeMembers(
     WGPUAdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs) {
-    DeleteAllocationFromHeapArray(subgroupMatrixConfigs.configs);
+    delete[] subgroupMatrixConfigs.configs;
 }
 
 bool AdapterBase::APIHasFeature(wgpu::FeatureName feature) const {
@@ -220,7 +220,7 @@ void AdapterBase::APIGetFeatures(SupportedFeatures* features) const {
 }
 
 void APISupportedFeaturesFreeMembers(WGPUSupportedFeatures supportedFeatures) {
-    DeleteAllocationFromHeapArray(supportedFeatures.features);
+    delete[] supportedFeatures.features;
 }
 
 // TODO(https://crbug.com/dawn/2465) Could potentially re-implement via AllowSpontaneous async mode.

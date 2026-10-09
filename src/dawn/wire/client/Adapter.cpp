@@ -335,25 +335,25 @@ wgpu::Status Adapter::APIGetFormatCapabilities(wgpu::TextureFormat format,
 
 void APIAdapterInfoFreeMembers(WGPUAdapterInfo info) {
     // This single delete is enough because everything is a single allocation.
-    DeleteAllocationFromHeapArray(info.vendor.data);
+    delete[] info.vendor.data;
 }
 
 void APIAdapterPropertiesMemoryHeapsFreeMembers(
     WGPUAdapterPropertiesMemoryHeaps memoryHeapProperties) {
-    DeleteAllocationFromHeapArray(memoryHeapProperties.heapInfo);
+    delete[] memoryHeapProperties.heapInfo;
 }
 
 void APIDawnDrmFormatCapabilitiesFreeMembers(WGPUDawnDrmFormatCapabilities capabilities) {
-    DeleteAllocationFromHeapArray(capabilities.properties);
+    delete[] capabilities.properties;
 }
 
 void APISupportedFeaturesFreeMembers(WGPUSupportedFeatures supportedFeatures) {
-    DeleteAllocationFromHeapArray(supportedFeatures.features);
+    delete[] supportedFeatures.features;
 }
 
 void APIAdapterPropertiesSubgroupMatrixConfigsFreeMembers(
     WGPUAdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs) {
-    DeleteAllocationFromHeapArray(subgroupMatrixConfigs.configs);
+    delete[] subgroupMatrixConfigs.configs;
 }
 
 }  // namespace dawn::wire::client
