@@ -39,8 +39,6 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_core_ir_transform lib
-  lang/core/ir/transform/array_length_from.cc
-  lang/core/ir/transform/array_length_from.h
   lang/core/ir/transform/bgra8unorm_polyfill.cc
   lang/core/ir/transform/bgra8unorm_polyfill.h
   lang/core/ir/transform/binary_polyfill.cc
@@ -92,6 +90,8 @@ tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/remove_uniform_vector_component_loads.h
   lang/core/ir/transform/rename_conflicts.cc
   lang/core/ir/transform/rename_conflicts.h
+  lang/core/ir/transform/replace_array_and_buffer_length.cc
+  lang/core/ir/transform/replace_array_and_buffer_length.h
   lang/core/ir/transform/resource_table.cc
   lang/core/ir/transform/resource_table.h
   lang/core/ir/transform/resource_table_helper.cc
@@ -147,8 +147,6 @@ tint_target_add_external_dependencies(tint_lang_core_ir_transform lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_lang_core_ir_transform_test test
-  lang/core/ir/transform/array_length_from_immediate_test.cc
-  lang/core/ir/transform/array_length_from_uniform_test.cc
   lang/core/ir/transform/bgra8unorm_polyfill_test.cc
   lang/core/ir/transform/binary_polyfill_test.cc
   lang/core/ir/transform/binding_remapper_test.cc
@@ -175,6 +173,7 @@ tint_add_target(tint_lang_core_ir_transform_test test
   lang/core/ir/transform/remove_terminator_args_test.cc
   lang/core/ir/transform/remove_uniform_vector_component_loads_test.cc
   lang/core/ir/transform/rename_conflicts_test.cc
+  lang/core/ir/transform/replace_array_and_buffer_length_test.cc
   lang/core/ir/transform/resource_table_test.cc
   lang/core/ir/transform/robustness_test.cc
   lang/core/ir/transform/signed_integer_polyfill_test.cc
@@ -220,7 +219,6 @@ if(TINT_BUILD_FUZZERS)
 # Condition: TINT_BUILD_FUZZERS
 ################################################################################
 tint_add_target(tint_lang_core_ir_transform_fuzz fuzz
-  lang/core/ir/transform/array_length_from_uniform_fuzz.cc
   lang/core/ir/transform/bgra8unorm_polyfill_fuzz.cc
   lang/core/ir/transform/binary_polyfill_fuzz.cc
   lang/core/ir/transform/binding_remapper_fuzz.cc

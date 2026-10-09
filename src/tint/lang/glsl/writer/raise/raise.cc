@@ -31,7 +31,6 @@
 #include <unordered_map>
 
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/core/ir/transform/array_length_from.h"
 #include "src/tint/lang/core/ir/transform/bgra8unorm_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binding_remapper.h"
@@ -50,6 +49,7 @@
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/core/ir/transform/remove_uniform_vector_component_loads.h"
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
+#include "src/tint/lang/core/ir/transform/replace_array_and_buffer_length.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
@@ -208,7 +208,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
                 size_indices[bp] = index;
             }
         }
-        TINT_CHECK_RESULT(core::ir::transform::ArrayLengthFromImmediates(
+        TINT_CHECK_RESULT(core::ir::transform::ReplaceArrayAndBufferLength(
             module, immediate_data_layout, buffer_sizes_array_elements_num, size_indices));
     }
     TINT_CHECK_RESULT(core::ir::transform::BlockDecoratedStructs(module));

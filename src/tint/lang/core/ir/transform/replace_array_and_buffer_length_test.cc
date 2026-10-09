@@ -25,10 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "src/tint/lang/core/ir/transform/replace_array_and_buffer_length.h"
+
 #include <algorithm>
 #include <utility>
 
-#include "src/tint/lang/core/ir/transform/array_length_from.h"
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/ir/transform/prepare_immediate_data.h"
 
@@ -38,7 +39,7 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-struct IR_ArrayLengthFromImmediatesTest : public TransformTest {
+struct IR_ReplaceArrayAndBufferLengthTest : public TransformTest {
     void SetUp() override { mod.properties.Add(Property::kAllowBufferTypes); }
 };
 
@@ -51,7 +52,7 @@ uint32_t GetBufferSizesNumElements(
     return max_index + 1;
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, NoModify_UserFunction) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, NoModify_UserFunction) {
     auto* arr = ty.array<i32>();
     auto* arr_ptr = ty.ptr<storage>(arr);
 
@@ -116,12 +117,12 @@ $B1: {  # root
     auto immediate_data = PrepareImmediateData(mod, {});
     EXPECT_EQ(immediate_data, Success);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), 0u, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), 0u, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, DirectUse) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, DirectUse) {
     auto* arr = ty.array<i32>();
     auto* arr_ptr = ty.ptr<storage>(arr);
 
@@ -192,12 +193,12 @@ $B1: {  # root
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, DirectUse_NonZeroIndex) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, DirectUse_NonZeroIndex) {
     auto* arr = ty.array<i32>();
     auto* arr_ptr = ty.ptr<storage>(arr);
 
@@ -268,12 +269,12 @@ $B1: {  # root
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, DirectUse_NotInMap) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, DirectUse_NotInMap) {
     auto* arr = ty.array<i32>();
     auto* arr_ptr = ty.ptr<storage>(arr);
 
@@ -322,12 +323,12 @@ $B1: {  # root
     auto immediate_data = PrepareImmediateData(mod, {});
     EXPECT_EQ(immediate_data, Success);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), 0u, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), 0u, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, DirectUse_NoEntryPoint) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, DirectUse_NoEntryPoint) {
     auto* arr = ty.array<i32>();
     auto* arr_ptr = ty.ptr<storage>(arr);
 
@@ -377,12 +378,12 @@ $B1: {  # root
     auto immediate_data = PrepareImmediateData(mod, {});
     EXPECT_EQ(immediate_data, Success);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), 0u, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), 0u, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, DirectUse_CalledByEntryPoint) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, DirectUse_CalledByEntryPoint) {
     auto* arr = ty.array<i32>();
     auto* arr_ptr = ty.ptr<storage>(arr);
 
@@ -471,12 +472,12 @@ $B1: {  # root
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, ViaAccess_StructMember) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, ViaAccess_StructMember) {
     auto* arr = ty.array<i32>();
     auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
                                                                  {mod.symbols.New("a"), arr},
@@ -562,12 +563,12 @@ $B1: {  # root
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, ViaAccess_StructMember_NonZeroOffset) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, ViaAccess_StructMember_NonZeroOffset) {
     auto* arr = ty.array<i32>();
     auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
                                                                  {mod.symbols.New("u1"), ty.u32()},
@@ -668,12 +669,12 @@ $B1: {  # root
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, ViaLet) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, ViaLet) {
     auto* arr = ty.array<i32>();
     auto* arr_ptr = ty.ptr<storage>(arr);
 
@@ -746,12 +747,12 @@ $B1: {  # root
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, ViaParameter) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, ViaParameter) {
     auto* arr = ty.array<i32>();
     auto* arr_ptr = ty.ptr<storage>(arr);
 
@@ -842,12 +843,12 @@ $B1: {  # root
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, ViaParameterChain) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, ViaParameterChain) {
     auto* arr = ty.array<i32>();
     auto* arr_ptr = ty.ptr<storage>(arr);
 
@@ -958,7 +959,7 @@ $B1: {  # root
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
@@ -966,7 +967,7 @@ $B1: {  # root
 // Test that when we arrayLength is called on a parameter but the originating variable at the
 // callsite is not in the bindpoint map, we reintroduce an arrayLength call instead of passing
 // undef to the callee.
-TEST_F(IR_ArrayLengthFromImmediatesTest, ViaParameter_NotInMap) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, ViaParameter_NotInMap) {
     auto* arr = ty.array<i32>();
     auto* arr_ptr = ty.ptr<storage>(arr);
 
@@ -1034,13 +1035,13 @@ $B1: {  # root
     auto immediate_data = PrepareImmediateData(mod, {});
     EXPECT_EQ(immediate_data, Success);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), 0u, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), 0u, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
 // Test that we reuse the length parameter for multiple arrayLength calls on the same parameter.
-TEST_F(IR_ArrayLengthFromImmediatesTest, ViaParameter_MultipleCallsSameParameter) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, ViaParameter_MultipleCallsSameParameter) {
     auto* arr = ty.array<i32>();
     auto* arr_ptr = ty.ptr<storage>(arr);
 
@@ -1139,12 +1140,12 @@ $B1: {  # root
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, ViaParameter_MultipleCallsDifferentParameters) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, ViaParameter_MultipleCallsDifferentParameters) {
     auto* arr = ty.array<i32>();
     auto* arr_ptr = ty.ptr<storage>(arr);
 
@@ -1246,12 +1247,12 @@ $B1: {  # root
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, ViaComplexChain) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, ViaComplexChain) {
     auto* arr = ty.array<i32>();
     auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
                                                                  {mod.symbols.New("u1"), ty.u32()},
@@ -1369,12 +1370,12 @@ $B1: {  # root
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, ElementStrideLargerThanSize) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, ElementStrideLargerThanSize) {
     auto* arr = ty.array<vec3<i32>>();
     auto* arr_ptr = ty.ptr<storage>(arr);
 
@@ -1444,12 +1445,12 @@ $B1: {  # root
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, MultipleVars) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, MultipleVars) {
     auto* arr = ty.array<i32>();
     auto* arr_ptr = ty.ptr<storage>(arr);
 
@@ -1572,12 +1573,12 @@ $B1: {  # root
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, BufferLength_Operand_Const) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, BufferLength_Operand_Const) {
     auto* v = b.Var("v", ty.ptr(storage, ty.unsized_buffer()));
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
@@ -1635,14 +1636,14 @@ $B1: {  # root
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), 0u, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), 0u, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, BufferLength_Operand_NonConst) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, BufferLength_Operand_NonConst) {
     auto* v = b.Var("v", ty.ptr(storage, ty.unsized_buffer()));
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
@@ -1703,14 +1704,14 @@ $B1: {  # root
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), 0u, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), 0u, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, BufferLength_Operand_NonConst_ThroughFunction) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, BufferLength_Operand_NonConst_ThroughFunction) {
     auto* v = b.Var("v", ty.ptr(storage, ty.unsized_buffer()));
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
@@ -1790,14 +1791,14 @@ $B1: {  # root
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), 0u, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), 0u, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, BufferLength_Count_Const) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, BufferLength_Count_Const) {
     auto* v = b.Var("v", ty.ptr(storage, ty.buffer(16)));
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
@@ -1855,14 +1856,14 @@ $B1: {  # root
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), 0u, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), 0u, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, BufferView_Unsized_Direct) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, BufferView_Unsized_Direct) {
     auto* buf = ty.unsized_buffer();
     auto* buf_ptr = ty.ptr(storage, buf);
 
@@ -1961,12 +1962,12 @@ $B1: {  # root
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, BufferArrayView_Sized_Direct) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, BufferArrayView_Sized_Direct) {
     auto* buf = ty.buffer(128);
     auto* buf_ptr = ty.ptr(storage, buf);
 
@@ -2031,14 +2032,14 @@ $B1: {  # root
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), 0u, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), 0u, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromImmediatesTest, BufferView_Unsized_Indirect) {
+TEST_F(IR_ReplaceArrayAndBufferLengthTest, BufferView_Unsized_Indirect) {
     auto* buf = ty.unsized_buffer();
     auto* buf_ptr = ty.ptr(storage, buf);
 
@@ -2181,7 +2182,7 @@ $B1: {  # root
               Success);
     auto immediate_data = PrepareImmediateData(mod, immediate_data_config);
     EXPECT_EQ(immediate_data, Success);
-    Run(ArrayLengthFromImmediates, immediate_data.Get(), num_elements, bindpoint_to_index);
+    Run(ReplaceArrayAndBufferLength, immediate_data.Get(), num_elements, bindpoint_to_index);
 
     EXPECT_EQ(expect, str());
 }

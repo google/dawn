@@ -45,8 +45,6 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("transform") {
   sources = [
-    "array_length_from.cc",
-    "array_length_from.h",
     "bgra8unorm_polyfill.cc",
     "bgra8unorm_polyfill.h",
     "binary_polyfill.cc",
@@ -98,6 +96,8 @@ libtint_source_set("transform") {
     "remove_uniform_vector_component_loads.h",
     "rename_conflicts.cc",
     "rename_conflicts.h",
+    "replace_array_and_buffer_length.cc",
+    "replace_array_and_buffer_length.h",
     "resource_table.cc",
     "resource_table.h",
     "resource_table_helper.cc",
@@ -147,8 +147,6 @@ libtint_source_set("transform") {
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
-      "array_length_from_immediate_test.cc",
-      "array_length_from_uniform_test.cc",
       "bgra8unorm_polyfill_test.cc",
       "binary_polyfill_test.cc",
       "binding_remapper_test.cc",
@@ -175,6 +173,7 @@ if (tint_build_unittests) {
       "remove_terminator_args_test.cc",
       "remove_uniform_vector_component_loads_test.cc",
       "rename_conflicts_test.cc",
+      "replace_array_and_buffer_length_test.cc",
       "resource_table_test.cc",
       "robustness_test.cc",
       "signed_integer_polyfill_test.cc",
@@ -213,7 +212,6 @@ if (tint_build_unittests) {
 if (tint_build_fuzzers) {
   tint_fuzz_source_set("fuzz") {
     sources = [
-      "array_length_from_uniform_fuzz.cc",
       "bgra8unorm_polyfill_fuzz.cc",
       "binary_polyfill_fuzz.cc",
       "binding_remapper_fuzz.cc",

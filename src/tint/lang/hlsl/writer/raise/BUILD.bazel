@@ -44,7 +44,6 @@ cc_library(
   name = "raise",
   srcs = [
     "array_offset_from_immediate.cc",
-    "array_offset_from_uniform.cc",
     "binary_polyfill.cc",
     "builtin_polyfill.cc",
     "decompose_snorm10_10_10_2.cc",
@@ -63,7 +62,6 @@ cc_library(
   ],
   hdrs = [
     "array_offset_from_immediate.h",
-    "array_offset_from_uniform.h",
     "binary_polyfill.h",
     "builtin_polyfill.h",
     "decompose_snorm10_10_10_2.h",
@@ -115,7 +113,6 @@ cc_library(
   alwayslink = True,
   srcs = [
     "array_offset_from_immediate_test.cc",
-    "array_offset_from_uniform_test.cc",
     "binary_polyfill_test.cc",
     "builtin_polyfill_test.cc",
     "decompose_snorm10_10_10_2_test.cc",

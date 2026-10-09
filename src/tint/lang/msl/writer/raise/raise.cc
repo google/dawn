@@ -32,7 +32,6 @@
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/core/ir/transform/array_length_from.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binding_remapper.h"
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
@@ -50,6 +49,7 @@
 #include "src/tint/lang/core/ir/transform/remove_continue_in_switch.h"
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
+#include "src/tint/lang/core/ir/transform/replace_array_and_buffer_length.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
@@ -194,7 +194,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     TINT_CHECK_RESULT(core::ir::transform::MultiplanarExternalTexture(module, multiplanar_map));
 
-    TINT_CHECK_RESULT(core::ir::transform::ArrayLengthFromImmediates(
+    TINT_CHECK_RESULT(core::ir::transform::ReplaceArrayAndBufferLength(
         module, immediate_data_layout, buffer_sizes_array_elements_num,
         array_length_from_constants.bindpoint_to_size_index));
 

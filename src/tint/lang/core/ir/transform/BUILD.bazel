@@ -43,7 +43,6 @@ exports_files(glob(["*.def", "*.tmpl"], allow_empty = True))
 cc_library(
   name = "transform",
   srcs = [
-    "array_length_from.cc",
     "bgra8unorm_polyfill.cc",
     "binary_polyfill.cc",
     "binding_remapper.cc",
@@ -69,6 +68,7 @@ cc_library(
     "remove_terminator_args.cc",
     "remove_uniform_vector_component_loads.cc",
     "rename_conflicts.cc",
+    "replace_array_and_buffer_length.cc",
     "resource_table.cc",
     "resource_table_helper.cc",
     "robustness.cc",
@@ -82,7 +82,6 @@ cc_library(
     "zero_init_workgroup_memory.cc",
   ],
   hdrs = [
-    "array_length_from.h",
     "bgra8unorm_polyfill.h",
     "binary_polyfill.h",
     "binding_remapper.h",
@@ -109,6 +108,7 @@ cc_library(
     "remove_terminator_args.h",
     "remove_uniform_vector_component_loads.h",
     "rename_conflicts.h",
+    "replace_array_and_buffer_length.h",
     "resource_table.h",
     "resource_table_helper.h",
     "robustness.h",
@@ -150,8 +150,6 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
-    "array_length_from_immediate_test.cc",
-    "array_length_from_uniform_test.cc",
     "bgra8unorm_polyfill_test.cc",
     "binary_polyfill_test.cc",
     "binding_remapper_test.cc",
@@ -178,6 +176,7 @@ cc_library(
     "remove_terminator_args_test.cc",
     "remove_uniform_vector_component_loads_test.cc",
     "rename_conflicts_test.cc",
+    "replace_array_and_buffer_length_test.cc",
     "resource_table_test.cc",
     "robustness_test.cc",
     "signed_integer_polyfill_test.cc",

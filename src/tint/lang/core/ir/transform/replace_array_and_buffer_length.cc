@@ -25,9 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/ir/transform/array_length_from.h"
+#include "src/tint/lang/core/ir/transform/replace_array_and_buffer_length.h"
 
-#include <algorithm>
 #include <utility>
 
 #include "src/tint/lang/core/ir/builder.h"
@@ -50,11 +49,6 @@ struct State {
     /// The IR module.
     Module& ir;
 
-    bool from_uniform = true;
-
-    /// The binding point to use for the uniform buffer.
-    BindingPoint ubo_binding;
-
     /// The map from binding point to the element index which holds the size of that buffer.
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_size_index;
 
@@ -67,9 +61,6 @@ struct State {
 
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
-
-    /// The uniform buffer variable that holds the total size of each storage buffer.
-    Var* buffer_sizes_var = nullptr;
 
     /// The construct instruction that creates the array lengths structure in the entry point.
     Construct* lengths_constructor = nullptr;
@@ -359,7 +350,7 @@ struct State {
 
     /// Compute the array length of the runtime-sized array that is inside a storage buffer
     /// variable. If the variable's binding point is not found in the bindpoint map, returns nullptr
-    /// to indicate that the original arrayLength builtin should be used instead.
+    /// to indicate that the original length builtin should be used instead.
     ///
     /// @param var the storage buffer variable that contains the runtime-sized array
     /// @param insertion_point the insertion point for new instructions
@@ -372,14 +363,14 @@ struct State {
                                core::AddressSpace::kWorkgroup);
 
         if (!binding) {
-            // Must be a workgroup variable, so preserve the arrayLength() call.
+            // Must be a workgroup variable, so preserve the original length builtin call.
             return nullptr;
         }
 
         auto idx_it = bindpoint_to_size_index.find(*binding);
         if (idx_it == bindpoint_to_size_index.end()) {
             // If the bindpoint_to_size_index map does not contain an entry for the storage buffer,
-            // then we preserve the arrayLength() call.
+            // then we preserve the original length builtin call.
             return nullptr;
         }
 
@@ -406,30 +397,6 @@ struct State {
         b.InsertBefore(insertion_point,
                        [&] { length = b.Access<u32>(structure, u32(member_index)); });
         return length;
-    }
-
-    /// Get (or create, on first call) the uniform buffer that contains the storage buffer sizes.
-    /// @returns the uniform buffer pointer
-    Value* BufferSizes() {
-        if (buffer_sizes_var) {
-            return buffer_sizes_var->Result();
-        }
-
-        // Find the largest index declared in the map, in order to determine the number of elements
-        // needed in the array of buffer sizes.
-        // The buffer sizes will be packed into vec4s to satisfy the 16-byte alignment requirement
-        // for array elements in uniform buffers.
-        uint32_t max_index = 0;
-        for (auto& entry : bindpoint_to_size_index) {
-            max_index = std::max(max_index, entry.second);
-        }
-        uint32_t num_elements = (max_index / 4) + 1;
-        b.Append(ir.root_block, [&] {
-            buffer_sizes_var = b.Var("tint_storage_buffer_sizes",
-                                     ty.ptr<uniform>(ty.array(ty.vec4u(), num_elements)));
-        });
-        buffer_sizes_var->SetBindingPoint(ubo_binding.group, ubo_binding.binding);
-        return buffer_sizes_var->Result();
     }
 
     /// Create the structure to hold the array lengths and fill in the construct instruction that
@@ -461,21 +428,12 @@ struct State {
                 TINT_IR_ASSERT(ir, bindpoint_to_size_index.contains(info.binding_point));
                 TINT_IR_ASSERT(ir, bindpoint_to_length_member_index.Contains(info.binding_point));
 
-                // Uniform data packs sizes into vec4s; immediate data uses tightly packed u32s.
                 const uint32_t size_index = bindpoint_to_size_index.at(info.binding_point);
-                Value* total_buffer_size = nullptr;
-                if (from_uniform) {
-                    const uint32_t array_index = size_index / 4;
-                    const uint32_t vec_index = size_index % 4;
-                    auto* vec_ptr = b.Access<ptr<uniform, vec4u>>(BufferSizes(), u32(array_index));
-                    total_buffer_size = b.LoadVectorElement(vec_ptr, u32(vec_index))->Result();
-                } else {
-                    auto* buffer_sizes = immediate_data_layout.GetPointer(
-                        b, core::InternalImmediate::kStorageBufferSizes);
-                    auto* size_ptr =
-                        b.Access(ty.ptr(immediate, ty.u32()), buffer_sizes, u32(size_index));
-                    total_buffer_size = b.Load(size_ptr)->Result();
-                }
+                auto* buffer_sizes = immediate_data_layout.GetPointer(
+                    b, core::InternalImmediate::kStorageBufferSizes);
+                auto* size_ptr =
+                    b.Access(ty.ptr(immediate, ty.u32()), buffer_sizes, u32(size_index));
+                Value* total_buffer_size = b.Load(size_ptr)->Result();
 
                 // Calculate actual array length:
                 //                total_buffer_size - array_offset
@@ -513,55 +471,24 @@ struct State {
             return ContainingFunction(inst->Block()->Parent());
         });
     }
-
-    /// @returns true if the transformed module needs a storage buffer sizes UBO
-    bool NeedsStorageBufferSizes() {
-        if (from_uniform) {
-            return buffer_sizes_var != nullptr;
-        } else {
-            return !lengths_structure_members.IsEmpty() && lengths_constructor != nullptr;
-        }
-    }
 };
 
 }  // namespace
 
-Result<ArrayLengthResult> ArrayLengthFromUniform(
-    Module& ir,
-    BindingPoint ubo_binding,
-    const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_size_index) {
-    core::ir::AssertValid(ir, "before core.ArrayLengthFromUniform");
-
-    State state{.ir = ir,
-                .from_uniform = true,
-                .ubo_binding = ubo_binding,
-                .bindpoint_to_size_index = bindpoint_to_size_index,
-                .immediate_data_layout = {}};
-    state.Process();
-
-    ArrayLengthResult result;
-    result.needs_storage_buffer_sizes = state.NeedsStorageBufferSizes();
-    return result;
-}
-
-Result<ArrayLengthResult> ArrayLengthFromImmediates(
+Result<SuccessType> ReplaceArrayAndBufferLength(
     Module& ir,
     const core::ir::transform::ImmediateDataLayout& immediate_data_layout,
     const uint32_t buffer_sizes_array_elements_num,
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_size_index) {
-    core::ir::AssertValid(ir, "before core.ArrayLengthFromImmediates");
+    core::ir::AssertValid(ir, "before core.ReplaceArrayAndBufferLength");
 
     State state{.ir = ir,
-                .from_uniform = false,
-                .ubo_binding = {},
                 .bindpoint_to_size_index = bindpoint_to_size_index,
                 .immediate_data_layout = immediate_data_layout,
                 .buffer_sizes_array_elements_num = buffer_sizes_array_elements_num};
     state.Process();
 
-    ArrayLengthResult result;
-    result.needs_storage_buffer_sizes = state.NeedsStorageBufferSizes();
-    return result;
+    return Success;
 }
 
 }  // namespace tint::core::ir::transform
