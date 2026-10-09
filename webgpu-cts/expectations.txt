@@ -982,6 +982,20 @@ crbug.com/558827232 [ dawn-no-backend-validation nvidia-0x2184 nvidia_ge_32.0.16
 crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 webgpu-dxc-enabled win11 ] webgpu:shader,execution,expression,unary,af_arithmetic:negation:inputSource="const";vectorize="_undef_" [ Failure ]
 
 # Linux/GTX 1660 failures when going to 595.104.02
+crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:api,operation,render_pipeline,sample_mask:alpha_to_coverage_mask:* [ Failure ]
+crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="r16float" [ Failure ]
+crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,subgroupMinMax:compute,all_active:op="subgroupMax";wgSize=[16,16,1] [ Failure ]
+crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:* [ Failure ]
+
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:* [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:* [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:initMethod="WriteTexture";checkMethod="FullCopyT2B";format="rg8snorm";dimension="2d" [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="rgba16sint";aspect="all";samples=1 [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="bc7-rgba-unorm";dim="cube";filt="nearest";modeU="r";modeV="c";modeW="r";offset=false [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_3d_coords:format="bc2-rgba-unorm-srgb";dim="3d";filt="linear";modeU="r";modeV="c";modeW="c";offset=false [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:arrayed_2d_coords:format="depth24plus-stencil8";filt="nearest";modeU="r";modeV="m";offset=true [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:* [ Failure ]
+
 crbug.com/568459643 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,bufferArrayView:mixed_types_aliasing* [ Failure ]
 
 # Win/Snapdragon X Elite failures
