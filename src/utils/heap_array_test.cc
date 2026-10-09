@@ -30,6 +30,7 @@
 #include <array>
 #include <limits>
 #include <ranges>
+#include <vector>
 
 #include "src/utils/gtest.h"
 #include "src/utils/typed_integer.h"
@@ -163,42 +164,6 @@ TEST_F(HeapArrayTest, Uninit) {
     EXPECT_EQ(arr[Index{0u}], 5);
 }
 
-// Tests for MoveToRawPointer.
-TEST_F(HeapArrayTest, MoveToRawPointer) {
-    // Check with an untyped HeapArray.
-    {
-        auto arr = HeapArray<int>(5);
-        int* originalData = arr.data();
-        size_t originalSize = arr.size();
-
-        auto [size, data] = std::move(arr).MoveToRawPointer();
-
-        ASSERT_TRUE(arr.empty());
-        static_assert(std::is_same_v<decltype(data), int*>);
-        static_assert(std::is_same_v<decltype(size), size_t>);
-        ASSERT_EQ(data, originalData);
-        ASSERT_EQ(size, originalSize);
-
-        delete[] data;
-    }
-    // Check with a typed HeapArray.
-    {
-        auto arr = ityp::HeapArray<Index, int>(Index{5u});
-        int* originalData = arr.data();
-        Index originalSize = arr.size();
-
-        auto [size, data] = std::move(arr).MoveToRawPointer();
-
-        ASSERT_TRUE(arr.empty());
-        static_assert(std::is_same_v<decltype(data), int*>);
-        static_assert(std::is_same_v<decltype(size), size_t>);  // Not an Index!
-        ASSERT_EQ(data, originalData);
-        ASSERT_EQ(size, size_t{originalSize});
-
-        delete[] data;
-    }
-}
-
 // Tests for MoveToSpan.
 TEST_F(HeapArrayTest, MoveToSpan) {
     // Check with an untyped HeapArray.
@@ -214,7 +179,7 @@ TEST_F(HeapArrayTest, MoveToSpan) {
         ASSERT_EQ(sp.data(), originalData);
         ASSERT_EQ(sp.size(), originalSize);
 
-        delete[] sp.data();
+        DeleteAllocationFromHeapArray(sp.data());
     }
     // Check with a typed HeapArray.
     {
@@ -229,7 +194,47 @@ TEST_F(HeapArrayTest, MoveToSpan) {
         ASSERT_EQ(sp.data(), originalData);
         ASSERT_EQ(sp.size(), originalSize);
 
-        delete[] sp.data();
+        DeleteAllocationFromHeapArray(sp.data());
+    }
+}
+
+// Tests for MoveToSpan of byte types as there is special logic to overalign the allocation.
+TEST_F(HeapArrayTest, MoveToByteType) {
+    // Check with an untyped HeapArray.
+    {
+        auto arr = HeapArray<std::byte>(5);
+        std::byte* originalData = arr.data();
+        size_t originalSize = arr.size();
+
+        auto sp = std::move(arr).MoveToSpan();
+
+        ASSERT_TRUE(arr.empty());
+        static_assert(std::is_same_v<decltype(sp), Span<std::byte>>);
+        ASSERT_EQ(sp.data(), originalData);
+        ASSERT_EQ(sp.size(), originalSize);
+
+        // Dawn uses types that need at least 16.
+        ASSERT_TRUE((reinterpret_cast<uintptr_t>(sp.data()) & 0xF) == 0u);
+
+        DeleteAllocationFromHeapArray(sp.data());
+    }
+    // Check with a typed HeapArray.
+    {
+        auto arr = ityp::HeapArray<Index, std::byte>(Index{5u});
+        std::byte* originalData = arr.data();
+        Index originalSize = arr.size();
+
+        auto sp = std::move(arr).MoveToSpan();
+
+        ASSERT_TRUE(arr.empty());
+        static_assert(std::is_same_v<decltype(sp), ityp::span<Index, std::byte>>);
+        ASSERT_EQ(sp.data(), originalData);
+        ASSERT_EQ(sp.size(), originalSize);
+
+        // Dawn uses types that need at least 16.
+        ASSERT_TRUE((reinterpret_cast<uintptr_t>(sp.data()) & 0xF) == 0u);
+
+        DeleteAllocationFromHeapArray(sp.data());
     }
 }
 
@@ -332,17 +337,31 @@ TEST_F(HeapArrayDeathTest, SmallIndex) {
     }
 }
 
-// Checks that various byte types are always aligned to alignof(std::max_align_t).
+// Checks that various byte types are always aligned to alignof(std::max_align_t) and 16.
 template <typename HA>
 void CheckByteAllocation(const HA& ha) {
     EXPECT_EQ(reinterpret_cast<uintptr_t>(ha.data()) % alignof(std::max_align_t), 0u);
+    EXPECT_EQ(reinterpret_cast<uintptr_t>(ha.data()) % 16, 0u);
 }
 TEST_F(HeapArrayTest, ByteTypeAlignment) {
-    CheckByteAllocation(HeapArray<std::byte>(16));
-    CheckByteAllocation(HeapArray<char>(16));
-    // uint8_t is not technically guaranteed to be max-aligned, but in practice it will be.
-    // As of this writing, some Dawn code relies on it.
-    CheckByteAllocation(HeapArray<uint8_t>(16));
+    // Keep allocations alive at the same time to stress the allocator a bunch.
+    std::vector<HeapArray<std::byte>> byteAllocs;
+    std::vector<HeapArray<char>> charAllocs;
+    std::vector<HeapArray<uint8_t>> uint8Allocs;
+
+    // Try allocating various sizes, cycling all size between 1 and 31 since 13 and 31 and prime
+    // with each other (and starting the cycle right after 0).
+    for (size_t size = 31; size != 0; size = (size + 13) % 31) {
+        byteAllocs.push_back(HeapArray<std::byte>{size});
+        CheckByteAllocation(byteAllocs.back());
+
+        charAllocs.push_back(HeapArray<char>{size});
+        CheckByteAllocation(charAllocs.back());
+
+        static_assert(std::is_same_v<uint8_t, unsigned char>);
+        uint8Allocs.push_back(HeapArray<uint8_t>{size});
+        CheckByteAllocation(uint8Allocs.back());
+    }
 }
 
 // Check that various non-byte types are always aligned as expected.
@@ -373,7 +392,7 @@ TEST_F(HeapArrayTest, OutOfMemoryAtLimit) {
     {
         // Test sizes that are blocked by the HeapArray implementation before trying to allocate,
         // and one element smaller so that HeapArray will actually try to allocate.
-        for (size_t leaveSpace : {0u, 4094u, 4095u}) {
+        for (size_t leaveSpace : {0u, 3u, 4094u, 4095u}) {
             HeapArray<uint8_t> arr{std::numeric_limits<size_t>::max() - leaveSpace, std::nothrow};
             PreventElidingAllocation(arr);
             EXPECT_FALSE(bool{arr});

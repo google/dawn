@@ -326,7 +326,7 @@ Surface* Instance::APICreateSurface(const SurfaceDescriptor* desc) const {
 
 void APISupportedWGSLLanguageFeaturesFreeMembers(
     WGPUSupportedWGSLLanguageFeatures supportedFeatures) {
-    delete[] supportedFeatures.features;
+    DeleteAllocationFromHeapArray(supportedFeatures.features);
 }
 
 void APISupportedInstanceFeaturesFreeMembers(WGPUSupportedInstanceFeatures supportedFeatures) {

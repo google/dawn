@@ -576,9 +576,9 @@ MaybeUnknownError Surface::GetCapabilities(AdapterBase* adapter,
 }
 
 void APISurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities capabilities) {
-    delete[] capabilities.formats;
-    delete[] capabilities.presentModes;
-    delete[] capabilities.alphaModes;
+    DeleteAllocationFromHeapArray(capabilities.formats);
+    DeleteAllocationFromHeapArray(capabilities.presentModes);
+    DeleteAllocationFromHeapArray(capabilities.alphaModes);
 }
 
 MaybeError Surface::GetCurrentTexture(SurfaceTexture* surfaceTexture) const {
