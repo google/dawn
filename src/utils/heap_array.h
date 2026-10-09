@@ -37,6 +37,7 @@
 
 #include "src/utils/non_copyable.h"
 #include "src/utils/numeric.h"
+#include "src/utils/platform.h"
 #include "src/utils/span.h"
 #include "src/utils/underlying_type.h"
 
@@ -78,14 +79,14 @@ class HeapArray :
     constexpr ~HeapArray() {
         if (Value* ptr = mOwnedData.data()) {
             mOwnedData = {};
-            delete[] ptr;
+            DeleteAllocation(ptr);
         }
     }
 
     // Constructs a zero-initialized HeapArray with count `count`.
     constexpr explicit HeapArray(Index count)
         // SAFETY: Allocation size matches container size.
-        : DAWN_UNSAFE_BUFFERS(HeapArray{Alloc(count, InitType::Init), count}) {
+        : DAWN_UNSAFE_BUFFERS(HeapArray{Alloc<InitType::Init, ThrowType::Throw>(count), count}) {
         // Even if count is 0, the new[] shouldn't have returned nullptr.
         DAWN_ASSERT(mOwnedData.data() != nullptr);
     }
@@ -93,7 +94,7 @@ class HeapArray :
     // If allocation fails, returns a falsy object, with .data() == nullptr and .size() == 0.
     constexpr HeapArray(Index count, std::nothrow_t)
         // SAFETY: Allocation size matches container size; private constructor handles if it fails.
-        : DAWN_UNSAFE_BUFFERS(HeapArray{AllocNoThrow(count, InitType::Init), count}) {
+        : DAWN_UNSAFE_BUFFERS(HeapArray{Alloc<InitType::Init, ThrowType::NoThrow>(count), count}) {
         if (mOwnedData.data() == nullptr) {
             DAWN_ASSERT(mOwnedData.size() == Index{});
         }
@@ -105,7 +106,7 @@ class HeapArray :
         Index count)
         requires std::is_trivially_default_constructible_v<Value>
     {
-        return HeapArray<Index, Value>{Alloc(count, InitType::Uninit), count};
+        return HeapArray<Index, Value>{Alloc<InitType::Uninit, ThrowType::Throw>(count), count};
     }
     // Constructs an uninitialized HeapArray with count `count`, or count 0 if allocation fails.
     // This can only be used with POD types, as other types are always initialized.
@@ -114,25 +115,20 @@ class HeapArray :
         std::nothrow_t)
         requires std::is_trivially_default_constructible_v<Value>
     {
-        return HeapArray<Index, Value>{AllocNoThrow(count, InitType::Uninit), count};
-    }
-
-    // Acquire the contents as a raw pointer and size (kind of like what you get from new[] - it's
-    // valid to delete using `delete[]`).
-    // Useful with std::tie when returning a size+ptr array (e.g. via the webgpu.h C API).
-    constexpr std::pair<size_t, Value*> MoveToRawPointer() && {
-        auto data = mOwnedData;
-        mOwnedData = {};
-        return {checked_cast<size_t>(data.size()), data.data()};
+        return HeapArray<Index, Value>{Alloc<InitType::Uninit, ThrowType::NoThrow>(count), count};
     }
 
     // Acquire the contents as a size, it's valid to delete using `delete[] span.data()`).
     // Useful when returning an array as a span (e.g. via the webgpu.h C++ API).
+    // The resulting data must be deallocated using DeleteAllocationFromHeapArray so that the
+    // standard library delete function is used.
     constexpr TSpan MoveToSpan() && {
         TSpan result = mOwnedData;
         mOwnedData = {};
         return result;
     }
+
+    static void DeleteAllocation(const Value* alloc) { Delete(alloc); }
 
     // Returns true if the allocation succeeded. This can be used like `if (myHeapArray) {}` to
     // check if nothrow allocation succeeded. Note, even if the size is 0, this may return true.
@@ -175,45 +171,131 @@ class HeapArray :
         Uninit,
     };
 
-    static constexpr Value* Alloc(Index count, InitType initType) {
-        switch (initType) {
-            case InitType::Init:
-                return new Value[checked_cast<size_t>(count)]{};
-            case InitType::Uninit:
-                return new Value[checked_cast<size_t>(count)];
-        }
-        DAWN_UNREACHABLE();
-        return nullptr;
-    }
+    enum class ThrowType {
+        Throw,
+        NoThrow,
+    };
 
-    static constexpr Value* AllocNoThrow(Index count, InitType initType) {
+    // HeapArrays of byte types are used for allocations that can be reinterpreted as other
+    // kinds of data. Make sure that they are aligned to max_align_t such that the allocation is
+    // aligned enough for any reasonable type. Also ensure allocations are aligned to 16 as the
+    // WebGPU API guarantees that alignment for mapped buffers.
+    template <typename T>
+    static constexpr bool IsByteType =
+        std::is_same_v<std::remove_cv_t<T>, std::byte> ||
+        std::is_same_v<std::remove_cv_t<T>, char> || std::is_same_v<std::remove_cv_t<T>, uint8_t>;
+    template <typename T>
+    static constexpr size_t AllocAlignment =
+        IsByteType<T> ? std::max(alignof(std::max_align_t), size_t{16u}) : alignof(T);
+
+    template <size_t Alignment>
+    struct AlignedArrayOfBytes {
+        alignas(Alignment) std::byte data[Alignment];
+    };
+
+    template <InitType Init,
+              ThrowType Throws,
+              typename AllocType = Value,
+              typename IndexType = Index>
+    static constexpr AllocType* Alloc(IndexType count) {
 #if DAWN_ASAN_ENABLED() || DAWN_MSAN_ENABLED() || DAWN_TSAN_ENABLED()
         // std::nothrow isn't implemented in sanitizers and they often have a 2GB allocation
         // limit. Catch large allocations and error out so fuzzers make progress.
-        constexpr size_t kLargestAllowedAllocationAttemptBytes = 0x70000000;
+        [[maybe_unused]] constexpr size_t kLargestAllowedAllocationAttemptBytes = 0x70000000;
 #else
-        constexpr size_t kLargestAllowedAllocationAttemptBytes =
+        [[maybe_unused]] constexpr size_t kLargestAllowedAllocationAttemptBytes =
             std::numeric_limits<size_t>::max() - 4095;
 #endif
 
-        // Early-fail to cover two cases:
-        // - The checked_cast is going to fail.
-        // - The total allocation size is going to be too close to the whole address space.
-        //   PartitionAlloc in particular crashes instead of failing if (size >= SIZE_MAX - 23).
-        if (I{count} > kLargestAllowedAllocationAttemptBytes / sizeof(Value)) {
-            return nullptr;
+        if constexpr (Throws == ThrowType::NoThrow) {
+            // Early-fail to cover two cases:
+            // - The checked_cast is going to fail.
+            // - The total allocation size is going to be too close to the whole address space.
+            //   PartitionAlloc in particular crashes instead of failing if (size >= SIZE_MAX - 23).
+            if (I{count} > kLargestAllowedAllocationAttemptBytes / sizeof(AllocType)) {
+                return nullptr;
+            }
         }
 
-        switch (initType) {
-            case InitType::Init:
-                return new (std::nothrow) Value[checked_cast<size_t>(count)]{};
-            case InitType::Uninit:
-                return new (std::nothrow) Value[checked_cast<size_t>(count)];
+        // Workaround an MSVC bug where new (std::align_val_t) produces an error C2956 because it
+        // treats it the same as a placement new, and requires a matching placement delete, even if
+        // it is a different construct. Even when using Clang, the Windows CRT also has mysterious
+        // issues with new (std::align_val_t). So on Windows use new (std::align_t) only with clang
+        // and PartitionAlloc and the workaround otherwise.
+        // TODO(https://crbug.com/571664297): Revisit if/when MSVC and CRT no longer have issues.
+        // TODO(b/571962072): Reenable on others OSes even when partition alloc is not present once
+        // GWP-Asan is fixed.
+#if DAWN_COMPILER_IS(MSVC) || !defined(DAWN_ENABLE_PARTITION_ALLOC)
+        if constexpr (IsByteType<AllocType>) {
+            // Replace allocations for byte types with an allocation of an aligned equivalent type
+            // to force an alignment.
+            using AlignedAllocType = AlignedArrayOfBytes<AllocAlignment<AllocType>>;
+            static_assert(sizeof(AlignedAllocType) == AllocAlignment<AllocType>);
+            static_assert(alignof(AlignedAllocType) == AllocAlignment<AllocType>);
+
+            // Check against kLargestAllowedAllocationAttemptBytes because it ensures no overflow
+            // happens in the addition below.
+            static_assert(sizeof(AlignedAllocType) < 4095);
+            DAWN_CHECK(checked_cast<size_t>(count) <=
+                       kLargestAllowedAllocationAttemptBytes / sizeof(AllocType));
+            size_t countForAligned = (checked_cast<size_t>(count) + sizeof(AlignedAllocType) - 1) /
+                                     sizeof(AlignedAllocType);
+
+            AlignedAllocType* aligned =
+                Alloc<Init, Throws, AlignedAllocType, size_t>(countForAligned);
+            return reinterpret_cast<AllocType*>(aligned);
         }
+
+        if constexpr (Throws == ThrowType::NoThrow) {
+            if constexpr (Init == InitType::Init) {
+                return new (std::nothrow) AllocType[checked_cast<size_t>(count)]{};
+            } else {
+                return new (std::nothrow) AllocType[checked_cast<size_t>(count)];
+            }
+        } else {
+            if constexpr (Init == InitType::Init) {
+                return new AllocType[checked_cast<size_t>(count)]{};
+            } else {
+                return new AllocType[checked_cast<size_t>(count)];
+            }
+        }
+#else   // MSVC || (WINDOWS && !PARTITION_ALLOC)
+
+        constexpr std::align_val_t kAlignment{AllocAlignment<AllocType>};
+
+        if constexpr (Throws == ThrowType::NoThrow) {
+            if constexpr (Init == InitType::Init) {
+                return new (kAlignment, std::nothrow) AllocType[checked_cast<size_t>(count)]{};
+            } else {
+                return new (kAlignment, std::nothrow) AllocType[checked_cast<size_t>(count)];
+            }
+        } else {
+            if constexpr (Init == InitType::Init) {
+                return new (kAlignment) AllocType[checked_cast<size_t>(count)]{};
+            } else {
+                return new (kAlignment) AllocType[checked_cast<size_t>(count)];
+            }
+        }
+#endif  // MSVC || (WINDOWS && !PARTITION_ALLOC)
+
         DAWN_UNREACHABLE();
         return nullptr;
     }
 
+    template <typename AllocType = Value>
+    static constexpr void Delete(const AllocType* alloc) {
+        // Match the logic in Alloc that allocates aligned array of bytes instead of using the
+        // operator new that takes an std::align_val_t.
+#if DAWN_COMPILER_IS(MSVC) || !defined(DAWN_ENABLE_PARTITION_ALLOC)
+        if constexpr (IsByteType<AllocType>) {
+            using AlignedAllocType = AlignedArrayOfBytes<AllocAlignment<AllocType>>;
+            Delete<AlignedAllocType>(reinterpret_cast<const AlignedAllocType*>(alloc));
+            return;
+        }
+#endif
+
+        delete[] alloc;
+    }
     // We store this as a span, but we own its allocation.
     // {nullptr, 0} = failed to allocate. (operator bool() returns false)
     // {non-null, size} = succeeded in allocating, even if size==0. (operator bool() returns true)
@@ -241,6 +323,12 @@ using HeapArray = ityp::HeapArray<size_t, Value>;
 
 [[nodiscard]] static constexpr auto HeapArrayFrom(const std::ranges::sized_range auto& src) {
     return ityp::HeapArrayFrom<size_t>(src);
+}
+
+// Must be called to free allocations originating from a HeapArray and acquired with MoveToSpan.
+template <typename T>
+static constexpr void DeleteAllocationFromHeapArray(T* alloc) {
+    HeapArray<std::remove_const_t<T>>::DeleteAllocation(alloc);
 }
 
 }  // namespace dawn

@@ -808,7 +808,7 @@ void InstanceBase::APIGetWGSLLanguageFeatures(SupportedWGSLLanguageFeatures* fea
 
 void APISupportedWGSLLanguageFeaturesFreeMembers(
     WGPUSupportedWGSLLanguageFeatures supportedFeatures) {
-    delete[] supportedFeatures.features;
+    DeleteAllocationFromHeapArray(supportedFeatures.features);
 }
 
 }  // namespace dawn::native
