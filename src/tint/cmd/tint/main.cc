@@ -190,6 +190,7 @@ struct Options {
     std::string fxc_path;
     std::string dxc_path;
     tint::hlsl::validate::HlslShaderModel hlsl_shader_model = kMinShaderModelForDXC;
+    std::vector<tint::BindingPoint> ignored_by_robustness_transform;
     tint::hlsl::writer::PixelLocalOptions pixel_local_options;
 #endif  // TINT_BUILD_HLSL_WRITER
 
@@ -381,6 +382,12 @@ R32Sint, R32Uint, R32Float.
 Valid values are 6.0, 6.2, 6.4, 6.6 and 6.10)",
         hlsl_shader_model_enum_names, Default{tint::hlsl::validate::HlslShaderModel::kSM_6_0});
     TINT_DEFER(opts->hlsl_shader_model = *hlsl_shader_model.value);
+
+    auto& bindings_ignored = options.Add<StringOption>(
+        "bindings-ignored",
+        R"(Bindings to ignore in the robustness transform, as space-separated group,binding pairs.
+For example: "0,1 2,3".)",
+        Default{""});
 #endif  // TINT_BUILD_HLSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER || TINT_BUILD_MSL_WRITER
@@ -719,6 +726,36 @@ Options:
     }
 
 #endif
+
+#if TINT_BUILD_HLSL_WRITER
+    if (bindings_ignored.value.has_value() && !bindings_ignored.value->empty()) {
+        for (auto binding_text : tint::Split(*bindings_ignored.value, " ")) {
+            auto parts = tint::Split(binding_text, ",");
+            if (parts.Length() != 2) {
+                std::cerr << "A binding point requires a 'group,binding' pair for "
+                          << bindings_ignored.name << ".\n";
+                return false;
+            }
+
+            auto group = tint::strconv::ParseUint32(parts[0]);
+            if (group != tint::Success) {
+                std::cerr << "Invalid group index for " << bindings_ignored.name << ": " << parts[0]
+                          << "\n";
+                return false;
+            }
+
+            auto binding_index = tint::strconv::ParseUint32(parts[1]);
+            if (binding_index != tint::Success) {
+                std::cerr << "Invalid binding index for " << bindings_ignored.name << ": "
+                          << parts[1] << "\n";
+                return false;
+            }
+
+            opts->ignored_by_robustness_transform.emplace_back(
+                tint::BindingPoint{group.Get(), binding_index.Get()});
+        }
+    }
+#endif  // TINT_BUILD_HLSL_WRITER
 
 #if TINT_BUILD_MSL_WRITER
     if (arg_buffer.value.has_value()) {
@@ -1305,6 +1342,7 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
     }
     gen_options.entry_point_name = options.ep_name;
     gen_options.disable_robustness = !options.enable_robustness;
+    gen_options.ignored_by_robustness_transform = options.ignored_by_robustness_transform;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.pixel_local = options.pixel_local_options;
     gen_options.extensions.polyfill_dot_4x8_packed =
