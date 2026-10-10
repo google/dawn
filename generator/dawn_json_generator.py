@@ -1466,8 +1466,13 @@ def as_cppEnum(value_name):
 
 
 def as_MethodSuffix(type_name, method_name):
-    assert not type_name.native and not method_name.native
-    return type_name.CamelCase() + method_name.CamelCase()
+    c_method = ''
+    if type_name:
+        assert not type_name.native
+        c_method += type_name.CamelCase()
+    assert not method_name.native
+    c_method += method_name.CamelCase()
+    return c_method
 
 
 def as_CppMethodSuffix(type_name, method_name):
@@ -1532,9 +1537,12 @@ def get_c_methods_sorted_by_parent(api_params):
 
 
 def get_c_methods_sorted_by_name(api_params):
-    unsorted = [(as_MethodSuffix(typ.name, method.name), typ, method) \
-    for (typ, methods) in get_c_methods_sorted_by_parent(api_params) \
-    for method in methods]
+    unsorted = [(as_MethodSuffix(typ.name, method.name), typ, method)
+                for (typ,
+                     methods) in get_c_methods_sorted_by_parent(api_params)
+                for method in methods]
+    unsorted += [(function.name.CamelCase(), None, function)
+                 for function in api_params['by_category']['function']]
     return [(typ, method) for (_, typ, method) in sorted(unsorted)]
 
 
@@ -1588,7 +1596,7 @@ def make_base_render_params(metadata):
         c_method = c_prefix.lower()
         if namespace is not None:
             c_method += namespace.CamelCase()
-        if type_name is not None:
+        if type_name:
             assert not type_name.native
             c_method += type_name.CamelCase()
         assert not method_name.native

@@ -225,12 +225,6 @@ bool IsTextureSubresourceInitialized(WGPUTexture texture,
     return textureBase->IsSubresourceContentInitialized(range);
 }
 
-std::vector<std::string_view> GetProcMapNamesForTestingInternal();
-
-std::vector<std::string_view> GetProcMapNamesForTesting() {
-    return GetProcMapNamesForTestingInternal();
-}
-
 DAWN_NATIVE_EXPORT bool DeviceTick(WGPUDevice device) {
     return FromAPI(device)->APITick();
 }

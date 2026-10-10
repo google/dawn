@@ -185,9 +185,6 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
     MemoryTransferService(const MemoryTransferService&) = delete;
     MemoryTransferService& operator=(const MemoryTransferService&) = delete;
 };
-
-// Backdoor to get the order of the ProcMap for testing
-DAWN_WIRE_EXPORT std::vector<std::string_view> GetProcMapNamesForTesting();
 }  // namespace client
 }  // namespace dawn::wire
 

@@ -35,6 +35,7 @@
 #include <utility>
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
 #include "dawn/wire/client/{{prefix}}_platform.h"
 #include "dawn/wire/client/webgpu.h"
 #include "dawn/dawn_version.h"
@@ -152,16 +153,13 @@ using namespace dawn::wire::client;
 {% endfor %}
 
 namespace {
-    struct ProcEntry {
-        WGPUProc proc;
-        std::string_view name;
-    };
-    static const ProcEntry sProcMap[] = {
-        {% for (type, method) in c_methods_sorted_by_name %}
-            { reinterpret_cast<WGPUProc>({{as_cMethodNamespaced(type.name, method.name, Name('dawn wire client'))}}), "{{as_cMethod(type.name, method.name)}}" },
-        {% endfor %}
-    };
-    static constexpr size_t sProcMapSize = sizeof(sProcMap) / sizeof(sProcMap[0]);
+    static const absl::flat_hash_map<std::string_view, WGPUProc> sProcMap = []() {
+        return absl::flat_hash_map<std::string_view, WGPUProc>{
+            {% for (type, method) in c_methods_sorted_by_name %}
+                {"{{as_cMethod(type.name, method.name)}}", reinterpret_cast<WGPUProc>({{as_cMethodNamespaced(type.name, method.name, Name('dawn wire client'))}})},
+            {% endfor %}
+        };
+    }();
 }  // anonymous namespace
 
 DAWN_WIRE_EXPORT WGPUProc {{as_cMethodNamespaced(None, Name('get proc address'), Name('dawn wire client'))}}(WGPUStringView cProcName) {
@@ -170,38 +168,11 @@ DAWN_WIRE_EXPORT WGPUProc {{as_cMethodNamespaced(None, Name('get proc address'),
     }
 
     std::string_view procName(cProcName.data, cProcName.length != WGPU_STRLEN ? cProcName.length : strlen(cProcName.data));
-
-    const ProcEntry* entry = std::lower_bound(&sProcMap[0], &sProcMap[sProcMapSize], procName,
-        [](const ProcEntry &a, const std::string_view& b) -> bool {
-            return a.name.compare(b) < 0;
-        }
-    );
-
-    if (entry != &sProcMap[sProcMapSize] && entry->name == procName) {
-        return entry->proc;
-    }
-
-    // Special case the free-standing functions of the API.
-    // TODO(dawn:1238) Checking string one by one is slow, it needs to be optimized.
-    {% for function in by_category["function"] %}
-        if (procName == "{{as_cMethod(None, function.name)}}") {
-            return reinterpret_cast<WGPUProc>({{as_cMethodNamespaced(None, function.name, Name('dawn wire client'))}});
-        }
-
-    {% endfor %}
-    return nullptr;
+    auto it = sProcMap.find(procName);
+    return it != sProcMap.end() ? it->second : nullptr;
 }
 
 namespace dawn::wire::client {
-
-    std::vector<std::string_view> GetProcMapNamesForTesting() {
-        std::vector<std::string_view> result;
-        result.reserve(sProcMapSize);
-        for (const ProcEntry& entry : sProcMap) {
-            result.push_back(entry.name);
-        }
-        return result;
-    }
 
     {% set Prefix = metadata.proc_table_prefix %}
 

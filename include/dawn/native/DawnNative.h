@@ -227,9 +227,6 @@ DAWN_NATIVE_EXPORT bool IsTextureSubresourceInitialized(
     uint32_t layerCount,
     WGPUTextureAspect aspect = WGPUTextureAspect_All);
 
-// Backdoor to get the order of the ProcMap for testing
-DAWN_NATIVE_EXPORT std::vector<std::string_view> GetProcMapNamesForTesting();
-
 DAWN_NATIVE_EXPORT bool DeviceTick(WGPUDevice device);
 
 DAWN_NATIVE_EXPORT bool InstanceProcessEvents(WGPUInstance instance);
