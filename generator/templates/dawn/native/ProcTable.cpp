@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <vector>
 
+#include "absl/base/no_destructor.h"
 #include "absl/container/flat_hash_map.h"
 #include "{{native_dir}}/{{prefix}}_platform.h"
 #include "{{include_dir}}/{{Prefix}}Native.h"
@@ -97,29 +98,22 @@ namespace {{native_namespace}} {
         }
     {% endfor %}
 
-    WGPUProc NativeGetProcAddress(WGPUStringView cProcName);
-
-    namespace {
-
-        {% set c_prefix = metadata.c_prefix %}
-        static const absl::flat_hash_map<std::string_view, {{c_prefix}}Proc> sProcMap = []() {
-            return absl::flat_hash_map<std::string_view, {{c_prefix}}Proc>{
-                {% for (type, method) in c_methods_sorted_by_name %}
-                    {"{{as_cMethod(type.name, method.name)}}", reinterpret_cast<{{c_prefix}}Proc>(Native{{as_MethodSuffix(type.name, method.name)}})},
-                {% endfor %}
-            };
-        }();
-
-    }  // anonymous namespace
-
     WGPUProc NativeGetProcAddress(WGPUStringView cProcName) {
         if (cProcName.data == nullptr) {
             return nullptr;
         }
 
+        {% set c_prefix = metadata.c_prefix %}
+        static const absl::NoDestructor<absl::flat_hash_map<std::string_view, {{c_prefix}}Proc>> sProcMap(
+            absl::flat_hash_map<std::string_view, {{c_prefix}}Proc>{
+                {% for (type, method) in c_methods_sorted_by_name %}
+                    {"{{as_cMethod(type.name, method.name)}}", reinterpret_cast<{{c_prefix}}Proc>(Native{{as_MethodSuffix(type.name, method.name)}})},
+                {% endfor %}
+            });
+
         std::string_view procName(cProcName.data, cProcName.length != WGPU_STRLEN ? cProcName.length : strlen(cProcName.data));
-        auto it = sProcMap.find(procName);
-        return it != sProcMap.end() ? it->second : nullptr;
+        auto it = sProcMap->find(procName);
+        return it != sProcMap->end() ? it->second : nullptr;
     }
 
     constexpr {{Prefix}}ProcTable MakeProcTable() {

@@ -35,6 +35,7 @@
 #include <utility>
 #include <vector>
 
+#include "absl/base/no_destructor.h"
 #include "absl/container/flat_hash_map.h"
 #include "dawn/wire/client/{{prefix}}_platform.h"
 #include "dawn/wire/client/webgpu.h"
@@ -152,24 +153,21 @@ using namespace dawn::wire::client;
 
 {% endfor %}
 
-namespace {
-    static const absl::flat_hash_map<std::string_view, WGPUProc> sProcMap = []() {
-        return absl::flat_hash_map<std::string_view, WGPUProc>{
-            {% for (type, method) in c_methods_sorted_by_name %}
-                {"{{as_cMethod(type.name, method.name)}}", reinterpret_cast<WGPUProc>({{as_cMethodNamespaced(type.name, method.name, Name('dawn wire client'))}})},
-            {% endfor %}
-        };
-    }();
-}  // anonymous namespace
-
 DAWN_WIRE_EXPORT WGPUProc {{as_cMethodNamespaced(None, Name('get proc address'), Name('dawn wire client'))}}(WGPUStringView cProcName) {
     if (cProcName.data == nullptr) {
         return nullptr;
     }
 
+    static const absl::NoDestructor<absl::flat_hash_map<std::string_view, WGPUProc>> sProcMap(
+        absl::flat_hash_map<std::string_view, WGPUProc>{
+            {% for (type, method) in c_methods_sorted_by_name %}
+                {"{{as_cMethod(type.name, method.name)}}", reinterpret_cast<WGPUProc>({{as_cMethodNamespaced(type.name, method.name, Name('dawn wire client'))}})},
+            {% endfor %}
+        });
+
     std::string_view procName(cProcName.data, cProcName.length != WGPU_STRLEN ? cProcName.length : strlen(cProcName.data));
-    auto it = sProcMap.find(procName);
-    return it != sProcMap.end() ? it->second : nullptr;
+    auto it = sProcMap->find(procName);
+    return it != sProcMap->end() ? it->second : nullptr;
 }
 
 namespace dawn::wire::client {

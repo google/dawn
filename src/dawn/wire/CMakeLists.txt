@@ -128,6 +128,7 @@ dawn_add_library(
   PRIVATE_DEPENDS
     absl::flat_hash_map
     absl::flat_hash_set
+    absl::no_destructor
     dawn::dawn_common
     dawn::partition_alloc
     tint_lang_wgsl

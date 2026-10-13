@@ -931,6 +931,7 @@ set(dawn_native_private_depends
     absl::flat_hash_map
     absl::flat_hash_set
     absl::inlined_vector
+    absl::no_destructor
     absl::str_format_internal
     absl::strings
     dawn::dawn_system_utils
