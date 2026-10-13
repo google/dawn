@@ -1793,6 +1793,7 @@ MaybeError ImportedTextureBase::EndAccess(ExternalSemaphoreHandle* handle,
 
     // Release the texture
     mExternalState = ExternalState::Released;
+    mLastExternalState = ExternalState::Released;
 
     // Compute the layouts for the queue transition for export. desiredLayout == UNDEFINED is a tag
     // value used to export with whatever the current layout is. However queue transitioning to the
@@ -2052,7 +2053,7 @@ void SharedTexture::SetPendingAcquire(VkImageLayout pendingAcquireOldLayout,
                                       VkImageLayout pendingAcquireNewLayout) {
     DAWN_ASSERT(GetSharedResourceMemoryContents() != nullptr);
     mExternalState = ExternalState::PendingAcquire;
-    mLastExternalState = ExternalState::PendingAcquire;
+    mLastExternalState = ExternalState::Released;
 
     mPendingAcquireOldLayout = pendingAcquireOldLayout;
     mPendingAcquireNewLayout = pendingAcquireNewLayout;

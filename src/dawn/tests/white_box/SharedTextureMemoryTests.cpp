@@ -2341,6 +2341,85 @@ TEST_P(SharedTextureMemoryTests, RenderThenSampleEncodeBeforeBeginAccess) {
     }
 }
 
+// Test rendering to a texture memory, then sampling it on the same device from a single read-only
+// texture that is reused across several BeginAccess/EndAccess cycles. Regression test for the
+// Vulkan backend, where SharedTexture::SetPendingAcquire left mLastExternalState equal to
+// mExternalState. The second access of a read-only texture then skipped its acquire barrier and
+// transitioned the image to VK_IMAGE_LAYOUT_UNDEFINED.
+TEST_P(SharedTextureMemoryTests, RenderThenSampleSameReadOnlyTextureAcrossAccesses) {
+    // TODO(crbug.com/523272965): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
+    // crbug.com/475503907
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsImgTec());
+
+    for (const auto& memories :
+         GetParam().mBackend->CreatePerDeviceSharedTextureMemoriesFilterByUsage(
+             {device}, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding,
+             GetParam().mLayerCount)) {
+        auto memory = memories[0];
+        wgpu::SharedTextureMemoryProperties properties;
+        memory.GetProperties(&properties);
+
+        // One texture writes the contents. A second, read-only texture is reused for every read.
+        wgpu::Texture writeTexture = memory.CreateTexture();
+
+        wgpu::TextureDescriptor readTextureDesc = {};
+        readTextureDesc.format = properties.format;
+        readTextureDesc.size = properties.size;
+        readTextureDesc.usage = wgpu::TextureUsage::TextureBinding;
+        readTextureDesc.label = "read texture";
+        wgpu::Texture readTexture = memory.CreateTexture(&readTextureDesc);
+
+        // Clear the texture.
+        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+        beginDesc.concurrentRead = false;
+        beginDesc.initialized = false;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+        memory.BeginAccess(writeTexture, &beginDesc);
+
+        wgpu::CommandBuffer commandBuffer = MakeFourColorsClearCommandBuffer(device, writeTexture);
+        device.GetQueue().Submit(1, &commandBuffer);
+
+        wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
+        memory.EndAccess(writeTexture, &endState);
+        EXPECT_TRUE(endState.initialized);
+
+        // Sample from the same read-only texture in several consecutive accesses. The second
+        // access is the one that previously skipped the acquire barrier on Vulkan.
+        constexpr int kAccessCount = 3;
+        for (int i = 0; i < kAccessCount; ++i) {
+            std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
+            for (size_t j = 0; j < endState.fenceCount; ++j) {
+                sharedFences[j] = utils::ImportFenceTo(device, endState.fences[j]);
+            }
+            beginDesc.fenceCount = endState.fenceCount;
+            beginDesc.fences = sharedFences.data();
+            beginDesc.signaledValueCount = endState.signaledValueCount;
+            beginDesc.signaledValues = endState.signaledValues;
+            beginDesc.concurrentRead = false;
+            beginDesc.initialized = endState.initialized;
+            backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
+
+            memory.BeginAccess(readTexture, &beginDesc);
+
+            wgpu::Texture colorTarget;
+            std::tie(commandBuffer, colorTarget) =
+                MakeCheckBySamplingCommandBuffer(device, readTexture);
+            device.GetQueue().Submit(1, &commandBuffer);
+
+            memory.EndAccess(readTexture, &endState);
+            EXPECT_TRUE(endState.initialized);
+
+            CheckFourColors(device, readTexture.GetFormat(), colorTarget);
+        }
+    }
+}
+
 // Test rendering to a texture memory on one device, then sampling it using another device.
 // Destroy the texture from the first device after submitting the commands, but before performing
 // EndAccess. The second device should still be able to wait on the first device and see the
