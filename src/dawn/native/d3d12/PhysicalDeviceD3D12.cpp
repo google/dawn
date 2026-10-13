@@ -525,14 +525,15 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
                                     feature));
             }
             break;
-        // Subgroup matrix produces incorrect results on Intel drivers through 101.8992.
+        // Subgroup matrix produces incorrect results on Intel drivers through 101.9034.
+        // Fixed on Intel driver >=101.9150.
         case wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix: {
-            const gpu_info::IntelWindowsDriverVersion kBuggyDriverVersion = {32, 0, 101, 8992};
+            const gpu_info::IntelWindowsDriverVersion kBuggyDriverVersion = {32, 0, 101, 9034};
             if (gpu_info::IsIntel(GetVendorId()) &&
                 gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) <= kBuggyDriverVersion &&
                 !toggles.IsEnabled(Toggle::D3D12ForceEnableSubgroupMatrixOnBuggyIntelDrivers)) {
                 return FeatureValidationResult(
-                    absl::StrFormat("Intel D3D12 drivers through version 101.8992 require "
+                    absl::StrFormat("Intel D3D12 drivers through version 101.9034 require "
                                     "`d3d12_force_enable_subgroup_matrix_on_buggy_intel_drivers` "
                                     "to enable %s.",
                                     feature));
@@ -797,13 +798,19 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     uint32_t deviceId = GetDeviceId();
     uint32_t vendorId = GetVendorId();
 
-    // Currently this workaround is only needed on Intel Gen12, Xe, Xe2 and Xe3 GPUs.
+    // This workaround is needed on Intel Gen12 GPUs, and on Intel Xe, Xe2 and Xe3 GPUs with
+    // drivers through version 101.9034. Intel drivers newer than 101.9150 fixed the bug below.
     // See http://crbug.com/341991439 for more information.
+    const gpu_info::IntelWindowsDriverVersion kDecomposeWorkgroupAccessMaxDriverVersion = {
+        32, 0, 101, 9034};
     if (gpu_info::IsIntelGen12LP(vendorId, deviceId) ||
         gpu_info::IsIntelGen12HP(vendorId, deviceId) ||
-        gpu_info::IsIntelXeLPG(vendorId, deviceId) || gpu_info::IsIntelXe2LPG(vendorId, deviceId) ||
-        gpu_info::IsIntelXe2HPG(vendorId, deviceId) ||
-        gpu_info::IsIntelXe3LPG(vendorId, deviceId)) {
+        ((gpu_info::IsIntelXeLPG(vendorId, deviceId) ||
+          gpu_info::IsIntelXe2LPG(vendorId, deviceId) ||
+          gpu_info::IsIntelXe2HPG(vendorId, deviceId) ||
+          gpu_info::IsIntelXe3LPG(vendorId, deviceId)) &&
+         gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) <=
+             kDecomposeWorkgroupAccessMaxDriverVersion)) {
         deviceToggles->Default(Toggle::D3D12DecomposeWorkgroupAccess, true);
     }
 
