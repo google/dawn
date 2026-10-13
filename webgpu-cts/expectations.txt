@@ -1631,10 +1631,6 @@ crbug.com/543960651 [ android-sm-s926b ] webgpu:web_platform,copyToTexture,image
 # Flaky pixel mismatches across the canvas copyToTexture family on Win10 NVIDIA with backend validation.
 crbug.com/564903015 [ dawn-backend-validation nvidia-0x2184 release-x64 target-cpu-64 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,canvas:* [ RetryOnFailure ]
 
-# canvas,configure:invalid_usage fails for bgra8unorm with STORAGE_BINDING when bgra8unorm-storage is unsupported
-crbug.com/565366976 [ android-pixel-4 ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="*";format="bgra8unorm";usage=8 [ Failure ]
-crbug.com/565366976 [ android-pixel-10 ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="*";format="bgra8unorm";usage=8 [ Failure ]
-
 # Metal/AMD render_pass_resolve fails on sRGB formats (bgra8unorm-srgb, rgba8unorm-srgb)
 crbug.com/565363847 [ amd mac ] webgpu:api,operation,render_pass,resolve:render_pass_resolve:colorFormat="bgra8unorm-srgb";* [ Failure ]
 crbug.com/565363847 [ amd mac ] webgpu:api,operation,render_pass,resolve:render_pass_resolve:colorFormat="rgba8unorm-srgb";* [ Failure ]
