@@ -701,8 +701,11 @@ napi_status ConcludeDeferred(napi_env env,
     if (!ValidateArgs(env, deferred, value)) {
         return napi_invalid_arg;
     }
-    auto it = std::find_if(env->deferreds.begin(), env->deferreds.end(),
-                           [deferred](const auto& d) { return d.get() == deferred; });
+    if (!env->last_exception.IsEmpty()) {
+        return env->SetLastError(napi_pending_exception, "An exception is pending");
+    }
+    auto it = std::ranges::find_if(env->deferreds.begin(), env->deferreds.end(),
+                                   [deferred](const auto& d) { return d.get() == deferred; });
     if (it == env->deferreds.end()) {
         return env->SetLastError(napi_invalid_arg, "Deferred not found");
     }
@@ -2042,6 +2045,9 @@ napi_status napi_get_typedarray_info(napi_env env,
 napi_status napi_create_promise(napi_env env, napi_deferred* deferred, napi_value* promise) {
     if (!ValidateArgs(env, deferred, promise)) {
         return napi_invalid_arg;
+    }
+    if (!env->last_exception.IsEmpty()) {
+        return env->SetLastError(napi_pending_exception, "An exception is pending");
     }
     v8::Local<v8::Context> ctx = env->GetContext();
     v8::MaybeLocal<v8::Promise::Resolver> maybe_resolver = v8::Promise::Resolver::New(ctx);

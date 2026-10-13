@@ -208,17 +208,27 @@ enum class PromiseState {
     Discarded,
 };
 
+// A tag used in a Promise constructor to say it won't be used and doesn't need to be initialized.
+struct UnusedPromiseTag {};
+inline constexpr UnusedPromiseTag kUnusedPromise;
+
 namespace detail {
 // Base class for Promise<T> specializations.
 class PromiseBase {
   public:
     // Implicit conversion operators to Napi promises.
     // NOLINTNEXTLINE(google-explicit-constructor)
-    inline operator napi_value() const { return state_->deferred.Promise(); }
+    inline operator napi_value() const {
+        return state_ ? static_cast<napi_value>(state_->deferred.Promise()) : nullptr;
+    }
     // NOLINTNEXTLINE(google-explicit-constructor)
-    inline operator Napi::Value() const { return state_->deferred.Promise(); }
+    inline operator Napi::Value() const {
+        return state_ ? state_->deferred.Promise() : Napi::Value();
+    }
     // NOLINTNEXTLINE(google-explicit-constructor)
-    inline operator Napi::Promise() const { return state_->deferred.Promise(); }
+    inline operator Napi::Promise() const {
+        return state_ ? state_->deferred.Promise() : Napi::Promise(nullptr, nullptr);
+    }
 
     // Comparison operator between promises
     friend bool operator==(const PromiseBase& lhs, const PromiseBase& rhs) {
@@ -254,6 +264,8 @@ class PromiseBase {
         PromiseState state = PromiseState::Pending;
     };
 
+    explicit PromiseBase(UnusedPromiseTag) : state_(nullptr) {}
+
     PromiseBase(Napi::Env env, const PromiseInfo& info)
         : state_(new State{Napi::Promise::Deferred::New(env), info}) {
         state_->deferred.Promise().AddFinalizer(
@@ -271,10 +283,6 @@ class PromiseBase {
 };
 }  // namespace detail
 
-// A tag used in a Promise constructor to say it won't be used and doesn't need to be initialized.
-struct UnusedPromiseTag {};
-inline constexpr UnusedPromiseTag kUnusedPromise;
-
 // Promise<T> is a templated wrapper around a JavaScript promise, which can
 // resolve to the template type T.
 template <typename T>
@@ -282,9 +290,7 @@ class Promise : public detail::PromiseBase {
   public:
     // Constructor
     Promise(Napi::Env env, const PromiseInfo& info) : PromiseBase(env, info) {}
-    Promise(Napi::Env env, UnusedPromiseTag) : PromiseBase(env, PROMISE_INFO) {
-        Reject("Unused Promise, you should never see this!");
-    }
+    Promise(Napi::Env, UnusedPromiseTag) : PromiseBase(kUnusedPromise) {}
 
     // Resolve() fulfills the promise with the given value.
     void Resolve(T&& value) const {
@@ -298,9 +304,7 @@ class Promise<void> : public detail::PromiseBase {
   public:
     // Constructor
     Promise(Napi::Env env, const PromiseInfo& info) : PromiseBase(env, info) {}
-    Promise(Napi::Env env, UnusedPromiseTag) : PromiseBase(env, PROMISE_INFO) {
-        Reject("Unused Promise, you should never see this!");
-    }
+    Promise(Napi::Env, UnusedPromiseTag) : PromiseBase(kUnusedPromise) {}
 
     // Resolve() fulfills the promise.
     void Resolve() const { PromiseBase::Resolve(state_->deferred.Env().Undefined()); }

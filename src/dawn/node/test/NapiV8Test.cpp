@@ -3013,6 +3013,26 @@ TEST_F(NapiV8Test, PromiseReject) {
     EXPECT_STREQ(buf, "something failed");
 }
 
+TEST_F(NapiV8Test, PromisePendingException) {
+    napi_deferred deferred = nullptr;
+    napi_value promise = nullptr;
+    ASSERT_EQ(napi_create_promise(env_, &deferred, &promise), napi_ok);
+
+    napi_value val = nullptr;
+    ASSERT_EQ(napi_create_int32(env_, 1, &val), napi_ok);
+    ASSERT_EQ(napi_throw(env_, val), napi_ok);
+
+    napi_deferred unused_deferred = nullptr;
+    napi_value unused_promise = nullptr;
+    EXPECT_EQ(napi_create_promise(env_, &unused_deferred, &unused_promise), napi_pending_exception);
+    EXPECT_EQ(napi_resolve_deferred(env_, deferred, val), napi_pending_exception);
+    EXPECT_EQ(napi_reject_deferred(env_, deferred, val), napi_pending_exception);
+
+    napi_value ex = nullptr;
+    ASSERT_EQ(napi_get_and_clear_last_exception(env_, &ex), napi_ok);
+    EXPECT_EQ(napi_resolve_deferred(env_, deferred, val), napi_ok);
+}
+
 TEST_F(NapiV8Test, GetVersion) {
     uint32_t version = 0;
     ASSERT_EQ(napi_get_version(env_, &version), napi_ok);
