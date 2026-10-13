@@ -207,6 +207,7 @@ GPUDevice::GPUDevice(Napi::Env env,
         std::string_view type_str = str(type);
         printf("%.*s:\n", static_cast<int>(type_str.size()), type_str.data());
         chunkedWrite(message);
+        printf("\n");
     });
     {
         std::lock_guard<std::mutex> lock(s_device_to_js_map_mutex_);
@@ -256,6 +257,7 @@ void GPUDevice::handleUncapturedError(ErrorType type, wgpu::StringView message) 
     if (doDefault) {
         printf("%.*s:\n", static_cast<int>(type_str.size()), type_str.data());
         chunkedWrite(message);
+        printf("\n");
     }
 }
 
