@@ -29,6 +29,8 @@ src:*src{/,\\}dawn{/,\\}native{/,\\}opengl{/,\\}*
 src:*src{/,\\}dawn{/,\\}tests{/,\\}*
 # Google Mock's gmock-actions.h contains sign conversion warnings.
 src:*third_party{/,\\}googletest{/,\\}googlemock{/,\\}*
+# V8's v8-internal.h adds signed int offsets to unsigned Address values.
+src:*third_party{/,\\}v8{/,\\}src{/,\\}include{/,\\}*
 
 [zero-as-null-pointer-constant]
 # Used by EGL macros.
@@ -90,11 +92,27 @@ src:*third_party{/,\\}partition_alloc{/,\\}src{/,\\}partition_alloc{/,\\}pointer
 src:*third_party{/,\\}partition_alloc{/,\\}src{/,\\}partition_alloc{/,\\}internal{/,\\}partition_root_exports.h
 # __PTRAUTH__ can be undefined in build_config.h
 src:*build{/,\\}build_config.h
+# V8 headers test V8_TARGET_ARCH_* and USING_V8_SHARED macros with #if.
+src:*third_party{/,\\}v8{/,\\}src{/,\\}include{/,\\}*
 
 [unique-object-duplication]
 # straighten_larger_slot_span_free_lists_, sort_smaller_slot_span_free_lists_,
 # and sort_active_slot_spans_ may be duplicated when built into a shared library.
 src:*third_party{/,\\}partition_alloc{/,\\}src{/,\\}partition_alloc{/,\\}partition_root.h
+# V8's v8-internal.h and v8-platform.h define static objects in inline functions and templates.
+src:*third_party{/,\\}v8{/,\\}src{/,\\}include{/,\\}*
+
+[non-virtual-dtor]
+# V8 headers define interface and mixin classes without virtual destructors.
+src:*third_party{/,\\}v8{/,\\}src{/,\\}include{/,\\}*
+
+[suggest-destructor-override]
+# V8's v8-microtask-queue.h declares ~MicrotaskQueue() without override.
+src:*third_party{/,\\}v8{/,\\}src{/,\\}include{/,\\}*
+
+[undefined-reinterpret-cast]
+# V8's v8-function-callback.h reinterpret_casts internal::Address* to Isolate**.
+src:*third_party{/,\\}v8{/,\\}src{/,\\}include{/,\\}*
 
 [nullability-extension]
 # absl uses _Nonnull.

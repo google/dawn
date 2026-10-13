@@ -45,18 +45,7 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/linked_hash_set.h"
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wundef"
-#pragma clang diagnostic ignored "-Wcast-function-type-strict"
-#pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
-#pragma clang diagnostic ignored "-Wsuggest-destructor-override"
-#pragma clang diagnostic ignored "-Wnon-virtual-dtor"
-#pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
-#pragma clang diagnostic ignored "-Wunique-object-duplication"
-#pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
-#pragma clang diagnostic ignored "-Wsign-conversion"
 #include <v8.h>
-#pragma clang diagnostic pop
 
 // Internal structs representing handle scopes
 struct napi_handle_scope__ {

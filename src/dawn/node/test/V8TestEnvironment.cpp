@@ -29,11 +29,7 @@
 
 #include <memory>
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wundef"
-#pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
 #include "libplatform/libplatform.h"
-#pragma clang diagnostic pop
 
 namespace dawn::node::test {
 

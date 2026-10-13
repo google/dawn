@@ -40,11 +40,7 @@
 #include "src/dawn/node/standalone/Polyfills.h"
 #include "src/dawn/utils/CommandLineParser.h"
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wundef"
-#pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
 #include "libplatform/libplatform.h"
-#pragma clang diagnostic pop
 
 namespace {
 
