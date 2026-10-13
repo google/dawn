@@ -64,13 +64,37 @@ target_include_directories(webgpu_c_bundled PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} 
 target_link_libraries(webgpu_c_bundled PRIVATE android sync webgpu_dawn dawn_common dawn_internal_config)
 target_link_options(webgpu_c_bundled PRIVATE "-Wl,-z,max-page-size=16384")
 
-# Copy headers for webgpu_c_bundled over.
-add_custom_command(DEPENDS dawncpp_headers POST_BUILD
-                   OUTPUT ${CMAKE_SOURCE_DIR}/gen/include/dawn/webgpu.h
-                   COMMAND rm -r "${CMAKE_SOURCE_DIR}/gen" || echo
-                   COMMAND ${CMAKE_COMMAND} -E copy
-                           ${CMAKE_CURRENT_BINARY_DIR}/dawn/gen/include/dawn/webgpu.h
-                           ${CMAKE_SOURCE_DIR}/gen/include/dawn/webgpu.h)
+# Stage webgpu.h for the Prefab module of the AAR: build.gradle publishes
+# gen/include as the headers directory of webgpu_c_bundled.
+#
+# The staged header is the OUTPUT of this command and webgpu_c_bundled depends
+# on it, so it is refreshed whenever it is missing (e.g. after "git clean") or
+# Dawn regenerated it, even when the library itself is up to date.
+#
+# Every ABI builds concurrently and stages into this one directory, so nothing
+# is ever deleted here and the header is published atomically: "cmake -E copy"
+# rewrites its destination in place (unlink, write, chmod) and can fail when
+# another ABI does the same at the same time, whereas a rename cannot be
+# observed half-done. The temporary file lives outside gen/include so that it
+# is never packaged.
+set(WEBGPU_PREFAB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/gen/include")
+set(WEBGPU_PREFAB_HEADER "${WEBGPU_PREFAB_INCLUDE_DIR}/webgpu/webgpu.h")
+set(WEBGPU_PREFAB_HEADER_TMP "${CMAKE_CURRENT_SOURCE_DIR}/gen/webgpu.h.${ANDROID_ABI}.tmp")
+add_custom_command(
+    OUTPUT "${WEBGPU_PREFAB_HEADER}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${WEBGPU_PREFAB_INCLUDE_DIR}/webgpu"
+    COMMAND ${CMAKE_COMMAND} -E copy
+            "${DAWN_BUILD_GEN_DIR}/include/dawn/webgpu.h"
+            "${WEBGPU_PREFAB_HEADER_TMP}"
+    COMMAND ${CMAKE_COMMAND} -E rename
+            "${WEBGPU_PREFAB_HEADER_TMP}"
+            "${WEBGPU_PREFAB_HEADER}"
+    DEPENDS "${DAWN_BUILD_GEN_DIR}/include/dawn/webgpu.h" dawn_headers
+    COMMENT "Staging webgpu.h for the Prefab module"
+    VERBATIM
+)
+add_custom_target(webgpu_c_bundled_prefab_headers DEPENDS "${WEBGPU_PREFAB_HEADER}")
+add_dependencies(webgpu_c_bundled webgpu_c_bundled_prefab_headers)
 
 # Add unit test build configuration
 # To run use the following command:
