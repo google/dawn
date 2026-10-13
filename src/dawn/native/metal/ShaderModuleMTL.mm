@@ -177,37 +177,18 @@ std::unordered_map<uint32_t, tint::msl::writer::ArgumentBufferInfo> GenerateArgu
         uint32_t argumentBufferIdx = curBufferIdx--;
         // TODO(crbug.com/363031535): The dynamic offsets should all be in a single grouping
         // which is in the immediates buffer.
-        std::optional<uint32_t> dynamicOffsetsBufferIdx = std::nullopt;
+        std::optional<uint32_t> dynamicOffsetsBufferIdx;
         if (uint32_t(bgl->GetDynamicBufferCount()) > 0u) {
             dynamicOffsetsBufferIdx = curBufferIdx--;
         }
 
-        tint::msl::writer::ArgumentBufferInfo argBufferInfo = {
+        tint::msl::writer::ArgumentBufferInfo argumentBufferInfo{
             .id = argumentBufferIdx,
             .dynamic_buffer_id = dynamicOffsetsBufferIdx,
         };
+        bgl->FillTintArgumentBufferInfo(argumentBufferInfo);
 
-        uint32_t curDynamicOffset = 0;
-
-        for (BindingIndex bindingIndex : Range(bgl->GetBindingCount())) {
-            const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
-
-            MatchVariant(
-                bindingInfo.bindingLayout,  //
-                [&](const BufferBindingInfo& binding) {
-                    if (binding.hasDynamicOffset) {
-                        argBufferInfo.binding_info_to_offset_index.insert(
-                            {uint32_t{bindingIndex}, curDynamicOffset++});
-                    }
-                },
-                [&](const SamplerBindingInfo& bindingInfo) {},
-                [&](const StaticSamplerBindingInfo& bindingInfo) {},
-                [&](const TextureBindingInfo& bindingInfo) {}, [](const TexelBufferBindingInfo&) {},
-                [&](const StorageTextureBindingInfo& bindingInfo) {},
-                [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); },
-                [](const ExternalTextureBindingInfo&) { DAWN_UNREACHABLE(); });
-        }
-        info.insert({static_cast<uint32_t>(group), argBufferInfo});
+        info.insert({static_cast<uint32_t>(group), argumentBufferInfo});
     }
 
     return info;

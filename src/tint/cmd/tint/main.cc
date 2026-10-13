@@ -60,6 +60,7 @@
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/styled_text.h"
 #include "src/tint/utils/text/styled_text_printer.h"
+#include "src/utils/numeric.h"
 
 #if TINT_BUILD_WGSL_READER
 #include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
@@ -530,6 +531,11 @@ When specified, automatically enables MSL validation)",
         "argument-buffer",
         R"(Mapping for an argument buffer, format is GROUP=ARGUMENT_BUFFER_ID, comma separated)");
 
+    auto& arg_buffer_binding = options.Add<StringOption>(
+        "argument-buffer-binding",
+        R"(Mapping for argument buffer struct members, format is GROUP.BINDING[=PLACEHOLDER_TYPE], comma separated)",
+        Alias{"argument-buffer-member"});
+
     auto& dynamic_buffer = options.Add<StringOption>(
         "dynamic-offset-buffer",
         R"(Mapping for a dynamic offset buffer, format is GROUP=DYNAMIC_BUFFER_ID, comma separated))");
@@ -781,6 +787,64 @@ Options:
                 opts->group_to_argument_buffer_info.insert({group, {}});
             }
             opts->group_to_argument_buffer_info[group].id = idx;
+        }
+    }
+
+    if (arg_buffer_binding.value.has_value()) {
+        auto parse_resource_type = [](std::string_view name) -> tint::Result<tint::ResourceType> {
+            for (uint32_t i = dawn::to_underlying(tint::EnumRange<tint::ResourceType>::kMin);
+                 i <= dawn::to_underlying(tint::EnumRange<tint::ResourceType>::kMax); ++i) {
+                auto type = static_cast<tint::ResourceType>(i);
+                if (tint::ToString(type) == name) {
+                    return type;
+                }
+            }
+            return tint::Failure{"unknown ResourceType '" + std::string(name) + "'"};
+        };
+
+        for (auto val : tint::Split(*arg_buffer_binding.value, ",")) {
+            tint::ResourceType placeholder_type = tint::ResourceType::kEmpty;
+            std::string_view bp_str = val;
+            if (auto eq_idx = val.find("="); eq_idx != std::string_view::npos) {
+                bp_str = val.substr(0, eq_idx);
+                auto type_str = val.substr(eq_idx + 1);
+                auto res = parse_resource_type(type_str);
+                if (res != tint::Success) {
+                    std::cerr << "Invalid placeholder type for " << arg_buffer_binding.Name()
+                              << ": " << res.Failure() << "\n";
+                    return false;
+                }
+                placeholder_type = res.Get();
+            }
+
+            auto bind_point = tint::Split(bp_str, ".");
+            if (bind_point.Length() != 2) {
+                std::cerr << "argument-buffer-binding values must be of the form "
+                             "GROUP.BINDING[=PLACEHOLDER_TYPE]\n";
+                return false;
+            }
+
+            auto group_res = tint::strconv::ParseUint32(bind_point[0]);
+            if (group_res != tint::Success) {
+                std::cerr << "Invalid group for " << arg_buffer_binding.Name() << ": "
+                          << bind_point[0] << "\n";
+                return false;
+            }
+            auto binding_res = tint::strconv::ParseUint32(bind_point[1]);
+            if (binding_res != tint::Success) {
+                std::cerr << "Invalid binding for " << arg_buffer_binding.Name() << ": "
+                          << bind_point[1] << "\n";
+                return false;
+            }
+
+            uint32_t group = group_res.Get();
+            uint32_t binding = binding_res.Get();
+
+            if (!opts->group_to_argument_buffer_info.contains(group)) {
+                opts->group_to_argument_buffer_info.insert({group, {}});
+            }
+            opts->group_to_argument_buffer_info[group].struct_members.push_back(
+                tint::msl::writer::ArgumentBufferInfo::MemberInfo{binding, placeholder_type});
         }
     }
 

@@ -1,4 +1,4 @@
-// flags: --use-argument-buffers --argument-buffer 0=20,1=21,2=22 --dynamic-offset-buffer 0=23 --dynamic-offset 0.0=2
+// flags: --use-argument-buffers --argument-buffer 0=20,1=21,2=22 --argument-buffer-binding 0.0,1.0,2.0 --dynamic-offset-buffer 0=23 --dynamic-offset 0.0=2
 //
 // Copyright 2025 The Dawn & Tint Authors
 //
@@ -33,6 +33,9 @@
 // * Argument buffer for group 0 -> buffer 20
 // * Argument buffer for group 1 -> buffer 21
 // * Argument buffer for group 2 -> buffer 22
+// * Argument buffer bindings for group 0 are: 0 (no placeholderType)
+// * Argument buffer bindings for group 1 are: 0 (no placeholderType)
+// * Argument buffer bindings for group 2 are: 0 (no placeholderType)
 // * Dynamic offset buffer for group 0 -> buffer 23
 // * Dynamic offset for group 0, binding 0 is at index 2
 //

@@ -114,6 +114,47 @@ const core::type::Type* ResourceTypeToType(core::type::Manager& ty, ResourceType
             return ty.sampler();
         case ResourceType::kSampler_comparison:
             return ty.comparison_sampler();
+
+        // These don't have unique WGSL type representations, so we don't handle them here.
+        case ResourceType::kUniformBuffer:
+        case ResourceType::kReadOnlyStorageBuffer:
+        case ResourceType::kWritableStorageBuffer:
+        case ResourceType::kTextureStorage1d_f32_read:
+        case ResourceType::kTextureStorage1d_f32_read_write:
+        case ResourceType::kTextureStorage1d_f32_write:
+        case ResourceType::kTextureStorage1d_i32_read:
+        case ResourceType::kTextureStorage1d_i32_read_write:
+        case ResourceType::kTextureStorage1d_i32_write:
+        case ResourceType::kTextureStorage1d_u32_read:
+        case ResourceType::kTextureStorage1d_u32_read_write:
+        case ResourceType::kTextureStorage1d_u32_write:
+        case ResourceType::kTextureStorage2dArray_f32_read:
+        case ResourceType::kTextureStorage2dArray_f32_read_write:
+        case ResourceType::kTextureStorage2dArray_f32_write:
+        case ResourceType::kTextureStorage2dArray_i32_read:
+        case ResourceType::kTextureStorage2dArray_i32_read_write:
+        case ResourceType::kTextureStorage2dArray_i32_write:
+        case ResourceType::kTextureStorage2dArray_u32_read:
+        case ResourceType::kTextureStorage2dArray_u32_read_write:
+        case ResourceType::kTextureStorage2dArray_u32_write:
+        case ResourceType::kTextureStorage2d_f32_read:
+        case ResourceType::kTextureStorage2d_f32_read_write:
+        case ResourceType::kTextureStorage2d_f32_write:
+        case ResourceType::kTextureStorage2d_i32_read:
+        case ResourceType::kTextureStorage2d_i32_read_write:
+        case ResourceType::kTextureStorage2d_i32_write:
+        case ResourceType::kTextureStorage2d_u32_read:
+        case ResourceType::kTextureStorage2d_u32_read_write:
+        case ResourceType::kTextureStorage2d_u32_write:
+        case ResourceType::kTextureStorage3d_f32_read:
+        case ResourceType::kTextureStorage3d_f32_read_write:
+        case ResourceType::kTextureStorage3d_f32_write:
+        case ResourceType::kTextureStorage3d_i32_read:
+        case ResourceType::kTextureStorage3d_i32_read_write:
+        case ResourceType::kTextureStorage3d_i32_write:
+        case ResourceType::kTextureStorage3d_u32_read:
+        case ResourceType::kTextureStorage3d_u32_read_write:
+        case ResourceType::kTextureStorage3d_u32_write:
         case ResourceType::kEmpty:
             break;
     }

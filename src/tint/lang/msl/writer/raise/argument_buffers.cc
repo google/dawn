@@ -33,8 +33,13 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/core/type/binding_array.h"
+#include "src/tint/lang/core/type/resource_type.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/msl/builtin_fn.h"
 #include "src/tint/lang/msl/ir/builtin_call.h"
+#include "src/tint/lang/msl/writer/common/options.h"
+#include "src/tint/utils/text/string_stream.h"
 
 namespace tint::msl::writer::raise {
 namespace {
@@ -91,7 +96,7 @@ struct State {
             block_to_function.Add(func->Block(), func);
         }
 
-        CreateArgumentBuffers();
+        TINT_CHECK_RESULT(CreateArgumentBuffers());
 
         for (auto func : ir.functions) {
             if (!func->IsEntryPoint()) {
@@ -173,9 +178,82 @@ struct State {
         return Success;
     }
 
+    const core::type::Type* CreatePlaceholderMemberType(
+        const tint::msl::writer::ArgumentBufferInfo::MemberInfo& member) {
+        return CreatePlaceholderMemberElementType(member.placeholder_type);
+    }
+
+    const core::type::Type* CreatePlaceholderMemberElementType(const tint::ResourceType& type) {
+        // Metal doesn't care about format, only component type, so use R32* always.
+        constexpr core::TexelFormat kTexelFormatForStorage_f32 = core::TexelFormat::kR32Float;
+        constexpr core::TexelFormat kTexelFormatForStorage_i32 = core::TexelFormat::kR32Sint;
+        constexpr core::TexelFormat kTexelFormatForStorage_u32 = core::TexelFormat::kR32Uint;
+
+        switch (type) {
+            // Construct a case+return row for each possible type of storage texture.
+#define STORAGE_TEXTURE_CASE(dimension, component_type, access)                        \
+    case tint::ResourceType::kTextureStorage##dimension##_##component_type##_##access: \
+        return ty.storage_texture(core::type::TextureDimension::k##dimension,          \
+                                  kTexelFormatForStorage_##component_type, access);
+            STORAGE_TEXTURE_CASE(1d, f32, read)
+            STORAGE_TEXTURE_CASE(1d, f32, read_write)
+            STORAGE_TEXTURE_CASE(1d, f32, write)
+            STORAGE_TEXTURE_CASE(1d, i32, read)
+            STORAGE_TEXTURE_CASE(1d, i32, read_write)
+            STORAGE_TEXTURE_CASE(1d, i32, write)
+            STORAGE_TEXTURE_CASE(1d, u32, read)
+            STORAGE_TEXTURE_CASE(1d, u32, read_write)
+            STORAGE_TEXTURE_CASE(1d, u32, write)
+            STORAGE_TEXTURE_CASE(2d, f32, read)
+            STORAGE_TEXTURE_CASE(2d, f32, read_write)
+            STORAGE_TEXTURE_CASE(2d, f32, write)
+            STORAGE_TEXTURE_CASE(2d, i32, read)
+            STORAGE_TEXTURE_CASE(2d, i32, read_write)
+            STORAGE_TEXTURE_CASE(2d, i32, write)
+            STORAGE_TEXTURE_CASE(2d, u32, read)
+            STORAGE_TEXTURE_CASE(2d, u32, read_write)
+            STORAGE_TEXTURE_CASE(2d, u32, write)
+            STORAGE_TEXTURE_CASE(2dArray, f32, read)
+            STORAGE_TEXTURE_CASE(2dArray, f32, read_write)
+            STORAGE_TEXTURE_CASE(2dArray, f32, write)
+            STORAGE_TEXTURE_CASE(2dArray, i32, read)
+            STORAGE_TEXTURE_CASE(2dArray, i32, read_write)
+            STORAGE_TEXTURE_CASE(2dArray, i32, write)
+            STORAGE_TEXTURE_CASE(2dArray, u32, read)
+            STORAGE_TEXTURE_CASE(2dArray, u32, read_write)
+            STORAGE_TEXTURE_CASE(2dArray, u32, write)
+            STORAGE_TEXTURE_CASE(3d, f32, read)
+            STORAGE_TEXTURE_CASE(3d, f32, read_write)
+            STORAGE_TEXTURE_CASE(3d, f32, write)
+            STORAGE_TEXTURE_CASE(3d, i32, read)
+            STORAGE_TEXTURE_CASE(3d, i32, read_write)
+            STORAGE_TEXTURE_CASE(3d, i32, write)
+            STORAGE_TEXTURE_CASE(3d, u32, read)
+            STORAGE_TEXTURE_CASE(3d, u32, read_write)
+            STORAGE_TEXTURE_CASE(3d, u32, write)
+#undef STORAGE_TEXTURE_CASE
+
+            // We assume the layout of a buffer pointer is independent of the pointed-to type.
+            case tint::ResourceType::kUniformBuffer:
+                return ty.ptr(uniform, ty.i32(), read);
+            case tint::ResourceType::kReadOnlyStorageBuffer:
+                return ty.ptr(storage, ty.i32(), read);
+            case tint::ResourceType::kWritableStorageBuffer:
+                // Metal pointer type shouldn't care if this is write or read_write.
+                return ty.ptr(storage, ty.i32(), read_write);
+
+            default:
+                return core::type::ResourceTypeToType(ty, type);
+
+            case tint::ResourceType::kEmpty:
+                break;
+        }
+        TINT_ICE();
+    }
+
     /// Create the argument buffers. Each bind group will have a separate structure.
-    void CreateArgumentBuffers() {
-        Vector<core::ir::Var*, 4> vars;
+    Result<SuccessType> CreateArgumentBuffers() {
+        Hashmap<BindingPoint, core::ir::Var*, 4> bindpoint_to_var;
         for (auto* global : *ir.root_block) {
             auto* var = global->As<core::ir::Var>();
             if (!var) {
@@ -192,57 +270,104 @@ struct State {
                 continue;
             }
 
-            vars.Push(var);
+            bindpoint_to_var.Add(*bp, var);
         }
 
-        // Metal requires the argument buffer `id` entries to be in increasing order. Sort the Vars
-        // such that when we create the struct we will create it in ascending order.
-        vars.Sort([&](const auto* va, const auto* vb) {
-            return va->BindingPoint() < vb->BindingPoint();
-        });
-
-        // Collect a list of struct members for the variable declarations.
-        Hashmap<uint32_t, Vector<core::type::Manager::StructMemberDesc, 8>, 4> group_to_members;
-        for (auto& var : vars) {
-            auto bp = var->BindingPoint();
-            auto* type = var->Result()->Type();
-
-            // Handle types drop the pointer and are passed around by value.
-            auto* ptr = type->As<core::type::Pointer>();
-            if (ptr->AddressSpace() == core::AddressSpace::kHandle) {
-                type = ptr->StoreType();
+        Vector<BindingPoint, 4> missing_bindings;
+        for (BindingPoint bp : bindpoint_to_var.Keys()) {
+            auto it = config.group_to_argument_buffer_info.find(bp.group);
+            if (it == config.group_to_argument_buffer_info.end()) {
+                missing_bindings.Push(bp);
+                continue;
             }
-
-            auto name = ir.NameOf(var);
-            if (!name) {
-                name = ir.symbols.New();
+            bool found = false;
+            for (const auto& member : it->second.struct_members) {
+                if (member.id == bp.binding) {
+                    found = true;
+                    break;
+                }
             }
-            module_vars.Push(var);
-
-            auto& struct_members = group_to_members.GetOrAddZero(bp->group);
-            var_to_struct_idx.Add(var, static_cast<uint32_t>(struct_members.Length()));
-
-            struct_members.Push(core::type::Manager::StructMemberDesc{
-                name, type,
-                core::IOAttributes{
-                    .binding_point = BindingPoint{bp->group, bp->binding},
-                }});
+            if (!found) {
+                missing_bindings.Push(bp);
+            }
+        }
+        // Sort and print the first error so the result doesn't depend on Hashmap iteration order.
+        if (!missing_bindings.IsEmpty()) {
+            missing_bindings.Sort();
+            StringStream ss;
+            ss << "ArgumentBuffersConfig is missing entries:";
+            for (auto& bp : missing_bindings) {
+                ss << " " << bp;
+            }
+            return Failure(ss.str());
         }
 
-        // Sort the keys for deterministic struct generation
-        auto keys = group_to_members.Keys().Sort();
+        // Construct the argbuf struct definition.
+        Vector<uint32_t, 4> sorted_groups;
+        for (const auto& [group, _] : config.group_to_argument_buffer_info) {
+            sorted_groups.Push(group);
+        }
+        // Sort so that the output doesn't depend on unordered_map iteration order.
+        sorted_groups.Sort();
+        for (uint32_t group : sorted_groups) {
+            const auto& argument_buffer_info = config.group_to_argument_buffer_info.at(group);
+            // Translate argbuf members from Tint API into IR.
+            Vector<core::type::Manager::StructMemberDesc, 8> struct_members;
+            for (const auto member : argument_buffer_info.struct_members) {
+                Symbol name;
+                const core::type::Type* type = nullptr;
 
-        for (auto& k : keys) {
+                // If there's a var for this bindpoint, get the type info from it.
+                // Otherwise, take it from the config.
+                if (auto var = bindpoint_to_var.GetOr(BindingPoint{group, member.id}, nullptr)) {
+                    // Note that if there is a binding in the WGSL, we don't look at the type from
+                    // the config at all. We simply assume that the caller (Dawn) will catch any
+                    // mismatch before reaching this (in pipeline descriptor validation).
+                    type = var->Result()->Type();
+                    // Handle types drop the pointer and are passed around by value.
+                    auto* ptr = type->As<core::type::Pointer>();
+                    if (ptr->AddressSpace() == core::AddressSpace::kHandle) {
+                        type = ptr->StoreType();
+                    }
+
+                    name = ir.NameOf(var);
+                    if (!name) {
+                        name = ir.symbols.New("unnamed");
+                    }
+                    module_vars.Push(var);
+
+                    var_to_struct_idx.Add(var, static_cast<uint32_t>(struct_members.Length()));
+                } else {
+                    if (member.placeholder_type == tint::ResourceType::kEmpty) {
+                        StringStream ss;
+                        ss << "ArgumentBuffersConfig entry for " << BindingPoint{group, member.id}
+                           << " is missing placeholder_type";
+                        return Failure(ss.str());
+                    }
+                    // Create a placeholder struct member. This is just to take up space in the
+                    // struct, so we only care that it has the right MSL alignment/size in practice.
+                    type = CreatePlaceholderMemberType(member);
+                    name = ir.symbols.New("placeholder");
+                }
+
+                struct_members.Push(core::type::Manager::StructMemberDesc{
+                    name, type,
+                    core::IOAttributes{
+                        .binding_point = BindingPoint{group, member.id},
+                    }});
+            }
+
             // Create the structure.
-            auto name = ir.symbols.New(std::string(kArgBufferName) + "_" + std::to_string(k));
-            auto members = group_to_members.Get(k);
+            auto name = ir.symbols.New(std::string(kArgBufferName) + "_" + std::to_string(group));
 
-            auto* strct = ty.Struct(name, std::move(*members));
+            auto* strct = ty.Struct(name, std::move(struct_members));
             strct->SetStructFlag(core::type::kExplicitLayout);
 
             auto* type = ty.ptr(uniform, strct, read);
-            arg_buffers.Add(k, type);
+            arg_buffers.Add(group, type);
         }
+
+        return Success;
     }
 
     /// Add an argument buffer structure to an entry point function.
