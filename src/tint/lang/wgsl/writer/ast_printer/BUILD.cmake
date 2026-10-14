@@ -104,6 +104,7 @@ tint_add_target(tint_lang_wgsl_writer_ast_printer_test test
   lang/wgsl/writer/ast_printer/helper_test.h
   lang/wgsl/writer/ast_printer/identifier_test.cc
   lang/wgsl/writer/ast_printer/if_test.cc
+  lang/wgsl/writer/ast_printer/interpolated_string_test.cc
   lang/wgsl/writer/ast_printer/literal_test.cc
   lang/wgsl/writer/ast_printer/loop_test.cc
   lang/wgsl/writer/ast_printer/member_accessor_test.cc

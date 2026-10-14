@@ -159,8 +159,8 @@ class ServiceImplementationOpaqueFD : public ServiceImplementation {
         return allocatedMemory;
     }
 
-    ResultOrError<VkImage> CreateImage(const ExternalImageDescriptor* descriptor,
-                                       const VkImageCreateInfo& baseCreateInfo) override {
+    ResultOrUnknownError<VkImage> CreateImage(const ExternalImageDescriptor* descriptor,
+                                              const VkImageCreateInfo& baseCreateInfo) override {
         VkImageCreateInfo createInfo = baseCreateInfo;
         createInfo.flags |= VK_IMAGE_CREATE_ALIAS_BIT_KHR;
         createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;

@@ -892,7 +892,7 @@ TEST_P(BindGroupTests, DynamicBufferInOneStageNotAppliedToOtherStage1) {
 
 // Test for latent bug discovered when fixing the crash reported in http://crbug.com/478206474
 // Tests that a dynamic buffer bound to one stage does attempt to get applied to the other stage,
-// resulting in Tint's ArrayLengthFromImmediates transform erroneously replacing arrayLength calls
+// resulting in Tint's ReplaceArrayAndBufferLength transform erroneously replacing arrayLength calls
 // on the non-dynamic storage buffer.
 // We do this by binding a regular storage buffer to (0,0) to both vertex and fragment stages,
 // and a dynamic storage buffer to (0,1) to only the fragment stage.
@@ -900,7 +900,7 @@ TEST_P(BindGroupTests, DynamicBufferInOneStageNotAppliedToOtherStage1) {
 // BindGroupLayoutInternalBase, (BindingTypeOrder_DynamicBuffer first, then
 // BindingTypeOrder_RegularBuffer), the uniform buffer's WGSL binding will be remapped from (0,0) to
 // (0,1) - the same as the storage buffer's WGSL binding. Before fixing this bug,
-// ArrayLengthFromImmediates would erroneously replace the arrayLength of the regular storage
+// ReplaceArrayAndBufferLength would erroneously replace the arrayLength of the regular storage
 // buffer, resulting in the wrong value being retrieved at execution time. This was fixed by making
 // sure to only populate bindpoint_to_size_index for bindpoints that are visible for the stage being
 // processed.

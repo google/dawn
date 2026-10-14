@@ -27,16 +27,22 @@
 
 #include "src/dawn/native/TintUtils.h"
 
+#include "dawn/native/wgpu_structs_autogen.h"
 #include "src/dawn/native/BindGroupLayoutInternal.h"
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/Pipeline.h"
 #include "src/dawn/native/PipelineLayout.h"
 #include "src/dawn/native/RenderPipeline.h"
+#include "src/dawn/native/Subresource.h"
 #include "tint/tint.h"
 
 namespace dawn::native {
 
 namespace {
+
+TextureComponentType FormatToComponentType(DeviceBase* device, wgpu::TextureFormat format) {
+    return device->GetValidInternalFormat(format).GetAspectInfo(Aspect::Color).baseType;
+}
 
 tint::VertexFormat ToTintVertexFormat(wgpu::VertexFormat format) {
     switch (format) {
@@ -187,13 +193,30 @@ std::unordered_map<tint::OverrideId, double> BuildSubstituteOverridesTransformCo
     return map;
 }
 
-tint::ResourceType BindingLayoutToResourceType(const BindingInfo& bi) {
+tint::ResourceType BindingLayoutToResourceType(DeviceBase* device, const BindingInfo& bi) {
     return MatchVariant(
         bi.bindingLayout,
+        [&](const BufferBindingInfo& bindingInfo) {
+            switch (bindingInfo.type) {
+                case wgpu::BufferBindingType::Uniform:
+                    return tint::ResourceType::kUniformBuffer;
+                case wgpu::BufferBindingType::Storage:
+                case wgpu::BufferBindingType::ReadOnlyStorage:
+                case kInternalStorageBufferBinding:
+                    return tint::ResourceType::kWritableStorageBuffer;
+                case kInternalReadOnlyStorageBufferBinding:
+                    return tint::ResourceType::kReadOnlyStorageBuffer;
+                case wgpu::BufferBindingType::BindingNotUsed:
+                case wgpu::BufferBindingType::Undefined:
+                    break;
+            }
+            DAWN_UNREACHABLE();
+        },
         [&](const SamplerBindingInfo& bindingInfo) {
             switch (bindingInfo.type) {
                 case wgpu::SamplerBindingType::BindingNotUsed:
                 case wgpu::SamplerBindingType::Undefined:
+                case kUnknownFilteringSamplerBindingType:
                     break;
 
                 case wgpu::SamplerBindingType::Filtering:
@@ -214,6 +237,8 @@ tint::ResourceType BindingLayoutToResourceType(const BindingInfo& bi) {
                         case wgpu::TextureSampleType::BindingNotUsed:
                         case wgpu::TextureSampleType::Undefined:
                         case wgpu::TextureSampleType::Depth:
+                        case kUnknownFilterableFloatSampleType:
+                        case kInternalResolveAttachmentSampleType:
                             break;
                         case wgpu::TextureSampleType::Float:
                             return tint::ResourceType::kTexture1d_f32_filterable;
@@ -232,6 +257,8 @@ tint::ResourceType BindingLayoutToResourceType(const BindingInfo& bi) {
                             case wgpu::TextureSampleType::BindingNotUsed:
                             case wgpu::TextureSampleType::Undefined:
                             case wgpu::TextureSampleType::Float:
+                            case kUnknownFilterableFloatSampleType:
+                            case kInternalResolveAttachmentSampleType:
                                 break;
                             case wgpu::TextureSampleType::UnfilterableFloat:
                                 return tint::ResourceType::kTextureMultisampled2d_f32;
@@ -246,6 +273,8 @@ tint::ResourceType BindingLayoutToResourceType(const BindingInfo& bi) {
                         switch (bindingInfo.sampleType) {
                             case wgpu::TextureSampleType::BindingNotUsed:
                             case wgpu::TextureSampleType::Undefined:
+                            case kUnknownFilterableFloatSampleType:
+                            case kInternalResolveAttachmentSampleType:
                                 break;
                             case wgpu::TextureSampleType::Float:
                                 return tint::ResourceType::kTexture2d_f32_filterable;
@@ -265,6 +294,8 @@ tint::ResourceType BindingLayoutToResourceType(const BindingInfo& bi) {
                     switch (bindingInfo.sampleType) {
                         case wgpu::TextureSampleType::BindingNotUsed:
                         case wgpu::TextureSampleType::Undefined:
+                        case kUnknownFilterableFloatSampleType:
+                        case kInternalResolveAttachmentSampleType:
                             break;
                         case wgpu::TextureSampleType::Float:
                             return tint::ResourceType::kTexture2dArray_f32_filterable;
@@ -283,6 +314,8 @@ tint::ResourceType BindingLayoutToResourceType(const BindingInfo& bi) {
                     switch (bindingInfo.sampleType) {
                         case wgpu::TextureSampleType::BindingNotUsed:
                         case wgpu::TextureSampleType::Undefined:
+                        case kUnknownFilterableFloatSampleType:
+                        case kInternalResolveAttachmentSampleType:
                             break;
                         case wgpu::TextureSampleType::Float:
                             return tint::ResourceType::kTextureCube_f32_filterable;
@@ -301,6 +334,8 @@ tint::ResourceType BindingLayoutToResourceType(const BindingInfo& bi) {
                     switch (bindingInfo.sampleType) {
                         case wgpu::TextureSampleType::BindingNotUsed:
                         case wgpu::TextureSampleType::Undefined:
+                        case kUnknownFilterableFloatSampleType:
+                        case kInternalResolveAttachmentSampleType:
                             break;
                         case wgpu::TextureSampleType::Float:
                             return tint::ResourceType::kTextureCubeArray_f32_filterable;
@@ -320,6 +355,8 @@ tint::ResourceType BindingLayoutToResourceType(const BindingInfo& bi) {
                         case wgpu::TextureSampleType::BindingNotUsed:
                         case wgpu::TextureSampleType::Undefined:
                         case wgpu::TextureSampleType::Depth:
+                        case kUnknownFilterableFloatSampleType:
+                        case kInternalResolveAttachmentSampleType:
                             break;
                         case wgpu::TextureSampleType::Float:
                             return tint::ResourceType::kTexture3d_f32_filterable;
@@ -335,16 +372,192 @@ tint::ResourceType BindingLayoutToResourceType(const BindingInfo& bi) {
             }
             DAWN_UNREACHABLE();
         },
-
-        [&](const BufferBindingInfo&) {
-            // TODO(363031535): Return correct resource type for argument buffers.
-            return tint::ResourceType::kEmpty;
+        [&](const StorageTextureBindingInfo& bindingInfo) {
+            switch (bindingInfo.viewDimension) {
+                case wgpu::TextureViewDimension::e1D:
+                    switch (FormatToComponentType(device, bindingInfo.format)) {
+                        case TextureComponentType::Float:
+                            switch (bindingInfo.access) {
+                                case wgpu::StorageTextureAccess::ReadOnly:
+                                    return tint::ResourceType::kTextureStorage1d_f32_read;
+                                case wgpu::StorageTextureAccess::WriteOnly:
+                                    return tint::ResourceType::kTextureStorage1d_f32_write;
+                                case wgpu::StorageTextureAccess::ReadWrite:
+                                    return tint::ResourceType::kTextureStorage1d_f32_read_write;
+                                case wgpu::StorageTextureAccess::BindingNotUsed:
+                                case wgpu::StorageTextureAccess::Undefined:
+                                    break;
+                            }
+                            DAWN_UNREACHABLE();
+                        case TextureComponentType::Uint:
+                            switch (bindingInfo.access) {
+                                case wgpu::StorageTextureAccess::ReadOnly:
+                                    return tint::ResourceType::kTextureStorage1d_u32_read;
+                                case wgpu::StorageTextureAccess::WriteOnly:
+                                    return tint::ResourceType::kTextureStorage1d_u32_write;
+                                case wgpu::StorageTextureAccess::ReadWrite:
+                                    return tint::ResourceType::kTextureStorage1d_u32_read_write;
+                                case wgpu::StorageTextureAccess::BindingNotUsed:
+                                case wgpu::StorageTextureAccess::Undefined:
+                                    break;
+                            }
+                            DAWN_UNREACHABLE();
+                        case TextureComponentType::Sint:
+                            switch (bindingInfo.access) {
+                                case wgpu::StorageTextureAccess::ReadOnly:
+                                    return tint::ResourceType::kTextureStorage1d_i32_read;
+                                case wgpu::StorageTextureAccess::WriteOnly:
+                                    return tint::ResourceType::kTextureStorage1d_i32_write;
+                                case wgpu::StorageTextureAccess::ReadWrite:
+                                    return tint::ResourceType::kTextureStorage1d_i32_read_write;
+                                case wgpu::StorageTextureAccess::BindingNotUsed:
+                                case wgpu::StorageTextureAccess::Undefined:
+                                    break;
+                            }
+                            DAWN_UNREACHABLE();
+                    }
+                    DAWN_UNREACHABLE();
+                case wgpu::TextureViewDimension::e2D:
+                    switch (FormatToComponentType(device, bindingInfo.format)) {
+                        case TextureComponentType::Float:
+                            switch (bindingInfo.access) {
+                                case wgpu::StorageTextureAccess::ReadOnly:
+                                    return tint::ResourceType::kTextureStorage2d_f32_read;
+                                case wgpu::StorageTextureAccess::WriteOnly:
+                                    return tint::ResourceType::kTextureStorage2d_f32_write;
+                                case wgpu::StorageTextureAccess::ReadWrite:
+                                    return tint::ResourceType::kTextureStorage2d_f32_read_write;
+                                case wgpu::StorageTextureAccess::BindingNotUsed:
+                                case wgpu::StorageTextureAccess::Undefined:
+                                    break;
+                            }
+                            DAWN_UNREACHABLE();
+                        case TextureComponentType::Uint:
+                            switch (bindingInfo.access) {
+                                case wgpu::StorageTextureAccess::ReadOnly:
+                                    return tint::ResourceType::kTextureStorage2d_u32_read;
+                                case wgpu::StorageTextureAccess::WriteOnly:
+                                    return tint::ResourceType::kTextureStorage2d_u32_write;
+                                case wgpu::StorageTextureAccess::ReadWrite:
+                                    return tint::ResourceType::kTextureStorage2d_u32_read_write;
+                                case wgpu::StorageTextureAccess::BindingNotUsed:
+                                case wgpu::StorageTextureAccess::Undefined:
+                                    break;
+                            }
+                            DAWN_UNREACHABLE();
+                        case TextureComponentType::Sint:
+                            switch (bindingInfo.access) {
+                                case wgpu::StorageTextureAccess::ReadOnly:
+                                    return tint::ResourceType::kTextureStorage2d_i32_read;
+                                case wgpu::StorageTextureAccess::WriteOnly:
+                                    return tint::ResourceType::kTextureStorage2d_i32_write;
+                                case wgpu::StorageTextureAccess::ReadWrite:
+                                    return tint::ResourceType::kTextureStorage2d_i32_read_write;
+                                case wgpu::StorageTextureAccess::BindingNotUsed:
+                                case wgpu::StorageTextureAccess::Undefined:
+                                    break;
+                            }
+                            DAWN_UNREACHABLE();
+                    }
+                    DAWN_UNREACHABLE();
+                case wgpu::TextureViewDimension::e2DArray:
+                    switch (FormatToComponentType(device, bindingInfo.format)) {
+                        case TextureComponentType::Float:
+                            switch (bindingInfo.access) {
+                                case wgpu::StorageTextureAccess::ReadOnly:
+                                    return tint::ResourceType::kTextureStorage2dArray_f32_read;
+                                case wgpu::StorageTextureAccess::WriteOnly:
+                                    return tint::ResourceType::kTextureStorage2dArray_f32_write;
+                                case wgpu::StorageTextureAccess::ReadWrite:
+                                    return tint::ResourceType::
+                                        kTextureStorage2dArray_f32_read_write;
+                                case wgpu::StorageTextureAccess::BindingNotUsed:
+                                case wgpu::StorageTextureAccess::Undefined:
+                                    break;
+                            }
+                            DAWN_UNREACHABLE();
+                        case TextureComponentType::Uint:
+                            switch (bindingInfo.access) {
+                                case wgpu::StorageTextureAccess::ReadOnly:
+                                    return tint::ResourceType::kTextureStorage2dArray_u32_read;
+                                case wgpu::StorageTextureAccess::WriteOnly:
+                                    return tint::ResourceType::kTextureStorage2dArray_u32_write;
+                                case wgpu::StorageTextureAccess::ReadWrite:
+                                    return tint::ResourceType::
+                                        kTextureStorage2dArray_u32_read_write;
+                                case wgpu::StorageTextureAccess::BindingNotUsed:
+                                case wgpu::StorageTextureAccess::Undefined:
+                                    break;
+                            }
+                            DAWN_UNREACHABLE();
+                        case TextureComponentType::Sint:
+                            switch (bindingInfo.access) {
+                                case wgpu::StorageTextureAccess::ReadOnly:
+                                    return tint::ResourceType::kTextureStorage2dArray_i32_read;
+                                case wgpu::StorageTextureAccess::WriteOnly:
+                                    return tint::ResourceType::kTextureStorage2dArray_i32_write;
+                                case wgpu::StorageTextureAccess::ReadWrite:
+                                    return tint::ResourceType::
+                                        kTextureStorage2dArray_i32_read_write;
+                                case wgpu::StorageTextureAccess::BindingNotUsed:
+                                case wgpu::StorageTextureAccess::Undefined:
+                                    break;
+                            }
+                            DAWN_UNREACHABLE();
+                    }
+                    DAWN_UNREACHABLE();
+                case wgpu::TextureViewDimension::e3D:
+                    switch (FormatToComponentType(device, bindingInfo.format)) {
+                        case TextureComponentType::Float:
+                            switch (bindingInfo.access) {
+                                case wgpu::StorageTextureAccess::ReadOnly:
+                                    return tint::ResourceType::kTextureStorage3d_f32_read;
+                                case wgpu::StorageTextureAccess::WriteOnly:
+                                    return tint::ResourceType::kTextureStorage3d_f32_write;
+                                case wgpu::StorageTextureAccess::ReadWrite:
+                                    return tint::ResourceType::kTextureStorage3d_f32_read_write;
+                                case wgpu::StorageTextureAccess::BindingNotUsed:
+                                case wgpu::StorageTextureAccess::Undefined:
+                                    break;
+                            }
+                            DAWN_UNREACHABLE();
+                        case TextureComponentType::Uint:
+                            switch (bindingInfo.access) {
+                                case wgpu::StorageTextureAccess::ReadOnly:
+                                    return tint::ResourceType::kTextureStorage3d_u32_read;
+                                case wgpu::StorageTextureAccess::WriteOnly:
+                                    return tint::ResourceType::kTextureStorage3d_u32_write;
+                                case wgpu::StorageTextureAccess::ReadWrite:
+                                    return tint::ResourceType::kTextureStorage3d_u32_read_write;
+                                case wgpu::StorageTextureAccess::BindingNotUsed:
+                                case wgpu::StorageTextureAccess::Undefined:
+                                    break;
+                            }
+                            DAWN_UNREACHABLE();
+                        case TextureComponentType::Sint:
+                            switch (bindingInfo.access) {
+                                case wgpu::StorageTextureAccess::ReadOnly:
+                                    return tint::ResourceType::kTextureStorage3d_i32_read;
+                                case wgpu::StorageTextureAccess::WriteOnly:
+                                    return tint::ResourceType::kTextureStorage3d_i32_write;
+                                case wgpu::StorageTextureAccess::ReadWrite:
+                                    return tint::ResourceType::kTextureStorage3d_i32_read_write;
+                                case wgpu::StorageTextureAccess::BindingNotUsed:
+                                case wgpu::StorageTextureAccess::Undefined:
+                                    break;
+                            }
+                            DAWN_UNREACHABLE();
+                    }
+                    DAWN_UNREACHABLE();
+                case wgpu::TextureViewDimension::Undefined:
+                case wgpu::TextureViewDimension::Cube:
+                case wgpu::TextureViewDimension::CubeArray:
+                case kInternalInputAttachmentDim:
+                    break;
+            }
+            DAWN_UNREACHABLE();
         },
         [&](const TexelBufferBindingInfo&) {
-            // TODO(363031535): Return correct resource type for argument buffers.
-            return tint::ResourceType::kEmpty;
-        },
-        [&](const StorageTextureBindingInfo&) {
             // TODO(363031535): Return correct resource type for argument buffers.
             return tint::ResourceType::kEmpty;
         },

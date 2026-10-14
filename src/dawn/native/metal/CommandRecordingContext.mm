@@ -68,7 +68,7 @@ MaybeError CommandRecordingContext::PrepareNextCommandBuffer(id<MTLCommandQueue>
 
         mCommands = [queue commandBuffer];
         if (mCommands == nil) {
-            return DAWN_INTERNAL_ERROR("Failed to allocate an MTLCommandBuffer");
+            return DAWN_UNRECOVERABLE_ERROR("Failed to allocate an MTLCommandBuffer");
         }
 
         return {};
@@ -131,7 +131,7 @@ MaybeError CommandRecordingContext::EncodeSharedEventWorkaround() {
         id<MTLDevice> mtlDevice = ToBackend(mQueue->GetDevice())->GetMTLDevice();
         mSerializeWorkaround.sharedEvent.Acquire([mtlDevice newSharedEvent]);
         if (mSerializeWorkaround.sharedEvent == nil) {
-            return DAWN_INTERNAL_ERROR(
+            return DAWN_UNRECOVERABLE_ERROR(
                 "Failed to create internal MTLSharedEvent for splitting command buffers.");
         }
     }

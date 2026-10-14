@@ -39,29 +39,29 @@ using Index = TypedInteger<struct IndexT, uint32_t>;
 
 TEST(RawSpanDanglingDeathTest, Constructor) {
     auto owner = std::make_unique<std::vector<int>>(std::initializer_list<int>{1, 2, 3});
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         {
-            [[maybe_unused]] auto sp = RawSpan<int>{*owner};
+            auto sp = RawSpan<int>{*owner};
             owner.reset();
         },
         "");
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         {
-            [[maybe_unused]] auto sub = RawSpan<int>{*owner}.subspan(1u);
+            auto sub = RawSpan<int>{*owner}.subspan(1u);
             owner.reset();
         },
         "");
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         {
-            [[maybe_unused]] auto sp =
+            auto sp =
                 // SAFETY: This is viewing owner, just with typed indices.
                 DAWN_UNSAFE_BUFFERS((ityp::raw_span<Index, int>{owner->data(), Index{3u}}));
             owner.reset();
         },
         "");
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         {
-            [[maybe_unused]] auto sub =
+            auto sub =
                 // SAFETY: This is viewing owner, just with typed indices.
                 DAWN_UNSAFE_BUFFERS((ityp::raw_span<Index, int>{owner->data(), Index{3u}}))
                     .subspan(Index{1u});
@@ -72,27 +72,27 @@ TEST(RawSpanDanglingDeathTest, Constructor) {
 
 TEST(RawSpanDanglingDeathTest, SpanAsBytes) {
     auto owner = std::make_unique<std::vector<int>>(std::initializer_list<int>{1, 2, 3});
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         {
-            [[maybe_unused]] auto bsp = SpanAsBytes(RawSpan<int>{*owner});
+            auto bsp = SpanAsBytes(RawSpan<int>{*owner});
             owner.reset();
         },
         "");
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         {
-            [[maybe_unused]] auto sub = SpanAsBytes(RawSpan<int>{*owner}).subspan(1u);
+            auto sub = SpanAsBytes(RawSpan<int>{*owner}).subspan(1u);
             owner.reset();
         },
         "");
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         {
-            [[maybe_unused]] auto wbsp = SpanAsWritableBytes(RawSpan<int>{*owner});
+            auto wbsp = SpanAsWritableBytes(RawSpan<int>{*owner});
             owner.reset();
         },
         "");
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         {
-            [[maybe_unused]] auto sub = SpanAsWritableBytes(RawSpan<int>{*owner}).subspan(1u);
+            auto sub = SpanAsWritableBytes(RawSpan<int>{*owner}).subspan(1u);
             owner.reset();
         },
         "");
@@ -100,29 +100,27 @@ TEST(RawSpanDanglingDeathTest, SpanAsBytes) {
 
 TEST(RawSpanDanglingDeathTest, ReinterpretSpan) {
     auto owner = std::make_unique<std::vector<std::byte>>(4 * sizeof(int));
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         {
-            [[maybe_unused]] auto sp = ReinterpretSpan<int>(RawSpan<std::byte>{*owner});
+            auto sp = ReinterpretSpan<int>(RawSpan<std::byte>{*owner});
             owner.reset();
         },
         "");
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         {
-            [[maybe_unused]] auto sub =
-                ReinterpretSpan<int>(RawSpan<std::byte>{*owner}).subspan(1u);
+            auto sub = ReinterpretSpan<int>(RawSpan<std::byte>{*owner}).subspan(1u);
             owner.reset();
         },
         "");
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         {
-            [[maybe_unused]] auto sp = (ReinterpretSpan<int, Index>(RawSpan<std::byte>{*owner}));
+            auto sp = (ReinterpretSpan<int, Index>(RawSpan<std::byte>{*owner}));
             owner.reset();
         },
         "");
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         {
-            [[maybe_unused]] auto sub =
-                (ReinterpretSpan<int, Index>(RawSpan<std::byte>{*owner})).subspan(Index{1u});
+            auto sub = (ReinterpretSpan<int, Index>(RawSpan<std::byte>{*owner})).subspan(Index{1u});
             owner.reset();
         },
         "");

@@ -182,7 +182,7 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
         DAWN_TRY(CheckHRESULT(d3d12Device->GetDeviceRemovedReason(),
                               "ID3D12Device::GetDeviceRemovedReason"));
         // Otherwise, return a generic device lost error.
-        return DAWN_DEVICE_LOST_ERROR("Device lost");
+        return DAWN_BACKEND_DEVICE_LOST_ERROR("Device lost");
     }
 
     if (completedSerial <= GetCompletedCommandSerial()) {

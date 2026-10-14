@@ -85,12 +85,12 @@ MaybeError DisplayEGL::InitializeWithDynamicLoading(const char* libName,
                                                     std::span<const std::string> searchPaths) {
     std::string err;
     if (!mLib.Valid() && !mLib.Open(libName, searchPaths, &err)) {
-        return DAWN_FORMAT_INTERNAL_ERROR("Failed to load %s: \"%s\".", libName, err.c_str());
+        return DAWN_UNRECOVERABLE_ERROR("Failed to load %s: \"%s\".", libName, err.c_str());
     }
 
     EGLGetProcProc getProc = reinterpret_cast<EGLGetProcProc>(mLib.GetProc("eglGetProcAddress"));
     if (!getProc) {
-        return DAWN_FORMAT_INTERNAL_ERROR("Couldn't get \"eglGetProcAddress\" from %s.", libName);
+        return DAWN_UNRECOVERABLE_ERROR("Couldn't get \"eglGetProcAddress\" from %s.", libName);
     }
 
     return InitializeWithProcAndDisplay(getProc, EGL_NO_DISPLAY);
@@ -105,13 +105,13 @@ MaybeError DisplayEGL::InitializeWithProcAndDisplay(EGLGetProcProc getProc, EGLD
         mDisplay = egl->GetDisplay(EGL_DEFAULT_DISPLAY);
     }
     if (mDisplay == EGL_NO_DISPLAY) {
-        return DAWN_INTERNAL_ERROR("Couldn't create the default EGL display.");
+        return DAWN_UNRECOVERABLE_ERROR("Couldn't create the default EGL display.");
     }
 
     DAWN_TRY(mFunctions.LoadDisplayProcs(mDisplay));
 
     // We require at least EGL 1.4.
-    DAWN_INVALID_IF(
+    DAWN_UNRECOVERABLE_ERROR_IF(
         egl->GetMajorVersion() < 1 || (egl->GetMajorVersion() == 1 && egl->GetMinorVersion() < 4),
         "EGL version (%u.%u) must be at least 1.4", egl->GetMajorVersion(), egl->GetMinorVersion());
 
@@ -122,9 +122,10 @@ MaybeError DisplayEGL::InitializeWithProcAndDisplay(EGLGetProcProc getProc, EGLD
     if (rawClientAPIs != nullptr) {
         absl::flat_hash_set<std::string_view> clientAPIs = absl::StrSplit(rawClientAPIs, " ");
         const char* targetAPI = (mApiEnum == EGL_OPENGL_API) ? "OpenGL" : "OpenGL_ES";
-        DAWN_INVALID_IF(!clientAPIs.contains(targetAPI),
-                        "EGL display does not support requested client API '%s' (supported: %s).",
-                        targetAPI, rawClientAPIs);
+        DAWN_UNRECOVERABLE_ERROR_IF(
+            !clientAPIs.contains(targetAPI),
+            "EGL display does not support requested client API '%s' (supported: %s).", targetAPI,
+            rawClientAPIs);
     }
 
     return {};

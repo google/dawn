@@ -46,6 +46,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
     IDXGIAdapter3* GetHardwareAdapter() const;
     Backend* GetBackendBase() const;
 
+    const LUID& GetAdapterLUID() const;
+
     ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
         InstanceBase* instance,
         const Surface* surface) const override;
@@ -56,6 +58,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
   private:
     ComPtr<IDXGIAdapter3> mHardwareAdapter;
     raw_ptr<Backend> mBackend;
+    LUID mAdapterLUID = {};
 };
 
 }  // namespace dawn::native::d3d

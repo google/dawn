@@ -15,16 +15,15 @@ mat3 v_2(uint start_byte_offset) {
 mat3[4] v_3(uint start_byte_offset) {
   mat3 a[4] = mat3[4](mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)));
   {
-    uint v_4 = 0u;
-    v_4 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_5 = v_4;
-      if ((v_5 >= 4u)) {
+      uint v_4 = idx;
+      if ((v_4 >= 4u)) {
         break;
       }
-      a[v_5] = v_2((start_byte_offset + (v_5 * 48u)));
+      a[v_4] = v_2((start_byte_offset + (v_4 * 48u)));
       {
-        v_4 = (v_5 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -35,7 +34,7 @@ void main() {
   p = v_3(0u);
   p[1] = v_2(96u);
   p[1][0] = uintBitsToFloat(v.inner[1u].xyz).zxy;
-  uvec4 v_6 = v.inner[1u];
-  p[1][0].x = uintBitsToFloat(v_6.x);
+  uvec4 v_5 = v.inner[1u];
+  p[1][0].x = uintBitsToFloat(v_5.x);
   v_1.inner = p[1][0].x;
 }

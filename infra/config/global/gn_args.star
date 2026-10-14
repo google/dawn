@@ -88,6 +88,13 @@ gn_args.config(
 )
 
 gn_args.config(
+    name = "dawn_agility_sdk",
+    args = {
+        "dawn_use_agility_sdk": True,
+    },
+)
+
+gn_args.config(
     name = "dawn_no_d3d12",
     args = {
         "dawn_enable_d3d12": False,
@@ -315,6 +322,7 @@ gn_args.config(
     name = "win_clang",
     configs = [
         "clang",
+        "dawn_agility_sdk",
         "siso",
         "tint_hlsl_writer",
         "tint_msl_writer",
@@ -327,6 +335,7 @@ gn_args.config(
 gn_args.config(
     name = "win_msvc",
     configs = [
+        "dawn_agility_sdk",
         "msvc",
         "no_custom_libcxx",
         "siso",

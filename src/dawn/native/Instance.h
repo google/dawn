@@ -89,13 +89,35 @@ class InstanceBase final : public ErrorSink, public RefCounted {
 
     void EmitLog(WGPULoggingType type, const std::string_view message) const;
 
+    // TODO(crbug.com/536639352): When `UnknownError` is available, determine if we can combine
+    // these overloads into a single one taking the UnknownError class.
+    //
     // Consume an error and log its warning at most once. This is useful for
     // physical device creation errors that happen because the backend is not
     // supported or doesn't meet the required capabilities.
-    bool ConsumedErrorAndWarnOnce(MaybeError maybeError);
-
     template <typename T>
-    [[nodiscard]] bool ConsumedErrorAndWarnOnce(ResultOrError<T> resultOrError, T* result) {
+        requires(IsMaybeError<T>)
+    bool ConsumedErrorAndWarnOnce(T maybeError) {
+        if (!maybeError.IsError()) {
+            return false;
+        }
+        return ConsumedErrorAndWarnOnce(maybeError.AcquireError());
+    }
+
+    // Consume an error and log its warning at most once. This is useful for
+    // physical device creation errors that happen because the backend is not
+    // supported or doesn't meet the required capabilities.
+    bool ConsumedErrorAndWarnOnce(std::unique_ptr<UnknownError> error) {
+        std::string message = error->GetFormattedMessage();
+        if (mWarningMessages.insert(message).second) {
+            EmitLog(WGPULoggingType_Warning, message);
+        }
+        return true;
+    }
+
+    template <typename E, typename T>
+        requires(IsResultOrError<E, T>)
+    [[nodiscard]] bool ConsumedErrorAndWarnOnce(E resultOrError, T* result) {
         if (resultOrError.IsError()) [[unlikely]] {
             return ConsumedErrorAndWarnOnce(resultOrError.AcquireError());
         }
@@ -156,6 +178,11 @@ class InstanceBase final : public ErrorSink, public RefCounted {
 
     void DisconnectDawnPlatform();
 
+    // ErrorSink implementation
+    void ConsumeErrorImpl(
+        std::unique_ptr<UnknownError> error,
+        InternalErrorType additionalAllowedErrors = InternalErrorType::None) override;
+
   private:
     explicit InstanceBase(const TogglesState& instanceToggles);
     ~InstanceBase() override;
@@ -184,10 +211,6 @@ class InstanceBase final : public ErrorSink, public RefCounted {
                                    wgpu::PowerPreference powerPreference);
 
     void GatherWGSLFeatures(const DawnWGSLBlocklist* wgslBlocklist);
-
-    // ErrorSink implementation
-    void ConsumeError(std::unique_ptr<InternalError> error,
-                      InternalErrorType additionalAllowedErrors = InternalErrorType::None) override;
 
     absl::flat_hash_set<std::string> mWarningMessages;
 

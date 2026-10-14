@@ -171,7 +171,9 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
             }
         }
     }
-    options.array_length_from_constants.buffer_sizes_offset = 0x800;
+    if (!options.array_length_from_constants.bindpoint_to_size_index.empty()) {
+        options.array_length_from_constants.buffer_sizes_offset = 0x800;
+    }
 
     TINT_CHECK_RESULT_UNWRAP(output, Generate(module, options));
     if (context.options.dump) {

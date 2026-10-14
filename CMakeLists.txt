@@ -412,10 +412,12 @@ target_include_directories(dawn_public_config INTERFACE
 # The internal config contains additional path but includes the dawn_public_config include paths
 add_library(dawn_internal_config INTERFACE)
 target_include_directories(dawn_internal_config INTERFACE
-    "${PROJECT_SOURCE_DIR}"
     "${DAWN_BUILD_GEN_DIR}/src"
 )
-target_link_libraries(dawn_internal_config INTERFACE dawn_public_config)
+target_link_libraries(dawn_internal_config INTERFACE
+    dawn_public_config
+    dawn_utils_config
+)
 
 ################################################################################
 # Include utility CMake modules
@@ -435,10 +437,6 @@ find_package(Python3 REQUIRED)
 message(STATUS "Dawn: using python at ${Python3_EXECUTABLE}")
 
 # Options and compile definitions for the internal config
-add_dependencies(dawn_internal_config dawn_warnings_config)
-if (DAWN_ALWAYS_ASSERT OR IS_DEBUG_BUILD)
-    target_compile_definitions(dawn_internal_config INTERFACE "DAWN_ENABLE_ASSERTS")
-endif()
 if (DAWN_ENABLE_D3D11)
     target_compile_definitions(dawn_internal_config INTERFACE "DAWN_ENABLE_BACKEND_D3D11")
 endif()
@@ -477,9 +475,6 @@ if (DAWN_USE_X11)
 endif()
 if (DAWN_USE_WINDOWS_UI)
     target_compile_definitions(dawn_internal_config INTERFACE "DAWN_USE_WINDOWS_UI")
-endif()
-if (WIN32)
-    target_compile_definitions(dawn_internal_config INTERFACE "NOMINMAX" "WIN32_LEAN_AND_MEAN")
 endif()
 if (DAWN_FORCE_SYSTEM_COMPONENT_LOAD)
     target_compile_definitions(dawn_internal_config INTERFACE "DAWN_FORCE_SYSTEM_COMPONENT_LOAD")

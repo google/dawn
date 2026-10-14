@@ -188,7 +188,8 @@ ResultOrError<ResourceMemoryAllocation> ResourceMemoryAllocator::Allocate(
     bool forceDisableSubAllocation) {
     // The Vulkan spec guarantees at least one memory type is valid.
     auto maybeMemoryType = FindBestTypeIndex(requirements, kind);
-    DAWN_INTERNAL_ERROR_IF(!maybeMemoryType.has_value(), "Failed to find suitable memory type.");
+    DAWN_UNRECOVERABLE_ERROR_IF(!maybeMemoryType.has_value(),
+                                "Failed to find suitable memory type.");
     uint32_t memoryType = maybeMemoryType.value();
     bool isLazyMemoryType = mAllocatorsPerType[memoryType]->IsLazyMemoryType();
 

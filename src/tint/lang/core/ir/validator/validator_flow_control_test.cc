@@ -126,6 +126,35 @@ TEST_F(IR_ValidatorTest, Discard_NotInFragmentViaFunction) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Discard_NotInFragmentViaTransitiveFunction) {
+    auto* func1 = b.Function("foo", ty.void_());
+    b.Append(func1->Block(), [&] {
+        b.Discard();
+        b.Return(func1);
+    });
+
+    auto* func2 = b.Function("bar", ty.void_());
+    b.Append(func2->Block(), [&] {
+        b.Call(func1);
+        b.Return(func2);
+    });
+
+    auto* ep = ComputeEntryPoint("ep");
+
+    b.Append(ep->Block(), [&] {
+        b.Call(func2);
+        b.Return(ep);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:5 error: discard: cannot be used in a compute shader
+    discard
+    ^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Discard_NotInFragmentViaEntryPoint) {
     auto* ep = ComputeEntryPoint("ep");
 

@@ -390,6 +390,57 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_TexturePolyfillTest, TextureNumLayers_Multisampled2DArray) {
+    auto* var = b.Var("v", handle,
+                      ty.multisampled_texture(core::type::TextureDimension::k2dArray, ty.f32()),
+                      core::Access::kRead);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, b.Load(var)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<handle, texture_multisampled_2d_array<f32>, read> = var undef @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_multisampled_2d_array<f32> = load %v
+    %4:u32 = textureNumLayers %3
+    %x:u32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<handle, texture_multisampled_2d_array<f32>, read> = combined_texture_sampler undef @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_multisampled_2d_array<f32> = load %v
+    %4:vec3<i32> = glsl.textureSize %3
+    %5:i32 = swizzle %4, z
+    %6:u32 = bitcast<u32> %5
+    %x:u32 = let %6
+    ret
+  }
+}
+)";
+
+    TexturePolyfillConfig cfg;
+    Run(TexturePolyfill, cfg);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(GlslWriter_TexturePolyfillTest, TextureNumLayers_Depth2DArray) {
     auto* var = b.Var("v", handle, ty.depth_texture(core::type::TextureDimension::k2dArray),
                       core::Access::kRead);

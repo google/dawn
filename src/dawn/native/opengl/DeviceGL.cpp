@@ -298,11 +298,8 @@ ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
     return TextureView::Create(texture, descriptor);
 }
 
-ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
-    const SharedTextureMemoryDescriptor* descriptor) {
-    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-
+ResultOrUnknownError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
+    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(
         type, (unpacked.ValidateBranches<Branch<SharedTextureMemoryAHardwareBufferDescriptor>>()));
@@ -313,18 +310,15 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
                             "%s is not enabled.",
                             wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer);
             return SharedTextureMemoryEGL::Create(
-                this, descriptor->label,
+                this, unpacked->label,
                 unpacked.Get<SharedTextureMemoryAHardwareBufferDescriptor>());
         default:
             DAWN_UNREACHABLE();
     }
 }
 
-ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
-    const SharedFenceDescriptor* descriptor) {
-    UnpackedPtr<SharedFenceDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-
+ResultOrUnknownError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
+    UnpackedPtr<SharedFenceDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(type, (unpacked.ValidateBranches<Branch<SharedFenceSyncFDDescriptor>,
                                                      Branch<SharedFenceEGLSyncDescriptor>>()));
@@ -333,19 +327,20 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
         case wgpu::SType::SharedFenceSyncFDDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceSyncFD), "%s is not enabled.",
                             wgpu::FeatureName::SharedFenceSyncFD);
-            return SharedFenceEGL::Create(this, descriptor->label,
+            return SharedFenceEGL::Create(this, unpacked->label,
                                           unpacked.Get<SharedFenceSyncFDDescriptor>());
         case wgpu::SType::SharedFenceEGLSyncDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceEGLSync), "%s is not enabled.",
                             wgpu::FeatureName::SharedFenceEGLSync);
-            return SharedFenceEGL::Create(this, descriptor->label,
+            return SharedFenceEGL::Create(this, unpacked->label,
                                           unpacked.Get<SharedFenceEGLSyncDescriptor>());
         default:
             DAWN_UNREACHABLE();
     }
 }
 
-MaybeError Device::ValidateTextureCanBeWrapped(const UnpackedPtr<TextureDescriptor>& descriptor) {
+MaybeValError Device::ValidateTextureCanBeWrapped(
+    const UnpackedPtr<TextureDescriptor>& descriptor) {
     DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
                     "Texture dimension (%s) is not %s.", descriptor->dimension,
                     wgpu::TextureDimension::e2D);
@@ -372,7 +367,7 @@ Ref<TextureBase> Device::CreateTextureWrappingEGLImage(const ExternalImageDescri
     return result;
 }
 
-ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingEGLImageImpl(
+ResultOrUnknownError<Ref<TextureBase>> Device::CreateTextureWrappingEGLImageImpl(
     const ExternalImageDescriptor* descriptor,
     ::EGLImage image) {
     // TODO(451928481): We cannot defer the GL work here because the external texture may be
@@ -434,7 +429,7 @@ Ref<TextureBase> Device::CreateTextureWrappingGLTexture(const ExternalImageDescr
     return result;
 }
 
-ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingGLTextureImpl(
+ResultOrUnknownError<Ref<TextureBase>> Device::CreateTextureWrappingGLTextureImpl(
     const ExternalImageDescriptor* descriptor,
     GLuint texture) {
     // TODO(451928481): We cannot defer the GL work here because the external texture may be
@@ -464,7 +459,8 @@ ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingGLTextureImpl(
         textureDescriptor->size.height != static_cast<uint32_t>(height) ||
         textureDescriptor->size.depthOrArrayLayers != 1) {
         return DAWN_VALIDATION_ERROR(
-            "GL texture size (width: %u, height: %u, depth: 1) doesn't match descriptor size %s.",
+            "GL texture size (width: %u, height: %u, depth: 1) doesn't match descriptor size "
+            "%s.",
             width, height, textureDescriptor->size);
     }
 

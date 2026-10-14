@@ -89,40 +89,15 @@
         "In Wasm, if `memcpy`ing into this range, prefer using @ref wgpuBufferWriteMappedRange instead for better performance.": "",
         "In Wasm, if `memcpy`ing from this range, prefer using @ref wgpuBufferReadMappedRange instead for better performance.": ""
     },
-    "customize_api": {
-        "objects": {
-            "device": {
-                "methods": {
-                    "get lost future": {
-                        "omitted": true
-                    }
-                }
+    "metadata": {
+        "addins": {
+            "create instance": {
+                "kotlin_name": "createGPUInstance"
             },
-            "instance": {
-                "methods": {
-                    "wait any": {
-                        "omitted": true
-                    }
-                }
-            }
-        },
-        "structures": {
-            "future": {
-                "omitted": true
-            },
-            "future wait info": {
+            "device::get lost future": {
                 "omitted": true
             },
             "external texture descriptor": {
-                "exclude_members": [
-                    "plane 0",
-                    "apparent size",
-                    "src transfer function parameters",
-                    "dst transfer function parameters",
-                    "gamut conversion matrix",
-                    "do yuv to rgb conversion only",
-                    "yuv to rgb conversion matrix"
-                ],
                 "additional_members": [
                     {
                         "name": "srcColorSpace",
@@ -137,15 +112,41 @@
                         "optional": false
                     }
                 ]
-            }
-        },
-        "enums": {
-            "wait status": {
+            },
+            "external texture descriptor::apparent size": {
                 "omitted": true
-            }
-        },
-        "function pointer": {
+            },
+            "external texture descriptor::do yuv to rgb conversion only": {
+                "omitted": true
+            },
+            "external texture descriptor::dst transfer function parameters": {
+                "omitted": true
+            },
+            "external texture descriptor::gamut conversion matrix": {
+                "omitted": true
+            },
+            "external texture descriptor::plane 0": {
+                "omitted": true
+            },
+            "external texture descriptor::src transfer function parameters": {
+                "omitted": true
+            },
+            "external texture descriptor::yuv to rgb conversion matrix": {
+                "omitted": true
+            },
+            "future": {
+                "omitted": true
+            },
+            "future wait info": {
+                "omitted": true
+            },
+            "instance::wait any": {
+                "omitted": true
+            },
             "proc": {
+                "omitted": true
+            },
+            "wait status": {
                 "omitted": true
             }
         }

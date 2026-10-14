@@ -136,13 +136,15 @@ TEST_F(IRBinaryRoundtripTest, Fn_ParameterAttributes) {
     auto* p1 = b.FunctionParam(ty.u32());
     auto* p2 = b.FunctionParam(ty.f32());
     auto* p3 = b.FunctionParam(ty.bool_());
+    auto* p4 = b.FunctionParam(ty.u32());
     p0->SetBuiltin(BuiltinValue::kGlobalInvocationId);
     p1->SetInvariant(true);
     p2->SetLocation(10);
     p2->SetColor(50);
     p2->SetInterpolation(Interpolation{InterpolationType::kFlat, InterpolationSampling::kCenter});
     p3->SetBindingPoint(20, 30);
-    fn->SetParams({p0, p1, p2, p3});
+    p4->SetBuiltin(BuiltinValue::kViewIndex);
+    fn->SetParams({p0, p1, p2, p3, p4});
     RUN_TEST();
 }
 
@@ -489,6 +491,18 @@ TEST_F(IRBinaryRoundtripTest, UserCall) {
 TEST_F(IRBinaryRoundtripTest, BuiltinCall) {
     auto* fn = b.Function("Function", ty.f32());
     b.Append(fn->Block(), [&] { b.Return(fn, b.Max(1_i, 2_i)); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, InterpolateString) {
+    auto* x = b.FunctionParam<i32>("x");
+    auto* fn = b.Function("Function", ty.void_());
+    fn->SetParams({x});
+    b.Append(fn->Block(), [&] {
+        auto* str = b.InterpolateString(b.Constant("x = "), x, b.Constant("!"));
+        b.Call(ty.void_(), core::BuiltinFn::kPrint, str);
+        b.Return(fn);
+    });
     RUN_TEST();
 }
 

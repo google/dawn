@@ -143,6 +143,12 @@ constexpr PipelineCompatibilityToken kExplicitPCT = PipelineCompatibilityToken(0
 // Used to look up additional information related to the pass, such a resource usages.
 using PassIndex = TypedInteger<struct PassIndexT, uint32_t>;
 
+// A unique identifier for a pass-level resource usage tracker (the RenderPassResourceUsageTracker
+// of a render pass or render bundle, or the ComputePassResourceUsageTracker of a compute pass) used
+// to intrusively deduplicate BindGroup resource usage tracking within the pass.
+using PassTrackerID = TypedInteger<struct PassTrackerIDT, uint64_t>;
+constexpr PassTrackerID kInvalidPassTrackerID = PassTrackerID(0u);
+
 }  // namespace dawn::native
 
 #endif  // SRC_DAWN_NATIVE_INTEGERTYPES_H_

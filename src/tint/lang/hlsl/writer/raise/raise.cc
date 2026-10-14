@@ -33,7 +33,6 @@
 
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/reflection.h"
-#include "src/tint/lang/core/ir/transform/array_length_from.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binding_remapper.h"
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
@@ -50,6 +49,7 @@
 #include "src/tint/lang/core/ir/transform/remove_continue_in_switch.h"
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
+#include "src/tint/lang/core/ir/transform/replace_array_and_buffer_length.h"
 #include "src/tint/lang/core/ir/transform/resource_table.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
@@ -258,9 +258,9 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         TINT_CHECK_RESULT(raise::ReplaceDefaultOnlySwitch(module));
     }
 
-    // ArrayLength must run after Robustness, which introduces arrayLength calls.
+    // ReplaceArrayAndBufferLength must run after Robustness, which introduces arrayLength calls.
     if (array_length_from_immediate_options.buffer_sizes_offset) {
-        TINT_CHECK_RESULT(core::ir::transform::ArrayLengthFromImmediates(
+        TINT_CHECK_RESULT(core::ir::transform::ReplaceArrayAndBufferLength(
             module, immediate_data_layout, buffer_sizes_array_elements_num,
             array_length_from_immediate_options.bindpoint_to_size_index));
     }
@@ -296,11 +296,15 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
     // Split workgroup variables that contain atomics into separate data and atomic variables.
     // Must run after DirectVariableAccess and before DecomposeAccess.
-    if (options.workarounds.d3d12_decompose_workgroup_access) {
-        TINT_CHECK_RESULT_UNWRAP(workgroup_info, core::ir::GetWorkgroupInfo(module));
+    if (auto workgroup_res = core::ir::GetWorkgroupInfo(module); workgroup_res == Success) {
+        raise::SplitWorkgroupAtomicsConfig config;
+        config.mode = options.workarounds.d3d12_decompose_workgroup_access
+                          ? raise::SplitMode::kAll
+                          : raise::SplitMode::kSubgroupMatrix;
+        auto workgroup_info = workgroup_res.Get();
         raise_result.workgroup_storage_size_before_split_workgroup_atomics =
             workgroup_info.storage_size;
-        TINT_CHECK_RESULT(raise::SplitWorkgroupAtomics(module));
+        TINT_CHECK_RESULT(raise::SplitWorkgroupAtomics(module, config));
     }
 
     // DecomposeStorageAccess must come after Robustness and DirectVariableAccess

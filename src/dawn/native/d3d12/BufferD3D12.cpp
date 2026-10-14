@@ -588,32 +588,33 @@ void Buffer::DestroyImpl(DestroyReason reason) {
 
     if (mHostMappedDisposeCallback) {
         struct DisposeTask : TrackTaskCallback {
-            DisposeTask(std::unique_ptr<Heap> heap, wgpu::Callback callback, void* userdata)
+            DisposeTask(std::unique_ptr<Heap> heap, wgpu::Callback callback, raw_ptr<void> userdata)
                 : TrackTaskCallback(nullptr),
                   heap(std::move(heap)),
                   callback(callback),
-                  userdata(userdata) {}
+                  userdata(std::move(userdata)) {}
             ~DisposeTask() override = default;
 
             void FinishImpl() override {
                 heap = nullptr;
-                callback(userdata);
+                callback(userdata.ExtractAsDangling());
             }
             void HandleDeviceLossImpl() override {
                 heap = nullptr;
-                callback(userdata);
+                callback(userdata.ExtractAsDangling());
             }
             void HandleShutDownImpl() override {
                 heap = nullptr;
-                callback(userdata);
+                callback(userdata.ExtractAsDangling());
             }
 
             std::unique_ptr<Heap> heap;
             wgpu::Callback callback;
-            raw_ptr<void, DisableDanglingPtrDetection> userdata;
+            raw_ptr<void> userdata;
         };
-        std::unique_ptr<DisposeTask> request = std::make_unique<DisposeTask>(
-            std::move(mHostMappedHeap), mHostMappedDisposeCallback, mHostMappedDisposeUserdata);
+        std::unique_ptr<DisposeTask> request =
+            std::make_unique<DisposeTask>(std::move(mHostMappedHeap), mHostMappedDisposeCallback,
+                                          std::move(mHostMappedDisposeUserdata));
         mHostMappedDisposeCallback = nullptr;
         mHostMappedHeap = nullptr;
 

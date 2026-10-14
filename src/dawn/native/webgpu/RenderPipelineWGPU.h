@@ -46,7 +46,7 @@ class RenderPipeline final : public RenderPipelineBase,
     static Ref<RenderPipeline> CreateUninitialized(
         Device* device,
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
-    MaybeError InitializeImpl() override;
+    MaybeUnknownError InitializeImpl() override;
 
     MaybeError AddReferenced(CaptureContext& captureContext) override;
     MaybeError CaptureCreationParameters(CaptureContext& context) override;

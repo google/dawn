@@ -97,7 +97,8 @@ class Device final : public DeviceBase {
         // 2nd special case: if a task is enqueued inside another task, then run it immediately
         // instead of deferring it. This can be detected by checking IsInScopedMakeCurrent().
         if (mContext->IsInScopedMakeCurrent()) {
-            return work(mGL);
+            DAWN_TRY(work(mGL));
+            return {};
         }
 
         // Otherwise, queue up the work.
@@ -208,7 +209,7 @@ class Device final : public DeviceBase {
 
     float GetMaxTextureMaxAnisotropy() const;
 
-    MaybeError ValidateTextureCanBeWrapped(const UnpackedPtr<TextureDescriptor>& descriptor);
+    MaybeValError ValidateTextureCanBeWrapped(const UnpackedPtr<TextureDescriptor>& descriptor);
     Ref<TextureBase> CreateTextureWrappingEGLImage(const ExternalImageDescriptor* descriptor,
                                                    ::EGLImage image);
     Ref<TextureBase> CreateTextureWrappingGLTexture(const ExternalImageDescriptor* descriptor,
@@ -280,14 +281,16 @@ class Device final : public DeviceBase {
         const UnpackedPtr<ComputePipelineDescriptor>& descriptor) override;
     Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor) override;
-    ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
-        const SharedTextureMemoryDescriptor* descriptor) override;
-    ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
-        const SharedFenceDescriptor* descriptor) override;
-    ResultOrError<Ref<TextureBase>> CreateTextureWrappingEGLImageImpl(
+
+    ResultOrUnknownError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
+        UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) override;
+    ResultOrUnknownError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
+        UnpackedPtr<SharedFenceDescriptor> unpacked) override;
+
+    ResultOrUnknownError<Ref<TextureBase>> CreateTextureWrappingEGLImageImpl(
         const ExternalImageDescriptor* descriptor,
         ::EGLImage image);
-    ResultOrError<Ref<TextureBase>> CreateTextureWrappingGLTextureImpl(
+    ResultOrUnknownError<Ref<TextureBase>> CreateTextureWrappingGLTextureImpl(
         const ExternalImageDescriptor* descriptor,
         GLuint texture);
 

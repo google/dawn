@@ -208,6 +208,8 @@ struct EntryPoint {
     bool fine_derivative_builtin_used = false;
     /// Does the entry point use primitive_index
     bool primitive_index_used = false;
+    /// Does the entry point use view_index
+    bool view_index_used = false;
     /// Does the entry point use subgroup_invocation_id
     bool subgroup_invocation_id_used = false;
     /// Does the entry point use subgroup_size

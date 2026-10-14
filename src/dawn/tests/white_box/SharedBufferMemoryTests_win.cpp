@@ -710,11 +710,11 @@ class D3D12HostPointerBackend : public SharedBufferMemoryTestBackend {
         wgpu::SharedBufferMemoryHostPointerDescriptor hostPointerDesc;
         hostPointerDesc.pointer = pointer.data();
         hostPointerDesc.size = alignedSize;
-        hostPointerDesc.disposeCallback = [](WGPUCallbackStatus status, void* userdata) {
-            EXPECT_EQ(WGPUCallbackStatus_Success, status);
-            VirtualFree(userdata, 0, MEM_RELEASE);
-        };
-        hostPointerDesc.userdata = allocationPtr;
+        hostPointerDesc.SetDisposeCallback(wgpu::CallbackMode::AllowSpontaneous,
+                                           [pointer](wgpu::CallbackStatus status) {
+                                               EXPECT_EQ(wgpu::CallbackStatus::Success, status);
+                                               VirtualFree(pointer.data(), 0, MEM_RELEASE);
+                                           });
         desc.nextInChain = &hostPointerDesc;
 
         wgpu::SharedBufferMemory memory = device.ImportSharedBufferMemory(&desc);
@@ -728,19 +728,22 @@ class D3D12HostPointerBackend : public SharedBufferMemoryTestBackend {
     D3D12HostPointerBackend() {}
 };
 
-class SharedBufferMemoryD3D12HostPointerTests : public SharedBufferMemoryTests {};
+class SharedBufferMemoryD3D12HostPointerTests : public SharedBufferMemoryTests {
+  protected:
+    using MockDisposeCallback = testing::MockCppCallback<wgpu::DisposeCallback<void>*>;
+    testing::StrictMock<MockDisposeCallback> mMockDispose;
+};
 
 // Ensure that importing a nullptr host pointer results in error, and that disposeCallback is
 // still invoked exactly once, with an error status.
 TEST_P(SharedBufferMemoryD3D12HostPointerTests, NullPointerFailure) {
-    testing::MockCallback<wgpu::DisposeCallback> disposeCallback;
-    EXPECT_CALL(disposeCallback, Call(WGPUCallbackStatus_Error, nullptr)).Times(1);
+    EXPECT_CALL(mMockDispose, Call(wgpu::CallbackStatus::Error)).Times(1);
 
     wgpu::SharedBufferMemoryHostPointerDescriptor hostPointerDesc;
     hostPointerDesc.pointer = nullptr;
     hostPointerDesc.size = kD3D12SharedBufferMemoryHostPointerAlignment;
-    hostPointerDesc.disposeCallback = disposeCallback.Callback();
-    hostPointerDesc.userdata = disposeCallback.MakeUserdata(nullptr);
+    hostPointerDesc.SetDisposeCallback(wgpu::CallbackMode::AllowSpontaneous,
+                                       mMockDispose.Callback());
     wgpu::SharedBufferMemoryDescriptor desc;
     desc.nextInChain = &hostPointerDesc;
     ASSERT_DEVICE_ERROR(device.ImportSharedBufferMemory(&desc));
@@ -753,17 +756,14 @@ TEST_P(SharedBufferMemoryD3D12HostPointerTests, ZeroSizeFailure) {
                              MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
     ASSERT_NE(ptr, nullptr);
 
-    testing::MockCallback<wgpu::DisposeCallback> disposeCallback;
-    EXPECT_CALL(disposeCallback, Call(WGPUCallbackStatus_Error, ptr))
-        .WillOnce([](WGPUCallbackStatus, void* userdata) {
-            EXPECT_TRUE(VirtualFree(userdata, 0, MEM_RELEASE));
-        });
+    EXPECT_CALL(mMockDispose, Call(wgpu::CallbackStatus::Error))
+        .WillOnce([ptr](wgpu::CallbackStatus) { EXPECT_TRUE(VirtualFree(ptr, 0, MEM_RELEASE)); });
 
     wgpu::SharedBufferMemoryHostPointerDescriptor hostPointerDesc;
     hostPointerDesc.pointer = ptr;
     hostPointerDesc.size = 0;
-    hostPointerDesc.disposeCallback = disposeCallback.Callback();
-    hostPointerDesc.userdata = disposeCallback.MakeUserdata(ptr);
+    hostPointerDesc.SetDisposeCallback(wgpu::CallbackMode::AllowSpontaneous,
+                                       mMockDispose.Callback());
     wgpu::SharedBufferMemoryDescriptor desc;
     desc.nextInChain = &hostPointerDesc;
     ASSERT_DEVICE_ERROR(device.ImportSharedBufferMemory(&desc));
@@ -776,11 +776,8 @@ TEST_P(SharedBufferMemoryD3D12HostPointerTests, UnalignedPointerFailure) {
     void* ptr = VirtualAlloc(nullptr, kAllocationSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
     ASSERT_NE(ptr, nullptr);
 
-    testing::MockCallback<wgpu::DisposeCallback> disposeCallback;
-    EXPECT_CALL(disposeCallback, Call(WGPUCallbackStatus_Error, ptr))
-        .WillOnce([](WGPUCallbackStatus, void* userdata) {
-            EXPECT_TRUE(VirtualFree(userdata, 0, MEM_RELEASE));
-        });
+    EXPECT_CALL(mMockDispose, Call(wgpu::CallbackStatus::Error))
+        .WillOnce([ptr](wgpu::CallbackStatus) { EXPECT_TRUE(VirtualFree(ptr, 0, MEM_RELEASE)); });
 
     wgpu::SharedBufferMemoryHostPointerDescriptor hostPointerDesc;
     // SAFETY: `ptr + kD3D12SharedBufferMemoryHostPointerAlignment / 2` and the following
@@ -788,8 +785,8 @@ TEST_P(SharedBufferMemoryD3D12HostPointerTests, UnalignedPointerFailure) {
     hostPointerDesc.pointer = DAWN_UNSAFE_BUFFERS(static_cast<uint8_t*>(ptr) +
                                                   kD3D12SharedBufferMemoryHostPointerAlignment / 2);
     hostPointerDesc.size = kD3D12SharedBufferMemoryHostPointerAlignment;
-    hostPointerDesc.disposeCallback = disposeCallback.Callback();
-    hostPointerDesc.userdata = disposeCallback.MakeUserdata(ptr);
+    hostPointerDesc.SetDisposeCallback(wgpu::CallbackMode::AllowSpontaneous,
+                                       mMockDispose.Callback());
     wgpu::SharedBufferMemoryDescriptor desc;
     desc.nextInChain = &hostPointerDesc;
     ASSERT_DEVICE_ERROR(device.ImportSharedBufferMemory(&desc));
@@ -802,19 +799,15 @@ TEST_P(SharedBufferMemoryD3D12HostPointerTests, DisposeCallbackIsCalled) {
                              MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
     ASSERT_NE(ptr, nullptr);
 
-    testing::MockCallback<wgpu::DisposeCallback> disposeCallback;
-    EXPECT_CALL(disposeCallback, Call(WGPUCallbackStatus_Success, ptr))
-        .WillOnce([ptr](WGPUCallbackStatus status, void*) {
-            EXPECT_EQ(WGPUCallbackStatus_Success, status);
-            EXPECT_TRUE(VirtualFree(ptr, 0, MEM_RELEASE));
-        });
+    EXPECT_CALL(mMockDispose, Call(wgpu::CallbackStatus::Success))
+        .WillOnce([ptr](wgpu::CallbackStatus) { EXPECT_TRUE(VirtualFree(ptr, 0, MEM_RELEASE)); });
 
     {
         wgpu::SharedBufferMemoryHostPointerDescriptor hostPointerDesc;
         hostPointerDesc.pointer = ptr;
         hostPointerDesc.size = kD3D12SharedBufferMemoryHostPointerAlignment;
-        hostPointerDesc.disposeCallback = disposeCallback.Callback();
-        hostPointerDesc.userdata = disposeCallback.MakeUserdata(ptr);
+        hostPointerDesc.SetDisposeCallback(wgpu::CallbackMode::AllowSpontaneous,
+                                           mMockDispose.Callback());
         wgpu::SharedBufferMemoryDescriptor desc;
         desc.nextInChain = &hostPointerDesc;
 

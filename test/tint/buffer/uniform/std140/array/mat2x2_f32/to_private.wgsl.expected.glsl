@@ -19,16 +19,15 @@ mat2 v_2(uint start_byte_offset) {
 mat2[4] v_7(uint start_byte_offset) {
   mat2 a[4] = mat2[4](mat2(vec2(0.0f), vec2(0.0f)), mat2(vec2(0.0f), vec2(0.0f)), mat2(vec2(0.0f), vec2(0.0f)), mat2(vec2(0.0f), vec2(0.0f)));
   {
-    uint v_8 = 0u;
-    v_8 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_9 = v_8;
-      if ((v_9 >= 4u)) {
+      uint v_8 = idx;
+      if ((v_8 >= 4u)) {
         break;
       }
-      a[v_9] = v_2((start_byte_offset + (v_9 * 16u)));
+      a[v_8] = v_2((start_byte_offset + (v_8 * 16u)));
       {
-        v_8 = (v_9 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -39,7 +38,7 @@ void main() {
   p = v_7(0u);
   p[1] = v_2(32u);
   p[1][0] = uintBitsToFloat(v.inner[0u].zw).yx;
-  uvec4 v_10 = v.inner[0u];
-  p[1][0].x = uintBitsToFloat(v_10.z);
+  uvec4 v_9 = v.inner[0u];
+  p[1][0].x = uintBitsToFloat(v_9.z);
   v_1.inner = p[1][0].x;
 }

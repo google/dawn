@@ -2896,6 +2896,14 @@ TEST_P(ResourceTableTests, SwitchUseResourceTableAndNot) {
     EXPECT_BUFFER_U32_EQ(42, resultBuffer, 8);
 }
 
+// Check that Device::Destroy calls DestroyImpl on the ResourceTables
+// Regression test for https://crbug.com/564921047
+TEST_P(ResourceTableTests, DestroyDeviceThenResourceTable) {
+    wgpu::ResourceTable table = MakeResourceTable(0);
+    DestroyDevice();
+    table.Destroy();
+}
+
 DAWN_INSTANTIATE_TEST(ResourceTableTests, D3D12Backend(), MetalBackend(), VulkanBackend());
 
 // Test that a resource used in a bindful way outside of a usage scope will get correctly barriered

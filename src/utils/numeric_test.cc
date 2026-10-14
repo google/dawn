@@ -59,11 +59,11 @@ void CheckedCastTestPair() {
     checked_cast<T64>(T32{std::numeric_limits<Prim32>::max()});
 
     // Narrowing
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         checked_cast<T32>(T64{Prim64{std::numeric_limits<Prim32>::max()} + 1}), "");
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         checked_cast<T32>(T64{Prim64{std::numeric_limits<Prim32>::max()} * 2}), "");
-    EXPECT_DEATH_IF_SUPPORTED(checked_cast<T32>(T64{std::numeric_limits<Prim64>::max()}), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(checked_cast<T32>(T64{std::numeric_limits<Prim64>::max()}), "");
 }
 template <typename U32, typename I32, typename U64, typename I64>
 void CheckedCastTest() {

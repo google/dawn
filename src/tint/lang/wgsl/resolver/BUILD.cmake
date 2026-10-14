@@ -142,6 +142,7 @@ tint_add_target(tint_lang_wgsl_resolver_test test
   lang/wgsl/resolver/increment_decrement_validation_test.cc
   lang/wgsl/resolver/inferred_type_test.cc
   lang/wgsl/resolver/input_attachments_extension_test.cc
+  lang/wgsl/resolver/interpolated_string_test.cc
   lang/wgsl/resolver/is_storeable_test.cc
   lang/wgsl/resolver/language_features_test.cc
   lang/wgsl/resolver/load_test.cc
@@ -174,6 +175,7 @@ tint_add_target(tint_lang_wgsl_resolver_test test
   lang/wgsl/resolver/value_constructor_validation_test.cc
   lang/wgsl/resolver/variable_test.cc
   lang/wgsl/resolver/variable_validation_test.cc
+  lang/wgsl/resolver/view_instancing_extension_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_resolver_test test

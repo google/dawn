@@ -34,7 +34,7 @@ namespace dawn::native::stream {
 BlobSource::BlobSource(Blob&& blob) : mBlob(std::move(blob)) {}
 
 ResultOrError<std::span<const std::byte>> BlobSource::Read(size_t bytes) {
-    DAWN_INVALID_IF(bytes > mBlob.Size() - mOffset, "Out of bounds.");
+    DAWN_UNRECOVERABLE_ERROR_IF(bytes > mBlob.Size() - mOffset, "Out of bounds.");
     std::span<const std::byte> result = mBlob.Data().subspan(mOffset, bytes);
     mOffset += bytes;
     return result;

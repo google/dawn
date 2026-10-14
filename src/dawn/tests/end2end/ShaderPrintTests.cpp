@@ -74,6 +74,48 @@ class ShaderPrintTest : public DawnTest {
     }
 
   protected:
+    void RunRenderPipeline(const wgpu::ShaderModule& module) {
+        utils::ComboRenderPipelineDescriptor pDesc;
+        pDesc.vertex.module = module;
+        pDesc.cFragment.module = module;
+        pDesc.cFragment.targetCount = 1;
+        pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+        pDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        wgpu::RenderPipeline testPipeline = device.CreateRenderPipeline(&pDesc);
+
+        auto rp = utils::CreateBasicRenderPass(device, 1, 1);
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+
+        pass.SetPipeline(testPipeline);
+        pass.Draw(1);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        WaitForAllOperations();
+    }
+
+    void RunComputePipeline(const wgpu::ShaderModule& module,
+                            uint32_t workgroups_x = 1,
+                            uint32_t workgroups_y = 1,
+                            uint32_t workgroups_z = 1) {
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.compute.module = module;
+        wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.DispatchWorkgroups(workgroups_x, workgroups_y, workgroups_z);
+        pass.End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        WaitForAllOperations();
+    }
+
     std::stringstream print_output;
 };
 
@@ -90,27 +132,7 @@ TEST_P(ShaderPrintTest, RenderPipeline) {
         }
     )");
 
-    utils::ComboRenderPipelineDescriptor pDesc;
-    pDesc.vertex.module = module;
-    pDesc.cFragment.module = module;
-    pDesc.cFragment.targetCount = 1;
-    pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
-    pDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
-    wgpu::RenderPipeline testPipeline = device.CreateRenderPipeline(&pDesc);
-
-    // Run the test
-    auto rp = utils::CreateBasicRenderPass(device, 1, 1);
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
-
-    pass.SetPipeline(testPipeline);
-    pass.Draw(1);
-    pass.End();
-
-    wgpu::CommandBuffer commands = encoder.Finish();
-    queue.Submit(1, &commands);
-
-    WaitForAllOperations();
+    RunRenderPipeline(module);
 
     EXPECT_THAT(print_output.str(), testing::HasSubstr("[ vert vs:L3 instance=0, vertex=0 ] 42"));
     EXPECT_THAT(
@@ -126,19 +148,7 @@ TEST_P(ShaderPrintTest, ComputePipeline) {
         }
     )");
 
-    wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.compute.module = module;
-    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
-
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-    pass.SetPipeline(pipeline);
-    pass.DispatchWorkgroups(2);
-    pass.End();
-    wgpu::CommandBuffer commands = encoder.Finish();
-    queue.Submit(1, &commands);
-
-    WaitForAllOperations();
+    RunComputePipeline(module, 2);
 
     EXPECT_THAT(print_output.str(),
                 testing::HasSubstr("[ comp main:L4 global_invocation_id(0, 0, 0) ] 0,0,0"));
@@ -157,6 +167,97 @@ TEST_P(ShaderPrintTest, ComputePipeline) {
                 testing::HasSubstr("[ comp main:L4 global_invocation_id(2, 1, 0) ] 1,0,0"));
     EXPECT_THAT(print_output.str(),
                 testing::HasSubstr("[ comp main:L4 global_invocation_id(3, 1, 0) ] 1,0,0"));
+}
+
+TEST_P(ShaderPrintTest, StringLiteral) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @compute @workgroup_size(1)
+        fn main() {
+            print(`hello world`);
+            print(`hello from backticks`);
+        }
+    )");
+
+    RunComputePipeline(module);
+
+    EXPECT_THAT(print_output.str(),
+                testing::HasSubstr("[ comp main:L4 global_invocation_id(0, 0, 0) ] hello world"));
+    EXPECT_THAT(
+        print_output.str(),
+        testing::HasSubstr("[ comp main:L5 global_invocation_id(0, 0, 0) ] hello from backticks"));
+}
+
+TEST_P(ShaderPrintTest, InterpolatedStringRenderPipeline) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @vertex fn vs() -> @builtin(position) vec4f {
+            print(`vertex ${42i}`);
+            return vec4f(0, 0, 0.5, 0.5);
+        }
+
+        @fragment fn fs() -> @location(0) vec4f {
+            print(`fragment ${vec4u(1, 2, 3, 4)}`);
+            return vec4(0, 0, 0, 0);
+        }
+    )");
+
+    RunRenderPipeline(module);
+
+    EXPECT_THAT(print_output.str(),
+                testing::HasSubstr("[ vert vs:L3 instance=0, vertex=0 ] vertex 42"));
+    EXPECT_THAT(print_output.str(),
+                testing::HasSubstr(
+                    "[ frag fs:L8 position(0.500000, 0.500000, 1.000000) ] fragment 1,2,3,4"));
+}
+
+TEST_P(ShaderPrintTest, InterpolatedStringComputePipeline) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @compute @workgroup_size(1)
+        fn main(@builtin(workgroup_id) wgid: vec3u) {
+            print(`workgroup: ${wgid}`);
+        }
+    )");
+
+    RunComputePipeline(module);
+
+    EXPECT_THAT(
+        print_output.str(),
+        testing::HasSubstr("[ comp main:L4 global_invocation_id(0, 0, 0) ] workgroup: 0,0,0"));
+}
+
+TEST_P(ShaderPrintTest, InterpolatedStringMultiple) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @compute @workgroup_size(1)
+        fn main() {
+            let a = 10i;
+            let b = 20u;
+            let c = 30.5f;
+            print(`a=${a}, b=${b}, c=${c}!`);
+        }
+    )");
+
+    RunComputePipeline(module);
+
+    EXPECT_THAT(print_output.str(),
+                testing::HasSubstr(
+                    "[ comp main:L7 global_invocation_id(0, 0, 0) ] a=10, b=20, c=30.500000!"));
+}
+
+TEST_P(ShaderPrintTest, InterpolatedStringExpressions) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @compute @workgroup_size(1)
+        fn main() {
+            print(`100% complete: ${1i + 2i} / 100%`);
+            print(`adjacent: ${1i}${2i}`);
+        }
+    )");
+
+    RunComputePipeline(module);
+
+    EXPECT_THAT(print_output.str(),
+                testing::HasSubstr(
+                    "[ comp main:L4 global_invocation_id(0, 0, 0) ] 100% complete: 3 / 100%"));
+    EXPECT_THAT(print_output.str(),
+                testing::HasSubstr("[ comp main:L5 global_invocation_id(0, 0, 0) ] adjacent: 12"));
 }
 
 DAWN_INSTANTIATE_TEST(ShaderPrintTest, MetalBackend({"enable_shader_print"}));

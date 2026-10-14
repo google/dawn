@@ -41,7 +41,7 @@
 namespace dawn::native::metal {
 
 namespace {
-ResultOrError<wgpu::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t format) {
+ResultOrValError<wgpu::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t format) {
     switch (format) {
         case kCVPixelFormatType_64RGBAHalf:
             return wgpu::TextureFormat::RGBA16Float;
@@ -111,7 +111,7 @@ MTLTextureUsage MetalTextureUsage(bool allowStorageBinding) {
 }  // anonymous namespace
 
 // static
-ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
+ResultOrUnknownError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     Device* device,
     StringView label,
     const SharedTextureMemoryIOSurfaceDescriptor* descriptor) {
@@ -209,7 +209,7 @@ ResultOrError<Ref<TextureBase>> SharedTextureMemory::CreateTextureImpl(
     return Texture::CreateFromSharedTextureMemory(this, descriptor);
 }
 
-MaybeError SharedTextureMemory::BeginAccessImpl(
+MaybeValError SharedTextureMemory::BeginAccessImpl(
     TextureBase* texture,
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     DAWN_TRY(descriptor.ValidateSubset<>());
@@ -224,13 +224,15 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
                                 wgpu::SharedFenceType::MTLSharedEvent);
                 break;
             default:
+                // TODO(crbug.com/536639352): Move the validation of the fence type into the
+                // frontend to better separate the validation and internal error.
                 return DAWN_VALIDATION_ERROR("Unsupported fence type %s.", exportInfo.type);
         }
     }
     return {};
 }
 
-ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
+ResultOrUnknownError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     TextureBase* texture,
     ExecutionSerial lastUsageSerial,
     UnpackedPtr<EndAccessState>& state) {
@@ -286,7 +288,8 @@ MaybeError SharedTextureMemory::CreateMtlTextures() {
             mMtlPlaneTextures[plane] = AcquireNSPRef(
                 CreateTextureMtlForPlane(mMtlUsage, *format, plane, device, mIOSurface.Get()));
             if (mMtlPlaneTextures[plane] == nil) {
-                return DAWN_INTERNAL_ERROR("Failed to create MTLTexture plane view for IOSurface.");
+                return DAWN_UNRECOVERABLE_ERROR(
+                    "Failed to create MTLTexture plane view for IOSurface.");
             }
         }
     }

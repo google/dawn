@@ -172,10 +172,10 @@ class Device final : public d3d::Device {
     void InitializeComputePipelineAsyncImpl(Ref<CreateComputePipelineAsyncEvent> event) override;
     void InitializeRenderPipelineAsyncImpl(Ref<CreateRenderPipelineAsyncEvent> event) override;
 
-    ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
-        const SharedTextureMemoryDescriptor* descriptor) override;
-    ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
-        const SharedFenceDescriptor* descriptor) override;
+    ResultOrUnknownError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
+        UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) override;
+    ResultOrUnknownError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
+        UnpackedPtr<SharedFenceDescriptor> unpacked) override;
 
     void DestroyImpl(DestroyReason reason) override;
     MaybeError CheckDebugLayerAndGenerateErrors();

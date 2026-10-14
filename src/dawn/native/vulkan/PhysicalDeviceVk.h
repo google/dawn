@@ -70,6 +70,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool IsAndroidSamsung() const;
     bool IsAndroidImgTec() const;
     bool IsAndroidHuawei() const;
+    bool IsAdreno6xx() const;
+    bool IsAdreno7xx() const;
     bool IsPixel10() const;
     bool IsSwiftshader() const;
     static bool IsWindows();
@@ -127,7 +129,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
     // Sets core feature level as not being supported and stores `error` with
     // reason why core isn't supported.
-    void SetCoreNotSupported(std::unique_ptr<InternalError> error);
+    void SetCoreNotSupported(std::unique_ptr<UnrecoverableError> error);
 
     VkPhysicalDevice mVkPhysicalDevice;
     raw_ptr<InstanceBase> mInstance;
@@ -136,7 +138,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
     std::optional<uint32_t> mDefaultComputeSubgroupSize;
     bool mSupportsCoreFeatureLevel = true;
-    mutable std::unique_ptr<InternalError> mCoreError;
+    mutable std::unique_ptr<UnrecoverableError> mCoreError;
 
 #if DAWN_PLATFORM_IS(ANDROID)
     std::unique_ptr<AHBFunctions> mAHBFunctions;

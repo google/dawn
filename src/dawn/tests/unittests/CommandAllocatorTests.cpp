@@ -35,10 +35,10 @@
 #include <utility>
 #include <vector>
 
-#include "gtest/gtest.h"
 #include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/MemoryBlockAllocator.h"
 #include "src/dawn/native/CommandAllocator.h"
+#include "src/utils/gtest.h"
 
 namespace dawn::native {
 namespace {
@@ -405,28 +405,28 @@ struct alignas(A) AlignedStruct {
 // Test for overflows in Allocate's computations, size 1 variant
 TEST(CommandAllocatorDeathTest, AllocationOverflow_1) {
     CommandAllocatorAndPool allocator;
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         allocator.AllocateData<AlignedStruct<1>>(std::numeric_limits<size_t>::max() / 1u), "");
 }
 
 // Test for overflows in Allocate's computations, size 2 variant
 TEST(CommandAllocatorDeathTest, AllocationOverflow_2) {
     CommandAllocatorAndPool allocator;
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         allocator.AllocateData<AlignedStruct<2>>(std::numeric_limits<size_t>::max() / 2u), "");
 }
 
 // Test for overflows in Allocate's computations, size 4 variant
 TEST(CommandAllocatorDeathTest, AllocationOverflow_4) {
     CommandAllocatorAndPool allocator;
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         allocator.AllocateData<AlignedStruct<4>>(std::numeric_limits<size_t>::max() / 4u), "");
 }
 
 // Test for overflows in Allocate's computations, size 8 variant
 TEST(CommandAllocatorDeathTest, AllocationOverflow_8) {
     CommandAllocatorAndPool allocator;
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         allocator.AllocateData<AlignedStruct<8>>(std::numeric_limits<size_t>::max() / 8u), "");
 }
 

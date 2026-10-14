@@ -2,24 +2,23 @@
 RWByteAddressBuffer S : register(u0);
 void v(uint offset, int obj[4]) {
   {
-    uint v_1 = 0u;
-    v_1 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_2 = v_1;
-      if ((v_2 >= 4u)) {
+      uint v_1 = idx;
+      if ((v_1 >= 4u)) {
         break;
       }
-      S.Store((offset + (v_2 * 4u)), asuint(obj[v_2]));
+      S.Store((offset + (v_1 * 4u)), asuint(obj[v_1]));
       {
-        v_1 = (v_2 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
 }
 
 void func() {
-  int v_3[4] = (int[4])0;
-  v(0u, v_3);
+  int v_2[4] = (int[4])0;
+  v(0u, v_2);
 }
 
 [numthreads(1, 1, 1)]

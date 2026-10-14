@@ -179,8 +179,7 @@ class Buffer : public BufferBase {
 
     virtual ComPtr<ID3D11Buffer> GetD3D11MappedBuffer();
 
-    // TODO(https://crbug.com/526537224): Use RawSpan.
-    Span<std::byte> mMappedData;
+    RawSpan<std::byte> mMappedData;
 
   private:
     MaybeError Initialize(bool mappedAtCreation,

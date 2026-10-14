@@ -1588,7 +1588,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
                     RecordWriteTimestampCmd(recordingContext, device,
                                             computePassCmd->timestampWrites.querySet.Get(),
                                             computePassCmd->timestampWrites.endOfPassWriteIndex,
-                                            false, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+                                            false, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
                 }
 
                 UpdateQueryAvailability(computePassCmd->timestampWrites);
@@ -1695,7 +1695,8 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
                 WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
 
                 RecordWriteTimestampCmd(recordingContext, device, cmd->querySet.Get(),
-                                        cmd->queryIndex, false, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+                                        cmd->queryIndex, false,
+                                        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
 
                 UpdateQueryAvailability(cmd);
                 break;

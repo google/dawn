@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_PRESERVE_PADDING_H_
 
 #include "src/tint/lang/core/ir/validator/validate.h"
+#include "src/tint/utils/reflection/reflection.h"
 #include "src/tint/utils/result.h"
 
 // Forward declarations.
@@ -38,13 +39,20 @@ class Module;
 
 namespace tint::core::ir::transform {
 
+struct PreservePaddingConfig {
+    bool workgroup_buffer_view = false;
+
+    TINT_REFLECT(PreservePaddingConfig, workgroup_buffer_view);
+};
+
 /// PreservePadding is a transform that decomposes stores of whole structure and array types to
 /// preserve padding bytes.
 ///
 /// @note assumes that DirectVariableAccess will be run afterwards for backends that need it.
-/// @param module the module to transform
+/// @param ir the module to transform
+/// @param options the transform options
 /// @returns success or failure
-Result<SuccessType> PreservePadding(Module& module);
+Result<SuccessType> PreservePadding(Module& ir, const PreservePaddingConfig& options);
 
 }  // namespace tint::core::ir::transform
 

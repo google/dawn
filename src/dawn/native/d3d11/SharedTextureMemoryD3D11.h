@@ -59,7 +59,7 @@ class SharedTextureMemoryContentsD3D11 final : public SharedTextureMemoryContent
 
 class SharedTextureMemory final : public d3d::SharedTextureMemory {
   public:
-    static ResultOrError<Ref<SharedTextureMemory>> Create(
+    static ResultOrUnknownError<Ref<SharedTextureMemory>> Create(
         Device* device,
         StringView label,
         const SharedTextureMemoryDXGISharedHandleDescriptor* descriptor);
@@ -86,9 +86,9 @@ class SharedTextureMemory final : public d3d::SharedTextureMemory {
 
     Ref<SharedResourceMemoryContents> CreateContents() override;
 
-    MaybeError BeginAccessImpl(TextureBase* texture,
-                               const UnpackedPtr<BeginAccessDescriptor>& descriptor) override;
-    ResultOrError<FenceAndSignalValue> EndAccessImpl(
+    MaybeValError BeginAccessImpl(TextureBase* texture,
+                                  const UnpackedPtr<BeginAccessDescriptor>& descriptor) override;
+    ResultOrUnknownError<FenceAndSignalValue> EndAccessImpl(
         TextureBase* texture,
         ExecutionSerial lastUsageSerial,
         UnpackedPtr<EndAccessState>& descriptor) override;

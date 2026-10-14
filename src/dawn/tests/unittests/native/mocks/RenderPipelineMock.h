@@ -44,7 +44,7 @@ class RenderPipelineMock : public RenderPipelineBase {
 
     ~RenderPipelineMock() override;
 
-    MOCK_METHOD(MaybeError, InitializeImpl, (), (override));
+    MOCK_METHOD(MaybeUnknownError, InitializeImpl, (), (override));
     MOCK_METHOD(void, DestroyImpl, (DestroyReason), (override));
 
   protected:

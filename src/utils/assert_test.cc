@@ -79,11 +79,7 @@ using AssertDeathTest = ::testing::Test;
 
 // DAWN_UNREACHABLE crashes in both debug and release.
 TEST_F(AssertDeathTest, SimpleUnreachable) {
-#if defined(DAWN_ENABLE_ASSERTS)
-    EXPECT_DEATH_IF_SUPPORTED(DAWN_UNREACHABLE(), "Unreachable code hit");
-#else
-    EXPECT_DEATH_IF_SUPPORTED(DAWN_UNREACHABLE(), "");
-#endif
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(DAWN_UNREACHABLE(), "Unreachable code hit");
 }
 
 enum class TestEnum : uint32_t {
@@ -125,11 +121,7 @@ TEST_F(AssertDeathTest, JumpTableUnreachable) {
     g_var = g_var + 1;
     TestEnum enum_val = static_cast<TestEnum>(g_var);
 
-#if defined(DAWN_ENABLE_ASSERTS)
-    EXPECT_DEATH_IF_SUPPORTED(g_var = DoFakeOp(enum_val, g_var), "Unreachable code hit");
-#else
-    EXPECT_DEATH_IF_SUPPORTED(g_var = DoFakeOp(enum_val, g_var), "");
-#endif
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(g_var = DoFakeOp(enum_val, g_var), "Unreachable code hit");
 
     g_var = g_var + 1;
 }
@@ -138,18 +130,16 @@ TEST_F(AssertDeathTest, JumpTableUnreachable) {
 volatile uint32_t g_var2 = 123;
 TEST_F(AssertDeathTest, AssertKills) {
     g_var2 = g_var2 + 1;
-#ifdef DAWN_ENABLE_ASSERTS
-    EXPECT_DEATH_IF_SUPPORTED(DAWN_ASSERT(g_var2 != 124), "g_var2 != 124");
-#endif
+    DAWN_EXPECT_DEBUG_DEATH_IF_SUPPORTED(DAWN_ASSERT(g_var2 != 124), "g_var2 != 124");
 }
 
 #ifndef _WIN32
 TEST_F(AssertDeathTest, StackTrace) {
-    EXPECT_DEATH_IF_SUPPORTED(DAWN_UNREACHABLE(), "PC: @");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(DAWN_UNREACHABLE(), "PC: @");
 }
 
 TEST_F(AssertDeathTest, CrashStackTrace) {
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         {
             volatile int* ptr = nullptr;
             *ptr = 1;

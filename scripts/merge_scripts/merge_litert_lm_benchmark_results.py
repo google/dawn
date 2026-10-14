@@ -29,58 +29,14 @@
 """
 
 import json
-import os
 from pathlib import Path
-import subprocess
 import sys
-import tempfile
-import time
 
 DAWN_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(DAWN_ROOT))
 
+from scripts.merge_scripts import perf_results_common
 from testing.merge_scripts import merge_api
-
-
-def find_gsutil() -> list[str]:
-    gsutil_path = DAWN_ROOT / 'third_party' / 'depot_tools' / 'gsutil.py'
-    if not gsutil_path.exists():
-        raise RuntimeError(f'Unable to find gsutil.py at {gsutil_path}')
-    return [sys.executable, '-u', str(gsutil_path)]
-
-
-def upload_file_to_gcs(local_file_path: Path, gcs_bucket: str,
-                       gcs_dest_path: str) -> None:
-    if not local_file_path.exists():
-        raise FileNotFoundError(f"Local file not found at: {local_file_path}")
-
-    gsutil_cmd = find_gsutil()
-    gcs_url = f"gs://{gcs_bucket}/{gcs_dest_path}"
-
-    cmd = gsutil_cmd + ['cp', str(local_file_path), gcs_url]
-    print(f"Uploading {local_file_path.name} to GCS: {' '.join(cmd)}")
-    subprocess.run(cmd, check=True)
-
-
-def generate_metadata(metadata_file_path: Path, timestamp: int,
-                      build_properties_str: str | None) -> None:
-    props = {}
-    if build_properties_str:
-        try:
-            props = json.loads(build_properties_str)
-        except Exception as e:
-            print(f"Warning: Failed to parse build-properties: {e}",
-                  file=sys.stderr)
-
-    metadata = {
-        'timestamp': timestamp,
-        'git_revision': props.get('got_revision'),
-        'buildername': props.get('buildername'),
-        'builder_group': props.get('builder_group'),
-    }
-
-    with open(metadata_file_path, 'w', encoding='utf-8') as f:
-        json.dump(metadata, f, indent=2)
 
 
 def main() -> int:
@@ -100,9 +56,19 @@ def main() -> int:
         'failures': [],
         'valid': True,
     }
+    if not args.jsons_to_merge:
+        print("Error: No shard output files provided to merge.",
+              file=sys.stderr)
+        merged_results['failures'].append('missing_shard_output')
+        merged_results['valid'] = False
+
     for json_file_str in args.jsons_to_merge:
         json_file = Path(json_file_str)
         if not json_file.exists():
+            print(f"Error: Shard output file '{json_file}' does not exist.",
+                  file=sys.stderr)
+            merged_results['failures'].append('missing_shard_output')
+            merged_results['valid'] = False
             continue
         try:
             with open(json_file, 'r', encoding='utf-8') as f:
@@ -130,30 +96,16 @@ def main() -> int:
             metric_file = pb_path
 
     if not metric_file:
-        print("Warning: No litert_lm_metrics.pb file found to upload.",
+        print("Error: No litert_lm_metrics.pb file found to upload.",
               file=sys.stderr)
-        return 0
+        return 1
 
     # Upload metrics and generated metadata to GCS.
-    timestamp = int(time.time())
-    task_id = os.environ.get('SWARMING_TASK_ID', 'local')
-    run_id = f"{timestamp}_{task_id}"
-    bucket_name = 'dawn-webgpu-perf-results'
-    directory_name = f'litert_lm_benchmark/{run_id}'
-
-    with tempfile.TemporaryDirectory() as tempdir_str:
-        tempdir = Path(tempdir_str)
-        # Generate metadata.json locally with accurate builder context.
-        metadata_file = tempdir / 'metadata.json'
-        generate_metadata(metadata_file, timestamp,
-                          getattr(args, 'build_properties', None))
-
-        upload_file_to_gcs(metadata_file, bucket_name,
-                           f"{directory_name}/metadata.json")
-
-        # Upload the single metric file.
-        upload_file_to_gcs(metric_file, bucket_name,
-                           f"{directory_name}/litert_lm_metrics.pb")
+    perf_results_common.upload_perf_results(
+        test_suite='litert_lm_benchmark',
+        artifacts={'litert_lm_metrics.pb': metric_file},
+        build_properties_str=getattr(args, 'build_properties', None),
+    )
 
     return 0
 

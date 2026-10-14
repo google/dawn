@@ -48,6 +48,7 @@
 /third_party/litert-lm/src
 /third_party/llvm-build
 /third_party/llvm-dev
+/third_party/llvm-libclang
 /third_party/markupsafe
 /third_party/mesa/src
 /third_party/meson/src

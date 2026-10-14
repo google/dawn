@@ -102,8 +102,11 @@ function(tint_default_compile_options TARGET)
   endif()
 
   set(COMMON_CLANG_OPTIONS
+    # We require C++20.
     -Wno-c++98-compat
     -Wno-c++98-compat-pedantic
+    -Wno-c++20-extensions
+
     -Wno-deprecated-copy-with-dtor
     -Wno-documentation
     -Wno-documentation-unknown-command

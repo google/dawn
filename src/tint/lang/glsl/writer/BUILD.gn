@@ -144,7 +144,6 @@ if (tint_build_fuzzers && tint_build_glsl_writer) {
       "${tint_src_dir}/lang/glsl/writer/helpers",
       "${tint_src_dir}/lang/glsl/writer/printer",
       "${tint_src_dir}/utils",
-      "${tint_src_dir}/utils/bytes",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",

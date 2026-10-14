@@ -41,7 +41,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 {% endif %}
 public class {{ kotlin_name(obj) }} private constructor(public val handle: Long): AutoCloseable {
     {% set all_method_info = object_info.methods if object_info else {} %}
-    {% for method in obj.methods if include_method(obj, method) %}
+    {% for method in obj.methods if include_method(method) %}
         {% set _kotlin_return = kotlin_return(method) %}
         //* Generating KDocs
         {% set method_info = all_method_info.get(method.name.snake_case()) %}

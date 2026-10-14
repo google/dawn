@@ -38,6 +38,8 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
             ///////////////////////////////////////////////////////////////////
         case LanguageFeature::kSizedBindingArray:
         case LanguageFeature::kTexelBuffers:
+        case LanguageFeature::kMultisampledArrayTextures:
+        case LanguageFeature::kFragmentDepth:
             return FeatureStatus::kUnsafeExperimental;
 
             ////////////////////////////////////////////////////////////////////
@@ -49,14 +51,12 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
             ////////////////////////////////////////////////////////////////////
             // Shipped with killswitch features
             ///////////////////////////////////////////////////////////////////
-        case LanguageFeature::kUniformBufferStandardLayout:
         case LanguageFeature::kSubgroupId:
         case LanguageFeature::kSubgroupUniformity:
         case LanguageFeature::kTextureAndSamplerLet:
         case LanguageFeature::kTextureFormatsTier1:
         case LanguageFeature::kLinearIndexing:
         case LanguageFeature::kBufferView:
-        case LanguageFeature::kFragmentDepth:
         case LanguageFeature::kSwizzleAssignment:
             return FeatureStatus::kShippedWithKillswitch;
 
@@ -68,6 +68,7 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
         case LanguageFeature::kReadonlyAndReadwriteStorageTextures:
         case LanguageFeature::kUnrestrictedPointerParameters:
         case LanguageFeature::kImmediateAddressSpace:
+        case LanguageFeature::kUniformBufferStandardLayout:
             return FeatureStatus::kShipped;
 
             ////////////////////////////////////////////////////////////////////

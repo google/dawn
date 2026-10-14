@@ -106,8 +106,7 @@ struct TableIndex {
     /// @returns true if the integer type `T` has enough bits to index all the
     /// elements in the array @p arr.
     template <typename U, size_t COUNT>
-    static constexpr bool CanIndex(U (&arr)[COUNT]) {
-        (void)arr;  // The array isn't actually used
+    static constexpr bool CanIndex([[maybe_unused]] U (&arr)[COUNT]) {
         /// kInvalid is the largest value representable by `T`. It is not a valid index.
         return COUNT < kInvalid;
     }

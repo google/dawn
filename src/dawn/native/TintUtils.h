@@ -183,7 +183,7 @@ tint::Bindings GenerateBindingRemapping(const PipelineLayoutBase* layout,
     return bindings;
 }
 
-tint::ResourceType BindingLayoutToResourceType(const BindingInfo& bi);
+tint::ResourceType BindingLayoutToResourceType(DeviceBase* device, const BindingInfo& bi);
 
 template <ConvertsBindingIndexToBindingPoint F>
 std::unordered_map<tint::BindingPoint, tint::ResourceType> GenerateBindingToResourceType(
@@ -197,8 +197,8 @@ std::unordered_map<tint::BindingPoint, tint::ResourceType> GenerateBindingToReso
         for (const auto& [_, apiBindingIndex] : bgl->GetBindingMap()) {
             tint::BindingPoint dstBindingPoint =
                 BindingPointFor(group, bgl->AsBindingIndex(apiBindingIndex));
-            tint::ResourceType type =
-                BindingLayoutToResourceType(bgl->GetAPIBindingInfo(apiBindingIndex));
+            tint::ResourceType type = BindingLayoutToResourceType(
+                layout->GetDevice(), bgl->GetAPIBindingInfo(apiBindingIndex));
             binding_to_resource_type.emplace(dstBindingPoint, type);
         }
     }

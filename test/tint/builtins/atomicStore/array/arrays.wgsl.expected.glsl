@@ -3,16 +3,15 @@
 shared uint wg[3][2][1];
 void compute_main_inner(uint tint_local_index) {
   {
-    uint v = 0u;
-    v = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_1 = v;
-      if ((v_1 >= 6u)) {
+      uint v = idx;
+      if ((v >= 6u)) {
         break;
       }
-      atomicExchange(wg[(v_1 / 2u)][(v_1 % 2u)][0u], 0u);
+      atomicExchange(wg[(v / 2u)][(v % 2u)][0u], 0u);
       {
-        v = (v_1 + 1u);
+        idx = (idx + 1u);
       }
     }
   }

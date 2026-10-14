@@ -37,7 +37,7 @@
 namespace dawn::native::vulkan {
 
 // static
-ResultOrError<Ref<SharedFence>> SharedFence::Create(
+ResultOrUnknownError<Ref<SharedFence>> SharedFence::Create(
     Device* device,
     StringView label,
     const SharedFenceVkSemaphoreZirconHandleDescriptor* descriptor) {
@@ -50,9 +50,10 @@ ResultOrError<Ref<SharedFence>> SharedFence::Create(
 }
 
 // static
-ResultOrError<Ref<SharedFence>> SharedFence::Create(Device* device,
-                                                    StringView label,
-                                                    const SharedFenceSyncFDDescriptor* descriptor) {
+ResultOrUnknownError<Ref<SharedFence>> SharedFence::Create(
+    Device* device,
+    StringView label,
+    const SharedFenceSyncFDDescriptor* descriptor) {
     DAWN_INVALID_IF(descriptor->handle < 0 && descriptor->handle != kSemaphoreFdAlreadySignaledFd,
                     "File descriptor (%d) was invalid.", descriptor->handle);
     SystemHandle handle;
@@ -65,7 +66,7 @@ ResultOrError<Ref<SharedFence>> SharedFence::Create(Device* device,
 }
 
 // static
-ResultOrError<Ref<SharedFence>> SharedFence::Create(
+ResultOrUnknownError<Ref<SharedFence>> SharedFence::Create(
     Device* device,
     StringView label,
     const SharedFenceVkSemaphoreOpaqueFDDescriptor* descriptor) {
@@ -90,7 +91,7 @@ const SystemHandle& SharedFence::GetHandle() const {
     return mHandle;
 }
 
-MaybeError SharedFence::ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const {
+MaybeValError SharedFence::ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const {
     info->type = mType;
 
 #if DAWN_PLATFORM_IS(FUCHSIA)

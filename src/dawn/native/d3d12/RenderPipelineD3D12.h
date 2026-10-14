@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_D3D12_RENDERPIPELINED3D12_H_
 
 #include "src/dawn/native/RenderPipeline.h"
+#include "src/dawn/native/d3d12/DeviceD3D12.h"
 #include "src/dawn/native/d3d12/PipelineLayoutHandle.h"
 #include "src/dawn/native/d3d12/ShaderModuleD3D12.h"
 #include "src/dawn/native/d3d12/d3d12_platform.h"
@@ -44,7 +45,7 @@ class RenderPipeline final : public RenderPipelineBase {
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
     RenderPipeline() = delete;
 
-    MaybeError InitializeImpl() override;
+    MaybeUnknownError InitializeImpl() override;
 
     D3D12_PRIMITIVE_TOPOLOGY GetD3D12PrimitiveTopology() const;
     ID3D12PipelineState* GetPipelineState() const;
@@ -54,9 +55,8 @@ class RenderPipeline final : public RenderPipelineBase {
     // Dawn API
     void SetLabelImpl() override;
 
-    ComPtr<ID3D12CommandSignature> GetDrawIndirectCommandSignature();
-
-    ComPtr<ID3D12CommandSignature> GetDrawIndexedIndirectCommandSignature();
+    const CommandSignature& GetDrawIndirectCommandSignature();
+    const CommandSignature& GetDrawIndexedIndirectCommandSignature();
 
   private:
     ~RenderPipeline() override;

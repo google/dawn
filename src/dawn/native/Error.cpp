@@ -33,14 +33,32 @@
 
 namespace dawn::native {
 
+UnknownError::UnknownError(std::unique_ptr<ErrorData> d) : mData(std::move(d)) {}
+UnknownError::UnknownError(std::unique_ptr<UnrecoverableError> d) : mData(d->ReleaseData()) {}
+UnknownError::UnknownError(std::unique_ptr<ValidationError> d) : mData(d->ReleaseData()) {}
+
+UnrecoverableError::UnrecoverableError(std::unique_ptr<UnknownError> d)
+    : UnknownError(d->ReleaseData()) {
+    if (GetType() == InternalErrorType::Validation) {
+        SetType(InternalErrorType::Unrecoverable);
+    }
+}
+
+void IgnoreErrors(MaybeUnknownError maybeError) {
+    if (maybeError.IsError()) {
+        std::unique_ptr<UnrecoverableError> err = ErrorAdapter(maybeError.AcquireError());
+        IgnoreErrors(std::move(err));
+    }
+}
+
 void IgnoreErrors(MaybeError maybeError) {
     if (maybeError.IsError()) {
-        std::unique_ptr<InternalError> errorData = maybeError.AcquireError();
+        std::unique_ptr<UnrecoverableError> errorData = maybeError.AcquireError();
         // During shutdown and destruction, device lost errors can be ignored.
         // We can also ignore other unexpected internal errors on shut down and treat it as
         // device lost so that we can continue with destruction.
-        DAWN_ASSERT(errorData->GetType() == InternalErrorType::DeviceLost ||
-                    errorData->GetType() == InternalErrorType::Internal);
+        DAWN_ASSERT(errorData->GetType() == InternalErrorType::BackendDeviceLost ||
+                    errorData->GetType() == InternalErrorType::Unrecoverable);
     }
 }
 
@@ -50,9 +68,9 @@ wgpu::ErrorType ToWGPUErrorType(InternalErrorType type) {
             return wgpu::ErrorType::Validation;
         case InternalErrorType::OutOfMemory:
             return wgpu::ErrorType::OutOfMemory;
-        case InternalErrorType::Internal:
+        case InternalErrorType::PipelineUncategorized:
             return wgpu::ErrorType::Internal;
-
+        case InternalErrorType::Unrecoverable:
         default:
             return wgpu::ErrorType::Unknown;
     }
@@ -65,7 +83,7 @@ InternalErrorType FromWGPUErrorType(wgpu::ErrorType type) {
         case wgpu::ErrorType::OutOfMemory:
             return InternalErrorType::OutOfMemory;
         default:
-            return InternalErrorType::Internal;
+            return InternalErrorType::Unrecoverable;
     }
 }
 
@@ -94,21 +112,29 @@ AbslFormatConvert(InternalErrorType value,
             s->Append("Validation");
             value &= ~InternalErrorType::Validation;
         }
-        if (value & InternalErrorType::DeviceLost) {
+        if (value & InternalErrorType::BackendDeviceLost) {
             if (!first) {
                 s->Append("|");
             }
             first = false;
             s->Append("DeviceLost");
-            value &= ~InternalErrorType::DeviceLost;
+            value &= ~InternalErrorType::BackendDeviceLost;
         }
-        if (value & InternalErrorType::Internal) {
+        if (value & InternalErrorType::Unrecoverable) {
             if (!first) {
                 s->Append("|");
             }
             first = false;
             s->Append("Internal");
-            value &= ~InternalErrorType::Internal;
+            value &= ~InternalErrorType::Unrecoverable;
+        }
+        if (value & InternalErrorType::PipelineUncategorized) {
+            if (!first) {
+                s->Append("|");
+            }
+            first = false;
+            s->Append("PipelineUncategorized");
+            value &= ~InternalErrorType::PipelineUncategorized;
         }
         if (value & InternalErrorType::OutOfMemory) {
             if (!first) {

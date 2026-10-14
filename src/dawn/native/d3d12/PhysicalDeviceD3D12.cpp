@@ -35,6 +35,7 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/GPUInfo.h"
+#include "src/dawn/common/Math.h"
 #include "src/dawn/common/WindowsUtils.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Instance.h"
@@ -105,7 +106,7 @@ MaybeError PhysicalDevice::InitializeImpl() {
     DAWN_TRY_ASSIGN(mD3d12Device, GetBackend()->CreateD3DDevice(GetHardwareAdapter()));
 
     // Check if we should block the use of D3D12 on the current device.
-    DAWN_TRY(ValidateUseOfD3D12());
+    DAWN_TRY(CheckD3D12Blocklist());
 
     DAWN_TRY(InitializeDebugLayerFilters());
 
@@ -305,7 +306,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
 
     if (featureLevels.MaxSupportedFeatureLevel == D3D_FEATURE_LEVEL_11_0 &&
         featureData.ResourceBindingTier < D3D12_RESOURCE_BINDING_TIER_2) {
-        return DAWN_INTERNAL_ERROR(
+        return DAWN_UNRECOVERABLE_ERROR(
             "At least Resource Binding Tier 2 is required for D3D12 Feature Level 11.0 "
             "devices.");
     }
@@ -524,14 +525,15 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
                                     feature));
             }
             break;
-        // Subgroup matrix produces incorrect results on Intel drivers through 101.8992.
+        // Subgroup matrix produces incorrect results on Intel drivers through 101.9034.
+        // Fixed on Intel driver >=101.9150.
         case wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix: {
-            const gpu_info::IntelWindowsDriverVersion kBuggyDriverVersion = {32, 0, 101, 8992};
+            const gpu_info::IntelWindowsDriverVersion kBuggyDriverVersion = {32, 0, 101, 9034};
             if (gpu_info::IsIntel(GetVendorId()) &&
                 gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) <= kBuggyDriverVersion &&
                 !toggles.IsEnabled(Toggle::D3D12ForceEnableSubgroupMatrixOnBuggyIntelDrivers)) {
                 return FeatureValidationResult(
-                    absl::StrFormat("Intel D3D12 drivers through version 101.8992 require "
+                    absl::StrFormat("Intel D3D12 drivers through version 101.9034 require "
                                     "`d3d12_force_enable_subgroup_matrix_on_buggy_intel_drivers` "
                                     "to enable %s.",
                                     feature));
@@ -796,13 +798,19 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     uint32_t deviceId = GetDeviceId();
     uint32_t vendorId = GetVendorId();
 
-    // Currently this workaround is only needed on Intel Gen12, Xe, Xe2 and Xe3 GPUs.
+    // This workaround is needed on Intel Gen12 GPUs, and on Intel Xe, Xe2 and Xe3 GPUs with
+    // drivers through version 101.9034. Intel drivers newer than 101.9150 fixed the bug below.
     // See http://crbug.com/341991439 for more information.
+    const gpu_info::IntelWindowsDriverVersion kDecomposeWorkgroupAccessMaxDriverVersion = {
+        32, 0, 101, 9034};
     if (gpu_info::IsIntelGen12LP(vendorId, deviceId) ||
         gpu_info::IsIntelGen12HP(vendorId, deviceId) ||
-        gpu_info::IsIntelXeLPG(vendorId, deviceId) || gpu_info::IsIntelXe2LPG(vendorId, deviceId) ||
-        gpu_info::IsIntelXe2HPG(vendorId, deviceId) ||
-        gpu_info::IsIntelXe3LPG(vendorId, deviceId)) {
+        ((gpu_info::IsIntelXeLPG(vendorId, deviceId) ||
+          gpu_info::IsIntelXe2LPG(vendorId, deviceId) ||
+          gpu_info::IsIntelXe2HPG(vendorId, deviceId) ||
+          gpu_info::IsIntelXe3LPG(vendorId, deviceId)) &&
+         gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) <=
+             kDecomposeWorkgroupAccessMaxDriverVersion)) {
         deviceToggles->Default(Toggle::D3D12DecomposeWorkgroupAccess, true);
     }
 
@@ -959,9 +967,13 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::D3D12PolyfillReflectVec2F32, true);
     }
 
-    // Currently this workaround is needed on old Intel drivers and newer version of Windows 11.
-    // See http://crbug.com/dawn/2308 for more information.
     if (gpu_info::IsIntel(vendorId)) {
+        // Workaround an Intel GPU hardware limitation that corrupts buffer<->texture copies with
+        // a large row pitch. See https://crbug.com/481934465.
+        deviceToggles->Default(Toggle::SplitBufferTextureCopyForOversizedRow, true);
+
+        // The workaround below is needed on old Intel drivers and newer version of Windows 11.
+        // See http://crbug.com/dawn/2308 for more information.
         constexpr uint64_t kAffectedMinimumWindowsBuildNumber = 25957u;
         const gpu_info::IntelWindowsDriverVersion kAffectedMaximumDriverVersion = {27, 20, 100,
                                                                                    9664};
@@ -997,14 +1009,14 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
                            platform->IsFeatureEnabled(platform::Features::kWebGPUUseHLSL2021));
 }
 
-MaybeError PhysicalDevice::ValidateUseOfD3D12() const {
+MaybeError PhysicalDevice::CheckD3D12Blocklist() const {
     uint32_t deviceId = GetDeviceId();
     uint32_t vendorId = GetVendorId();
 
     // D3D12 is no longer allowed on 4th Generation Intel Processor Graphics.
     // https://www.intel.com/content/www/us/en/support/articles/000057520/graphics.html
     if (gpu_info::IsIntelGen7(vendorId, deviceId)) {
-        return DAWN_INTERNAL_ERROR("D3D12 backend is not allowed on Intel gen-7 GPUs.");
+        return DAWN_UNRECOVERABLE_ERROR("D3D12 backend is not allowed on Intel gen-7 GPUs.");
     }
 
     return {};
@@ -1069,6 +1081,8 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
     if (auto* d3dProperties = info.Get<AdapterPropertiesD3D>()) {
         // Report highest supported shader model version, instead of actual applied version.
         d3dProperties->shaderModel = GetDeviceInfo().highestSupportedShaderModel;
+        d3dProperties->adapterLUIDLowPart = GetAdapterLUID().LowPart;
+        d3dProperties->adapterLUIDHighPart = static_cast<uint32_t>(GetAdapterLUID().HighPart);
     }
     if (auto* subgroupMatrixConfigs = info.Get<AdapterPropertiesSubgroupMatrixConfigs>()) {
         std::vector<SubgroupMatrixConfig> supportedConfigs =
@@ -1080,6 +1094,21 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
 std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs(
     const TogglesState& toggles) const {
 #ifdef DAWN_USE_AGILITY_SDK
+    return EnumerateSubgroupMatrixConfigs(
+        GetDeviceInfo().linAlgWaveMatrixMultiplySupports, mVendorId, mDeviceId,
+        IsFeatureSupportedWithToggles(wgpu::FeatureName::ShaderF16, toggles));
+#else
+    return {};
+#endif  // DAWN_USE_AGILITY_SDK
+}
+
+#ifdef DAWN_USE_AGILITY_SDK
+// static
+std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs(
+    std::span<const D3D12DeviceInfo::LinAlgWMMSupport> supports,
+    uint32_t vendorId,
+    uint32_t deviceId,
+    bool supportsShaderF16) {
     auto ToWgpuType =
         [](D3D12_LINEAR_ALGEBRA_DATATYPE dataType) -> wgpu::SubgroupMatrixComponentType {
         switch (dataType) {
@@ -1126,9 +1155,13 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
         DAWN_UNREACHABLE();
     };
 
+    auto IsMultipleOf = [](const SubgroupMatrixConfig& a, const SubgroupMatrixConfig& b) {
+        return a.M % b.M == 0 && a.N % b.N == 0 && a.K % b.K == 0;
+    };
+
     std::vector<SubgroupMatrixConfig> subgroupMatrixConfigs;
 
-    for (auto& wmms : GetDeviceInfo().linAlgWaveMatrixMultiplySupports) {
+    for (const auto& wmms : supports) {
         DAWN_ASSERT(wmms.Inputs.MatrixAComponentType == wmms.Inputs.MatrixBComponentType);
         auto dataTypeAB = wmms.Inputs.MatrixAComponentType;
         auto dataTypeAcc = wmms.Inputs.AccumulatorComponentType;
@@ -1146,36 +1179,95 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
             continue;
         }
 
-        if (gpu_info::IsMicrosoftWARP(mVendorId, mDeviceId)) {
-            // On WARP 1.65535.20-preview, CheckFeatureSupport returns shapes for SINT8 and UINT8,
-            // even though these types are not supported.
-            // TODO(crbug.com/527049636): Remove once this is fixed in WARP.
-            if (ByteSize(dataTypeAB) == 1 || ByteSize(dataTypeAcc) == 1) {
-                continue;
-            }
+        // Disable SINT8 and UINT8 until Tint's HLSL backend supports them.
+        // TODO(crbug.com/512455144): Support 8-bit subgroup matrix loads from workgroup memory in
+        // the HLSL writer.
+
+        //  Once supported, keep this check only for WARP 1.65535.20-preview, which incorrectly
+        //  reports these shapes.
+        // TODO(crbug.com/527049636): Remove the WARP workaround once it is fixed in WARP.
+        if (ByteSize(dataTypeAB) == 1 || ByteSize(dataTypeAcc) == 1) {
+            continue;
         }
 
-        if (!IsFeatureSupportedWithToggles(wgpu::FeatureName::ShaderF16, toggles)) {
+        if (!supportsShaderF16) {
             if (IsFloat(dataTypeAB) || IsFloat(dataTypeAcc)) {
                 continue;
             }
         }
 
-        for (auto& shape : wmms.Shapes) {
+        DAWN_ASSERT(IsPowerOfTwo(wmms.Inputs.WaveSize));
+        for (const auto& shape : wmms.Shapes) {
             SubgroupMatrixConfig config;
             config.M = shape.M;
             config.N = shape.N;
             config.K = shape.K;
             config.componentType = ToWgpuType(dataTypeAB);
             config.resultComponentType = ToWgpuType(dataTypeAcc);
-            subgroupMatrixConfigs.push_back(config);
+            config.minSubgroupSize = wmms.Inputs.WaveSize;
+            config.maxSubgroupSize = wmms.Inputs.WaveSize;
+
+            // D3D12 reports the base shape(s) for each wave size, and automatically decomposes any
+            // multiple of a base shape into native ops. Therefore, when comparing `config` at the
+            // current wave size against a previously added `found` config with consecutive/adjacent
+            // power-of-two subgroup sizes:
+            // - If `config` is a multiple of `found`, `config` is also supported across `found`'s
+            //   subgroup size range, so extend `config.minSubgroupSize` down to
+            //   `found.minSubgroupSize`. E.g. on WARP, curr is 8x8x4 range [8,8], found is 4x4x4
+            //   range [4,4], extend 8x8x4's range to [4,8].
+            // - If `found` is a multiple of `config`, `found` is also supported at the current wave
+            //   size, so extend `found.maxSubgroupSize` up to `wmms.Inputs.WaveSize`. (Handled for
+            //   completeness; e.g. if curr is 4x4x4 range [8,8] and found is 8x8x4 range [4,4],
+            //   extend 8x8x4's range to [4,8].)
+            // - If both are true (`found` and `config` have the exact same shape) and their ranges
+            //   merged, do not insert a duplicate `config`. E.g. on AMD, curr is 16x16x16 range
+            //   [64,64], found is 16x16x16 range [32,32], extend found's range to [32,64] and do
+            //   not add curr.
+            //
+            // Note 1: This depends on `supports` being ordered by non-decreasing WaveSize for each
+            // type pair (asserted below).
+            //
+            // Note 2: The search is O(n), but n is typically small (e.g. 6 on AMD, 14 on WARP), and
+            // this is only performed once at startup.
+            //
+            // TODO(crbug.com/567996254): Remove all this once we can use the Enumeration API
+            bool addConfig = true;
+            for (auto it = subgroupMatrixConfigs.rbegin(); it != subgroupMatrixConfigs.rend();
+                 ++it) {
+                SubgroupMatrixConfig& found = *it;
+                // Skip non-matching type pair
+                if (found.componentType != config.componentType ||
+                    found.resultComponentType != config.resultComponentType) {
+                    continue;
+                }
+
+                const bool configIsMultipleOfFound = IsMultipleOf(config, found);
+                const bool foundIsMultipleOfConfig = IsMultipleOf(found, config);
+
+                if (configIsMultipleOfFound) {
+                    if (found.maxSubgroupSize >= config.minSubgroupSize / 2) {
+                        config.minSubgroupSize =
+                            std::min(config.minSubgroupSize, found.minSubgroupSize);
+                    }
+                }
+                if (foundIsMultipleOfConfig) {
+                    DAWN_ASSERT(wmms.Inputs.WaveSize >= found.maxSubgroupSize);
+                    if (found.maxSubgroupSize >= wmms.Inputs.WaveSize / 2) {
+                        found.maxSubgroupSize = wmms.Inputs.WaveSize;
+                        if (DAWN_LIKELY(configIsMultipleOfFound)) {
+                            addConfig = false;
+                        }
+                    }
+                }
+            }
+            if (addConfig) {
+                subgroupMatrixConfigs.push_back(config);
+            }
         }
     }
 
     return subgroupMatrixConfigs;
-#else
-    return {};
-#endif  // DAWN_USE_AGILITY_SDK
 }
+#endif  // DAWN_USE_AGILITY_SDK
 
 }  // namespace dawn::native::d3d12

@@ -61,33 +61,31 @@ S v_10(uint start_byte_offset) {
 }
 void tint_store_and_preserve_padding(S value_param[4]) {
   {
-    uint v_16 = 0u;
-    v_16 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_17 = v_16;
-      if ((v_17 >= 4u)) {
+      uint v_16 = idx;
+      if ((v_16 >= 4u)) {
         break;
       }
-      tint_store_and_preserve_padding_1(uint[1](v_17), value_param[v_17]);
+      tint_store_and_preserve_padding_1(uint[1](v_16), value_param[v_16]);
       {
-        v_16 = (v_17 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
 }
-S[4] v_18(uint start_byte_offset) {
+S[4] v_17(uint start_byte_offset) {
   S a[4] = S[4](S(0, 0u, f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf)), tint_pad16_init, tint_pad16_init, 0, 0u, 0u, 0u, tint_pad16_init, tint_pad16_init, tint_pad16_init), S(0, 0u, f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf)), tint_pad16_init, tint_pad16_init, 0, 0u, 0u, 0u, tint_pad16_init, tint_pad16_init, tint_pad16_init), S(0, 0u, f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf)), tint_pad16_init, tint_pad16_init, 0, 0u, 0u, 0u, tint_pad16_init, tint_pad16_init, tint_pad16_init), S(0, 0u, f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf)), tint_pad16_init, tint_pad16_init, 0, 0u, 0u, 0u, tint_pad16_init, tint_pad16_init, tint_pad16_init));
   {
-    uint v_19 = 0u;
-    v_19 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_20 = v_19;
-      if ((v_20 >= 4u)) {
+      uint v_18 = idx;
+      if ((v_18 >= 4u)) {
         break;
       }
-      a[v_20] = v_10((start_byte_offset + (v_20 * 128u)));
+      a[v_18] = v_10((start_byte_offset + (v_18 * 128u)));
       {
-        v_19 = (v_20 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -95,7 +93,7 @@ S[4] v_18(uint start_byte_offset) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_store_and_preserve_padding(v_18(0u));
+  tint_store_and_preserve_padding(v_17(0u));
   tint_store_and_preserve_padding_1(uint[1](1u), v_10(256u));
   v_1.inner[3].m = v_2(264u);
   v_1.inner[1].m[0] = tint_bitcast_to_16bit(v.inner[1u].xy).ywxz;

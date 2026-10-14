@@ -43,6 +43,9 @@ struct State {
     /// The IR module.
     Module& ir;
 
+    /// The options.
+    const PreservePaddingConfig& options;
+
     /// The IR builder.
     Builder b{ir};
 
@@ -57,8 +60,10 @@ struct State {
 
     /// Process the module.
     void Process() {
-        // Find host-visible stores of types that contain padding bytes.
+        // Find host-visible stores of types that contain padding bytes and workgroup buffer_view
+        // calls.
         Vector<Store*, 8> worklist;
+        Vector<Usage, 64> buffer_view_worklist;
         for (auto inst : ir.Instructions()) {
             if (auto* store = inst->As<Store>()) {
                 auto* ptr = store->To()->Type()->As<core::type::Pointer>();
@@ -66,7 +71,56 @@ struct State {
                     ContainsPadding(ptr->StoreType())) {
                     worklist.Push(store);
                 }
+            } else if (options.workgroup_buffer_view) {
+                if (auto* call = inst->As<CoreBuiltinCall>()) {
+                    if (call->Func() == BuiltinFn::kBufferView ||
+                        call->Func() == BuiltinFn::kBufferArrayView) {
+                        if (call->Result()->Type()->As<core::type::Pointer>()->AddressSpace() ==
+                            AddressSpace::kWorkgroup) {
+                            for (auto usage : call->Result()->UsagesSorted()) {
+                                buffer_view_worklist.Push(usage);
+                            }
+                        }
+                    }
+                }
             }
+        }
+
+        // Trace the buffer_view calls to find stores whose padding needs preserved.
+        Hashset<Store*, 8> seen_stores;
+        while (!buffer_view_worklist.IsEmpty()) {
+            auto usage = buffer_view_worklist.Pop();
+            auto* inst = usage.instruction;
+            tint::Switch(
+                inst,
+                [&](Store* store) {
+                    auto* ptr = store->To()->Type()->As<core::type::Pointer>();
+                    TINT_IR_ASSERT(ir, usage.operand_index == 0);
+                    if (!seen_stores.Contains(store) && ContainsPadding(ptr->StoreType())) {
+                        worklist.Push(store);
+                        // We might reach this store multiple times. Only add it to the worklist
+                        // once.
+                        seen_stores.Add(store);
+                    }
+                },
+                [&](UserCall* call) {
+                    // Need to look through called functions.
+                    auto* target = call->Target();
+                    size_t param_index = usage.operand_index - call->ArgsOperandOffset();
+                    auto* param = target->Params()[param_index];
+                    for (auto param_use : param->UsagesSorted()) {
+                        buffer_view_worklist.Push(param_use);
+                    }
+                },
+                [&](Default) {
+                    // Only keep tracing if we're still following a pointer.
+                    if (inst->Results().Length() == 1 &&
+                        inst->Result()->Type()->Is<core::type::Pointer>()) {
+                        for (auto inst_usage : inst->Result()->UsagesSorted()) {
+                            buffer_view_worklist.Push(inst_usage);
+                        }
+                    }
+                });
         }
 
         // Replace the stores we found with calls to helper functions that decompose the accesses.
@@ -115,6 +169,7 @@ struct State {
     /// @returns the instruction that performs the store
     Instruction* MakeStore(Value* to, Value* value) {
         auto* store_type = value->Type();
+        const auto addr_space = to->Type()->As<core::type::Pointer>()->AddressSpace();
 
         // If there are no padding bytes in this type, just use a regular store instruction.
         if (!ContainsPadding(store_type)) {
@@ -124,7 +179,7 @@ struct State {
         // The type contains padding bytes, so call a helper function that decomposes the accesses.
         auto* helper = helpers.GetOrAdd(store_type, [&] {
             auto* func = b.Function("tint_store_and_preserve_padding", ty.void_());
-            auto* target = b.FunctionParam("target", ty.ptr(storage, store_type));
+            auto* target = b.FunctionParam("target", ty.ptr(addr_space, store_type));
             auto* value_param = b.FunctionParam("value_param", store_type);
             func->SetParams({target, value_param});
 
@@ -133,7 +188,8 @@ struct State {
                     store_type,  //
                     [&](const core::type::Array* arr) {
                         b.LoopRange(0_u, u32(arr->ConstantCount().value()), 1_u, [&](Value* idx) {
-                            auto* el_ptr = b.Access(ty.ptr(storage, arr->ElemType()), target, idx);
+                            auto* el_ptr =
+                                b.Access(ty.ptr(addr_space, arr->ElemType()), target, idx);
                             auto* el_value = b.Access(arr->ElemType(), value_param, idx);
                             MakeStore(el_ptr, el_value);
                         });
@@ -141,14 +197,14 @@ struct State {
                     [&](const core::type::Matrix* mat) {
                         for (uint32_t i = 0; i < mat->Columns(); i++) {
                             auto* col_ptr =
-                                b.Access(ty.ptr(storage, mat->ColumnType()), target, u32(i));
+                                b.Access(ty.ptr(addr_space, mat->ColumnType()), target, u32(i));
                             auto* col_value = b.Access(mat->ColumnType(), value_param, u32(i));
                             MakeStore(col_ptr, col_value);
                         }
                     },
                     [&](const core::type::Struct* str) {
                         for (auto* member : str->Members()) {
-                            auto* sub_ptr = b.Access(ty.ptr(storage, member->Type()), target,
+                            auto* sub_ptr = b.Access(ty.ptr(addr_space, member->Type()), target,
                                                      u32(member->Index()));
                             auto* sub_value =
                                 b.Access(member->Type(), value_param, u32(member->Index()));
@@ -168,10 +224,10 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> PreservePadding(Module& ir) {
+Result<SuccessType> PreservePadding(Module& ir, const PreservePaddingConfig& options) {
     core::ir::AssertValid(ir, "before core.PreservePadding");
 
-    State{ir}.Process();
+    State{ir, options}.Process();
 
     return Success;
 }

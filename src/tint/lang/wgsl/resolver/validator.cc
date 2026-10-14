@@ -47,6 +47,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/string.h"
 #include "src/tint/lang/core/type/subgroup_matrix.h"
 #include "src/tint/lang/core/type/swizzle_view.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
@@ -180,15 +181,13 @@ Validator::Validator(
     SemHelper& sem,
     const wgsl::Extensions& enabled_extensions,
     const wgsl::AllowedFeatures& allowed_features,
-    const Hashmap<const core::type::Type*, const Source*, 8>& atomic_composite_info,
-    Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts)
+    const Hashmap<const core::type::Type*, const Source*, 8>& atomic_composite_info)
     : symbols_(builder->Symbols()),
       diagnostics_(builder->Diagnostics()),
       sem_(sem),
       enabled_extensions_(enabled_extensions),
       allowed_features_(allowed_features),
-      atomic_composite_info_(atomic_composite_info),
-      valid_type_storage_layouts_(valid_type_storage_layouts) {
+      atomic_composite_info_(atomic_composite_info) {
     // Set default severities for filterable diagnostic rules.
     diagnostic_filters_.Set(wgsl::CoreDiagnosticRule::kDerivativeUniformity,
                             wgsl::DiagnosticSeverity::kError);
@@ -408,8 +407,17 @@ bool Validator::SampledTexture(const core::type::SampledTexture* t, const Source
 
 bool Validator::MultisampledTexture(const core::type::MultisampledTexture* t,
                                     const Source& source) const {
-    if (t->Dim() != core::type::TextureDimension::k2d) {
-        AddError(source) << "only 2d multisampled textures are supported";
+    if (t->Dim() != core::type::TextureDimension::k2d &&
+        t->Dim() != core::type::TextureDimension::k2dArray) {
+        AddError(source) << "only 2d and 2d_array multisampled textures are supported";
+        return false;
+    }
+
+    if (t->Dim() == core::type::TextureDimension::k2dArray &&
+        !allowed_features_.features.contains(wgsl::LanguageFeature::kMultisampledArrayTextures)) {
+        AddError(source) << "use of " << style::Type("texture_multisampled_2d_array")
+                         << " requires the " << style::Code("multisampled_array_textures")
+                         << " language feature, which is not allowed in the current environment";
         return false;
     }
 
@@ -576,147 +584,6 @@ bool Validator::VariableInitializer(const ast::Variable* v,
     return true;
 }
 
-bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
-                                   core::AddressSpace address_space,
-                                   Source source) const {
-    // https://gpuweb.github.io/gpuweb/wgsl/#storage-class-layout-constraints
-
-    auto is_uniform_struct_or_array = [address_space](const core::type::Type* ty) {
-        return address_space == core::AddressSpace::kUniform &&
-               ty->IsAnyOf<sem::Array, core::type::Struct>();
-    };
-
-    auto is_uniform_struct = [address_space](const core::type::Type* ty) {
-        return address_space == core::AddressSpace::kUniform && ty->Is<core::type::Struct>();
-    };
-
-    auto required_alignment_of = [&](const core::type::Type* ty) {
-        uint32_t actual_align = ty->Align();
-        uint32_t required_align = actual_align;
-        if (is_uniform_struct_or_array(ty) &&
-            !allowed_features_.features.contains(
-                wgsl::LanguageFeature::kUniformBufferStandardLayout)) {
-            required_align = tint::RoundUp(16u, actual_align);
-        }
-        return required_align;
-    };
-
-    auto member_name_of = [](const core::type::StructMember* sm) { return sm->Name().Name(); };
-
-    // Only validate the [type + address space] once
-    if (!valid_type_storage_layouts_.Add(TypeAndAddressSpace{store_ty, address_space})) {
-        return true;
-    }
-
-    auto note_usage = [&] {
-        AddNote(source) << style::Type(store_ty->FriendlyName()) << " used in address space "
-                        << style::Enum(address_space) << " here";
-    };
-
-    if (auto* str = store_ty->As<sem::Struct>()) {
-        auto& str_source = str->Declaration()->name->source;
-        for (size_t i = 0; i < str->Members().Length(); ++i) {
-            auto* const m = str->Members()[i];
-            uint32_t required_align = required_alignment_of(m->Type());
-
-            // Recurse into the member type.
-            if (!AddressSpaceLayout(m->Type(), address_space, m->Declaration()->type->source)) {
-                AddNote(str_source) << "see layout of struct:\n" << str->Layout();
-                note_usage();
-                return false;
-            }
-
-            // For uniform buffers, validate that the number of bytes between the previous member of
-            // type struct and the current is a multiple of 16 bytes.
-            auto* const prev_member = (i == 0) ? nullptr : str->Members()[i - 1];
-            if (prev_member && is_uniform_struct(prev_member->Type()) &&
-                !allowed_features_.features.contains(
-                    wgsl::LanguageFeature::kUniformBufferStandardLayout)) {
-                const uint32_t prev_to_curr_offset = m->Offset() - prev_member->Offset();
-                if (prev_to_curr_offset % 16 != 0) {
-                    AddError(m->Declaration()->source)
-                        << style::Enum("uniform")
-                        << " storage requires that the number of bytes between the start of the "
-                           "previous member of type struct and the current member be a "
-                           "multiple of 16 bytes, but there are currently "
-                        << prev_to_curr_offset << " bytes between "
-                        << style::Variable(member_name_of(prev_member)) << " and "
-                        << style::Variable(member_name_of(m)) << ". Consider setting "
-                        << style::Attribute("@align") << style::Code("(16)") << " on this member";
-
-                    AddNote(str_source) << "see layout of struct:\n" << str->Layout();
-
-                    auto* prev_member_str = prev_member->Type()->As<sem::Struct>();
-                    AddNote(prev_member_str->Declaration()->name->source)
-                        << "and layout of previous member struct:\n"
-                        << prev_member_str->Layout();
-                    note_usage();
-                    return false;
-                }
-            }
-
-            // If an alignment was explicitly specified, we need to validate that it satisfies the
-            // alignment requirement of the address space.
-            auto* align_attr =
-                ast::GetAttribute<ast::StructMemberAlignAttribute>(m->Declaration()->attributes);
-            if (align_attr != nullptr) {
-                auto align = sem_.GetVal(align_attr->expr)->ConstantValue()->ValueAs<uint32_t>();
-                if (align % required_align != 0) {
-                    AddError(align_attr->expr->source)
-                        << "alignment must be a multiple of " << style::Literal(required_align)
-                        << " bytes for the " << style::Enum(address_space) << " address space";
-                    note_usage();
-                    return false;
-                }
-            }
-        }
-    }
-
-    // For uniform buffer array members, validate that array elements are aligned to 16 bytes
-    if (auto* arr = store_ty->As<sem::Array>()) {
-        // Recurse into the element type.
-        // TODO(crbug.com/tint/1388): Ideally we'd pass the source for nested element type here, but
-        // we can't easily get that from the semantic node. We should consider recursing through the
-        // AST type nodes instead.
-        if (!AddressSpaceLayout(arr->ElemType(), address_space, source)) {
-            return false;
-        }
-
-        if (address_space == core::AddressSpace::kUniform &&
-            !allowed_features_.features.contains(
-                wgsl::LanguageFeature::kUniformBufferStandardLayout)) {
-            // We already validated that this array member is itself aligned to 16 bytes above, so
-            // we only need to validate that stride is a multiple of 16 bytes.
-            if (arr->ImplicitStride() % 16 != 0) {
-                // Since WGSL has no stride attribute, try to provide a useful hint for how the
-                // shader author can resolve the issue.
-                StyledText hint;
-                if (arr->ElemType()->Is<core::type::Scalar>()) {
-                    hint << "Consider using a vector or struct as the element type instead.";
-                } else if (auto* vec = arr->ElemType()->As<core::type::Vector>();
-                           vec && vec->Type()->Size() == 4) {
-                    hint << "Consider using a vec4 instead.";
-                } else if (arr->ElemType()->Is<sem::Struct>()) {
-                    hint << "Consider using the " << style::Attribute("@size")
-                         << " attribute on the last struct member.";
-                } else {
-                    hint << "Consider wrapping the element type in a struct and using the "
-                         << style::Attribute("@size") << " attribute.";
-                }
-                AddError(source) << style::Enum("uniform")
-                                 << " storage requires that array elements are aligned to 16 "
-                                    "bytes, but array element of type "
-                                 << style::Type(arr->ElemType()->FriendlyName())
-                                 << " has a stride of " << arr->ImplicitStride() << " bytes. "
-                                 << hint;
-                return false;
-            }
-        }
-    }
-
-    return true;
-}
-
 bool Validator::LocalVariable(const sem::Variable* local) const {
     auto* decl = local->Declaration();
     return Switch(
@@ -729,9 +596,9 @@ bool Validator::LocalVariable(const sem::Variable* local) const {
                 return false;
             }
             return Var(local);
-        },                                            //
-        [&](const ast::Let*) { return Let(local); },  //
-        [&](const ast::Const*) { return true; },      //
+        },                                                //
+        [&](const ast::Let*) { return Let(local); },      //
+        [&](const ast::Const*) { return Const(local); },  //
         TINT_ICE_ON_NO_MATCH);
 }
 
@@ -942,7 +809,14 @@ bool Validator::Override(const sem::GlobalVariable* v,
     return true;
 }
 
-bool Validator::Const(const sem::Variable*) const {
+bool Validator::Const(const sem::Variable* v) const {
+    auto* decl = v->Declaration();
+    auto* storage_ty = v->Type()->UnwrapRef();
+    if (!storage_ty->IsConstructible()) {
+        AddError(decl->source) << sem_.TypeNameOf(storage_ty) << " cannot be used as the type of a "
+                               << style::Keyword("const");
+        return false;
+    }
     return true;
 }
 
@@ -1231,6 +1105,25 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
             }
             if (stage != ast::PipelineStage::kNone &&
                 !(stage == ast::PipelineStage::kFragment && is_input)) {
+                is_stage_mismatch = true;
+            }
+            break;
+        }
+        case core::BuiltinValue::kViewIndex: {
+            if (!enabled_extensions_.Contains(wgsl::Extension::kViewInstancing)) {
+                AddError(attr->source)
+                    << "use of " << style::Attribute("@builtin")
+                    << style::Code("(", style::Enum(builtin), ")")
+                    << " requires enabling extension " << style::Code("view_instancing");
+                return false;
+            }
+            if (!type->Is<core::type::U32>()) {
+                err_builtin_type("u32");
+                return false;
+            }
+            if (stage != ast::PipelineStage::kNone && !((stage == ast::PipelineStage::kVertex ||
+                                                         stage == ast::PipelineStage::kFragment) &&
+                                                        is_input)) {
                 is_stage_mismatch = true;
             }
             break;
@@ -2001,9 +1894,7 @@ bool Validator::BuiltinCall(const sem::Call* call) const {
     // The `print()` builtin requires the chromium_print language feature to be available.
     if (auto* fn = call->Target()->As<sem::BuiltinFn>()) {
         if (fn->Fn() == wgsl::BuiltinFn::kPrint) {
-            if (!allowed_features_.features.contains(wgsl::LanguageFeature::kChromiumPrint)) {
-                AddError(call->Declaration()->source) << "the 'chromium_print' language feature is "
-                                                         "not allowed in the current environment";
+            if (!CheckChromiumPrintEnabled(call->Declaration()->source)) {
                 return false;
             }
         }
@@ -2565,6 +2456,25 @@ bool Validator::CheckU8Enabled(const Source& source) const {
         AddError(source) << style::Type("u8") << " type used without "
                          << style::Code("chromium_experimental_subgroup_matrix")
                          << " extension enabled";
+        return false;
+    }
+    return true;
+}
+
+bool Validator::CheckChromiumPrintEnabled(const Source& source) const {
+    if (!allowed_features_.features.contains(wgsl::LanguageFeature::kChromiumPrint)) {
+        AddError(source) << "the 'chromium_print' language feature is not allowed in the current "
+                            "environment";
+        return false;
+    }
+    return true;
+}
+
+bool Validator::InterpolatedStringElement(const sem::ValueExpression* expr) const {
+    auto* ty = expr->Type();
+    if (!ty->IsAnyOf<core::type::String, core::type::Scalar, core::type::Vector>()) {
+        AddError(expr->Declaration()->source)
+            << sem_.TypeNameOf(expr->Type()) << " cannot be interpolated in a string";
         return false;
     }
     return true;
@@ -3557,10 +3467,6 @@ bool Validator::CheckTypeAccessAddressSpace(const core::type::Type* store_ty,
                                             core::Access access,
                                             core::AddressSpace address_space,
                                             const Source& source) const {
-    if (!AddressSpaceLayout(store_ty, address_space, source)) {
-        return false;
-    }
-
     switch (address_space) {
         case core::AddressSpace::kPixelLocal:
             if (auto* str = store_ty->As<sem::Struct>()) {

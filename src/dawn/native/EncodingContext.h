@@ -38,6 +38,7 @@
 #include "src/dawn/native/CommandAllocator.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/ErrorData.h"
+#include "src/dawn/native/ErrorSink.h"
 #include "src/dawn/native/IndirectDrawMetadata.h"
 #include "src/dawn/native/PassResourceUsageTracker.h"
 #include "src/dawn/native/dawn_platform.h"
@@ -90,12 +91,12 @@ class EncodingContext {
 
     // Functions to set current encoder state
     void EnterPass(const ApiObjectBase* passEncoder);
-    MaybeError ExitRenderPass(const ApiObjectBase* passEncoder,
-                              RenderPassResourceUsageTracker usageTracker,
-                              CommandEncoder* commandEncoder,
-                              IndirectDrawMetadata indirectDrawMetadata);
+    MaybeUnknownError ExitRenderPass(const ApiObjectBase* passEncoder,
+                                     RenderPassResourceUsageTracker usageTracker,
+                                     CommandEncoder* commandEncoder,
+                                     IndirectDrawMetadata indirectDrawMetadata);
     void ExitComputePass(const ApiObjectBase* passEncoder, ComputePassResourceUsage usages);
-    MaybeError Finish();
+    MaybeUnknownError Finish();
 
     // Called when a pass encoder is deleted. Provides an opportunity to clean up if it's the
     // mCurrentEncoder.
@@ -112,9 +113,11 @@ class EncodingContext {
 
   private:
     // Functions to handle encoder errors
-    void HandleError(std::unique_ptr<InternalError> error);
+    void HandleError(std::unique_ptr<UnknownError> error);
 
-    inline bool ConsumedError(MaybeError maybeError) {
+    template <typename E>
+        requires(IsMaybeError<E>)
+    inline bool ConsumedError(E maybeError) {
         if (maybeError.IsError()) [[unlikely]] {
             HandleError(maybeError.AcquireError());
             return true;
@@ -122,10 +125,11 @@ class EncodingContext {
         return false;
     }
 
-    template <typename... Args>
-    inline bool ConsumedError(MaybeError maybeError, const char* formatStr, const Args&... args) {
+    template <typename E, typename... Args>
+        requires(IsMaybeError<E>)
+    inline bool ConsumedError(E maybeError, const char* formatStr, const Args&... args) {
         if (maybeError.IsError()) [[unlikely]] {
-            std::unique_ptr<InternalError> error = maybeError.AcquireError();
+            auto error = maybeError.AcquireError();
             if (error->GetType() == InternalErrorType::Validation) {
                 std::string out;
                 absl::UntypedFormatSpec format(formatStr);
@@ -133,7 +137,7 @@ class EncodingContext {
                     error->AppendContext(std::move(out));
                 } else {
                     error->AppendContext(
-                        absl::StrFormat("[Failed to format error message: \"%s\"].", formatStr));
+                        absl::StrFormat("[Failed to format error: \"%s\"].", formatStr));
                 }
             }
             HandleError(std::move(error));
@@ -142,7 +146,7 @@ class EncodingContext {
         return false;
     }
 
-    inline MaybeError ValidateCanEncodeOn(const ApiObjectBase* encoder) {
+    inline MaybeValError ValidateCanEncodeOn(const ApiObjectBase* encoder) {
         if (encoder != mCurrentEncoder) [[unlikely]] {
             switch (mStatus) {
                 case Status::ErrorAtCreation:
@@ -222,7 +226,7 @@ class EncodingContext {
     std::vector<std::string_view> mDebugGroupLabels;
 
     Status mStatus = Status::Open;
-    std::unique_ptr<InternalError> mError;
+    std::unique_ptr<UnknownError> mError;
 };
 
 }  // namespace dawn::native

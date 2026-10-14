@@ -411,6 +411,9 @@ void ValidationTest::SetUp(const wgpu::InstanceDescriptor* nativeDesc,
                                        << self->mDeviceErrorMessage                          //
                                        << "\nsecond one is:\n"                               //
                                        << message;
+            ASSERT_EQ(std::string_view(message).find("[Failed to format error:"), std::string::npos)
+                << "Error message contains an absl::FormatUntyped failure:\n"
+                << message;
 
             self->mDeviceErrorMessage = message;
             if (self->mExpectError) {

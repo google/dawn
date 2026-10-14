@@ -20,7 +20,7 @@ package {{ kotlin_package }}
 
 {% set ns = namespace(callback_count = 0, default_count = 0) %}
 {%- set members = [] -%}
-{%- for member in kotlin_record_members(structure.members, structure.name.get()) -%}
+{%- for member in kotlin_record_members(structure.members) -%}
     {%- if member.name.camelCase().endswith('Callback') -%}
         {%- set ns.callback_count = ns.callback_count + 1 -%}
     {%- endif -%}
@@ -35,8 +35,7 @@ package {{ kotlin_package }}
     {%- set ns.default_count = ns.default_count + 1 -%}
 {%- endfor -%}
 
-{%- set struct_config = customize_structures.get(structure.name.get(), {}) -%}
-{%- set graduated_batches = struct_config.get('graduated_batches', []) -%}
+{%- set graduated_batches = structure.graduated_batches | default([]) -%}
 {%- set class_is_experimental = item_is_experimental(structure) == 'True' -%}
 
 {%- set stable_members = [] -%}

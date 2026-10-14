@@ -35,16 +35,15 @@ S v_3(uint start_byte_offset) {
 S[4] v_9(uint start_byte_offset) {
   S a_2[4] = S[4](S(0, mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0), S(0, mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0), S(0, mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0), S(0, mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0));
   {
-    uint v_10 = 0u;
-    v_10 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_11 = v_10;
-      if ((v_11 >= 4u)) {
+      uint v_10 = idx;
+      if ((v_10 >= 4u)) {
         break;
       }
-      a_2[v_11] = v_3((start_byte_offset + (v_11 * 128u)));
+      a_2[v_10] = v_3((start_byte_offset + (v_10 * 128u)));
       {
-        v_10 = (v_11 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -56,6 +55,6 @@ void main() {
   b(v_3(256u));
   c(v_2(272u));
   d(uintBitsToFloat(v_1.inner[2u].xyz).zxy);
-  uvec4 v_12 = v_1.inner[2u];
-  e(uintBitsToFloat(v_12.z));
+  uvec4 v_11 = v_1.inner[2u];
+  e(uintBitsToFloat(v_11.z));
 }

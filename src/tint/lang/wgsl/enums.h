@@ -128,6 +128,7 @@ enum class Extension : uint8_t {
     kPrimitiveIndex,
     kSubgroupSizeControl,
     kSubgroups,
+    kViewInstancing,
 };
 
 /// @param value the enum value
@@ -163,6 +164,7 @@ constexpr std::string_view kExtensionStrings[] = {
     "primitive_index",
     "subgroup_size_control",
     "subgroups",
+    "view_instancing",
 };
 
 /// All extensions
@@ -181,6 +183,7 @@ inline constexpr Extension kAllExtensions[] = {
     Extension::kPrimitiveIndex,
     Extension::kSubgroupSizeControl,
     Extension::kSubgroups,
+    Extension::kViewInstancing,
 };
 
 /// An enumerator of WGSL language features
@@ -197,6 +200,7 @@ enum class LanguageFeature : uint8_t {
     kFragmentDepth,
     kImmediateAddressSpace,
     kLinearIndexing,
+    kMultisampledArrayTextures,
     kPacked4X8IntegerDotProduct,
     kPointerCompositeAccess,
     kReadonlyAndReadwriteStorageTextures,
@@ -231,6 +235,7 @@ constexpr std::string_view kLanguageFeatureStrings[] = {
     "fragment_depth",
     "immediate_address_space",
     "linear_indexing",
+    "multisampled_array_textures",
     "packed_4x8_integer_dot_product",
     "pointer_composite_access",
     "readonly_and_readwrite_storage_textures",
@@ -257,6 +262,7 @@ inline constexpr LanguageFeature kAllLanguageFeatures[] = {
     LanguageFeature::kFragmentDepth,
     LanguageFeature::kImmediateAddressSpace,
     LanguageFeature::kLinearIndexing,
+    LanguageFeature::kMultisampledArrayTextures,
     LanguageFeature::kPacked4X8IntegerDotProduct,
     LanguageFeature::kPointerCompositeAccess,
     LanguageFeature::kReadonlyAndReadwriteStorageTextures,

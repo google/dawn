@@ -50,7 +50,7 @@ Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
     return AcquireRef(new ComputePipeline(device, descriptor));
 }
 
-ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
+ResultOrUnknownError<Extent3D> ComputePipeline::InitializeImpl() {
     if (UsesNumWorkgroups()) {
         mImmediateMask |= GetImmediateBlockBits(offsetof(ComputeImmediates, numWorkgroups),
                                                 sizeof(NumWorkgroupsDimensions));
@@ -184,7 +184,7 @@ PipelineLayoutHandle* ComputePipeline::GetPipelineLayoutHandle() const {
     return mPipelineLayoutHandle.Get();
 }
 
-ComPtr<ID3D12CommandSignature> ComputePipeline::GetDispatchIndirectCommandSignature() {
+const CommandSignature& ComputePipeline::GetDispatchIndirectCommandSignature() {
     if (UsesNumWorkgroups()) {
         return mPipelineLayoutHandle->GetDispatchIndirectCommandSignatureWithNumWorkgroups();
     }

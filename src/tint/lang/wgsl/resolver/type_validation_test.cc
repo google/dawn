@@ -980,6 +980,30 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                          MultisampledTextureDimensionTest,
                          testing::Values(core::type::TextureDimension::k2d));
 
+TEST_F(ResolverTypeValidationTest, MultisampledArrayTextureRequiresLanguageFeature) {
+    GlobalVar(
+        "a",
+        ty.multisampled_texture(Source{{12, 34}}, core::type::TextureDimension::k2dArray, ty.i32()),
+        Group(0_a), Binding(0_a));
+
+    Resolver resolver{this, wgsl::AllowedFeatures{}};
+    EXPECT_FALSE(resolver.Resolve());
+    EXPECT_EQ(resolver.error(),
+              "12:34 error: use of 'texture_multisampled_2d_array' requires the "
+              "'multisampled_array_textures' language feature, which is not allowed in the "
+              "current environment");
+}
+
+TEST_F(ResolverTypeValidationTest, MultisampledArrayTexture) {
+    Require(wgsl::LanguageFeature::kMultisampledArrayTextures);
+    GlobalVar(
+        "a",
+        ty.multisampled_texture(Source{{12, 34}}, core::type::TextureDimension::k2dArray, ty.i32()),
+        Group(0_a), Binding(0_a));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 struct TypeParams {
     builder::ast_type_func_ptr type_func;
     bool is_valid;

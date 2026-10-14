@@ -11,16 +11,15 @@ void func(uint pointer_indices[1]) {
 }
 void main_inner(uint tint_local_index) {
   {
-    uint v = 0u;
-    v = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_1 = v;
-      if ((v_1 >= 4u)) {
+      uint v = idx;
+      if ((v >= 4u)) {
         break;
       }
-      S[v_1] = str(0);
+      S[v] = str(0);
       {
-        v = (v_1 + 1u);
+        idx = (idx + 1u);
       }
     }
   }

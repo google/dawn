@@ -52,7 +52,8 @@ class ComputePipeline final : public ComputePipelineBase {
 
     // Specializations used to JIT pipelines.
     using Specialization = CommonPipelineSpecialization;
-    ResultOrError<PipelineHandles> GetOrCreateSpecializedHandle(Specialization&& specialization);
+    ResultOrUnknownError<PipelineHandles> GetOrCreateSpecializedHandle(
+        Specialization&& specialization);
     bool RequiresSpecialization() const;
 
     void ApplyDynamicState(VkCommandBuffer& commands, const ComputePipeline* prevPipeline) const {}
@@ -64,7 +65,7 @@ class ComputePipeline final : public ComputePipelineBase {
     ~ComputePipeline() override;
     void DestroyImpl(DestroyReason reason) override;
     using ComputePipelineBase::ComputePipelineBase;
-    ResultOrError<Extent3D> InitializeImpl() override;
+    ResultOrUnknownError<Extent3D> InitializeImpl() override;
 
     // Initializes a pipeline for the specialization and stores it in mSpecializations.
     struct SpecializationResult {
@@ -72,7 +73,7 @@ class ComputePipeline final : public ComputePipelineBase {
         Ref<RefCountedVkHandle<VkPipeline>> pipeline;
         Ref<RefCountedVkHandle<VkPipelineLayout>> layout;
     };
-    ResultOrError<SpecializationResult> InitializeSpecialization(
+    ResultOrUnknownError<SpecializationResult> InitializeSpecialization(
         const Specialization& specialization,
         bool buildCacheKey);
 

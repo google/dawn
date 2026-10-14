@@ -1,0 +1,9 @@
+# Enforces that struct/class member fields cannot use a raw pointer (T*) as a
+# template argument of any class/struct template (must use raw_ptr<T> instead).
+# By default, the plugin only checks a predefined list of STL/base containers;
+# setting `override_defaults: true` with no `included_types` clears that default
+# allowlist so all class/struct templates are checked unless in `excluded_types`.
+check_raw_ptr_in_container:
+  enabled: true
+  override_defaults: true
+  excluded_types:

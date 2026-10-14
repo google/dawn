@@ -36,7 +36,7 @@
 
 namespace dawn::native {
 
-MaybeError ValidateQuerySetDescriptor(DeviceBase* device, const QuerySetDescriptor* descriptor);
+MaybeValError ValidateQuerySetDescriptor(DeviceBase* device, const QuerySetDescriptor* descriptor);
 
 uint32_t ToQueryStorageSize(QueryIndex count);
 inline constexpr uint32_t kSingleQueryStorageSize = 8;  // size of a uint64_t
@@ -54,7 +54,7 @@ class QuerySetBase : public ApiObjectBase {
     bool AreAllQueriesAvailable(QueryIndex first, QueryIndex count) const;
     void MarkQueryAvailable(QueryIndex index);
 
-    MaybeError ValidateCanUseInSubmitNow() const;
+    MaybeValError ValidateCanUseInSubmitNow() const;
 
     // Dawn API
     void APIDestroy();

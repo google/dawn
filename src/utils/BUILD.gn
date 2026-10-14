@@ -297,25 +297,24 @@ config("dawn_warnings") {
   cflags_objcc = cflags_cc
 }
 
-# TODO(crbug.com/523358231): Some targets pick up this config multiple times and
-# receive all of the warning flags repeatedly, for example they're repeated
-# three times in obj/src/dawn/native/sources/Device.o. Can this be avoided?
-config("internal_config") {
+# Include paths and defines required by any code that includes src/utils
+# headers, either directly or transitively (e.g. through Tint headers).
+#
+# Unlike :utils_config, this doesn't carry Dawn's warning configuration, so it
+# is safe to propagate to targets outside of Dawn (e.g. Chromium targets that
+# include Tint headers). See "tint_public_config" in src/tint/BUILD.gn.
+config("utils_public_config") {
   include_dirs = [ "${dawn_root}" ]
 
-  defines = []
-  configs = [ ":dawn_warnings" ]
-
-  if (is_clang && dawn_standalone && !is_wasm) {
-    configs += [ ":raw_ptr_check" ]
-  }
+  defines = [ "DAWN_HAVE_UTILS_BUILD_CONFIG" ]
 
   # Use Chromium's dcheck_always_on when available so that we respect it when
   # running tests on the GPU builders. If we are not building with Chromium, we
   # ignore dcheck_always_on and rely on either dawn_always_assert or the build
   # type (is_debug) to enable asserts.
-  if (dawn_always_assert || (build_with_chromium && dcheck_always_on) ||
-      is_debug || use_fuzzing_engine) {
+  if (dawn_always_assert ||
+      (build_with_chromium && (dcheck_always_on || use_fuzzing_engine)) ||
+      is_debug) {
     defines += [ "DAWN_ENABLE_ASSERTS" ]
   }
 
@@ -335,6 +334,20 @@ config("internal_config") {
   # Inject it from the build system
   if (is_chromeos) {
     defines += [ "DAWN_OS_CHROMEOS" ]
+  }
+}
+
+# TODO(crbug.com/523358231): Some targets pick up this config multiple times and
+# receive all of the warning flags repeatedly, for example they're repeated
+# three times in obj/src/dawn/native/sources/Device.o. Can this be avoided?
+config("utils_config") {
+  configs = [
+    ":utils_public_config",
+    ":dawn_warnings",
+  ]
+
+  if (is_clang && dawn_standalone && !is_wasm) {
+    configs += [ ":raw_ptr_check" ]
   }
 }
 
@@ -361,7 +374,7 @@ static_library("utils") {
     sources += [ "windows_with_undefs.h" ]
   }
 
-  public_configs = [ ":internal_config" ]
+  public_configs = [ ":utils_config" ]
   public_deps = [ "${dawn_root}/src/dawn/partition_alloc:raw_ptr" ]
 }
 
@@ -370,10 +383,11 @@ source_set("crash_handler") {
     "crash_handler.cc",
     "crash_handler.h",
   ]
-  public_configs = [ ":internal_config" ]
+  public_configs = [ ":utils_config" ]
   public_deps = [ "${dawn_abseil_dir}:absl" ]
 }
 
+# Negative compile tests. See dawn_nocompile_source_set for how to write these.
 dawn_nocompile_source_set("nocompile_sources") {
   deps = [ ":utils" ]
   sources = [
@@ -488,21 +502,33 @@ source_set("gmock_and_gtest") {
 #   plugin_arguments: List of arguments to pass to the plugin.
 template("clang_plugin") {
   config(target_name) {
+    forward_variables_from(invoker,
+                           [
+                             "cflags",
+                             "configs",
+                             "inputs",
+                           ])
+    if (!defined(cflags)) {
+      cflags = []
+    }
+
     # -Xclang=arg is mishandled by clang-tidy, so have to use the two-arg style.
-    cflags = [
+    cflags += [
       "-Xclang",
       "-add-plugin",
       "-Xclang",
       "${invoker.plugin}",
     ]
 
-    foreach(flag, invoker.plugin_arguments) {
-      cflags += [
-        "-Xclang",
-        "-plugin-arg-${invoker.plugin}",
-        "-Xclang",
-        "${flag}",
-      ]
+    if (defined(invoker.plugin_arguments)) {
+      foreach(flag, invoker.plugin_arguments) {
+        cflags += [
+          "-Xclang",
+          "-plugin-arg-${invoker.plugin}",
+          "-Xclang",
+          "${flag}",
+        ]
+      }
     }
   }
 }
@@ -512,12 +538,24 @@ clang_plugin("raw_ptr_check") {
   # Defined in <chromium>/tools/clang/raw_ptr_plugin/RawPtrPlugin.cpp
   plugin = "raw-ptr-plugin"
 
+  if (clang_raw_ptr_plugin_config_file != "") {
+    inputs = [ clang_raw_ptr_plugin_config_file ]
+  }
+
   plugin_arguments = [
     "check-raw-ptr-fields",
     "check-raw-ptr-to-stack-allocated",
     "check-raw-ref-fields",
     "check-span-fields",
   ]
+
+  if (enable_check_container_fields) {
+    if (clang_raw_ptr_plugin_config_file != "") {
+      plugin_arguments +=
+          [ "config-path=" +
+            rebase_path(clang_raw_ptr_plugin_config_file, root_build_dir) ]
+    }
+  }
 
   _exclusions = [
     "/include/",

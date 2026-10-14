@@ -47,7 +47,7 @@ class CommandRecordingContext;
 
 class SharedTextureMemory final : public SharedTextureMemoryBase {
   public:
-    static ResultOrError<Ref<SharedTextureMemory>> Create(
+    static ResultOrUnknownError<Ref<SharedTextureMemory>> Create(
         Device* device,
         StringView label,
         const SharedTextureMemoryIOSurfaceDescriptor* descriptor);
@@ -73,11 +73,12 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
 
     ResultOrError<Ref<TextureBase>> CreateTextureImpl(
         const UnpackedPtr<TextureDescriptor>& descriptor) override;
-    MaybeError BeginAccessImpl(TextureBase* texture,
-                               const UnpackedPtr<BeginAccessDescriptor>& descriptor) override;
-    ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,
-                                                     ExecutionSerial lastUsageSerial,
-                                                     UnpackedPtr<EndAccessState>& state) override;
+    MaybeValError BeginAccessImpl(TextureBase* texture,
+                                  const UnpackedPtr<BeginAccessDescriptor>& descriptor) override;
+    ResultOrUnknownError<FenceAndSignalValue> EndAccessImpl(
+        TextureBase* texture,
+        ExecutionSerial lastUsageSerial,
+        UnpackedPtr<EndAccessState>& state) override;
     MaybeError CreateMtlTextures();
 
     CFRef<IOSurfaceRef> mIOSurface;

@@ -170,14 +170,14 @@ void QueueBase::FormatLabel(absl::FormatSink* s) const {
 }
 
 void QueueBase::APISubmit(Span<CommandBufferBase* const> commands) {
-    MaybeError result = SubmitInternal(commands);
+    MaybeUnknownError result = SubmitInternal(commands);
 
     // Destroy the command buffers even if SubmitInternal failed. (crbug.com/dawn/1863)
     for (CommandBufferBase* commandBuffer : commands) {
         commandBuffer->Destroy();
     }
 
-    [[maybe_unused]] bool hadError =
+    std::ignore =
         GetDevice()->ConsumedError(std::move(result), "calling %s.Submit(%s)", this, commands);
 }
 
@@ -315,24 +315,26 @@ void QueueBase::HandleDeviceLoss() {
 void QueueBase::APIWriteBuffer(BufferBase* buffer,
                                uint64_t bufferOffset,
                                Span<const std::byte> data) {
-    auto writeBuffer = [&]() -> MaybeError {
+    auto writeBuffer = [&]() -> MaybeUnknownError {
         DAWN_TRY(WriteBuffer(buffer, bufferOffset, data));
-        return GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands();
+        DAWN_TRY(GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands());
+        return {};
     };
-    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
+    std::ignore = GetDevice()->ConsumedError(
         writeBuffer(), "calling %s.WriteBuffer(%s, (%d bytes), data, (%d bytes))", this, buffer,
         bufferOffset, data.size());
 }
 
-MaybeError QueueBase::WriteBuffer(BufferBase* buffer,
-                                  uint64_t bufferOffset,
-                                  Span<const std::byte> data) {
+MaybeUnknownError QueueBase::WriteBuffer(BufferBase* buffer,
+                                         uint64_t bufferOffset,
+                                         Span<const std::byte> data) {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_TRY(GetDevice()->ValidateObject(this));
     DAWN_TRY(ValidateWriteBuffer(GetDevice(), buffer, bufferOffset, data.size()));
     BufferBase::ScopedUseBuffer scopedUseBuffer;
     DAWN_TRY_ASSIGN(scopedUseBuffer, buffer->ValidateCanUseOnQueueNow());
-    return WriteBufferImpl(buffer, bufferOffset, data);
+    DAWN_TRY(WriteBufferImpl(buffer, bufferOffset, data));
+    return {};
 }
 
 MaybeError QueueBase::WriteBufferImpl(BufferBase* buffer,
@@ -345,19 +347,20 @@ void QueueBase::APIWriteTexture(const TexelCopyTextureInfo* destination,
                                 Span<const std::byte> data,
                                 const TexelCopyBufferLayout* dataLayout,
                                 const Extent3D* writeSize) {
-    auto writeTexture = [&]() -> MaybeError {
+    auto writeTexture = [&]() -> MaybeUnknownError {
         DAWN_TRY(WriteTextureInternal(destination, data, *dataLayout, writeSize));
-        return GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands();
+        DAWN_TRY(GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands());
+        return {};
     };
-    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
-        writeTexture(), "calling %s.WriteTexture(%s, (%u bytes), %s, %s)", this, destination,
-        data.size(), dataLayout, writeSize);
+    std::ignore = GetDevice()->ConsumedError(
+        writeTexture(), "calling %s.WriteTexture(%s, (%u bytes), %s, %s)", this, *destination,
+        data.size(), *dataLayout, *writeSize);
 }
 
-MaybeError QueueBase::WriteTextureInternal(const TexelCopyTextureInfo* destinationOrig,
-                                           Span<const std::byte> data,
-                                           const TexelCopyBufferLayout& dataLayout,
-                                           const Extent3D* writeSize) {
+MaybeUnknownError QueueBase::WriteTextureInternal(const TexelCopyTextureInfo* destinationOrig,
+                                                  Span<const std::byte> data,
+                                                  const TexelCopyBufferLayout& dataLayout,
+                                                  const Extent3D* writeSize) {
     TexelCopyTextureInfo destination = WithTrivialFrontendDefaults(*destinationOrig);
 
     DAWN_TRY(ValidateWriteTexture(&destination, data.size(), dataLayout, writeSize));
@@ -369,7 +372,8 @@ MaybeError QueueBase::WriteTextureInternal(const TexelCopyTextureInfo* destinati
     const TexelBlockInfo& blockInfo = GetBlockInfo(destination);
     TexelCopyBufferLayout layout = dataLayout;
     ApplyDefaultTexelCopyBufferLayoutOptions(&layout, blockInfo, *writeSize);
-    return WriteTextureImpl(destination, data, layout, *writeSize);
+    DAWN_TRY(WriteTextureImpl(destination, data, layout, *writeSize));
+    return {};
 }
 
 MaybeError QueueBase::WriteTextureImpl(const TexelCopyTextureInfo& destination,
@@ -431,7 +435,7 @@ void QueueBase::APICopyTextureForBrowser(const TexelCopyTextureInfo* source,
                                          const TexelCopyTextureInfo* destination,
                                          const Extent3D* copySize,
                                          const CopyTextureForBrowserOptions* options) {
-    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
+    std::ignore = GetDevice()->ConsumedError(
         CopyTextureForBrowserInternal(source, destination, copySize, options));
 }
 
@@ -439,14 +443,15 @@ void QueueBase::APICopyExternalTextureForBrowser(const ImageCopyExternalTexture*
                                                  const TexelCopyTextureInfo* destination,
                                                  const Extent3D* copySize,
                                                  const CopyTextureForBrowserOptions* options) {
-    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
+    std::ignore = GetDevice()->ConsumedError(
         CopyExternalTextureForBrowserInternal(source, destination, copySize, options));
 }
 
-MaybeError QueueBase::CopyTextureForBrowserInternal(const TexelCopyTextureInfo* sourceOrig,
-                                                    const TexelCopyTextureInfo* destinationOrig,
-                                                    const Extent3D* copySize,
-                                                    const CopyTextureForBrowserOptions* options) {
+MaybeUnknownError QueueBase::CopyTextureForBrowserInternal(
+    const TexelCopyTextureInfo* sourceOrig,
+    const TexelCopyTextureInfo* destinationOrig,
+    const Extent3D* copySize,
+    const CopyTextureForBrowserOptions* options) {
     TexelCopyTextureInfo source = WithTrivialFrontendDefaults(*sourceOrig);
     TexelCopyTextureInfo destination = WithTrivialFrontendDefaults(*destinationOrig);
 
@@ -456,10 +461,11 @@ MaybeError QueueBase::CopyTextureForBrowserInternal(const TexelCopyTextureInfo* 
             "validating CopyTextureForBrowser from %s to %s", source.texture, destination.texture);
     }
 
-    return DoCopyTextureForBrowser(GetDevice(), &source, &destination, copySize, options);
+    DAWN_TRY(DoCopyTextureForBrowser(GetDevice(), &source, &destination, copySize, options));
+    return {};
 }
 
-MaybeError QueueBase::CopyExternalTextureForBrowserInternal(
+MaybeUnknownError QueueBase::CopyExternalTextureForBrowserInternal(
     const ImageCopyExternalTexture* source,
     const TexelCopyTextureInfo* destinationOrig,
     const Extent3D* copySize,
@@ -473,11 +479,12 @@ MaybeError QueueBase::CopyExternalTextureForBrowserInternal(
                          source->externalTexture, destination.texture);
     }
 
-    return DoCopyExternalTextureForBrowser(GetDevice(), source, &destination, copySize, options);
+    DAWN_TRY(DoCopyExternalTextureForBrowser(GetDevice(), source, &destination, copySize, options));
+    return {};
 }
 
-MaybeError QueueBase::ValidateSubmit(Span<CommandBufferBase* const> commands,
-                                     BufferSet& buffersFromCommands) const {
+MaybeValError QueueBase::ValidateSubmit(Span<CommandBufferBase* const> commands,
+                                        BufferSet& buffersFromCommands) const {
     TRACE_EVENT(DAWN_TRACE_CATEGORY("validation"), "Queue::ValidateSubmit");
     DAWN_TRY(GetDevice()->ValidateObject(this));
 
@@ -492,7 +499,7 @@ MaybeError QueueBase::ValidateSubmit(Span<CommandBufferBase* const> commands,
 
         const CommandBufferResourceUsage& usages = commandBuffer->GetResourceUsages();
 
-        auto ValidateBuffer = [&buffersFromCommands](BufferBase* buffer) -> MaybeError {
+        auto ValidateBuffer = [&buffersFromCommands](BufferBase* buffer) -> MaybeValError {
             if (auto [iter, inserted] = buffersFromCommands.insert(buffer); inserted) {
                 BufferBase::ScopedUseBuffer use;
                 DAWN_TRY_ASSIGN_WITH_CLEANUP(use, buffer->ValidateCanUseOnQueueNow(),
@@ -548,15 +555,15 @@ MaybeError QueueBase::ValidateSubmit(Span<CommandBufferBase* const> commands,
     return {};
 }
 
-MaybeError QueueBase::ValidateOnSubmittedWorkDone() const {
+MaybeValError QueueBase::ValidateOnSubmittedWorkDone() const {
     DAWN_TRY(GetDevice()->ValidateObject(this));
     return {};
 }
 
-MaybeError QueueBase::ValidateWriteTexture(const TexelCopyTextureInfo* destination,
-                                           size_t dataSize,
-                                           const TexelCopyBufferLayout& dataLayout,
-                                           const Extent3D* writeSize) const {
+MaybeValError QueueBase::ValidateWriteTexture(const TexelCopyTextureInfo* destination,
+                                              size_t dataSize,
+                                              const TexelCopyBufferLayout& dataLayout,
+                                              const Extent3D* writeSize) const {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_TRY(GetDevice()->ValidateObject(this));
     DAWN_TRY(GetDevice()->ValidateObject(destination->texture));
@@ -590,7 +597,7 @@ MaybeError QueueBase::ValidateWriteTexture(const TexelCopyTextureInfo* destinati
     return {};
 }
 
-MaybeError QueueBase::SubmitInternal(Span<CommandBufferBase* const> commands) {
+MaybeUnknownError QueueBase::SubmitInternal(Span<CommandBufferBase* const> commands) {
     DeviceBase* device = GetDevice();
 
     // If device is lost, don't let any commands be submitted

@@ -123,8 +123,8 @@ struct TintProgram : public RefCounted {
 // clang-format off
 DAWN_SERIALIZABLE(struct, CachedValidationError, CACHED_VALIDATION_ERROR_MEMBER){
     CachedValidationError() = default;
-    explicit CachedValidationError(std::unique_ptr<InternalError>&& errorData);
-    std::unique_ptr<InternalError> ToInternalError() const;
+    explicit CachedValidationError(std::unique_ptr<UnknownError>&& errorData);
+    std::unique_ptr<UnknownError> ToError() const;
 };
 // clang-format on
 #undef CACHED_VALIDATION_ERROR_MEMBER
@@ -144,9 +144,9 @@ DAWN_SERIALIZABLE(struct, ShaderModuleParseResult, SHADER_MODULE_PARSE_RESULT_ME
     bool HasTintProgram() const;
     // Check if ShaderModuleParseResult holds validation error.
     bool HasError() const;
-    std::unique_ptr<InternalError> ToInternalError() const;
+    std::unique_ptr<UnknownError> ToError() const;
 
-    void SetValidationError(std::unique_ptr<InternalError> && errorData);
+    void SetValidationError(std::unique_ptr<UnknownError> && errorData);
 };
 #undef SHADER_MODULE_PARSE_RESULT_MEMBER
 
@@ -163,23 +163,23 @@ void DumpShaderFromDescriptor(LogEmitter* logEmitter,
 // returned within ShaderModuleParseResult together with compilation messages, rather than as an
 // error (i.e. ResultOrError::IsSuccess() is true in this case). Other types of errors still get
 // returned as ErrorData in ResultOrError (i.e. ResultOrError::IsError() is true).
-ResultOrError<ShaderModuleParseResult> ParseShaderModule(ShaderModuleParseRequest req);
+ResultOrUnknownError<ShaderModuleParseResult> ParseShaderModule(ShaderModuleParseRequest req);
 
-MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
-                                                   const EntryPointMetadata& entryPoint,
-                                                   const PipelineLayoutBase* layout);
+MaybeValError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
+                                                      const EntryPointMetadata& entryPoint,
+                                                      const PipelineLayoutBase* layout);
 
 // Return extent3D with workgroup size dimension info if it is valid.
 // width = x, height = y, depthOrArrayLength = z.
-ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
+ResultOrValError<Extent3D> ValidateComputeStageWorkgroupSize(
     const tint::WorkgroupInfo& workgroupInfo,
     bool usesSubgroupMatrix,
     uint32_t maxSubgroupSize,
     const LimitsForCompilationRequest& limits,
     const LimitsForCompilationRequest& adapterSupportedlimits);
 
-MaybeError ValidateSubgroupMatrixConfiguration(const tint::SubgroupMatrixInfo& smInfo,
-                                               const std::vector<SubgroupMatrixConfig>& cfg);
+MaybeValError ValidateSubgroupMatrixConfiguration(const tint::SubgroupMatrixInfo& smInfo,
+                                                  const std::vector<SubgroupMatrixConfig>& cfg);
 
 RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata& entryPoint,
                                                         const PipelineLayoutBase* layout);
@@ -375,7 +375,7 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
                                            ParsedCompilationMessages&& compilationMessages);
 
     void Initialize();
-    std::unique_ptr<InternalError> GetInitializationError();
+    std::unique_ptr<UnknownError> GetInitializationError();
 
     ObjectType GetType() const override;
 

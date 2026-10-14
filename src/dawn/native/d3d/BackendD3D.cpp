@@ -54,7 +54,7 @@ ResultOrError<ComPtr<IDXGIFactory4>> CreateFactory(const PlatformFunctions* func
     }
 
     if (FAILED(functions->createDxgiFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory)))) {
-        return DAWN_INTERNAL_ERROR("Failed to create a DXGI factory");
+        return DAWN_UNRECOVERABLE_ERROR("Failed to create a DXGI factory");
     }
 
     DAWN_ASSERT(factory != nullptr);

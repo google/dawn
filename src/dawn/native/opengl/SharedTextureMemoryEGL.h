@@ -38,7 +38,7 @@ struct OpenGLFunctions;
 
 class SharedTextureMemoryEGL final : public SharedTextureMemory {
   public:
-    static ResultOrError<Ref<SharedTextureMemory>> Create(
+    static ResultOrValError<Ref<SharedTextureMemory>> Create(
         Device* device,
         StringView label,
         const SharedTextureMemoryAHardwareBufferDescriptor* descriptor);

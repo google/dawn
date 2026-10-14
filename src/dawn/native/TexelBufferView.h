@@ -36,8 +36,8 @@
 namespace dawn::native {
 
 bool IsFormatSupportedForTexelBuffer(wgpu::TextureFormat format);
-ResultOrError<const Format*> ValidateTexelBufferFormat(DeviceBase* device,
-                                                       wgpu::TextureFormat format);
+ResultOrValError<const Format*> ValidateTexelBufferFormat(DeviceBase* device,
+                                                          wgpu::TextureFormat format);
 
 class TexelBufferViewBase : public ApiObjectBase {
   public:

@@ -33,6 +33,7 @@
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
 #include "src/tint/lang/wgsl/ast/call_expression.h"
 #include "src/tint/lang/wgsl/ast/index_accessor_expression.h"
+#include "src/tint/lang/wgsl/ast/interpolated_string_expression.h"
 #include "src/tint/lang/wgsl/ast/literal_expression.h"
 #include "src/tint/lang/wgsl/ast/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/ast/phony_expression.h"
@@ -160,6 +161,10 @@ bool TraverseExpressions(const Expression* root, CALLBACK&& callback) {
             },
             [&](const UnaryOpExpression* unary) {
                 push_single(unary->expr, p.depth + 1);
+                return true;
+            },
+            [&](const InterpolatedStringExpression* tmpl) {
+                push_list(tmpl->elements, p.depth + 1);
                 return true;
             },
             [&](const LiteralExpression*) { return true; },

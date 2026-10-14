@@ -65,14 +65,14 @@ class BufferConsumer {
   public:
     explicit BufferConsumer(Span<BufferT> data) : mData(data) {}
 
-    bool Empty() const { return mData.empty(); }
+    bool Empty() const { return mOffset >= mData.size(); }
 
   protected:
     template <typename T>
     WireResult NextN(size_t count, Span<T>* out) {
         size_t byteCount = 0;
         WIRE_TRY(PeekN(count, out, &byteCount));
-        mData = mData.subspan(byteCount);
+        mOffset += byteCount;
         return WireResult::Success;
     }
 
@@ -90,7 +90,7 @@ class BufferConsumer {
     WireResult PeekN(size_t count, Span<T>* out, size_t* byteCount = nullptr) const {
         // If size is nullopt then it indicates an overflow.
         auto size = WireAlignSizeofN<T>(count);
-        if (!size || *size > mData.size()) {
+        if (!size || *size > mData.size() - mOffset) {
             return WireResult::FatalError;
         }
         DAWN_CHECK(*size >= sizeof(T) * count);
@@ -105,12 +105,19 @@ class BufferConsumer {
         // overlaying types with managed state onto the data, and we own the structs passed through
         // here and can guarantee that they do not manage additional state, we allow reinterpreting
         // the data here.
-        *out = DAWN_UNSAFE_BUFFERS(ReinterpretSpan<T>(mData.first(sizeof(T) * count)));
+        *out = DAWN_UNSAFE_BUFFERS(
+            ReinterpretSpan<T>(Span<BufferT>(mData).subspan(mOffset, sizeof(T) * count)));
         return WireResult::Success;
     }
 
-    // TODO(https://crbug.com/526537224): Use RawSpan instead of Span.
-    Span<BufferT> mData = {};
+    RawSpan<BufferT> mData = {};
+    // Track the current offset separately instead of mutating `mData` via `mData =
+    // mData.subspan(...)` on every `NextN` call. Because `NextN` is inlined into all generated
+    // wire serialization and deserialization code, repeatedly reassigning `mData` (a `RawSpan`
+    // backed by `raw_ptr`) would inline PartitionAlloc BackupRefPtr refcount bookkeeping at every
+    // call site and significantly increase compiled binary size. Advancing a plain offset instead
+    // keeps `mData` unmodified for the lifetime of the `BufferConsumer`.
+    size_t mOffset = 0;
 };
 
 class SerializeBuffer : public BufferConsumer<volatile std::byte> {

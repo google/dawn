@@ -14,39 +14,38 @@ typedef float3 ary_ret[8];
 ary_ret v(uint offset) {
   float3 a[8] = (float3[8])0;
   {
-    uint v_1 = 0u;
-    v_1 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_2 = v_1;
-      if ((v_2 >= 8u)) {
+      uint v_1 = idx;
+      if ((v_1 >= 8u)) {
         break;
       }
-      a[v_2] = asfloat(particles.Load3((offset + (v_2 * 16u))));
+      a[v_1] = asfloat(particles.Load3((offset + (v_1 * 16u))));
       {
-        v_1 = (v_2 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  float3 v_3[8] = a;
-  return v_3;
+  float3 v_2[8] = a;
+  return v_2;
 }
 
-Particle v_4(uint offset) {
-  float3 v_5[8] = v((offset + 0u));
-  Particle v_6 = {v_5, asfloat(particles.Load((offset + 128u))), asfloat(particles.Load4((offset + 144u))), asfloat(particles.Load3((offset + 160u)))};
-  return v_6;
+Particle v_3(uint offset) {
+  float3 v_4[8] = v((offset + 0u));
+  Particle v_5 = {v_4, asfloat(particles.Load((offset + 128u))), asfloat(particles.Load4((offset + 144u))), asfloat(particles.Load3((offset + 160u)))};
+  return v_5;
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  uint v_7 = 0u;
-  particles.GetDimensions(v_7);
-  Particle particle = v_4((0u + (min(0u, ((v_7 / 176u) - 1u)) * 176u)));
-  uint v_8 = sim[0u].x;
-  uint v_9 = min(sim[0u].x, 7u);
+  uint v_6 = 0u;
+  particles.GetDimensions(v_6);
+  Particle particle = v_3((0u + (min(0u, ((v_6 / 176u) - 1u)) * 176u)));
+  uint v_7 = sim[0u].x;
+  uint v_8 = min(sim[0u].x, 7u);
   float3 tint_array_copy[8] = particle.position;
-  tint_array_copy[min(v_8, 7u)] = particle.position[v_9];
-  float3 v_10[8] = tint_array_copy;
-  particle.position = v_10;
+  tint_array_copy[min(v_7, 7u)] = particle.position[v_8];
+  float3 v_9[8] = tint_array_copy;
+  particle.position = v_9;
 }
 

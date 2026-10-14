@@ -3517,6 +3517,43 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvParserTest, ViewIndex) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability MultiView
+               OpExtension "SPV_KHR_multiview"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %view_index
+               OpExecutionMode %main OriginUpperLeft
+               OpName %view_index "view_index"
+               OpDecorate %view_index BuiltIn ViewIndex
+               OpDecorate %view_index Flat
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+%ptr_Input_u32 = OpTypePointer Input %u32
+ %view_index = OpVariable %ptr_Input_u32 Input
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+      %entry = OpLabel
+      %value = OpLoad %u32 %view_index
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %view_index:ptr<__in, u32, read> = var undef @builtin(view_index)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    undef = phony %view_index
+    %3:u32 = load %view_index
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, UnsupportedBuiltin) {
     auto result = Run(R"(
                OpCapability Shader

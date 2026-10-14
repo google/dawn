@@ -49,7 +49,7 @@ class ComputePipeline final : public ComputePipelineBase,
 
   protected:
     ComputePipeline(Device* device, const UnpackedPtr<ComputePipelineDescriptor>& descriptor);
-    ResultOrError<Extent3D> InitializeImpl() override;
+    ResultOrUnknownError<Extent3D> InitializeImpl() override;
 
     void SetLabelImpl() override;
 };

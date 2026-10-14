@@ -69,7 +69,7 @@ MaybeError Deserialize(ReadHead& readHead, BindGroupLayoutEntryVariant* out) {
     switch (type) {
         DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES(DAWN_REPLAY_BINDGROUPLAYOUT_DESERIALIZE_CASE)
         default:
-            return DAWN_INTERNAL_ERROR("unhandled bind group layout entry type");
+            return DAWN_UNRECOVERABLE_ERROR("unhandled bind group layout entry type");
     }
 }
 #undef DAWN_REPLAY_BINDGROUPLAYOUT_DESERIALIZE_CASE
@@ -88,15 +88,15 @@ MaybeError Deserialize(ReadHead& readHead, BindGroupLayoutEntryVariant* out) {
         return {};                                                  \
     }
 
-#define DAWN_REPLAY_GEN_BINDGROUP_DESERIALIZE(ENUM_NAME, MEMBERS)              \
-    MaybeError Deserialize(ReadHead& readHead, BindGroupEntryVariant* out) {   \
-        schema::ENUM_NAME type;                                                \
-        DAWN_TRY(Deserialize(readHead, &type));                                \
-        switch (type) {                                                        \
-            MEMBERS(DAWN_REPLAY_BINDGROUP_DESERIALIZE_CASE)                    \
-            default:                                                           \
-                return DAWN_INTERNAL_ERROR("unhandled bind group entry type"); \
-        }                                                                      \
+#define DAWN_REPLAY_GEN_BINDGROUP_DESERIALIZE(ENUM_NAME, MEMBERS)                   \
+    MaybeError Deserialize(ReadHead& readHead, BindGroupEntryVariant* out) {        \
+        schema::ENUM_NAME type;                                                     \
+        DAWN_TRY(Deserialize(readHead, &type));                                     \
+        switch (type) {                                                             \
+            MEMBERS(DAWN_REPLAY_BINDGROUP_DESERIALIZE_CASE)                         \
+            default:                                                                \
+                return DAWN_UNRECOVERABLE_ERROR("unhandled bind group entry type"); \
+        }                                                                           \
     }
 
 DAWN_REPLAY_BINDING_GROUP_LAYOUT_ENTRY_TYPES_ENUM(DAWN_REPLAY_GEN_BINDGROUP_DESERIALIZE)
@@ -153,7 +153,7 @@ MaybeError DeserializeResourceData(ReadHead& readHead, schema::ObjectType type, 
         DAWN_REPLAY_RESOURCE_DATA_MAP(AS_DESERIALIZE_RESOURCE_DATA_CASE)
 #undef AS_DESERIALIZE_RESOURCE_DATA_CASE
         default:
-            return DAWN_INTERNAL_ERROR("unhandled resource type");
+            return DAWN_UNRECOVERABLE_ERROR("unhandled resource type");
     }
 }
 
@@ -194,7 +194,7 @@ MaybeError DeserializeRootCommand(ReadHead& readHead,
     switch (cmd) {
         DAWN_REPLAY_ROOT_COMMANDS(DAWN_REPLAY_ROOT_COMMAND_DESERIALIZE_CASE)
         default:
-            return DAWN_INTERNAL_ERROR("unhandled root command");
+            return DAWN_UNRECOVERABLE_ERROR("unhandled root command");
     }
 }
 
@@ -222,10 +222,10 @@ MaybeError DeserializeRootCommand(ReadHead& readHead,
             switch (cmd) {                                                                      \
                 COMMANDS(PASS_COMMAND_CASE)                                                     \
                 default:                                                                        \
-                    return DAWN_INTERNAL_ERROR("unhandled " #PASS_NAME " command");             \
+                    return DAWN_UNRECOVERABLE_ERROR("unhandled " #PASS_NAME " command");        \
             }                                                                                   \
         }                                                                                       \
-        return DAWN_INTERNAL_ERROR("Missing " #PASS_NAME " End command");                       \
+        return DAWN_UNRECOVERABLE_ERROR("Missing " #PASS_NAME " End command");                  \
     }
 
 PROCESS_COMMANDS_FUNC(ComputePass, DAWN_REPLAY_COMPUTE_PASS_COMMANDS)
@@ -337,27 +337,27 @@ VisitResult ProcessEncoderCommands(ReadHead* readHead, EncoderVisitor* visitor) 
 #undef ENCODER_NON_CREATION_COMMAND_CASE
 
             default:
-                return DAWN_INTERNAL_ERROR("unhandled encoder command");
+                return DAWN_UNRECOVERABLE_ERROR("unhandled encoder command");
         }
     }
-    return DAWN_INTERNAL_ERROR("Missing encoder End command");
+    return DAWN_UNRECOVERABLE_ERROR("Missing encoder End command");
 }
 
-#define DAWN_REPLAY_RESOURCE_VISITOR_DEF(ENUM, TYPE)                     \
-    VisitResult ResourceVisitor::operator()(const TYPE& data) {          \
-        if constexpr (std::is_same_v<TYPE, InvalidData>) {               \
-            return DAWN_INTERNAL_ERROR("Invalid resource data");         \
-        } else if constexpr (std::is_same_v<TYPE, DeviceData>) {         \
-            return DAWN_INTERNAL_ERROR("Device data not expected here"); \
-        } else {                                                         \
-            return VisitStatus::Continue;                                \
-        }                                                                \
+#define DAWN_REPLAY_RESOURCE_VISITOR_DEF(ENUM, TYPE)                          \
+    VisitResult ResourceVisitor::operator()(const TYPE& data) {               \
+        if constexpr (std::is_same_v<TYPE, InvalidData>) {                    \
+            return DAWN_UNRECOVERABLE_ERROR("Invalid resource data");         \
+        } else if constexpr (std::is_same_v<TYPE, DeviceData>) {              \
+            return DAWN_UNRECOVERABLE_ERROR("Device data not expected here"); \
+        } else {                                                              \
+            return VisitStatus::Continue;                                     \
+        }                                                                     \
     }
 DAWN_REPLAY_RESOURCE_DATA_MAP(DAWN_REPLAY_RESOURCE_VISITOR_DEF)
 #undef DAWN_REPLAY_RESOURCE_VISITOR_DEF
 
 VisitResult ResourceVisitor::operator()(const std::monostate&) {
-    return DAWN_INTERNAL_ERROR("Invalid resource data (monostate)");
+    return DAWN_UNRECOVERABLE_ERROR("Invalid resource data (monostate)");
 }
 
 VisitResult RootCommandVisitor::operator()(const CreateResourceData& data) {
@@ -365,7 +365,7 @@ VisitResult RootCommandVisitor::operator()(const CreateResourceData& data) {
 }
 
 VisitResult RootCommandVisitor::operator()(const std::monostate&) {
-    return DAWN_INTERNAL_ERROR("Invalid command (monostate)");
+    return DAWN_UNRECOVERABLE_ERROR("Invalid command (monostate)");
 }
 
 MaybeError CaptureWalker::Walk(RootCommandVisitor& visitor) {

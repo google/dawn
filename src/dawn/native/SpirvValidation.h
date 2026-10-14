@@ -38,7 +38,7 @@ class SpirvTools;
 
 namespace dawn::native {
 
-MaybeError ValidateSpirv(LogEmitter* logEmitter, Span<const uint32_t> spirv, bool spv14);
+MaybeValError ValidateSpirv(LogEmitter* logEmitter, Span<const uint32_t> spirv, bool spv14);
 
 void DumpSpirv(LogEmitter* logEmitter,
                Span<const uint32_t> spirv,

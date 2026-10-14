@@ -44,7 +44,7 @@
 #include "src/dawn/native/EventManager.h"
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/RenderPipeline.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/dawn/platform/metrics/HistogramMacros.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
 
@@ -108,7 +108,7 @@ template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
 CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::CreatePipelineAsyncEvent(
     DeviceBase* device,
     const CreatePipelineAsyncCallbackInfo& callbackInfo,
-    std::unique_ptr<InternalError> error,
+    std::unique_ptr<UnknownError> error,
     StringView label)
     : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode), Completed{}),
       mCallback(callbackInfo.callback),
@@ -135,7 +135,7 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::In
     TRACE_EVENT(DAWN_TRACE_CATEGORY(), "CreatePipelineAsyncEvent::InitializeImpl", "label",
                 utils::GetLabelForTrace(mPipeline->GetLabel()));
 
-    MaybeError maybeError;
+    MaybeUnknownError maybeError;
     {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), kDawnHistogramMetricsUS);
         maybeError = mPipeline->Initialize(std::move(mScopedUseShaderPrograms));

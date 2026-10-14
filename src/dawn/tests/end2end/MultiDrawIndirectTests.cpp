@@ -137,6 +137,14 @@ TEST_P(MultiDrawIndirectTest, Uint32) {
     Test({3, 1, 0, 0, 3, 1, 3, 0}, 0, 2, filled, filled);
 }
 
+// Non-zero firstInstance is not allowed because `IndirectFirstInstance` is not requested in
+// `MultiDrawIndirectTest`.
+TEST_P(MultiDrawIndirectTest, FirstInstanceRequiresFeature) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
+    Test({3, 1, 0, 1, 3, 1, 3, 0}, 0, 2, notFilled, filled);
+}
+
 // The basic triangle draw with various drawCount.
 TEST_P(MultiDrawIndirectTest, DrawCount) {
     // TODO(crbug.com/356461286): NVIDIA Drivers for Vulkan Linux are drawing more than
@@ -289,10 +297,11 @@ DAWN_INSTANTIATE_TEST(MultiDrawIndirectUsingFirstVertexTest,
 class MultiDrawIndirectUsingInstanceIndexTest : public MultiDrawIndirectUsingFirstVertexTest {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        if (!SupportsFeatures({wgpu::FeatureName::MultiDrawIndirect})) {
+        if (!SupportsFeatures(
+                {wgpu::FeatureName::MultiDrawIndirect, wgpu::FeatureName::IndirectFirstInstance})) {
             return {};
         }
-        return {wgpu::FeatureName::MultiDrawIndirect};
+        return {wgpu::FeatureName::MultiDrawIndirect, wgpu::FeatureName::IndirectFirstInstance};
     }
 
     void SetupShaderModule() override {

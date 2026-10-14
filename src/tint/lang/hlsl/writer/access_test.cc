@@ -386,21 +386,20 @@ typedef float3 ary_ret[5];
 ary_ret v_1(uint offset) {
   float3 a[5] = (float3[5])0;
   {
-    uint v_2 = 0u;
-    v_2 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_3 = v_2;
-      if ((v_3 >= 5u)) {
+      uint v_2 = idx;
+      if ((v_2 >= 5u)) {
         break;
       }
-      a[v_3] = asfloat(v.Load3((offset + (v_3 * 16u))));
+      a[v_2] = asfloat(v.Load3((offset + (v_2 * 16u))));
       {
-        v_2 = (v_3 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  float3 v_4[5] = a;
-  return v_4;
+  float3 v_3[5] = a;
+  return v_3;
 }
 
 void main() {
@@ -502,50 +501,49 @@ typedef float3 ary_ret[5];
 ary_ret v_1(uint offset) {
   float3 a[5] = (float3[5])0;
   {
-    uint v_2 = 0u;
-    v_2 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_3 = v_2;
-      if ((v_3 >= 5u)) {
+      uint v_2 = idx;
+      if ((v_2 >= 5u)) {
         break;
       }
-      a[v_3] = asfloat(v.Load3((offset + (v_3 * 16u))));
+      a[v_2] = asfloat(v.Load3((offset + (v_2 * 16u))));
       {
-        v_2 = (v_3 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  float3 v_4[5] = a;
-  return v_4;
+  float3 v_3[5] = a;
+  return v_3;
 }
 
-float3x3 v_5(uint offset) {
+float3x3 v_4(uint offset) {
   return float3x3(asfloat(v.Load3((offset + 0u))), asfloat(v.Load3((offset + 16u))), asfloat(v.Load3((offset + 32u))));
 }
 
-Inner v_6(uint offset) {
-  float3x3 v_7 = v_5((offset + 0u));
-  float3 v_8[5] = v_1((offset + 48u));
-  Inner v_9 = {v_7, v_8};
-  return v_9;
+Inner v_5(uint offset) {
+  float3x3 v_6 = v_4((offset + 0u));
+  float3 v_7[5] = v_1((offset + 48u));
+  Inner v_8 = {v_6, v_7};
+  return v_8;
 }
 
-Outer v_10(uint offset) {
-  float v_11 = asfloat(v.Load((offset + 0u)));
-  Inner v_12 = v_6((offset + 16u));
-  Outer v_13 = {v_11, v_12};
-  return v_13;
+Outer v_9(uint offset) {
+  float v_10 = asfloat(v.Load((offset + 0u)));
+  Inner v_11 = v_5((offset + 16u));
+  Outer v_12 = {v_10, v_11};
+  return v_12;
 }
 
-SB v_14(uint offset) {
-  int v_15 = asint(v.Load((offset + 0u)));
-  Outer v_16 = v_10((offset + 16u));
-  SB v_17 = {v_15, v_16};
-  return v_17;
+SB v_13(uint offset) {
+  int v_14 = asint(v.Load((offset + 0u)));
+  Outer v_15 = v_9((offset + 16u));
+  SB v_16 = {v_14, v_15};
+  return v_16;
 }
 
 void main() {
-  SB a = v_14(0u);
+  SB a = v_13(0u);
   float b = asfloat(v.Load(136u));
 }
 
@@ -1308,21 +1306,20 @@ typedef float3 ary_ret[5];
 ary_ret v_1(uint start_byte_offset) {
   float3 a[5] = (float3[5])0;
   {
-    uint v_2 = 0u;
-    v_2 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_3 = v_2;
-      if ((v_3 >= 5u)) {
+      uint v_2 = idx;
+      if ((v_2 >= 5u)) {
         break;
       }
-      a[v_3] = asfloat(v[((start_byte_offset + (v_3 * 16u)) / 16u)].xyz);
+      a[v_2] = asfloat(v[((start_byte_offset + (v_2 * 16u)) / 16u)].xyz);
       {
-        v_2 = (v_3 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  float3 v_4[5] = a;
-  return v_4;
+  float3 v_3[5] = a;
+  return v_3;
 }
 
 void main() {
@@ -1361,23 +1358,22 @@ typedef vector<float16_t, 3> ary_ret[5];
 ary_ret v_2(uint start_byte_offset) {
   vector<float16_t, 3> a[5] = (vector<float16_t, 3>[5])0;
   {
-    uint v_3 = 0u;
-    v_3 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_4 = v_3;
-      if ((v_4 >= 5u)) {
+      uint v_3 = idx;
+      if ((v_3 >= 5u)) {
         break;
       }
-      uint v_5 = (start_byte_offset + (v_4 * 8u));
-      uint4 v_6 = v[(v_5 / 16u)];
-      a[v_4] = tint_bitcast_to_f16(select((((v_5 & 15u) >> 2u) == 2u), v_6.zw, v_6.xy)).xyz;
+      uint v_4 = (start_byte_offset + (v_3 * 8u));
+      uint4 v_5 = v[(v_4 / 16u)];
+      a[v_3] = tint_bitcast_to_f16(select((((v_4 & 15u) >> 2u) == 2u), v_5.zw, v_5.xy)).xyz;
       {
-        v_3 = (v_4 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  vector<float16_t, 3> v_7[5] = a;
-  return v_7;
+  vector<float16_t, 3> v_6[5] = a;
+  return v_6;
 }
 
 void main() {
@@ -1410,21 +1406,20 @@ typedef float3 ary_ret[42];
 ary_ret v_1(uint start_byte_offset) {
   float3 a[42] = (float3[42])0;
   {
-    uint v_2 = 0u;
-    v_2 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_3 = v_2;
-      if ((v_3 >= 42u)) {
+      uint v_2 = idx;
+      if ((v_2 >= 42u)) {
         break;
       }
-      a[v_3] = asfloat(v[((start_byte_offset + (v_3 * 16u)) / 16u)].xyz);
+      a[v_2] = asfloat(v[((start_byte_offset + (v_2 * 16u)) / 16u)].xyz);
       {
-        v_2 = (v_3 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  float3 v_4[42] = a;
-  return v_4;
+  float3 v_3[42] = a;
+  return v_3;
 }
 
 void main() {
@@ -1580,50 +1575,49 @@ typedef float3 ary_ret[5];
 ary_ret v_1(uint start_byte_offset) {
   float3 a[5] = (float3[5])0;
   {
-    uint v_2 = 0u;
-    v_2 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_3 = v_2;
-      if ((v_3 >= 5u)) {
+      uint v_2 = idx;
+      if ((v_2 >= 5u)) {
         break;
       }
-      a[v_3] = asfloat(v[((start_byte_offset + (v_3 * 16u)) / 16u)].xyz);
+      a[v_2] = asfloat(v[((start_byte_offset + (v_2 * 16u)) / 16u)].xyz);
       {
-        v_2 = (v_3 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  float3 v_4[5] = a;
-  return v_4;
+  float3 v_3[5] = a;
+  return v_3;
 }
 
-float3x3 v_5(uint start_byte_offset) {
+float3x3 v_4(uint start_byte_offset) {
   return float3x3(asfloat(v[(start_byte_offset / 16u)].xyz), asfloat(v[((16u + start_byte_offset) / 16u)].xyz), asfloat(v[((32u + start_byte_offset) / 16u)].xyz));
 }
 
-Inner v_6(uint start_byte_offset) {
-  float3x3 v_7 = v_5(start_byte_offset);
-  float3 v_8[5] = v_1((48u + start_byte_offset));
-  Inner v_9 = {v_7, v_8};
-  return v_9;
+Inner v_5(uint start_byte_offset) {
+  float3x3 v_6 = v_4(start_byte_offset);
+  float3 v_7[5] = v_1((48u + start_byte_offset));
+  Inner v_8 = {v_6, v_7};
+  return v_8;
 }
 
-Outer v_10(uint start_byte_offset) {
-  float v_11 = asfloat(v[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
-  Inner v_12 = v_6((16u + start_byte_offset));
-  Outer v_13 = {v_11, v_12};
-  return v_13;
+Outer v_9(uint start_byte_offset) {
+  float v_10 = asfloat(v[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
+  Inner v_11 = v_5((16u + start_byte_offset));
+  Outer v_12 = {v_10, v_11};
+  return v_12;
 }
 
-SB v_14(uint start_byte_offset) {
-  int v_15 = asint(v[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
-  Outer v_16 = v_10((16u + start_byte_offset));
-  SB v_17 = {v_15, v_16};
-  return v_17;
+SB v_13(uint start_byte_offset) {
+  int v_14 = asint(v[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
+  Outer v_15 = v_9((16u + start_byte_offset));
+  SB v_16 = {v_14, v_15};
+  return v_16;
 }
 
 void main() {
-  SB a = v_14(0u);
+  SB a = v_13(0u);
   float b = asfloat(v[8u].z);
 }
 
@@ -1974,16 +1968,15 @@ TEST_F(HlslWriterTest, AccessStoreArray) {
 RWByteAddressBuffer v : register(u0);
 void v_1(uint offset, float3 obj[5]) {
   {
-    uint v_2 = 0u;
-    v_2 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_3 = v_2;
-      if ((v_3 >= 5u)) {
+      uint v_2 = idx;
+      if ((v_2 >= 5u)) {
         break;
       }
-      v.Store3((offset + (v_3 * 16u)), asuint(obj[v_3]));
+      v.Store3((offset + (v_2 * 16u)), asuint(obj[v_2]));
       {
-        v_2 = (v_3 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -2206,48 +2199,47 @@ struct SB {
 RWByteAddressBuffer v : register(u0);
 void v_1(uint offset, float3 obj[5]) {
   {
-    uint v_2 = 0u;
-    v_2 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_3 = v_2;
-      if ((v_3 >= 5u)) {
+      uint v_2 = idx;
+      if ((v_2 >= 5u)) {
         break;
       }
-      v.Store3((offset + (v_3 * 16u)), asuint(obj[v_3]));
+      v.Store3((offset + (v_2 * 16u)), asuint(obj[v_2]));
       {
-        v_2 = (v_3 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
 }
 
-void v_4(uint offset, float3x3 obj) {
+void v_3(uint offset, float3x3 obj) {
   v.Store3((offset + 0u), asuint(obj[0u]));
   v.Store3((offset + 16u), asuint(obj[1u]));
   v.Store3((offset + 32u), asuint(obj[2u]));
 }
 
-void v_5(uint offset, Inner obj) {
-  v_4((offset + 0u), obj.s);
-  float3 v_6[5] = obj.t;
-  v_1((offset + 48u), v_6);
+void v_4(uint offset, Inner obj) {
+  v_3((offset + 0u), obj.s);
+  float3 v_5[5] = obj.t;
+  v_1((offset + 48u), v_5);
 }
 
-void v_7(uint offset, Outer obj) {
+void v_6(uint offset, Outer obj) {
   v.Store((offset + 0u), asuint(obj.x));
-  Inner v_8 = obj.y;
-  v_5((offset + 16u), v_8);
+  Inner v_7 = obj.y;
+  v_4((offset + 16u), v_7);
 }
 
-void v_9(uint offset, SB obj) {
+void v_8(uint offset, SB obj) {
   v.Store((offset + 0u), asuint(obj.a));
-  Outer v_10 = obj.b;
-  v_7((offset + 16u), v_10);
+  Outer v_9 = obj.b;
+  v_6((offset + 16u), v_9);
 }
 
 void main() {
   SB s = (SB)0;
-  v_9(0u, s);
+  v_8(0u, s);
 }
 
 )");

@@ -11,16 +11,15 @@ void foo() {
 
 void main_inner(uint tint_local_index) {
   {
-    uint v_2 = 0u;
-    v_2 = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_3 = v_2;
-      if ((v_3 >= 16u)) {
+      uint v_2 = idx;
+      if ((v_2 >= 16u)) {
         break;
       }
-      v[((v_3 * 4u) / 4u)] = 0u;
+      v[((v_2 * 4u) / 4u)] = 0u;
       {
-        v_2 = (v_3 + 1u);
+        idx = (idx + 1u);
       }
     }
   }

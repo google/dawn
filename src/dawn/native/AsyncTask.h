@@ -110,10 +110,10 @@ class ErrorGeneratingAsyncTask : public AsyncTask {
     bool IsSuccess() const;
     bool IsError() const;
     InternalErrorType GetErrorType() const;
-    std::unique_ptr<InternalError> AcquireError();
+    std::unique_ptr<UnrecoverableError> AcquireError();
 
   private:
-    std::unique_ptr<InternalError> mErrorData;
+    std::unique_ptr<UnrecoverableError> mErrorData;
 };
 
 class AsyncTaskManager {

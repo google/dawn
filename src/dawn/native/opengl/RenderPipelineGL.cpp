@@ -27,6 +27,10 @@
 
 #include "src/dawn/native/opengl/RenderPipelineGL.h"
 
+#include <set>
+#include <string>
+#include <unordered_map>
+
 #include "src/dawn/native/opengl/DeviceGL.h"
 #include "src/dawn/native/opengl/Forward.h"
 #include "src/dawn/native/opengl/ImmediatesLayoutGL.h"
@@ -222,7 +226,7 @@ RenderPipeline::RenderPipeline(Device* device,
       mVertexArrayObject(0),
       mGlPrimitiveTopology(GLPrimitiveTopology(GetPrimitiveTopology())) {}
 
-MaybeError RenderPipeline::InitializeImpl() {
+MaybeUnknownError RenderPipeline::InitializeImpl() {
     if (UsesVertexIndex()) {
         mImmediateMask |= GetImmediateBlockBits(offsetof(RenderImmediates, firstVertex),
                                                 kImmediateElementByteSize);
@@ -235,19 +239,28 @@ MaybeError RenderPipeline::InitializeImpl() {
         mImmediateMask |= GetImmediateBlockBits(offsetof(RenderImmediates, clampFragDepth),
                                                 sizeof(ClampFragDepthArgs));
     }
-    return ToBackend(GetDevice())
-        ->EnqueueGL([self = Ref<RenderPipeline>(this)](const OpenGLFunctions& gl) -> MaybeError {
-            VertexAttributeMask bgraSwizzleAttributes = {};
-            for (VertexAttributeLocation i : self->GetAttributeLocationsUsed()) {
-                bgraSwizzleAttributes.set(
-                    i, self->GetAttribute(i).format == wgpu::VertexFormat::Unorm8x4BGRA);
-            }
 
-            DAWN_TRY(self->InitializeBase(gl, ToBackend(self->GetLayout()), self->GetAllStages(),
-                                          self->mImmediateMask, bgraSwizzleAttributes));
-            DAWN_TRY(self->CreateVAOForVertexState(gl));
-            return {};
-        });
+    VertexAttributeMask bgraSwizzleAttributes = {};
+    for (VertexAttributeLocation i : GetAttributeLocationsUsed()) {
+        bgraSwizzleAttributes.set(i, GetAttribute(i).format == wgpu::VertexFormat::Unorm8x4BGRA);
+    }
+
+    auto layout = ToBackend(GetLayout());
+    std::set<CombinedSampler> combinedSamplers;
+    std::unordered_map<SingleShaderStage, std::string> shaders;
+    DAWN_TRY(InitializeShaders(ToBackend(GetDevice())->GetGL(false), layout, GetAllStages(),
+                               mImmediateMask, bgraSwizzleAttributes, nullptr, &combinedSamplers,
+                               &shaders));
+
+    DAWN_TRY(ToBackend(GetDevice())
+                 ->EnqueueGL([self = Ref<RenderPipeline>(this), combinedSamplers,
+                              shaders](const OpenGLFunctions& gl) -> MaybeError {
+                     DAWN_TRY(self->InitializeBase(gl, ToBackend(self->GetLayout()),
+                                                   self->GetAllStages(), self->mImmediateMask,
+                                                   combinedSamplers, shaders));
+                     return self->CreateVAOForVertexState(gl);
+                 }));
+    return {};
 }
 
 RenderPipeline::~RenderPipeline() = default;

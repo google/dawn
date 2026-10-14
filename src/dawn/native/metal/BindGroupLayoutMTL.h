@@ -30,10 +30,16 @@
 
 #import <Metal/Metal.h>
 
+#include <vector>
+
 #include "src/dawn/common/MutexProtected.h"
 #include "src/dawn/common/NSRef.h"
 #include "src/dawn/common/SlabAllocator.h"
 #include "src/dawn/native/BindGroupLayoutInternal.h"
+
+namespace tint::msl::writer {
+struct ArgumentBufferInfo;
+}
 
 namespace dawn::native::metal {
 
@@ -51,6 +57,7 @@ class BindGroupLayout final : public BindGroupLayoutInternalBase {
     void ReduceMemoryUsage() override;
 
     NSPRef<id<MTLArgumentEncoder>> GetArgumentEncoder() const;
+    void FillTintArgumentBufferInfo(tint::msl::writer::ArgumentBufferInfo& info) const;
 
   private:
     BindGroupLayout(DeviceBase* device, const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor);

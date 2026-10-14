@@ -34,6 +34,7 @@
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/Buffer.h"
 #include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/Instance.h"
 #include "src/dawn/native/d3d/D3DError.h"
 #include "src/dawn/native/d3d/SharedFenceD3D.h"
 #include "src/dawn/native/d3d/UtilsD3D.h"
@@ -54,9 +55,9 @@ enum class HeapAccessType {
     GPUQueueAccessible,
 };
 
-ResultOrError<HeapAccessType> MapToHeapAccessType(const D3D12_HEAP_PROPERTIES& heapProperties,
-                                                  const D3D12_HEAP_FLAGS& heapFlags,
-                                                  const Device* device) {
+ResultOrValError<HeapAccessType> MapToHeapAccessType(const D3D12_HEAP_PROPERTIES& heapProperties,
+                                                     const D3D12_HEAP_FLAGS& heapFlags,
+                                                     const Device* device) {
     switch (heapProperties.Type) {
         case D3D12_HEAP_TYPE_UPLOAD:
             return HeapAccessType::Upload;
@@ -91,15 +92,14 @@ ResultOrError<HeapAccessType> MapToHeapAccessType(const D3D12_HEAP_PROPERTIES& h
                        heapProperties.MemoryPoolPreference == D3D12_MEMORY_POOL_L0) {
                 // A CUSTOM heap with WRITE_COMBINE + L0 is equivalent to a UPLOAD heap.
                 return HeapAccessType::Upload;
-            } else {
-                return DAWN_VALIDATION_ERROR("ID3D12Resources allocated on unsupported heap.");
             }
+            return DAWN_VALIDATION_ERROR("ID3D12Resources allocated on unsupported heap.");
         default:
             return DAWN_VALIDATION_ERROR("ID3D12Resources allocated on unsupported heap.");
     }
 }
 
-ResultOrError<SharedBufferMemoryProperties> GetSharedBufferMemoryProperties(
+ResultOrValError<SharedBufferMemoryProperties> GetSharedBufferMemoryProperties(
     Device* device,
     D3D12_HEAP_PROPERTIES heapProperties,
     D3D12_HEAP_FLAGS heapFlags,
@@ -169,58 +169,52 @@ SharedBufferMemory::SharedBufferMemory(Device* device,
 void SharedBufferMemory::DestroyImpl(DestroyReason reason) {
     SharedBufferMemoryBase::DestroyImpl(reason);
 
-    if (mHostPointerDisposeCallback == nullptr) {
+    if (!mHostPointerDispose.has_value()) {
         ToBackend(GetDevice())->ReferenceUntilUnused(std::move(mResource));
         return;
     }
 
-    // The host memory aliased by the heap must outlive both the heap and the resource placed on
-    // it, so the task owns the resource as well: it is only released once the task runs, which
-    // happens after the pending command serial has completed. Releasing the resource from the
-    // task (instead of through Device::ReferenceUntilUnused, which is drained by a different
-    // mechanism) guarantees the resource is released before the heap, and the heap before the
-    // dispose callback.
-    struct DisposeTask : TrackTaskCallback {
+    // TODO(386255678): Now using `TrackEvent()` will greatly increase the peak memory compared with
+    // `TrackTaskAfterEventualFlush()`. Use TrackEvent again once the peak memory usage issue is
+    // fixed.
+    class DisposeTask : public TrackTaskCallback {
+      public:
         DisposeTask(ComPtr<ID3D12Resource> resource,
                     std::unique_ptr<Heap> heap,
-                    wgpu::DisposeCallback callback,
-                    void* userdata)
+                    WGPUDisposeCallbackInfo dispose)
             : TrackTaskCallback(nullptr),
               resource(std::move(resource)),
               heap(std::move(heap)),
-              callback(callback),
-              userdata(userdata) {}
+              mCallback(dispose.callback),
+              mUserdata1(dispose.userdata1),
+              mUserdata2(dispose.userdata2) {}
         ~DisposeTask() override = default;
 
-        void FinishImpl() override { Dispose(WGPUCallbackStatus_Success); }
-        void HandleDeviceLossImpl() override { Dispose(WGPUCallbackStatus_Error); }
-        void HandleShutDownImpl() override { Dispose(WGPUCallbackStatus_Error); }
-
-        void Dispose(WGPUCallbackStatus status) {
+        void FinishImpl() override {
             resource = nullptr;
             heap = nullptr;
-            callback(status, userdata);
+            mCallback(WGPUCallbackStatus_Success, mUserdata1.ExtractAsDangling(),
+                      mUserdata2.ExtractAsDangling());
         }
+
+        void HandleDeviceLossImpl() override { FinishImpl(); }
+        void HandleShutDownImpl() override { FinishImpl(); }
 
         ComPtr<ID3D12Resource> resource;
         std::unique_ptr<Heap> heap;
-        wgpu::DisposeCallback callback;
-        raw_ptr<void, DisableDanglingPtrDetection> userdata;
+        WGPUDisposeCallback mCallback = nullptr;
+        raw_ptr<void> mUserdata1 = nullptr;
+        raw_ptr<void> mUserdata2 = nullptr;
     };
-    std::unique_ptr<DisposeTask> request =
-        std::make_unique<DisposeTask>(std::move(mResource), std::move(mHeap),
-                                      mHostPointerDisposeCallback, mHostPointerDisposeUserdata);
-    mHostPointerDisposeCallback = nullptr;
-    mHostPointerDisposeUserdata = nullptr;
 
-    // TODO(386255678): TrackTaskAfterEventualFlush() only marks the queue as needing a submit; it
-    // doesn't force one to happen immediately. If nothing ever ticks the device again, this task
-    // (and thus disposeCallback) may never run.
-    GetDevice()->GetQueue()->TrackTaskAfterEventualFlush(std::move(request));
+    auto disposeTask = std::make_unique<DisposeTask>(std::move(mResource), std::move(mHeap),
+                                                     mHostPointerDispose.value());
+    GetDevice()->GetQueue()->TrackTaskAfterEventualFlush(std::move(disposeTask));
+    mHostPointerDispose = std::nullopt;
 }
 
 // static
-ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::CreateFromHeap(
+ResultOrUnknownError<Ref<SharedBufferMemory>> SharedBufferMemory::CreateFromHeap(
     Device* device,
     StringView label,
     ComPtr<ID3D12Heap> d3d12Heap,
@@ -282,7 +276,7 @@ ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::CreateFromHeap(
 }
 
 // static
-ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
+ResultOrUnknownError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
     Device* device,
     StringView label,
     const SharedBufferMemoryD3D12ResourceDescriptor* descriptor) {
@@ -321,7 +315,7 @@ ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
 }
 
 // static
-ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
+ResultOrUnknownError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
     Device* device,
     StringView label,
     const SharedBufferMemoryFromWindowsHandleDescriptor* descriptor) {
@@ -346,7 +340,7 @@ ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
 }
 
 // static
-ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
+ResultOrUnknownError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
     Device* device,
     StringView label,
     const SharedBufferMemoryHostPointerDescriptor* descriptor) {
@@ -357,8 +351,9 @@ ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
     // Device::CreateSharedBufferMemory errors before or after calling this, e.g. due to unpacking
     // the chained struct, or a device loss / D3D12 error raised elsewhere in the meantime.
     absl::Cleanup disposeOnFailure = [descriptor] {
-        if (descriptor->disposeCallback) {
-            descriptor->disposeCallback(WGPUCallbackStatus_Error, descriptor->userdata);
+        if (descriptor->disposeCallbackInfo.callback != nullptr) {
+            const WGPUDisposeCallbackInfo& dispose = descriptor->disposeCallbackInfo;
+            dispose.callback(WGPUCallbackStatus_Error, dispose.userdata1, dispose.userdata2);
         }
     };
 
@@ -383,8 +378,7 @@ ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
     Ref<SharedBufferMemory> result;
     DAWN_TRY_ASSIGN(result, CreateFromHeap(device, label, std::move(d3d12Heap), descriptor->size,
                                            descriptor->pointer, wgpu::BufferUsage::None));
-    result->mHostPointerDisposeCallback = descriptor->disposeCallback;
-    result->mHostPointerDisposeUserdata = descriptor->userdata;
+    result->mHostPointerDispose = descriptor->disposeCallbackInfo;
     std::move(disposeOnFailure).Cancel();
     return result;
 }
@@ -398,7 +392,7 @@ ID3D12Resource* SharedBufferMemory::GetD3DResource() const {
     return mResource.Get();
 }
 
-MaybeError SharedBufferMemory::BeginAccessImpl(
+MaybeValError SharedBufferMemory::BeginAccessImpl(
     BufferBase* buffer,
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     DAWN_TRY(descriptor.ValidateSubset<>());
@@ -412,6 +406,8 @@ MaybeError SharedBufferMemory::BeginAccessImpl(
                                 wgpu::FeatureName::SharedFenceDXGISharedHandle);
                 break;
             default:
+                // TODO(crbug.com/536639352): Move the validation of the fence type into the
+                // frontend to better separate the validation and internal error.
                 return DAWN_VALIDATION_ERROR("Unsupported fence type %s.", exportInfo.type);
         }
     }
@@ -419,7 +415,7 @@ MaybeError SharedBufferMemory::BeginAccessImpl(
     return {};
 }
 
-ResultOrError<FenceAndSignalValue> SharedBufferMemory::EndAccessImpl(
+ResultOrUnknownError<FenceAndSignalValue> SharedBufferMemory::EndAccessImpl(
     BufferBase* buffer,
     ExecutionSerial lastUsageSerial,
     UnpackedPtr<EndAccessState>& state) {

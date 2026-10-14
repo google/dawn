@@ -93,10 +93,15 @@ class AdapterBase : public RefCounted, public WeakRefSupport<AdapterBase> {
     const std::string& GetName() const;
 
   private:
-    std::pair<Ref<DeviceBase::DeviceLostEvent>, ResultOrError<Ref<DeviceBase>>> CreateDevice(
+    std::pair<Ref<DeviceBase::DeviceLostEvent>, ResultOrUnknownError<Ref<DeviceBase>>> CreateDevice(
         const DeviceDescriptor* rawDescriptor);
-    ResultOrError<Ref<DeviceBase>> CreateDeviceInternal(const DeviceDescriptor* rawDescriptor,
-                                                        Ref<DeviceBase::DeviceLostEvent> lostEvent);
+    ResultOrUnknownError<Ref<DeviceBase>> CreateDeviceInternal(
+        const DeviceDescriptor* rawDescriptor,
+        Ref<DeviceBase::DeviceLostEvent> lostEvent);
+
+    ResultOrValError<UnpackedPtr<AdapterInfo>> ValidateGetInfo(AdapterInfo* info) const;
+    ResultOrValError<UnpackedPtr<DawnFormatCapabilities>> ValidateGetFormatCapabilities(
+        DawnFormatCapabilities* capabilities);
 
     // Generate the adapter's limits based on current adapter status. Should be called during
     // AdapterBase creation and when the adapter's limits-related status changes, e.g.

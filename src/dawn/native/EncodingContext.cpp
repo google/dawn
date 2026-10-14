@@ -59,7 +59,12 @@ EncodingContext::~EncodingContext() {
 
 void EncodingContext::Destroy() {
     mDebugGroupLabels.clear();
-
+    if (!mWereRenderPassUsagesAcquired) {
+        mRenderPassUsages.clear();
+    }
+    if (!mWereComputePassUsagesAcquired) {
+        mComputePassUsages.clear();
+    }
     if (!mWereIndirectDrawMetadataAcquired) {
         mIndirectDrawMetadata.clear();
     }
@@ -86,7 +91,7 @@ CommandIterator EncodingContext::AcquireCommands() {
     return commands;
 }
 
-void EncodingContext::HandleError(std::unique_ptr<InternalError> error) {
+void EncodingContext::HandleError(std::unique_ptr<UnknownError> error) {
     // Append in reverse so that the most recently set debug group is printed first, like a
     // call stack.
     for (auto iter = mDebugGroupLabels.rbegin(); iter != mDebugGroupLabels.rend(); ++iter) {
@@ -137,10 +142,10 @@ void EncodingContext::EnterPass(const ApiObjectBase* passEncoder) {
     mCurrentEncoder = passEncoder;
 }
 
-MaybeError EncodingContext::ExitRenderPass(const ApiObjectBase* passEncoder,
-                                           RenderPassResourceUsageTracker usageTracker,
-                                           CommandEncoder* commandEncoder,
-                                           IndirectDrawMetadata indirectDrawMetadata) {
+MaybeUnknownError EncodingContext::ExitRenderPass(const ApiObjectBase* passEncoder,
+                                                  RenderPassResourceUsageTracker usageTracker,
+                                                  CommandEncoder* commandEncoder,
+                                                  IndirectDrawMetadata indirectDrawMetadata) {
     DAWN_CHECK(mCurrentEncoder != mTopLevelEncoder);
     DAWN_CHECK(mCurrentEncoder == passEncoder);
 
@@ -192,8 +197,9 @@ void EncodingContext::EnsurePassExited(const ApiObjectBase* passEncoder) {
     if (mCurrentEncoder != mTopLevelEncoder && mCurrentEncoder == passEncoder) {
         // The current pass encoder is being deleted. Implicitly end the pass with an error.
         mCurrentEncoder = mTopLevelEncoder;
-        HandleError(DAWN_VALIDATION_ERROR("Command buffer recording ended before %s was ended.",
-                                          passEncoder));
+        std::unique_ptr<ValidationError> err = DAWN_VALIDATION_ERROR(
+            "Command buffer recording ended before %s was ended.", passEncoder);
+        HandleError(std::move(err));
     }
 }
 
@@ -233,17 +239,15 @@ void EncodingContext::PopDebugGroupLabel() {
     mDebugGroupLabels.pop_back();
 }
 
-MaybeError EncodingContext::Finish() {
+MaybeUnknownError EncodingContext::Finish() {
     CommitCommands(std::move(mPendingCommands));
 
     switch (mStatus) {
         case Status::ErrorAtCreation:
         case Status::Destroyed:
             return {};
-
         case Status::Finished:
             return DAWN_VALIDATION_ERROR("Command encoding already finished.");
-
         case Status::ErrorInRecording:
         case Status::Open:
             break;

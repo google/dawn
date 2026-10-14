@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 134
+; Bound: 137
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -18,6 +18,7 @@
                OpName %start_byte_offset "start_byte_offset"
                OpName %start_byte_offset_0 "start_byte_offset"
                OpName %a "a"
+               OpName %idx "idx"
                OpDecorate %_arr_v4uint_uint_8 ArrayStride 16
                OpMemberDecorate %u_block_tint_explicit_layout 0 Offset 0
                OpDecorate %u_block_tint_explicit_layout Block
@@ -68,6 +69,7 @@
     %uint_24 = OpConstant %uint 24
         %113 = OpTypeFunction %_arr_mat4v4half_uint_4 %uint
 %_ptr_Function__arr_mat4v4half_uint_4 = OpTypePointer Function %_arr_mat4v4half_uint_4
+%_ptr_Function_uint = OpTypePointer Function %uint
     %uint_32 = OpConstant %uint 32
 %_ptr_Function_mat4v4half = OpTypePointer Function %mat4v4half
           %f = OpFunction %void None %21
@@ -156,31 +158,35 @@
 %start_byte_offset_0 = OpFunctionParameter %uint
         %114 = OpLabel
           %a = OpVariable %_ptr_Function__arr_mat4v4half_uint_4 Function
+        %idx = OpVariable %_ptr_Function_uint Function
                OpStore %a %18
                OpBranch %117
         %117 = OpLabel
+               OpStore %idx %uint_0
                OpBranch %120
         %120 = OpLabel
-        %122 = OpPhi %uint %uint_0 %117 %123 %119
                OpLoopMerge %121 %119 None
                OpBranch %118
         %118 = OpLabel
-        %125 = OpUGreaterThanEqual %bool %122 %uint_4
-               OpSelectionMerge %126 None
-               OpBranchConditional %125 %127 %126
-        %127 = OpLabel
+        %125 = OpLoad %uint %idx None
+        %126 = OpUGreaterThanEqual %bool %125 %uint_4
+               OpSelectionMerge %127 None
+               OpBranchConditional %126 %128 %127
+        %128 = OpLabel
                OpBranch %121
-        %126 = OpLabel
-        %128 = OpIMul %uint %122 %uint_32
-        %130 = OpIAdd %uint %start_byte_offset_0 %128
-        %131 = OpAccessChain %_ptr_Function_mat4v4half %a %122
-        %133 = OpFunctionCall %mat4v4half %30 %130
-               OpStore %131 %133 None
+        %127 = OpLabel
+        %129 = OpIMul %uint %125 %uint_32
+        %131 = OpIAdd %uint %start_byte_offset_0 %129
+        %132 = OpAccessChain %_ptr_Function_mat4v4half %a %125
+        %134 = OpFunctionCall %mat4v4half %30 %131
+               OpStore %132 %134 None
                OpBranch %119
         %119 = OpLabel
-        %123 = OpIAdd %uint %122 %uint_1
+        %135 = OpLoad %uint %idx None
+        %136 = OpIAdd %uint %135 %uint_1
+               OpStore %idx %136 None
                OpBranch %120
         %121 = OpLabel
-        %124 = OpLoad %_arr_mat4v4half_uint_4 %a None
-               OpReturnValue %124
+        %122 = OpLoad %_arr_mat4v4half_uint_4 %a None
+               OpReturnValue %122
                OpFunctionEnd

@@ -675,6 +675,12 @@ TEST_P(DepthCopyTests, FromDepthAspectToBufferAtNonZeroOffset) {
     // TODO(crbug.com/519251261): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
+    // TODO(crbug.com/571358852): Flaky Depth32FloatStencil8 readback on Windows Qualcomm with
+    // D3D11 backend validation.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11() &&
+                          IsBackendValidationEnabled() &&
+                          GetParam().mTextureFormat == wgpu::TextureFormat::Depth32FloatStencil8);
+
     constexpr uint32_t kTestLevel = 0;
     constexpr uint32_t kBufferCopyOffsets[] = {4u, 512u};
     constexpr uint32_t kTestTextureSizes[][2] = {
@@ -704,9 +710,6 @@ TEST_P(DepthCopyTests, FromDepthAspectToBufferAtNonZeroOffset) {
 
 // Test copying the non-zero mip, depth-only aspect into a buffer.
 TEST_P(DepthCopyTests, FromNonZeroMipDepthAspect) {
-    // TODO(42242119): fail on Qualcomm Adreno X1.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
-
     // TODO(477654109): This test fails for this one format on MacOS AMD 550X and 560X
     // though not on AMD Radeon Pro 5300M.
     DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsAMD() &&
@@ -1212,8 +1215,6 @@ class StencilCopyTests : public DepthStencilCopyTests {
 TEST_P(StencilCopyTests, FromStencilAspect) {
     // TODO(crbug.com/40238674): Fails on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsImgTec());
-    // TODO(42242119): hang/crash on Qualcomm Adreno X1.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
 
     constexpr uint32_t kTestLevel = 0;
     constexpr uint32_t kBufferCopyOffset = 0;
@@ -1241,8 +1242,6 @@ TEST_P(StencilCopyTests, FromStencilAspect) {
 TEST_P(StencilCopyTests, FromStencilAspectAtNonZeroOffset) {
     // TODO(crbug.com/40238674): Fails on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsImgTec());
-    // TODO(42242119): hang/crash on Qualcomm Adreno X1.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
 
     constexpr uint32_t kTestLevel = 0;
     constexpr std::array<uint32_t, 2> kBufferCopyOffsets = {4u, 512u};
@@ -1272,8 +1271,6 @@ TEST_P(StencilCopyTests, FromStencilAspectAtNonZeroOffset) {
 TEST_P(StencilCopyTests, FromNonZeroMipStencilAspect) {
     // TODO(crbug.com/40238674): Fails on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsImgTec());
-    // TODO(42242119): hang/crash on Qualcomm Adreno X1.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
 
     constexpr uint32_t kWidth = 9;
     constexpr uint32_t kHeight = 9;

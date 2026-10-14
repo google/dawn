@@ -14,16 +14,15 @@ mat2x4 v_2(uint start_byte_offset) {
 mat2x4[4] v_3(uint start_byte_offset) {
   mat2x4 a[4] = mat2x4[4](mat2x4(vec4(0.0f), vec4(0.0f)), mat2x4(vec4(0.0f), vec4(0.0f)), mat2x4(vec4(0.0f), vec4(0.0f)), mat2x4(vec4(0.0f), vec4(0.0f)));
   {
-    uint v_4 = 0u;
-    v_4 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_5 = v_4;
-      if ((v_5 >= 4u)) {
+      uint v_4 = idx;
+      if ((v_4 >= 4u)) {
         break;
       }
-      a[v_5] = v_2((start_byte_offset + (v_5 * 32u)));
+      a[v_4] = v_2((start_byte_offset + (v_4 * 32u)));
       {
-        v_4 = (v_5 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -34,6 +33,6 @@ void main() {
   mat2x4 l_a[4] = v_3(0u);
   mat2x4 l_a_i = v_2(64u);
   vec4 l_a_i_i = uintBitsToFloat(v.inner[5u]);
-  uvec4 v_6 = v.inner[5u];
-  v_1.inner = (((uintBitsToFloat(v_6.x) + l_a[0][0].x) + l_a_i[0].x) + l_a_i_i.x);
+  uvec4 v_5 = v.inner[5u];
+  v_1.inner = (((uintBitsToFloat(v_5.x) + l_a[0][0].x) + l_a_i[0].x) + l_a_i_i.x);
 }

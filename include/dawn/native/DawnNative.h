@@ -227,9 +227,6 @@ DAWN_NATIVE_EXPORT bool IsTextureSubresourceInitialized(
     uint32_t layerCount,
     WGPUTextureAspect aspect = WGPUTextureAspect_All);
 
-// Backdoor to get the order of the ProcMap for testing
-DAWN_NATIVE_EXPORT std::vector<std::string_view> GetProcMapNamesForTesting();
-
 DAWN_NATIVE_EXPORT bool DeviceTick(WGPUDevice device);
 
 DAWN_NATIVE_EXPORT bool InstanceProcessEvents(WGPUInstance instance);
@@ -240,6 +237,8 @@ DAWN_NATIVE_EXPORT void EnableErrorInjector();
 DAWN_NATIVE_EXPORT void DisableErrorInjector();
 DAWN_NATIVE_EXPORT void ClearErrorInjector();
 DAWN_NATIVE_EXPORT uint64_t AcquireErrorInjectorCallCount();
+// TODO(https://crbug.com/562254224): Introduce "categories" or something to make it so that tests
+// don't have to specify/predict the exact number of injectable backend API calls in the backend.
 DAWN_NATIVE_EXPORT void InjectErrorAt(uint64_t index);
 #endif  // defined(DAWN_ENABLE_ERROR_INJECTION)
 

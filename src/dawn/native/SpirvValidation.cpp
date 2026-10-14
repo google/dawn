@@ -34,7 +34,7 @@
 
 namespace dawn::native {
 
-MaybeError ValidateSpirv(LogEmitter* logEmitter, Span<const uint32_t> spirv, bool spv14) {
+MaybeValError ValidateSpirv(LogEmitter* logEmitter, Span<const uint32_t> spirv, bool spv14) {
     spvtools::SpirvTools spirvTools(spv14 ? SPV_ENV_VULKAN_1_1_SPIRV_1_4 : SPV_ENV_VULKAN_1_1);
     spirvTools.SetMessageConsumer([logEmitter](spv_message_level_t level, const char*,
                                                const spv_position_t& position,

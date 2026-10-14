@@ -131,7 +131,7 @@ class ExecutionQueueBase : public ApiObjectBase {
     // Waits for GPU to finish, checks errors and gets ready for destruction. This is only used when
     // properly destructing the device. For a real device loss, this function doesn't need to be
     // called since the driver already closed all resources.
-    MaybeError WaitForIdleForDestruction();
+    void WaitForIdleForDestruction();
 
     // Wait at most `timeout` synchronously for the ExecutionSerial to pass.
     MaybeError WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout);

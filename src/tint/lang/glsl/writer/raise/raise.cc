@@ -31,7 +31,6 @@
 #include <unordered_map>
 
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/core/ir/transform/array_length_from.h"
 #include "src/tint/lang/core/ir/transform/bgra8unorm_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binding_remapper.h"
@@ -50,10 +49,10 @@
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/core/ir/transform/remove_uniform_vector_component_loads.h"
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
+#include "src/tint/lang/core/ir/transform/replace_array_and_buffer_length.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
-#include "src/tint/lang/core/ir/transform/std140.h"
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 #include "src/tint/lang/core/ir/transform/value_to_let.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
@@ -170,7 +169,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     TINT_CHECK_RESULT(core::ir::transform::MultiplanarExternalTexture(module, multiplanar_map));
 
     // `PreservePadding` must run before `DirectVariableAccess`.
-    TINT_CHECK_RESULT(core::ir::transform::PreservePadding(module));
+    TINT_CHECK_RESULT(core::ir::transform::PreservePadding(module, {}));
 
     {
         // This must come after `MultiplanarExternalTexture` as it will insert functions with
@@ -184,14 +183,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // DecomposeAccess must come before BlockDecoratedStructs, which will wrap the
     // uniform variable in a structure. It must come after DirectVariableAccess which removes
     // uniform buffers passed as function parameters.
-    // Uniform buffers are only unconditionally decomposed if the implementation does not support
-    // uniform buffer standard layout. Otherwise, only buffer type variables are decomposed.
-    core::ir::transform::DecomposeAccessConfig decompose_config{.uniform =
-                                                                    !options.use_uniform_buffers};
+    // Uniform buffers are unconditionally decomposed to support implementations that do not support
+    // uniform buffer standard layout.
+    core::ir::transform::DecomposeAccessConfig decompose_config{
+        .uniform = true,
+    };
     TINT_CHECK_RESULT(core::ir::transform::DecomposeAccess(module, decompose_config));
-    if (options.use_uniform_buffers) {
-        TINT_CHECK_RESULT(core::ir::transform::Std140(module));
-    }
 
     // Note, this must come after DecomposeAccess to support buffer_view.
     // Note, this must come after Robustness as it may add `arrayLength`.
@@ -211,7 +208,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
                 size_indices[bp] = index;
             }
         }
-        TINT_CHECK_RESULT(core::ir::transform::ArrayLengthFromImmediates(
+        TINT_CHECK_RESULT(core::ir::transform::ReplaceArrayAndBufferLength(
             module, immediate_data_layout, buffer_sizes_array_elements_num, size_indices));
     }
     TINT_CHECK_RESULT(core::ir::transform::BlockDecoratedStructs(module));

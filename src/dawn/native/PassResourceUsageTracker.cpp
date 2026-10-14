@@ -121,7 +121,7 @@ void SyncScopeUsageTracker::MergeResourceUsages(const SyncScopeResourceUsage& us
     DAWN_ASSERT(usages.resourceTable == nullptr);
 }
 
-void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
+void SyncScopeUsageTracker::AddBindGroupUsages(BindGroupBase* group) {
     const auto* layout = group->GetLayout();
 
     for (BindingIndex i : layout->GetBufferIndices()) {
@@ -250,7 +250,7 @@ SyncScopeResourceUsage SyncScopeUsageTracker::AcquireSyncScopeUsage() {
     }
     mTextureSyncInfos.clear();
 
-    for (auto* const it : mExternalTextureUsages) {
+    for (ExternalTextureBase* it : mExternalTextureUsages) {
         result.externalTextures.push_back(it);
     }
     mExternalTextureUsages.clear();
@@ -263,9 +263,20 @@ SyncScopeResourceUsage SyncScopeUsageTracker::AcquireSyncScopeUsage() {
     return result;
 }
 
-ComputePassResourceUsageTracker::ComputePassResourceUsageTracker() = default;
+void DispatchResourceUsageTracker::AddBindGroup(BindGroupBase* group) {
+    AddBindGroupUsages(group);
+}
+
+ComputePassResourceUsageTracker::ComputePassResourceUsageTracker(PassTrackerID passTrackerID)
+    : mPassTrackerID(passTrackerID) {}
+
+ComputePassResourceUsageTracker::ComputePassResourceUsageTracker(
+    ComputePassResourceUsageTracker&&) = default;
 
 ComputePassResourceUsageTracker::~ComputePassResourceUsageTracker() = default;
+
+ComputePassResourceUsageTracker& ComputePassResourceUsageTracker::operator=(
+    ComputePassResourceUsageTracker&&) = default;
 
 void ComputePassResourceUsageTracker::AddDispatch(SyncScopeResourceUsage scope) {
     mUsage.dispatchUsages.push_back(std::move(scope));
@@ -280,6 +291,14 @@ void ComputePassResourceUsageTracker::AddReferencedResourceTable(ResourceTableBa
 }
 
 void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGroupBase* group) {
+    DAWN_ASSERT(mPassTrackerID != kInvalidPassTrackerID);
+    // The referenced resources only depend on the bind group, so they only need to be added once
+    // per compute pass. Per-dispatch sync scopes are tracked separately. If the bind group is
+    // concurrently added in multiple encoders at the same time, duplicate additions are benign.
+    if (!group->ShouldAddToPassTracker(mPassTrackerID)) {
+        return;
+    }
+
     const auto* layout = group->GetLayout();
 
     for (BindingIndex i : layout->GetBufferIndices()) {
@@ -303,10 +322,12 @@ void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGrou
 }
 
 ComputePassResourceUsage ComputePassResourceUsageTracker::AcquireResourceUsage() {
+    mPassTrackerID = kInvalidPassTrackerID;
     return std::move(mUsage);
 }
 
-RenderPassResourceUsageTracker::RenderPassResourceUsageTracker() = default;
+RenderPassResourceUsageTracker::RenderPassResourceUsageTracker(PassTrackerID passTrackerID)
+    : mPassTrackerID(passTrackerID) {}
 
 RenderPassResourceUsageTracker::RenderPassResourceUsageTracker(RenderPassResourceUsageTracker&&) =
     default;
@@ -315,6 +336,18 @@ RenderPassResourceUsageTracker::~RenderPassResourceUsageTracker() = default;
 
 RenderPassResourceUsageTracker& RenderPassResourceUsageTracker::operator=(
     RenderPassResourceUsageTracker&&) = default;
+
+void RenderPassResourceUsageTracker::AddBindGroup(BindGroupBase* group) {
+    DAWN_ASSERT(mPassTrackerID != kInvalidPassTrackerID);
+    // Intrusive PassTrackerID tracking on BindGroupBase suffices to detect duplicates because usage
+    // is tracked per entire resource, and dynamic offsets are handled separately. If the bind group
+    // is concurrently added in multiple encoders at the same time, duplicate additions are benign.
+    if (!group->ShouldAddToPassTracker(mPassTrackerID)) {
+        return;
+    }
+
+    AddBindGroupUsages(group);
+}
 
 void RenderPassResourceUsageTracker::MarkFramebufferFetchUsed() {
     mFramebufferFetchUsed = true;
@@ -333,6 +366,7 @@ RenderPassResourceUsage RenderPassResourceUsageTracker::AcquireResourceUsage() {
     }
 
     mQueryAvailabilities.clear();
+    mPassTrackerID = kInvalidPassTrackerID;
 
     result.usesFramebufferFetch = mFramebufferFetchUsed;
 

@@ -52,9 +52,9 @@ void TestConstValue() {
 
 // Uninit can only be used when the value type is capable of being uninitialized.
 void TestUninit() {
-    (void)HeapArray<int>::Uninit(4);
-    (void)HeapArray<Val>::Uninit(4);
-    (void)HeapArray<Index>::Uninit(4);  // expected-error {{no matching function for call to 'Uninit'}}
+    std::ignore = HeapArray<int>::Uninit(4);
+    std::ignore = HeapArray<Val>::Uninit(4);
+    std::ignore = HeapArray<Index>::Uninit(4);  // expected-error {{no matching function for call to 'Uninit'}}
 }
 
 void TestConversionToSpan() {
@@ -62,8 +62,8 @@ void TestConversionToSpan() {
 
     // dawn::Span cannot construct from a range with a different index type.
     // This probably isn't important and could be changed.
-    (void)ityp::span<Index, Val>(arr);
-    (void)dawn::Span<Val>(arr);  // expected-error {{no matching conversion for functional-style cast from}}
+    std::ignore = ityp::span<Index, Val>(arr);
+    std::ignore = dawn::Span<Val>(arr);  // expected-error {{no matching conversion for functional-style cast from}}
 }
 
 void TestIndexing() {

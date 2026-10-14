@@ -277,6 +277,56 @@ TEST_F(QueueSubmitValidationTest, SubmitWithUnusedComputeBuffer) {
     }
 }
 
+// Test that buffers in compute pass bindgroups that are set multiple times, in the same pass and
+// in passes of different command buffers, are checked in Queue::Submit validation for every
+// command buffer. This covers deduplication of SetBindGroup tracking within a compute pass.
+TEST_F(QueueSubmitValidationTest, SubmitWithComputeBindGroupSetInMultiplePasses) {
+    wgpu::Queue queue = device.GetQueue();
+
+    wgpu::BindGroupLayout testBGL = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage}});
+
+    wgpu::BufferDescriptor bufDesc;
+    bufDesc.size = 4;
+    bufDesc.usage = wgpu::BufferUsage::Storage;
+
+    for (bool destroy : {true, false}) {
+        wgpu::Buffer buffer = device.CreateBuffer(&bufDesc);
+        wgpu::BindGroup bg = utils::MakeBindGroup(device, testBGL, {{0, buffer}});
+
+        // Set the same bind group multiple times in a pass, including at another index.
+        wgpu::CommandBuffer commands0;
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetBindGroup(0, bg);
+            pass.SetBindGroup(0, bg);
+            pass.SetBindGroup(1, bg);
+            pass.End();
+            commands0 = encoder.Finish();
+        }
+
+        // Set the same bind group again in a pass of another command buffer.
+        wgpu::CommandBuffer commands1;
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetBindGroup(0, bg);
+            pass.End();
+            commands1 = encoder.Finish();
+        }
+
+        if (destroy) {
+            buffer.Destroy();
+            ASSERT_DEVICE_ERROR(queue.Submit(1, &commands1));
+            ASSERT_DEVICE_ERROR(queue.Submit(1, &commands0));
+        } else {
+            queue.Submit(1, &commands1);
+            queue.Submit(1, &commands0);
+        }
+    }
+}
+
 // Test that textures in unused compute pass bindgroups are still checked for in
 // Queue::Submit validation.
 TEST_F(QueueSubmitValidationTest, SubmitWithUnusedComputeTextures) {

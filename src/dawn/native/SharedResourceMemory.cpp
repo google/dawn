@@ -87,7 +87,7 @@ SharedResourceMemoryContents* SharedResourceMemory::GetContents() const {
     return mContents.Get();
 }
 
-MaybeError SharedResourceMemory::ValidateResourceCreatedFromSelf(SharedResource* resource) {
+MaybeValError SharedResourceMemory::ValidateResourceCreatedFromSelf(SharedResource* resource) {
     auto* contents = resource->GetSharedResourceMemoryContents();
     DAWN_INVALID_IF(contents == nullptr, "%s was not created from %s.", resource, this);
 
@@ -117,8 +117,8 @@ wgpu::Status SharedResourceMemory::APIBeginAccess(
 }
 
 template <typename Resource, typename BeginAccessDescriptor>
-MaybeError SharedResourceMemory::BeginAccess(Resource* resource,
-                                             const BeginAccessDescriptor* rawDescriptor) {
+MaybeUnknownError SharedResourceMemory::BeginAccess(Resource* resource,
+                                                    const BeginAccessDescriptor* rawDescriptor) {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_TRY(GetDevice()->ValidateObject(resource));
 
@@ -232,26 +232,26 @@ wgpu::Status SharedResourceMemory::APIEndAccess(BufferBase* buffer,
                : wgpu::Status::Success;
 }
 
-MaybeError SharedResourceMemory::BeginAccessImpl(
+MaybeValError SharedResourceMemory::BeginAccessImpl(
     TextureBase* texture,
     const UnpackedPtr<SharedTextureMemoryBeginAccessDescriptor>& descriptor) {
     DAWN_UNREACHABLE();
 }
 
-MaybeError SharedResourceMemory::BeginAccessImpl(
+MaybeValError SharedResourceMemory::BeginAccessImpl(
     BufferBase* buffer,
     const UnpackedPtr<SharedBufferMemoryBeginAccessDescriptor>& descriptor) {
     DAWN_UNREACHABLE();
 }
 
-ResultOrError<FenceAndSignalValue> SharedResourceMemory::EndAccessImpl(
+ResultOrUnknownError<FenceAndSignalValue> SharedResourceMemory::EndAccessImpl(
     TextureBase* texture,
     ExecutionSerial lastUsageSerial,
     UnpackedPtr<SharedTextureMemoryEndAccessState>& state) {
     DAWN_UNREACHABLE();
 }
 
-ResultOrError<FenceAndSignalValue> SharedResourceMemory::EndAccessImpl(
+ResultOrUnknownError<FenceAndSignalValue> SharedResourceMemory::EndAccessImpl(
     BufferBase* buffer,
     ExecutionSerial lastUsageSerial,
     UnpackedPtr<SharedBufferMemoryEndAccessState>& state) {
@@ -263,7 +263,7 @@ bool SharedResourceMemory::APIIsDeviceLost() const {
 }
 
 template <typename Resource, typename EndAccessState>
-MaybeError SharedResourceMemory::EndAccess(Resource* resource, EndAccessState* state) {
+MaybeUnknownError SharedResourceMemory::EndAccess(Resource* resource, EndAccessState* state) {
     DAWN_TRY(GetDevice()->ValidateObject(resource));
     DAWN_TRY(ValidateResourceCreatedFromSelf(resource));
 
@@ -291,12 +291,15 @@ MaybeError SharedResourceMemory::EndAccess(Resource* resource, EndAccessState* s
             mExclusiveAccess = nullptr;
         }
     } else if constexpr (std::is_same_v<Resource, BufferBase>) {
-        DAWN_INVALID_IF(
-            static_cast<BufferBase*>(resource)->APIGetMapState() != wgpu::BufferMapState::Unmapped,
-            "%s is currently mapped or pending map.", resource);
         DAWN_INVALID_IF(mExclusiveAccess != resource,
                         "Cannot end access with %s on %s which is currently accessed by %s.",
                         resource, this, mExclusiveAccess.Get());
+        auto* buffer = static_cast<BufferBase*>(resource);
+        if (buffer->APIGetMapState() != wgpu::BufferMapState::Unmapped) {
+            // Unmap the buffer on the caller's behalf instead of failing so that EndAccess always
+            // succeeds, regardless of the buffer's map state.
+            DAWN_TRY(buffer->Unmap());
+        }
         mContents->mSharedResourceAccessState = SharedResourceAccessState::NotAccessed;
         mExclusiveAccess = nullptr;
     }
@@ -316,9 +319,9 @@ MaybeError SharedResourceMemory::EndAccess(Resource* resource, EndAccessState* s
     // Call the error-generating part of the EndAccess implementation to export a fence.
     // This is separated out because writing the output state must happen regardless of whether
     // or not EndAccessInternal succeeds.
-    MaybeError err;
+    MaybeUnknownError err;
     if (lastUsageSerial != kBeginningOfGPUTime) {
-        ResultOrError<FenceAndSignalValue> result =
+        ResultOrUnknownError<FenceAndSignalValue> result =
             EndAccessInternal(lastUsageSerial, resource, state);
         if (result.IsSuccess()) {
             FenceAndSignalValue fence = result.AcquireSuccess();
@@ -353,7 +356,7 @@ MaybeError SharedResourceMemory::EndAccess(Resource* resource, EndAccessState* s
 }
 
 template <typename Resource, typename EndAccessState>
-ResultOrError<FenceAndSignalValue> SharedResourceMemory::EndAccessInternal(
+ResultOrUnknownError<FenceAndSignalValue> SharedResourceMemory::EndAccessInternal(
     ExecutionSerial lastUsageSerial,
     Resource* resource,
     EndAccessState* rawState) {

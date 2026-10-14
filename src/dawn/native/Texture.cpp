@@ -52,9 +52,9 @@ namespace dawn::native {
 
 namespace {
 
-MaybeError ValidateTextureViewFormatCompatibility(const DeviceBase* device,
-                                                  const Format& format,
-                                                  wgpu::TextureFormat viewFormatEnum) {
+MaybeValError ValidateTextureViewFormatCompatibility(const DeviceBase* device,
+                                                     const Format& format,
+                                                     wgpu::TextureFormat viewFormatEnum) {
     const Format* viewFormat;
     DAWN_TRY_ASSIGN(viewFormat, device->GetInternalFormat(viewFormatEnum));
 
@@ -69,10 +69,10 @@ MaybeError ValidateTextureViewFormatCompatibility(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateCanViewTextureAs(const DeviceBase* device,
-                                    const TextureBase* texture,
-                                    const Format& viewFormat,
-                                    wgpu::TextureAspect aspect) {
+MaybeValError ValidateCanViewTextureAs(const DeviceBase* device,
+                                       const TextureBase* texture,
+                                       const Format& viewFormat,
+                                       wgpu::TextureAspect aspect) {
     const Format& format = texture->GetFormat();
 
     if (aspect != wgpu::TextureAspect::All) {
@@ -145,7 +145,7 @@ bool IsTextureViewDimensionCompatibleWithTextureDimension(
     DAWN_UNREACHABLE();
 }
 
-MaybeError ValidateDepthOrArrayLayersIsCompatibleWithTextureBindingViewDimension(
+MaybeValError ValidateDepthOrArrayLayersIsCompatibleWithTextureBindingViewDimension(
     wgpu::TextureViewDimension textureBindingViewDimension,
     uint32_t depthOrArrayLayers) {
     switch (textureBindingViewDimension) {
@@ -190,9 +190,9 @@ bool IsArrayLayerValidForTextureViewDimension(wgpu::TextureViewDimension texture
     DAWN_UNREACHABLE();
 }
 
-MaybeError ValidateSampleCount(const TextureDescriptor* descriptor,
-                               wgpu::TextureUsage usage,
-                               const Format* format) {
+MaybeValError ValidateSampleCount(const TextureDescriptor* descriptor,
+                                  wgpu::TextureUsage usage,
+                                  const Format* format) {
     DAWN_INVALID_IF(!IsValidSampleCount(descriptor->sampleCount),
                     "The sample count (%u) of the texture is not supported.",
                     descriptor->sampleCount);
@@ -234,7 +234,7 @@ MaybeError ValidateSampleCount(const TextureDescriptor* descriptor,
     return {};
 }
 
-MaybeError ValidateTextureViewDimensionCompatibility(
+MaybeValError ValidateTextureViewDimensionCompatibility(
     const DeviceBase* device,
     const TextureBase* texture,
     const UnpackedPtr<TextureViewDescriptor>& descriptor) {
@@ -284,9 +284,9 @@ MaybeError ValidateTextureViewDimensionCompatibility(
     return {};
 }
 
-MaybeError ValidateTextureSize(const DeviceBase* device,
-                               const TextureDescriptor* descriptor,
-                               const Format* format) {
+MaybeValError ValidateTextureSize(const DeviceBase* device,
+                                  const TextureDescriptor* descriptor,
+                                  const Format* format) {
     DAWN_CHECK(descriptor->size.width != 0 && descriptor->size.height != 0 &&
                descriptor->size.depthOrArrayLayers != 0);
     const CombinedLimits& limits = device->GetLimits();
@@ -399,7 +399,7 @@ MaybeError ValidateTextureSize(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateTextureUsageConstraints(
+MaybeValError ValidateTextureUsageConstraints(
     const DeviceBase* device,
     wgpu::TextureDimension textureDimension,
     wgpu::TextureUsage usage,
@@ -491,9 +491,10 @@ wgpu::TextureUsage GetTextureViewUsage(wgpu::TextureUsage sourceTextureUsage,
                                                             : sourceTextureUsage;
 }
 
-MaybeError ValidateTextureComponentSwizzle(const DeviceBase* device,
-                                           const TextureBase* texture,
-                                           const UnpackedPtr<TextureViewDescriptor>& descriptor) {
+MaybeValError ValidateTextureComponentSwizzle(
+    const DeviceBase* device,
+    const TextureBase* texture,
+    const UnpackedPtr<TextureViewDescriptor>& descriptor) {
     if (auto* swizzleDesc = descriptor.Get<TextureComponentSwizzleDescriptor>()) {
         DAWN_INVALID_IF(!device->HasFeature(Feature::TextureComponentSwizzle),
                         "swizzle used without the %s feature enabled.",
@@ -509,10 +510,10 @@ MaybeError ValidateTextureComponentSwizzle(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateTextureViewUsage(const DeviceBase* device,
-                                    const TextureBase* texture,
-                                    wgpu::TextureUsage usage,
-                                    const Format* format) {
+MaybeValError ValidateTextureViewUsage(const DeviceBase* device,
+                                       const TextureBase* texture,
+                                       wgpu::TextureUsage usage,
+                                       const Format* format) {
     wgpu::TextureUsage inheritedUsage = GetTextureViewUsage(texture->GetUsage(), usage);
 
     DAWN_INVALID_IF(!IsSubset(inheritedUsage, texture->GetUsage()),
@@ -781,7 +782,7 @@ wgpu::ComponentSwizzle ComposeSwizzleComponent(wgpu::TextureComponentSwizzle swi
 
 }  // anonymous namespace
 
-MaybeError ValidateTextureDescriptor(
+MaybeValError ValidateTextureDescriptor(
     const DeviceBase* device,
     const UnpackedPtr<TextureDescriptor>& descriptor,
     AllowMultiPlanarTextureFormat allowMultiPlanar,
@@ -919,9 +920,9 @@ MaybeError ValidateTextureDescriptor(
     return {};
 }
 
-MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
-                                         const TextureBase* texture,
-                                         const UnpackedPtr<TextureViewDescriptor>& descriptor) {
+MaybeValError ValidateTextureViewDescriptor(const DeviceBase* device,
+                                            const TextureBase* texture,
+                                            const UnpackedPtr<TextureViewDescriptor>& descriptor) {
     // Parent texture should have been already validated.
     DAWN_CHECK(texture);
     DAWN_CHECK(!texture->IsError());
@@ -996,7 +997,7 @@ MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
     return {};
 }
 
-ResultOrError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
+ResultOrValError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
     const TextureBase* texture,
     const TextureViewDescriptor* descriptor) {
     DAWN_CHECK(texture);
@@ -1357,8 +1358,6 @@ wgpu::TextureUsage TextureBase::GetInternalUsage() const {
     return mInternalUsage;
 }
 
-
-
 void TextureBase::AddInternalUsage(wgpu::TextureUsage usage) {
     DAWN_CHECK(!IsError());
     mInternalUsage |= usage;
@@ -1447,7 +1446,7 @@ void TextureBase::SetIsSubresourceContentInitialized(bool isInitialized,
     }
 }
 
-MaybeError TextureBase::ValidateCanUseInSubmitNow() const {
+MaybeValError TextureBase::ValidateCanUseInSubmitNow() const {
     DAWN_CHECK(!IsError());
     if (mState.destroyed || !mState.hasAccess) [[unlikely]] {
         DAWN_INVALID_IF(mState.destroyed, "Destroyed texture %s used in a submit.", this);
@@ -1575,7 +1574,7 @@ Extent3D TextureBase::GetMipLevelSubresourcePhysicalSize(uint32_t level, Aspect 
     return extent;
 }
 
-ResultOrError<Ref<TextureViewBase>> TextureBase::CreateView(
+ResultOrUnknownError<Ref<TextureViewBase>> TextureBase::CreateView(
     const TextureViewDescriptor* descriptor) {
     if (descriptor == nullptr) {
         return GetOrCreateDefaultView();
@@ -1650,7 +1649,7 @@ uint64_t TextureBase::ComputeEstimatedByteSize() const {
     return byteSize;
 }
 
-ResultOrError<Ref<TextureViewBase>> TextureBase::GetOrCreateDefaultView() {
+ResultOrUnknownError<Ref<TextureViewBase>> TextureBase::GetOrCreateDefaultView() {
     // Texture view caching is not enabled, so don't cache the default view.
     if (!mTextureViewCache) {
         return GetDevice()->CreateTextureView(this, nullptr);

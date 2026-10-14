@@ -28,6 +28,8 @@
 #ifndef SRC_TINT_LANG_HLSL_WRITER_RAISE_SPLIT_WORKGROUP_ATOMICS_H_
 #define SRC_TINT_LANG_HLSL_WRITER_RAISE_SPLIT_WORKGROUP_ATOMICS_H_
 
+#include <cstdint>
+
 #include "src/tint/utils/result.h"
 
 // Forward declarations.
@@ -36,6 +38,15 @@ class Module;
 }  // namespace tint::core::ir
 
 namespace tint::hlsl::writer::raise {
+
+enum class SplitMode : uint8_t {
+    kSubgroupMatrix,
+    kAll,
+};
+
+struct SplitWorkgroupAtomicsConfig {
+    SplitMode mode = SplitMode::kSubgroupMatrix;
+};
 
 /// SplitWorkgroupAtomics is a transform that splits workgroup variables containing atomic members
 /// into two separate variables:
@@ -55,8 +66,10 @@ namespace tint::hlsl::writer::raise {
 ///     atomic variables are left untouched.
 ///
 /// @param ir the module to transform
+/// @param config the transform options
 /// @returns success or failure
-Result<SuccessType> SplitWorkgroupAtomics(core::ir::Module& ir);
+Result<SuccessType> SplitWorkgroupAtomics(core::ir::Module& ir,
+                                          const SplitWorkgroupAtomicsConfig& config);
 
 }  // namespace tint::hlsl::writer::raise
 

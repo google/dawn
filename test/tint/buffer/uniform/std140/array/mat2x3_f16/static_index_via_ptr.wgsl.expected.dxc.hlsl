@@ -27,21 +27,20 @@ typedef matrix<float16_t, 2, 3> ary_ret[4];
 ary_ret v_6(uint start_byte_offset) {
   matrix<float16_t, 2, 3> a_1[4] = (matrix<float16_t, 2, 3>[4])0;
   {
-    uint v_7 = 0u;
-    v_7 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_8 = v_7;
-      if ((v_8 >= 4u)) {
+      uint v_7 = idx;
+      if ((v_7 >= 4u)) {
         break;
       }
-      a_1[v_8] = v_1((start_byte_offset + (v_8 * 16u)));
+      a_1[v_7] = v_1((start_byte_offset + (v_7 * 16u)));
       {
-        v_7 = (v_8 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  matrix<float16_t, 2, 3> v_9[4] = a_1;
-  return v_9;
+  matrix<float16_t, 2, 3> v_8[4] = a_1;
+  return v_8;
 }
 
 [numthreads(1, 1, 1)]

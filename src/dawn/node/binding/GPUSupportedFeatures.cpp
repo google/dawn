@@ -27,6 +27,8 @@
 
 #include "src/dawn/node/binding/GPUSupportedFeatures.h"
 
+#include <span>
+
 #include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/IteratorHelper.h"
 #include "src/utils/compiler.h"
@@ -43,8 +45,7 @@ GPUSupportedFeatures::GPUSupportedFeatures(Napi::Env env,
 
     // Add all known GPUFeatureNames that are known by dawn.node and skip the other ones are they
     // may be native-only extension, Dawn-specific or other special cases.
-    for (uint32_t i = 0; i < supportedFeatures.featureCount; ++i) {
-        wgpu::FeatureName feature = DAWN_UNSAFE_TODO(supportedFeatures.features[i]);
+    for (wgpu::FeatureName feature : WGPU_SPAN(supportedFeatures.feature)) {
         interop::GPUFeatureName gpuFeature;
         if (conv(gpuFeature, feature)) {
             enabled_.emplace(gpuFeature);

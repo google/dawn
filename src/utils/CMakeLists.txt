@@ -57,25 +57,37 @@ set(conditional_private_depends)
 
 add_subdirectory(chromium_test_compat)
 
+add_library(dawn_utils_config INTERFACE)
+target_include_directories(dawn_utils_config INTERFACE "${PROJECT_SOURCE_DIR}")
+add_dependencies(dawn_utils_config dawn_warnings_config)
+target_compile_definitions(dawn_utils_config INTERFACE "DAWN_HAVE_UTILS_BUILD_CONFIG")
+if (DAWN_ALWAYS_ASSERT OR IS_DEBUG_BUILD)
+    target_compile_definitions(dawn_utils_config INTERFACE "DAWN_ENABLE_ASSERTS")
+endif()
+if (WIN32)
+    target_compile_definitions(dawn_utils_config INTERFACE "NOMINMAX" "WIN32_LEAN_AND_MEAN")
+endif()
+
 dawn_add_library(
     dawn_shared_utils
     ENABLE_EMSCRIPTEN
-    UTILITY_TARGET dawn_internal_config
     HEADERS
         ${private_headers}
     SOURCES
         ${sources}
+    DEPENDS
+        dawn_utils_config
 )
 
 dawn_add_library(
     dawn_crash_handler
     ENABLE_EMSCRIPTEN
-    UTILITY_TARGET dawn_internal_config
     HEADERS
         "crash_handler.h"
     SOURCES
         "crash_handler.cc"
     DEPENDS
+        dawn_utils_config
         absl::failure_signal_handler
         absl::symbolize
 )

@@ -27,41 +27,39 @@ typedef matrix<float16_t, 4, 2> ary_ret[4];
 ary_ret v_8(uint start_byte_offset) {
   matrix<float16_t, 4, 2> a[4] = (matrix<float16_t, 4, 2>[4])0;
   {
-    uint v_9 = 0u;
-    v_9 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_10 = v_9;
-      if ((v_10 >= 4u)) {
+      uint v_9 = idx;
+      if ((v_9 >= 4u)) {
         break;
       }
-      a[v_10] = v_1((start_byte_offset + (v_10 * 16u)));
+      a[v_9] = v_1((start_byte_offset + (v_9 * 16u)));
       {
-        v_9 = (v_10 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  matrix<float16_t, 4, 2> v_11[4] = a;
-  return v_11;
+  matrix<float16_t, 4, 2> v_10[4] = a;
+  return v_10;
 }
 
 void f_inner(uint tint_local_index) {
   {
-    uint v_12 = 0u;
-    v_12 = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_13 = v_12;
-      if ((v_13 >= 4u)) {
+      uint v_11 = idx;
+      if ((v_11 >= 4u)) {
         break;
       }
-      w[v_13] = matrix<float16_t, 4, 2>((float16_t(0.0h)).xx, (float16_t(0.0h)).xx, (float16_t(0.0h)).xx, (float16_t(0.0h)).xx);
+      w[v_11] = matrix<float16_t, 4, 2>((float16_t(0.0h)).xx, (float16_t(0.0h)).xx, (float16_t(0.0h)).xx, (float16_t(0.0h)).xx);
       {
-        v_12 = (v_13 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  matrix<float16_t, 4, 2> v_14[4] = v_8(0u);
-  w = v_14;
+  matrix<float16_t, 4, 2> v_12[4] = v_8(0u);
+  w = v_12;
   w[int(1)] = v_1(32u);
   w[int(1)][int(0)] = tint_bitcast_to_f16(u[0u].y).yx;
   w[int(1)][int(0)].x = tint_bitcast_to_f16(u[0u].y).x;

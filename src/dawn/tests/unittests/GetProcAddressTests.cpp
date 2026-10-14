@@ -173,19 +173,5 @@ INSTANTIATE_TEST_SUITE_P(,
                          testing::Values(DawnFlavor::Native, DawnFlavor::Wire),
                          testing::PrintToStringParamName());
 
-TEST(GetProcAddressInternalTests, CheckDawnNativeProcMapOrder) {
-    std::vector<std::string_view> names = native::GetProcMapNamesForTesting();
-    for (size_t i = 1; i < names.size(); i++) {
-        ASSERT_LT(names[i - 1], names[i]);
-    }
-}
-
-TEST(GetProcAddressInternalTests, CheckDawnWireClientProcMapOrder) {
-    std::vector<std::string_view> names = wire::client::GetProcMapNamesForTesting();
-    for (size_t i = 1; i < names.size(); i++) {
-        ASSERT_LT(names[i - 1], names[i]);
-    }
-}
-
 }  // anonymous namespace
 }  // namespace dawn

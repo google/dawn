@@ -531,7 +531,7 @@ TEST_F(CoreIntrinsicTableTest, OverloadOrderByNumberOfParameters) {
     ASSERT_EQ(result.Failure().Plain(),
               R"(no matching call to 'textureDimensions(bool, bool)'
 
-33 candidate functions:
+34 candidate functions:
  • 'textureDimensions(texture: texture_depth_2d  ✗ , level: L  ✗ ) -> vec2<u32>' where:
       ✗  'L' is 'i32' or 'u32'
  • 'textureDimensions(texture: texture_depth_2d_array  ✗ , level: L  ✗ ) -> vec2<u32>' where:
@@ -578,6 +578,8 @@ TEST_F(CoreIntrinsicTableTest, OverloadOrderByNumberOfParameters) {
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'textureDimensions(texture: texture_multisampled_2d<T>  ✗ ) -> vec2<u32>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_multisampled_2d_array<T>  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
  • 'textureDimensions(texture: texture_storage_1d<F, R>  ✗ ) -> u32' where:
       ✗  'R' is 'read'
  • 'textureDimensions(texture: texture_storage_2d<F, R>  ✗ ) -> vec2<u32>' where:
@@ -610,7 +612,7 @@ TEST_F(CoreIntrinsicTableTest, OverloadOrderByMatchingParameter) {
     ASSERT_EQ(result.Failure().Plain(),
               R"(no matching call to 'textureDimensions(texture_depth_2d, bool)'
 
-33 candidate functions:
+34 candidate functions:
  • 'textureDimensions(texture: texture_depth_2d  ✓ , level: L  ✗ ) -> vec2<u32>' where:
       ✗  'L' is 'i32' or 'u32'
  • 'textureDimensions(texture: texture_depth_2d  ✓ ) -> vec2<u32>' where:
@@ -657,6 +659,8 @@ TEST_F(CoreIntrinsicTableTest, OverloadOrderByMatchingParameter) {
  • 'textureDimensions(texture: texture_cube_array<T>  ✗ ) -> vec2<u32>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'textureDimensions(texture: texture_multisampled_2d<T>  ✗ ) -> vec2<u32>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'textureDimensions(texture: texture_multisampled_2d_array<T>  ✗ ) -> vec2<u32>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'textureDimensions(texture: texture_storage_1d<F, R>  ✗ ) -> u32' where:
       ✗  'R' is 'read'
@@ -997,6 +1001,15 @@ TEST_F(CoreIntrinsicTableTest, MemberFunctionDoesNotMatchNonMemberFunction) {
     ASSERT_NE(result, Success);
     EXPECT_EQ(result.Failure().Plain(), R"(no matching call to 'arrayLength(array<f32>)'
 )");
+}
+
+TEST_F(CoreIntrinsicTableTest, MatchPrintString) {
+    auto result =
+        table.Lookup(BuiltinFn::kPrint, Empty, Vector{ty.String()}, EvaluationStage::kRuntime);
+    ASSERT_EQ(result, Success);
+    EXPECT_EQ(result->return_type, ty.void_());
+    ASSERT_EQ(result->parameters.Length(), 1u);
+    EXPECT_EQ(result->parameters[0].type, ty.String());
 }
 
 }  // namespace

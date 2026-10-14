@@ -37,6 +37,13 @@ See:
           ) }}
 {{-     range .Overloads  -}}
 {{-       range $I.Permute . -}}
+{{-         $has_string := false -}}
+{{-         range .Parameters -}}
+{{-           if eq .Type.Target.Name "string" -}}
+{{-             $has_string = true -}}
+{{-           end -}}
+{{-         end -}}
+{{-         if not $has_string -}}
 {{- /*      Generate a ./literal/<function>/<permuataion-hash>.wgsl file using
             the Permutation macro defined below                             */ -}}
 {{-         $file := printf "./literal/%v/%v.wgsl" .Intrinsic.Name .Hash -}}
@@ -47,6 +54,7 @@ See:
 {{-         $file := printf "./var/%v/%v.wgsl" .Intrinsic.Name .Hash -}}
 {{-         $content := Eval "Permutation" "Overload" . "Mode" "var" -}}
 {{-         WriteFile $file $content -}}
+{{-         end -}}
 {{-       end  }}
 {{-     end  }}
 {{-   end  }}
@@ -366,6 +374,11 @@ enable chromium_internal_input_attachments;
 {{- /* Emit 'enable f16' if required */ -}}
 {{-   if OverloadUsesType $overload "f16"}}
 enable f16;
+{{    end -}}
+
+{{- /* Emit 'requires multisampled_array_textures' if required */ -}}
+{{-   if OverloadUsesType $overload "texture_multisampled_2d_array"}}
+requires multisampled_array_textures;
 {{    end -}}
 
 {{- /* Emit 'requires texel_buffers' if required */ -}}

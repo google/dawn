@@ -41,6 +41,8 @@ if(TINT_BUILD_MSL_WRITER)
 # Condition: TINT_BUILD_MSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_msl_writer_raise lib
+  lang/msl/writer/raise/alias_to_let.cc
+  lang/msl/writer/raise/alias_to_let.h
   lang/msl/writer/raise/argument_buffers.cc
   lang/msl/writer/raise/argument_buffers.h
   lang/msl/writer/raise/binary_polyfill.cc
@@ -115,6 +117,7 @@ if(TINT_BUILD_MSL_WRITER)
 # Condition: TINT_BUILD_MSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_msl_writer_raise_test test
+  lang/msl/writer/raise/alias_to_let_test.cc
   lang/msl/writer/raise/argument_buffers_test.cc
   lang/msl/writer/raise/binary_polyfill_test.cc
   lang/msl/writer/raise/builtin_polyfill_test.cc

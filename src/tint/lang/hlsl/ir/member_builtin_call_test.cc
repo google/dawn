@@ -149,9 +149,11 @@ TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchIncorrectType) {
         res.Failure().reason,
         R"(:7:17 error: Store: no matching call to 'Store(hlsl.byte_address_buffer<read>, u32, u32)'
 
-5 candidate functions:
+6 candidate functions:
  • 'Store(byte_address_buffer<write' or 'read_write>  ✗ , offset: u32  ✓ , value: u32  ✓ )'
  • 'Store(subgroup_matrix<K, S, C, R>  ✗ , ptr<workgroup, array<S, AC>, read_write>  ✗ , offset: u32  ✓ , stride: u32  ✗ , matrix_layout  ✗ )' where:
+      ✗  'S' is 'f32', 'i32', 'u32', 'f16', 'i8' or 'u8'
+ • 'Store(subgroup_matrix<K, S, C, R>  ✗ , ptr<workgroup, array<vecN<S>, AC>, read_write>  ✗ , offset: u32  ✓ , stride: u32  ✗ , matrix_layout  ✗ )' where:
       ✗  'S' is 'f32', 'i32', 'u32', 'f16', 'i8' or 'u8'
  • 'Store(subgroup_matrix<K, S, C, R>  ✗ , byte_address_buffer<AM>  ✗ , offset: u32  ✓ , stride: u32  ✗ , matrix_layout  ✗ )' where:
       ✗  'S' is 'f32', 'i32', 'u32', 'f16', 'i8' or 'u8'
@@ -301,7 +303,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, TooFewArgs) {
     EXPECT_EQ(res.Failure().reason,
               R"(:7:17 error: Load: no matching call to 'Load(hlsl.byte_address_buffer<read>)'
 
-24 candidate functions:
+25 candidate functions:
  • 'Load(byte_address_buffer<read' or 'read_write>  ✓ , offset: u32  ✗ ) -> u32'
  • 'Load(texture: texture_depth_2d  ✗ , location: vec3<i32>  ✗ ) -> vec4<f32>'
  • 'Load(texture: texture_depth_2d_array  ✗ , location: vec4<i32>  ✗ ) -> vec4<f32>'
@@ -361,6 +363,8 @@ TEST_F(IR_HlslMemberBuiltinCallTest, TooFewArgs) {
  • 'Load(texture: texture_depth_multisampled_2d  ✗ , location: vec2<i32>  ✗ , sample_index: i32  ✗ ) -> vec4<f32>'
  • 'Load(texture: texture_multisampled_2d<T>  ✗ , location: vec2<i32>  ✗ , sample_index: i32  ✗ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'Load(texture: texture_multisampled_2d_array<T>  ✗ , location: vec3<i32>  ✗ , sample_index: i32  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
 
     %3:u32 = %t.Load
                 ^^^^
@@ -401,11 +405,13 @@ TEST_F(IR_HlslMemberBuiltinCallTest, TooManyArgs) {
         res.Failure().reason,
         R"(:7:17 error: Load: no matching call to 'Load(hlsl.byte_address_buffer<read>, u32, u32, u32)'
 
-24 candidate functions:
+25 candidate functions:
  • 'Load(byte_address_buffer<read' or 'read_write>  ✓ , offset: u32  ✓ ) -> u32' where:
       ✗  overload expects 2 arguments, call passed 4 arguments
  • 'Load(texture: texture_depth_multisampled_2d  ✗ , location: vec2<i32>  ✗ , sample_index: i32  ✗ ) -> vec4<f32>'
  • 'Load(texture: texture_multisampled_2d<T>  ✗ , location: vec2<i32>  ✗ , sample_index: i32  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'Load(texture: texture_multisampled_2d_array<T>  ✗ , location: vec3<i32>  ✗ , sample_index: i32  ✗ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'Load(texture: texture_depth_2d  ✗ , location: vec3<i32>  ✗ ) -> vec4<f32>'
  • 'Load(texture: texture_depth_2d_array  ✗ , location: vec4<i32>  ✗ ) -> vec4<f32>'

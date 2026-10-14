@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 265
+; Bound: 280
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -34,19 +34,26 @@
                OpName %main_inner "main_inner"
                OpName %tint_local_index "tint_local_index"
                OpName %src_let "ary"
+               OpName %idx "idx"
                OpName %start_byte_offset "start_byte_offset"
                OpName %a "a"
+               OpName %idx_0 "idx"
                OpName %main "main"
                OpName %tint_convert_explicit_layout "tint_convert_explicit_layout"
                OpName %tint_source "tint_source"
+               OpName %idx_1 "idx"
                OpName %tint_convert_explicit_layout_0 "tint_convert_explicit_layout"
                OpName %tint_source_0 "tint_source"
+               OpName %idx_2 "idx"
                OpName %tint_convert_explicit_layout_1 "tint_convert_explicit_layout"
                OpName %tint_source_1 "tint_source"
+               OpName %idx_3 "idx"
                OpName %tint_convert_explicit_layout_2 "tint_convert_explicit_layout"
                OpName %tint_source_2 "tint_source"
+               OpName %idx_4 "idx"
                OpName %tint_convert_explicit_layout_3 "tint_convert_explicit_layout"
                OpName %tint_source_3 "tint_source"
+               OpName %idx_5 "idx"
                OpDecorate %_arr_v4uint_uint_4 ArrayStride 16
                OpMemberDecorate %src_uniform_block_tint_explicit_layout 0 Offset 0
                OpDecorate %src_uniform_block_tint_explicit_layout Block
@@ -133,30 +140,31 @@
 %_ptr_StorageBuffer__arr__arr__arr_int_uint_2_uint_3_uint_4 = OpTypePointer StorageBuffer %_arr__arr__arr_int_uint_2_uint_3_uint_4
         %105 = OpTypeFunction %void %uint
    %uint_264 = OpConstant %uint 264
+%_ptr_Function_uint = OpTypePointer Function %uint
        %bool = OpTypeBool
 %_ptr_Workgroup_v4int = OpTypePointer Workgroup %v4int
-        %123 = OpConstantNull %v4int
+        %124 = OpConstantNull %v4int
      %uint_1 = OpConstant %uint 1
-        %126 = OpTypeFunction %_arr_v4int_uint_4 %uint
+        %129 = OpTypeFunction %_arr_v4int_uint_4 %uint
     %uint_16 = OpConstant %uint 16
 %_ptr_Function_v4int = OpTypePointer Function %v4int
 %_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
-        %151 = OpTypeFunction %void
-        %156 = OpTypeFunction %_arr_v4int_uint_4 %_arr_v4int_uint_4_0
+        %156 = OpTypeFunction %void
+        %161 = OpTypeFunction %_arr_v4int_uint_4 %_arr_v4int_uint_4_0
 %_ptr_Function__arr_v4int_uint_4_0 = OpTypePointer Function %_arr_v4int_uint_4_0
-        %176 = OpTypeFunction %_arr_v4int_uint_4_0 %_arr_v4int_uint_4
-        %180 = OpConstantNull %_arr_v4int_uint_4_0
-        %196 = OpTypeFunction %_arr__arr__arr_int_uint_2_uint_3_uint_4 %_arr__arr__arr_int_uint_2_0_uint_3_uint_4
+        %183 = OpTypeFunction %_arr_v4int_uint_4_0 %_arr_v4int_uint_4
+        %187 = OpConstantNull %_arr_v4int_uint_4_0
+        %205 = OpTypeFunction %_arr__arr__arr_int_uint_2_uint_3_uint_4 %_arr__arr__arr_int_uint_2_0_uint_3_uint_4
 %_ptr_Function__arr__arr__arr_int_uint_2_uint_3_uint_4 = OpTypePointer Function %_arr__arr__arr_int_uint_2_uint_3_uint_4
-        %201 = OpConstantNull %_arr__arr__arr_int_uint_2_uint_3_uint_4
+        %210 = OpConstantNull %_arr__arr__arr_int_uint_2_uint_3_uint_4
 %_ptr_Function__arr__arr_int_uint_2_0_uint_3 = OpTypePointer Function %_arr__arr_int_uint_2_0_uint_3
 %_ptr_Function__arr__arr_int_uint_2_uint_3 = OpTypePointer Function %_arr__arr_int_uint_2_uint_3
-        %221 = OpTypeFunction %_arr__arr_int_uint_2_uint_3 %_arr__arr_int_uint_2_0_uint_3
-        %225 = OpConstantNull %_arr__arr_int_uint_2_uint_3
+        %232 = OpTypeFunction %_arr__arr_int_uint_2_uint_3 %_arr__arr_int_uint_2_0_uint_3
+        %236 = OpConstantNull %_arr__arr_int_uint_2_uint_3
 %_ptr_Function__arr_int_uint_2_0 = OpTypePointer Function %_arr_int_uint_2_0
 %_ptr_Function__arr_int_uint_2 = OpTypePointer Function %_arr_int_uint_2
-        %245 = OpTypeFunction %_arr_int_uint_2 %_arr_int_uint_2_0
-        %249 = OpConstantNull %_arr_int_uint_2
+        %258 = OpTypeFunction %_arr_int_uint_2 %_arr_int_uint_2_0
+        %262 = OpConstantNull %_arr_int_uint_2
 %_ptr_Function_int = OpTypePointer Function %int
     %ret_arr = OpFunction %_arr_v4int_uint_4 None %36
          %37 = OpLabel
@@ -220,231 +228,259 @@
  %main_inner = OpFunction %void None %105
 %tint_local_index = OpFunctionParameter %uint
         %106 = OpLabel
+        %idx = OpVariable %_ptr_Function_uint Function
                OpBranch %107
         %107 = OpLabel
+               OpStore %idx %tint_local_index
                OpBranch %110
         %110 = OpLabel
-        %112 = OpPhi %uint %tint_local_index %107 %113 %109
                OpLoopMerge %111 %109 None
                OpBranch %108
         %108 = OpLabel
-        %117 = OpUGreaterThanEqual %bool %112 %uint_4
-               OpSelectionMerge %119 None
-               OpBranchConditional %117 %120 %119
-        %120 = OpLabel
+        %117 = OpLoad %uint %idx None
+        %118 = OpUGreaterThanEqual %bool %117 %uint_4
+               OpSelectionMerge %120 None
+               OpBranchConditional %118 %121 %120
+        %121 = OpLabel
                OpBranch %111
-        %119 = OpLabel
-        %121 = OpAccessChain %_ptr_Workgroup_v4int %src_workgroup %112
-               OpStore %121 %123 None
+        %120 = OpLabel
+        %122 = OpAccessChain %_ptr_Workgroup_v4int %src_workgroup %117
+               OpStore %122 %124 None
                OpBranch %109
         %109 = OpLabel
-        %113 = OpIAdd %uint %112 %uint_1
+        %125 = OpLoad %uint %idx None
+        %126 = OpIAdd %uint %125 %uint_1
+               OpStore %idx %126 None
                OpBranch %110
         %111 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-        %116 = OpFunctionCall %void %foo %src_let
+        %114 = OpFunctionCall %void %foo %src_let
                OpReturn
                OpFunctionEnd
-         %84 = OpFunction %_arr_v4int_uint_4 None %126
+         %84 = OpFunction %_arr_v4int_uint_4 None %129
 %start_byte_offset = OpFunctionParameter %uint
-        %127 = OpLabel
+        %130 = OpLabel
           %a = OpVariable %_ptr_Function__arr_v4int_uint_4 Function
+      %idx_0 = OpVariable %_ptr_Function_uint Function
                OpStore %a %src_let
-               OpBranch %129
-        %129 = OpLabel
                OpBranch %132
         %132 = OpLabel
-        %134 = OpPhi %uint %uint_0 %129 %135 %131
-               OpLoopMerge %133 %131 None
-               OpBranch %130
-        %130 = OpLabel
-        %137 = OpUGreaterThanEqual %bool %134 %uint_4
-               OpSelectionMerge %138 None
-               OpBranchConditional %137 %139 %138
-        %139 = OpLabel
+               OpStore %idx_0 %uint_0
+               OpBranch %135
+        %135 = OpLabel
+               OpLoopMerge %136 %134 None
                OpBranch %133
-        %138 = OpLabel
-        %140 = OpIMul %uint %134 %uint_16
-        %142 = OpIAdd %uint %start_byte_offset %140
-        %143 = OpAccessChain %_ptr_Function_v4int %a %134
-        %145 = OpUDiv %uint %142 %uint_16
-        %146 = OpAccessChain %_ptr_Uniform_v4uint %11 %uint_0 %145
-        %148 = OpLoad %v4uint %146 None
-        %149 = OpBitcast %v4int %148
-               OpStore %143 %149 None
-               OpBranch %131
-        %131 = OpLabel
-        %135 = OpIAdd %uint %134 %uint_1
-               OpBranch %132
         %133 = OpLabel
-        %136 = OpLoad %_arr_v4int_uint_4 %a None
-               OpReturnValue %136
+        %139 = OpLoad %uint %idx_0 None
+        %140 = OpUGreaterThanEqual %bool %139 %uint_4
+               OpSelectionMerge %141 None
+               OpBranchConditional %140 %142 %141
+        %142 = OpLabel
+               OpBranch %136
+        %141 = OpLabel
+        %143 = OpIMul %uint %139 %uint_16
+        %145 = OpIAdd %uint %start_byte_offset %143
+        %146 = OpAccessChain %_ptr_Function_v4int %a %139
+        %148 = OpUDiv %uint %145 %uint_16
+        %149 = OpAccessChain %_ptr_Uniform_v4uint %11 %uint_0 %148
+        %151 = OpLoad %v4uint %149 None
+        %152 = OpBitcast %v4int %151
+               OpStore %146 %152 None
+               OpBranch %134
+        %134 = OpLabel
+        %153 = OpLoad %uint %idx_0 None
+        %154 = OpIAdd %uint %153 %uint_1
+               OpStore %idx_0 %154 None
+               OpBranch %135
+        %136 = OpLabel
+        %137 = OpLoad %_arr_v4int_uint_4 %a None
+               OpReturnValue %137
                OpFunctionEnd
-       %main = OpFunction %void None %151
-        %152 = OpLabel
-        %153 = OpLoad %uint %main_local_invocation_index_Input None
-        %154 = OpFunctionCall %void %main_inner %153
+       %main = OpFunction %void None %156
+        %157 = OpLabel
+        %158 = OpLoad %uint %main_local_invocation_index_Input None
+        %159 = OpFunctionCall %void %main_inner %158
                OpReturn
                OpFunctionEnd
-%tint_convert_explicit_layout = OpFunction %_arr_v4int_uint_4 None %156
+%tint_convert_explicit_layout = OpFunction %_arr_v4int_uint_4 None %161
 %tint_source = OpFunctionParameter %_arr_v4int_uint_4_0
-        %157 = OpLabel
-        %158 = OpVariable %_ptr_Function__arr_v4int_uint_4_0 Function
-        %160 = OpVariable %_ptr_Function__arr_v4int_uint_4 Function %src_let
-               OpStore %158 %tint_source
-               OpBranch %161
-        %161 = OpLabel
-               OpBranch %164
-        %164 = OpLabel
-        %166 = OpPhi %uint %uint_0 %161 %167 %163
-               OpLoopMerge %165 %163 None
-               OpBranch %162
         %162 = OpLabel
-        %169 = OpUGreaterThanEqual %bool %166 %uint_4
-               OpSelectionMerge %170 None
-               OpBranchConditional %169 %171 %170
-        %171 = OpLabel
-               OpBranch %165
+        %163 = OpVariable %_ptr_Function__arr_v4int_uint_4_0 Function
+        %165 = OpVariable %_ptr_Function__arr_v4int_uint_4 Function %src_let
+      %idx_1 = OpVariable %_ptr_Function_uint Function
+               OpStore %163 %tint_source
+               OpBranch %166
+        %166 = OpLabel
+               OpStore %idx_1 %uint_0
+               OpBranch %169
+        %169 = OpLabel
+               OpLoopMerge %170 %168 None
+               OpBranch %167
+        %167 = OpLabel
+        %173 = OpLoad %uint %idx_1 None
+        %174 = OpUGreaterThanEqual %bool %173 %uint_4
+               OpSelectionMerge %175 None
+               OpBranchConditional %174 %176 %175
+        %176 = OpLabel
+               OpBranch %170
+        %175 = OpLabel
+        %177 = OpAccessChain %_ptr_Function_v4int %163 %173
+        %178 = OpLoad %v4int %177 None
+        %179 = OpAccessChain %_ptr_Function_v4int %165 %173
+               OpStore %179 %178 None
+               OpBranch %168
+        %168 = OpLabel
+        %180 = OpLoad %uint %idx_1 None
+        %181 = OpIAdd %uint %180 %uint_1
+               OpStore %idx_1 %181 None
+               OpBranch %169
         %170 = OpLabel
-        %172 = OpAccessChain %_ptr_Function_v4int %158 %166
-        %173 = OpLoad %v4int %172 None
-        %174 = OpAccessChain %_ptr_Function_v4int %160 %166
-               OpStore %174 %173 None
-               OpBranch %163
-        %163 = OpLabel
-        %167 = OpIAdd %uint %166 %uint_1
-               OpBranch %164
-        %165 = OpLabel
-        %168 = OpLoad %_arr_v4int_uint_4 %160 None
-               OpReturnValue %168
+        %171 = OpLoad %_arr_v4int_uint_4 %165 None
+               OpReturnValue %171
                OpFunctionEnd
-%tint_convert_explicit_layout_0 = OpFunction %_arr_v4int_uint_4_0 None %176
+%tint_convert_explicit_layout_0 = OpFunction %_arr_v4int_uint_4_0 None %183
 %tint_source_0 = OpFunctionParameter %_arr_v4int_uint_4
-        %177 = OpLabel
-        %178 = OpVariable %_ptr_Function__arr_v4int_uint_4 Function
-        %179 = OpVariable %_ptr_Function__arr_v4int_uint_4_0 Function %180
-               OpStore %178 %tint_source_0
-               OpBranch %181
-        %181 = OpLabel
-               OpBranch %184
         %184 = OpLabel
-        %186 = OpPhi %uint %uint_0 %181 %187 %183
-               OpLoopMerge %185 %183 None
-               OpBranch %182
-        %182 = OpLabel
-        %189 = OpUGreaterThanEqual %bool %186 %uint_4
-               OpSelectionMerge %190 None
-               OpBranchConditional %189 %191 %190
+        %185 = OpVariable %_ptr_Function__arr_v4int_uint_4 Function
+        %186 = OpVariable %_ptr_Function__arr_v4int_uint_4_0 Function %187
+      %idx_2 = OpVariable %_ptr_Function_uint Function
+               OpStore %185 %tint_source_0
+               OpBranch %188
+        %188 = OpLabel
+               OpStore %idx_2 %uint_0
+               OpBranch %191
         %191 = OpLabel
-               OpBranch %185
-        %190 = OpLabel
-        %192 = OpAccessChain %_ptr_Function_v4int %178 %186
-        %193 = OpLoad %v4int %192 None
-        %194 = OpAccessChain %_ptr_Function_v4int %179 %186
-               OpStore %194 %193 None
-               OpBranch %183
-        %183 = OpLabel
-        %187 = OpIAdd %uint %186 %uint_1
-               OpBranch %184
-        %185 = OpLabel
-        %188 = OpLoad %_arr_v4int_uint_4_0 %179 None
-               OpReturnValue %188
-               OpFunctionEnd
-%tint_convert_explicit_layout_1 = OpFunction %_arr__arr__arr_int_uint_2_uint_3_uint_4 None %196
-%tint_source_1 = OpFunctionParameter %_arr__arr__arr_int_uint_2_0_uint_3_uint_4
+               OpLoopMerge %192 %190 None
+               OpBranch %189
+        %189 = OpLabel
+        %195 = OpLoad %uint %idx_2 None
+        %196 = OpUGreaterThanEqual %bool %195 %uint_4
+               OpSelectionMerge %197 None
+               OpBranchConditional %196 %198 %197
+        %198 = OpLabel
+               OpBranch %192
         %197 = OpLabel
-        %198 = OpVariable %_ptr_Function__arr__arr__arr_int_uint_2_0_uint_3_uint_4 Function
-        %199 = OpVariable %_ptr_Function__arr__arr__arr_int_uint_2_uint_3_uint_4 Function %201
-               OpStore %198 %tint_source_1
-               OpBranch %202
-        %202 = OpLabel
-               OpBranch %205
-        %205 = OpLabel
-        %207 = OpPhi %uint %uint_0 %202 %208 %204
-               OpLoopMerge %206 %204 None
-               OpBranch %203
-        %203 = OpLabel
-        %210 = OpUGreaterThanEqual %bool %207 %uint_4
-               OpSelectionMerge %211 None
-               OpBranchConditional %210 %212 %211
-        %212 = OpLabel
-               OpBranch %206
-        %211 = OpLabel
-        %213 = OpAccessChain %_ptr_Function__arr__arr_int_uint_2_0_uint_3 %198 %207
-        %215 = OpLoad %_arr__arr_int_uint_2_0_uint_3 %213 None
-        %216 = OpFunctionCall %_arr__arr_int_uint_2_uint_3 %tint_convert_explicit_layout_2 %215
-        %218 = OpAccessChain %_ptr_Function__arr__arr_int_uint_2_uint_3 %199 %207
-               OpStore %218 %216 None
-               OpBranch %204
-        %204 = OpLabel
-        %208 = OpIAdd %uint %207 %uint_1
-               OpBranch %205
+        %199 = OpAccessChain %_ptr_Function_v4int %185 %195
+        %200 = OpLoad %v4int %199 None
+        %201 = OpAccessChain %_ptr_Function_v4int %186 %195
+               OpStore %201 %200 None
+               OpBranch %190
+        %190 = OpLabel
+        %202 = OpLoad %uint %idx_2 None
+        %203 = OpIAdd %uint %202 %uint_1
+               OpStore %idx_2 %203 None
+               OpBranch %191
+        %192 = OpLabel
+        %193 = OpLoad %_arr_v4int_uint_4_0 %186 None
+               OpReturnValue %193
+               OpFunctionEnd
+%tint_convert_explicit_layout_1 = OpFunction %_arr__arr__arr_int_uint_2_uint_3_uint_4 None %205
+%tint_source_1 = OpFunctionParameter %_arr__arr__arr_int_uint_2_0_uint_3_uint_4
         %206 = OpLabel
-        %209 = OpLoad %_arr__arr__arr_int_uint_2_uint_3_uint_4 %199 None
-               OpReturnValue %209
+        %207 = OpVariable %_ptr_Function__arr__arr__arr_int_uint_2_0_uint_3_uint_4 Function
+        %208 = OpVariable %_ptr_Function__arr__arr__arr_int_uint_2_uint_3_uint_4 Function %210
+      %idx_3 = OpVariable %_ptr_Function_uint Function
+               OpStore %207 %tint_source_1
+               OpBranch %211
+        %211 = OpLabel
+               OpStore %idx_3 %uint_0
+               OpBranch %214
+        %214 = OpLabel
+               OpLoopMerge %215 %213 None
+               OpBranch %212
+        %212 = OpLabel
+        %218 = OpLoad %uint %idx_3 None
+        %219 = OpUGreaterThanEqual %bool %218 %uint_4
+               OpSelectionMerge %220 None
+               OpBranchConditional %219 %221 %220
+        %221 = OpLabel
+               OpBranch %215
+        %220 = OpLabel
+        %222 = OpAccessChain %_ptr_Function__arr__arr_int_uint_2_0_uint_3 %207 %218
+        %224 = OpLoad %_arr__arr_int_uint_2_0_uint_3 %222 None
+        %225 = OpFunctionCall %_arr__arr_int_uint_2_uint_3 %tint_convert_explicit_layout_2 %224
+        %227 = OpAccessChain %_ptr_Function__arr__arr_int_uint_2_uint_3 %208 %218
+               OpStore %227 %225 None
+               OpBranch %213
+        %213 = OpLabel
+        %229 = OpLoad %uint %idx_3 None
+        %230 = OpIAdd %uint %229 %uint_1
+               OpStore %idx_3 %230 None
+               OpBranch %214
+        %215 = OpLabel
+        %216 = OpLoad %_arr__arr__arr_int_uint_2_uint_3_uint_4 %208 None
+               OpReturnValue %216
                OpFunctionEnd
-%tint_convert_explicit_layout_2 = OpFunction %_arr__arr_int_uint_2_uint_3 None %221
+%tint_convert_explicit_layout_2 = OpFunction %_arr__arr_int_uint_2_uint_3 None %232
 %tint_source_2 = OpFunctionParameter %_arr__arr_int_uint_2_0_uint_3
-        %222 = OpLabel
-        %223 = OpVariable %_ptr_Function__arr__arr_int_uint_2_0_uint_3 Function
-        %224 = OpVariable %_ptr_Function__arr__arr_int_uint_2_uint_3 Function %225
-               OpStore %223 %tint_source_2
-               OpBranch %226
-        %226 = OpLabel
-               OpBranch %229
-        %229 = OpLabel
-        %231 = OpPhi %uint %uint_0 %226 %232 %228
-               OpLoopMerge %230 %228 None
-               OpBranch %227
-        %227 = OpLabel
-        %234 = OpUGreaterThanEqual %bool %231 %uint_3
-               OpSelectionMerge %235 None
-               OpBranchConditional %234 %236 %235
-        %236 = OpLabel
-               OpBranch %230
-        %235 = OpLabel
-        %237 = OpAccessChain %_ptr_Function__arr_int_uint_2_0 %223 %231
-        %239 = OpLoad %_arr_int_uint_2_0 %237 None
-        %240 = OpFunctionCall %_arr_int_uint_2 %tint_convert_explicit_layout_3 %239
-        %242 = OpAccessChain %_ptr_Function__arr_int_uint_2 %224 %231
-               OpStore %242 %240 None
-               OpBranch %228
-        %228 = OpLabel
-        %232 = OpIAdd %uint %231 %uint_1
-               OpBranch %229
-        %230 = OpLabel
-        %233 = OpLoad %_arr__arr_int_uint_2_uint_3 %224 None
-               OpReturnValue %233
-               OpFunctionEnd
-%tint_convert_explicit_layout_3 = OpFunction %_arr_int_uint_2 None %245
-%tint_source_3 = OpFunctionParameter %_arr_int_uint_2_0
+        %233 = OpLabel
+        %234 = OpVariable %_ptr_Function__arr__arr_int_uint_2_0_uint_3 Function
+        %235 = OpVariable %_ptr_Function__arr__arr_int_uint_2_uint_3 Function %236
+      %idx_4 = OpVariable %_ptr_Function_uint Function
+               OpStore %234 %tint_source_2
+               OpBranch %237
+        %237 = OpLabel
+               OpStore %idx_4 %uint_0
+               OpBranch %240
+        %240 = OpLabel
+               OpLoopMerge %241 %239 None
+               OpBranch %238
+        %238 = OpLabel
+        %244 = OpLoad %uint %idx_4 None
+        %245 = OpUGreaterThanEqual %bool %244 %uint_3
+               OpSelectionMerge %246 None
+               OpBranchConditional %245 %247 %246
+        %247 = OpLabel
+               OpBranch %241
         %246 = OpLabel
-        %247 = OpVariable %_ptr_Function__arr_int_uint_2_0 Function
-        %248 = OpVariable %_ptr_Function__arr_int_uint_2 Function %249
-               OpStore %247 %tint_source_3
-               OpBranch %250
-        %250 = OpLabel
-               OpBranch %253
-        %253 = OpLabel
-        %255 = OpPhi %uint %uint_0 %250 %256 %252
-               OpLoopMerge %254 %252 None
-               OpBranch %251
-        %251 = OpLabel
-        %258 = OpUGreaterThanEqual %bool %255 %uint_2
-               OpSelectionMerge %259 None
-               OpBranchConditional %258 %260 %259
-        %260 = OpLabel
-               OpBranch %254
-        %259 = OpLabel
-        %261 = OpAccessChain %_ptr_Function_int %247 %255
-        %263 = OpLoad %int %261 None
-        %264 = OpAccessChain %_ptr_Function_int %248 %255
-               OpStore %264 %263 None
-               OpBranch %252
-        %252 = OpLabel
+        %248 = OpAccessChain %_ptr_Function__arr_int_uint_2_0 %234 %244
+        %250 = OpLoad %_arr_int_uint_2_0 %248 None
+        %251 = OpFunctionCall %_arr_int_uint_2 %tint_convert_explicit_layout_3 %250
+        %253 = OpAccessChain %_ptr_Function__arr_int_uint_2 %235 %244
+               OpStore %253 %251 None
+               OpBranch %239
+        %239 = OpLabel
+        %255 = OpLoad %uint %idx_4 None
         %256 = OpIAdd %uint %255 %uint_1
-               OpBranch %253
-        %254 = OpLabel
-        %257 = OpLoad %_arr_int_uint_2 %248 None
-               OpReturnValue %257
+               OpStore %idx_4 %256 None
+               OpBranch %240
+        %241 = OpLabel
+        %242 = OpLoad %_arr__arr_int_uint_2_uint_3 %235 None
+               OpReturnValue %242
+               OpFunctionEnd
+%tint_convert_explicit_layout_3 = OpFunction %_arr_int_uint_2 None %258
+%tint_source_3 = OpFunctionParameter %_arr_int_uint_2_0
+        %259 = OpLabel
+        %260 = OpVariable %_ptr_Function__arr_int_uint_2_0 Function
+        %261 = OpVariable %_ptr_Function__arr_int_uint_2 Function %262
+      %idx_5 = OpVariable %_ptr_Function_uint Function
+               OpStore %260 %tint_source_3
+               OpBranch %263
+        %263 = OpLabel
+               OpStore %idx_5 %uint_0
+               OpBranch %266
+        %266 = OpLabel
+               OpLoopMerge %267 %265 None
+               OpBranch %264
+        %264 = OpLabel
+        %270 = OpLoad %uint %idx_5 None
+        %271 = OpUGreaterThanEqual %bool %270 %uint_2
+               OpSelectionMerge %272 None
+               OpBranchConditional %271 %273 %272
+        %273 = OpLabel
+               OpBranch %267
+        %272 = OpLabel
+        %274 = OpAccessChain %_ptr_Function_int %260 %270
+        %276 = OpLoad %int %274 None
+        %277 = OpAccessChain %_ptr_Function_int %261 %270
+               OpStore %277 %276 None
+               OpBranch %265
+        %265 = OpLabel
+        %278 = OpLoad %uint %idx_5 None
+        %279 = OpIAdd %uint %278 %uint_1
+               OpStore %idx_5 %279 None
+               OpBranch %266
+        %267 = OpLabel
+        %268 = OpLoad %_arr_int_uint_2 %261 None
+               OpReturnValue %268
                OpFunctionEnd

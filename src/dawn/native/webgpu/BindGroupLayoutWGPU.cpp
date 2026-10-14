@@ -204,7 +204,7 @@ MaybeError BindGroupLayout::CaptureCreationParameters(CaptureContext& captureCon
                 return {};
             },
             [&](const auto& info) -> MaybeError {
-                return DAWN_INTERNAL_ERROR("Unsupported bind layout entry type");
+                return DAWN_UNRECOVERABLE_ERROR("Unsupported bind layout entry type");
             }));
     }
 

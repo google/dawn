@@ -828,6 +828,8 @@ TEST_P(FragmentBuiltin, AsParam) {
         src += "enable subgroups;\n";
     } else if (GetParam().name == "primitive_index") {
         src += "enable primitive_index;\n";
+    } else if (GetParam().name == "view_index") {
+        src += "enable view_instancing;\n";
     } else if (GetParam().name == "barycentric_coord") {
         src += "enable chromium_experimental_barycentric_coord;\n";
         asScalar = "vec3(b).x";
@@ -874,6 +876,8 @@ TEST_P(FragmentBuiltin, InStruct) {
         src += "enable subgroups;\n";
     } else if (GetParam().name == "primitive_index") {
         src += "enable primitive_index;\n";
+    } else if (GetParam().name == "view_index") {
+        src += "enable view_instancing;\n";
     } else if (GetParam().name == "barycentric_coord") {
         src += "enable chromium_experimental_barycentric_coord;\n";
         asScalar = "vec3(s.b).x";
@@ -924,6 +928,7 @@ INSTANTIATE_TEST_SUITE_P(UniformityAnalysisTest,
                                            BuiltinEntry{"sample_index", "u32", false},
                                            BuiltinEntry{"sample_mask", "u32", false},
                                            BuiltinEntry{"primitive_index", "u32", false},
+                                           BuiltinEntry{"view_index", "u32", false},
                                            BuiltinEntry{"subgroup_size", "u32", false},
                                            BuiltinEntry{"barycentric_coord", "vec3<f32>", false}),
                          [](const ::testing::TestParamInfo<FragmentBuiltin::ParamType>& p) {

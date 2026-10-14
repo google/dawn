@@ -39,23 +39,14 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_utils_bytes lib
-  utils/bytes/buffer_reader.cc
-  utils/bytes/buffer_reader.h
-  utils/bytes/decoder.h
-  utils/bytes/reader.cc
-  utils/bytes/reader.h
+  utils/bytes/swap.cc
   utils/bytes/swap.h
 )
 
 tint_target_add_dependencies(tint_utils_bytes lib
-  tint_utils
-  tint_utils_containers
   tint_utils_ice
   tint_utils_macros
-  tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
-  tint_utils_rtti
 )
 
 tint_target_add_external_dependencies(tint_utils_bytes lib
@@ -67,21 +58,14 @@ tint_target_add_external_dependencies(tint_utils_bytes lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_utils_bytes_test test
-  utils/bytes/buffer_reader_test.cc
-  utils/bytes/decoder_test.cc
   utils/bytes/swap_test.cc
 )
 
 tint_target_add_dependencies(tint_utils_bytes_test test
-  tint_utils
   tint_utils_bytes
-  tint_utils_containers
   tint_utils_ice
   tint_utils_macros
-  tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
-  tint_utils_rtti
 )
 
 tint_target_add_external_dependencies(tint_utils_bytes_test test

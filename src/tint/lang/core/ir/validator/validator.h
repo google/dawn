@@ -53,6 +53,7 @@
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/lang/core/ir/instruction_result.h"
+#include "src/tint/lang/core/ir/interpolate_string.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/load_vector_element.h"
@@ -486,6 +487,7 @@ class Validator {
     void CheckLoopContinuing(const Loop* loop);
     void CheckSwitch(const Switch* s);
     void CheckSwizzle(const Swizzle* s);
+    void CheckInterpolateString(const InterpolateString* is);
     void CheckTerminator(const Terminator* b);
     void CheckBreakIf(const BreakIf* b);
     void CheckContinue(const Continue* c);

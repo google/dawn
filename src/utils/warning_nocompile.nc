@@ -50,7 +50,7 @@ void TestWeverything() {
 void TestWarningSuppressionMappings() {
     // -Wold-style-cast is one such warning.
     int x = 0;
-    [[maybe_unused]] float y = (float)x; // expected-error {{use of old-style cast}}
+    std::ignore = (float)x; // expected-error {{use of old-style cast}}
 }
 
 // -Wunsafe-buffer-usage: operator[] on T*
@@ -61,9 +61,9 @@ void TestUnsafeBuffersRawPointer() {
     const int* arrPtr = arr.data();
 
     // But unsafe to use it like an array.
-    { [[maybe_unused]] int x = arr[1]; }
-    { [[maybe_unused]] int x = std::span(arr)[1]; }
-    { [[maybe_unused]] int x = arrPtr[1]; }  // expected-error {{unsafe buffer access}}
+    std::ignore = arr[1];
+    std::ignore = std::span(arr)[1];
+    std::ignore = arrPtr[1];  // expected-error {{unsafe buffer access}}
 }
 
 // -Wunsafe-buffer-usage-in-libc-call: memcpy()
@@ -85,7 +85,7 @@ void TestUnsafeBuffersStdSpanConstructors() {
     std::array<int, 4> arr{};
     // std::span is NOT tagged as being unsafe when using the unsafe buffers plugin.
     // (If we use -Wunsafe-buffer-usage without the plugin, it would be. This may be fixable.)
-    { [[maybe_unused]] auto s = std::span(arr.data(), arr.size()); }
+    std::ignore = std::span(arr.data(), arr.size());
     { [[maybe_unused]] std::span<int> s(arr.data(), arr.size()); }
 }
 
@@ -110,11 +110,11 @@ void TestUnsafeBuffersDawnSpanConstructors() {
 
 // -Wunsafe-buffer-usage: dawn::HeapArray::Uninit()
 void TestUnsafeBuffersDawnHeapArrayConstructors() {
-    { [[maybe_unused]] auto x = DAWN_UNSAFE_BUFFERS(HeapArray<int>::Uninit(4)); }  // Control case.
-    { [[maybe_unused]] auto x = HeapArray<int>::Uninit(4); }  // expected-error {{introduces unsafe buffer manipulation}}
+    std::ignore = DAWN_UNSAFE_BUFFERS(HeapArray<int>::Uninit(4));  // Control case.
+    std::ignore = HeapArray<int>::Uninit(4);  // expected-error {{introduces unsafe buffer manipulation}}
 
-    { [[maybe_unused]] auto x = DAWN_UNSAFE_BUFFERS(HeapArray<int>::Uninit(4, std::nothrow)); }  // Control case.
-    { [[maybe_unused]] auto x = HeapArray<int>::Uninit(4, std::nothrow); }  // expected-error {{introduces unsafe buffer manipulation}}
+    std::ignore = DAWN_UNSAFE_BUFFERS(HeapArray<int>::Uninit(4, std::nothrow));  // Control case.
+    std::ignore = HeapArray<int>::Uninit(4, std::nothrow);  // expected-error {{introduces unsafe buffer manipulation}}
 }
 
 // -Wunsafe-buffer-usage: dawn::ReinterpretSpan() for non-trivially-copyable types
@@ -128,8 +128,8 @@ void TestUnsafeBuffersDawnReinterpretSpan() {
     std::array<std::byte, 4> bytes;
     auto s = Span<std::byte>{bytes};
 
-    { [[maybe_unused]] auto x = DAWN_UNSAFE_BUFFERS(ReinterpretSpan<S>(s)); }  // Control case.
-    { [[maybe_unused]] auto x = ReinterpretSpan<S>(s); }  // expected-error {{introduces unsafe buffer manipulation}}
+    std::ignore = DAWN_UNSAFE_BUFFERS(ReinterpretSpan<S>(s));  // Control case.
+    std::ignore = ReinterpretSpan<S>(s);  // expected-error {{introduces unsafe buffer manipulation}}
 }
 
 }

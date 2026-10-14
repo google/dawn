@@ -117,6 +117,7 @@ class SurfaceTests : public DawnTest {
     void ClearTexture(wgpu::Texture texture,
                       wgpu::Color color,
                       wgpu::Device preferredDevice = nullptr) {
+        ASSERT_NE(texture, nullptr);
         if (preferredDevice == nullptr) {
             preferredDevice = device;
         }
@@ -335,9 +336,9 @@ TEST_P(SurfaceTests, SwitchPresentMode) {
     // crbug.com/358166481
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 
-    // TODO(crbug.com/463614521): Flakily causes a device loss on Snapdragon X
-    // Elite SoCs which causes all subsequent tests to fail.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D12());
+    // TODO(crbug.com/568452623): Flakily fails with DXGI_ERROR_DEVICE_REMOVED in
+    // IDXGISwapChain::Present on D3D11 WARP.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsWARP());
 
     constexpr wgpu::PresentMode kAllPresentModes[] = {
         wgpu::PresentMode::Immediate,
@@ -367,6 +368,8 @@ TEST_P(SurfaceTests, SwitchPresentMode) {
 
                 wgpu::SurfaceTexture surfaceTexture;
                 surface.GetCurrentTexture(&surfaceTexture);
+                ASSERT_EQ(surfaceTexture.status,
+                          wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal);
                 ClearTexture(surfaceTexture.texture, {0.0, 0.0, 0.0, 1.0});
                 ASSERT_EQ(wgpu::Status::Success, surface.Present());
             }
@@ -377,6 +380,8 @@ TEST_P(SurfaceTests, SwitchPresentMode) {
 
                 wgpu::SurfaceTexture surfaceTexture;
                 surface.GetCurrentTexture(&surfaceTexture);
+                ASSERT_EQ(surfaceTexture.status,
+                          wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal);
                 ClearTexture(surfaceTexture.texture, {0.0, 0.0, 0.0, 1.0});
                 ASSERT_EQ(wgpu::Status::Success, surface.Present());
                 surface.Unconfigure();
@@ -387,9 +392,6 @@ TEST_P(SurfaceTests, SwitchPresentMode) {
 
 // Test resizing the surface and without resizing the window.
 TEST_P(SurfaceTests, ResizingSurfaceOnly) {
-    // TODO(crbug.com/468228358): Flaky on Snapdragon X Elite SoCs w/ D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D12());
-
     // TODO(crbug.com/500766623): Fails due to backend validation errors on
     // Windows 11/AMD RX 5500 XT w/ D3D12.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsD3D12() && IsBackendValidationEnabled());
@@ -440,10 +442,6 @@ TEST_P(SurfaceTests, ResizingWindowOnly) {
 TEST_P(SurfaceTests, ResizingWindowAndSurface) {
     // TODO(crbug.com/dawn/1205): Currently failing on new NVIDIA GTX 1660s on Linux/Vulkan.
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());
-
-    // TODO(crbug.com/465497433): Flakily loses device on Snapdragon X Elite
-    // SoCs.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D12());
 
     // TODO(crbug.com/500766623): Fails due to backend validation errors on
     // Windows 11/AMD RX 5500 XT w/ D3D12.
@@ -857,6 +855,71 @@ TEST_P(SurfaceTests, Storage) {
     StorageLoadTexture(t.texture, utils::RGBA8::kRed);
 
     ASSERT_EQ(wgpu::Status::Success, surface.Present());
+}
+
+// Test acquiring a texture from a surface configured with viewFormats.
+TEST_P(SurfaceTests, ConfigureWithViewFormats) {
+    // Reinterpreting the surface format as its srgb counterpart isn't allowed in compatibility
+    // mode: viewFormats must match the format there.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
+    // TODO(crbug.com/564910787): Fails due to backend validation errors on Windows 11 AMD RX 5500
+    // XT.
+    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsD3D12() && IsBackendValidationEnabled());
+
+    wgpu::Surface surface = CreateTestSurface();
+    wgpu::SurfaceCapabilities caps;
+    surface.GetCapabilities(adapter, &caps);
+    wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+
+    // Reinterpretation between a format and its srgb counterpart is always
+    // allowed; pick the counterpart of whatever the surface prefers.
+    wgpu::TextureFormat viewFormat;
+    switch (config.format) {
+        case wgpu::TextureFormat::BGRA8Unorm:
+            viewFormat = wgpu::TextureFormat::BGRA8UnormSrgb;
+            break;
+        case wgpu::TextureFormat::RGBA8Unorm:
+            viewFormat = wgpu::TextureFormat::RGBA8UnormSrgb;
+            break;
+        default:
+            // Add a case above if a platform starts preferring another format.
+            DAWN_UNREACHABLE();
+    }
+    config.viewFormatCount = 1;
+    config.viewFormats = &viewFormat;
+    // When supported, also request CopySrc so the reinterpreted values can be read back.
+    if (caps.usages & wgpu::TextureUsage::CopySrc) {
+        config.usage |= wgpu::TextureUsage::CopySrc;
+    }
+    surface.Configure(&config);
+
+    wgpu::SurfaceTexture surfaceTexture;
+    surface.GetCurrentTexture(&surfaceTexture);
+
+    // Clear through a view using the reinterpreted format to check the texture really
+    // supports its viewFormats.
+    wgpu::TextureViewDescriptor viewDesc;
+    viewDesc.format = viewFormat;
+    utils::ComboRenderPassDescriptor renderPassDesc({surfaceTexture.texture.CreateView(&viewDesc)});
+    renderPassDesc.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+    renderPassDesc.cColorAttachments[0].clearValue = {0.5, 0.5, 0.5, 1.0};
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    if (surfaceTexture.texture.GetUsage() & wgpu::TextureUsage::CopySrc) {
+        // The sRGB view encodes the linear 0.5 clear value to ~0.735 on store, so the raw
+        // non-sRGB pixels read back as ~187.5 instead of 128 if the reinterpretation took
+        // effect. A gray value keeps the check independent of the BGRA/RGBA channel order.
+        EXPECT_PIXEL_RGBA8_BETWEEN(utils::RGBA8(187, 187, 187, 255),
+                                   utils::RGBA8(188, 188, 188, 255), surfaceTexture.texture, 0, 0);
+    }
+
+    surface.Present();
 }
 
 // TODO(crbug.com/465183957): Implement swap chain for WebGPUBackend.

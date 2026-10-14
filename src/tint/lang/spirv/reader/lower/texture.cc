@@ -681,8 +681,7 @@ struct State {
     void Image(spirv::ir::BuiltinCall* call) {
         const auto& args = call->Args();
         core::ir::Value* tex = nullptr;
-        [[maybe_unused]] core::ir::Value* sampler = nullptr;
-        std::tie(tex, sampler) = GetTextureSampler(args[0]);
+        std::tie(tex, std::ignore) = GetTextureSampler(args[0]);
 
         call->Result()->ReplaceAllUsesWith(tex);
         call->Destroy();

@@ -211,47 +211,6 @@ TEST_F(ShaderModuleValidationTest, ArrayOfCombinedTextureAndSampler) {
     ASSERT_DEVICE_ERROR(CreateShaderModuleFromASM(device, shader));
 }
 
-// Test that it is not allowed to declare a multisampled-array interface texture.
-// TODO(enga): Also test multisampled cube, cube array, and 3D. These have no GLSL keywords.
-TEST_F(ShaderModuleValidationTest, MultisampledArrayTexture) {
-    // SPIR-V ASM produced by glslang for the following fragment shader:
-    //
-    //  #version 450
-    //  layout(set=0, binding=0) uniform texture2DMSArray tex;
-    //  void main () {}}
-    //
-    // Note that the following defines an interface array multisampled texture which is not allowed
-    // in Dawn / WebGPU.
-    //
-    //  %7 = OpTypeImage %float 2D 0 1 1 1 Unknown
-    //  %_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
-    //  %tex = OpVariable %_ptr_UniformConstant_7 UniformConstant
-    const char* shader = R"(
-               OpCapability Shader
-          %1 = OpExtInstImport "GLSL.std.450"
-               OpMemoryModel Logical GLSL450
-               OpEntryPoint Fragment %main "main"
-               OpExecutionMode %main OriginUpperLeft
-               OpSource GLSL 450
-               OpName %main "main"
-               OpName %tex "tex"
-               OpDecorate %tex DescriptorSet 0
-               OpDecorate %tex Binding 0
-       %void = OpTypeVoid
-          %3 = OpTypeFunction %void
-      %float = OpTypeFloat 32
-          %7 = OpTypeImage %float 2D 0 1 1 1 Unknown
-%_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
-        %tex = OpVariable %_ptr_UniformConstant_7 UniformConstant
-       %main = OpFunction %void None %3
-          %5 = OpLabel
-               OpReturn
-               OpFunctionEnd
-        )";
-
-    ASSERT_DEVICE_ERROR(CreateShaderModuleFromASM(device, shader));
-}
-
 const char* kShaderWithNonUniformDerivative = R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -981,7 +940,7 @@ const WGSLExtensionInfo kExtensions[] = {
     {"chromium_experimental_subgroup_matrix", true, {wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix}, {"subgroups"}},
     {"chromium_experimental_resource_table", true, {wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable}, {}},
     {"subgroup_size_control", false, {wgpu::FeatureName::SubgroupSizeControl}, {"subgroups"}},
-    {"atomic_vec2u_min_max", true, {wgpu::FeatureName::AtomicVec2uMinMax}, {}}
+    {"atomic_vec2u_min_max", false, {wgpu::FeatureName::AtomicVec2uMinMax}, {}}
 
     // Currently the following WGSL extensions are not enabled under any situation.
     /*

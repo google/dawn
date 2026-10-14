@@ -725,4 +725,51 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_BufferArrayView_FixedFootprint) {
         << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, CallBuiltinFn_BufferView_StructNotHostShareable) {
+    mod.properties.Add(core::ir::Property::kAllowBufferTypes);
+    auto* bar = b.Function("bar", ty.void_());
+    auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
+    bar->SetParams({p});
+
+    auto* str_ty = ty.Struct(mod.symbols.New("S"), {
+                                                       {mod.symbols.New("b"), ty.bool_()},
+                                                   });
+
+    b.Append(bar->Block(), [&] {
+        b.CallExplicit(ty.ptr(storage, str_ty), BuiltinFn::kBufferView,
+                       Vector<TemplateParameter, 1>{str_ty}, p, 0_i);
+        b.Return(bar);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(bufferView result store type must be host-shareable)"))
+        << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, CallBuiltinFn_BufferArrayView_StructNotHostShareable) {
+    mod.properties.Add(core::ir::Property::kAllowBufferTypes);
+    auto* bar = b.Function("bar", ty.void_());
+    auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
+    bar->SetParams({p});
+
+    auto* str_ty = ty.Struct(mod.symbols.New("S"), {
+                                                       {mod.symbols.New("b"), ty.bool_()},
+                                                   });
+    auto* array_ty = ty.runtime_array(str_ty);
+
+    b.Append(bar->Block(), [&] {
+        b.CallExplicit(ty.ptr(storage, array_ty), BuiltinFn::kBufferArrayView,
+                       Vector<TemplateParameter, 1>{array_ty}, p, 0_i, 4_i);
+        b.Return(bar);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(bufferArrayView result store type must be host-shareable)"))
+        << res.Failure();
+}
+
 }  // namespace tint::core::ir

@@ -2124,7 +2124,7 @@ TEST(TintVectorDeathTest, AssertOOBs) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Vector vec{1};
-            [[maybe_unused]] int i = vec[1];
+            std::ignore = vec[1];
         },
         "internal compiler error");
 }
@@ -2465,7 +2465,7 @@ TEST(TintVectorRefDeathTest, AssertOOBs) {
         {
             Vector vec{1};
             const VectorRef<int> vec_ref(vec);
-            [[maybe_unused]] int i = vec_ref[1];
+            std::ignore = vec_ref[1];
         },
         "internal compiler error");
 }

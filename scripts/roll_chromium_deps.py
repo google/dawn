@@ -6,9 +6,7 @@
 #   'charset-normalizer==2.0.12',
 #   'idna==3.10',
 #   'urllib3==2.5.0',
-#   'certifi==2025.8.3',
-#   'httplib2==0.22.0',
-#   'pyparsing==3.2.0'
+#   'certifi==2025.8.3'
 # ]
 # ///
 
@@ -123,6 +121,7 @@ SYNCED_GCS_DEPS = {
     'build/linux/debian_bullseye_mipsel-sysroot',
     'build/linux/debian_bullseye_mips64el-sysroot',
     'build/linux/debian_bullseye_amd64-sysroot',
+    'third_party/llvm-libclang',
 }
 
 # Files that are copied from Chromium directly. A map from Dawn file path to
@@ -392,7 +391,7 @@ class GerritUtilHttpConnAdapter:
         self.req_host = host
         self.req_uri = uri
         self.req_headers = {}
-        self.proxy_info = None
+        self.proxy = None
 
     def has_header(self, header: str) -> bool:
         return header in self.req_headers
@@ -448,16 +447,12 @@ def _get_gitiles_session(host: str) -> requests.Session:
     session.headers.update(gerrit_adapter.req_headers)
 
     # Apply proxy if set for SSO.
-    if gerrit_adapter.proxy_info:
-        proxy_host = gerrit_adapter.proxy_info.proxy_host
-        if isinstance(proxy_host, bytes):
-            proxy_host = proxy_host.decode('utf-8')
-        proxy_url = f'http://{proxy_host}:{gerrit_adapter.proxy_info.proxy_port}'
+    if gerrit_adapter.proxy:
         session.proxies = {
-            'http': proxy_url,
-            'https': proxy_url,
+            'http': gerrit_adapter.proxy,
+            'https': gerrit_adapter.proxy,
         }
-        logging.debug('Using SSO proxy: %s', proxy_url)
+        logging.debug('Using SSO proxy: %s', gerrit_adapter.proxy)
 
     # Store the base URL (potentially rewritten by SSO).
     session.gitiles_base_url = gerrit_adapter.req_uri.rstrip('/')

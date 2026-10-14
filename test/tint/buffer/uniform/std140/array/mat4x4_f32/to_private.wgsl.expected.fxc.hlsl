@@ -12,27 +12,26 @@ typedef float4x4 ary_ret[4];
 ary_ret v_1(uint start_byte_offset) {
   float4x4 a[4] = (float4x4[4])0;
   {
-    uint v_2 = 0u;
-    v_2 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_3 = v_2;
-      if ((v_3 >= 4u)) {
+      uint v_2 = idx;
+      if ((v_2 >= 4u)) {
         break;
       }
-      a[v_3] = v((start_byte_offset + (v_3 * 64u)));
+      a[v_2] = v((start_byte_offset + (v_2 * 64u)));
       {
-        v_2 = (v_3 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  float4x4 v_4[4] = a;
-  return v_4;
+  float4x4 v_3[4] = a;
+  return v_3;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  float4x4 v_5[4] = v_1(0u);
-  p = v_5;
+  float4x4 v_4[4] = v_1(0u);
+  p = v_4;
   p[int(1)] = v(128u);
   p[int(1)][int(0)] = asfloat(u[1u]).ywxz;
   p[int(1)][int(0)].x = asfloat(u[1u].x);

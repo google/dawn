@@ -39,7 +39,7 @@
 
 // DAWN_FORCE_INLINE
 //
-// Annotate a function indicating it should really never be inline, even in debug mode.
+// Annotate a function (in release builds only) indicating it should REALLY be inline.
 #if DAWN_COMPILER_IS(CLANG) && defined(NDEBUG) && DAWN_HAS_CPP_ATTRIBUTE(clang::always_inline)
 #define DAWN_FORCE_INLINE [[clang::always_inline]] inline
 #elif DAWN_COMPILER_IS(GCC) && defined(NDEBUG) && DAWN_HAS_ATTRIBUTE(always_inline)

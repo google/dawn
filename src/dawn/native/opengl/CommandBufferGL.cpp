@@ -1037,7 +1037,7 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                                                             &implFormat));
                                 DAWN_GL_TRY(
                                     gl, GetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &implType));
-                                DAWN_INTERNAL_ERROR_IF(
+                                DAWN_UNRECOVERABLE_ERROR_IF(
                                     static_cast<GLenum>(implFormat) != glFormat ||
                                         static_cast<GLenum>(implType) != glType,
                                     "glReadPixels of an integer cube texture requires "

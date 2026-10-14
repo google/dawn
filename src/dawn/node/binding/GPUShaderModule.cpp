@@ -28,11 +28,12 @@
 #include "src/dawn/node/binding/GPUShaderModule.h"
 
 #include <memory>
+#include <span>
 #include <utility>
 #include <vector>
 
 #include "src/dawn/node/binding/Converter.h"
-#include "src/utils/compiler.h"
+#include "src/utils/assert.h"
 
 namespace wgpu::binding {
 
@@ -59,7 +60,7 @@ GPUShaderModule::getCompilationInfo(Napi::Env env) {
             [[maybe_unused]] bool foundUtf16 = false;
             for (const auto* chain = m.nextInChain; chain != nullptr; chain = chain->nextInChain) {
                 if (chain->sType == wgpu::SType::DawnCompilationMessageUtf16) {
-                    assert(!foundUtf16);
+                    DAWN_ASSERT(!foundUtf16);
                     foundUtf16 = true;
                     const auto* utf16 =
                         reinterpret_cast<const wgpu::DawnCompilationMessageUtf16*>(chain);
@@ -68,7 +69,7 @@ GPUShaderModule::getCompilationInfo(Napi::Env env) {
                     length = utf16->length;
                 }
             }
-            assert(foundUtf16);
+            DAWN_ASSERT(foundUtf16);
 
             switch (m.type) {
                 case wgpu::CompilationMessageType::Error:
@@ -122,11 +123,12 @@ GPUShaderModule::getCompilationInfo(Napi::Env env) {
         wgpu::CallbackMode::AllowProcessEvents,
         [ctx = std::move(ctx)](wgpu::CompilationInfoRequestStatus status,
                                wgpu::CompilationInfo const* compilationInfo) {
-            Messages messages(compilationInfo->messageCount);
-            for (uint32_t i = 0; i < compilationInfo->messageCount; i++) {
-                auto& msg = DAWN_UNSAFE_TODO(compilationInfo->messages[i]);
-                messages[i] =
-                    interop::GPUCompilationMessage::Create<GPUCompilationMessage>(ctx->env, msg);
+            auto msg_span = WGPU_SPAN(compilationInfo->message);
+            Messages messages;
+            messages.reserve(msg_span.size());
+            for (const auto& msg : msg_span) {
+                messages.push_back(
+                    interop::GPUCompilationMessage::Create<GPUCompilationMessage>(ctx->env, msg));
             }
 
             ctx->promise.Resolve(interop::GPUCompilationInfo::Create<GPUCompilationInfo>(

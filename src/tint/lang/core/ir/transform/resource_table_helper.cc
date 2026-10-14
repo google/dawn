@@ -38,8 +38,10 @@
 
 namespace tint::core::ir::transform {
 
-std::optional<ResourceTableConfig> GenerateResourceTableConfig(Module& mod,
-                                                               bool treat_samplers_as_filtering) {
+std::optional<ResourceTableConfig> GenerateResourceTableConfig(
+    Module& mod,
+    bool treat_samplers_as_filtering,
+    bool treat_textures_as_unfilterable) {
     std::vector<ResourceType> default_binding_type_order;
 
     for (auto* inst : mod.Instructions()) {
@@ -99,7 +101,12 @@ std::optional<ResourceTableConfig> GenerateResourceTableConfig(Module& mod,
             continue;
         }
 
-        binding_to_resource_type.emplace(bp, DefaultResourceTypeFor(ty));
+        if (ty->Is<type::Texture>() && treat_textures_as_unfilterable) {
+            binding_to_resource_type.emplace(
+                bp, DefaultUnfilterableResourceTypeFor(ty->As<type::Texture>()));
+        } else {
+            binding_to_resource_type.emplace(bp, DefaultResourceTypeFor(ty));
+        }
 
         std::vector<ResourceType> converts = ConvertsFrom(ty);
         // The converts from only contains values for the filterable types, for

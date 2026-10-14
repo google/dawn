@@ -121,37 +121,7 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
     DAWN_CHECK(info != nullptr);
 
     UnpackedPtr<AdapterInfo> unpacked;
-    if (mInstance->ConsumedError(ValidateAndUnpack(info), &unpacked)) {
-        return wgpu::Status::Error;
-    }
-
-    bool hadError = false;
-    if (unpacked.Has<AdapterPropertiesMemoryHeaps>() &&
-        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesMemoryHeaps)) {
-        hadError |= mInstance->ConsumedError(
-            DAWN_VALIDATION_ERROR("Feature AdapterPropertiesMemoryHeaps is not available."));
-    }
-    if (unpacked.Has<AdapterPropertiesD3D>() &&
-        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesD3D)) {
-        hadError |= mInstance->ConsumedError(
-            DAWN_VALIDATION_ERROR("Feature AdapterPropertiesD3D is not available."));
-    }
-    if (unpacked.Has<AdapterPropertiesVk>() &&
-        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesVk)) {
-        hadError |= mInstance->ConsumedError(
-            DAWN_VALIDATION_ERROR("Feature AdapterPropertiesVk is not available."));
-    }
-    if (unpacked.Has<AdapterPropertiesDrm>() &&
-        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesDrm)) {
-        hadError |= mInstance->ConsumedError(
-            DAWN_VALIDATION_ERROR("Feature AdapterPropertiesDrm is not available."));
-    }
-    if (unpacked.Has<AdapterPropertiesSubgroupMatrixConfigs>() &&
-        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix)) {
-        hadError |= mInstance->ConsumedError(
-            DAWN_VALIDATION_ERROR("Feature ChromiumExperimentalSubgroupMatrix is not available."));
-    }
-    if (hadError) {
+    if (mInstance->ConsumedError(ValidateGetInfo(info), &unpacked)) {
         return wgpu::Status::Error;
     }
 
@@ -188,25 +158,53 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
     return wgpu::Status::Success;
 }
 
+ResultOrValError<UnpackedPtr<AdapterInfo>> AdapterBase::ValidateGetInfo(AdapterInfo* info) const {
+    UnpackedPtr<AdapterInfo> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(info));
+
+    DAWN_INVALID_IF(
+        unpacked.Has<AdapterPropertiesMemoryHeaps>() &&
+            !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesMemoryHeaps),
+        "Feature AdapterPropertiesMemoryHeaps is not available.");
+    DAWN_INVALID_IF(unpacked.Has<AdapterPropertiesD3D>() &&
+                        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesD3D),
+                    "Feature AdapterPropertiesD3D is not available.");
+    DAWN_INVALID_IF(unpacked.Has<AdapterPropertiesVk>() &&
+                        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesVk),
+                    "Feature AdapterPropertiesVk is not available.");
+    DAWN_INVALID_IF(unpacked.Has<vulkan::AdapterPropertiesVulkanUUIDs>() &&
+                        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesVk),
+                    "Feature AdapterPropertiesVk is not available.");
+    DAWN_INVALID_IF(unpacked.Has<AdapterPropertiesDrm>() &&
+                        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesDrm),
+                    "Feature AdapterPropertiesDrm is not available.");
+    DAWN_INVALID_IF(
+        unpacked.Has<AdapterPropertiesSubgroupMatrixConfigs>() &&
+            !mSupportedFeatures.IsEnabled(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix),
+        "Feature ChromiumExperimentalSubgroupMatrix is not available.");
+
+    return unpacked;
+}
+
 void APIAdapterInfoFreeMembers(WGPUAdapterInfo info) {
-    delete[] info.vendor.data;
-    delete[] info.architecture.data;
-    delete[] info.device.data;
-    delete[] info.description.data;
+    DeleteAllocationFromHeapArray(info.vendor.data);
+    DeleteAllocationFromHeapArray(info.architecture.data);
+    DeleteAllocationFromHeapArray(info.device.data);
+    DeleteAllocationFromHeapArray(info.description.data);
 }
 
 void APIAdapterPropertiesMemoryHeapsFreeMembers(
     WGPUAdapterPropertiesMemoryHeaps memoryHeapProperties) {
-    delete[] memoryHeapProperties.heapInfo;
+    DeleteAllocationFromHeapArray(memoryHeapProperties.heapInfo);
 }
 
 void APIDawnDrmFormatCapabilitiesFreeMembers(WGPUDawnDrmFormatCapabilities capabilities) {
-    delete[] capabilities.properties;
+    DeleteAllocationFromHeapArray(capabilities.properties);
 }
 
 void APIAdapterPropertiesSubgroupMatrixConfigsFreeMembers(
     WGPUAdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs) {
-    delete[] subgroupMatrixConfigs.configs;
+    DeleteAllocationFromHeapArray(subgroupMatrixConfigs.configs);
 }
 
 bool AdapterBase::APIHasFeature(wgpu::FeatureName feature) const {
@@ -222,7 +220,7 @@ void AdapterBase::APIGetFeatures(SupportedFeatures* features) const {
 }
 
 void APISupportedFeaturesFreeMembers(WGPUSupportedFeatures supportedFeatures) {
-    delete[] supportedFeatures.features;
+    DeleteAllocationFromHeapArray(supportedFeatures.features);
 }
 
 // TODO(https://crbug.com/dawn/2465) Could potentially re-implement via AllowSpontaneous async mode.
@@ -240,7 +238,7 @@ DeviceBase* AdapterBase::APICreateDevice(const DeviceDescriptor* descriptor) {
     return ReturnToAPI(std::move(device));
 }
 
-ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
+ResultOrUnknownError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     const DeviceDescriptor* rawDescriptor,
     Ref<DeviceBase::DeviceLostEvent> lostEvent) {
     DAWN_CHECK(rawDescriptor != nullptr);
@@ -310,7 +308,7 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     DAWN_INVALID_IF(mAdapterIsConsumed,
                     "adapter is \"consumed\": it has already been used to create a device");
 
-    auto result =
+    ResultOrError<Ref<DeviceBase>> result =
         mPhysicalDevice->CreateDevice(this, descriptor, deviceToggles, std::move(lostEvent));
 
     // The adapter should be consumed only upon successful device creation if the instance doesn't
@@ -322,11 +320,10 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     if (result.IsSuccess() && consumeOnSuccess) {
         mAdapterIsConsumed = true;
     }
-
     return result;
 }
 
-std::pair<Ref<DeviceBase::DeviceLostEvent>, ResultOrError<Ref<DeviceBase>>>
+std::pair<Ref<DeviceBase::DeviceLostEvent>, ResultOrUnknownError<Ref<DeviceBase>>>
 AdapterBase::CreateDevice(const DeviceDescriptor* descriptor) {
     DAWN_CHECK(descriptor != nullptr);
 
@@ -335,7 +332,7 @@ AdapterBase::CreateDevice(const DeviceDescriptor* descriptor) {
 
     // Catch any errors to directly complete the device lost event with the error message.
     if (result.IsError()) {
-        auto error = result.AcquireError();
+        std::unique_ptr<UnknownError> error = result.AcquireError();
         lostEvent->SetLost(mInstance->GetEventManager(), wgpu::DeviceLostReason::FailedCreation,
                            "Failed to create device:\n" + error->GetFormattedMessage());
 
@@ -412,27 +409,30 @@ Future AdapterBase::APIRequestDevice(const DeviceDescriptor* descriptor,
 
 wgpu::Status AdapterBase::APIGetFormatCapabilities(wgpu::TextureFormat format,
                                                    DawnFormatCapabilities* capabilities) {
-    if (!mSupportedFeatures.IsEnabled(wgpu::FeatureName::DawnFormatCapabilities)) {
-        [[maybe_unused]] bool hadError = mInstance->ConsumedError(
-            DAWN_VALIDATION_ERROR("Feature DawnFormatCapabilities is not available."));
-        return wgpu::Status::Error;
-    }
-    DAWN_CHECK(capabilities != nullptr);
-
     UnpackedPtr<DawnFormatCapabilities> unpacked;
-    if (mInstance->ConsumedError(ValidateAndUnpack(capabilities), &unpacked)) {
-        return wgpu::Status::Error;
-    }
-
-    if (unpacked.Has<DawnDrmFormatCapabilities>() &&
-        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::DawnDrmFormatCapabilities)) {
-        [[maybe_unused]] bool hadError = mInstance->ConsumedError(
-            DAWN_VALIDATION_ERROR("Feature DawnDrmFormatCapabilities is not available."));
+    if (mInstance->ConsumedError(ValidateGetFormatCapabilities(capabilities), &unpacked)) {
         return wgpu::Status::Error;
     }
 
     mPhysicalDevice->PopulateBackendFormatCapabilities(format, unpacked);
     return wgpu::Status::Success;
+}
+
+ResultOrValError<UnpackedPtr<DawnFormatCapabilities>> AdapterBase::ValidateGetFormatCapabilities(
+    DawnFormatCapabilities* capabilities) {
+    DAWN_INVALID_IF(!mSupportedFeatures.IsEnabled(wgpu::FeatureName::DawnFormatCapabilities),
+                    "Feature DawnFormatCapabilities is not available.");
+
+    DAWN_CHECK(capabilities != nullptr);
+
+    UnpackedPtr<DawnFormatCapabilities> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(capabilities));
+
+    DAWN_INVALID_IF(unpacked.Has<DawnDrmFormatCapabilities>() &&
+                        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::DawnDrmFormatCapabilities),
+                    "Feature DawnDrmFormatCapabilities is not available.");
+
+    return unpacked;
 }
 
 const TogglesState& AdapterBase::GetTogglesState() const {
@@ -453,19 +453,29 @@ const std::string& AdapterBase::GetName() const {
 
 std::vector<Ref<AdapterBase>> SortAdapters(std::vector<Ref<AdapterBase>> adapters,
                                            const UnpackedPtr<RequestAdapterOptions>& options) {
-    const bool noPowerPreference = options->powerPreference == wgpu::PowerPreference::Undefined;
-    const bool highPerformance = options->powerPreference == wgpu::PowerPreference::HighPerformance;
+    int discreteRank = 1;
+    int integratedRank = 1;
+    switch (options->powerPreference) {
+        case wgpu::PowerPreference::HighPerformance:
+            // Prioritize discrete GPUs in this case.
+            discreteRank = 0;
+            break;
+        case wgpu::PowerPreference::LowPower:
+            // Prioritize integrated GPUs in this case.
+            integratedRank = 0;
+            break;
+        case wgpu::PowerPreference::Undefined:
+            // Deliberately leave both discrete and integrated ranks at 1 so that the original
+            // OS-provided order of adapters is preserved.
+            break;
+    }
 
     const auto ComputeAdapterTypeRank = [&](const Ref<AdapterBase>& a) {
-        if (noPowerPreference) {
-            return 0;
-        }
-
         switch (a->GetPhysicalDevice()->GetAdapterType()) {
             case wgpu::AdapterType::DiscreteGPU:
-                return highPerformance ? 0 : 1;
+                return discreteRank;
             case wgpu::AdapterType::IntegratedGPU:
-                return highPerformance ? 1 : 0;
+                return integratedRank;
             case wgpu::AdapterType::CPU:
                 return 2;
             case wgpu::AdapterType::Unknown:

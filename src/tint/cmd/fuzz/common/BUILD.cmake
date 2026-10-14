@@ -41,6 +41,9 @@ if(TINT_BUILD_FUZZERS)
 # Condition: TINT_BUILD_FUZZERS
 ################################################################################
 tint_add_target(tint_cmd_fuzz_common lib
+  cmd/fuzz/common/fuzzer_decoder.h
+  cmd/fuzz/common/fuzzer_encoder.h
+  cmd/fuzz/common/fuzzer_limits.h
   cmd/fuzz/common/helper.cc
   cmd/fuzz/common/helper.h
   cmd/fuzz/common/init.cc
@@ -61,7 +64,6 @@ tint_target_add_dependencies(tint_cmd_fuzz_common lib
   tint_lang_core_ir_validator
   tint_lang_core_type
   tint_utils
-  tint_utils_bytes
   tint_utils_command
   tint_utils_containers
   tint_utils_diagnostic
@@ -86,5 +88,33 @@ if(TINT_BUILD_HLSL_WRITER)
     tint_lang_hlsl_validate
   )
 endif(TINT_BUILD_HLSL_WRITER)
+
+endif(TINT_BUILD_FUZZERS)
+if(TINT_BUILD_FUZZERS)
+################################################################################
+# Target:    tint_cmd_fuzz_common_test
+# Kind:      test
+# Condition: TINT_BUILD_FUZZERS
+################################################################################
+tint_add_target(tint_cmd_fuzz_common_test test
+  cmd/fuzz/common/fuzzer_decoder_test.cc
+)
+
+tint_target_add_dependencies(tint_cmd_fuzz_common_test test
+  tint_cmd_fuzz_common
+  tint_utils
+  tint_utils_containers
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_rtti
+)
+
+tint_target_add_external_dependencies(tint_cmd_fuzz_common_test test
+  "gtest"
+  "src_utils"
+)
 
 endif(TINT_BUILD_FUZZERS)

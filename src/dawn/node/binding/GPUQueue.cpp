@@ -27,7 +27,6 @@
 
 #include "src/dawn/node/binding/GPUQueue.h"
 
-#include <cassert>
 #include <limits>
 #include <memory>
 #include <utility>

@@ -54,8 +54,7 @@ ResultOrError<Ref<Buffer>> Buffer::CreateInternalBuffer(Device* device,
     }
 
     if (descriptor->mappedAtCreation) {
-        [[maybe_unused]] bool usingStagingBuffer;
-        DAWN_TRY_ASSIGN(usingStagingBuffer, buffer->MapAtCreationInternal());
+        DAWN_TRY_ASSIGN(std::ignore, buffer->MapAtCreationInternal());
     }
 
     return std::move(buffer);
@@ -267,8 +266,8 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
                                        GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT));
             }
 
-            // SAFETY: A successful call to glMapBufferRange returns a pointer to `length` bytes of
-            // data.
+            // SAFETY: A successful call to glMapBufferRange returns a pointer to `length`
+            // bytes of data.
             self->mMappedData = DAWN_UNSAFE_BUFFERS({static_cast<std::byte*>(mappedPointer), size});
             return {};
         });

@@ -173,11 +173,11 @@ ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const d3d::D3DBytecodeCompilati
         DAWN_TRY(CheckHRESULT(result->GetErrorBuffer(&errors), "DXC get error buffer"));
 
         if (dumpShadersOnFailure) {
-            return DAWN_VALIDATION_ERROR(
+            return DAWN_PIPELINE_UNCATEGORIZED_ERROR(
                 "DXC compile failed with error: %s msg: %s\n/* Generated HLSL: */\n%s\n",
                 hrAsString, static_cast<char*>(errors->GetBufferPointer()), hlslSource.c_str());
         }
-        return DAWN_VALIDATION_ERROR("DXC compile failed with error: %s.", hrAsString);
+        return DAWN_PIPELINE_UNCATEGORIZED_ERROR("DXC compile failed with error: %s.", hrAsString);
     }
 
     ComPtr<IDxcBlob> compiledShader;
@@ -201,20 +201,21 @@ ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(const d3d::D3DBytecodeCompilati
         const char* resultAsString = HRESULTAsString(result);
         if (dumpShadersOnFailure) {
             std::string errorMsg = errors ? static_cast<char*>(errors->GetBufferPointer()) : "";
-            return DAWN_VALIDATION_ERROR(
+            return DAWN_PIPELINE_UNCATEGORIZED_ERROR(
                 "FXC compile failed with error: %s msg: %s\n/* Generated HLSL: */\n%s\n",
                 resultAsString, errorMsg, hlslSource.c_str());
         }
 
-        return DAWN_VALIDATION_ERROR("FXC compile failed with error: %s.", resultAsString);
+        return DAWN_PIPELINE_UNCATEGORIZED_ERROR("FXC compile failed with error: %s.",
+                                                 resultAsString);
     }
 
     return std::move(compiledShader);
 }
 
-MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
-                           UnsafeUnserializedValue<dawn::platform::Platform*> tracePlatform,
-                           CompiledShader* compiledShader) {
+MaybeUnknownError TranslateToHLSL(d3d::HlslCompilationRequest r,
+                                  UnsafeUnserializedValue<dawn::platform::Platform*> tracePlatform,
+                                  CompiledShader* compiledShader) {
     r.tintOptions.strip_all_names = !r.disableSymbolRenaming;
 
     TRACE_EVENT(DAWN_TRACE_CATEGORY(), "tint::hlsl::writer::Generate");
@@ -285,14 +286,13 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
                         "The subgroup_size attribute (%u) is not in the allowed range "
                         "([%u, %u]).",
                         explicitSubgroupSize, r.waveLaneCountMin, r.waveLaneCountMax);
-                } else {
-                    return DAWN_VALIDATION_ERROR(
-                        "The subgroup_size attribute (%u) is not in the allowed range "
-                        "([%u, %u]). Note that on this device the allowed range is not "
-                        "[minSubgroupSize, maxSubgroupsize]([%u, %u]).",
-                        explicitSubgroupSize, r.waveLaneCountMin, r.waveLaneCountMax,
-                        r.minSubgroupSize, r.maxSubgroupSize);
                 }
+                return DAWN_VALIDATION_ERROR(
+                    "The subgroup_size attribute (%u) is not in the allowed range "
+                    "([%u, %u]). Note that on this device the allowed range is not "
+                    "[minSubgroupSize, maxSubgroupsize]([%u, %u]).",
+                    explicitSubgroupSize, r.waveLaneCountMin, r.waveLaneCountMax, r.minSubgroupSize,
+                    r.maxSubgroupSize);
             }
         }
 
@@ -376,7 +376,7 @@ std::string CompileFlagsToString(uint32_t compileFlags) {
     return result;
 }
 
-ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
+ResultOrUnknownError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
     CompiledShader compiledShader;
     bool dumpShadersOnFailure = r.hlsl.dumpShaders || r.hlsl.dumpShadersOnFailure;
     // Compile the source shader to HLSL.

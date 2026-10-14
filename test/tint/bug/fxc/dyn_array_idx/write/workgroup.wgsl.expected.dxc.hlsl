@@ -14,22 +14,21 @@ RWByteAddressBuffer result : register(u1);
 groupshared S s;
 void f_inner(uint tint_local_index) {
   {
-    uint v = 0u;
-    v = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_1 = v;
-      if ((v_1 >= 64u)) {
+      uint v = idx;
+      if ((v >= 64u)) {
         break;
       }
-      s.data[v_1] = int(0);
+      s.data[v] = int(0);
       {
-        v = (v_1 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  uint v_2 = min(uint(asint(ubo[0u].x)), 63u);
-  s.data[v_2] = int(1);
+  uint v_1 = min(uint(asint(ubo[0u].x)), 63u);
+  s.data[v_1] = int(1);
   result.Store(0u, asuint(s.data[int(3)]));
 }
 

@@ -15,46 +15,44 @@ float3x4 v_1(uint start_byte_offset) {
 
 void v_2(uint offset, float3x4 obj[4]) {
   {
-    uint v_3 = 0u;
-    v_3 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_4 = v_3;
-      if ((v_4 >= 4u)) {
+      uint v_3 = idx;
+      if ((v_3 >= 4u)) {
         break;
       }
-      v((offset + (v_4 * 48u)), obj[v_4]);
+      v((offset + (v_3 * 48u)), obj[v_3]);
       {
-        v_3 = (v_4 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
 }
 
 typedef float3x4 ary_ret[4];
-ary_ret v_5(uint start_byte_offset) {
+ary_ret v_4(uint start_byte_offset) {
   float3x4 a[4] = (float3x4[4])0;
   {
-    uint v_6 = 0u;
-    v_6 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_7 = v_6;
-      if ((v_7 >= 4u)) {
+      uint v_5 = idx;
+      if ((v_5 >= 4u)) {
         break;
       }
-      a[v_7] = v_1((start_byte_offset + (v_7 * 48u)));
+      a[v_5] = v_1((start_byte_offset + (v_5 * 48u)));
       {
-        v_6 = (v_7 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  float3x4 v_8[4] = a;
-  return v_8;
+  float3x4 v_6[4] = a;
+  return v_6;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  float3x4 v_9[4] = v_5(0u);
-  v_2(0u, v_9);
+  float3x4 v_7[4] = v_4(0u);
+  v_2(0u, v_7);
   v(48u, v_1(96u));
   s.Store4(48u, asuint(asfloat(u[1u]).ywxz));
   s.Store(48u, asuint(asfloat(u[1u].x)));

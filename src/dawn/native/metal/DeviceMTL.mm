@@ -270,11 +270,8 @@ void Device::InitializeRenderPipelineAsyncImpl(Ref<CreateRenderPipelineAsyncEven
     event->InitializeAsync();
 }
 
-ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
-    const SharedTextureMemoryDescriptor* baseDescriptor) {
-    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(baseDescriptor));
-
+ResultOrUnknownError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
+    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(type,
                     (unpacked.ValidateBranches<Branch<SharedTextureMemoryIOSurfaceDescriptor>>()));
@@ -285,14 +282,14 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
     DAWN_INVALID_IF(!HasFeature(Feature::SharedTextureMemoryIOSurface), "%s is not enabled.",
                     wgpu::FeatureName::SharedTextureMemoryIOSurface);
 
-    return SharedTextureMemory::Create(this, baseDescriptor->label, descriptor);
+    Ref<SharedTextureMemoryBase> sharedTextureMemoryBase;
+    DAWN_TRY_ASSIGN(sharedTextureMemoryBase,
+                    SharedTextureMemory::Create(this, unpacked->label, descriptor));
+    return sharedTextureMemoryBase;
 }
 
-ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
-    const SharedFenceDescriptor* baseDescriptor) {
-    UnpackedPtr<SharedFenceDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(baseDescriptor));
-
+ResultOrUnknownError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
+    UnpackedPtr<SharedFenceDescriptor> unpacked) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(type,
                     (unpacked.ValidateBranches<Branch<SharedFenceMTLSharedEventDescriptor>>()));
@@ -303,7 +300,7 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
     DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceMTLSharedEvent), "%s is not enabled.",
                     wgpu::FeatureName::SharedFenceMTLSharedEvent);
 
-    return SharedFence::Create(this, baseDescriptor->label, descriptor);
+    return SharedFence::Create(this, unpacked->label, descriptor);
 }
 
 MaybeError Device::TickImpl() {
@@ -429,7 +426,7 @@ CounterSampleBufferAllocator* Device::GetCounterSampleBufferAllocator() const {
 }
 
 void Device::StartTrace() {
-    assert(!mTraceInProgress);
+    DAWN_ASSERT(!mTraceInProgress);
 
     auto [filenameBase, shouldTrace] = GetTraceInfo();
     if (!shouldTrace) {

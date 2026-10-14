@@ -95,7 +95,7 @@ class CaptureContext {
     // capturing an implicit call to createXXX.
     template <typename T>
     ResultOrError<schema::ObjectId> AddResourceAndGetId(T* object) {
-        assert(object != nullptr);
+        DAWN_ASSERT(object != nullptr);
         schema::ObjectId id;
         Ref<ApiObjectBase> ref(object);
         auto it = mObjectIds.find(ref);

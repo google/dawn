@@ -14,16 +14,15 @@ void compute_main_inner(uint tint_local_index) {
     wg.y = 0u;
   }
   {
-    uint v = 0u;
-    v = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_1 = v;
-      if ((v_1 >= 10u)) {
+      uint v = idx;
+      if ((v >= 10u)) {
         break;
       }
-      atomicExchange(wg.a[v_1], 0u);
+      atomicExchange(wg.a[v], 0u);
       {
-        v = (v_1 + 1u);
+        idx = (idx + 1u);
       }
     }
   }

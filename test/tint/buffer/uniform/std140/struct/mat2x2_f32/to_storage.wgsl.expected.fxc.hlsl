@@ -38,50 +38,48 @@ S v_7(uint start_byte_offset) {
 
 void v_12(uint offset, S obj[4]) {
   {
-    uint v_13 = 0u;
-    v_13 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_14 = v_13;
-      if ((v_14 >= 4u)) {
+      uint v_13 = idx;
+      if ((v_13 >= 4u)) {
         break;
       }
-      S v_15 = obj[v_14];
-      v_6((offset + (v_14 * 128u)), v_15);
+      S v_14 = obj[v_13];
+      v_6((offset + (v_13 * 128u)), v_14);
       {
-        v_13 = (v_14 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
 }
 
 typedef S ary_ret[4];
-ary_ret v_16(uint start_byte_offset) {
+ary_ret v_15(uint start_byte_offset) {
   S a[4] = (S[4])0;
   {
-    uint v_17 = 0u;
-    v_17 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_18 = v_17;
-      if ((v_18 >= 4u)) {
+      uint v_16 = idx;
+      if ((v_16 >= 4u)) {
         break;
       }
-      S v_19 = v_7((start_byte_offset + (v_18 * 128u)));
-      a[v_18] = v_19;
+      S v_17 = v_7((start_byte_offset + (v_16 * 128u)));
+      a[v_16] = v_17;
       {
-        v_17 = (v_18 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  S v_20[4] = a;
-  return v_20;
+  S v_18[4] = a;
+  return v_18;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  S v_21[4] = v_16(0u);
-  v_12(0u, v_21);
-  S v_22 = v_7(256u);
-  v_6(128u, v_22);
+  S v_19[4] = v_15(0u);
+  v_12(0u, v_19);
+  S v_20 = v_7(256u);
+  v_6(128u, v_20);
   v(392u, v_1(264u));
   s.Store2(136u, asuint(asfloat(u[1u].xy).yx));
 }

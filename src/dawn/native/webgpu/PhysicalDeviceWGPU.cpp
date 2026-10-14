@@ -115,7 +115,7 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
 
     if (status != WGPUStatus_Success) {
         mBackend->GetFunctions().surfaceRelease(innerSurface);
-        return DAWN_VALIDATION_ERROR("Failed to get inner surface capabilities");
+        return DAWN_UNRECOVERABLE_ERROR("Failed to get inner surface capabilities");
     }
 
     Span<const WGPUTextureFormat> innerSurfaceFormats =
@@ -168,7 +168,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     WGPUStatus status = GetFunctions().adapterGetLimits(mInnerAdapter, ToAPI(&limits->v1));
     if (status != WGPUStatus_Success) {
-        return DAWN_INTERNAL_ERROR("Fail to get inner adapter limits");
+        return DAWN_UNRECOVERABLE_ERROR("Fail to get inner adapter limits");
     }
     return {};
 }

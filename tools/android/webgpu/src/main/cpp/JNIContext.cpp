@@ -28,7 +28,6 @@
 #include "JNIContext.h"
 
 #include <algorithm>
-#include <cassert>
 
 #include "structures.h"
 

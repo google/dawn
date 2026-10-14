@@ -30,6 +30,7 @@
 #include <array>
 #include <limits>
 #include <ranges>
+#include <vector>
 
 #include "src/utils/gtest.h"
 #include "src/utils/typed_integer.h"
@@ -61,14 +62,14 @@ class HeapArrayTest : public ::testing::Test {
 using HeapArrayDeathTest = HeapArrayTest;
 
 TEST_F(HeapArrayTest, KeyTypes) {
-    (void)ityp::HeapArray<TypedInteger<struct KU8, uint8_t>, int>();
-    (void)ityp::HeapArray<TypedInteger<struct KU32, uint32_t>, int>();
-    (void)ityp::HeapArray<TypedInteger<struct KSizeT, size_t>, int>();
+    std::ignore = ityp::HeapArray<TypedInteger<struct KU8, uint8_t>, int>();
+    std::ignore = ityp::HeapArray<TypedInteger<struct KU32, uint32_t>, int>();
+    std::ignore = ityp::HeapArray<TypedInteger<struct KSizeT, size_t>, int>();
 
     enum class E : uint32_t {};
-    (void)ityp::HeapArray<E, int>();
+    std::ignore = ityp::HeapArray<E, int>();
 
-    (void)ityp::HeapArray<uint16_t, int>();
+    std::ignore = ityp::HeapArray<uint16_t, int>();
 }
 
 // Test that values can be set at an index and retrieved from the same index.
@@ -163,42 +164,6 @@ TEST_F(HeapArrayTest, Uninit) {
     EXPECT_EQ(arr[Index{0u}], 5);
 }
 
-// Tests for MoveToRawPointer.
-TEST_F(HeapArrayTest, MoveToRawPointer) {
-    // Check with an untyped HeapArray.
-    {
-        auto arr = HeapArray<int>(5);
-        int* originalData = arr.data();
-        size_t originalSize = arr.size();
-
-        auto [size, data] = std::move(arr).MoveToRawPointer();
-
-        ASSERT_TRUE(arr.empty());
-        static_assert(std::is_same_v<decltype(data), int*>);
-        static_assert(std::is_same_v<decltype(size), size_t>);
-        ASSERT_EQ(data, originalData);
-        ASSERT_EQ(size, originalSize);
-
-        delete[] data;
-    }
-    // Check with a typed HeapArray.
-    {
-        auto arr = ityp::HeapArray<Index, int>(Index{5u});
-        int* originalData = arr.data();
-        Index originalSize = arr.size();
-
-        auto [size, data] = std::move(arr).MoveToRawPointer();
-
-        ASSERT_TRUE(arr.empty());
-        static_assert(std::is_same_v<decltype(data), int*>);
-        static_assert(std::is_same_v<decltype(size), size_t>);  // Not an Index!
-        ASSERT_EQ(data, originalData);
-        ASSERT_EQ(size, size_t{originalSize});
-
-        delete[] data;
-    }
-}
-
 // Tests for MoveToSpan.
 TEST_F(HeapArrayTest, MoveToSpan) {
     // Check with an untyped HeapArray.
@@ -214,7 +179,7 @@ TEST_F(HeapArrayTest, MoveToSpan) {
         ASSERT_EQ(sp.data(), originalData);
         ASSERT_EQ(sp.size(), originalSize);
 
-        delete[] sp.data();
+        DeleteAllocationFromHeapArray(sp.data());
     }
     // Check with a typed HeapArray.
     {
@@ -229,7 +194,47 @@ TEST_F(HeapArrayTest, MoveToSpan) {
         ASSERT_EQ(sp.data(), originalData);
         ASSERT_EQ(sp.size(), originalSize);
 
-        delete[] sp.data();
+        DeleteAllocationFromHeapArray(sp.data());
+    }
+}
+
+// Tests for MoveToSpan of byte types as there is special logic to overalign the allocation.
+TEST_F(HeapArrayTest, MoveToByteType) {
+    // Check with an untyped HeapArray.
+    {
+        auto arr = HeapArray<std::byte>(5);
+        std::byte* originalData = arr.data();
+        size_t originalSize = arr.size();
+
+        auto sp = std::move(arr).MoveToSpan();
+
+        ASSERT_TRUE(arr.empty());
+        static_assert(std::is_same_v<decltype(sp), Span<std::byte>>);
+        ASSERT_EQ(sp.data(), originalData);
+        ASSERT_EQ(sp.size(), originalSize);
+
+        // Dawn uses types that need at least 16.
+        ASSERT_TRUE((reinterpret_cast<uintptr_t>(sp.data()) & 0xF) == 0u);
+
+        DeleteAllocationFromHeapArray(sp.data());
+    }
+    // Check with a typed HeapArray.
+    {
+        auto arr = ityp::HeapArray<Index, std::byte>(Index{5u});
+        std::byte* originalData = arr.data();
+        Index originalSize = arr.size();
+
+        auto sp = std::move(arr).MoveToSpan();
+
+        ASSERT_TRUE(arr.empty());
+        static_assert(std::is_same_v<decltype(sp), ityp::span<Index, std::byte>>);
+        ASSERT_EQ(sp.data(), originalData);
+        ASSERT_EQ(sp.size(), originalSize);
+
+        // Dawn uses types that need at least 16.
+        ASSERT_TRUE((reinterpret_cast<uintptr_t>(sp.data()) & 0xF) == 0u);
+
+        DeleteAllocationFromHeapArray(sp.data());
     }
 }
 
@@ -310,9 +315,9 @@ TEST_F(HeapArrayTest, Range) {
     HeapArrayVal arr{Index{10u}};
 
     // Explicit construction.
-    (void)std::span<Val>(arr);
+    std::ignore = std::span<Val>(arr);
     // Dawn's span requires the index type to match.
-    (void)ityp::span<Index, Val>(arr);
+    std::ignore = ityp::span<Index, Val>(arr);
 
     // Spans also allow implicit construction from a range.
     [[maybe_unused]] std::span<Val> s1 = arr;
@@ -324,24 +329,39 @@ TEST_F(HeapArrayTest, Range) {
 TEST_F(HeapArrayDeathTest, SmallIndex) {
     using IndexU8 = TypedInteger<struct IndexU8T, uint8_t>;
     {
-        (void)ityp::HeapArrayFrom<IndexU8>(std::array<int, 254>{});
+        std::ignore = ityp::HeapArrayFrom<IndexU8>(std::array<int, 254>{});
 
         // 255 is invalid because it's reserved as a sentinel value by dawn::SpanBase.
-        EXPECT_DEATH_IF_SUPPORTED((void)ityp::HeapArrayFrom<IndexU8>(std::array<int, 255>{}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(
+            std::ignore = ityp::HeapArrayFrom<IndexU8>(std::array<int, 255>{}), "");
     }
 }
 
-// Checks that various byte types are always aligned to alignof(std::max_align_t).
+// Checks that various byte types are always aligned to alignof(std::max_align_t) and 16.
 template <typename HA>
 void CheckByteAllocation(const HA& ha) {
     EXPECT_EQ(reinterpret_cast<uintptr_t>(ha.data()) % alignof(std::max_align_t), 0u);
+    EXPECT_EQ(reinterpret_cast<uintptr_t>(ha.data()) % 16, 0u);
 }
 TEST_F(HeapArrayTest, ByteTypeAlignment) {
-    CheckByteAllocation(HeapArray<std::byte>(16));
-    CheckByteAllocation(HeapArray<char>(16));
-    // uint8_t is not technically guaranteed to be max-aligned, but in practice it will be.
-    // As of this writing, some Dawn code relies on it.
-    CheckByteAllocation(HeapArray<uint8_t>(16));
+    // Keep allocations alive at the same time to stress the allocator a bunch.
+    std::vector<HeapArray<std::byte>> byteAllocs;
+    std::vector<HeapArray<char>> charAllocs;
+    std::vector<HeapArray<uint8_t>> uint8Allocs;
+
+    // Try allocating various sizes, cycling all size between 1 and 31 since 13 and 31 and prime
+    // with each other (and starting the cycle right after 0).
+    for (size_t size = 31; size != 0; size = (size + 13) % 31) {
+        byteAllocs.push_back(HeapArray<std::byte>{size});
+        CheckByteAllocation(byteAllocs.back());
+
+        charAllocs.push_back(HeapArray<char>{size});
+        CheckByteAllocation(charAllocs.back());
+
+        static_assert(std::is_same_v<uint8_t, unsigned char>);
+        uint8Allocs.push_back(HeapArray<uint8_t>{size});
+        CheckByteAllocation(uint8Allocs.back());
+    }
 }
 
 // Check that various non-byte types are always aligned as expected.
@@ -372,7 +392,7 @@ TEST_F(HeapArrayTest, OutOfMemoryAtLimit) {
     {
         // Test sizes that are blocked by the HeapArray implementation before trying to allocate,
         // and one element smaller so that HeapArray will actually try to allocate.
-        for (size_t leaveSpace : {0u, 4094u, 4095u}) {
+        for (size_t leaveSpace : {0u, 3u, 4094u, 4095u}) {
             HeapArray<uint8_t> arr{std::numeric_limits<size_t>::max() - leaveSpace, std::nothrow};
             PreventElidingAllocation(arr);
             EXPECT_FALSE(bool{arr});
@@ -426,10 +446,10 @@ TEST_F(HeapArrayDeathTest, OutOfMemoryAtLimit) {
     // Allocation of uint8_t values
     {
         // Exact maximum amount that will fit in the address space
-        EXPECT_DEATH_IF_SUPPORTED(
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(
             PreventElidingAllocation(HeapArray<uint8_t>{std::numeric_limits<size_t>::max()}), "");
         // And a bit less.
-        EXPECT_DEATH_IF_SUPPORTED(
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(
             PreventElidingAllocation(HeapArray<uint8_t>{std::numeric_limits<size_t>::max() - 4095}),
             "");
     }
@@ -437,14 +457,16 @@ TEST_F(HeapArrayDeathTest, OutOfMemoryAtLimit) {
     {
         static constexpr size_t kMaxSize = std::numeric_limits<size_t>::max() / sizeof(uint32_t);
         // Maximum amount that will fit in the address space
-        EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize}), "");
         // And a bit less.
-        EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize - 1023}),
-                                  "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(
+            PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize - 1023}), "");
 
         // Cases where size * sizeof(val) is larger than the address space and could overflow.
-        EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize + 1}), "");
-        EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize + 2}), "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize + 1}),
+                                       "");
+        DAWN_EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(HeapArray<uint32_t>{kMaxSize + 2}),
+                                       "");
     }
 }
 
@@ -453,8 +475,9 @@ TEST_F(HeapArrayDeathTest, OutOfMemory64) {
     using Key64 = TypedInteger<struct Key64T, uint64_t>;
     static constexpr Key64 kHugeSize{0x1000'0000'0000'0000u};
 
-    EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(ityp::HeapArray<Key64, Val>{kHugeSize}), "");
-    EXPECT_DEATH_IF_SUPPORTED(
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(PreventElidingAllocation(ityp::HeapArray<Key64, Val>{kHugeSize}),
+                                   "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(
         PreventElidingAllocation(
             // SAFETY: Testing unsafe API.
             DAWN_UNSAFE_BUFFERS(ityp::HeapArray<Key64, int>::Uninit(kHugeSize))),
@@ -470,10 +493,10 @@ TEST_F(HeapArrayDeathTest, OutOfBounds) {
     }
 
     HeapArrayVal arr{Index{10u}};
-    EXPECT_DEATH_IF_SUPPORTED(arr[Index{10u}], "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(arr[Index{10u}], "");
 
     const HeapArrayVal& constArr = arr;
-    EXPECT_DEATH_IF_SUPPORTED(constArr[Index{10u}], "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(constArr[Index{10u}], "");
 }
 
 // If the index/size is 64-bit, it needs to be narrowed to size_t. Verify that's checked correctly.
@@ -487,17 +510,17 @@ TEST_F(HeapArrayDeathTest, OversizedIndex) {
     static constexpr Key64 kHugeKey64{0x1000'0000'0000'0000u};
 
     // Crash either due to OOM (on 64-bit) or due to narrowing (on 32-bit).
-    EXPECT_DEATH_IF_SUPPORTED((ityp::HeapArray<Key64, Val>(kHugeKey64)), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED((ityp::HeapArray<Key64, Val>(kHugeKey64)), "");
 
     ityp::HeapArray<Key64, Val> vec(Key64{10u});
 
     vec[Key64{9u}];
     // Regular out-of-bounds.
-    EXPECT_DEATH_IF_SUPPORTED(vec[Key64{10u}], "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(vec[Key64{10u}], "");
 
     vec[Key64{0u}];
     // If this were cast to a 32-bit size_t without a check, it would be in-bounds.
-    EXPECT_DEATH_IF_SUPPORTED(vec[kHugeKey64], "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(vec[kHugeKey64], "");
 }
 
 // Using uninitialized memory should crash on MSan builds.
@@ -508,7 +531,7 @@ TEST_F(HeapArrayDeathTest, ReadUninitWithPODType) {
 
     // SAFETY: Testing unsafe API.
     auto arr = DAWN_UNSAFE_BUFFERS(HeapArrayPOD::Uninit(Index{1u}));
-    EXPECT_DEATH_IF_SUPPORTED([&]() { printf("%d\n", arr[Index{0u}]); }(), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED([&]() { printf("%d\n", arr[Index{0u}]); }(), "");
 }
 
 }  // anonymous namespace

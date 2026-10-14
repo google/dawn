@@ -275,12 +275,12 @@ class WireMemoryTransferServiceTestBase : public WireTest,
         wgpu::MapMode mode = GetParam().mMapMode;
 
         // Mode independent expectations.
-        EXPECT_CALL(api,
-                    OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _))
-            .WillOnce([&] {
+        EXPECT_CALL(
+            api, OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _, _))
+            .WillOnce(WithArg<5>([&](WGPUFuture future) {
                 api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
-                                               kEmptyOutputStringView);
-            });
+                                               kEmptyOutputStringView, future);
+            }));
         EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Success, _)).Times(1);
 
         switch (mode) {
@@ -444,6 +444,24 @@ TEST_P(WireMemoryTransferServiceBufferHandleTests, Destroy) {
     FlushClient();
 }
 
+// Regression test for crbug.com/566650084. Per-buffer state may retain backend state that still
+// references the buffer, so it must be destroyed before the backend buffer is released.
+TEST_P(WireMemoryTransferServiceBufferHandleTests, DestroyHandleBeforeReleasingBuffer) {
+    WGPUBuffer apiBuffer;
+    wgpu::Buffer buffer;
+    MockClientMemoryHandle* clientHandle;
+    MockServerMemoryHandle* serverHandle;
+    std::tie(apiBuffer, buffer, clientHandle, serverHandle) = CreateValidBuffer();
+
+    EXPECT_CALL(*clientHandle, Destroy).Times(1);
+    buffer = nullptr;
+
+    bool bufferReleased = false;
+    EXPECT_CALL(*serverHandle, Destroy).WillOnce([&] { EXPECT_FALSE(bufferReleased); });
+    EXPECT_CALL(api, BufferRelease(apiBuffer)).WillOnce([&] { bufferReleased = true; });
+    FlushClient();
+}
+
 // Test handle(s) creation failure.
 TEST_P(WireMemoryTransferServiceBufferHandleTests, CreationFailure) {
     ExpectHandleCreation(false);
@@ -547,11 +565,12 @@ TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, Error) {
                     mMapAsyncCb.Callback());
 
     // Make the server respond to the callback with an error.
-    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _))
-        .WillOnce([&] {
+    EXPECT_CALL(api,
+                OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _, _))
+        .WillOnce(WithArg<5>([&](WGPUFuture future) {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Error,
-                                           ToOutputStringView("Validation error"));
-        });
+                                           ToOutputStringView("Validation error"), future);
+        }));
     FlushClient();
 
     // The callback should happen when the server flushes the response.
@@ -590,11 +609,12 @@ TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, DeserializeDataUpdateFailur
     }
 
     // Set mode independent expectations for the map async call now.
-    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _))
-        .WillOnce([&] {
+    EXPECT_CALL(api,
+                OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _, _))
+        .WillOnce(WithArg<5>([&](WGPUFuture future) {
             api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
-                                           kEmptyOutputStringView);
-        });
+                                           kEmptyOutputStringView, future);
+        }));
 
     switch (mode) {
         case wgpu::MapMode::Read: {

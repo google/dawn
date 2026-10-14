@@ -28,6 +28,17 @@
 #ifndef SRC_UTILS_COMPILER_H_
 #define SRC_UTILS_COMPILER_H_
 
+#if !defined(DAWN_HAVE_UTILS_BUILD_CONFIG)
+#error "Something is wrong with the build config. Global defines must be set to use src/utils."
+#endif
+#if !defined(NDEBUG) && !defined(DAWN_ENABLE_ASSERTS)
+// There should only be three combinations of these settings:
+// -          DAWN_ENABLE_ASSERTS = debug build
+// - NDEBUG                       = release build
+// - NDEBUG + DAWN_ENABLE_ASSERTS = release build with dawn_always_assert
+#error "One or both of NDEBUG and DAWN_ENABLE_ASSERTS should always be set."
+#endif
+
 // DAWN_COMPILER_IS(CLANG|GCC|MSVC): Compiler detection
 //
 // Note: clang masquerades as GCC on POSIX and as MSVC on Windows. It must be checked first.
@@ -116,6 +127,30 @@
 #else
 #define DAWN_MSAN_ENABLED() 0
 #endif
+#endif
+
+// DAWN_TSAN_ENABLED()
+//
+// Checks whether TSan is enabled.
+#if DAWN_COMPILER_IS(CLANG)
+#define DAWN_TSAN_ENABLED() __has_feature(thread_sanitizer)
+#elif DAWN_COMPILER_IS(GCC) || DAWN_COMPILER_IS(MSVC)
+#if defined(__SANITIZE_THREAD__)
+#define DAWN_TSAN_ENABLED() 1
+#else
+#define DAWN_TSAN_ENABLED() 0
+#endif
+#endif
+
+// DAWN_TSAN_RELEASE(addr)/DAWN_TSAN_ACQUIRE(addr)
+//
+// Emits a __tsan_release(addr)/__tsan_acquire(addr) if TSan is enabled, and nothing otherwise.
+#if DAWN_TSAN_ENABLED()
+#define DAWN_TSAN_RELEASE(addr) __tsan_release(addr)
+#define DAWN_TSAN_ACQUIRE(addr) __tsan_acquire(addr)
+#else
+#define DAWN_TSAN_RELEASE(addr)
+#define DAWN_TSAN_ACQUIRE(addr)
 #endif
 
 // DAWN_UBSAN_ENABLED()

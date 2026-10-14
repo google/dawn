@@ -61,6 +61,25 @@ TEST_F(SpirvWriterTest, ModuleHeader_VulkanMemoryModel) {
     EXPECT_INST("OpMemoryModel Logical Vulkan");
 }
 
+TEST_F(SpirvWriterTest, ViewIndex) {
+    auto* view_index = b.FunctionParam("view_index", ty.u32());
+    view_index->SetBuiltin(core::BuiltinValue::kViewIndex);
+
+    auto* ep = b.Function("main", ty.vec4f(), core::ir::Function::PipelineStage::kVertex);
+    ep->SetParams({view_index});
+    ep->SetReturnAttributes({.builtin = core::BuiltinValue::kPosition});
+    b.Append(ep->Block(), [&] {
+        b.Let("view", view_index);
+        b.Return(ep, b.Zero(ty.vec4f()));
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("OpExtension \"SPV_KHR_multiview\"");
+    EXPECT_INST("OpCapability MultiView");
+    EXPECT_INST("BuiltIn ViewIndex");
+}
+
 TEST_F(SpirvWriterTest, CanGenerate_SubgroupMatrixRequiresVulkanMemoryModel) {
     core::ir::Var* v = nullptr;
     b.Append(mod.root_block,
@@ -341,10 +360,10 @@ TEST_F(SpirvWriterTest, Spv14_CopyLogical) {
          %wg = OpVariable %_ptr_Workgroup__arr_uint_uint_4_0 Workgroup
 )");
     EXPECT_INST(R"(
-         %27 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_4 %1 %uint_0
-         %30 = OpLoad %_arr_uint_uint_4 %27 None
-         %31 = OpCopyLogical %_arr_uint_uint_4_0 %30
-               OpStore %wg %31 None
+         %25 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_4 %1 %uint_0
+         %28 = OpLoad %_arr_uint_uint_4 %25 None
+         %29 = OpCopyLogical %_arr_uint_uint_4_0 %28
+               OpStore %wg %29 None
                OpReturn
 )");
 }

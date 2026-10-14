@@ -712,6 +712,9 @@ BuiltinType ParseBuiltinType(std::string_view str) {
     if (str == "texture_multisampled_2d") {
         return BuiltinType::kTextureMultisampled2D;
     }
+    if (str == "texture_multisampled_2d_array") {
+        return BuiltinType::kTextureMultisampled2DArray;
+    }
     if (str == "texture_storage_1d") {
         return BuiltinType::kTextureStorage1D;
     }
@@ -950,6 +953,8 @@ std::string_view ToString(BuiltinType value) {
             return "texture_external";
         case BuiltinType::kTextureMultisampled2D:
             return "texture_multisampled_2d";
+        case BuiltinType::kTextureMultisampled2DArray:
+            return "texture_multisampled_2d_array";
         case BuiltinType::kTextureStorage1D:
             return "texture_storage_1d";
         case BuiltinType::kTextureStorage2D:
@@ -1059,6 +1064,9 @@ BuiltinValue ParseBuiltinValue(std::string_view str) {
     if (str == "vertex_index") {
         return BuiltinValue::kVertexIndex;
     }
+    if (str == "view_index") {
+        return BuiltinValue::kViewIndex;
+    }
     if (str == "workgroup_id") {
         return BuiltinValue::kWorkgroupId;
     }
@@ -1113,6 +1121,8 @@ std::string_view ToString(BuiltinValue value) {
             return "subgroup_size";
         case BuiltinValue::kVertexIndex:
             return "vertex_index";
+        case BuiltinValue::kViewIndex:
+            return "view_index";
         case BuiltinValue::kWorkgroupId:
             return "workgroup_id";
         case BuiltinValue::kWorkgroupIndex:

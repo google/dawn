@@ -129,10 +129,6 @@ class InlineMemoryTransferService : public MemoryTransferService {
         WGPUBuffer TryWrapInBuffer(const DawnProcTable* procs,
                                    WGPUDevice device,
                                    const WGPUBufferDescriptor* descriptor) override {
-            if (descriptor->usage & (WGPUBufferUsage_Indirect | WGPUBufferUsage_Index)) {
-                return nullptr;
-            }
-
             if (descriptor->size != mSharedMemory->GetMappedSpan().size()) {
                 return nullptr;
             }
@@ -143,13 +139,16 @@ class InlineMemoryTransferService : public MemoryTransferService {
                 return nullptr;
             }
 
-            WGPUSharedBufferMemoryHostPointerDescriptor hostPointerDesc = {};
-            hostPointerDesc.chain.sType = WGPUSType_SharedBufferMemoryHostPointerDescriptor;
-            hostPointerDesc.pointer = mSharedMemory->GetMappedSpan().data();
-            hostPointerDesc.size = mSharedMemory->GetAllocatedSize();
-            // No-op in `disposeCallback` since the memory is managed outside Dawn native.
-            hostPointerDesc.userdata = nullptr;
-            hostPointerDesc.disposeCallback = [](WGPUCallbackStatus, void*) {};
+            WGPUSharedBufferMemoryHostPointerDescriptor hostPointerDesc = {
+                .chain = {.sType = WGPUSType_SharedBufferMemoryHostPointerDescriptor},
+                .pointer = mSharedMemory->GetMappedSpan().data(),
+                .size = mSharedMemory->GetAllocatedSize(),
+                .disposeCallbackInfo =
+                    {
+                        .mode = WGPUCallbackMode_AllowSpontaneous,
+                        .callback = [](WGPUCallbackStatus, void*, void*) {},
+                    },
+            };
 
             WGPUSharedBufferMemoryDescriptor desc = {};
             desc.nextInChain = &hostPointerDesc.chain;

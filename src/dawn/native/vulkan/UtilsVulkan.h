@@ -202,7 +202,7 @@ std::vector<VkDrmFormatModifierPropertiesEXT> GetFormatModifierProps(
 
 // Get the properties for the (format, modifier) pair.
 // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkDrmFormatModifierPropertiesEXT.html
-ResultOrError<VkDrmFormatModifierPropertiesEXT> GetFormatModifierProps(
+ResultOrValError<VkDrmFormatModifierPropertiesEXT> GetFormatModifierProps(
     const VulkanFunctions& fn,
     VkPhysicalDevice vkPhysicalDevice,
     VkFormat format,

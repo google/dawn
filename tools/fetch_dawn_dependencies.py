@@ -37,9 +37,14 @@ a project that you trust not to contain malicious DEPS files.
 """
 
 import os
+import shutil
 import sys
 import subprocess
 import argparse
+import tempfile
+import urllib.parse
+import urllib.request
+import zipfile
 from pathlib import Path
 
 parser = argparse.ArgumentParser(
@@ -91,6 +96,11 @@ parser.add_argument('-t',
     Deprecated: Test dependencies are now always included.
     """)
 
+parser.add_argument('--fetch-agility-sdk',
+                    action='store_true',
+                    default=False,
+                    help="Fetch the Agility SDK version pinned in DEPS.")
+
 
 def main(args):
     # The dependencies that we need to pull from the DEPS files.
@@ -116,6 +126,8 @@ def main(args):
         'third_party/vulkan-utility-libraries/src',
         'third_party/webgpu-headers/src',
     ]
+    if args.fetch_agility_sdk:
+        required_submodules.append('third_party/agility-sdk/src')
 
     root_dir = Path(args.directory).resolve()
 
@@ -151,53 +163,12 @@ def process_dir(args, dir_path, required_submodules):
         if submodule not in deps:
             continue
         submodule_path = dir_path / Path(submodule)
+        dep = deps[submodule]
 
-        raw_url = deps[submodule]['url']
-        git_url, git_tag = raw_url.format(**variables).rsplit('@', 1)
-
-        # Run git from within the submodule's path (don't use for clone)
-        git = lambda *x: subprocess.run([args.git, '-C', submodule_path, *x],
-                                        capture_output=True)
-
-        log(f"Fetching dependency '{submodule}'")
-        if (submodule_path / ".git").is_dir():
-            # The module was already cloned, but we may need to update it
-            proc = git('rev-parse', 'HEAD')
-            need_update = proc.stdout.decode().strip() != git_tag
-
-            if need_update:
-                # The module was already cloned, but we may need to update it
-                proc = git('cat-file', '-t', git_tag)
-                git_tag_exists = proc.returncode == 0
-
-                if not git_tag_exists:
-                    log(f"Updating '{submodule_path}' from '{git_url}'")
-                    if args.shallow:
-                        git('fetch', 'origin', git_tag, '--depth', '1')
-                    else:
-                        git('fetch', 'origin')
-
-                log(f"Checking out tag '{git_tag}'")
-                git('checkout', git_tag)
-
+        if dep.get('dep_type') == 'cipd':
+            fetch_cipd_dependency(dep, variables, submodule_path)
         else:
-            if args.shallow:
-                log(f"Shallow cloning '{git_url}' at '{git_tag}' into '{submodule_path}'"
-                    )
-                shallow_clone(git, git_url, git_tag)
-            else:
-                log(f"Cloning '{git_url}' into '{submodule_path}'")
-                subprocess.run([
-                    args.git,
-                    'clone',
-                    '--recurse-submodules',
-                    git_url,
-                    submodule_path,
-                ],
-                               capture_output=True)
-
-            log(f"Checking out tag '{git_tag}'")
-            git('checkout', git_tag)
+            fetch_git_dependency(args, dep, variables, submodule_path)
 
         # Recursive call
         required_subsubmodules = [
@@ -205,6 +176,86 @@ def process_dir(args, dir_path, required_submodules):
             if m.startswith(submodule + "/")
         ]
         process_dir(args, submodule_path, required_subsubmodules)
+
+
+def fetch_git_dependency(args, dep, variables, submodule_path):
+    raw_url = dep['url']
+    git_url, git_tag = raw_url.format(**variables).rsplit('@', 1)
+
+    # Run git from within the submodule's path (don't use for clone)
+    git = lambda *x: subprocess.run([args.git, '-C', submodule_path, *x],
+                                    capture_output=True)
+
+    log(f"Fetching dependency '{submodule_path}'")
+    if (submodule_path / ".git").is_dir():
+        # The module was already cloned, but we may need to update it
+        proc = git('rev-parse', 'HEAD')
+        need_update = proc.stdout.decode().strip() != git_tag
+
+        if need_update:
+            # The module was already cloned, but we may need to update it
+            proc = git('cat-file', '-t', git_tag)
+            git_tag_exists = proc.returncode == 0
+
+            if not git_tag_exists:
+                log(f"Updating '{submodule_path}' from '{git_url}'")
+                if args.shallow:
+                    git('fetch', 'origin', git_tag, '--depth', '1')
+                else:
+                    git('fetch', 'origin')
+
+            log(f"Checking out tag '{git_tag}'")
+            git('checkout', git_tag)
+    else:
+        if args.shallow:
+            log(f"Shallow cloning '{git_url}' at '{git_tag}' into '{submodule_path}'"
+                )
+            shallow_clone(git, git_url, git_tag)
+        else:
+            log(f"Cloning '{git_url}' into '{submodule_path}'")
+            subprocess.run([
+                args.git,
+                'clone',
+                '--recurse-submodules',
+                git_url,
+                submodule_path,
+            ],
+                           capture_output=True)
+
+        log(f"Checking out tag '{git_tag}'")
+        git('checkout', git_tag)
+
+
+def fetch_cipd_dependency(dep, variables, submodule_path):
+    for package in dep['packages']:
+        name = package['package']
+        # TODO(crbug.com/519934394): Append package['platform'] to the package name when present.
+        assert 'platform' not in package
+        version = package['version']
+        assert isinstance(version, Var)
+        version = variables[version.name]
+
+        # CIPD dependencies are archives rather than Git checkouts. Keep a local version stamp in
+        # the ignored dependency directory so repeated runs can skip downloading the same DEPS
+        # version. The stamp is written only after extraction succeeds.
+        stamp = submodule_path / ('.dawn-' + name.replace('/', '-') +
+                                  '-version')
+        if stamp.is_file() and stamp.read_text() == version:
+            continue
+
+        log(f"Fetching CIPD dependency '{name}' at '{version}'")
+        if submodule_path.exists():
+            shutil.rmtree(submodule_path)
+        submodule_path.mkdir(parents=True)
+        url = ('https://chrome-infra-packages.appspot.com/dl/' + name + '/+/' +
+               urllib.parse.quote(version, safe=''))
+        with tempfile.TemporaryDirectory() as temp_dir:
+            archive = Path(temp_dir) / 'package.zip'
+            urllib.request.urlretrieve(url, archive)
+            with zipfile.ZipFile(archive) as package_zip:
+                package_zip.extractall(submodule_path)
+
+        stamp.write_text(version)
 
 
 def shallow_clone(git, git_url, git_tag):

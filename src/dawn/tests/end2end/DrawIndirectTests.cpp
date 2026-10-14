@@ -142,6 +142,111 @@ DAWN_INSTANTIATE_TEST(DrawIndirectTest,
                       VulkanBackend(),
                       WebGPUBackend());
 
+// These tests exercise general DrawIndirect behavior, but were added specifically to cover
+// D3D12's batching of consecutive indirect draws into a single ExecuteIndirect call.
+class DrawIndirectBatchingTest : public DrawIndirectTest {
+  protected:
+    void TestTwoDraws(const wgpu::Buffer& firstBuffer,
+                      uint64_t firstOffset,
+                      const wgpu::Buffer& secondBuffer,
+                      uint64_t secondOffset) {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.SetPipeline(pipeline);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.DrawIndirect(firstBuffer, firstOffset);
+        pass.DrawIndirect(secondBuffer, secondOffset);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 1, 3);
+        EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 3, 1);
+    }
+};
+
+// Consecutive DrawIndirect calls using adjacent records may be submitted as one D3D12
+// ExecuteIndirect call. Test that both draws execute.
+TEST_P(DrawIndirectBatchingTest, ConsecutiveDraws) {
+    wgpu::Buffer indirectBuffer = utils::CreateBufferFromData<uint32_t>(
+        device, wgpu::BufferUsage::Indirect, {3, 1, 0, 0, 3, 1, 3, 0});
+
+    TestTwoDraws(indirectBuffer, 0, indirectBuffer, uint64_t{4} * sizeof(uint32_t));
+}
+
+// Non-adjacent indirect records must remain separate draws with their original arguments.
+TEST_P(DrawIndirectBatchingTest, NonConsecutiveOffsets) {
+    wgpu::Buffer indirectBuffer = utils::CreateBufferFromData<uint32_t>(
+        device, wgpu::BufferUsage::Indirect, {3, 1, 0, 0, 0, 0, 0, 0, 3, 1, 3, 0});
+
+    TestTwoDraws(indirectBuffer, 0, indirectBuffer, uint64_t{8} * sizeof(uint32_t));
+}
+
+// Indirect draws backed by different buffers must retain the arguments from each buffer.
+TEST_P(DrawIndirectBatchingTest, DifferentBuffers) {
+    // TODO(42242119): fail on Qualcomm Adreno X1.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+
+    wgpu::Buffer first =
+        utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, {3, 1, 0, 0});
+    wgpu::Buffer second =
+        utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, {3, 1, 3, 0});
+
+    TestTwoDraws(first, 0, second, 0);
+}
+
+// A pipeline change must flush pending indirect draws before applying the new pipeline.
+TEST_P(DrawIndirectBatchingTest, PipelineChangePreservesDrawState) {
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+        @vertex
+        fn main(@location(0) position : vec4f) -> @builtin(position) vec4f {
+            return position;
+        })");
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(1.0, 0.0, 0.0, 1.0);
+        })");
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleStrip;
+    descriptor.vertex.bufferCount = 1;
+    descriptor.cBuffers[0].arrayStride = uint64_t{4} * sizeof(float);
+    descriptor.cBuffers[0].attributeCount = 1;
+    descriptor.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
+    descriptor.cTargets[0].format = renderPass.colorFormat;
+    wgpu::RenderPipeline redPipeline = device.CreateRenderPipeline(&descriptor);
+
+    wgpu::Buffer indirectBuffer = utils::CreateBufferFromData<uint32_t>(
+        device, wgpu::BufferUsage::Indirect, {3, 1, 0, 0, 3, 1, 3, 0});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.SetVertexBuffer(0, vertexBuffer);
+    pass.DrawIndirect(indirectBuffer, 0);
+    pass.SetPipeline(redPipeline);
+    pass.DrawIndirect(indirectBuffer, uint64_t{4} * sizeof(uint32_t));
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 1, 3);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(255, 0, 0, 255), renderPass.color, 3, 1);
+}
+
+DAWN_INSTANTIATE_TEST(DrawIndirectBatchingTest,
+                      D3D11Backend(),
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend(),
+                      WebGPUBackend());
+
 class DrawIndirectUsingFirstVertexTest : public DawnTest {
   protected:
     virtual void SetupShaderModule() {

@@ -428,6 +428,10 @@ dawn_test("dawn_unittests") {
 
   if (dawn_enable_d3d12) {
     sources += [ "unittests/d3d12/CopySplitTests.cpp" ]
+    if (dawn_use_agility_sdk) {
+      sources += [ "unittests/d3d12/SubgroupMatrixConfigTests.cpp" ]
+      deps += [ "${dawn_agility_sdk_dir}:agility_sdk" ]
+    }
   }
 
   if (dawn_enable_webgpu_on_webgpu) {
@@ -449,13 +453,18 @@ dawn_test("dawn_unittests") {
     deps += [ "${dawn_spirv_tools_dir}:spvtools_opt" ]
   }
 
-  if (checkout_v8 && dawn_node) {
+  # V8 does not build with MSVC.
+  if (checkout_v8 && dawn_node && is_clang) {
     sources += [
+      "${dawn_root}/src/dawn/node/test/EventLoopTest.cpp",
       "${dawn_root}/src/dawn/node/test/NapiV8Test.cpp",
       "${dawn_root}/src/dawn/node/test/PolyfillsTest.cpp",
+      "${dawn_root}/src/dawn/node/test/V8TestEnvironment.cpp",
+      "${dawn_root}/src/dawn/node/test/V8TestEnvironment.h",
     ]
     deps += [
       "${dawn_root}/src/dawn/node/napi_v8",
+      "${dawn_root}/src/dawn/node/standalone:event_loop",
       "${dawn_root}/src/dawn/node/standalone:polyfills",
       "//third_party/v8/src:v8",
       "//third_party/v8/src:v8_libplatform",
@@ -587,7 +596,6 @@ source_set("end2end_tests_sources") {
     "end2end/AdapterFormatCapabilitiesVkTests.cpp",
     "end2end/AdapterPropertiesD3DTests.cpp",
     "end2end/AdapterPropertiesDrmTests.cpp",
-    "end2end/AdapterPropertiesVkTests.cpp",
     "end2end/ArchTierLimitsExhaustive.cpp",
     "end2end/BasicTests.cpp",
     "end2end/BindGroupTests.cpp",
@@ -761,7 +769,10 @@ source_set("end2end_tests_sources") {
   }
 
   if (dawn_enable_vulkan) {
-    sources += [ "end2end/AllocatorMemoryInstrumentationTests.cpp" ]
+    sources += [
+      "end2end/AdapterPropertiesVkTests.cpp",
+      "end2end/AllocatorMemoryInstrumentationTests.cpp",
+    ]
   }
 
   if (dawn_enable_webgpu_on_webgpu) {
@@ -985,6 +996,7 @@ dawn_test("dawn_perf_tests") {
     "perf_tests/ShaderRobustnessPerf.cpp",
     "perf_tests/SubresourceTrackingPerf.cpp",
     "perf_tests/UniformBufferUpdatePerf.cpp",
+    "perf_tests/UsageTrackingPerf.cpp",
     "perf_tests/VulkanZeroInitializeWorkgroupMemoryPerf.cpp",
     "perf_tests/WorkgroupAtomicPerf.cpp",
   ]

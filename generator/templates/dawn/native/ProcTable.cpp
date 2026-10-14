@@ -35,6 +35,8 @@
 #include <algorithm>
 #include <vector>
 
+#include "absl/base/no_destructor.h"
+#include "absl/container/flat_hash_map.h"
 #include "{{native_dir}}/{{prefix}}_platform.h"
 #include "{{include_dir}}/{{Prefix}}Native.h"
 #include "dawn/dawn_version.h"
@@ -84,7 +86,7 @@ namespace {{native_namespace}} {
         {% endfor %}
     {% endfor %}
 
-    {% for function in by_category["function"] if function.name.canonical_case() != "get proc address" and function.name.canonical_case() != "get proc address 2" %}
+    {% for function in by_category["function"] if function.name.canonical_case() != "get proc address" %}
         {% set suffix = function.name.CamelCase() %}
         {{as_annotated_cType(function.returns)}} Native{{suffix}}(
             {%- for arg in function.arguments -%}
@@ -96,57 +98,22 @@ namespace {{native_namespace}} {
         }
     {% endfor %}
 
-    namespace {
-
-        {% set c_prefix = metadata.c_prefix %}
-        struct ProcEntry {
-            {{c_prefix}}Proc proc;
-            std::string_view name;
-        };
-        static const ProcEntry sProcMap[] = {
-            {% for (type, method) in c_methods_sorted_by_name %}
-                { reinterpret_cast<{{c_prefix}}Proc>(Native{{as_MethodSuffix(type.name, method.name)}}), "{{as_cMethod(type.name, method.name)}}" },
-            {% endfor %}
-        };
-        static constexpr size_t sProcMapSize = sizeof(sProcMap) / sizeof(sProcMap[0]);
-
-    }  // anonymous namespace
-
     WGPUProc NativeGetProcAddress(WGPUStringView cProcName) {
         if (cProcName.data == nullptr) {
             return nullptr;
         }
 
+        {% set c_prefix = metadata.c_prefix %}
+        static const absl::NoDestructor<absl::flat_hash_map<std::string_view, {{c_prefix}}Proc>> sProcMap(
+            absl::flat_hash_map<std::string_view, {{c_prefix}}Proc>{
+                {% for (type, method) in c_methods_sorted_by_name %}
+                    {"{{as_cMethod(type.name, method.name)}}", reinterpret_cast<{{c_prefix}}Proc>(Native{{as_MethodSuffix(type.name, method.name)}})},
+                {% endfor %}
+            });
+
         std::string_view procName(cProcName.data, cProcName.length != WGPU_STRLEN ? cProcName.length : strlen(cProcName.data));
-
-        const ProcEntry* entry = std::lower_bound(&sProcMap[0], &sProcMap[sProcMapSize], procName,
-            [](const ProcEntry &a, const std::string_view& b) -> bool {
-                return a.name.compare(b) < 0;
-            }
-        );
-
-        if (entry != &sProcMap[sProcMapSize] && entry->name == procName) {
-            return entry->proc;
-        }
-
-        // Special case the free-standing functions of the API.
-        // TODO(dawn:1238) Checking string one by one is slow, it needs to be optimized.
-        {% for function in by_category["function"] %}
-            if (procName == "{{as_cMethod(None, function.name)}}") {
-                return reinterpret_cast<{{c_prefix}}Proc>(Native{{as_cppType(function.name)}});
-            }
-
-        {% endfor %}
-        return nullptr;
-    }
-
-    std::vector<std::string_view> GetProcMapNamesForTestingInternal() {
-        std::vector<std::string_view> result;
-        result.reserve(sProcMapSize);
-        for (const ProcEntry& entry : sProcMap) {
-            result.push_back(entry.name);
-        }
-        return result;
+        auto it = sProcMap->find(procName);
+        return it != sProcMap->end() ? it->second : nullptr;
     }
 
     constexpr {{Prefix}}ProcTable MakeProcTable() {

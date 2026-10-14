@@ -83,7 +83,7 @@ MaybeError GetVendorIdFromVendors(id<MTLDevice> device, PCIIDs* ids) {
     }
 
     if (vendorId == 0) {
-        return DAWN_INTERNAL_ERROR("Failed to find vendor id with the device");
+        return DAWN_UNRECOVERABLE_ERROR("Failed to find vendor id with the device");
     }
 
     // Set vendor id with 0
@@ -132,7 +132,7 @@ MaybeError GetDeviceIORegistryPCIInfo(id<MTLDevice> device, PCIIDs* ids) {
     CFRef<CFMutableDictionaryRef> matchingDict =
         AcquireCFRef(IORegistryEntryIDMatching([device registryID]));
     if (matchingDict == nullptr) {
-        return DAWN_INTERNAL_ERROR("Failed to create the matching dict for the device");
+        return DAWN_UNRECOVERABLE_ERROR("Failed to create the matching dict for the device");
     }
 
     // IOServiceGetMatchingService will consume the reference on the matching dictionary,
@@ -141,14 +141,14 @@ MaybeError GetDeviceIORegistryPCIInfo(id<MTLDevice> device, PCIIDs* ids) {
         AcquireIORef(IOServiceGetMatchingService(kIOMainPortDefault, matchingDict.Detach()));
 
     if (acceleratorEntry == IO_OBJECT_NULL) {
-        return DAWN_INTERNAL_ERROR("Failed to get the IO registry entry for the accelerator");
+        return DAWN_UNRECOVERABLE_ERROR("Failed to get the IO registry entry for the accelerator");
     }
 
     // Get the parent entry that will be the IOPCIDevice
     IORef<io_registry_entry_t> deviceEntry;
     if (IORegistryEntryGetParentEntry(acceleratorEntry.Get(), kIOServicePlane,
                                       deviceEntry.InitializeInto()) != kIOReturnSuccess) {
-        return DAWN_INTERNAL_ERROR("Failed to get the IO registry entry for the device");
+        return DAWN_UNRECOVERABLE_ERROR("Failed to get the IO registry entry for the device");
     }
 
     DAWN_ASSERT(deviceEntry != IO_OBJECT_NULL);
@@ -400,6 +400,9 @@ void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platfo
 
 void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platform,
                                                TogglesState* deviceToggles) const {
+    uint32_t deviceId = GetDeviceId();
+    uint32_t vendorId = GetVendorId();
+
     {
         bool haveStoreAndMSAAResolve = false;
 #if DAWN_PLATFORM_IS(MACOS)
@@ -453,13 +456,17 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // of the Metal Spec (v3.2).
     // TODO(crbug/390426577): Consider removing this toggle as it is no longer needs to be toggled
     // as it is (semantically correctly) supported for all Metal 2.3+.
-    deviceToggles->Default(Toggle::DisableDemoteToHelper, true);
+    if (gpu_info::IsApple(vendorId)) {
+        // When per-sample shading is enabled, writes that occur after discard_fragment() are
+        // sometimes still visible on Apple Silicon, so we use DemoteToHelper.
+        // See https://crbug.com/562093713
+        deviceToggles->Default(Toggle::DisableDemoteToHelper, false);
+    } else {
+        deviceToggles->Default(Toggle::DisableDemoteToHelper, true);
+    }
 
     // TODO(crbug.com/dawn/846): tighten this workaround when the driver bug is fixed.
     deviceToggles->Default(Toggle::AlwaysResolveIntoZeroLevelAndLayer, true);
-
-    uint32_t deviceId = GetDeviceId();
-    uint32_t vendorId = GetVendorId();
 
     // TODO(crbug.com/dawn/847): Use MTLStorageModeShared instead of MTLStorageModePrivate when
     // creating MTLCounterSampleBuffer in QuerySet on Intel platforms, otherwise it fails to
@@ -1089,6 +1096,8 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
             configs[0].M = 32;
             configs[0].N = 32;
             configs[0].K = 32;
+            configs[0].minSubgroupSize = GetSubgroupMinSize();
+            configs[0].maxSubgroupSize = GetSubgroupMaxSize();
 
             subgroupMatrixConfigs->configs = std::move(configs).MoveToSpan();
         } else {
@@ -1101,12 +1110,16 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
             configs[0].M = 8;
             configs[0].N = 8;
             configs[0].K = 8;
+            configs[0].minSubgroupSize = GetSubgroupMinSize();
+            configs[0].maxSubgroupSize = GetSubgroupMaxSize();
 
             configs[1].componentType = wgpu::SubgroupMatrixComponentType::F16;
             configs[1].resultComponentType = wgpu::SubgroupMatrixComponentType::F16;
             configs[1].M = 8;
             configs[1].N = 8;
             configs[1].K = 8;
+            configs[1].minSubgroupSize = GetSubgroupMinSize();
+            configs[1].maxSubgroupSize = GetSubgroupMaxSize();
 
             subgroupMatrixConfigs->configs = std::move(configs).MoveToSpan();
         }

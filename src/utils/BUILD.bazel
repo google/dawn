@@ -28,6 +28,11 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//src/utils:flags.bzl", "COPTS")
 
+config_setting(
+  name = "opt",
+  values = {"compilation_mode": "opt"},
+)
+
 cc_library(
   name = "utils",
   hdrs = [
@@ -55,6 +60,10 @@ cc_library(
     "log.cc",
     "placeholder.cc",
   ],
+  defines = ["DAWN_HAVE_UTILS_BUILD_CONFIG"] + select({
+    ":opt": [],
+    "//conditions:default": ["DAWN_ENABLE_ASSERTS"],
+  }),
   deps = [],
   copts = COPTS,
   visibility = ["//visibility:public"],

@@ -138,16 +138,16 @@ Full details on the various options are detailed below.
 ## Running an Experiment
 
 To start the experiment on your system, execute the `fuzz` helper with
-the `-experiment` flag:
+the `experiment` subcommand:
 
 ```bash
-/tools/run fuzz -experiment -build out/fuzzers my_experiment/
+tools/run fuzz experiment -build out/fuzzers my_experiment/
 ```
 
 where `out/fuzzers` is a GN configured build with the correct values
 set in `args.gn`
 
-**Note:** `-experiment` does support the `-j` flag for running
+**Note:** `experiment` does support the `-j` flag for running
 concurrent operations, but defaults it to **1**. This is because
 saturating the RAM or CPU in the execution environment (e.g. -j `max
 num of cores`) can significantly impact the results. It is recommended
@@ -194,10 +194,10 @@ The framework guides execution through the following phases:
 ## Processing and Analyzing Results
 
 Once execution has completed, you can aggregate and process results
-using the `-analyze` flag:
+using the `analyze` subcommand:
 
 ```bash
-tools/run fuzz -analyze my_experiment/
+tools/run fuzz analyze my_experiment/
 ```
 
 ### Analysis Pipeline

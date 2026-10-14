@@ -77,16 +77,15 @@ void tint_store_and_preserve_padding_8(uint target_indices[1], Inner value_param
 }
 void tint_store_and_preserve_padding_9(Inner value_param[4]) {
   {
-    uint v_1 = 0u;
-    v_1 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_2 = v_1;
-      if ((v_2 >= 4u)) {
+      uint v_1 = idx;
+      if ((v_1 >= 4u)) {
         break;
       }
-      tint_store_and_preserve_padding_8(uint[1](v_2), value_param[v_2]);
+      tint_store_and_preserve_padding_8(uint[1](v_1), value_param[v_1]);
       {
-        v_1 = (v_2 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -98,16 +97,15 @@ void tint_store_and_preserve_padding_7(Inner value_param) {
 }
 void tint_store_and_preserve_padding_6(vec3 value_param[2]) {
   {
-    uint v_3 = 0u;
-    v_3 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_4 = v_3;
-      if ((v_4 >= 2u)) {
+      uint v_2 = idx;
+      if ((v_2 >= 2u)) {
         break;
       }
-      v.inner.arr2_vec3_f32[v_4] = value_param[v_4];
+      v.inner.arr2_vec3_f32[v_2] = value_param[v_2];
       {
-        v_3 = (v_4 + 1u);
+        idx = (idx + 1u);
       }
     }
   }

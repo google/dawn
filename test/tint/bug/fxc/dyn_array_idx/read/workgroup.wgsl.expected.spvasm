@@ -1,10 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 61
+; Bound: 64
 ; Schema: 0
                OpCapability Shader
-         %45 = OpExtInstImport "GLSL.std.450"
+         %43 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f" %f_local_invocation_index_Input
                OpExecutionMode %f LocalSize 1 1 1
@@ -20,6 +20,7 @@
                OpName %f_local_invocation_index_Input "f_local_invocation_index_Input"
                OpName %f_inner "f_inner"
                OpName %tint_local_index "tint_local_index"
+               OpName %idx "idx"
                OpName %f "f"
                OpDecorate %_arr_v4uint_uint_1 ArrayStride 16
                OpMemberDecorate %ubo_block_tint_explicit_layout 0 Offset 0
@@ -62,49 +63,54 @@
 %_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
     %uint_63 = OpConstant %uint 63
 %_ptr_Workgroup_int = OpTypePointer Workgroup %int
+%_ptr_Function_uint = OpTypePointer Function %uint
        %bool = OpTypeBool
       %int_0 = OpConstant %int 0
-         %57 = OpTypeFunction %void
+         %60 = OpTypeFunction %void
     %f_inner = OpFunction %void None %23
 %tint_local_index = OpFunctionParameter %uint
          %24 = OpLabel
+        %idx = OpVariable %_ptr_Function_uint Function
                OpBranch %25
          %25 = OpLabel
+               OpStore %idx %tint_local_index
                OpBranch %28
          %28 = OpLabel
-         %30 = OpPhi %uint %tint_local_index %25 %31 %27
                OpLoopMerge %29 %27 None
                OpBranch %26
          %26 = OpLabel
-         %50 = OpUGreaterThanEqual %bool %30 %uint_64
-               OpSelectionMerge %52 None
-               OpBranchConditional %50 %53 %52
-         %53 = OpLabel
+         %50 = OpLoad %uint %idx None
+         %51 = OpUGreaterThanEqual %bool %50 %uint_64
+               OpSelectionMerge %53 None
+               OpBranchConditional %51 %54 %53
+         %54 = OpLabel
                OpBranch %29
-         %52 = OpLabel
-         %54 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %30
-               OpStore %54 %int_0 None
+         %53 = OpLabel
+         %55 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %50
+               OpStore %55 %int_0 None
                OpBranch %27
          %27 = OpLabel
-         %31 = OpIAdd %uint %30 %uint_1
+         %57 = OpLoad %uint %idx None
+         %58 = OpIAdd %uint %57 %uint_1
+               OpStore %idx %58 None
                OpBranch %28
          %29 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %35 = OpAccessChain %_ptr_StorageBuffer_int %8 %uint_0 %uint_0
-         %38 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
-         %40 = OpLoad %v4uint %38 None
-         %41 = OpCompositeExtract %uint %40 0
-         %42 = OpBitcast %int %41
-         %43 = OpBitcast %uint %42
-         %44 = OpExtInst %uint %45 UMin %43 %uint_63
-         %47 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %44
-         %49 = OpLoad %int %47 None
-               OpStore %35 %49 None
+         %33 = OpAccessChain %_ptr_StorageBuffer_int %8 %uint_0 %uint_0
+         %36 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
+         %38 = OpLoad %v4uint %36 None
+         %39 = OpCompositeExtract %uint %38 0
+         %40 = OpBitcast %int %39
+         %41 = OpBitcast %uint %40
+         %42 = OpExtInst %uint %43 UMin %41 %uint_63
+         %45 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %42
+         %47 = OpLoad %int %45 None
+               OpStore %33 %47 None
                OpReturn
                OpFunctionEnd
-          %f = OpFunction %void None %57
-         %58 = OpLabel
-         %59 = OpLoad %uint %f_local_invocation_index_Input None
-         %60 = OpFunctionCall %void %f_inner %59
+          %f = OpFunction %void None %60
+         %61 = OpLabel
+         %62 = OpLoad %uint %f_local_invocation_index_Input None
+         %63 = OpFunctionCall %void %f_inner %62
                OpReturn
                OpFunctionEnd

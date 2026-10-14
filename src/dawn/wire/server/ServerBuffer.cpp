@@ -142,7 +142,12 @@ WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
     // - `TryWrapInBuffer()` may return a valid buffer, an error buffer or nullptr to align with the
     //   behavior of `DeviceBase::APICreateBuffer()`.
     // - When a valid buffer is returned, `beginAccess()` must have been called on it.
-    buffer->handle = memoryHandle->TryWrapInBuffer(mProcs.get(), device->handle, ToAPI(descriptor));
+    // - Index/indirect buffers are not supported to prevent the TOCTOU issue with races between
+    //   GPU-side validation and the client modifying the buffer.
+    if (!(descriptor->usage & (wgpu::BufferUsage::Indirect | wgpu::BufferUsage::Index))) {
+        buffer->handle =
+            memoryHandle->TryWrapInBuffer(mProcs.get(), device->handle, ToAPI(descriptor));
+    }
     if (buffer->handle != nullptr) {
         buffer->backedWithSharedMemory = true;
         return buffer->mapState.Use([&](auto mapState) {

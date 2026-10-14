@@ -130,6 +130,8 @@ enum class Toggle {
     UseBlitForUintTextureToBufferCopy,
     UseBlitForSintTextureToBufferCopy,
     VulkanSplitBufferTextureCopyForArrayLayers,
+    VulkanForceAlphaWriteForAlphaToCoverage,
+    SplitBufferTextureCopyForOversizedRow,
     GLUseArrayLengthFromImmediate,
     D3D11DisableCPUUploadBuffers,
     UseT2B2TForSRGBTextureCopy,
@@ -180,7 +182,6 @@ enum class Toggle {
     MetalUseArgumentBuffers,
     EnableShaderPrint,
     BlobCacheHashValidation,
-    DecomposeUniformBuffers,
     D3D12DecomposeWorkgroupAccess,
     D3D12PolyfillF16CeilFloor,
     CollapseSubgroupMinMax,
@@ -204,6 +205,7 @@ enum class Toggle {
     VulkanReplaceUnsignedCompareZero,
     VulkanUseCooperativeMatrixRobustBufferAccess,
     MetalEnableTensors,
+    AllowAlphaToCoverageNotBlendable,
 
     // Once all backends have been updated to be thread safe for waiting, we can remove this toggle.
     WaitIsThreadSafe,

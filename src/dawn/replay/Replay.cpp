@@ -525,7 +525,7 @@ struct BindGroupEntryVisitor {
     }
 
     VisitResult operator()(const std::monostate&) {
-        return DAWN_INTERNAL_ERROR("invalid bind group entry");
+        return DAWN_UNRECOVERABLE_ERROR("invalid bind group entry");
     }
 
   private:
@@ -557,7 +557,7 @@ struct BindGroupEntryVisitor {
 
     MaybeError FillEntry(wgpu::BindGroupEntry& entry,
                          const schema::BindGroupEntryTypeTexelBufferBindingData& data) {
-        return DAWN_INTERNAL_ERROR("texel buffer binding not supported");
+        return DAWN_UNRECOVERABLE_ERROR("texel buffer binding not supported");
     }
 
     MaybeError FillEntry(wgpu::BindGroupEntry& entry,
@@ -602,7 +602,7 @@ struct BindGroupLayoutEntryVisitor {
     }
 
     VisitResult operator()(const std::monostate&) {
-        return DAWN_INTERNAL_ERROR("invalid bind group layout entry");
+        return DAWN_UNRECOVERABLE_ERROR("invalid bind group layout entry");
     }
 
   private:
@@ -645,7 +645,7 @@ struct BindGroupLayoutEntryVisitor {
 
     template <typename T>
     MaybeError FillEntry(const T&) {
-        return DAWN_INTERNAL_ERROR("unhandled bind group layout entry type");
+        return DAWN_UNRECOVERABLE_ERROR("unhandled bind group layout entry type");
     }
 };
 
@@ -1410,7 +1410,7 @@ ResultOrError<wgpu::CommandBuffer> CreateResource(const DawnRootCommandVisitor& 
                                                   const std::string& label) {
     // This is here to make resource handling generic. We don't create
     // devices from commands but we reference devices as another resource.
-    return DAWN_INTERNAL_ERROR("Device creation not supported");
+    return DAWN_UNRECOVERABLE_ERROR("Device creation not supported");
 }
 
 ResultOrError<wgpu::Surface> CreateResource(const DawnRootCommandVisitor& replay,
@@ -1419,7 +1419,7 @@ ResultOrError<wgpu::Surface> CreateResource(const DawnRootCommandVisitor& replay
                                             const std::string& label) {
     // This is here to make resource handling generic. We don't create
     // surfaces from this CreateResource but from SurfaceCreate root command.
-    return DAWN_INTERNAL_ERROR("Surface creation not supported through CreateResource");
+    return DAWN_UNRECOVERABLE_ERROR("Surface creation not supported through CreateResource");
 }
 
 }  // anonymous namespace
@@ -1548,7 +1548,7 @@ MaybeError DawnRootCommandVisitor::SetLabel(schema::ObjectId id,
     switch (type) {
         DAWN_REPLAY_OBJECT_TYPES_ENUM(DAWN_SET_LABEL_GEN)
         default:
-            return DAWN_INTERNAL_ERROR("unhandled resource type");
+            return DAWN_UNRECOVERABLE_ERROR("unhandled resource type");
     }
 
 #undef DAWN_SET_LABEL_GEN

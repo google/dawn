@@ -393,9 +393,10 @@ void SubresourceStorage<T>::Merge(const SubresourceStorage<U>& other, F&& mergeF
 template <typename T>
 template <typename F, typename R>
 R SubresourceStorage<T>::Iterate(F&& iterateFunc) const {
-    static_assert(std::is_same_v<R, MaybeError> || std::is_same_v<R, void>,
-                  "R must be either void or MaybeError");
-    constexpr bool mayError = std::is_same_v<R, MaybeError>;
+    static_assert(std::is_same_v<R, MaybeError> || std::is_same_v<R, MaybeValError> ||
+                      std::is_same_v<R, void>,
+                  "R must be either void, MaybeError or MaybeValError");
+    constexpr bool mayError = std::is_same_v<R, MaybeError> || std::is_same_v<R, MaybeValError>;
 
     for (Aspect aspect : IterateEnumMask(mAspects)) {
         uint32_t aspectIndex = GetAspectIndex(aspect);

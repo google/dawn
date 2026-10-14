@@ -207,6 +207,8 @@ struct BeginRenderPassCmd {
 
 struct BufferCopy {
     BufferCopy();
+    BufferCopy(BufferCopy&&);
+    BufferCopy& operator=(BufferCopy&&);
     ~BufferCopy();
 
     Ref<BufferBase> buffer;
@@ -219,6 +221,8 @@ struct TextureCopy {
     TextureCopy();
     TextureCopy(const TextureCopy&);
     TextureCopy& operator=(const TextureCopy&);
+    TextureCopy(TextureCopy&&);
+    TextureCopy& operator=(TextureCopy&&);
     ~TextureCopy();
 
     Ref<TextureBase> texture;

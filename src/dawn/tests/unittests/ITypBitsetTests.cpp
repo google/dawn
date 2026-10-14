@@ -237,9 +237,10 @@ TEST_F(ITypBitsetDeathTest, OutOfBounds) {
         constexpr uint64_t validBits = (one << bits) - 1;
         ityp::bitset<Key, bits>{0};                                             // Valid
         ityp::bitset<Key, bits>{validBits};                                     // All valid bits
-        EXPECT_DEATH_IF_SUPPORTED((ityp::bitset<Key, bits>{one << bits}), "");  // Invalid lsb
-        EXPECT_DEATH_IF_SUPPORTED((ityp::bitset<Key, bits>{one << 63}), "");    // Invalid msb
-        EXPECT_DEATH_IF_SUPPORTED((ityp::bitset<Key, bits>{~validBits}), "");   // All invalid bits
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((ityp::bitset<Key, bits>{one << bits}), "");  // Invalid lsb
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((ityp::bitset<Key, bits>{one << 63}), "");    // Invalid msb
+        DAWN_EXPECT_DEATH_IF_SUPPORTED((ityp::bitset<Key, bits>{~validBits}),
+                                       "");  // All invalid bits
     };
 
     test(std::integral_constant<uint64_t, 1>{});

@@ -58,18 +58,17 @@ class ShaderModule final : public ShaderModuleBase {
     struct MetalFunctionData {
         std::string msl;
         NSPRef<id<MTLFunction>> function;
-        bool needsStorageBufferLength = false;
         std::vector<uint32_t> workgroupAllocations;
         MTLSize localWorkgroupSize{};
     };
 
-    MaybeError CreateFunction(SingleShaderStage stage,
-                              const ProgrammableStage& programmableStage,
-                              const PipelineLayout* layout,
-                              const ImmediateMask& pipelineImmediateMask,
-                              MetalFunctionData* out,
-                              uint32_t sampleMask = 0xFFFFFFFF,
-                              const RenderPipeline* renderPipeline = nullptr);
+    MaybeUnknownError CreateFunction(SingleShaderStage stage,
+                                     const ProgrammableStage& programmableStage,
+                                     const PipelineLayout* layout,
+                                     const ImmediateMask& pipelineImmediateMask,
+                                     MetalFunctionData* out,
+                                     uint32_t sampleMask = 0xFFFFFFFF,
+                                     const RenderPipeline* renderPipeline = nullptr);
 
   private:
     ShaderModule(Device* device,

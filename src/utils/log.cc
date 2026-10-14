@@ -29,6 +29,7 @@
 
 #include <cstdio>
 #include <string>
+#include <tuple>
 
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
@@ -91,7 +92,7 @@ LogMessage& LogMessage::operator=(LogMessage&& other) = default;
 
 #if defined(DAWN_DISABLE_LOGGING)
 LogMessage::~LogMessage() {
-    (void)mSeverity;
+    std::ignore = mSeverity;
     // Don't print logs to make fuzzing more efficient. Implemented as
     // an early return to avoid warnings about unused member variables.
     return;

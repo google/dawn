@@ -317,7 +317,7 @@ Ref<RenderPipeline> RenderPipeline::CreateUninitialized(
     return AcquireRef(new RenderPipeline(device, descriptor));
 }
 
-MaybeError RenderPipeline::InitializeImpl() {
+MaybeUnknownError RenderPipeline::InitializeImpl() {
     if (UsesVertexIndex() || UsesInstanceIndex()) {
         // firstVertex and firstInstance are allocated together.
         mImmediateMask |= GetImmediateBlockBits(offsetof(RenderImmediates, firstIndexOffset),
@@ -540,7 +540,7 @@ void RenderPipeline::SetLabelImpl() {
     SetDebugName(ToBackend(GetDevice()), GetPipelineState(), "Dawn_RenderPipeline", GetLabel());
 }
 
-ComPtr<ID3D12CommandSignature> RenderPipeline::GetDrawIndirectCommandSignature() {
+const CommandSignature& RenderPipeline::GetDrawIndirectCommandSignature() {
     if (UsesVertexIndex() || UsesInstanceIndex()) {
         return mPipelineLayoutHandle->GetDrawIndirectCommandSignatureWithInstanceVertexOffsets();
     }
@@ -548,7 +548,7 @@ ComPtr<ID3D12CommandSignature> RenderPipeline::GetDrawIndirectCommandSignature()
     return ToBackend(GetDevice())->GetDrawIndirectSignature();
 }
 
-ComPtr<ID3D12CommandSignature> RenderPipeline::GetDrawIndexedIndirectCommandSignature() {
+const CommandSignature& RenderPipeline::GetDrawIndexedIndirectCommandSignature() {
     if (UsesVertexIndex() || UsesInstanceIndex()) {
         return mPipelineLayoutHandle
             ->GetDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets();

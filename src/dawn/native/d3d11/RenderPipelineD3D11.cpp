@@ -239,7 +239,7 @@ RenderPipeline::RenderPipeline(Device* device,
     : RenderPipelineBase(device, descriptor),
       mD3DPrimitiveTopology(D3DPrimitiveTopology(GetPrimitiveTopology())) {}
 
-MaybeError RenderPipeline::InitializeImpl() {
+MaybeUnknownError RenderPipeline::InitializeImpl() {
     // Set firstVertex and firstInstance bits together to ensure non immediate case has correct
     // offset.
     // TODO(crbug.com/366291600): Setting these bits respectively after immediate covers all cases.

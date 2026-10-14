@@ -33,7 +33,7 @@ plugins {
 }
 
 def dawnBuildType = findProperty('dawnBuildType') ?: 'Debug'
-def nativeTargetsList = (findProperty('nativeTargets') ?: 'webgpu_c_bundled,webgpu_wrapper_tests').split(',').collect { it.trim() }.findAll { !it.isEmpty() }
+def nativeTargetsList = (findProperty('nativeTargets') ?: 'webgpu_c_bundled').split(',').collect { it.trim() }.findAll { !it.isEmpty() }
 // When -PabiFilters= is set (comma-separated), native / CMake builds are limited to those ABIs only.
 // If unset, no abiFilters are applied here — same as before this property existed (AGP default ABIs).
 def abiFiltersProp = findProperty('abiFilters')
@@ -63,6 +63,16 @@ android {
             }
         }
     }
+    buildTypes {
+        debug {
+            externalNativeBuild {
+                cmake {
+                    // Only androidTest (debug) runs the native gtests; keep them out of the release AAR.
+                    targets 'webgpu_wrapper_tests'
+                }
+            }
+        }
+    }
     externalNativeBuild {
         cmake {
             path file('src/main/cpp/CMakeLists.txt')
@@ -76,11 +86,6 @@ android {
         if (nativeTargetsList.contains('webgpu_c_bundled')) {
             webgpu_c_bundled {
                 headers "src/main/cpp/gen/include"
-            }
-        }
-        if (nativeTargetsList.contains('webgpu_wrapper_tests')) {
-            webgpu_wrapper_tests {
-                name "webgpu_wrapper_tests"
             }
         }
     }

@@ -71,7 +71,7 @@ DAWN_SERIALIZABLE(struct, CompiledShader, COMPILED_SHADER_MEMBERS) {
 
 std::string CompileFlagsToString(uint32_t compileFlags);
 
-ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r);
+ResultOrUnknownError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r);
 
 InterStageShaderVariablesMask ToInterStageShaderVariablesMask(const std::vector<bool>& inputMask);
 

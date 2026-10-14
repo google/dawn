@@ -35,26 +35,12 @@
 #include <climits>
 #include <cmath>
 #include <limits>
-#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wundef"
-#pragma clang diagnostic ignored "-Wcast-function-type-strict"
-#pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
-#pragma clang diagnostic ignored "-Wsuggest-destructor-override"
-#pragma clang diagnostic ignored "-Wnon-virtual-dtor"
-#pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
-#pragma clang diagnostic ignored "-Wunique-object-duplication"
-#pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
-#include <v8.h>
-
-#include "libplatform/libplatform.h"
-#pragma clang diagnostic pop
-
 #include "src/dawn/node/napi_v8/napi_v8.h"
+#include "src/dawn/node/test/V8TestEnvironment.h"
 
 #ifndef V8_ENABLE_SANDBOX
 #define V8_ENABLE_SANDBOX 0
@@ -62,56 +48,28 @@
 
 namespace {
 
-// Global test environment managing process-wide V8 platform initialization and teardown.
-class V8Environment : public ::testing::Environment {
-  public:
-    ~V8Environment() override = default;
-
-    void SetUp() override {
-        v8::V8::SetFlagsFromString("--expose_gc");
-        platform_ = v8::platform::NewDefaultPlatform();
-        v8::V8::InitializePlatform(platform_.get());
-        v8::V8::Initialize();
-    }
-
-    void TearDown() override {
-        v8::V8::Dispose();
-        v8::V8::DisposePlatform();
-        platform_.reset();
-    }
-
-  private:
-    std::unique_ptr<v8::Platform> platform_;
-};
-
-testing::Environment* const v8_env = testing::AddGlobalTestEnvironment(new V8Environment);
-
 // Test fixture providing an isolated V8 environment and napi_env for each test case.
-class NapiV8Test : public ::testing::Test {
+class NapiV8Test : public dawn::node::test::V8IsolateTest {
   protected:
+    NapiV8Test() : V8IsolateTest(v8::MicrotasksPolicy::kAuto) {}
+
     void SetUp() override {
-        allocator_.reset(v8::ArrayBuffer::Allocator::NewDefaultAllocator());
-        create_params_.array_buffer_allocator = allocator_.get();
-        isolate_ = v8::Isolate::New(create_params_);
-        isolate_->Enter();
-
-        // Constructing a v8::HandleScope automatically registers and attaches the scope to the
-        // isolate. All local handles (v8::Local) created by napi_* calls are placed in this
-        // active scope and kept alive until the scope is destroyed in TearDown().
-        handle_scope_.emplace(isolate_);
-
-        v8::Local<v8::Context> context = v8::Context::New(isolate_);
-        context->Enter();
-        env_ = dawn::napi_v8::CreateEnv(isolate_, context);
+        V8IsolateTest::SetUp();
+        env_ = dawn::napi_v8::CreateEnv(isolate_, context());
+        napi_value setup_script = nullptr;
+        ASSERT_EQ(napi_create_string_utf8(
+                      env_,
+                      "globalThis._immediateQueue = [];"
+                      "globalThis.setImmediate = (fn) => { globalThis._immediateQueue.push(fn); };",
+                      NAPI_AUTO_LENGTH, &setup_script),
+                  napi_ok);
+        napi_value unused = nullptr;
+        ASSERT_EQ(napi_run_script(env_, setup_script, &unused), napi_ok);
     }
 
     void TearDown() override {
-        env_->GetContext()->Exit();
         dawn::napi_v8::DestroyEnv(env_);
-        handle_scope_.reset();
-        isolate_->Exit();
-        isolate_->Dispose();
-        allocator_.reset();
+        V8IsolateTest::TearDown();
     }
 
     napi_env env_ = nullptr;
@@ -120,18 +78,25 @@ class NapiV8Test : public ::testing::Test {
 
     void DestroySubEnv(napi_env sub_env) { dawn::napi_v8::DestroyEnv(sub_env); }
 
+    void DrainImmediates() {
+        napi_value drain_script = nullptr;
+        ASSERT_EQ(napi_create_string_utf8(env_,
+                                          "while (globalThis._immediateQueue.length > 0) {"
+                                          "  globalThis._immediateQueue.shift()();"
+                                          "}",
+                                          NAPI_AUTO_LENGTH, &drain_script),
+                  napi_ok);
+        napi_value unused = nullptr;
+        ASSERT_EQ(napi_run_script(env_, drain_script, &unused), napi_ok);
+    }
+
     void RequestGC() {
         isolate_->RequestGarbageCollectionForTesting(v8::Isolate::kFullGarbageCollection);
+        DrainImmediates();
     }
 
     // Executes pending JavaScript microtasks (such as Promise .then() / .catch() callbacks).
     void RunMicrotasks() { isolate_->PerformMicrotaskCheckpoint(); }
-
-  private:
-    std::unique_ptr<v8::ArrayBuffer::Allocator> allocator_;
-    v8::Isolate::CreateParams create_params_;
-    v8::Isolate* isolate_ = nullptr;
-    std::optional<v8::HandleScope> handle_scope_;
 };
 
 // ============================================================================
@@ -1950,6 +1915,140 @@ TEST_F(NapiV8Test, IsExceptionPendingLifecycle) {
     EXPECT_FALSE(pending);
 }
 
+TEST_F(NapiV8Test, ThrowCaughtByJavaScriptLeavesNoPendingException) {
+    auto throwing_cb = [](napi_env env, napi_callback_info) -> napi_value {
+        napi_value msg;
+        napi_create_string_utf8(env, "Caught by JS", NAPI_AUTO_LENGTH, &msg);
+        napi_value err;
+        napi_create_error(env, nullptr, msg, &err);
+        napi_throw(env, err);
+        return nullptr;
+    };
+
+    napi_value fn;
+    ASSERT_EQ(napi_create_function(env_, "throwFn", NAPI_AUTO_LENGTH, throwing_cb, nullptr, &fn),
+              napi_ok);
+    napi_value global;
+    ASSERT_EQ(napi_get_global(env_, &global), napi_ok);
+    ASSERT_EQ(napi_set_named_property(env_, global, "throwFn", fn), napi_ok);
+
+    napi_value script;
+    ASSERT_EQ(
+        napi_create_string_utf8(env_,
+                                "(() => { try { throwFn(); return 'did not throw'; } catch (e) "
+                                "{ return e.message; } })()",
+                                NAPI_AUTO_LENGTH, &script),
+        napi_ok);
+    napi_value result;
+    ASSERT_EQ(napi_run_script(env_, script, &result), napi_ok);
+    char buf[64];
+    ASSERT_EQ(napi_get_value_string_utf8(env_, result, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "Caught by JS");
+
+    // Once the callback has returned and JavaScript caught the exception, nothing remains pending.
+    bool pending = true;
+    ASSERT_EQ(napi_is_exception_pending(env_, &pending), napi_ok);
+    EXPECT_FALSE(pending);
+}
+
+TEST_F(NapiV8Test, ThrowIsPendingWithinTheNativeCall) {
+    struct Observation {
+        napi_status throw_status = napi_generic_failure;
+        napi_status pending_status = napi_generic_failure;
+        bool pending_after_throw = false;
+    };
+    Observation observation;
+
+    auto throwing_cb = [](napi_env env, napi_callback_info info) -> napi_value {
+        void* data = nullptr;
+        napi_get_cb_info(env, info, nullptr, nullptr, nullptr, &data);
+        auto* obs = static_cast<Observation*>(data);
+
+        napi_value msg;
+        napi_create_string_utf8(env, "Thrown by native code", NAPI_AUTO_LENGTH, &msg);
+        napi_value err;
+        napi_create_error(env, nullptr, msg, &err);
+        obs->throw_status = napi_throw(env, err);
+        obs->pending_status = napi_is_exception_pending(env, &obs->pending_after_throw);
+        return nullptr;
+    };
+
+    napi_value fn;
+    ASSERT_EQ(
+        napi_create_function(env_, "throwFn", NAPI_AUTO_LENGTH, throwing_cb, &observation, &fn),
+        napi_ok);
+    napi_value global;
+    ASSERT_EQ(napi_get_global(env_, &global), napi_ok);
+    ASSERT_EQ(napi_set_named_property(env_, global, "throwFn", fn), napi_ok);
+
+    napi_value script;
+    ASSERT_EQ(napi_create_string_utf8(env_,
+                                      "(() => { try { throwFn(); return 'did not throw'; } "
+                                      "catch (e) { return e.message; } })()",
+                                      NAPI_AUTO_LENGTH, &script),
+              napi_ok);
+    napi_value result;
+    ASSERT_EQ(napi_run_script(env_, script, &result), napi_ok);
+
+    EXPECT_EQ(observation.throw_status, napi_ok);
+    EXPECT_EQ(observation.pending_status, napi_ok);
+    EXPECT_TRUE(observation.pending_after_throw);
+
+    char buf[64];
+    ASSERT_EQ(napi_get_value_string_utf8(env_, result, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "Thrown by native code");
+}
+
+// Clearing a pending exception with napi_get_and_clear_last_exception() before the native callback
+// returns stops it from being thrown into JavaScript.
+TEST_F(NapiV8Test, ClearingThePendingExceptionStopsItReachingJavaScript) {
+    auto withdrawing_cb = [](napi_env env, napi_callback_info) -> napi_value {
+        napi_value msg;
+        napi_create_string_utf8(env, "withdrawn", NAPI_AUTO_LENGTH, &msg);
+        napi_value err;
+        napi_create_error(env, nullptr, msg, &err);
+        napi_throw(env, err);
+
+        bool pending = false;
+        napi_is_exception_pending(env, &pending);
+        if (!pending) {
+            napi_value not_pending;
+            napi_create_string_utf8(env, "not pending", NAPI_AUTO_LENGTH, &not_pending);
+            return not_pending;
+        }
+
+        napi_value caught;
+        napi_get_and_clear_last_exception(env, &caught);
+        napi_value message;
+        napi_get_named_property(env, caught, "message", &message);
+        return message;
+    };
+
+    napi_value fn;
+    ASSERT_EQ(
+        napi_create_function(env_, "withdrawFn", NAPI_AUTO_LENGTH, withdrawing_cb, nullptr, &fn),
+        napi_ok);
+    napi_value global;
+    ASSERT_EQ(napi_get_global(env_, &global), napi_ok);
+    ASSERT_EQ(napi_set_named_property(env_, global, "withdrawFn", fn), napi_ok);
+
+    napi_value script;
+    ASSERT_EQ(napi_create_string_utf8(env_,
+                                      "(() => { try { return withdrawFn(); } "
+                                      "catch (e) { return 'threw: ' + e.message; } })()",
+                                      NAPI_AUTO_LENGTH, &script),
+              napi_ok);
+    napi_value result;
+    ASSERT_EQ(napi_run_script(env_, script, &result), napi_ok);
+    char buf[64];
+    ASSERT_EQ(napi_get_value_string_utf8(env_, result, buf, sizeof(buf), nullptr), napi_ok);
+    EXPECT_STREQ(buf, "withdrawn");
+
+    bool pending = true;
+    ASSERT_EQ(napi_is_exception_pending(env_, &pending), napi_ok);
+    EXPECT_FALSE(pending);
+}
+
 TEST_F(NapiV8Test, GetAndClearLastException) {
     // When no exception has occurred, get_and_clear returns undefined
     napi_value no_err;
@@ -2914,6 +3013,26 @@ TEST_F(NapiV8Test, PromiseReject) {
     EXPECT_STREQ(buf, "something failed");
 }
 
+TEST_F(NapiV8Test, PromisePendingException) {
+    napi_deferred deferred = nullptr;
+    napi_value promise = nullptr;
+    ASSERT_EQ(napi_create_promise(env_, &deferred, &promise), napi_ok);
+
+    napi_value val = nullptr;
+    ASSERT_EQ(napi_create_int32(env_, 1, &val), napi_ok);
+    ASSERT_EQ(napi_throw(env_, val), napi_ok);
+
+    napi_deferred unused_deferred = nullptr;
+    napi_value unused_promise = nullptr;
+    EXPECT_EQ(napi_create_promise(env_, &unused_deferred, &unused_promise), napi_pending_exception);
+    EXPECT_EQ(napi_resolve_deferred(env_, deferred, val), napi_pending_exception);
+    EXPECT_EQ(napi_reject_deferred(env_, deferred, val), napi_pending_exception);
+
+    napi_value ex = nullptr;
+    ASSERT_EQ(napi_get_and_clear_last_exception(env_, &ex), napi_ok);
+    EXPECT_EQ(napi_resolve_deferred(env_, deferred, val), napi_ok);
+}
+
 TEST_F(NapiV8Test, GetVersion) {
     uint32_t version = 0;
     ASSERT_EQ(napi_get_version(env_, &version), napi_ok);
@@ -2933,10 +3052,15 @@ TEST_F(NapiV8Test, RunScript) {
     napi_value bad_script;
     ASSERT_EQ(napi_create_string_utf8(env_, "syntax error {", NAPI_AUTO_LENGTH, &bad_script),
               napi_ok);
-    EXPECT_EQ(napi_run_script(env_, bad_script, &result), napi_generic_failure);
+    EXPECT_EQ(napi_run_script(env_, bad_script, &result), napi_pending_exception);
+    bool pending = false;
+    ASSERT_EQ(napi_is_exception_pending(env_, &pending), napi_ok);
+    EXPECT_TRUE(pending);
     napi_value ex;
     ASSERT_EQ(napi_get_and_clear_last_exception(env_, &ex), napi_ok);
-    EXPECT_NE(ex, nullptr);
+    bool is_error = false;
+    ASSERT_EQ(napi_is_error(env_, ex, &is_error), napi_ok);
+    EXPECT_TRUE(is_error);
 }
 
 TEST_F(NapiV8Test, BuffersAndPromisesInvalidArgs) {
@@ -3040,12 +3164,15 @@ TEST_F(NapiV8Test, AddFinalizer) {
 
     RequestGC();
     EXPECT_TRUE(finalized);
+
+    // The collected object leaves the reference behind for its owner to release.
+    EXPECT_EQ(napi_delete_reference(env_, ref), napi_ok);
 }
 
 TEST_F(NapiV8Test, EscapableHandleScopeReleasesNonEscapedHandles) {
-    bool escaped_finalized = false;
-    bool dropped_finalized = false;
     napi_value escaped = nullptr;
+    napi_ref kept_ref = nullptr;
+    napi_ref dropped_ref = nullptr;
 
     {
         napi_escapable_handle_scope scope;
@@ -3054,12 +3181,12 @@ TEST_F(NapiV8Test, EscapableHandleScopeReleasesNonEscapedHandles) {
         napi_value kept, dropped;
         ASSERT_EQ(napi_create_object(env_, &kept), napi_ok);
         ASSERT_EQ(napi_create_object(env_, &dropped), napi_ok);
-        ASSERT_EQ(
-            napi_add_finalizer(env_, kept, &escaped_finalized, SetBoolFinalizer, nullptr, nullptr),
-            napi_ok);
-        ASSERT_EQ(napi_add_finalizer(env_, dropped, &dropped_finalized, SetBoolFinalizer, nullptr,
-                                     nullptr),
-                  napi_ok);
+
+        // Weak, so that the references report whether each object survived rather than being the
+        // reason it did. A finalizer would not work here: the escaped object is still reachable at
+        // the end of the test, so its finalizer would not run until the environment is torn down.
+        ASSERT_EQ(napi_create_reference(env_, kept, 0, &kept_ref), napi_ok);
+        ASSERT_EQ(napi_create_reference(env_, dropped, 0, &dropped_ref), napi_ok);
 
         ASSERT_EQ(napi_escape_handle(env_, scope, kept, &escaped), napi_ok);
         ASSERT_EQ(napi_close_escapable_handle_scope(env_, scope), napi_ok);
@@ -3068,9 +3195,17 @@ TEST_F(NapiV8Test, EscapableHandleScopeReleasesNonEscapedHandles) {
     RequestGC();
 
     // The escaped handle was promoted into the enclosing scope, so its object is still rooted.
-    EXPECT_FALSE(escaped_finalized);
+    napi_value kept_value = nullptr;
+    ASSERT_EQ(napi_get_reference_value(env_, kept_ref, &kept_value), napi_ok);
+    EXPECT_NE(kept_value, nullptr);
+
     // The handle that did not escape was released along with the scope.
-    EXPECT_TRUE(dropped_finalized);
+    napi_value dropped_value = nullptr;
+    ASSERT_EQ(napi_get_reference_value(env_, dropped_ref, &dropped_value), napi_ok);
+    EXPECT_EQ(dropped_value, nullptr);
+
+    EXPECT_EQ(napi_delete_reference(env_, kept_ref), napi_ok);
+    EXPECT_EQ(napi_delete_reference(env_, dropped_ref), napi_ok);
 }
 
 TEST_F(NapiV8Test, EscapeHandleOnlySucceedsOncePerScope) {
@@ -3137,7 +3272,7 @@ TEST_F(NapiV8Test, InstanceOf) {
     // A non-callable constructor makes JavaScript throw, which is surfaced as a pending exception.
     napi_value plain;
     ASSERT_EQ(napi_create_object(env_, &plain), napi_ok);
-    EXPECT_EQ(napi_instanceof(env_, inst, plain, &result), napi_generic_failure);
+    EXPECT_EQ(napi_instanceof(env_, inst, plain, &result), napi_pending_exception);
     bool pending = false;
     ASSERT_EQ(napi_is_exception_pending(env_, &pending), napi_ok);
     EXPECT_TRUE(pending);
@@ -3274,6 +3409,81 @@ TEST_F(NapiV8Test, UnwrapIgnoresLookalikeProperty) {
     ASSERT_EQ(napi_wrap(env_, obj, &real, nullptr, nullptr, nullptr), napi_ok);
     ASSERT_EQ(napi_unwrap(env_, obj, &unwrapped), napi_ok);
     EXPECT_EQ(unwrapped, &real);
+}
+
+void AllocateJsObjectInFinalizer(napi_env env, void* finalize_data, void*) {
+    auto* ran = static_cast<bool*>(finalize_data);
+    napi_handle_scope scope = nullptr;
+    ASSERT_EQ(napi_open_handle_scope(env, &scope), napi_ok);
+
+    napi_value obj = nullptr;
+    ASSERT_EQ(napi_create_object(env, &obj), napi_ok);
+    napi_value marker = nullptr;
+    ASSERT_EQ(napi_create_string_utf8(env, "allocated-in-finalizer", NAPI_AUTO_LENGTH, &marker),
+              napi_ok);
+    ASSERT_EQ(napi_set_named_property(env, obj, "status", marker), napi_ok);
+
+    napi_value global = nullptr;
+    ASSERT_EQ(napi_get_global(env, &global), napi_ok);
+    ASSERT_EQ(napi_set_named_property(env, global, "_fromFinalizer", obj), napi_ok);
+
+    ASSERT_EQ(napi_close_handle_scope(env, scope), napi_ok);
+    *ran = true;
+}
+
+// Node-API `napi_finalize` callbacks receive a `napi_env` and are allowed to allocate JavaScript
+// objects and call into V8, which requires running them outside V8's first-pass GC pause.
+TEST_F(NapiV8Test, FinalizerCanAllocateJavaScriptObjects) {
+    bool finalized = false;
+    {
+        napi_handle_scope scope = nullptr;
+        ASSERT_EQ(napi_open_handle_scope(env_, &scope), napi_ok);
+        napi_value obj = nullptr;
+        ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+        ASSERT_EQ(napi_add_finalizer(env_, obj, &finalized, AllocateJsObjectInFinalizer, nullptr,
+                                     nullptr),
+                  napi_ok);
+        ASSERT_EQ(napi_close_handle_scope(env_, scope), napi_ok);
+    }
+
+    RequestGC();
+    EXPECT_TRUE(finalized);
+
+    napi_value script = nullptr;
+    ASSERT_EQ(napi_create_string_utf8(env_, "globalThis._fromFinalizer.status", NAPI_AUTO_LENGTH,
+                                      &script),
+              napi_ok);
+    napi_value result = nullptr;
+    ASSERT_EQ(napi_run_script(env_, script, &result), napi_ok);
+    char buf[64] = {};
+    size_t len = 0;
+    ASSERT_EQ(napi_get_value_string_utf8(env_, result, buf, sizeof(buf), &len), napi_ok);
+    EXPECT_STREQ(buf, "allocated-in-finalizer");
+}
+
+void RecordFinalizedFlag(napi_env, void* finalize_data, void*) {
+    *static_cast<bool*>(finalize_data) = true;
+}
+
+// GC schedules `napi_finalize` callbacks onto `globalThis.setImmediate` rather than running them
+// during `CollectGarbage()`.
+TEST_F(NapiV8Test, FinalizerIsDeferredThroughSetImmediate) {
+    bool finalized = false;
+    {
+        napi_handle_scope scope = nullptr;
+        ASSERT_EQ(napi_open_handle_scope(env_, &scope), napi_ok);
+        napi_value obj = nullptr;
+        ASSERT_EQ(napi_create_object(env_, &obj), napi_ok);
+        ASSERT_EQ(napi_add_finalizer(env_, obj, &finalized, RecordFinalizedFlag, nullptr, nullptr),
+                  napi_ok);
+        ASSERT_EQ(napi_close_handle_scope(env_, scope), napi_ok);
+    }
+
+    isolate_->RequestGarbageCollectionForTesting(v8::Isolate::kFullGarbageCollection);
+    EXPECT_FALSE(finalized);
+
+    DrainImmediates();
+    EXPECT_TRUE(finalized);
 }
 
 }  // namespace

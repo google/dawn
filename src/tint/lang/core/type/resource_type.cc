@@ -114,6 +114,47 @@ const core::type::Type* ResourceTypeToType(core::type::Manager& ty, ResourceType
             return ty.sampler();
         case ResourceType::kSampler_comparison:
             return ty.comparison_sampler();
+
+        // These don't have unique WGSL type representations, so we don't handle them here.
+        case ResourceType::kUniformBuffer:
+        case ResourceType::kReadOnlyStorageBuffer:
+        case ResourceType::kWritableStorageBuffer:
+        case ResourceType::kTextureStorage1d_f32_read:
+        case ResourceType::kTextureStorage1d_f32_read_write:
+        case ResourceType::kTextureStorage1d_f32_write:
+        case ResourceType::kTextureStorage1d_i32_read:
+        case ResourceType::kTextureStorage1d_i32_read_write:
+        case ResourceType::kTextureStorage1d_i32_write:
+        case ResourceType::kTextureStorage1d_u32_read:
+        case ResourceType::kTextureStorage1d_u32_read_write:
+        case ResourceType::kTextureStorage1d_u32_write:
+        case ResourceType::kTextureStorage2dArray_f32_read:
+        case ResourceType::kTextureStorage2dArray_f32_read_write:
+        case ResourceType::kTextureStorage2dArray_f32_write:
+        case ResourceType::kTextureStorage2dArray_i32_read:
+        case ResourceType::kTextureStorage2dArray_i32_read_write:
+        case ResourceType::kTextureStorage2dArray_i32_write:
+        case ResourceType::kTextureStorage2dArray_u32_read:
+        case ResourceType::kTextureStorage2dArray_u32_read_write:
+        case ResourceType::kTextureStorage2dArray_u32_write:
+        case ResourceType::kTextureStorage2d_f32_read:
+        case ResourceType::kTextureStorage2d_f32_read_write:
+        case ResourceType::kTextureStorage2d_f32_write:
+        case ResourceType::kTextureStorage2d_i32_read:
+        case ResourceType::kTextureStorage2d_i32_read_write:
+        case ResourceType::kTextureStorage2d_i32_write:
+        case ResourceType::kTextureStorage2d_u32_read:
+        case ResourceType::kTextureStorage2d_u32_read_write:
+        case ResourceType::kTextureStorage2d_u32_write:
+        case ResourceType::kTextureStorage3d_f32_read:
+        case ResourceType::kTextureStorage3d_f32_read_write:
+        case ResourceType::kTextureStorage3d_f32_write:
+        case ResourceType::kTextureStorage3d_i32_read:
+        case ResourceType::kTextureStorage3d_i32_read_write:
+        case ResourceType::kTextureStorage3d_i32_write:
+        case ResourceType::kTextureStorage3d_u32_read:
+        case ResourceType::kTextureStorage3d_u32_read_write:
+        case ResourceType::kTextureStorage3d_u32_write:
         case ResourceType::kEmpty:
             break;
     }
@@ -214,6 +255,98 @@ ResourceType DefaultResourceTypeFor(const core::type::Type* in_type) {
                 return ResourceType::kSampler_comparison;
             }
             return ResourceType::kSampler_non_filtering;
+        },
+        TINT_ICE_ON_NO_MATCH);
+}
+
+ResourceType DefaultUnfilterableResourceTypeFor(const type::Texture* in_type) {
+    return tint::Switch(
+        in_type,
+        [&](const core::type::SampledTexture* sa) {
+            switch (sa->Dim()) {
+                case core::type::TextureDimension::k1d:
+                    return tint::Switch(
+                        sa->Type(),
+                        [&](const core::type::F32*) {
+                            return ResourceType::kTexture1d_f32_unfilterable;
+                        },
+                        [&](const core::type::I32*) { return ResourceType::kTexture1d_i32; },
+                        [&](const core::type::U32*) { return ResourceType::kTexture1d_u32; },
+                        TINT_ICE_ON_NO_MATCH);
+                case core::type::TextureDimension::k2d:
+                    return tint::Switch(
+                        sa->Type(),
+                        [&](const core::type::F32*) {
+                            return ResourceType::kTexture2d_f32_unfilterable;
+                        },
+                        [&](const core::type::I32*) { return ResourceType::kTexture2d_i32; },
+                        [&](const core::type::U32*) { return ResourceType::kTexture2d_u32; },
+                        TINT_ICE_ON_NO_MATCH);
+                case core::type::TextureDimension::k2dArray:
+                    return tint::Switch(
+                        sa->Type(),
+                        [&](const core::type::F32*) {
+                            return ResourceType::kTexture2dArray_f32_unfilterable;
+                        },
+                        [&](const core::type::I32*) { return ResourceType::kTexture2dArray_i32; },
+                        [&](const core::type::U32*) { return ResourceType::kTexture2dArray_u32; },
+                        TINT_ICE_ON_NO_MATCH);
+                case core::type::TextureDimension::k3d:
+                    return tint::Switch(
+                        sa->Type(),
+                        [&](const core::type::F32*) {
+                            return ResourceType::kTexture3d_f32_unfilterable;
+                        },
+                        [&](const core::type::I32*) { return ResourceType::kTexture3d_i32; },
+                        [&](const core::type::U32*) { return ResourceType::kTexture3d_u32; },
+                        TINT_ICE_ON_NO_MATCH);
+                case core::type::TextureDimension::kCube:
+                    return tint::Switch(
+                        sa->Type(),
+                        [&](const core::type::F32*) {
+                            return ResourceType::kTextureCube_f32_unfilterable;
+                        },
+                        [&](const core::type::I32*) { return ResourceType::kTextureCube_i32; },
+                        [&](const core::type::U32*) { return ResourceType::kTextureCube_u32; },
+                        TINT_ICE_ON_NO_MATCH);
+                case core::type::TextureDimension::kCubeArray:
+                    return tint::Switch(
+                        sa->Type(),
+                        [&](const core::type::F32*) {
+                            return ResourceType::kTextureCubeArray_f32_unfilterable;
+                        },
+                        [&](const core::type::I32*) { return ResourceType::kTextureCubeArray_i32; },
+                        [&](const core::type::U32*) { return ResourceType::kTextureCubeArray_u32; },
+                        TINT_ICE_ON_NO_MATCH);
+                case core::type::TextureDimension::kNone:
+                    TINT_UNREACHABLE();
+            }
+            TINT_UNREACHABLE();
+        },
+        [&](const core::type::MultisampledTexture* ms) {
+            return tint::Switch(
+                ms->Type(),
+                [&](const core::type::F32*) { return ResourceType::kTextureMultisampled2d_f32; },
+                [&](const core::type::I32*) { return ResourceType::kTextureMultisampled2d_i32; },
+                [&](const core::type::U32*) { return ResourceType::kTextureMultisampled2d_u32; },
+                TINT_ICE_ON_NO_MATCH);
+        },
+        [&](const core::type::DepthMultisampledTexture*) {
+            return ResourceType::kTextureDepthMultisampled2d;
+        },
+        [&](const core::type::DepthTexture* de) {
+            switch (de->Dim()) {
+                case core::type::TextureDimension::k2d:
+                    return ResourceType::kTextureDepth2d;
+                case core::type::TextureDimension::k2dArray:
+                    return ResourceType::kTextureDepth2dArray;
+                case core::type::TextureDimension::kCube:
+                    return ResourceType::kTextureDepthCube;
+                case core::type::TextureDimension::kCubeArray:
+                    return ResourceType::kTextureDepthCubeArray;
+                default:
+                    TINT_UNREACHABLE();
+            }
         },
         TINT_ICE_ON_NO_MATCH);
 }

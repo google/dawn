@@ -34,8 +34,8 @@
 
 namespace dawn::native {
 
-MaybeError ValidateFloat(std::string_view floatName, float f);
-MaybeError ValidateColor(std::string_view colorName, const Color& color);
+MaybeValError ValidateFloat(std::string_view floatName, float f);
+MaybeValError ValidateColor(std::string_view colorName, const Color& color);
 
 }  // namespace dawn::native
 

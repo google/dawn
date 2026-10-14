@@ -9,5 +9,3 @@ fn fs() -> @location(0) vec4f {
   let s = getResource<sampler>(0);
   return textureSample(t, s, vec2f(0));
 }
-
-

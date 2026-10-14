@@ -52,7 +52,9 @@ using testing::MockCppCallback;
 using testing::NonEmptySizedString;
 using testing::NotNull;
 using testing::Return;
+using testing::SaveArg;
 using testing::WithArg;
+using testing::WithArgs;
 
 // Fixture that helps execute specific commands through the wire that may not be possible to trigger
 // through usage of the dawn::wire::client. It is even more change detecting than regular dawn::wire
@@ -152,10 +154,11 @@ TEST_F(WireSpecificCommandTests, UpdateMappedDataAfterDeviceDestroy_MapWriteOffs
     // Map the buffer
     buffer.MapAsync(wgpu::MapMode::Write, 4, 4, wgpu::CallbackMode::AllowProcessEvents,
                     [](wgpu::MapAsyncStatus status, wgpu::StringView) {});
-    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 4, 4, _)).WillOnce([&] {
-        api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
-                                       kEmptyOutputStringView);
-    });
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, WGPUMapMode_Write, 4, 4, _, _))
+        .WillOnce(WithArg<5>([&](WGPUFuture future) {
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
+                                           kEmptyOutputStringView, future);
+        }));
 
     FlushClient();
     FlushServer();
@@ -230,14 +233,14 @@ TEST_F(WireSpecificCommandTests, RequestDeviceIdReuseAfterInjectedUnregister) {
             requestB = *cmd;
         });
 
-    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _))
-        .WillOnce(WithArg<1>([&](const WGPUDeviceDescriptor* desc) {
+    EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _, _))
+        .WillOnce(WithArgs<1, 3>([&](const WGPUDeviceDescriptor* desc, WGPUFuture future) {
             SetDeviceCallbacks(apiDeviceA, desc);
-            futureA = api.GetLastFuture();
+            futureA = future;
         }))
-        .WillOnce(WithArg<1>([&](const WGPUDeviceDescriptor* desc) {
+        .WillOnce(WithArgs<1, 3>([&](const WGPUDeviceDescriptor* desc, WGPUFuture future) {
             SetDeviceCallbacks(apiDeviceB, desc);
-            futureB = api.GetLastFuture();
+            futureB = future;
         }));
     FlushClient();
 
@@ -328,9 +331,9 @@ TEST_F(WireSpecificCommandTests, RequestAdapterIdReuseAfterInjectedUnregister) {
             requestB = *cmd;
         });
 
-    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, IsNull(), _))
-        .WillOnce([&]() { futureA = api.GetLastFuture(); })
-        .WillOnce([&]() { futureB = api.GetLastFuture(); });
+    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, IsNull(), _, _))
+        .WillOnce(SaveArg<3>(&futureA))
+        .WillOnce(SaveArg<3>(&futureB));
     FlushClient();
 
     // Emulate the backend server completing the first request for an adapter successfully. Even
@@ -418,9 +421,9 @@ TEST_F(WireSpecificCommandTests, CreateComputePipelineAsyncIdReuseAfterInjectedU
             const_cast<ComputePipelineDescriptor*>(cmd->descriptor)->compute.module = shader.Get();
         });
 
-    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, NotNull(), _))
-        .WillOnce([&]() { futureA = api.GetLastFuture(); })
-        .WillOnce([&]() { futureB = api.GetLastFuture(); });
+    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, NotNull(), _, _))
+        .WillOnce(SaveArg<3>(&futureA))
+        .WillOnce(SaveArg<3>(&futureB));
     FlushClient();
 
     EXPECT_CALL(api, ComputePipelineRelease(apiPipelineA)).Times(1);
@@ -502,9 +505,9 @@ TEST_F(WireSpecificCommandTests, CreateRenderPipelineAsyncIdReuseAfterInjectedUn
             const_cast<FragmentState*>(desc->fragment)->module = shader.Get();
         });
 
-    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, NotNull(), _))
-        .WillOnce([&]() { futureA = api.GetLastFuture(); })
-        .WillOnce([&]() { futureB = api.GetLastFuture(); });
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, NotNull(), _, _))
+        .WillOnce(SaveArg<3>(&futureA))
+        .WillOnce(SaveArg<3>(&futureB));
     FlushClient();
 
     EXPECT_CALL(api, RenderPipelineRelease(apiPipelineA)).Times(1);

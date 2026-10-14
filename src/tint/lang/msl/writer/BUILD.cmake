@@ -86,6 +86,7 @@ if(TINT_BUILD_MSL_WRITER)
 # Condition: TINT_BUILD_MSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_msl_writer_test test
+  lang/msl/writer/alias_test.cc
   lang/msl/writer/binary_test.cc
   lang/msl/writer/constant_test.cc
   lang/msl/writer/discard_test.cc
@@ -155,7 +156,6 @@ tint_target_add_dependencies(tint_lang_msl_writer_fuzz fuzz
   tint_lang_msl_writer_common
   tint_lang_msl_writer_printer
   tint_utils
-  tint_utils_bytes
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice

@@ -34,8 +34,10 @@
 #include "src/dawn/common/AlignedAlloc.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/common/MemoryBlockAllocator.h"
+#include "src/dawn/common/Range.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn {
 
@@ -47,8 +49,8 @@ SlabAllocatorImpl::IndexLinkNode::IndexLinkNode(Index index, Index nextIndex)
 // Slab
 
 SlabAllocatorImpl::Slab::Slab() = default;
-SlabAllocatorImpl::Slab::Slab(HeapArray<std::byte> allocation, IndexLinkNode* head)
-    : allocation(std::move(allocation)), freeList(head) {}
+SlabAllocatorImpl::Slab::Slab(HeapArray<std::byte> allocation)
+    : allocation(std::move(allocation)) {}
 
 SlabAllocatorImpl::Slab::Slab(Slab&& rhs) = default;
 
@@ -111,29 +113,37 @@ SlabAllocatorImpl::~SlabAllocatorImpl() {
     mRecycledSlabs.Destroy(mMemoryBlockAllocator.get());
 }
 
-SlabAllocatorImpl::IndexLinkNode* SlabAllocatorImpl::OffsetFrom(
-    IndexLinkNode* node,
-    std::make_signed_t<Index> offset) const {
-    return reinterpret_cast<IndexLinkNode*>(
-        DAWN_UNSAFE_TODO(reinterpret_cast<char*>(node) + static_cast<intptr_t>(mBlockStride)) *
-        offset);
+size_t SlabAllocatorImpl::GetBlockOffset(Index index) const {
+    DAWN_ASSERT(index < mBlocksPerSlab);
+    return mSlabBlocksOffset + static_cast<size_t>(index) * mBlockStride;
 }
 
-SlabAllocatorImpl::IndexLinkNode* SlabAllocatorImpl::NodeFromObject(void* object) const {
-    return reinterpret_cast<SlabAllocatorImpl::IndexLinkNode*>(
-        DAWN_UNSAFE_TODO(static_cast<char*>(object) + mIndexLinkNodeOffset));
+SlabAllocatorImpl::IndexLinkNode* SlabAllocatorImpl::GetNodeAtIndex(Slab* slab, Index index) const {
+    DAWN_ASSERT(index < mBlocksPerSlab);
+    size_t byteOffset = GetBlockOffset(index) + mIndexLinkNodeOffset;
+    return reinterpret_cast<IndexLinkNode*>(&slab->allocation[byteOffset]);
 }
 
-void* SlabAllocatorImpl::ObjectFromNode(IndexLinkNode* node) const {
-    return static_cast<void*>(
-        DAWN_UNSAFE_TODO(reinterpret_cast<char*>(node) - mIndexLinkNodeOffset));
+SlabAllocatorImpl::IndexLinkNode* SlabAllocatorImpl::GetNodeFromBlock(
+    dawn::Span<std::byte> object) const {
+    DAWN_ASSERT(object.size() >= mIndexLinkNodeOffset + sizeof(IndexLinkNode));
+    return reinterpret_cast<IndexLinkNode*>(&object[mIndexLinkNodeOffset]);
+}
+
+void* SlabAllocatorImpl::GetObjectFromNode(Slab* slab, IndexLinkNode* node) const {
+    DAWN_ASSERT(IsNodeInSlab(slab, node));
+    return &slab->allocation[GetBlockOffset(node->index)];
 }
 
 bool SlabAllocatorImpl::IsNodeInSlab(Slab* slab, IndexLinkNode* node) const {
-    char* firstObjectPtr = DAWN_UNSAFE_TODO(reinterpret_cast<char*>(slab) + mSlabBlocksOffset);
-    IndexLinkNode* firstNode = NodeFromObject(firstObjectPtr);
-    IndexLinkNode* lastNode = OffsetFrom(firstNode, mBlocksPerSlab - 1);
-    return node >= firstNode && node <= lastNode && node->index < mBlocksPerSlab;
+    if (node == nullptr || node->index >= mBlocksPerSlab) {
+        return false;
+    }
+    size_t nodeOffset = GetBlockOffset(node->index) + mIndexLinkNodeOffset;
+    if (nodeOffset + sizeof(IndexLinkNode) > slab->allocation.size()) {
+        return false;
+    }
+    return node == reinterpret_cast<const IndexLinkNode*>(&slab->allocation[nodeOffset]);
 }
 
 void SlabAllocatorImpl::PushFront(Slab* slab, IndexLinkNode* node) const {
@@ -160,7 +170,7 @@ SlabAllocatorImpl::IndexLinkNode* SlabAllocatorImpl::PopFront(Slab* slab) const 
         slab->freeList = nullptr;
     } else {
         DAWN_ASSERT(IsNodeInSlab(slab, head));
-        slab->freeList = OffsetFrom(head, head->nextIndex - head->index);
+        slab->freeList = GetNodeAtIndex(slab, head->nextIndex);
         DAWN_ASSERT(IsNodeInSlab(slab, slab->freeList));
     }
 
@@ -242,17 +252,22 @@ void* SlabAllocatorImpl::Allocate() {
         mFullSlabs.Prepend(slab);
     }
 
-    return ObjectFromNode(node);
+    return GetObjectFromNode(slab, node);
 }
 
-void SlabAllocatorImpl::Deallocate(void* ptr) {
-    IndexLinkNode* node = NodeFromObject(ptr);
+void SlabAllocatorImpl::Deallocate(void* object) {
+    DAWN_ASSERT(object != nullptr);
 
+    // This assumes `object` is pointing to at least `mBlockStride` bytes.
+    Span<std::byte> DAWN_UNSAFE_TODO(blockSpan(static_cast<std::byte*>(object), mBlockStride));
+    IndexLinkNode* node = GetNodeFromBlock(blockSpan);
+    DAWN_ASSERT(IsPtrAligned(node, alignof(IndexLinkNode)));
     DAWN_ASSERT(node->index < mBlocksPerSlab);
-    void* firstAllocation =
-        ObjectFromNode(OffsetFrom(node, checked_cast<std::make_signed_t<Index>>(-node->index)));
-    Slab* slab = reinterpret_cast<Slab*>(
-        DAWN_UNSAFE_TODO(static_cast<char*>(firstAllocation) - mSlabBlocksOffset));
+
+    // SAFETY: `GetBlockOffset` is guaranteed to return a valid offset
+    // from object to the start of the slab.
+    Slab* slab = DAWN_UNSAFE_BUFFERS(
+        reinterpret_cast<Slab*>(static_cast<std::byte*>(object) - GetBlockOffset(node->index)));
     DAWN_ASSERT(slab != nullptr);
 
     bool slabWasFull = slab->blocksInUse == mBlocksPerSlab;
@@ -282,22 +297,21 @@ void SlabAllocatorImpl::GetNewSlab() {
         return;
     }
 
+    // Allocate the slab
     HeapArray<std::byte> allocation = mMemoryBlockAllocator->Allocate(mTotalAllocationSize);
-    std::byte* alignedPtr = allocation.data();
-    DAWN_CHECK(IsPtrAligned(alignedPtr, mAllocationAlignment));
+    std::byte* allocationPtr = allocation.data();
+    DAWN_CHECK(IsPtrAligned(allocationPtr, mAllocationAlignment));
 
-    void* dataStart = allocation.subspan(mSlabBlocksOffset).data();
+    Slab* slab = new (allocationPtr) Slab(std::move(allocation));
+    slab->freeList = GetNodeAtIndex(slab, 0);
+    mAvailableSlabs.Prepend(slab);
 
-    IndexLinkNode* node = NodeFromObject(dataStart);
-    for (Index i = 0; i < mBlocksPerSlab; ++i) {
-        new (OffsetFrom(node, sign_cast(i))) IndexLinkNode(i, i + 1);
+    // Initialize all of its nodes
+    for (Index i : Range(mBlocksPerSlab)) {
+        IndexLinkNode* node = GetNodeAtIndex(slab, i);
+        new (node) IndexLinkNode(i, i + 1);
     }
-
-    IndexLinkNode* lastNode =
-        OffsetFrom(node, checked_cast<std::make_signed_t<Index>>(mBlocksPerSlab - 1));
-    lastNode->nextIndex = kInvalidIndex;
-
-    mAvailableSlabs.Prepend(new (alignedPtr) Slab(std::move(allocation), node));
+    GetNodeAtIndex(slab, mBlocksPerSlab - 1)->nextIndex = kInvalidIndex;
 }
 
 }  // namespace dawn

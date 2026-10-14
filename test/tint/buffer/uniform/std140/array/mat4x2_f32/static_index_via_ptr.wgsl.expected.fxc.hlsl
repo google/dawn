@@ -21,21 +21,20 @@ typedef float4x2 ary_ret[4];
 ary_ret v_11(uint start_byte_offset) {
   float4x2 a_1[4] = (float4x2[4])0;
   {
-    uint v_12 = 0u;
-    v_12 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_13 = v_12;
-      if ((v_13 >= 4u)) {
+      uint v_12 = idx;
+      if ((v_12 >= 4u)) {
         break;
       }
-      a_1[v_13] = v((start_byte_offset + (v_13 * 32u)));
+      a_1[v_12] = v((start_byte_offset + (v_12 * 32u)));
       {
-        v_12 = (v_13 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  float4x2 v_14[4] = a_1;
-  return v_14;
+  float4x2 v_13[4] = a_1;
+  return v_13;
 }
 
 [numthreads(1, 1, 1)]

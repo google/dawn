@@ -1,20 +1,8 @@
 #include <metal_stdlib>
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
 struct S {
-  tint_array<int, 4> arr;
+  array<int, 4> arr;
 };
 
 struct tint_module_vars_struct {
@@ -22,13 +10,13 @@ struct tint_module_vars_struct {
 };
 
 int foo() {
-  tint_array<int, 4> const src = tint_array<int, 4>{};
-  tint_array<int, 4> dst = {};
+  array<int, 4> const src = array<int, 4>{};
+  array<int, 4> dst = {};
   S dst_struct = {};
-  tint_array<tint_array<int, 4>, 2> dst_array = {};
-  thread tint_array<int, 4>* const dst_ptr = (&dst);
+  array<array<int, 4>, 2> dst_array = {};
+  thread array<int, 4>* const dst_ptr = (&dst);
   thread S* const dst_struct_ptr = (&dst_struct);
-  thread tint_array<tint_array<int, 4>, 2>* const dst_array_ptr = (&dst_array);
+  thread array<array<int, 4>, 2>* const dst_array_ptr = (&dst_array);
   dst_struct.arr = src;
   dst_array[1] = src;
   (*dst_ptr) = src;

@@ -12,32 +12,30 @@ buffer s_block_1_ssbo {
 } v;
 void tint_store_and_preserve_padding_4(uint target_indices[1], vec3 value_param[3]) {
   {
-    uint v_1 = 0u;
-    v_1 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_2 = v_1;
-      if ((v_2 >= 3u)) {
+      uint v_1 = idx;
+      if ((v_1 >= 3u)) {
         break;
       }
-      v.inner.b[target_indices[0u]][v_2] = value_param[v_2];
+      v.inner.b[target_indices[0u]][v_1] = value_param[v_1];
       {
-        v_1 = (v_2 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
 }
 void tint_store_and_preserve_padding_3(vec3 value_param[3][3]) {
   {
-    uint v_3 = 0u;
-    v_3 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_4 = v_3;
-      if ((v_4 >= 3u)) {
+      uint v_2 = idx;
+      if ((v_2 >= 3u)) {
         break;
       }
-      tint_store_and_preserve_padding_4(uint[1](v_4), value_param[v_4]);
+      tint_store_and_preserve_padding_4(uint[1](v_2), value_param[v_2]);
       {
-        v_3 = (v_4 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
@@ -49,16 +47,15 @@ void tint_store_and_preserve_padding_2(uint target_indices[1], mat3 value_param)
 }
 void tint_store_and_preserve_padding_1(mat3 value_param[3]) {
   {
-    uint v_5 = 0u;
-    v_5 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_6 = v_5;
-      if ((v_6 >= 3u)) {
+      uint v_3 = idx;
+      if ((v_3 >= 3u)) {
         break;
       }
-      tint_store_and_preserve_padding_2(uint[1](v_6), value_param[v_6]);
+      tint_store_and_preserve_padding_2(uint[1](v_3), value_param[v_3]);
       {
-        v_5 = (v_6 + 1u);
+        idx = (idx + 1u);
       }
     }
   }

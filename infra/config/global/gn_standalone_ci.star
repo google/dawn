@@ -77,6 +77,7 @@ gpu.ci.linux_builder(
                 "dawn_android",
                 "dawn_node",
                 "dawn_wasm",
+                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -117,6 +118,7 @@ gpu.ci.linux_builder(
                 "dawn_android",
                 "dawn_node",
                 "dawn_wasm",
+                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -156,6 +158,7 @@ gpu.ci.linux_builder(
             apply_configs = [
                 "dawn_node",
                 "dawn_wasm",
+                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -198,6 +201,7 @@ gpu.ci.linux_builder(
                 "dawn_node",
                 "dawn_wasm",
                 "checkout_litert_lm",
+                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -360,6 +364,7 @@ gpu.ci.mac_builder(
                 "dawn_node",
                 "dawn_wasm",
                 "checkout_litert_lm",
+                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -400,6 +405,7 @@ gpu.ci.mac_builder(
             apply_configs = [
                 "dawn_node",
                 "dawn_wasm",
+                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -440,6 +446,7 @@ gpu.ci.mac_builder(
             apply_configs = [
                 "dawn_node",
                 "dawn_wasm",
+                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -479,6 +486,7 @@ gpu.ci.windows_builder(
             config = "dawn",
             apply_configs = [
                 "dawn_node",
+                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -519,6 +527,7 @@ gpu.ci.windows_builder(
             config = "dawn",
             apply_configs = [
                 "dawn_node",
+                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -560,6 +569,7 @@ gpu.ci.windows_builder(
             config = "dawn",
             apply_configs = [
                 "dawn_node",
+                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -600,6 +610,7 @@ gpu.ci.windows_builder(
             config = "dawn",
             apply_configs = [
                 "dawn_node",
+                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -642,6 +653,7 @@ gpu.ci.windows_builder(
             config = "dawn",
             apply_configs = [
                 "dawn_node",
+                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -685,6 +697,7 @@ gpu.ci.windows_builder(
             apply_configs = [
                 "dawn_node",
                 "checkout_litert_lm",
+                "checkout_v8",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -1686,6 +1699,14 @@ ci.thin_tester(
             "win11_qualcomm_snapdragon_x_elite_stable",
             "win_snapdragon_x_elite_gtest_args",
         ],
+        per_test_modifications = {
+            "dawn_end2end_no_dxc_tests": targets.remove(
+                reason = "D3D12 with FXC coverage is not necessary on Qualcomm Windows.",
+            ),
+            "dawn_end2end_no_dxc_validation_layers_tests": targets.remove(
+                reason = "D3D12 with FXC coverage is not necessary on Qualcomm Windows.",
+            ),
+        },
     ),
     targets_settings = targets.settings(
         browser_config = targets.browser_config.RELEASE,
@@ -1945,6 +1966,7 @@ ci.thin_tester(
     targets = targets.bundle(
         targets = [
             "real_hardware_win_gtests",
+            "litert_lm_benchmark",
         ],
         mixins = [
             "win10_nvidia_gtx_1660_stable",

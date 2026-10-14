@@ -105,7 +105,8 @@ class Device final : public DeviceBase {
 
     // Dawn Native API
 
-    Ref<TextureBase> CreateTextureWrappingVulkanImage(
+    MaybeValError ValidateTextureWrappingVulkanImage(const ExternalImageDescriptorVk* descriptor);
+    ResultOrUnknownError<Ref<TextureBase>> CreateTextureWrappingVulkanImage(
         const ExternalImageDescriptorVk* descriptor,
         ExternalMemoryHandle memoryHandle,
         const std::vector<ExternalSemaphoreHandle>& waitHandles);
@@ -206,10 +207,10 @@ class Device final : public DeviceBase {
     void InitializeComputePipelineAsyncImpl(Ref<CreateComputePipelineAsyncEvent> event) override;
     void InitializeRenderPipelineAsyncImpl(Ref<CreateRenderPipelineAsyncEvent> event) override;
 
-    ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
-        const SharedTextureMemoryDescriptor* baseDescriptor) override;
-    ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
-        const SharedFenceDescriptor* baseDescriptor) override;
+    ResultOrUnknownError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
+        UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) override;
+    ResultOrUnknownError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
+        UnpackedPtr<SharedFenceDescriptor> unpacked) override;
 
     ResultOrError<VulkanDeviceKnobs> CreateDevice(VkPhysicalDevice vkPhysicalDevice);
 

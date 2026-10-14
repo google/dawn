@@ -154,12 +154,13 @@ set(private_headers
     "SwapChain.h"
     "SystemEvent.h"
     "Texture.h"
+    "BufferTextureCopyOversizedRow.h"
     "TexelBufferView.h"
     "TintUtils.h"
     "ToBackend.h"
     "Toggles.h"
     "UsageValidationMode.h"
-    "utils/WGPUHelpers.h"
+    "utils/NativeHelpers.h"
     "ValidationUtils.h"
     "VisitableMembers.h"
     "WaitAnySystemEvent.h"
@@ -263,10 +264,11 @@ set(sources
     "SwapChain.cpp"
     "SystemEvent.cpp"
     "Texture.cpp"
+    "BufferTextureCopyOversizedRow.cpp"
     "TexelBufferView.cpp"
     "TintUtils.cpp"
     "Toggles.cpp"
-    "utils/WGPUHelpers.cpp"
+    "utils/NativeHelpers.cpp"
     "ValidationUtils.cpp"
     "WaitAnySystemEvent.cpp"
     "WaitListEvent.cpp"
@@ -929,6 +931,7 @@ set(dawn_native_private_depends
     absl::flat_hash_map
     absl::flat_hash_set
     absl::inlined_vector
+    absl::no_destructor
     absl::str_format_internal
     absl::strings
     dawn::dawn_system_utils

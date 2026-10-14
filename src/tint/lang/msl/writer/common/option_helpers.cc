@@ -254,13 +254,8 @@ void PopulateBindingRelatedOptions(const Options& options,
             }
         }
 
-        if (options.array_length_from_constants.buffer_sizes_offset) {
-            array_length_options.buffer_sizes_offset =
-                options.array_length_from_constants.buffer_sizes_offset;
-        } else {
-            array_length_options.ubo_binding = options.array_length_from_constants.ubo_binding;
-        }
-
+        array_length_options.buffer_sizes_offset =
+            options.array_length_from_constants.buffer_sizes_offset;
         array_length_options.bindpoint_to_size_index = std::move(bindpoint_to_size_index);
     }
 }

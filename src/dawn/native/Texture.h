@@ -62,15 +62,15 @@ enum class AllowMultiPlanarTextureFormat {
     Yes,
 };
 
-MaybeError ValidateTextureDescriptor(
+MaybeValError ValidateTextureDescriptor(
     const DeviceBase* device,
     const UnpackedPtr<TextureDescriptor>& descriptor,
     AllowMultiPlanarTextureFormat allowMultiPlanar = AllowMultiPlanarTextureFormat::No,
     std::optional<wgpu::TextureUsage> allowedSharedTextureMemoryUsage = std::nullopt);
-MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
-                                         const TextureBase* texture,
-                                         const UnpackedPtr<TextureViewDescriptor>& descriptor);
-ResultOrError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
+MaybeValError ValidateTextureViewDescriptor(const DeviceBase* device,
+                                            const TextureBase* texture,
+                                            const UnpackedPtr<TextureViewDescriptor>& descriptor);
+ResultOrValError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
     const TextureBase* texture,
     const TextureViewDescriptor* descriptor);
 
@@ -192,7 +192,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     bool IsSubresourceContentInitialized(const SubresourceRange& range) const;
     void SetIsSubresourceContentInitialized(bool isInitialized, const SubresourceRange& range);
 
-    MaybeError ValidateCanUseInSubmitNow() const;
+    MaybeValError ValidateCanUseInSubmitNow() const;
 
     bool IsMultisampledTexture() const;
 
@@ -222,7 +222,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     void AddResourceTableUse(ResourceTableBase* table);
     void RemoveResourceTableUse(ResourceTableBase* table);
 
-    ResultOrError<Ref<TextureViewBase>> CreateView(
+    ResultOrUnknownError<Ref<TextureViewBase>> CreateView(
         const TextureViewDescriptor* descriptor = nullptr);
     Ref<TextureViewBase> CreateErrorView(const TextureViewDescriptor* descriptor = nullptr);
     ApiObjectList* GetViewTrackingList();
@@ -232,7 +232,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     uint64_t ComputeEstimatedByteSize() const;
 
     template <typename CreateFn>
-    ResultOrError<Ref<TextureViewBase>> GetOrCreateViewFromCache(
+    ResultOrUnknownError<Ref<TextureViewBase>> GetOrCreateViewFromCache(
         const UnpackedPtr<TextureViewDescriptor>& desc,
         CreateFn createFn);
 
@@ -279,7 +279,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
 
     std::string GetSizeLabel() const;
 
-    ResultOrError<Ref<TextureViewBase>> GetOrCreateDefaultView();
+    ResultOrUnknownError<Ref<TextureViewBase>> GetOrCreateDefaultView();
 
     void MarkDestroyedInResourceTables();
 
@@ -324,7 +324,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
 };
 
 template <typename CreateFn>
-ResultOrError<Ref<TextureViewBase>> TextureBase::GetOrCreateViewFromCache(
+ResultOrUnknownError<Ref<TextureViewBase>> TextureBase::GetOrCreateViewFromCache(
     const UnpackedPtr<TextureViewDescriptor>& desc,
     CreateFn createFn) {
     TextureViewQuery query(desc);

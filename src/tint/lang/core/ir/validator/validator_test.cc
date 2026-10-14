@@ -1134,6 +1134,20 @@ TEST_F(IR_ValidatorTest, Convert_PtrToPtr) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Load_PointerFromArray_WithProperty) {
+    auto* arr_ty = ty.array<ptr<function, u32>, 4>();
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function>(arr_ty));
+        b.Load(b.Access(ty.ptr<function, ptr<function, u32>>(), var, 1_u));
+        b.Return(f);
+    });
+
+    mod.properties.Add(Property::kAllowPointerAndHandleInAggregates);
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Block_NoTerminator) {
     b.Function("my_func", ty.void_());
 
@@ -3105,6 +3119,42 @@ TEST_F(IR_ValidatorTest, IncorrectDomainModulo_Vec) {
     auto res = ir::Validate(mod, ir::ErrorSource::kWgsl);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason, "5:7 error: binary: integer division by zero is invalid");
+}
+
+TEST_F(IR_ValidatorTest, InterpolateString_Valid) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.InterpolateString(b.Constant("hello "), 42_i, b.Constant(" world"));
+        b.Return(f);
+    });
+    EXPECT_EQ(ir::Validate(mod), Success);
+}
+
+TEST_F(IR_ValidatorTest, InterpolateString_InvalidResultType) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* res = b.InstructionResult(ty.i32());
+        b.InterpolateStringWithResult(res, 42_i);
+        b.Return(f);
+    });
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("error: interpolate_string: result type must be string"));
+}
+
+TEST_F(IR_ValidatorTest, InterpolateString_InvalidOperandType) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* arr = b.Zero(ty.array<i32, 4>());
+        b.InterpolateString(arr);
+        b.Return(f);
+    });
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    "error: interpolate_string: operand must be a scalar, vector, or string"));
 }
 
 }  // namespace tint::core::ir

@@ -1199,5 +1199,392 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          TokenData{"var", Token::Type::kVar},
                                          TokenData{"while", Token::Type::kWhile}));
 
+TEST_F(LexerTest, StringLiteral_Empty) {
+    Source::File file("", "``");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(2u, list.size());
+    EXPECT_TRUE(list[0].IsStringLiteral());
+    EXPECT_EQ(list[0].to_str(), "");
+    EXPECT_EQ(list[0].source().range.begin.column, 1u);
+    EXPECT_EQ(list[0].source().range.end.column, 3u);
+    EXPECT_TRUE(list[1].IsEof());
+}
+
+TEST_F(LexerTest, StringLiteral_Basic) {
+    Source::File file("", "`hello world`");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(2u, list.size());
+    EXPECT_TRUE(list[0].IsStringLiteral());
+    EXPECT_EQ(list[0].to_str(), "hello world");
+    EXPECT_EQ(list[0].source().range.begin.column, 1u);
+    EXPECT_EQ(list[0].source().range.end.column, 14u);
+    EXPECT_TRUE(list[1].IsEof());
+}
+
+TEST_F(LexerTest, StringLiteral_Escapes) {
+    Source::File file("", R"(`\n\r\t\\\`\$`)");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(2u, list.size());
+    EXPECT_TRUE(list[0].IsStringLiteral());
+    EXPECT_EQ(list[0].to_str(), "\n\r\t\\`$");
+    EXPECT_TRUE(list[1].IsEof());
+}
+
+TEST_F(LexerTest, StringLiteral_QuotesAllowedDirectly) {
+    Source::File file("", "`\"hello\" and 'world'`");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(2u, list.size());
+    EXPECT_TRUE(list[0].IsStringLiteral());
+    EXPECT_EQ(list[0].to_str(), "\"hello\" and 'world'");
+    EXPECT_TRUE(list[1].IsEof());
+}
+
+TEST_F(LexerTest, StringLiteral_MultiLine) {
+    Source::File file("", "`line 1\nline 2`");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(2u, list.size());
+    EXPECT_TRUE(list[0].IsStringLiteral());
+    EXPECT_EQ(list[0].to_str(), "line 1\nline 2");
+    EXPECT_EQ(list[0].source().range.begin.line, 1u);
+    EXPECT_EQ(list[0].source().range.begin.column, 1u);
+    EXPECT_EQ(list[0].source().range.end.line, 2u);
+    EXPECT_EQ(list[0].source().range.end.column, 8u);
+    EXPECT_TRUE(list[1].IsEof());
+}
+
+TEST_F(LexerTest, StringLiteral_LineContinuation) {
+    Source::File file("", "`line 1 \\\nline 2`");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(2u, list.size());
+    EXPECT_TRUE(list[0].IsStringLiteral());
+    EXPECT_EQ(list[0].to_str(), "line 1 line 2");
+    EXPECT_TRUE(list[1].IsEof());
+}
+
+TEST_F(LexerTest, StringLiteral_DollarWithoutBrace) {
+    Source::File file("", "`$100 and $foo`");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(2u, list.size());
+    EXPECT_TRUE(list[0].IsStringLiteral());
+    EXPECT_EQ(list[0].to_str(), "$100 and $foo");
+    EXPECT_TRUE(list[1].IsEof());
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_SingleInterpolation) {
+    Source::File file("", "`hello ${world}!`");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(4u, list.size());
+
+    EXPECT_TRUE(list[0].Is(Token::Type::kInterpolatedStringHead));
+    EXPECT_EQ(list[0].to_str(), "hello ");
+    EXPECT_EQ(list[0].source().range.begin.column, 1u);
+    EXPECT_EQ(list[0].source().range.end.column, 10u);
+
+    EXPECT_TRUE(list[1].IsIdentifier());
+    EXPECT_EQ(list[1].to_str(), "world");
+    EXPECT_EQ(list[1].source().range.begin.column, 10u);
+    EXPECT_EQ(list[1].source().range.end.column, 15u);
+
+    EXPECT_TRUE(list[2].Is(Token::Type::kInterpolatedStringTail));
+    EXPECT_EQ(list[2].to_str(), "!");
+    EXPECT_EQ(list[2].source().range.begin.column, 15u);
+    EXPECT_EQ(list[2].source().range.end.column, 18u);
+
+    EXPECT_TRUE(list[3].IsEof());
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_EmptyHeadAndTail) {
+    Source::File file("", "`${x}`");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(4u, list.size());
+
+    EXPECT_TRUE(list[0].Is(Token::Type::kInterpolatedStringHead));
+    EXPECT_EQ(list[0].to_str(), "");
+    EXPECT_EQ(list[0].source().range.begin.column, 1u);
+    EXPECT_EQ(list[0].source().range.end.column, 4u);
+
+    EXPECT_TRUE(list[1].IsIdentifier());
+    EXPECT_EQ(list[1].to_str(), "x");
+
+    EXPECT_TRUE(list[2].Is(Token::Type::kInterpolatedStringTail));
+    EXPECT_EQ(list[2].to_str(), "");
+    EXPECT_EQ(list[2].source().range.begin.column, 5u);
+    EXPECT_EQ(list[2].source().range.end.column, 7u);
+
+    EXPECT_TRUE(list[3].IsEof());
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_MultipleInterpolations) {
+    Source::File file("", "`a ${1} b ${2} c`");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(6u, list.size());
+
+    EXPECT_TRUE(list[0].Is(Token::Type::kInterpolatedStringHead));
+    EXPECT_EQ(list[0].to_str(), "a ");
+
+    EXPECT_TRUE(list[1].Is(Token::Type::kIntLiteral));
+    EXPECT_EQ(list[1].to_i64(), 1);
+
+    EXPECT_TRUE(list[2].Is(Token::Type::kInterpolatedStringMiddle));
+    EXPECT_EQ(list[2].to_str(), " b ");
+
+    EXPECT_TRUE(list[3].Is(Token::Type::kIntLiteral));
+    EXPECT_EQ(list[3].to_i64(), 2);
+
+    EXPECT_TRUE(list[4].Is(Token::Type::kInterpolatedStringTail));
+    EXPECT_EQ(list[4].to_str(), " c");
+
+    EXPECT_TRUE(list[5].IsEof());
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_ConsecutiveInterpolations) {
+    Source::File file("", "`${1}${2}`");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(6u, list.size());
+
+    EXPECT_TRUE(list[0].Is(Token::Type::kInterpolatedStringHead));
+    EXPECT_EQ(list[0].to_str(), "");
+
+    EXPECT_TRUE(list[1].Is(Token::Type::kIntLiteral));
+    EXPECT_EQ(list[1].to_i64(), 1);
+
+    EXPECT_TRUE(list[2].Is(Token::Type::kInterpolatedStringMiddle));
+    EXPECT_EQ(list[2].to_str(), "");
+
+    EXPECT_TRUE(list[3].Is(Token::Type::kIntLiteral));
+    EXPECT_EQ(list[3].to_i64(), 2);
+
+    EXPECT_TRUE(list[4].Is(Token::Type::kInterpolatedStringTail));
+    EXPECT_EQ(list[4].to_str(), "");
+
+    EXPECT_TRUE(list[5].IsEof());
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_BracesInInterpolation) {
+    Source::File file("", "`${ { 1 } }`");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(6u, list.size());
+
+    EXPECT_TRUE(list[0].Is(Token::Type::kInterpolatedStringHead));
+    EXPECT_EQ(list[0].to_str(), "");
+
+    EXPECT_TRUE(list[1].Is(Token::Type::kBraceLeft));
+
+    EXPECT_TRUE(list[2].Is(Token::Type::kIntLiteral));
+    EXPECT_EQ(list[2].to_i64(), 1);
+
+    EXPECT_TRUE(list[3].Is(Token::Type::kBraceRight));
+
+    EXPECT_TRUE(list[4].Is(Token::Type::kInterpolatedStringTail));
+    EXPECT_EQ(list[4].to_str(), "");
+
+    EXPECT_TRUE(list[5].IsEof());
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_NestedInterpolatedLiterals) {
+    Source::File file("", "`outer ${ `inner ${x}` } end`");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(6u, list.size());
+
+    EXPECT_TRUE(list[0].Is(Token::Type::kInterpolatedStringHead));
+    EXPECT_EQ(list[0].to_str(), "outer ");
+
+    EXPECT_TRUE(list[1].Is(Token::Type::kInterpolatedStringHead));
+    EXPECT_EQ(list[1].to_str(), "inner ");
+
+    EXPECT_TRUE(list[2].IsIdentifier());
+    EXPECT_EQ(list[2].to_str(), "x");
+
+    EXPECT_TRUE(list[3].Is(Token::Type::kInterpolatedStringTail));
+    EXPECT_EQ(list[3].to_str(), "");
+
+    EXPECT_TRUE(list[4].Is(Token::Type::kInterpolatedStringTail));
+    EXPECT_EQ(list[4].to_str(), " end");
+
+    EXPECT_TRUE(list[5].IsEof());
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_NestedStringLiteral) {
+    Source::File file("", "`outer ${ `inner` } end`");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(4u, list.size());
+
+    EXPECT_TRUE(list[0].Is(Token::Type::kInterpolatedStringHead));
+    EXPECT_EQ(list[0].to_str(), "outer ");
+
+    EXPECT_TRUE(list[1].IsStringLiteral());
+    EXPECT_EQ(list[1].to_str(), "inner");
+
+    EXPECT_TRUE(list[2].Is(Token::Type::kInterpolatedStringTail));
+    EXPECT_EQ(list[2].to_str(), " end");
+
+    EXPECT_TRUE(list[3].IsEof());
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_Unterminated_Simple) {
+    Source::File file("", "`hello");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(1u, list.size());
+    EXPECT_TRUE(list[0].IsError());
+    EXPECT_EQ(list[0].to_str(), "unterminated interpolated string literal");
+    EXPECT_EQ(list[0].source().range.begin.line, 1u);
+    EXPECT_EQ(list[0].source().range.begin.column, 1u);
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_Unterminated_InInterpolation) {
+    Source::File file("", "`hello ${ x + 1");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_FALSE(list.empty());
+    auto& err = list.back();
+    EXPECT_TRUE(err.IsError());
+    EXPECT_EQ(err.to_str(), "unterminated interpolated string literal");
+    EXPECT_EQ(err.source().range.begin.line, 1u);
+    EXPECT_EQ(err.source().range.begin.column, 1u);
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_Unterminated_AfterInterpolation) {
+    Source::File file("", "`hello ${x} still open");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_FALSE(list.empty());
+    auto& err = list.back();
+    EXPECT_TRUE(err.IsError());
+    EXPECT_EQ(err.to_str(), "unterminated interpolated string literal");
+    EXPECT_EQ(err.source().range.begin.line, 1u);
+    EXPECT_EQ(err.source().range.begin.column, 1u);
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_Unterminated_TrailingEscape) {
+    Source::File file("", R"(`hello \)");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(1u, list.size());
+    EXPECT_TRUE(list[0].IsError());
+    EXPECT_EQ(list[0].to_str(), "unterminated interpolated string literal");
+    EXPECT_EQ(list[0].source().range.begin.line, 1u);
+    EXPECT_EQ(list[0].source().range.begin.column, 1u);
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_Unterminated_TrailingEscape_AfterInterpolation) {
+    Source::File file("", R"(`hello ${x} world\)");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_FALSE(list.empty());
+    auto& err = list.back();
+    EXPECT_TRUE(err.IsError());
+    EXPECT_EQ(err.to_str(), "unterminated interpolated string literal");
+    EXPECT_EQ(err.source().range.begin.line, 1u);
+    EXPECT_EQ(err.source().range.begin.column, 1u);
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_UnknownEscape) {
+    Source::File file("", R"(`hello \q world`)");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(1u, list.size());
+    EXPECT_TRUE(list[0].IsError());
+    EXPECT_EQ(list[0].to_str(), "unknown escape sequence");
+    EXPECT_EQ(list[0].source().range.begin.column, 8u);
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_DisallowedEscape_Quote) {
+    Source::File file("", R"(`hello \' world`)");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(1u, list.size());
+    EXPECT_TRUE(list[0].IsError());
+    EXPECT_EQ(list[0].to_str(), "unknown escape sequence");
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_DisallowedEscape_DoubleQuote) {
+    Source::File file("", R"(`hello \" world`)");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(1u, list.size());
+    EXPECT_TRUE(list[0].IsError());
+    EXPECT_EQ(list[0].to_str(), "unknown escape sequence");
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_DisallowedEscape_Null) {
+    Source::File file("", R"(`hello \0 world`)");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(1u, list.size());
+    EXPECT_TRUE(list[0].IsError());
+    EXPECT_EQ(list[0].to_str(), "unknown escape sequence");
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_NullByte_IsError) {
+    Source::File file("", std::string("`hello ") + '\0' + " world`");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(1u, list.size());
+    EXPECT_TRUE(list[0].IsError());
+    EXPECT_EQ(list[0].to_str(), "null character found");
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_InvalidUTF8_IsError) {
+    Source::File file("", "`hello \x80\x80\x80\x80 world`");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_EQ(1u, list.size());
+    EXPECT_TRUE(list[0].IsError());
+    EXPECT_EQ(list[0].to_str(), "invalid UTF-8");
+    EXPECT_EQ(list[0].source().range.begin.column, 8u);
+}
+
+TEST_F(LexerTest, InterpolatedStringLiteral_InvalidUTF8_AfterInterpolation) {
+    Source::File file("", "`hello ${x} \x80\x80\x80\x80 world`");
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_FALSE(list.empty());
+    auto& err = list.back();
+    EXPECT_TRUE(err.IsError());
+    EXPECT_EQ(err.to_str(), "invalid UTF-8");
+    EXPECT_EQ(err.source().range.begin.column, 13u);
+}
+
 }  // namespace
 }  // namespace tint::wgsl::reader

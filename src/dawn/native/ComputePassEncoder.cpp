@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <memory>
 
 #include "dawn/native/ObjectType_autogen.h"
 #include "src/dawn/common/Range.h"
@@ -46,7 +47,7 @@
 #include "src/dawn/native/PassResourceUsageTracker.h"
 #include "src/dawn/native/QuerySet.h"
 #include "src/dawn/native/ResourceTable.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/utils/compiler.h"
 
 namespace dawn::native {
@@ -150,6 +151,7 @@ ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                        CommandEncoder* commandEncoder,
                                        EncodingContext* encodingContext)
     : ProgrammableEncoder(device, descriptor->label, encodingContext),
+      mUsageTracker(device->GetNextPassTrackerID()),
       mCommandEncoder(commandEncoder) {
     GetObjectTrackingList()->Track(this);
 }
@@ -172,6 +174,7 @@ ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                        ErrorTag errorTag,
                                        StringView label)
     : ProgrammableEncoder(device, encodingContext, errorTag, label),
+      mUsageTracker(kInvalidPassTrackerID),
       mCommandEncoder(commandEncoder) {}
 
 // static
@@ -185,6 +188,7 @@ Ref<ComputePassEncoder> ComputePassEncoder::MakeError(DeviceBase* device,
 
 void ComputePassEncoder::DestroyImpl(DestroyReason reason) {
     mCommandBufferState.End();
+    mUsageTracker = ComputePassResourceUsageTracker(kInvalidPassTrackerID);
 
     // Ensure that the pass has exited. This is done for passes only since validation requires
     // they exit before destruction while bundles do not.
@@ -206,7 +210,7 @@ void ComputePassEncoder::APIEnd() {
 
     if (mEncodingContext->TryEncode(
             this,
-            [&](CommandAllocator* allocator) -> MaybeError {
+            [&](CommandAllocator* allocator) -> MaybeValError {
                 if (IsValidationEnabled()) {
                     DAWN_TRY(ValidateProgrammableEncoderEnd());
                 }
@@ -225,7 +229,7 @@ void ComputePassEncoder::APIDispatchWorkgroups(uint32_t workgroupCountX,
                                                uint32_t workgroupCountZ) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 if (workgroupCountX == 0 || workgroupCountY == 0 || workgroupCountZ == 0) {
                     GetDevice()->EmitWarningOnce(absl::StrFormat(
@@ -417,7 +421,7 @@ void ComputePassEncoder::APIDispatchWorkgroupsIndirect(BufferBase* indirectBuffe
                                                        uint64_t indirectOffset) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeUnknownError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
                 DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
@@ -438,7 +442,7 @@ void ComputePassEncoder::APIDispatchWorkgroupsIndirect(BufferBase* indirectBuffe
                 }
             }
 
-            SyncScopeUsageTracker scope;
+            DispatchResourceUsageTracker scope;
             mUsageTracker.AddReferencedBuffer(indirectBuffer);
             Ref<BufferBase> indirectBufferRef = indirectBuffer;
 
@@ -494,7 +498,7 @@ void ComputePassEncoder::APIDispatchWorkgroupsIndirect(BufferBase* indirectBuffe
 void ComputePassEncoder::APISetPipeline(ComputePipelineBase* pipeline) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(pipeline));
             }
@@ -513,7 +517,7 @@ void ComputePassEncoder::APISetPipeline(ComputePipelineBase* pipeline) {
 void ComputePassEncoder::APISetResourceTable(ResourceTableBase* table) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_INVALID_IF(
                     !GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable),
@@ -544,7 +548,7 @@ void ComputePassEncoder::APISetBindGroup(uint32_t groupIndexIn,
                                          ityp::span<BindingIndex, const uint32_t> dynamicOffsets) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             BindGroupIndex groupIndex(groupIndexIn);
 
             if (IsValidationEnabled()) {
@@ -568,7 +572,7 @@ void ComputePassEncoder::APISetBindGroup(uint32_t groupIndexIn,
 void ComputePassEncoder::APISetImmediates(uint32_t offset, Span<const std::byte> data) {
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(ValidateSetImmediates(offset, data.size()));
             }
@@ -585,7 +589,7 @@ void ComputePassEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t quer
 
     mEncodingContext->TryEncode(
         this,
-        [&](CommandAllocator* allocator) -> MaybeError {
+        [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(ValidateTimestampQuery(
                     GetDevice(), querySet, queryIndex,
@@ -604,7 +608,7 @@ void ComputePassEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t quer
         "encoding %s.WriteTimestamp(%s, %u).", this, querySet, queryIndex);
 }
 
-void ComputePassEncoder::AddDispatchSyncScope(SyncScopeUsageTracker scope) {
+void ComputePassEncoder::AddDispatchSyncScope(DispatchResourceUsageTracker scope) {
     PipelineLayoutBase* layout = mCommandBufferState.GetPipelineLayout();
     for (BindGroupIndex i : layout->GetBindGroupLayoutsMask()) {
         scope.AddBindGroup(mCommandBufferState.GetBindGroup(i));

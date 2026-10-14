@@ -34,7 +34,7 @@
 namespace dawn::native::metal {
 
 // static
-ResultOrError<Ref<SharedFence>> SharedFence::Create(
+ResultOrUnknownError<Ref<SharedFence>> SharedFence::Create(
     Device* device,
     StringView label,
     const SharedFenceMTLSharedEventDescriptor* descriptor) {
@@ -56,7 +56,7 @@ id<MTLSharedEvent> SharedFence::GetMTLSharedEvent() const {
     return mSharedEvent.Get();
 }
 
-MaybeError SharedFence::ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const {
+MaybeValError SharedFence::ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const {
     info->type = wgpu::SharedFenceType::MTLSharedEvent;
 
     DAWN_TRY(info.ValidateSubset<SharedFenceMTLSharedEventExportInfo>());

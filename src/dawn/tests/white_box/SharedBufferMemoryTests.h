@@ -57,10 +57,6 @@ class SharedBufferMemoryTestBackend {
                                                               wgpu::BufferUsage usages,
                                                               uint32_t bufferSize,
                                                               uint32_t data = 0) = 0;
-
-    // Creates a SharedFence from a backend-specific fence type.
-    wgpu::SharedFence ImportFenceTo(const wgpu::Device& importingDevice,
-                                    const wgpu::SharedFence& fence);
 };
 
 inline std::ostream& operator<<(std::ostream& o, SharedBufferMemoryTestBackend* backend) {

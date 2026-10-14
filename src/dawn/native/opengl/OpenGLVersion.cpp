@@ -38,7 +38,7 @@ namespace dawn::native::opengl {
 MaybeError OpenGLVersion::Initialize(GLGetProcProc getProc) {
     PFNGLGETSTRINGPROC getString = reinterpret_cast<PFNGLGETSTRINGPROC>(getProc("glGetString"));
     if (getString == nullptr) {
-        return DAWN_INTERNAL_ERROR("Couldn't load glGetString");
+        return DAWN_UNRECOVERABLE_ERROR("Couldn't load glGetString");
     }
 
     const char* version = reinterpret_cast<const char*>(getString(GL_VERSION));

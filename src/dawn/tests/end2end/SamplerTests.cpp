@@ -376,9 +376,6 @@ TEST_P(StaticSamplerTest, SamplerDiscrepancyOOB) {
     // TODO(crbug.com/465184301): Fix static sampler feature.
     DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
-    // TODO(crbug.com/459848481): Fails on Win/Snapdragon X Elite w/ D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D12());
-
     wgpu::SamplerDescriptor samplerDesc = {};
     wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 

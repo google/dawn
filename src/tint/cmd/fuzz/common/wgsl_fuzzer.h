@@ -38,9 +38,8 @@
 #include <tuple>
 #include <utility>
 
+#include "src/tint/cmd/fuzz/common/fuzzer_decoder.h"
 #include "src/tint/cmd/fuzz/common/options.h"
-#include "src/tint/utils/bytes/buffer_reader.h"
-#include "src/tint/utils/bytes/decoder.h"
 #include "src/tint/utils/containers/enum_set.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/macros/static_init.h"
@@ -88,24 +87,11 @@ struct ProgramFuzzer {
         if constexpr (sizeof...(ARGS) > 0) {
             auto fn_with_decode = [fn](const Program& program, const Context& context,
                                        std::span<const std::byte> data) {
-                if (data.empty()) {
-                    if (context.options.verbose) {
-                        std::cout << "   - Data expected but no data provided.\n";
-                    }
-                    return;
-                }
-                bytes::BufferReader reader{data};
-                auto data_args = bytes::Decode<std::tuple<std::decay_t<ARGS>...>>(reader);
-                if (data_args == Success) {
-                    auto all_args =
-                        std::tuple_cat(std::tuple<const Program&, const Context&>{program, context},
-                                       data_args.Get());
-                    std::apply(*fn, all_args);
-                } else {
-                    if (context.options.verbose) {
-                        std::cout << "   - Failed to decode fuzzer argument data.\n";
-                    }
-                }
+                SafeFuzzerDecoder decoder{data};
+                auto data_args = FuzzDecoder<std::tuple<std::decay_t<ARGS>...>>::Decode(decoder);
+                auto all_args = std::tuple_cat(
+                    std::tuple<const Program&, const Context&>{program, context}, data_args);
+                std::apply(*fn, all_args);
             };
             return ProgramFuzzer{name, std::move(fn_with_decode)};
         } else {
@@ -125,25 +111,12 @@ struct ProgramFuzzer {
     template <typename... ARGS>
     static ProgramFuzzer Create(std::string_view name, void (*fn)(const Program&, ARGS...)) {
         if constexpr (sizeof...(ARGS) > 0) {
-            auto fn_with_decode = [fn](const Program& program, const Context& context,
+            auto fn_with_decode = [fn](const Program& program, const Context& /*context*/,
                                        std::span<const std::byte> data) {
-                if (data.empty()) {
-                    if (context.options.verbose) {
-                        std::cout << "   - Data expected but no data provided.\n";
-                    }
-                    return;
-                }
-                bytes::BufferReader reader{data};
-                auto data_args = bytes::Decode<std::tuple<std::decay_t<ARGS>...>>(reader);
-                if (data_args == Success) {
-                    auto all_args =
-                        std::tuple_cat(std::tuple<const Program&>{program}, data_args.Get());
-                    std::apply(*fn, all_args);
-                } else {
-                    if (context.options.verbose) {
-                        std::cout << "   - Failed to decode fuzzer argument data.\n";
-                    }
-                }
+                SafeFuzzerDecoder decoder{data};
+                auto data_args = FuzzDecoder<std::tuple<std::decay_t<ARGS>...>>::Decode(decoder);
+                auto all_args = std::tuple_cat(std::tuple<const Program&>{program}, data_args);
+                std::apply(*fn, all_args);
             };
             return ProgramFuzzer{name, std::move(fn_with_decode)};
         } else {

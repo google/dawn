@@ -41,6 +41,7 @@ namespace {
 using testing::_;
 using testing::EmptySizedString;
 using testing::SizedString;
+using testing::WithArg;
 
 class WireErrorCallbackTests : public WireTest {};
 
@@ -122,11 +123,12 @@ TEST_P(WirePopErrorScopeCallbackTests, TypeAndFilters) {
     for (const auto& [type, filter] : kErrorTypeAndFilters) {
         PushErrorScope(filter);
         PopErrorScope();
-        EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _)).WillOnce([&] {
-            api.CallDevicePopErrorScopeCallback(apiDevice, WGPUPopErrorScopeStatus_Success,
-                                                static_cast<WGPUErrorType>(type),
-                                                ToOutputStringView("Some error message"));
-        });
+        EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _))
+            .WillOnce(WithArg<2>([&](WGPUFuture future) {
+                api.CallDevicePopErrorScopeCallback(
+                    apiDevice, WGPUPopErrorScopeStatus_Success, static_cast<WGPUErrorType>(type),
+                    ToOutputStringView("Some error message"), future);
+            }));
 
         FlushClient();
         FlushFutures();
@@ -145,7 +147,7 @@ TEST_P(WirePopErrorScopeCallbackTests, DisconnectBeforeServerReply) {
     PushErrorScope(wgpu::ErrorFilter::Validation);
 
     PopErrorScope();
-    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _)).Times(1);
+    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _)).Times(1);
 
     FlushClient();
     FlushFutures();
@@ -167,11 +169,12 @@ TEST_P(WirePopErrorScopeCallbackTests, DisconnectAfterServerReply) {
     PushErrorScope(wgpu::ErrorFilter::Validation);
     PopErrorScope();
 
-    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _)).WillOnce([&] {
-        api.CallDevicePopErrorScopeCallback(apiDevice, WGPUPopErrorScopeStatus_Success,
-                                            WGPUErrorType_Validation,
-                                            ToOutputStringView("Some error message"));
-    });
+    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _))
+        .WillOnce(WithArg<2>([&](WGPUFuture future) {
+            api.CallDevicePopErrorScopeCallback(apiDevice, WGPUPopErrorScopeStatus_Success,
+                                                WGPUErrorType_Validation,
+                                                ToOutputStringView("Some error message"), future);
+        }));
 
     FlushClient();
     FlushFutures();
@@ -188,11 +191,12 @@ TEST_P(WirePopErrorScopeCallbackTests, DisconnectAfterServerReply) {
 TEST_P(WirePopErrorScopeCallbackTests, EmptyStack) {
     PopErrorScope();
 
-    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _)).WillOnce([&] {
-        api.CallDevicePopErrorScopeCallback(apiDevice, WGPUPopErrorScopeStatus_Error,
-                                            WGPUErrorType_NoError,
-                                            ToOutputStringView("No error scopes to pop"));
-    });
+    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _))
+        .WillOnce(WithArg<2>([&](WGPUFuture future) {
+            api.CallDevicePopErrorScopeCallback(
+                apiDevice, WGPUPopErrorScopeStatus_Error, WGPUErrorType_NoError,
+                ToOutputStringView("No error scopes to pop"), future);
+        }));
 
     FlushClient();
     FlushFutures();

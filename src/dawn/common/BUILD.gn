@@ -36,7 +36,7 @@ import("${dawn_root}/scripts/dawn_features.gni")
 ###############################################################################
 
 config("internal_config") {
-  configs = [ "${dawn_root}/src/utils:internal_config" ]
+  configs = [ "${dawn_root}/src/utils:utils_config" ]
   include_dirs = [ "${target_gen_dir}/../../../src" ]
 
   defines = []

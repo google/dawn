@@ -2277,6 +2277,39 @@ TEST_P(ResolverBuiltinTest_SampledTextureOperation, TextureLoadSampled) {
     EXPECT_EQ(TypeOf(expr)->As<core::type::Vector>()->Width(), 4u);
 }
 
+TEST_F(ResolverBuiltinTest, TextureBuiltinsMultisampled2DArray) {
+    Require(wgsl::LanguageFeature::kMultisampledArrayTextures);
+    GlobalVar("texture", ty.multisampled_texture(core::type::TextureDimension::k2dArray, ty.f32()),
+              Binding(0_a), Group(0_a));
+
+    auto* dimensions = Call("textureDimensions", "texture");
+    auto* numLayers = Call("textureNumLayers", "texture");
+    auto* numSamples = Call("textureNumSamples", "texture");
+    auto* load = Call("textureLoad", "texture", Call<vec2<i32>>(1_i, 2_i), 3_i, 4_i);
+
+    WrapInFunction(Decl(Let("dimensions", dimensions)),  //
+                   Decl(Let("num_layers", numLayers)), Decl(Let("num_samples", numSamples)),
+                   Decl(Let("load", load)));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(dimensions), nullptr);
+    ASSERT_TRUE(TypeOf(dimensions)->Is<core::type::Vector>());
+    EXPECT_TRUE(TypeOf(dimensions)->As<core::type::Vector>()->Type()->Is<core::type::U32>());
+    EXPECT_EQ(TypeOf(dimensions)->As<core::type::Vector>()->Width(), 2u);
+
+    ASSERT_NE(TypeOf(numLayers), nullptr);
+    EXPECT_TRUE(TypeOf(numLayers)->Is<core::type::U32>());
+
+    ASSERT_NE(TypeOf(numSamples), nullptr);
+    EXPECT_TRUE(TypeOf(numSamples)->Is<core::type::U32>());
+
+    ASSERT_NE(TypeOf(load), nullptr);
+    ASSERT_TRUE(TypeOf(load)->Is<core::type::Vector>());
+    EXPECT_TRUE(TypeOf(load)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
+    EXPECT_EQ(TypeOf(load)->As<core::type::Vector>()->Width(), 4u);
+}
+
 INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          ResolverBuiltinTest_SampledTextureOperation,
                          testing::Values(TextureTestParams{core::type::TextureDimension::k1d},

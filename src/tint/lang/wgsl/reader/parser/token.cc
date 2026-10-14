@@ -50,6 +50,14 @@ std::string_view Token::TypeToName(Type type) {
             return "'i'-suffixed integer literal";
         case Token::Type::kIntLiteral_U:
             return "'u'-suffixed integer literal";
+        case Token::Type::kStringLiteral:
+            return "string literal";
+        case Token::Type::kInterpolatedStringHead:
+            return "interpolated string head";
+        case Token::Type::kInterpolatedStringMiddle:
+            return "interpolated string middle";
+        case Token::Type::kInterpolatedStringTail:
+            return "interpolated string tail";
         case Token::Type::kPlaceholder:
             return "placeholder";
         case Token::Type::kUninitialized:
@@ -259,6 +267,10 @@ std::string Token::to_str() const {
         case Type::kIntLiteral_U:
             return std::to_string(std::get<int64_t>(value_)) + "u";
         case Type::kIdentifier:
+        case Type::kStringLiteral:
+        case Type::kInterpolatedStringHead:
+        case Type::kInterpolatedStringMiddle:
+        case Type::kInterpolatedStringTail:
         case Type::kError:
             if (auto* view = std::get_if<std::string_view>(&value_)) {
                 return std::string(*view);
@@ -270,7 +282,9 @@ std::string Token::to_str() const {
 }
 
 std::string_view Token::to_str_view() const {
-    if (type_ != Type::kIdentifier) {
+    if (type_ != Type::kIdentifier && type_ != Type::kStringLiteral &&
+        type_ != Type::kInterpolatedStringHead && type_ != Type::kInterpolatedStringMiddle &&
+        type_ != Type::kInterpolatedStringTail) {
         return {};
     }
 

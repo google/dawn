@@ -158,7 +158,7 @@ MaybeError ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial waitSerial, Na
     }
 }
 
-MaybeError ExecutionQueueBase::WaitForIdleForDestruction() {
+void ExecutionQueueBase::WaitForIdleForDestruction() {
     // Currently waiting for idle for destruction requires the device lock to be held.
     DAWN_ASSERT(GetDevice()->IsLockedByCurrentThreadIfNeeded());
     mState.Use<NotifyType::None>([](auto state) {
@@ -209,7 +209,6 @@ MaybeError ExecutionQueueBase::WaitForIdleForDestruction() {
     }
 
     mState->mCallingCallbacks = false;
-    return {};
 }
 
 MaybeError ExecutionQueueBase::CheckPassedSerials() {

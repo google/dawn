@@ -361,7 +361,8 @@ MaybeError Texture::InitializeAsInternalTexture(const UnpackedPtr<TextureDescrip
             mMtlPlaneTextures[plane] = AcquireNSPRef(
                 CreateTextureMtlForPlane(mMtlUsage, GetFormat(), plane, device, GetIOSurface()));
             if (mMtlPlaneTextures[plane] == nil) {
-                return DAWN_INTERNAL_ERROR("Failed to create MTLTexture plane view for IOSurface.");
+                return DAWN_UNRECOVERABLE_ERROR(
+                    "Failed to create MTLTexture plane view for IOSurface.");
             }
         }
     }
@@ -831,7 +832,7 @@ MaybeError TextureView::Initialize(const UnpackedPtr<TextureViewDescriptor>& des
             }
 
             if (mMtlTextureView == nil) {
-                return DAWN_INTERNAL_ERROR("Failed to create MTLTexture view.");
+                return DAWN_UNRECOVERABLE_ERROR("Failed to create MTLTexture view.");
             }
         }
     }

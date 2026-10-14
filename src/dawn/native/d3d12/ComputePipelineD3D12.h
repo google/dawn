@@ -53,12 +53,12 @@ class ComputePipeline final : public ComputePipelineBase {
 
     PipelineLayoutHandle* GetPipelineLayoutHandle() const;
 
-    ComPtr<ID3D12CommandSignature> GetDispatchIndirectCommandSignature();
+    const CommandSignature& GetDispatchIndirectCommandSignature();
 
   private:
     ~ComputePipeline() override;
 
-    ResultOrError<Extent3D> InitializeImpl() override;
+    ResultOrUnknownError<Extent3D> InitializeImpl() override;
     void DestroyImpl(DestroyReason reason) override;
 
     Ref<PipelineLayoutHandle> mPipelineLayoutHandle;

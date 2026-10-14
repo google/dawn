@@ -1775,6 +1775,81 @@ TEST_F(RenderPassDescriptorValidationTest, ValidateDepthStencilAllAspects) {
     }
 }
 
+// Check that the depth stencil attachment must use all aspects.
+TEST_F(RenderPassDescriptorValidationTest, ValidateDepthStencilIsDepthStencilFormat) {
+    wgpu::TextureDescriptor texDesc;
+    texDesc.usage = wgpu::TextureUsage::RenderAttachment;
+    texDesc.size = {1, 1, 1};
+
+    wgpu::TextureViewDescriptor viewDesc;
+    viewDesc.baseMipLevel = 0;
+    viewDesc.mipLevelCount = 1;
+    viewDesc.baseArrayLayer = 0;
+    viewDesc.arrayLayerCount = 1;
+    viewDesc.aspect = wgpu::TextureAspect::All;
+
+    // Success case: Using a depth only format is allowed.
+    {
+        texDesc.format = wgpu::TextureFormat::Depth32Float;
+        viewDesc.format = wgpu::TextureFormat::Undefined;
+
+        wgpu::TextureView view = device.CreateTexture(&texDesc).CreateView(&viewDesc);
+        utils::ComboRenderPassDescriptor renderPass({}, view);
+        renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // Success case: Using a stencil only format is allowed.
+    {
+        texDesc.format = wgpu::TextureFormat::Stencil8;
+        viewDesc.format = wgpu::TextureFormat::Undefined;
+
+        wgpu::TextureView view = device.CreateTexture(&texDesc).CreateView(&viewDesc);
+        utils::ComboRenderPassDescriptor renderPass({}, view);
+        renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
+        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // Success case: Using a depth-stencil format is allowed.
+    {
+        texDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
+        viewDesc.format = wgpu::TextureFormat::Undefined;
+
+        wgpu::TextureView view = device.CreateTexture(&texDesc).CreateView(&viewDesc);
+        utils::ComboRenderPassDescriptor renderPass({}, view);
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // Error case: Using a color format is not allowed.
+    {
+        texDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+        viewDesc.format = wgpu::TextureFormat::Undefined;
+
+        wgpu::TextureView view = device.CreateTexture(&texDesc).CreateView(&viewDesc);
+        utils::ComboRenderPassDescriptor renderPass({}, view);
+        AssertBeginRenderPassError(&renderPass);
+    }
+
+    // Error case: Using a color format with a different view format is not allowed.
+    // This is a regression test for https://crbug.com/563755609 where a DAWN_CHECK would fire.
+    {
+        viewDesc.format = wgpu::TextureFormat::RGBA8UnormSrgb;
+
+        texDesc.viewFormatCount = 1;
+        texDesc.viewFormats = &viewDesc.format;
+        texDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+
+        wgpu::TextureView view = device.CreateTexture(&texDesc).CreateView(&viewDesc);
+        utils::ComboRenderPassDescriptor renderPass({}, view);
+        AssertBeginRenderPassError(&renderPass);
+
+        texDesc.viewFormatCount = 0;
+        texDesc.viewFormats = nullptr;
+    }
+}
+
 // Tests validation for per-pixel accounting for render targets. The tests currently assume that the
 // default maxColorAttachmentBytesPerSample limit of 32 is used.
 TEST_F(RenderPassDescriptorValidationTest, RenderPassColorAttachmentBytesPerSample) {

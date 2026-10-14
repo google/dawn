@@ -31,7 +31,7 @@ import androidx.webgpu.GPUSurface
 import androidx.webgpu.GPUSurfaceDescriptor
 import androidx.webgpu.GPUSurfaceSourceAndroidNativeWindow
 import androidx.webgpu.UncapturedErrorCallback
-import androidx.webgpu.GPU.createInstance
+import androidx.webgpu.GPU.createGPUInstance
 import androidx.webgpu.WebGpuRuntimeException
 import androidx.webgpu.helper.Util.windowFromSurface
 import java.util.concurrent.Executor
@@ -171,7 +171,7 @@ private suspend fun createWebGpuInternal(
 ): WebGpu = withContext(dispatcher) {
     initLibrary()
 
-    val instance = createInstance(instanceDescriptor)
+    val instance = createGPUInstance(instanceDescriptor)
     val webgpuSurface =
         surface?.let {
             instance.createSurface(

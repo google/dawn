@@ -50,7 +50,7 @@ VkFormat VulkanImageFormat(const Device* device, wgpu::TextureFormat format);
 // This version does not support depth stencil formats which can depend on
 // properties of the Device.
 VkFormat ColorVulkanImageFormat(wgpu::TextureFormat format);
-ResultOrError<wgpu::TextureFormat> FormatFromVkFormat(const Device* device, VkFormat vkFormat);
+ResultOrValError<wgpu::TextureFormat> FormatFromVkFormat(const Device* device, VkFormat vkFormat);
 VkImageUsageFlags VulkanImageUsage(const DeviceBase* device,
                                    wgpu::TextureUsage usage,
                                    const Format& format);
@@ -63,8 +63,8 @@ VkImageLayout VulkanImageLayoutForDepthStencilAttachment(const Format& format,
                                                          bool stencilReadOnly);
 VkSampleCountFlagBits VulkanSampleCount(uint32_t sampleCount);
 
-MaybeError ValidateVulkanImageCanBeWrapped(const DeviceBase* device,
-                                           const UnpackedPtr<TextureDescriptor>& descriptor);
+MaybeValError ValidateVulkanImageCanBeWrapped(const DeviceBase* device,
+                                              const UnpackedPtr<TextureDescriptor>& descriptor);
 
 bool IsSampleCountSupported(const dawn::native::vulkan::Device* device,
                             const VkImageCreateInfo& imageCreateInfo);
@@ -267,7 +267,7 @@ class ImportedTextureBase : public Texture {
 // A texture created from an VkImage that references an external memory object.
 class ExternalVkImageTexture final : public ImportedTextureBase {
   public:
-    static ResultOrError<Ref<ExternalVkImageTexture>> Create(
+    static ResultOrUnknownError<Ref<ExternalVkImageTexture>> Create(
         Device* device,
         const ExternalImageDescriptorVk* descriptor,
         const UnpackedPtr<TextureDescriptor>& textureDescriptor,
@@ -279,17 +279,17 @@ class ExternalVkImageTexture final : public ImportedTextureBase {
                                   VkDeviceMemory externalMemoryAllocation,
                                   std::vector<VkSemaphore> waitSemaphores);
 
-    MaybeError ExportExternalTexture(VkImageLayout desiredLayout,
-                                     ExternalSemaphoreHandle* handle,
-                                     VkImageLayout* releasedOldLayout,
-                                     VkImageLayout* releasedNewLayout);
+    MaybeUnknownError ExportExternalTexture(VkImageLayout desiredLayout,
+                                            ExternalSemaphoreHandle* handle,
+                                            VkImageLayout* releasedOldLayout,
+                                            VkImageLayout* releasedNewLayout);
 
     MaybeError OnBeforeSubmit(CommandRecordingContext* context) override;
 
   private:
     using ImportedTextureBase::ImportedTextureBase;
-    MaybeError Initialize(const ExternalImageDescriptorVk* descriptor,
-                          external_memory::Service* externalMemoryService);
+    MaybeUnknownError Initialize(const ExternalImageDescriptorVk* descriptor,
+                                 external_memory::Service* externalMemoryService);
     void DestroyImpl(DestroyReason reason) override;
 
     VkDeviceMemory mExternalAllocation = VK_NULL_HANDLE;

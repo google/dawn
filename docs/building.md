@@ -104,6 +104,9 @@ python tools/fetch_dawn_dependencies.py
 Use `python tools/fetch_dawn_dependencies.py -h` to know more about the available options.
 Contrary to `depot_tools`, this scripts does not figure out option-dependent requirements automatically.
 
+On Windows, configuring CMake with both `DAWN_FETCH_DEPENDENCIES=ON` and
+`DAWN_USE_AGILITY_SDK=ON` downloads the Agility SDK version pinned in `DEPS`.
+
 ### Linux dependencies
 
 The following packages are needed to build Dawn. (Package names are the Ubuntu names).

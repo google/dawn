@@ -29,9 +29,9 @@
 #include <set>
 #include <vector>
 
-#include "gtest/gtest.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/common/SlabAllocator.h"
+#include "src/utils/gtest.h"
 
 namespace dawn {
 namespace {
@@ -265,7 +265,7 @@ TEST(SlabAllocatorDeathTest, AlignmentLargerThanMaxAlignT) {
     struct alignas(256) OverAlignedFoo : public Foo {
         using Foo::Foo;
     };
-    EXPECT_DEATH_IF_SUPPORTED(SlabAllocator<OverAlignedFoo>(100), "");
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(SlabAllocator<OverAlignedFoo>(100), "");
 }
 
 }  // anonymous namespace

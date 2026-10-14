@@ -126,6 +126,21 @@ The generator for the pieces of dawn_native need additional data which is found 
   - `"metadata"` a dictionary containing various other containers that can be used in templates. Its keys are:
     - `addins`: A dictionary mapping fully qualified instance names (structs, struct members, functions, function arguments, objects, object methods, or method arguments) to a dictionary of attribute addins (e.g. `{"spanify": false}` or `{"index_type": "BindingIndex"}`).
 
+## Dawn "Kotlin" generators
+
+The generator for the Android Kotlin/JNI bindings needs additional data which is found in [`dawn_kotlin.json`](../../src/dawn/dawn_kotlin.json). It generates the Kotlin classes (one per object, structure, enum and callback) and the JNI glue that converts between Kotlin objects and `webgpu.h` structures.
+
+The schema of `dawn_kotlin.json` is a dictionary with the following keys:
+ - `"kotlin_package"` a string, the package for the generated Kotlin classes.
+ - `"jni_primitives"` / `"jni_signatures"` dictionaries mapping native type names to their JNI C type and JNI signature letter.
+ - `"kdocs_blocklist"` / `"kdocs_replacements"` filters applied to the upstream documentation when generating KDoc.
+ - `"metadata"` a dictionary with the same shape as in `dawn_native.json`:
+   - `addins`: maps fully qualified instance names to attribute addins. Supported addins are:
+     - `"omitted": true` on a structure, enum, function pointer, function, object method, or **structure member** to exclude it from the Kotlin API. It is not supported on function/method arguments (the generator asserts) since the native call would silently receive a zero-initialized value.
+     - `"kotlin_name": "<name>"` on a function or object method to override its Kotlin name (e.g. `"create instance": {"kotlin_name": "createGPUInstance"}`).
+     - `"additional_members": [...]` on a structure to add Kotlin-only members that have no native counterpart. Each entry has a `"name"`, a `"type"` (either a `dawn.json` type name or a Kotlin type when `"category": "kotlin type"`), and optional `"category"`, `"annotation"`, `"optional"` and `"default_value"` keys.
+     - `"graduated_batches": [[...], ...]` on a structure, a list of member-name batches that were added after the structure first shipped, used to emit hidden legacy constructors for binary compatibility.
+
 ## OpenGL loader generator
 
 The code to load OpenGL entrypoints from a `GetProcAddress` function is generated from [`gl.xml`](../../third_party/OpenGL-Registry/src/xml/gl.xml) and the [list of extensions](../../src/dawn/native/opengl/supported_extensions.json) it supports.

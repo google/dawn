@@ -76,8 +76,8 @@ class ServiceImplementation {
                                                        VkImage image) = 0;
 
     // Create a VkImage for the given handle type
-    virtual ResultOrError<VkImage> CreateImage(const ExternalImageDescriptor* descriptor,
-                                               const VkImageCreateInfo& baseCreateInfo) = 0;
+    virtual ResultOrUnknownError<VkImage> CreateImage(const ExternalImageDescriptor* descriptor,
+                                                      const VkImageCreateInfo& baseCreateInfo) = 0;
 
     // True if the device reports it supports this feature
     virtual bool Supported() const = 0;

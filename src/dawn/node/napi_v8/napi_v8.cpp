@@ -34,7 +34,27 @@
 #include <limits>
 #include <utility>
 
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+
+namespace {
+
+// Hands any exception recorded by napi_throw() to V8 when a native callback returns to JavaScript,
+// and clears env->last_exception so it does not stay pending for later calls. Returns true if an
+// exception was delivered.
+bool DeliverPendingException(napi_env env) {
+    if (env->last_exception.IsEmpty()) {
+        return false;
+    }
+    v8::Local<v8::Value> exception = env->last_exception.Get(env->isolate);
+    env->last_exception.Reset();
+    if (!env->isolate->IsExecutionTerminating()) {
+        env->isolate->ThrowException(exception);
+    }
+    return true;
+}
+
+}  // namespace
 
 napi_ref__::napi_ref__(napi_env e,
                        v8::Local<v8::Value> val,
@@ -52,12 +72,17 @@ napi_ref__::napi_ref__(napi_env e,
       finalize_hint(fin_hint),
       is_wrap_ref(wrap_ref),
       is_userland_ref(userland_ref) {
+    if (finalize_cb != nullptr) {
+        env->finalizable_references.insert(this);
+    }
     if (ref_count == 0) {
         SetWeak();
     }
 }
 
 napi_ref__::~napi_ref__() {
+    env->pending_finalizers.erase(this);
+    ClearFinalizer();
     handle.Reset();
 }
 
@@ -69,21 +94,112 @@ void napi_ref__::ClearWeak() {
     handle.ClearWeak<void>();
 }
 
+void napi_env__::DrainFinalizers() {
+    while (!pending_finalizers.empty()) {
+        auto it = pending_finalizers.begin();
+        napi_ref__* ref = *it;
+        pending_finalizers.erase(it);
+        if (ref->finalize_cb == nullptr) {
+            continue;
+        }
+
+        napi_finalize cb = ref->finalize_cb;
+        void* native_object = ref->native_object;
+        void* finalize_hint = ref->finalize_hint;
+        ref->ClearFinalizer();
+
+        ClearLastError();
+        cb(this, native_object, finalize_hint);
+        if (DeliverPendingException(this)) {
+            break;
+        }
+    }
+}
+
+namespace {
+
+void DrainFinalizersV8Callback(const v8::FunctionCallbackInfo<v8::Value>& info) {
+    auto* env = static_cast<napi_env>(
+        info.DataV2().As<v8::External>()->Value(v8::kExternalPointerTypeTagDefault));
+    env->finalizer_drain_scheduled = false;
+    env->DrainFinalizers();
+}
+
+}  // namespace
+
+// Node-API `napi_finalize` callbacks (https://nodejs.org/api/n-api.html#napi_finalize) receive a
+// `napi_env` and are permitted to allocate JavaScript objects and call into the engine. However,
+// V8's weak handle callback (`v8::PersistentBase::SetWeak`,
+// https://chromium.googlesource.com/v8/v8/+/refs/heads/main/include/v8-persistent-handle.h) runs
+// synchronously inside V8's atomic garbage collection pause while the heap is being swept. As
+// documented on `v8::WeakCallbackInfo::SetSecondPassCallback`
+// (https://chromium.googlesource.com/v8/v8/+/refs/heads/main/include/v8-weak-callback-info.h), the
+// initial callback passed to `SetWeak` must call `Reset()` on the weak handle and is prohibited
+// from making any other V8 API calls or allocating on the heap; any further work must be deferred
+// via `SetSecondPassCallback()`.
+//
+// Finalization therefore runs in three stages:
+//   1. `WeakCallback` (during the GC atomic pause): resets `self->handle`, appends `self` to
+//      `env->pending_finalizers`, and registers `PostGarbageCollectionCallback` via
+//      `SetSecondPassCallback()` once per GC cycle.
+//   2. `PostGarbageCollectionCallback` (after the GC pause finishes): runs once V8's heap is
+//      consistent again (`AllowGarbageCollection`). It schedules a single
+//      `DrainFinalizersV8Callback` task onto `globalThis.setImmediate` (matching Node.js's
+//      `v8impl::Reference::WeakCallback` -> `SetImmediate` ordering so finalizers run in the event
+//      loop's check phase rather than inside `Heap::CollectGarbage()`, where V8 prohibits
+//      arbitrary JavaScript execution).
+//   3. `DrainFinalizers` (on the event loop): invokes each queued `napi_finalize` callback in FIFO
+//      order.
 void napi_ref__::WeakCallback(const v8::WeakCallbackInfo<napi_ref__>& data) {
     napi_ref__* self = data.GetParameter();
-    napi_env env = self->env;
-    void* native_object = self->native_object;
-    void* finalize_hint = self->finalize_hint;
-    napi_finalize finalize_cb = self->finalize_cb;
-
-    // Reset the handle and clear finalize_cb before invoking the callback.
-    // The finalize_cb may call napi_delete_reference, which deletes `self`.
     self->handle.Reset();
-    self->finalize_cb = nullptr;
-
-    if (finalize_cb != nullptr) {
-        finalize_cb(env, native_object, finalize_hint);
+    if (self->finalize_cb != nullptr) {
+        napi_env env = self->env;
+        env->pending_finalizers.insert(self);
+        if (!env->post_gc_callback_scheduled && !env->finalizer_drain_scheduled) {
+            env->post_gc_callback_scheduled = true;
+            data.SetSecondPassCallback(&napi_ref__::PostGarbageCollectionCallback);
+        }
     }
+}
+
+// Invoked by V8 (`GlobalHandles::InvokeSecondPassPhantomCallbacks`) after the garbage collection
+// cycle completes (`Heap::NOT_IN_GC`), when V8 heap allocations are permitted again. Schedules
+// `DrainFinalizers` onto `globalThis.setImmediate`.
+void napi_ref__::PostGarbageCollectionCallback(const v8::WeakCallbackInfo<napi_ref__>& data) {
+    napi_env env = data.GetParameter()->env;
+    env->post_gc_callback_scheduled = false;
+    if (env->pending_finalizers.empty() || env->finalizer_drain_scheduled) {
+        return;
+    }
+
+    // V8 lifts `DisallowGarbageCollection` before invoking second-pass callbacks, but leaves
+    // `DisallowJavascriptExecution` active on the isolate; re-enable JS execution so we can call
+    // `globalThis.setImmediate` to enqueue `DrainFinalizersV8Callback`.
+    v8::Isolate::AllowJavascriptExecutionScope allow_js(env->isolate);
+    v8::HandleScope handle_scope(env->isolate);
+    v8::Local<v8::Context> ctx = env->GetContext();
+    v8::Context::Scope context_scope(ctx);
+
+    // `napi_v8` does not depend on `standalone::EventLoop`, so it schedules the batch drain once
+    // per GC cycle through `globalThis.setImmediate`, and then drains all queued references in C++
+    // inside `DrainFinalizers()`.
+    v8::Local<v8::String> key = v8::String::NewFromUtf8Literal(env->isolate, "setImmediate");
+    v8::Local<v8::Value> set_immediate_val;
+    [[maybe_unused]] bool has_set_immediate =
+        ctx->Global()->Get(ctx, key).ToLocal(&set_immediate_val) && set_immediate_val->IsFunction();
+    DAWN_ASSERT(has_set_immediate);
+
+    v8::Local<v8::External> ext =
+        v8::External::New(env->isolate, env, v8::kExternalPointerTypeTagDefault);
+    v8::Local<v8::Function> drain_fn;
+    [[maybe_unused]] bool has_drain_fn =
+        v8::Function::New(ctx, DrainFinalizersV8Callback, ext).ToLocal(&drain_fn);
+    DAWN_ASSERT(has_drain_fn);
+
+    env->finalizer_drain_scheduled = true;
+    v8::Local<v8::Value> arg = drain_fn;
+    (void)set_immediate_val.As<v8::Function>()->Call(ctx, ctx->Global(), 1, &arg);
 }
 
 namespace {
@@ -242,7 +358,7 @@ napi_status QueryProperty(napi_env env,
 
 // V8 and Node-API use different callback conventions:
 // - V8 callbacks use `void (const v8::FunctionCallbackInfo<v8::Value>&)` and pass user context via
-//   an attached `v8::External` value in `v8_info.Data()`.
+//   an attached `v8::External` value in `v8_info.DataV2()`.
 // - Node-API callbacks use `napi_value (*)(napi_env, napi_callback_info)` and retrieve user context
 //   via `napi_get_cb_info()`.
 //
@@ -251,7 +367,7 @@ napi_status QueryProperty(napi_env env,
 // wrapper referencing the active V8 callback arguments, executes the target `napi_callback`, and
 // forwards the returned `napi_value` back to V8.
 void NativeCallbackTrampoline(const v8::FunctionCallbackInfo<v8::Value>& v8_info) {
-    v8::Local<v8::External> ext = v8_info.Data().As<v8::External>();
+    v8::Local<v8::External> ext = v8_info.DataV2().As<v8::External>();
     auto* binding = static_cast<CallbackBinding*>(ext->Value(v8::kExternalPointerTypeTagDefault));
     napi_env env = binding->env;
 
@@ -260,8 +376,9 @@ void NativeCallbackTrampoline(const v8::FunctionCallbackInfo<v8::Value>& v8_info
     invocation_info.data = binding->user_data;
 
     v8::HandleScope scope(env->isolate);
+    env->ClearLastError();
     napi_value return_val = binding->callback(env, &invocation_info);
-    if (return_val != nullptr) {
+    if (!DeliverPendingException(env) && return_val != nullptr) {
         v8_info.GetReturnValue().Set(dawn::napi_v8::ToV8(return_val));
     }
 }
@@ -377,6 +494,9 @@ napi_status ProcessCallResult(napi_env env,
                               v8::TryCatch& try_catch,
                               v8::MaybeLocal<T> maybe_result,
                               napi_value* out_result) {
+    if (try_catch.HasTerminated()) {
+        return env->SetLastError(napi_generic_failure, "Execution was terminated");
+    }
     if (try_catch.HasCaught()) {
         env->last_exception.Reset(env->isolate, try_catch.Exception());
         return env->SetLastError(napi_pending_exception,
@@ -581,8 +701,11 @@ napi_status ConcludeDeferred(napi_env env,
     if (!ValidateArgs(env, deferred, value)) {
         return napi_invalid_arg;
     }
-    auto it = std::find_if(env->deferreds.begin(), env->deferreds.end(),
-                           [deferred](const auto& d) { return d.get() == deferred; });
+    if (!env->last_exception.IsEmpty()) {
+        return env->SetLastError(napi_pending_exception, "An exception is pending");
+    }
+    auto it = std::ranges::find_if(env->deferreds.begin(), env->deferreds.end(),
+                                   [deferred](const auto& d) { return d.get() == deferred; });
     if (it == env->deferreds.end()) {
         return env->SetLastError(napi_invalid_arg, "Deferred not found");
     }
@@ -1012,8 +1135,9 @@ napi_status napi_instanceof(napi_env env, napi_value object, napi_value construc
     v8::Maybe<bool> res = v8_obj->InstanceOf(ctx, v8_ctor.As<v8::Object>());
     if (res.IsNothing()) {
         if (try_catch.HasCaught()) {
-            env->isolate->ThrowException(try_catch.Exception());
             env->last_exception.Reset(env->isolate, try_catch.Exception());
+            return env->SetLastError(napi_pending_exception,
+                                     "An exception was thrown during the InstanceOf check");
         }
         return env->SetLastError(napi_generic_failure, "InstanceOf check failed");
     }
@@ -1410,9 +1534,10 @@ napi_status napi_throw(napi_env env, napi_value error) {
     if (!ValidateArgs(env, error)) {
         return napi_invalid_arg;
     }
-    v8::Local<v8::Value> v8_err = dawn::napi_v8::ToV8(error);
-    env->isolate->ThrowException(v8_err);
-    env->last_exception.Reset(env->isolate, v8_err);
+    // Record the exception rather than calling Isolate::ThrowException() immediately so native
+    // callers can inspect or clear it with napi_is_exception_pending() and
+    // napi_get_and_clear_last_exception() before DeliverPendingException() hands it to V8.
+    env->last_exception.Reset(env->isolate, dawn::napi_v8::ToV8(error));
     return napi_ok;
 }
 
@@ -1462,12 +1587,6 @@ void napi_fatal_error(const char* location,
     std::abort();
 }
 
-static napi_module* g_registered_module = nullptr;
-
-void napi_module_register(napi_module* mod) {
-    g_registered_module = mod;
-}
-
 // ============================================================================
 // References, ObjectWrap & Instance Data
 // ============================================================================
@@ -1481,8 +1600,9 @@ napi_status napi_create_reference(napi_env env,
     }
     v8::Local<v8::Value> v8_val = dawn::napi_v8::ToV8(value);
     auto ref = std::make_unique<napi_ref__>(env, v8_val, initial_refcount);
-    *result = ref.get();
-    env->references.push_back(std::move(ref));
+    napi_ref__* key = ref.get();
+    *result = key;
+    env->references.insert({key, std::move(ref)});
     return napi_ok;
 }
 
@@ -1490,9 +1610,7 @@ napi_status napi_delete_reference(napi_env env, napi_ref ref) {
     if (!ValidateArgs(env, ref)) {
         return napi_invalid_arg;
     }
-    size_t erased = std::erase_if(
-        env->references, [ref](const std::unique_ptr<napi_ref__>& r) { return r.get() == ref; });
-    if (erased > 0) {
+    if (env->references.erase(ref) > 0) {
         return napi_ok;
     }
     return env->SetLastError(napi_invalid_arg, "Reference not found");
@@ -1568,15 +1686,16 @@ napi_status napi_wrap(napi_env env,
     auto ref = std::make_unique<napi_ref__>(env, obj, 0, native_object, finalize_cb, finalize_hint,
                                             /*wrap_ref=*/true,
                                             /*userland_ref=*/result != nullptr);
+    napi_ref__* key_ref = ref.get();
     v8::Local<v8::External> ext =
-        v8::External::New(env->isolate, ref.get(), v8::kExternalPointerTypeTagDefault);
+        v8::External::New(env->isolate, key_ref, v8::kExternalPointerTypeTagDefault);
     if (obj->SetPrivate(ctx, key, ext).IsNothing()) {
         return env->SetLastError(napi_generic_failure, "Failed to attach the object's wrapper");
     }
     if (result != nullptr) {
-        *result = ref.get();
+        *result = key_ref;
     }
-    env->references.push_back(std::move(ref));
+    env->references.insert({key_ref, std::move(ref)});
     return napi_ok;
 }
 
@@ -1609,15 +1728,14 @@ napi_status napi_remove_wrap(napi_env env, napi_value js_object, void** result) 
     }
 
     // Detach the reference, clearing the finalizer so it never runs on the removed native object.
-    ref->finalize_cb = nullptr;
+    ref->ClearFinalizer();
     ref->native_object = nullptr;
     ref->is_wrap_ref = false;
 
     if (!ref->is_userland_ref) {
         // Internal runtime reference: erasing it destroys the unique_ptr, whose
         // destructor calls handle.Reset(), deregistering the weak callback in V8.
-        std::erase_if(env->references,
-                      [ref](const std::unique_ptr<napi_ref__>& r) { return r.get() == ref; });
+        env->references.erase(ref);
     }
     return napi_ok;
 }
@@ -1638,10 +1756,11 @@ napi_status napi_add_finalizer(napi_env env,
     auto ref = std::make_unique<napi_ref__>(env, val, 0, finalize_data, finalize_cb, finalize_hint,
                                             /*wrap_ref=*/false,
                                             /*userland_ref=*/result != nullptr);
+    napi_ref__* key_ref = ref.get();
     if (result != nullptr) {
-        *result = ref.get();
+        *result = key_ref;
     }
-    env->references.push_back(std::move(ref));
+    env->references.insert({key_ref, std::move(ref)});
     return napi_ok;
 }
 
@@ -1658,7 +1777,8 @@ napi_status napi_create_external(napi_env env,
     if (finalize_cb != nullptr) {
         auto ref = std::make_unique<napi_ref__>(env, ext, 0, data, finalize_cb, finalize_hint,
                                                 /*wrap_ref=*/false, /*userland_ref=*/false);
-        env->references.push_back(std::move(ref));
+        napi_ref__* key_ref = ref.get();
+        env->references.insert({key_ref, std::move(ref)});
     }
     *result = dawn::napi_v8::ToNapi(ext);
     return napi_ok;
@@ -1926,6 +2046,9 @@ napi_status napi_create_promise(napi_env env, napi_deferred* deferred, napi_valu
     if (!ValidateArgs(env, deferred, promise)) {
         return napi_invalid_arg;
     }
+    if (!env->last_exception.IsEmpty()) {
+        return env->SetLastError(napi_pending_exception, "An exception is pending");
+    }
     v8::Local<v8::Context> ctx = env->GetContext();
     v8::MaybeLocal<v8::Promise::Resolver> maybe_resolver = v8::Promise::Resolver::New(ctx);
     if (maybe_resolver.IsEmpty()) {
@@ -1969,16 +2092,10 @@ napi_status napi_run_script(napi_env env, napi_value script, napi_value* result)
     v8::TryCatch try_catch(env->isolate);
     v8::MaybeLocal<v8::Script> compiled = v8::Script::Compile(ctx, v8_script.As<v8::String>());
     if (compiled.IsEmpty()) {
-        env->isolate->ThrowException(try_catch.Exception());
-        return env->SetLastError(napi_generic_failure, "Failed to compile script");
+        return ProcessCallResult(env, try_catch, v8::MaybeLocal<v8::Value>(), nullptr);
     }
     v8::MaybeLocal<v8::Value> eval_result = compiled.ToLocalChecked()->Run(ctx);
-    if (eval_result.IsEmpty()) {
-        env->isolate->ThrowException(try_catch.Exception());
-        return env->SetLastError(napi_generic_failure, "Script execution failed");
-    }
-    *result = dawn::napi_v8::ToNapi(eval_result.ToLocalChecked());
-    return napi_ok;
+    return ProcessCallResult(env, try_catch, eval_result, result);
 }
 
 napi_status napi_get_version(node_api_nogc_env env, uint32_t* result) {

@@ -45,8 +45,8 @@
 
 namespace dawn::native {
 
-MaybeError ValidateColorAttachmentFormat(const DeviceBase* device,
-                                         wgpu::TextureFormat textureFormat) {
+MaybeValError ValidateColorAttachmentFormat(const DeviceBase* device,
+                                            wgpu::TextureFormat textureFormat) {
     DAWN_TRY(ValidateTextureFormat(textureFormat));
     const Format* format = nullptr;
     DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
@@ -55,10 +55,10 @@ MaybeError ValidateColorAttachmentFormat(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateDepthStencilAttachmentFormat(const DeviceBase* device,
-                                                wgpu::TextureFormat textureFormat,
-                                                bool depthReadOnly,
-                                                bool stencilReadOnly) {
+MaybeValError ValidateDepthStencilAttachmentFormat(const DeviceBase* device,
+                                                   wgpu::TextureFormat textureFormat,
+                                                   bool depthReadOnly,
+                                                   bool stencilReadOnly) {
     DAWN_TRY(ValidateTextureFormat(textureFormat));
     const Format* format = nullptr;
     DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
@@ -67,7 +67,7 @@ MaybeError ValidateDepthStencilAttachmentFormat(const DeviceBase* device,
     return {};
 }
 
-ResultOrError<UnpackedPtr<RenderBundleEncoderDescriptor>> ValidateRenderBundleEncoderDescriptor(
+ResultOrValError<UnpackedPtr<RenderBundleEncoderDescriptor>> ValidateRenderBundleEncoderDescriptor(
     DeviceBase* device,
     const RenderBundleEncoderDescriptor* descriptor) {
     UnpackedPtr<RenderBundleEncoderDescriptor> unpacked;
@@ -125,6 +125,7 @@ RenderBundleEncoder::RenderBundleEncoder(
     : RenderEncoderBase(device,
                         descriptor->label,
                         &mBundleEncodingContext,
+                        RenderPassResourceUsageTracker(device->GetNextPassTrackerID()),
                         device->GetOrCreateAttachmentState(descriptor),
                         descriptor->depthReadOnly,
                         descriptor->stencilReadOnly),
@@ -149,10 +150,13 @@ RenderBundleEncoder::~RenderBundleEncoder() {
 }
 
 void RenderBundleEncoder::DestroyImpl(DestroyReason reason) {
-    mIndirectDrawMetadata.ClearIndexedIndirectBufferValidationInfo();
     mCommandBufferState.End();
-    RenderEncoderBase::DestroyImpl(reason);
+    // Resource usages contain raw_ptrs to resources held by recorded commands. Clear them
+    // before releasing references in mIndirectDrawMetadata or commands to avoid dangling raw_ptrs.
+    mUsages = {};
+    mIndirectDrawMetadata.ClearIndexedIndirectBufferValidationInfo();
     mBundleEncodingContext.Destroy();
+    RenderEncoderBase::DestroyImpl(reason);
 }
 
 // static
@@ -199,7 +203,7 @@ bool RenderBundleEncoder::UsesResourceTable() const {
     return mUsesResourceTable;
 }
 
-ResultOrError<Ref<RenderBundleBase>> RenderBundleEncoder::Finish(
+ResultOrUnknownError<Ref<RenderBundleBase>> RenderBundleEncoder::Finish(
     const RenderBundleDescriptor* descriptor) {
     mCommandBufferState.End();
     // Even if mBundleEncodingContext.Finish() validation fails, calling it will mutate the
@@ -212,11 +216,10 @@ ResultOrError<Ref<RenderBundleBase>> RenderBundleEncoder::Finish(
     if (IsValidationEnabled()) {
         DAWN_TRY(ValidateFinish(mUsages));
     }
-
     return GetDevice()->CreateRenderBundle(this, descriptor);
 }
 
-MaybeError RenderBundleEncoder::ValidateFinish(const RenderPassResourceUsage& usages) const {
+MaybeValError RenderBundleEncoder::ValidateFinish(const RenderPassResourceUsage& usages) const {
     TRACE_EVENT(DAWN_TRACE_CATEGORY("validation"), "RenderBundleEncoder::ValidateFinish");
     DAWN_TRY(GetDevice()->ValidateObject(this));
     DAWN_TRY(ValidateProgrammableEncoderEnd());

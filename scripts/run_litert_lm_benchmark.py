@@ -35,11 +35,36 @@ import argparse
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 
 
 def run_litert_lm(metric_proto_file_path: Path) -> subprocess.CompletedProcess:
+    # The shared libraries (.so / .dylib) are isolated alongside the binary in the current
+    # build out directory, so explicitly add them to the library path for execution on bots.
+    env = os.environ.copy()
+    env['LD_LIBRARY_PATH'] = f"{Path.cwd()}{os.pathsep}{env.get('LD_LIBRARY_PATH', '')}"
+    env['DYLD_LIBRARY_PATH'] = f"{Path.cwd()}{os.pathsep}{env.get('DYLD_LIBRARY_PATH', '')}"
+
+    # Disable host GPU driver shader disk caches so Init Executor deterministically
+    # measures full cold shader compilation on every Swarming run.
+    # NVIDIA shader cache.
+    env['__GL_SHADER_DISK_CACHE'] = '0'
+
+    # Mesa shader cache.
+    env['MESA_SHADER_CACHE_DISABLE'] = 'true'
+
+    # Mac shader cache.
+    if sys.platform == 'darwin':
+        try:
+            darwin_cache = subprocess.check_output(
+                ['getconf', 'DARWIN_USER_CACHE_DIR'], text=True).strip()
+            for metal_cache in Path(darwin_cache).glob('**/com.apple.metal'):
+                shutil.rmtree(metal_cache, ignore_errors=True)
+        except Exception as e:
+            print(f"Warning: Failed to clear Metal shader cache: {e}")
+
     repo_root = Path(__file__).resolve().parent.parent
     binary_name = ('litert_lm_advanced_main.exe'
                    if sys.platform == 'win32' else 'litert_lm_advanced_main')
@@ -49,7 +74,10 @@ def run_litert_lm(metric_proto_file_path: Path) -> subprocess.CompletedProcess:
     cmd = [
         str(binary_path),
         '--benchmark',
+        '--benchmark_prefill_tokens=1024',
+        '--benchmark_decode_tokens=256',
         '--backend=gpu',
+        '--disable_cache=true',
         # Run pipeline compilation and weight upload synchronously during Init
         # Executor so background threads do not race with and spike Prefill speed.
         # TODO(crbug.com/562993169): Remove num_threads_to_compile and
@@ -57,17 +85,12 @@ def run_litert_lm(metric_proto_file_path: Path) -> subprocess.CompletedProcess:
         # a benchmark bug.
         '--num_threads_to_compile=0',
         '--num_threads_to_upload=0',
+        '--num_iterations=6',
         f'--model_path={model_path}',
         f'--metric_proto_file_path={metric_proto_file_path}',
     ]
 
     print(f"Executing: {' '.join(cmd)}")
-
-    # The shared libraries (.so / .dylib) are isolated alongside the binary in the current
-    # build out directory, so explicitly add them to the library path for execution on bots.
-    env = os.environ.copy()
-    env['LD_LIBRARY_PATH'] = f"{Path.cwd()}{os.pathsep}{env.get('LD_LIBRARY_PATH', '')}"
-    env['DYLD_LIBRARY_PATH'] = f"{Path.cwd()}{os.pathsep}{env.get('DYLD_LIBRARY_PATH', '')}"
 
     return subprocess.run(cmd, env=env, check=False)
 

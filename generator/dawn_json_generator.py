@@ -288,7 +288,8 @@ class RecordMember(AnnotatedTypedMember):
                  array_element_optional=False,
                  is_return_value=False,
                  default_value=None,
-                 skip_serialize=False):
+                 skip_serialize=False,
+                 kotlin_only=False):
         super().__init__(typ, annotation, optional, json_data)
         self.name = name
         self.array_element_optional = array_element_optional
@@ -299,6 +300,7 @@ class RecordMember(AnnotatedTypedMember):
         self.id_type = None
         self.default_value = default_value
         self.skip_serialize = skip_serialize
+        self.kotlin_only = kotlin_only
 
     def set_handle_type(self, handle_type):
         assert self.type.dict_name == "ObjectHandle"
@@ -937,9 +939,11 @@ def analyze_converter_usage(params_kotlin):
         # Only proceed if it's a structure and hasn't been marked yet to avoid infinite recursion.
         if isinstance(typ, StructureType) and not typ.needs_n2k:
             typ.needs_n2k = True
-            # Recursively mark all members of this structure.
+            # Recursively mark all members of this structure. kotlin_only
+            # members never cross JNI, so their types don't need a converter.
             for member in typ.members:
-                mark_n2k(member.type)
+                if not member.kotlin_only:
+                    mark_n2k(member.type)
             # Recursively mark all potential chained children.
             for child in chain_children.get(typ.name.get(), []):
                 mark_n2k(child)
@@ -948,9 +952,11 @@ def analyze_converter_usage(params_kotlin):
         # Only proceed if it's a structure and hasn't been marked yet to avoid infinite recursion.
         if isinstance(typ, StructureType) and not typ.needs_k2n:
             typ.needs_k2n = True
-            # Recursively mark all members of this structure.
+            # Recursively mark all members of this structure. See mark_n2k for
+            # why kotlin_only members are excluded.
             for member in typ.members:
-                mark_k2n(member.type)
+                if not member.kotlin_only:
+                    mark_k2n(member.type)
             # Recursively mark all potential chained children.
             for child in chain_children.get(typ.name.get(), []):
                 mark_k2n(child)
@@ -958,7 +964,7 @@ def analyze_converter_usage(params_kotlin):
     # Scan Objects and Methods for roots.
     for obj in params_kotlin['by_category']['object']:
         for method in obj.methods:
-            if not params_kotlin['include_method'](obj, method):
+            if not params_kotlin['include_method'](method):
                 continue
 
             # Root A: Return values are always Native -> Kotlin.
@@ -994,24 +1000,55 @@ def compute_kotlin_params(loaded_json,
                           doc_warn_log_file_path=None):
 
     params_kotlin = parse_json(loaded_json,
-                               enabled_tags=['art', 'art_experimental'])
+                               enabled_tags=['art', 'art_experimental'],
+                               metadata=kotlin_json['metadata'])
     params_kotlin['kotlin_package'] = kotlin_json['kotlin_package']
     params_kotlin['jni_primitives'] = kotlin_json['jni_primitives']
     params_kotlin['jni_signatures'] = kotlin_json['jni_signatures']
     kt_file_path = params_kotlin['kotlin_package'].replace('.', '/')
-    customize_api = kotlin_json["customize_api"]
-    customize_objects = customize_api["objects"]
-    customize_structures = customize_api["structures"]
-    customize_enums = customize_api["enums"]
-    customize_callback = customize_api["function pointer"]
 
-    def kotlin_record_members(members, structure_name=None):
+    # Among record members, the "omitted" addin is only supported on structure
+    # members: the JNI argument struct is still built from the full argument
+    # list, so omitting a function/method argument would silently pass a
+    # zero-initialized value to the native call.
+    all_functions_and_methods = params_kotlin['by_category']['function'] + [
+        method for obj in params_kotlin['by_category']['object']
+        for method in obj.methods
+    ]
+    for function in all_functions_and_methods:
+        for arg in function.arguments:
+            assert not getattr(arg, 'omitted', False), (
+                f'"omitted" addin is not supported on arguments: '
+                f'"{function.name.get()}::{arg.name.get()}"')
+
+    # Kotlin-only members from the "additional_members" addin are appended to
+    # the structure's members so that templates see a single member list. They
+    # are marked kotlin_only because they have no native counterpart.
+    for struct in params_kotlin['by_category']['structure']:
+        for added_member in getattr(struct, 'additional_members', []):
+            name = Name(added_member['name'])
+            # Default to native for simple types if not specified
+            category = added_member.get('category', 'native')
+            type_name = added_member['type']
+            if type_name in params_kotlin['types']:
+                typ = params_kotlin['types'][type_name]
+            else:
+                typ = Type(type_name, {'category': category})
+            struct.members.append(
+                RecordMember(name,
+                             typ,
+                             added_member.get('annotation', 'value'), {},
+                             optional=added_member.get('optional', False),
+                             default_value=added_member.get(
+                                 'default_value', None),
+                             kotlin_only=True))
+
+    def kotlin_record_members(members):
         # Members are sorted in the following order.
         # 1. members with no default value (except callbacks).
         # 2. members with default values.
         # 3. callbacks.
-        for member in sorted(kotlin_record_members_unsorted(
-                members, structure_name),
+        for member in sorted(kotlin_record_members_unsorted(members),
                              key=lambda arg: kotlin_default(arg) is not None):
             yield member
 
@@ -1027,11 +1064,7 @@ def compute_kotlin_params(loaded_json,
                         yield function_member
                     continue
 
-    def kotlin_record_members_unsorted(members, structure_name=None):
-        struct_config = customize_structures.get(structure_name,
-                                                 {}) if structure_name else {}
-        exclude_members = struct_config.get('exclude_members', [])
-
+    def kotlin_record_members_unsorted(members):
         for member in members:
             # length parameters are omitted because Kotlin containers have 'length'.
             if member in [m.length for m in members]:
@@ -1055,28 +1088,10 @@ def compute_kotlin_params(loaded_json,
                          {'category': 'kotlin type'}), None, {})
                 continue
 
-            if member.name.get() in exclude_members or member.name.camelCase(
-            ) in exclude_members:
+            if getattr(member, 'omitted', False):
                 continue
 
             yield member
-
-        for added_member in struct_config.get('additional_members', []):
-            name = Name(added_member['name'])
-            # Default to native for simple types if not specified
-            category = added_member.get('category', 'native')
-            type_name = added_member['type']
-            if type_name in params_kotlin['types']:
-                typ = params_kotlin['types'][type_name]
-            else:
-                typ = Type(type_name, {'category': category})
-            yield RecordMember(name,
-                               typ,
-                               added_member.get('annotation', 'value'), {},
-                               optional=added_member.get('optional', False),
-                               default_value=added_member.get(
-                                   'default_value', None),
-                               skip_serialize=True)
 
     # Calculate if we should, and can, provide a Kotlin default value for a given argument.
     # This will affect its order in the method parameter and structure field lists.
@@ -1158,8 +1173,12 @@ def compute_kotlin_params(loaded_json,
         )
         return None
 
-    def kotlin_name(type):
-        return f"{'GPU' if type.category in ('object', 'structure') else ''}{type.name.CamelCase()}"
+    def kotlin_name(item):
+        if isinstance(item, (FunctionDeclaration, Method)):
+            # The "kotlin_name" addin lets dawn_kotlin.json rename a function
+            # or method in the Kotlin API.
+            return getattr(item, 'kotlin_name', item.name.camelCase())
+        return f"{'GPU' if item.category in ('object', 'structure') else ''}{item.name.CamelCase()}"
 
     def kotlin_return(method):
         for argument in method.arguments:
@@ -1193,35 +1212,25 @@ def compute_kotlin_params(loaded_json,
             method.returns.type, method.returns.annotation, False,
             method.json_data) if method.returns else None
 
-    def include_method(obj, method):
+    def include_method(method):
         if method.returns and method.returns.type.category == 'function pointer':
             # Kotlin doesn't support returning functions.
             return False
 
-        if obj is None:
-            return True
-
         # Is the method marked omitted in dawn_kotlin.json?
-        return customize_objects.get(obj.name.get(),
-                                     {}).get("methods", {}).get(
-                                         method.name.get(),
-                                         {}).get('omitted') is not True
+        return not getattr(method, 'omitted', False)
 
     def include_structure(structure):
         if structure.name.canonical_case() == "string view":
             return False
         # Is the structure marked omitted in dawn_kotlin.json?
-        return customize_structures.get(structure.name.get(),
-                                        {}).get('omitted') is not True
+        return not getattr(structure, 'omitted', False)
 
     def include_enum(enum):
-        return customize_enums.get(enum.name.get(),
-                                   {}).get('omitted') is not True
+        return not getattr(enum, 'omitted', False)
 
     def include_callback(function):
-        is_omitted = bool(
-            customize_callback.get(function.name.get(), {}).get('omitted'))
-        if is_omitted:
+        if getattr(function, 'omitted', False):
             return False
 
         structures = params_kotlin['by_category']['structure']
@@ -1266,7 +1275,6 @@ def compute_kotlin_params(loaded_json,
     params_kotlin['kotlin_default'] = kotlin_default
     params_kotlin['kotlin_return'] = kotlin_return
     params_kotlin['kotlin_name'] = kotlin_name
-    params_kotlin['customize_structures'] = customize_structures
     params_kotlin['include_method'] = include_method
     params_kotlin['include_structure'] = include_structure
     params_kotlin['include_enum'] = include_enum
@@ -1463,8 +1471,13 @@ def as_cppEnum(value_name):
 
 
 def as_MethodSuffix(type_name, method_name):
-    assert not type_name.native and not method_name.native
-    return type_name.CamelCase() + method_name.CamelCase()
+    c_method = ''
+    if type_name:
+        assert not type_name.native
+        c_method += type_name.CamelCase()
+    assert not method_name.native
+    c_method += method_name.CamelCase()
+    return c_method
 
 
 def as_CppMethodSuffix(type_name, method_name):
@@ -1529,9 +1542,12 @@ def get_c_methods_sorted_by_parent(api_params):
 
 
 def get_c_methods_sorted_by_name(api_params):
-    unsorted = [(as_MethodSuffix(typ.name, method.name), typ, method) \
-    for (typ, methods) in get_c_methods_sorted_by_parent(api_params) \
-    for method in methods]
+    unsorted = [(as_MethodSuffix(typ.name, method.name), typ, method)
+                for (typ,
+                     methods) in get_c_methods_sorted_by_parent(api_params)
+                for method in methods]
+    unsorted += [(function.name.CamelCase(), None, function)
+                 for function in api_params['by_category']['function']]
     return [(typ, method) for (_, typ, method) in sorted(unsorted)]
 
 
@@ -1585,7 +1601,7 @@ def make_base_render_params(metadata):
         c_method = c_prefix.lower()
         if namespace is not None:
             c_method += namespace.CamelCase()
-        if type_name is not None:
+        if type_name:
             assert not type_name.native
             c_method += type_name.CamelCase()
         assert not method_name.native

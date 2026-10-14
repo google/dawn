@@ -135,7 +135,7 @@ TEST(Limits, ValidateLimits) {
     {
         CombinedLimits required = {};
         required.v1.maxTextureDimension3D = defaults.v1.maxTextureDimension3D + 1;
-        MaybeError err = ValidateLimits(defaults, required);
+        MaybeValError err = ValidateLimits(defaults, required);
         EXPECT_TRUE(err.IsError());
         err.AcquireError();
     }
@@ -152,7 +152,7 @@ TEST(Limits, ValidateLimits) {
         CombinedLimits required = {};
         required.v1.minUniformBufferOffsetAlignment =
             defaults.v1.minUniformBufferOffsetAlignment / 2;
-        MaybeError err = ValidateLimits(defaults, required);
+        MaybeValError err = ValidateLimits(defaults, required);
         EXPECT_TRUE(err.IsError());
         err.AcquireError();
     }
@@ -170,7 +170,7 @@ TEST(Limits, ValidateLimits) {
         CombinedLimits required = {};
         required.v1.minStorageBufferOffsetAlignment =
             defaults.v1.minStorageBufferOffsetAlignment * 3;
-        MaybeError err = ValidateLimits(defaults, required);
+        MaybeValError err = ValidateLimits(defaults, required);
         EXPECT_TRUE(err.IsError());
         err.AcquireError();
     }

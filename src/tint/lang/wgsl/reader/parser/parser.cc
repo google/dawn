@@ -47,10 +47,12 @@
 #include "src/tint/lang/wgsl/ast/if_statement.h"
 #include "src/tint/lang/wgsl/ast/increment_decrement_statement.h"
 #include "src/tint/lang/wgsl/ast/input_attachment_index_attribute.h"
+#include "src/tint/lang/wgsl/ast/interpolated_string_expression.h"
 #include "src/tint/lang/wgsl/ast/invariant_attribute.h"
 #include "src/tint/lang/wgsl/ast/loop_statement.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
+#include "src/tint/lang/wgsl/ast/string_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/subgroup_size_attribute.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
@@ -2008,8 +2010,63 @@ Maybe<const ast::BlockStatement*> Parser::continuing_statement() {
     return continuing_compound_statement();
 }
 
+// interpolated_string
+//   : STRING_LITERAL
+//   | TEMPLATE_HEAD expression (TEMPLATE_MIDDLE expression)* TEMPLATE_TAIL
+Maybe<const ast::Expression*> Parser::interpolated_string() {
+    if (peek_is(Token::Type::kStringLiteral)) {
+        auto& t = next();
+        return create<ast::StringLiteralExpression>(t.source(), t.to_str());
+    }
+
+    if (!peek_is(Token::Type::kInterpolatedStringHead)) {
+        return Parser::Failure::kNoMatch;
+    }
+
+    MultiTokenSource source(this);
+    auto& head = next();
+    tint::Vector<const ast::Expression*, 4> elements;
+    if (!head.to_str_view().empty()) {
+        elements.Push(create<ast::StringLiteralExpression>(head.source(), head.to_str()));
+    }
+
+    while (continue_parsing()) {
+        auto expr = expect_expression("interpolated string");
+        if (expr.errored) {
+            return Failure::kErrored;
+        }
+        elements.Push(expr.value);
+
+        if (peek_is(Token::Type::kInterpolatedStringMiddle)) {
+            auto& mid = next();
+            if (!mid.to_str().empty()) {
+                elements.Push(create<ast::StringLiteralExpression>(mid.source(), mid.to_str()));
+            }
+            continue;
+        }
+
+        if (peek_is(Token::Type::kInterpolatedStringTail)) {
+            auto& tail = next();
+            if (!tail.to_str().empty()) {
+                elements.Push(create<ast::StringLiteralExpression>(tail.source(), tail.to_str()));
+            }
+            return create<ast::InterpolatedStringExpression>(source(), std::move(elements));
+        }
+
+        auto& next_tok = peek();
+        if (handle_error(next_tok)) {
+            return Failure::kErrored;
+        }
+
+        return AddError(next_tok.source(), "expected '}' for interpolated string");
+    }
+
+    return Failure::kErrored;
+}
+
 // primary_expression
 //   : const_literal
+//   | interpolated_string
 //   | IDENT argument_expression_list?
 //   | paren_expression
 //
@@ -2022,6 +2079,14 @@ Maybe<const ast::Expression*> Parser::primary_expression() {
     }
     if (lit.matched) {
         return lit.value;
+    }
+
+    auto tmpl = interpolated_string();
+    if (tmpl.errored) {
+        return Failure::kErrored;
+    }
+    if (tmpl.matched) {
+        return tmpl.value;
     }
 
     auto& t = peek();

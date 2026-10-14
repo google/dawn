@@ -56,6 +56,7 @@ struct RobustnessConfig {
     /// Should subgroup matrix builtins be clamped?
     /// Note that the stride parameter will still be clamped if clamping is disabled.
     bool clamp_subgroup_matrix = true;
+    /// Subgroup matrix accesses to bindings in `bindings_ignored` are never clamped.
     bool clamp_storage_subgroup_matrix = true;
 
     /// Bindings that should always be ignored.

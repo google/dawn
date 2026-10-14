@@ -236,7 +236,7 @@ Buffer* Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
         memoryHandleCreateInfoLength = memoryHandle->GetSerializeCreateSize();
 
         // Prevent uninitialized memory from being visible via GetMappedRange().
-        if (mappableForWrite) {
+        if (mappableForWrite && !memoryHandle->IsInitialized()) {
             std::ranges::fill(memoryHandle->GetData(), std::byte(0u));
         }
     }
@@ -386,7 +386,7 @@ Future Buffer::APIMapAsync(wgpu::MapMode mode,
         return true;
     });
     if (!success) {
-        [[maybe_unused]] auto id = GetEventManager().SetFutureReady<MapAsyncEvent>(
+        std::ignore = GetEventManager().SetFutureReady<MapAsyncEvent>(
             futureIDInternal, wgpu::MapAsyncStatus::Error,
             "Buffer already has an outstanding map pending.");
         return {futureIDInternal};

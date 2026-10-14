@@ -182,6 +182,7 @@ MaybeError Queue::WaitForIdleForDestructionImpl() {
     // (so they are as good as waited on) or success.
     VkResult waitIdleResult = VkResult::WrapUnsafe(device->fn.QueueWaitIdle(mQueue));
 
+    // Insert an arbitrary sleep to avoid destroying the device too early on some faulty drivers.
     if (waitIdleResult == VK_ERROR_DEVICE_LOST &&
         GetDevice()->IsToggleEnabled(Toggle::VulkanSleepAfterLostDeviceWait)) {
         dawn::utils::USleep(1000);
@@ -305,7 +306,7 @@ MaybeError Queue::SubmitPendingCommandsImpl() {
     // Ensure that after calling this method we have a fresh recording context even if one of the
     // DAWN_TRY calls below fail.
     absl::Cleanup recycleContext = [&]() {
-        [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
+        std::ignore = GetDevice()->ConsumedError(
             RecycleRecordingContext(), "Recycling recording context after submit failed for %s",
             this);
     };

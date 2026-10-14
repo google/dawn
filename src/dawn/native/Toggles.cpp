@@ -517,6 +517,22 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "drivers mis-stride the buffer between layers when bufferImageHeight is padded, corrupting "
       "every layer after the first.",
       "https://issues.chromium.org/issues/520126486", ToggleStage::Device}},
+    {Toggle::VulkanForceAlphaWriteForAlphaToCoverage,
+     {"vulkan_force_alpha_write_for_alpha_to_coverage",
+      "When alpha-to-coverage is enabled and the alpha channel of color attachment 0 is masked "
+      "off, force the alpha write bit on and set the alpha blend to (src * ZERO + dst * ONE) so "
+      "the value stored is the destination alpha. Workaround for Huawei Maleoon GPUs, whose "
+      "drivers drop the alpha-to-coverage computation when the fragment alpha is not written, "
+      "counting every sample as covered. The destination-preserving blend leaves the "
+      "attachment's alpha channel unchanged, so the workaround is not observable to the "
+      "application. Skipped for non-blendable formats.",
+      "https://issues.chromium.org/issues/525294804", ToggleStage::Device}},
+    {Toggle::SplitBufferTextureCopyForOversizedRow,
+     {"split_buffer_texture_copy_for_oversized_row",
+      "Split a buffer-to-texture or texture-to-buffer copy into one copy command per row so its "
+      "row pitch (bytes) and row width (texels) never overflow the 18-bit and 14-bit hardware "
+      "register fields. Workaround for an Intel GPU hardware limitation.",
+      "https://crbug.com/481934465", ToggleStage::Device}},
     {Toggle::GLUseArrayLengthFromImmediate,
      {"gl_use_array_length_from_immediate",
       "Use immediate data to replace arrayLength() function calls of dynamic storage buffers. "
@@ -756,10 +772,6 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"blob_cache_hash_validation",
       "Enable hash validation when loading/storing from/to the blob cache",
       "https://crbug.com/429938352", ToggleStage::Device}},
-    {Toggle::DecomposeUniformBuffers,
-     {"decompose_uniform_buffers",
-      "Decompose uniform buffers into arrays of vec4<u32> on backends for Vulkan and OpenGL.",
-      "https://crbug.com/448452698", ToggleStage::Adapter}},
     {Toggle::D3D12DecomposeWorkgroupAccess,
      {"d3d12_decompose_workgroup_access",
       "Decompose workgroup memory variables into flat scalar arrays and rewrite accesses as "
@@ -832,7 +844,8 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "https://crbug.com/517225032", ToggleStage::Device}},
     {Toggle::VulkanSleepAfterLostDeviceWait,
      {"vulkan_sleep_after_lost_device_wait",
-      "Insert an arbitrary sleep after WaitIdle functions on device loss.",
+      "Insert an arbitrary sleep after WaitIdle functions on device loss. On some Mali drivers, "
+      "these may return before it's safe to destroy the device.",
       "https://crbug.com/500417361", ToggleStage::Device}},
     {Toggle::UseSpirvReconvergenceMode,
      {"use_spirv_reconvergence_mode",
@@ -860,6 +873,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
     {Toggle::MetalEnableTensors,
      {"metal_enable_tensors", "Enable the use of Metal 4 Tensor Operations for subgroup matrix.",
       "https://crbug.com/550350271", ToggleStage::Adapter}},
+    {Toggle::AllowAlphaToCoverageNotBlendable,
+     {"allow_alpha_to_coverage_not_blendable",
+      "Killswitch for a fix to the validation where non-blendable formats where allowed for "
+      "alphaToCoverageEnabled",
+      "https://crbug.com/550350271", ToggleStage::Device}},
     {Toggle::WaitIsThreadSafe,
      {"wait_is_thread_safe",
       "WaitFor* functions are thread-safe and can be called without the device-lock if implicit "

@@ -50,7 +50,6 @@ class ProcTableAsClass {
         virtual ~ProcTableAsClass();
 
         void GetProcTable({{Prefix}}ProcTable* table);
-        WGPUFuture GetLastFuture();
 
         // Creates an object that can be returned by a mocked call as in WillOnce(Return(foo)).
         // It returns an object of the write type that isn't equal to any previously returned object.
@@ -88,11 +87,16 @@ class ProcTableAsClass {
                 {% set Suffix = as_CppMethodSuffix(type.name, method.name) %}
                 //* The virtual function to call after saving the callback and userdata in the proc.
                 //* This function can be mocked.
+                // Future-returning methods also pass their backend future as the last argument.
+                // Use WithArg to respond immediately, or SaveArg to save it for a later response.
                 virtual void On{{Suffix}}(
                     {{-as_cType(type.name)}} {{as_varName(type.name)}}
                     {%- for arg in method.arguments -%}
                         , {{as_annotated_cType(arg)}}
                     {%- endfor -%}
+                    {%- if method.returns and method.returns.type.name.get() == "future" -%}
+                        , WGPUFuture future
+                    {%- endif -%}
                 ) = 0;
                 {% set CallbackInfoType = (method.arguments|last).type %}
                 {% set CallbackType = find_by_name(CallbackInfoType.members, "callback").type %}
@@ -102,7 +106,7 @@ class ProcTableAsClass {
                         , {{as_annotated_cType(arg)}}
                     {%- endfor -%}
                     {%- if method.returns and method.returns.type.name.get() == "future" -%}
-                        , WGPUFuture future = {dawn::kNullFutureID}
+                        , WGPUFuture future
                     {%- endif -%}
                 );
             {% endfor %}
@@ -176,6 +180,9 @@ class MockProcTable : public ProcTableAsClass {
                         {%- for arg in method.arguments -%}
                             , {{as_annotated_cType(arg)}}
                         {%- endfor -%}
+                        {%- if method.returns and method.returns.type.name.get() == "future" -%}
+                            , WGPUFuture future
+                        {%- endif -%}
                     ), (override));
             {% endfor %}
         {% endfor %}

@@ -37,7 +37,7 @@ class Device;
 
 class SharedFence : public d3d::SharedFence {
   public:
-    static ResultOrError<Ref<SharedFence>> Create(
+    static ResultOrUnknownError<Ref<SharedFence>> Create(
         Device* device,
         StringView label,
         const SharedFenceDXGISharedHandleDescriptor* descriptor);

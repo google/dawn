@@ -83,6 +83,16 @@ TEST_F(InlineSharedMemoryManagerTest, GetMappedSpan_ReturnsNonEmptySpanWithCorre
     EXPECT_NE(nullptr, span.data());
 }
 
+TEST_F(InlineSharedMemoryManagerTest, CreateSharedMemory_MemoryIsZeroInitialized) {
+    constexpr size_t kSize = 1024;
+    Ref<SharedMemory> memory = mManager->CreateSharedMemory(kSize);
+    ASSERT_NE(nullptr, memory.Get());
+
+    for (std::byte b : memory->GetMappedSpan()) {
+        EXPECT_EQ(std::byte(0), b);
+    }
+}
+
 TEST_F(InlineSharedMemoryManagerTest, GetHandle_ReturnsNonNullHandle) {
     Ref<SharedMemory> memory = mManager->CreateSharedMemory(256);
     EXPECT_TRUE(memory->GetSystemHandle().IsValid());

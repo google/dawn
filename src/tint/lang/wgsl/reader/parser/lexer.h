@@ -82,12 +82,21 @@ class Lexer {
     std::optional<Token> try_ident();
     std::optional<Token> try_integer();
     std::optional<Token> try_punctuation();
+    std::optional<Token> try_interpolated_string();
+
+    /// Scans a chunk of an interpolated string literal until the next '${' or closing '`'.
+    /// @param source the starting source location
+    /// @param is_tail_or_middle true if scanning after a '}' interpolation close
+    /// @returns the scanned token or an error token
+    Token scan_interpolated_string_chunk(Source source, bool is_tail_or_middle);
 
     Source begin_source() const;
     void end_source(Source&) const;
 
     /// @returns view of current line
     std::string_view line() const;
+    /// Updates the cached content of the current line based on the value of location_
+    void update_line();
     /// @returns position in current line
     uint32_t pos() const;
     /// @returns length of current line
@@ -132,6 +141,8 @@ class Lexer {
     Source::File const* const file_;
     /// The current location within the input
     Source::Location location_;
+    /// The cached content of the current line
+    std::string_view line_;
 
     /// The tokens
     std::vector<Token> tokens_;
@@ -142,6 +153,12 @@ class Lexer {
         uint64_t depth;
     };
     tint::Vector<PossibleTemplate, 16> possible_templates_;
+
+    struct InterpolatedStringContext {
+        uint32_t brace_depth = 0;
+        Source source;
+    };
+    tint::Vector<InterpolatedStringContext, 8> interpolated_string_stack_;
 };
 
 }  // namespace tint::wgsl::reader

@@ -429,7 +429,7 @@ void MaybeConvertDepthStencilSwizzleOneToAlpha(bool isDepthOrStencilFormat,
     // This is enabled by the VK_KHR_maintenance5 extension.
     // https://registry.khronos.org/vulkan/specs/latest/html/vkspec.html#textures-component-swizzle
     if (deviceInfo.HasExt(DeviceExt::Maintenance5) &&
-        deviceInfo.propertiesMaintenance5.depthStencilSwizzleOneSupport == VK_TRUE) {
+        deviceInfo.maintenance5Properties.depthStencilSwizzleOneSupport == VK_TRUE) {
         return;
     }
 
@@ -621,7 +621,7 @@ VkFormat ColorVulkanImageFormat(wgpu::TextureFormat format) {
     DAWN_UNREACHABLE();
 }
 
-ResultOrError<wgpu::TextureFormat> FormatFromVkFormat(const Device* device, VkFormat vkFormat) {
+ResultOrValError<wgpu::TextureFormat> FormatFromVkFormat(const Device* device, VkFormat vkFormat) {
     switch (vkFormat) {
 #define X(wgpuFormat, vkFormat) \
     case vkFormat:              \
@@ -846,8 +846,8 @@ VkSampleCountFlagBits VulkanSampleCount(uint32_t sampleCount) {
     DAWN_UNREACHABLE();
 }
 
-MaybeError ValidateVulkanImageCanBeWrapped(const DeviceBase*,
-                                           const UnpackedPtr<TextureDescriptor>& descriptor) {
+MaybeValError ValidateVulkanImageCanBeWrapped(const DeviceBase*,
+                                              const UnpackedPtr<TextureDescriptor>& descriptor) {
     DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
                     "Texture dimension (%s) is not %s.", descriptor->dimension,
                     wgpu::TextureDimension::e2D);
@@ -1391,8 +1391,6 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
     return {};
 }
 
-
-
 MaybeError Texture::EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
                                                         const SubresourceRange& range) {
     if (!GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
@@ -1795,6 +1793,7 @@ MaybeError ImportedTextureBase::EndAccess(ExternalSemaphoreHandle* handle,
 
     // Release the texture
     mExternalState = ExternalState::Released;
+    mLastExternalState = ExternalState::Released;
 
     // Compute the layouts for the queue transition for export. desiredLayout == UNDEFINED is a tag
     // value used to export with whatever the current layout is. However queue transitioning to the
@@ -1873,7 +1872,7 @@ MaybeError ImportedTextureBase::OnAfterSubmit() {
 //
 
 // static
-ResultOrError<Ref<ExternalVkImageTexture>> ExternalVkImageTexture::Create(
+ResultOrUnknownError<Ref<ExternalVkImageTexture>> ExternalVkImageTexture::Create(
     Device* device,
     const ExternalImageDescriptorVk* descriptor,
     const UnpackedPtr<TextureDescriptor>& textureDescriptor,
@@ -1905,8 +1904,9 @@ void ExternalVkImageTexture::DestroyImpl(DestroyReason reason) {
     ImportedTextureBase::DestroyImpl(reason);
 }
 
-MaybeError ExternalVkImageTexture::Initialize(const ExternalImageDescriptorVk* descriptor,
-                                              external_memory::Service* externalMemoryService) {
+MaybeUnknownError ExternalVkImageTexture::Initialize(
+    const ExternalImageDescriptorVk* descriptor,
+    external_memory::Service* externalMemoryService) {
     Device* device = ToBackend(GetDevice());
     VkFormat format = VulkanImageFormat(device, GetFormat().format);
     VkImageUsageFlags usage = VulkanImageUsage(device, GetInternalUsage(), GetFormat());
@@ -1987,10 +1987,10 @@ MaybeError ExternalVkImageTexture::BindExternalMemory(const ExternalImageDescrip
     return {};
 }
 
-MaybeError ExternalVkImageTexture::ExportExternalTexture(VkImageLayout desiredLayout,
-                                                         ExternalSemaphoreHandle* handle,
-                                                         VkImageLayout* releasedOldLayout,
-                                                         VkImageLayout* releasedNewLayout) {
+MaybeUnknownError ExternalVkImageTexture::ExportExternalTexture(VkImageLayout desiredLayout,
+                                                                ExternalSemaphoreHandle* handle,
+                                                                VkImageLayout* releasedOldLayout,
+                                                                VkImageLayout* releasedNewLayout) {
     DAWN_INVALID_IF(mExternalState == ExternalState::Released,
                     "Can't export a signal semaphore from signaled texture %s.", this);
 
@@ -2053,7 +2053,7 @@ void SharedTexture::SetPendingAcquire(VkImageLayout pendingAcquireOldLayout,
                                       VkImageLayout pendingAcquireNewLayout) {
     DAWN_ASSERT(GetSharedResourceMemoryContents() != nullptr);
     mExternalState = ExternalState::PendingAcquire;
-    mLastExternalState = ExternalState::PendingAcquire;
+    mLastExternalState = ExternalState::Released;
 
     mPendingAcquireOldLayout = pendingAcquireOldLayout;
     mPendingAcquireNewLayout = pendingAcquireNewLayout;

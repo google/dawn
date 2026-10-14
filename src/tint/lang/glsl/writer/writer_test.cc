@@ -193,6 +193,19 @@ TEST_F(GlslWriterTest, CanGenerate_TexelBufferUnsupported) {
                 testing::HasSubstr("texel buffers are not supported by the GLSL backend"));
 }
 
+TEST_F(GlslWriterTest, CanGenerate_ViewIndexUnsupported) {
+    auto* ep = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* view_index = b.FunctionParam("view_index", ty.u32());
+    view_index->SetBuiltin(core::BuiltinValue::kViewIndex);
+    ep->AppendParam(view_index);
+    b.Append(ep->Block(), [&] { b.Return(ep); });
+
+    auto result = Generate();
+    ASSERT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("view_index is not supported by the GLSL backend"));
+}
+
 TEST_F(GlslWriterTest, CanGenerate_AtomicStoreMax_Unsupported) {
     auto* sb =
         ty.Struct(mod.symbols.New("SB"), {
@@ -259,16 +272,15 @@ TEST_F(GlslWriterTest, WorkgroupStorageSize_OverflowAfterAlign) {
 shared uint a[1073741823];
 void main_inner(uint tint_local_index) {
   {
-    uint v = 0u;
-    v = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_1 = v;
-      if ((v_1 >= 1073741823u)) {
+      uint v = idx;
+      if ((v >= 1073741823u)) {
         break;
       }
-      a[v_1] = 0u;
+      a[v] = 0u;
       {
-        v = (v_1 + 64u);
+        idx = (idx + 64u);
       }
     }
   }

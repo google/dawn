@@ -328,7 +328,7 @@ ShaderModule::ShaderModule(Device* device,
                            std::vector<tint::wgsl::Extension> internalExtensions)
     : ShaderModuleBase(device, descriptor, std::move(internalExtensions)) {}
 
-ResultOrError<GLuint> ShaderModule::CompileShader(
+ResultOrUnknownError<std::string> ShaderModule::CompileShader(
     const OpenGLFunctions& gl,
     const ProgrammableStage& programmableStage,
     SingleShaderStage stage,
@@ -469,16 +469,13 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     req.tintOptions.disable_integer_range_analysis =
         !GetDevice()->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
 
-    req.tintOptions.use_uniform_buffers =
-        !GetDevice()->IsToggleEnabled(Toggle::DecomposeUniformBuffers);
-
     req.tintOptions.has_gl_ext_conservative_depth =
         gl.IsGLExtensionSupported("GL_EXT_conservative_depth");
 
     CacheResult<GLSLCompilation> compilationResult;
     DAWN_TRY_LOAD_OR_RUN(
         compilationResult, GetDevice(), std::move(req), GLSLCompilation::FromValidatedBlob,
-        [](GLSLCompilationRequest r) -> ResultOrError<GLSLCompilation> {
+        [](GLSLCompilationRequest r) -> ResultOrUnknownError<GLSLCompilation> {
             // Requires Tint Program here right before actual using.
             auto shaderModule = r.inputProgram.UnsafeGetValue();
             auto inputProgram = shaderModule->GetTintProgram();
@@ -539,8 +536,15 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         GetDevice()->EmitLog(wgpu::LoggingType::Info, dumpedMsg.str().c_str());
     }
 
+    GetDevice()->GetBlobCache()->EnsureStored(compilationResult);
+    return compilationResult->glsl;
+}
+
+ResultOrError<GLuint> ShaderModule::CreateGLShaderObject(const OpenGLFunctions& gl,
+                                                         SingleShaderStage stage,
+                                                         const std::string& glslSrc) {
     GLuint shader = DAWN_GL_TRY(gl, CreateShader(GLShaderType(stage)));
-    const char* source = compilationResult->glsl.c_str();
+    const char* source = glslSrc.c_str();
     {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetDevice()->GetPlatform(), "GLSL.CompileShader");
 
@@ -558,12 +562,10 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             std::vector<char> buffer(infoLogLength);
             DAWN_GL_TRY(gl, GetShaderInfoLog(shader, infoLogLength, nullptr, &buffer[0]));
             DAWN_GL_TRY(gl, DeleteShader(shader));
-            return DAWN_FORMAT_INTERNAL_ERROR("%s\nProgram compilation failed:\n%s", source,
-                                              buffer.data());
+            return DAWN_PIPELINE_UNCATEGORIZED_ERROR("%s\nProgram compilation failed:\n%s", source,
+                                                     buffer.data());
         }
     }
-
-    GetDevice()->GetBlobCache()->EnsureStored(compilationResult);
 
     return shader;
 }

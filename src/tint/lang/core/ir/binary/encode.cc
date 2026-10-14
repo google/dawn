@@ -34,6 +34,7 @@
 #include "src/tint/lang/core/constant/composite.h"
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/constant/splat.h"
+#include "src/tint/lang/core/constant/string.h"
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/array_count.h"
@@ -51,6 +52,7 @@
 #include "src/tint/lang/core/ir/exit_switch.h"
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/if.h"
+#include "src/tint/lang/core/ir/interpolate_string.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/load_vector_element.h"
@@ -84,6 +86,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/string.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/u8.h"
@@ -238,6 +241,9 @@ struct Encoder {
             [&](const ir::ExitSwitch* i) {
                 InstructionExitSwitch(*inst_out.mutable_exit_switch(), i);
             },
+            [&](const ir::InterpolateString* i) {
+                InstructionInterpolateString(*inst_out.mutable_interpolate_string(), i);
+            },
             [&](const ir::If* i) { InstructionIf(*inst_out.mutable_if_(), i); },
             [&](const ir::Let* i) { InstructionLet(*inst_out.mutable_let(), i); },
             [&](const ir::Load* i) { InstructionLoad(*inst_out.mutable_load(), i); },
@@ -305,6 +311,9 @@ struct Encoder {
     void InstructionContinue(pb::InstructionContinue&, const ir::Continue*) {}
 
     void InstructionConvert(pb::InstructionConvert&, const ir::Convert*) {}
+
+    void InstructionInterpolateString(pb::InstructionInterpolateString&,
+                                      const ir::InterpolateString*) {}
 
     void InstructionIf(pb::InstructionIf& if_out, const ir::If* if_in) {
         if (auto* block = if_in->True()) {
@@ -422,6 +431,7 @@ struct Encoder {
                 [&](const core::type::U64*) { type_out.set_basic(pb::TypeBasic::u64); },
                 [&](const core::type::I8*) { type_out.set_basic((pb::TypeBasic::i8)); },
                 [&](const core::type::U8*) { type_out.set_basic((pb::TypeBasic::u8)); },
+                [&](const core::type::String*) { type_out.set_basic(pb::TypeBasic::string); },
                 [&](const core::type::Vector* v) { TypeVector(*type_out.mutable_vector(), v); },
                 [&](const core::type::Matrix* m) { TypeMatrix(*type_out.mutable_matrix(), m); },
                 [&](const core::type::Pointer* m) { TypePointer(*type_out.mutable_pointer(), m); },
@@ -812,6 +822,9 @@ struct Encoder {
                 [&](const core::constant::Splat* splat) {
                     ConstantValueSplat(*constant_out.mutable_splat(), splat);
                 },
+                [&](const core::constant::String* str) {
+                    constant_out.set_string(std::string(str->value));
+                },
                 TINT_ICE_ON_NO_MATCH);
 
             mod_out_.mutable_constant_values()->Add(std::move(constant_out));
@@ -1164,6 +1177,8 @@ struct Encoder {
                 return pb::BuiltinValue::clip_distances;
             case core::BuiltinValue::kPrimitiveIndex:
                 return pb::BuiltinValue::primitive_index;
+            case core::BuiltinValue::kViewIndex:
+                return pb::BuiltinValue::view_index;
             case core::BuiltinValue::kBarycentricCoord:
                 return pb::BuiltinValue::barycentric_coord;
             case core::BuiltinValue::kUndefined:

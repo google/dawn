@@ -74,6 +74,9 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         if (attributes.builtin == core::BuiltinValue::kCullDistance) {
             return Failure("cull_distance is not supported by the MSL backend");
         }
+        if (attributes.builtin == core::BuiltinValue::kViewIndex) {
+            return Failure("view_index is not supported by the MSL backend");
+        }
         return Success;
     };
 
@@ -205,11 +208,8 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     TINT_CHECK_RESULT(CanGenerate(ir, options));
 
     // Raise from core-dialect to MSL-dialect.
-    TINT_CHECK_RESULT_UNWRAP(raise_result, Raise(ir, options));
-    TINT_CHECK_RESULT_UNWRAP(result, Print(ir, options));
-
-    result.needs_storage_buffer_sizes = raise_result.needs_storage_buffer_sizes;
-    return result;
+    TINT_CHECK_RESULT(Raise(ir, options));
+    return Print(ir, options);
 }
 
 }  // namespace tint::msl::writer

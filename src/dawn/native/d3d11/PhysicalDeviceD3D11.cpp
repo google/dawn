@@ -375,6 +375,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         }
     }
 
+    if (gpu_info::IsIntel(vendorId)) {
+        // Workaround an Intel GPU hardware limitation that corrupts buffer<->texture copies with
+        // a large row pitch. See https://crbug.com/481934465.
+        deviceToggles->Default(Toggle::SplitBufferTextureCopyForOversizedRow, true);
+    }
+
     // Enable the integer range analysis for shader robustness by default if the corresponding
     // platform feature is enabled.
     deviceToggles->Default(
@@ -434,6 +440,8 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
     }
     if (auto* d3dProperties = info.Get<AdapterPropertiesD3D>()) {
         d3dProperties->shaderModel = GetDeviceInfo().shaderModel;
+        d3dProperties->adapterLUIDLowPart = GetAdapterLUID().LowPart;
+        d3dProperties->adapterLUIDHighPart = static_cast<uint32_t>(GetAdapterLUID().HighPart);
     }
 }
 

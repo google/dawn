@@ -18,16 +18,15 @@ int bar() {
 
 void main_inner(uint tint_local_index) {
   {
-    uint v_3 = 0u;
-    v_3 = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_4 = v_3;
-      if ((v_4 >= 4u)) {
+      uint v_3 = idx;
+      if ((v_3 >= 4u)) {
         break;
       }
-      v[v_4] = int(0);
+      v[v_3] = int(0);
       {
-        v_3 = (v_4 + 1u);
+        idx = (idx + 1u);
       }
     }
   }

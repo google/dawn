@@ -93,7 +93,7 @@ class Device final : public DeviceBase, public ObjectWGPU<WGPUDevice> {
         const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor) override;
     ResultOrError<Ref<BufferBase>> CreateBufferImpl(
         const UnpackedPtr<BufferDescriptor>& descriptor) override;
-    ResultOrError<Ref<ExternalTextureBase>> CreateExternalTextureImpl(
+    ResultOrUnknownError<Ref<ExternalTextureBase>> CreateExternalTextureImpl(
         const ExternalTextureDescriptor* descriptor) override;
     ResultOrError<Ref<CommandBufferBase>> CreateCommandBuffer(
         CommandEncoder* encoder,
@@ -124,10 +124,11 @@ class Device final : public DeviceBase, public ObjectWGPU<WGPUDevice> {
     ResultOrError<Ref<TextureViewBase>> CreateTextureViewImpl(
         TextureBase* texture,
         const UnpackedPtr<TextureViewDescriptor>& descriptor) override;
-    ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
-        const SharedTextureMemoryDescriptor* descriptor) override;
-    ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
-        const SharedFenceDescriptor* descriptor) override;
+
+    ResultOrUnknownError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
+        UnpackedPtr<SharedTextureMemoryDescriptor> unpacked) override;
+    ResultOrUnknownError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
+        UnpackedPtr<SharedFenceDescriptor> unpacked) override;
 
     MaybeError TickImpl() override;
 

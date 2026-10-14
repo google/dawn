@@ -32,9 +32,9 @@
 
 #include "src/tint/lang/core/constant/string.h"
 #include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/interpolate_string.h"
 #include "src/tint/lang/core/ir/validator/validate.h"
-#include "src/tint/lang/core/type/string.h"
-#include "src/tint/lang/msl/ir/builtin_call.h"
+#include "src/tint/lang/msl/ir/os_log.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -77,18 +77,16 @@ struct State {
         SetupGlobals();
         TINT_IR_ASSERT(ir, entry_point != nullptr);
 
+        Vector<core::ir::InterpolateString*, 4> interpolate_strings_to_destroy;
+
         b.InsertBefore(call, [&] {
             auto* id = b.Load(invocation_id);
-            auto* value = call->Args()[0];
-            if (value->Type()->DeepestElement()->Is<core::type::Bool>()) {
-                value = b.Convert(ty.MatchWidth(ty.i32(), value->Type()), value);
-            }
 
             auto entry_point_name = ir.NameOf(entry_point).NameView();
             auto line = ir.SourceOf(call).range.begin.line;
 
             StringStream ss;
-            Vector<core::ir::Value*, 5> args;
+            Vector<core::ir::Value*, 8> args;
             args.Push(nullptr);
             switch (entry_point->Stage()) {
                 case core::ir::Function::PipelineStage::kCompute:
@@ -114,16 +112,62 @@ struct State {
                 case core::ir::Function::PipelineStage::kUndefined:
                     TINT_IR_UNREACHABLE(ir);
             }
-            args.Push(value);
 
-            // Add the format specifier for the value being printed, and set the format argument.
-            ss << "%" << TypeToFormatSpecifier(value->Type());
+            auto* value = call->Args()[0];
+            ProcessValue(value, ss, args, interpolate_strings_to_destroy);
+
             args[0] = b.Constant(ir.constant_values.Get(ss.str()));
 
-            b.Call<msl::ir::BuiltinCall>(ty.void_(), msl::BuiltinFn::kOsLog, std::move(args));
+            auto* os_log = ir.CreateInstruction<msl::ir::OsLog>(b.InstructionResult(ty.void_()),
+                                                                std::move(args));
+            b.Append(os_log);
         });
 
         call->Destroy();
+        for (auto* is : interpolate_strings_to_destroy) {
+            TINT_IR_ASSERT(ir, !is->Result()->IsUsed());
+            is->Destroy();
+        }
+    }
+
+    /// Process a value being printed, appending format specifiers and arguments.
+    /// @param value the value to process
+    /// @param ss the string stream for the format string
+    /// @param args the argument vector for the os_log call
+    /// @param interpolate_strings_to_destroy vector tracking InterpolateString instructions to
+    /// destroy
+    void ProcessValue(core::ir::Value* value,
+                      StringStream& ss,
+                      Vector<core::ir::Value*, 8>& args,
+                      Vector<core::ir::InterpolateString*, 4>& interpolate_strings_to_destroy) {
+        if (auto* is = value->AsInstruction<core::ir::InterpolateString>()) {
+            interpolate_strings_to_destroy.Push(is);
+            for (auto* operand : is->Operands()) {
+                ProcessValue(operand, ss, args, interpolate_strings_to_destroy);
+            }
+            return;
+        }
+
+        // Append string arguments to the generated format string.
+        if (auto* c = value->As<core::ir::Constant>()) {
+            if (auto* str = c->Value()->As<core::constant::String>()) {
+                for (char ch : str->Value()) {
+                    if (ch == '%') {
+                        ss << "%%";
+                    } else {
+                        ss << ch;
+                    }
+                }
+                return;
+            }
+        }
+
+        if (value->Type()->DeepestElement()->Is<core::type::Bool>()) {
+            value = b.Convert(ty.MatchWidth(ty.i32(), value->Type()), value);
+        }
+
+        ss << "%" << TypeToFormatSpecifier(value->Type());
+        args.Push(value);
     }
 
     /// Return the format string specifier that corresponds to a type.

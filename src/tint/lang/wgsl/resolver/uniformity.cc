@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/vector.h"
+#include "src/tint/lang/wgsl/ast/interpolated_string_expression.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/dependency_graph.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
@@ -1533,6 +1534,18 @@ class UniformityGraph {
 
             [&](const ast::MemberAccessorExpression* m) {
                 return ProcessExpression(cf, m->object, load_rule);
+            },
+
+            [&](const ast::InterpolatedStringExpression* t) {
+                auto* result = CreateNode({"interpolated_string_result"});
+                if (t->elements.IsEmpty()) {
+                    result->AddEdge(cf);
+                } else {
+                    for (auto* el : t->elements) {
+                        result->AddEdge(ProcessExpression(cf, el, load_rule));
+                    }
+                }
+                return result;
             },
 
             [&](const ast::UnaryOpExpression* u) {

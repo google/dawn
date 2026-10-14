@@ -38,6 +38,7 @@
 #include "src/tint/lang/core/ir/array_count.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/control_instruction.h"
+#include "src/tint/lang/core/ir/interpolate_string.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
@@ -50,6 +51,7 @@
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/string.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/utils/containers/hashset.h"
 #include "src/tint/utils/containers/transform.h"
@@ -472,6 +474,9 @@ struct Decoder {
             case pb::Instruction::KindCase::kExitSwitch:
                 inst_out = CreateInstructionExitSwitch(inst_in.exit_switch());
                 break;
+            case pb::Instruction::KindCase::kInterpolateString:
+                inst_out = CreateInstructionInterpolateString(inst_in.interpolate_string());
+                break;
             case pb::Instruction::KindCase::kDiscard:
                 inst_out = CreateInstructionDiscard(inst_in.discard());
                 break;
@@ -552,10 +557,10 @@ struct Decoder {
         if (inst_in.has_break_if()) {
             auto num_next_iter_values = inst_in.break_if().num_next_iter_values();
             bool is_valid =
-                inst_out->Operands().Length() >= num_next_iter_values + BreakIf::kArgsOperandOffset;
+                inst_out->Operands().Length() >= BreakIf::kArgsOperandOffset &&
+                inst_out->Operands().Length() - BreakIf::kArgsOperandOffset >= num_next_iter_values;
             if (DAWN_LIKELY(is_valid)) {
-                static_cast<BreakIf*>(inst_out)->SetNumNextIterValues(
-                    inst_in.break_if().num_next_iter_values());
+                static_cast<BreakIf*>(inst_out)->SetNumNextIterValues(num_next_iter_values);
             } else {
                 err_ << "invalid value for num_next_iter_values()\n";
             }
@@ -626,6 +631,11 @@ struct Decoder {
         auto* exit_out = mod_out_.CreateInstruction<ir::ExitSwitch>();
         exit_switches_.Push(exit_out);
         return exit_out;
+    }
+
+    ir::InterpolateString* CreateInstructionInterpolateString(
+        const pb::InstructionInterpolateString&) {
+        return mod_out_.CreateInstruction<ir::InterpolateString>();
     }
 
     ir::Discard* CreateInstructionDiscard(const pb::InstructionDiscard&) {
@@ -857,6 +867,8 @@ struct Decoder {
                 return mod_out_.Types().u8();
             case pb::TypeBasic::u64:
                 return mod_out_.Types().u64();
+            case pb::TypeBasic::string:
+                return mod_out_.Types().String();
 
             case pb::TypeBasic::TypeBasic_INT_MIN_SENTINEL_DO_NOT_USE_:
             case pb::TypeBasic::TypeBasic_INT_MAX_SENTINEL_DO_NOT_USE_:
@@ -1435,6 +1447,8 @@ struct Decoder {
                 return CreateConstantComposite(value_in.composite());
             case pb::ConstantValue::KindCase::kSplat:
                 return CreateConstantSplat(value_in.splat());
+            case pb::ConstantValue::KindCase::kString:
+                return b.ConstantValue(value_in.string());
             case pb::ConstantValue::KindCase::KIND_NOT_SET:
                 break;
         }
@@ -1507,19 +1521,28 @@ struct Decoder {
             return b.InvalidConstant()->Value();
         }
 
-        uint32_t num_elements = type->Elements().count;
+        auto elements = type->Elements();
+        uint32_t num_elements = elements.count;
         if (DAWN_UNLIKELY(num_elements == 0)) {
             err_ << "cannot create a splat of type " << type->FriendlyName() << "\n";
             return b.InvalidConstant()->Value();
         }
         auto* value = ConstantValue(splat_in.elements());
-        for (uint32_t i = 0; i < num_elements; i++) {
-            auto* el_type = type->Element(i);
-            if (DAWN_UNLIKELY(el_type != value->Type())) {
+        if (elements.type) {
+            if (DAWN_UNLIKELY(elements.type != value->Type())) {
                 err_ << "constant splat element value type " << value->Type()->FriendlyName()
-                     << " does not match element " << i << " type " << el_type->FriendlyName()
-                     << "\n";
+                     << " does not match type " << elements.type->FriendlyName() << "\n";
                 return b.InvalidConstant()->Value();
+            }
+        } else {
+            for (uint32_t i = 0; i < num_elements; i++) {
+                auto* el_type = type->Element(i);
+                if (DAWN_UNLIKELY(el_type != value->Type())) {
+                    err_ << "constant splat element value type " << value->Type()->FriendlyName()
+                         << " does not match element " << i << " type " << el_type->FriendlyName()
+                         << "\n";
+                    return b.InvalidConstant()->Value();
+                }
             }
         }
         return mod_out_.constant_values.Splat(type, value);
@@ -1919,6 +1942,8 @@ struct Decoder {
                 return core::BuiltinValue::kClipDistances;
             case pb::BuiltinValue::primitive_index:
                 return core::BuiltinValue::kPrimitiveIndex;
+            case pb::BuiltinValue::view_index:
+                return core::BuiltinValue::kViewIndex;
             case pb::BuiltinValue::barycentric_coord:
                 return core::BuiltinValue::kBarycentricCoord;
             case pb::BuiltinValue::BuiltinValue_INT_MIN_SENTINEL_DO_NOT_USE_:

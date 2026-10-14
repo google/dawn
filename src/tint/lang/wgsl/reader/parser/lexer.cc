@@ -111,7 +111,9 @@ uint32_t hex_value(char c) {
 
 }  // namespace
 
-Lexer::Lexer(const Source::File* file) : file_(file), location_{1, 1} {}
+Lexer::Lexer(const Source::File* file) : file_(file), location_{1, 1} {
+    update_line();
+}
 
 Lexer::~Lexer() = default;
 
@@ -137,11 +139,16 @@ std::vector<Token> Lexer::Lex() {
 }
 
 std::string_view Lexer::line() const {
-    if (file_->content.GetLineCount() == 0) {
+    return line_;
+}
+
+void Lexer::update_line() {
+    if (file_->content.GetLineCount() == 0 || location_.line > file_->content.GetLineCount()) {
         static const char* empty_string = "";
-        return empty_string;
+        line_ = empty_string;
+    } else {
+        line_ = file_->content.GetLine(location_.line - 1);
     }
-    return file_->content.GetLine(location_.line - 1);
 }
 
 uint32_t Lexer::pos() const {
@@ -149,27 +156,27 @@ uint32_t Lexer::pos() const {
 }
 
 uint32_t Lexer::length() const {
-    return static_cast<uint32_t>(line().size());
+    return static_cast<uint32_t>(line_.size());
 }
 
 const char& Lexer::at(uint32_t pos) const {
-    const auto& l = line();
-    // Unlike for std::string, if pos == line().size(), indexing `l[pos]` is UB for
-    // std::string_view.
-    if (pos >= l.size()) {
+    // Unlike for std::string, if pos == line_.size(), indexing `line_[pos]` is UB
+    // for std::string_view.
+    if (pos >= line_.size()) {
         static const char zero = 0;
         return zero;
     }
-    return l[pos];
+    return line_[pos];
 }
 
 const char* Lexer::line_end() const {
-    // SAFETY: line() is a valid string_view, so line().data() + line().size() is bounds-safe.
-    return DAWN_UNSAFE_BUFFERS(line().data() + line().size());
+    // SAFETY: line_ is a valid string_view, so line_.data() + line_.size()
+    // is bounds-safe.
+    return DAWN_UNSAFE_BUFFERS(line_.data() + line_.size());
 }
 
 std::string_view Lexer::substr(uint32_t offset, uint32_t count) {
-    return line().substr(offset, count);
+    return line_.substr(offset, count);
 }
 
 void Lexer::advance(uint32_t offset) {
@@ -183,6 +190,7 @@ void Lexer::set_pos(uint32_t pos) {
 void Lexer::advance_line() {
     location_.line++;
     location_.column = 1;
+    update_line();
 }
 
 bool Lexer::is_eof() const {
@@ -215,6 +223,10 @@ Token Lexer::next() {
     }
 
     if (auto t = try_ident(); t.has_value() && !t->IsUninitialized()) {
+        return std::move(t.value());
+    }
+
+    if (auto t = try_interpolated_string(); t.has_value() && !t->IsUninitialized()) {
         return std::move(t.value());
     }
 
@@ -310,6 +322,10 @@ std::optional<Token> Lexer::skip_blankspace_and_comments() {
         }
     }
     if (is_eof()) {
+        if (!interpolated_string_stack_.IsEmpty()) {
+            return Token{Token::Type::kError, interpolated_string_stack_.Back().source,
+                         "unterminated interpolated string literal"};
+        }
         return Token{Token::Type::kEOF, begin_source()};
     }
 
@@ -1076,235 +1092,382 @@ std::optional<Token> Lexer::try_punctuation() {
     auto source = begin_source();
     auto type = Token::Type::kUninitialized;
 
-    if (matches(pos(), '@')) {
-        type = Token::Type::kAttr;
-        advance(1);
-    } else if (matches(pos(), '(')) {
-        // Entering a nested expression
-        nesting_depth_ += 1;
+    if (is_eol()) {
+        return {};
+    }
 
-        type = Token::Type::kParenLeft;
-        advance(1);
-    } else if (matches(pos(), ')')) {
-        // Exiting a nested expression
-        // Pop the stack until we return to the current expression expr_depth
-        clear_templates_to_nest_depth();
-        if (nesting_depth_ > 0) {
-            nesting_depth_ -= 1;
-        }
-
-        type = Token::Type::kParenRight;
-        advance(1);
-    } else if (matches(pos(), '[')) {
-        // Entering a nested expression
-        nesting_depth_ += 1;
-
-        type = Token::Type::kBracketLeft;
-        advance(1);
-    } else if (matches(pos(), ']')) {
-        // Exiting a nested expression
-        // Pop the stack until we return to the current expression expr_depth
-        clear_templates_to_nest_depth();
-        if (nesting_depth_ > 0) {
-            nesting_depth_ -= 1;
-        }
-
-        type = Token::Type::kBracketRight;
-        advance(1);
-    } else if (matches(pos(), '{')) {
-        // Expression terminating token. No opening template list can hold this tokens, so clear the
-        // stack and expression depth.
-        reset_nest_depth();
-
-        type = Token::Type::kBraceLeft;
-        advance(1);
-    } else if (matches(pos(), '}')) {
-        type = Token::Type::kBraceRight;
-        advance(1);
-    } else if (matches(pos(), '&')) {
-        if (matches(pos() + 1, '&')) {
-            // Treat 'a < b || c > d' as a logical binary operator of two comparison operators
-            // instead of a single template argument 'b||c'.
-            // Use parentheses around 'b||c' to parse as a template argument list.
+    switch (at(pos())) {
+        case '@':
+            type = Token::Type::kAttr;
+            advance(1);
+            break;
+        case '(':
+            // Entering a nested expression
+            nesting_depth_ += 1;
+            type = Token::Type::kParenLeft;
+            advance(1);
+            break;
+        case ')':
+            // Exiting a nested expression
+            // Pop the stack until we return to the current expression expr_depth
             clear_templates_to_nest_depth();
-
-            type = Token::Type::kAndAnd;
-            advance(2);
-        } else if (matches(pos() + 1, '=')) {
-            type = Token::Type::kAndEqual;
-            advance(2);
-        } else {
-            type = Token::Type::kAnd;
+            if (nesting_depth_ > 0) {
+                nesting_depth_ -= 1;
+            }
+            type = Token::Type::kParenRight;
             advance(1);
-        }
-    } else if (matches(pos(), '/')) {
-        if (matches(pos() + 1, '=')) {
-            type = Token::Type::kDivisionEqual;
-            advance(2);
-        } else {
-            type = Token::Type::kForwardSlash;
+            break;
+        case '[':
+            // Entering a nested expression
+            nesting_depth_ += 1;
+            type = Token::Type::kBracketLeft;
             advance(1);
-        }
-    } else if (matches(pos(), '!')) {
-        if (matches(pos() + 1, '=')) {
-            type = Token::Type::kNotEqual;
-            advance(2);
-        } else {
-            type = Token::Type::kBang;
+            break;
+        case ']':
+            // Exiting a nested expression
+            // Pop the stack until we return to the current expression expr_depth
+            clear_templates_to_nest_depth();
+            if (nesting_depth_ > 0) {
+                nesting_depth_ -= 1;
+            }
+            type = Token::Type::kBracketRight;
             advance(1);
-        }
-    } else if (matches(pos(), ':')) {
-        // Expression terminating token. No opening template list can hold this tokens, so clear the
-        // stack and expression depth.
-        reset_nest_depth();
-
-        type = Token::Type::kColon;
-        advance(1);
-    } else if (matches(pos(), ',')) {
-        type = Token::Type::kComma;
-        advance(1);
-    } else if (matches(pos(), '=')) {
-        if (matches(pos() + 1, '=')) {
-            type = Token::Type::kEqualEqual;
-            advance(2);
-        } else {
+            break;
+        case '{':
+            if (!interpolated_string_stack_.IsEmpty()) {
+                interpolated_string_stack_.Back().brace_depth++;
+            }
             // Expression terminating token. No opening template list can hold this tokens, so clear
             // the stack and expression depth.
             reset_nest_depth();
-
-            type = Token::Type::kEqual;
+            type = Token::Type::kBraceLeft;
             advance(1);
-        }
-    } else if (matches(pos(), '>')) {
-        if (!possible_templates_.IsEmpty() && possible_templates_.Back().depth == nesting_depth_) {
+            break;
+        case '}':
+            if (!interpolated_string_stack_.IsEmpty()) {
+                if (interpolated_string_stack_.Back().brace_depth > 0) {
+                    interpolated_string_stack_.Back().brace_depth--;
+                    type = Token::Type::kBraceRight;
+                    advance(1);
+                    break;
+                }
+                // This was the final '}' that closes the interpolated expression.
+                advance(1);
+                return scan_interpolated_string_chunk(source, /* is_tail_or_middle */ true);
+            }
+            type = Token::Type::kBraceRight;
             advance(1);
-
-            type = Token::Type::kTemplateArgsRight;
-            tokens_[possible_templates_.Pop().token_idx].SetType(Token::Type::kTemplateArgsLeft);
-        } else if (matches(pos() + 1, '=')) {
-            type = Token::Type::kGreaterThanEqual;
-            advance(2);
-        } else if (matches(pos() + 1, '>')) {
-            if (matches(pos() + 2, '=')) {
-                type = Token::Type::kShiftRightEqual;
-                advance(3);
-            } else {
-                type = Token::Type::kShiftRight;
+            break;
+        case '&':
+            if (matches(pos() + 1, '&')) {
+                // Treat 'a < b || c > d' as a logical binary operator of two comparison operators
+                // instead of a single template argument 'b||c'.
+                // Use parentheses around 'b||c' to parse as a template argument list.
+                clear_templates_to_nest_depth();
+                type = Token::Type::kAndAnd;
                 advance(2);
-            }
-        } else {
-            type = Token::Type::kGreaterThan;
-            advance(1);
-        }
-    } else if (matches(pos(), '<')) {
-        if (matches(pos() + 1, '=')) {
-            type = Token::Type::kLessThanEqual;
-            advance(2);
-        } else if (matches(pos() + 1, '<')) {
-            if (matches(pos() + 2, '=')) {
-                type = Token::Type::kShiftLeftEqual;
-                advance(3);
-            } else {
-                type = Token::Type::kShiftLeft;
+            } else if (matches(pos() + 1, '=')) {
+                type = Token::Type::kAndEqual;
                 advance(2);
+            } else {
+                type = Token::Type::kAnd;
+                advance(1);
             }
-        } else {
-            if (!tokens_.empty() && (tokens_.back().Is(Token::Type::kIdentifier) ||
-                                     tokens_.back().Is(Token::Type::kVar))) {
-                possible_templates_.Emplace(static_cast<uint32_t>(tokens_.size()), nesting_depth_);
+            break;
+        case '/':
+            if (matches(pos() + 1, '=')) {
+                type = Token::Type::kDivisionEqual;
+                advance(2);
+            } else {
+                type = Token::Type::kForwardSlash;
+                advance(1);
             }
-
-            type = Token::Type::kLessThan;
+            break;
+        case '!':
+            if (matches(pos() + 1, '=')) {
+                type = Token::Type::kNotEqual;
+                advance(2);
+            } else {
+                type = Token::Type::kBang;
+                advance(1);
+            }
+            break;
+        case ':':
+            // Expression terminating token. No opening template list can hold this tokens, so clear
+            // the stack and expression depth.
+            reset_nest_depth();
+            type = Token::Type::kColon;
             advance(1);
-        }
-    } else if (matches(pos(), '%')) {
-        if (matches(pos() + 1, '=')) {
-            type = Token::Type::kModuloEqual;
-            advance(2);
-        } else {
-            type = Token::Type::kMod;
+            break;
+        case ',':
+            type = Token::Type::kComma;
             advance(1);
-        }
-    } else if (matches(pos(), '-')) {
-        if (matches(pos() + 1, '>')) {
-            type = Token::Type::kArrow;
-            advance(2);
-        } else if (matches(pos() + 1, '-')) {
-            type = Token::Type::kMinusMinus;
-            advance(2);
-        } else if (matches(pos() + 1, '=')) {
-            type = Token::Type::kMinusEqual;
-            advance(2);
-        } else {
-            type = Token::Type::kMinus;
+            break;
+        case '=':
+            if (matches(pos() + 1, '=')) {
+                type = Token::Type::kEqualEqual;
+                advance(2);
+            } else {
+                // Expression terminating token. No opening template list can hold this tokens, so
+                // clear the stack and expression depth.
+                reset_nest_depth();
+                type = Token::Type::kEqual;
+                advance(1);
+            }
+            break;
+        case '>':
+            if (!possible_templates_.IsEmpty() &&
+                possible_templates_.Back().depth == nesting_depth_) {
+                advance(1);
+                type = Token::Type::kTemplateArgsRight;
+                tokens_[possible_templates_.Pop().token_idx].SetType(
+                    Token::Type::kTemplateArgsLeft);
+            } else if (matches(pos() + 1, '=')) {
+                type = Token::Type::kGreaterThanEqual;
+                advance(2);
+            } else if (matches(pos() + 1, '>')) {
+                if (matches(pos() + 2, '=')) {
+                    type = Token::Type::kShiftRightEqual;
+                    advance(3);
+                } else {
+                    type = Token::Type::kShiftRight;
+                    advance(2);
+                }
+            } else {
+                type = Token::Type::kGreaterThan;
+                advance(1);
+            }
+            break;
+        case '<':
+            if (matches(pos() + 1, '=')) {
+                type = Token::Type::kLessThanEqual;
+                advance(2);
+            } else if (matches(pos() + 1, '<')) {
+                if (matches(pos() + 2, '=')) {
+                    type = Token::Type::kShiftLeftEqual;
+                    advance(3);
+                } else {
+                    type = Token::Type::kShiftLeft;
+                    advance(2);
+                }
+            } else {
+                if (!tokens_.empty() && (tokens_.back().Is(Token::Type::kIdentifier) ||
+                                         tokens_.back().Is(Token::Type::kVar))) {
+                    possible_templates_.Emplace(static_cast<uint32_t>(tokens_.size()),
+                                                nesting_depth_);
+                }
+                type = Token::Type::kLessThan;
+                advance(1);
+            }
+            break;
+        case '%':
+            if (matches(pos() + 1, '=')) {
+                type = Token::Type::kModuloEqual;
+                advance(2);
+            } else {
+                type = Token::Type::kMod;
+                advance(1);
+            }
+            break;
+        case '-':
+            if (matches(pos() + 1, '>')) {
+                type = Token::Type::kArrow;
+                advance(2);
+            } else if (matches(pos() + 1, '-')) {
+                type = Token::Type::kMinusMinus;
+                advance(2);
+            } else if (matches(pos() + 1, '=')) {
+                type = Token::Type::kMinusEqual;
+                advance(2);
+            } else {
+                type = Token::Type::kMinus;
+                advance(1);
+            }
+            break;
+        case '.':
+            type = Token::Type::kPeriod;
             advance(1);
-        }
-    } else if (matches(pos(), '.')) {
-        type = Token::Type::kPeriod;
-        advance(1);
-    } else if (matches(pos(), '+')) {
-        if (matches(pos() + 1, '+')) {
-            type = Token::Type::kPlusPlus;
-            advance(2);
-        } else if (matches(pos() + 1, '=')) {
-            type = Token::Type::kPlusEqual;
-            advance(2);
-        } else {
-            type = Token::Type::kPlus;
+            break;
+        case '+':
+            if (matches(pos() + 1, '+')) {
+                type = Token::Type::kPlusPlus;
+                advance(2);
+            } else if (matches(pos() + 1, '=')) {
+                type = Token::Type::kPlusEqual;
+                advance(2);
+            } else {
+                type = Token::Type::kPlus;
+                advance(1);
+            }
+            break;
+        case '|':
+            if (matches(pos() + 1, '|')) {
+                // Treat 'a < b || c > d' as a logical binary operator of two comparison operators
+                // instead of a single template argument 'b||c'.
+                // Use parentheses around 'b||c' to parse as a template argument list.
+                clear_templates_to_nest_depth();
+                type = Token::Type::kOrOr;
+                advance(2);
+            } else if (matches(pos() + 1, '=')) {
+                type = Token::Type::kOrEqual;
+                advance(2);
+            } else {
+                type = Token::Type::kOr;
+                advance(1);
+            }
+            break;
+        case ';':
+            // Expression terminating token. No opening template list can hold this tokens, so clear
+            // the stack and expression depth.
+            reset_nest_depth();
+            type = Token::Type::kSemicolon;
             advance(1);
-        }
-    } else if (matches(pos(), '|')) {
-        if (matches(pos() + 1, '|')) {
-            // Treat 'a < b || c > d' as a logical binary operator of two comparison operators
-            // instead of a single template argument 'b||c'.
-            // Use parentheses around 'b||c' to parse as a template argument list.
-            clear_templates_to_nest_depth();
-
-            type = Token::Type::kOrOr;
-            advance(2);
-        } else if (matches(pos() + 1, '=')) {
-            type = Token::Type::kOrEqual;
-            advance(2);
-        } else {
-            type = Token::Type::kOr;
+            break;
+        case '*':
+            if (matches(pos() + 1, '=')) {
+                type = Token::Type::kTimesEqual;
+                advance(2);
+            } else {
+                type = Token::Type::kStar;
+                advance(1);
+            }
+            break;
+        case '~':
+            type = Token::Type::kTilde;
             advance(1);
-        }
-    } else if (matches(pos(), ';')) {
-        // Expression terminating token. No opening template list can hold this tokens, so clear the
-        // stack and expression depth.
-        reset_nest_depth();
-
-        type = Token::Type::kSemicolon;
-        advance(1);
-    } else if (matches(pos(), '*')) {
-        if (matches(pos() + 1, '=')) {
-            type = Token::Type::kTimesEqual;
-            advance(2);
-        } else {
-            type = Token::Type::kStar;
+            break;
+        case '_':
+            type = Token::Type::kUnderscore;
             advance(1);
-        }
-    } else if (matches(pos(), '~')) {
-        type = Token::Type::kTilde;
-        advance(1);
-    } else if (matches(pos(), '_')) {
-        type = Token::Type::kUnderscore;
-        advance(1);
-    } else if (matches(pos(), '^')) {
-        if (matches(pos() + 1, '=')) {
-            type = Token::Type::kXorEqual;
-            advance(2);
-        } else {
-            type = Token::Type::kXor;
-            advance(1);
-        }
-    } else {
-        return {};
+            break;
+        case '^':
+            if (matches(pos() + 1, '=')) {
+                type = Token::Type::kXorEqual;
+                advance(2);
+            } else {
+                type = Token::Type::kXor;
+                advance(1);
+            }
+            break;
+        default:
+            return {};
     }
 
     end_source(source);
 
     return Token{type, source};
+}
+
+std::optional<Token> Lexer::try_interpolated_string() {
+    if (is_eol() || at(pos()) != '`') {
+        return {};
+    }
+
+    auto source = begin_source();
+    advance(1);  // consume the opening backtick
+    return scan_interpolated_string_chunk(source, /* is_tail_or_middle */ false);
+}
+
+Token Lexer::scan_interpolated_string_chunk(Source source, bool is_tail_or_middle) {
+    auto unicode_length = [](std::string_view str, size_t i) {
+        auto [_, n] = tint::utf8::Decode(str.substr(i));
+        return static_cast<uint32_t>(n);
+    };
+
+    std::string str;
+    while (!is_eof()) {
+        if (is_null()) {
+            return Token{Token::Type::kError, begin_source(), "null character found"};
+        }
+
+        if (is_eol()) {
+            str += '\n';
+            advance_line();
+            continue;
+        }
+
+        // Check for the end of the literal.
+        if (matches(pos(), '`')) {
+            advance(1);
+            end_source(source);
+            if (is_tail_or_middle) {
+                interpolated_string_stack_.Pop();
+                return Token{Token::Type::kInterpolatedStringTail, source, std::move(str)};
+            }
+            return Token{Token::Type::kStringLiteral, source, std::move(str)};
+        }
+
+        // Check for the beginning of a new expression interpolation delimiter.
+        if (matches(pos(), "${")) {
+            advance(2);
+            end_source(source);
+            if (is_tail_or_middle) {
+                interpolated_string_stack_.Back().brace_depth = 0;
+                return Token{Token::Type::kInterpolatedStringMiddle, source, std::move(str)};
+            }
+            interpolated_string_stack_.Push(InterpolatedStringContext{0, source});
+            return Token{Token::Type::kInterpolatedStringHead, source, std::move(str)};
+        }
+
+        // Check for escape characters.
+        if (matches(pos(), '\\')) {
+            auto esc_source = begin_source();
+            advance(1);
+            if (is_eof()) {
+                return Token{Token::Type::kError,
+                             is_tail_or_middle ? interpolated_string_stack_.Back().source : source,
+                             "unterminated interpolated string literal"};
+            }
+            if (is_eol()) {
+                // Line continuation: backslash followed by newline is ignored
+                advance_line();
+                continue;
+            }
+            char next_ch = at(pos());
+            switch (next_ch) {
+                case 'n':
+                    str += '\n';
+                    advance(1);
+                    break;
+                case 'r':
+                    str += '\r';
+                    advance(1);
+                    break;
+                case 't':
+                    str += '\t';
+                    advance(1);
+                    break;
+                case '\\':
+                    str += '\\';
+                    advance(1);
+                    break;
+                case '`':
+                    str += '`';
+                    advance(1);
+                    break;
+                case '$':
+                    str += '$';
+                    advance(1);
+                    break;
+                default:
+                    advance(1);
+                    end_source(esc_source);
+                    return Token{Token::Type::kError, esc_source, "unknown escape sequence"};
+            }
+            continue;
+        }
+
+        auto n = unicode_length(line(), pos());
+        if (n == 0) {
+            return Token{Token::Type::kError, begin_source(), "invalid UTF-8"};
+        }
+        str.append(substr(pos(), n));
+        advance(n);
+    }
+
+    return Token{Token::Type::kError,
+                 is_tail_or_middle ? interpolated_string_stack_.Back().source : source,
+                 "unterminated interpolated string literal"};
 }
 
 std::optional<Token::Type> Lexer::parse_keyword(std::string_view str) {

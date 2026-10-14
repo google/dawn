@@ -1,0 +1,94 @@
+SKIP: FAILED
+
+VertexOutput = struct @align(16) {
+  pos:vec4<f32> @offset(0), @builtin(position)
+}
+
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func():void {
+  $B1: {
+    %2:void = print "hello world"
+    ret
+  }
+}
+%fragment_main = @fragment func():void {
+  $B2: {
+    %4:void = print "hello from fragment"
+    ret
+  }
+}
+%vertex_main = @vertex func():VertexOutput {
+  $B3: {
+    %out:ptr<function, VertexOutput, read_write> = var undef
+    %7:ptr<function, vec4<f32>, read_write> = access %out, 0u
+    store %7, vec4<f32>(0.0f)
+    %8:void = print "hello from vertex"
+    %9:VertexOutput = load %out
+    ret %9
+  }
+}
+Failed to generate: print is not supported by the HLSL backend
+VertexOutput = struct @align(16) {
+  pos:vec4<f32> @offset(0), @builtin(position)
+}
+
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func():void {
+  $B1: {
+    %2:void = print "hello world"
+    ret
+  }
+}
+%fragment_main = @fragment func():void {
+  $B2: {
+    %4:void = print "hello from fragment"
+    ret
+  }
+}
+%vertex_main = @vertex func():VertexOutput {
+  $B3: {
+    %out:ptr<function, VertexOutput, read_write> = var undef
+    %7:ptr<function, vec4<f32>, read_write> = access %out, 0u
+    store %7, vec4<f32>(0.0f)
+    %8:void = print "hello from vertex"
+    %9:VertexOutput = load %out
+    ret %9
+  }
+}
+Failed to generate: print is not supported by the HLSL backend
+VertexOutput = struct @align(16) {
+  pos:vec4<f32> @offset(0), @builtin(position)
+}
+
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func():void {
+  $B1: {
+    %2:void = print "hello world"
+    ret
+  }
+}
+%fragment_main = @fragment func():void {
+  $B2: {
+    %4:void = print "hello from fragment"
+    ret
+  }
+}
+%vertex_main = @vertex func():VertexOutput {
+  $B3: {
+    %out:ptr<function, VertexOutput, read_write> = var undef
+    %7:ptr<function, vec4<f32>, read_write> = access %out, 0u
+    store %7, vec4<f32>(0.0f)
+    %8:void = print "hello from vertex"
+    %9:VertexOutput = load %out
+    ret %9
+  }
+}
+Failed to generate: print is not supported by the HLSL backend
+//
+// compute_main
+//
+//
+// fragment_main
+//
+//
+// vertex_main
+//
+
+tint executable returned error: exit status 1

@@ -158,7 +158,6 @@ if (tint_build_fuzzers && tint_build_spv_writer) {
       "${tint_src_dir}/lang/spirv/writer/common",
       "${tint_src_dir}/lang/spirv/writer/printer",
       "${tint_src_dir}/utils",
-      "${tint_src_dir}/utils/bytes",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",

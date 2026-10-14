@@ -434,6 +434,31 @@ TEST_F(IR_ValidatorTest, StructureMember_SizeTooSmall) {
         << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Structure_MemberOverlap) {
+    core::IOAttributes attrs = {};
+    tint::Vector<const core::type::StructMember*, 4> members;
+    // Member 'a' occupies bytes [0..16)
+    members.Push(ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.vec4<f32>(), 0u, 0u,
+                                                  /* align */ 16u, 16u, attrs));
+    // Member 'b' starts at byte 8 (overlapping with 'a')
+    members.Push(ty.Get<core::type::StructMember>(mod.symbols.New("b"), ty.u32(), 1u, 8u,
+                                                  /* align */ 4u, 4u, attrs));
+    auto* str_ty =
+        ty.Get<core::type::Struct>(mod.symbols.New("S"), std::move(members), /* size */ 32u);
+
+    mod.root_block->Append(b.Var("my_struct", private_, str_ty));
+
+    auto* fn = b.Function("F", ty.void_());
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr("struct member 1 offset (8) overlaps with previous member (ends at 16)"))
+        << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, StructMember_RuntimeArrayNotLast) {
     auto* s1 = ty.Struct(mod.symbols.New("S1"), {{mod.symbols.New("a"), ty.u32()}});
     auto* rta = ty.runtime_array(s1);
@@ -620,6 +645,24 @@ TEST_F(IR_ValidatorTest, StructMember_InvalidBuiltinType_Unused) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr("primitive_index must be an u32"));
+}
+
+TEST_F(IR_ValidatorTest, StructMember_InvalidViewIndexType_Unused) {
+    core::IOAttributes attr;
+    attr.builtin = core::BuiltinValue::kViewIndex;
+    auto* s = ty.Struct(mod.symbols.New("S"), {
+                                                  {
+                                                      mod.symbols.New("m"),
+                                                      ty.i32(),
+                                                      attr,
+                                                  },
+                                              });
+
+    mod.root_block->Append(b.Var("v", ty.ptr<uniform, read>(s)));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr("view_index must be an u32"));
 }
 
 TEST_F(IR_ValidatorTest, StructMember_InterpolationWithoutLocation) {
@@ -1393,7 +1436,7 @@ INSTANTIATE_TEST_SUITE_P(
                                      std::make_tuple(false, TypeBuilder<core::type::Void>)),
                      testing::Values(std::make_tuple(false, core::type::TextureDimension::k1d),
                                      std::make_tuple(true, core::type::TextureDimension::k2d),
-                                     std::make_tuple(false, core::type::TextureDimension::k2dArray),
+                                     std::make_tuple(true, core::type::TextureDimension::k2dArray),
                                      std::make_tuple(false, core::type::TextureDimension::k3d),
                                      std::make_tuple(false, core::type::TextureDimension::kCube),
                                      std::make_tuple(false,

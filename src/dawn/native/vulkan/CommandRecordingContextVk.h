@@ -31,6 +31,7 @@
 
 #include "absl/container/flat_hash_set.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "partition_alloc/pointers/raw_ptr_exclusion.h"
 #include "src/dawn/common/vulkan_platform.h"
 #include "src/dawn/native/vulkan/BufferVk.h"
 #include "src/dawn/native/vulkan/VulkanFunctions.h"
@@ -82,7 +83,7 @@ struct CommandRecordingContext {
     // See the VulkanSplitCommandBufferOnDepthStencilComputeSampleAfterRenderPass toggle as an
     // example. This tracks the list of all command buffers used for this recording context,
     // with commandBuffer always being the last element.
-    std::vector<VkCommandBuffer> commandBufferList;
+    RAW_PTR_EXCLUSION std::vector<VkCommandBuffer> commandBufferList;
     std::vector<VkCommandPool> commandPoolList;
 
     // Need to track if a render pass has already been recorded for the

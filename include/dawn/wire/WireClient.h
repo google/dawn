@@ -128,6 +128,11 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
         MemoryHandle();
         virtual ~MemoryHandle();
 
+        // Returns true if the memory is already known to be zero-initialized, allowing callers to
+        // skip explicitly zeroing it out.
+        // TODO(386255678): Make this function non-virtual once it is implemented in Chromium.
+        virtual bool IsInitialized() const { return false; }
+
         // Get the required serialization size for SerializeCreate
         virtual size_t GetSerializeCreateSize() const = 0;
 
@@ -180,9 +185,6 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
     MemoryTransferService(const MemoryTransferService&) = delete;
     MemoryTransferService& operator=(const MemoryTransferService&) = delete;
 };
-
-// Backdoor to get the order of the ProcMap for testing
-DAWN_WIRE_EXPORT std::vector<std::string_view> GetProcMapNamesForTesting();
 }  // namespace client
 }  // namespace dawn::wire
 

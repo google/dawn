@@ -10,18 +10,17 @@ struct S {
 shared S wg[10];
 void compute_main_inner(uint tint_local_index) {
   {
-    uint v = 0u;
-    v = tint_local_index;
+    uint idx = tint_local_index;
     while(true) {
-      uint v_1 = v;
-      if ((v_1 >= 10u)) {
+      uint v = idx;
+      if ((v >= 10u)) {
         break;
       }
-      wg[v_1].x = 0;
-      atomicExchange(wg[v_1].a, 0u);
-      wg[v_1].y = 0u;
+      wg[v].x = 0;
+      atomicExchange(wg[v].a, 0u);
+      wg[v].y = 0u;
       {
-        v = (v_1 + 1u);
+        idx = (idx + 1u);
       }
     }
   }

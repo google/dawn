@@ -67,10 +67,11 @@ std::vector<std::byte> GenerateHashPrefixedPayload(std::span<const std::byte> va
 ResultOrError<Blob> CheckAndUnpackHashPrefixedPayload(Blob&& blobWithHash) {
     // Validate the size of the buffer must be larger than the size of hash result.
     const size_t sizeWithHash = blobWithHash.Size();
-    DAWN_INTERNAL_ERROR_IF(!(sizeWithHash > kHashByteSize),
-                           "Blob cache hash validation failed. Blob of %zu bytes loaded from cache "
-                           "is no larger than size of hash result %zu bytes.",
-                           sizeWithHash, kHashByteSize);
+    DAWN_UNRECOVERABLE_ERROR_IF(
+        !(sizeWithHash > kHashByteSize),
+        "Blob cache hash validation failed. Blob of %zu bytes loaded from cache "
+        "is no larger than size of hash result %zu bytes.",
+        sizeWithHash, kHashByteSize);
 
     // Read the expected hash before we hide the hash from the blob.
     Hash* expectedHash = reinterpret_cast<Hash*>(blobWithHash.DataPtr());
@@ -90,10 +91,11 @@ ResultOrError<Blob> CheckAndUnpackHashPrefixedPayload(Blob&& blobWithHash) {
     };
 
     // Validate the hash matches the expected hash.
-    DAWN_INTERNAL_ERROR_IF(actualHash != *expectedHash,
-                           "Blob cache hash validation failed. Loaded blob of size %zu fails the "
-                           "hash validation, expected hash: %s, computed hash: %s.",
-                           sizeWithHash, PrintHash(expectedHash), PrintHash(&actualHash));
+    DAWN_UNRECOVERABLE_ERROR_IF(
+        actualHash != *expectedHash,
+        "Blob cache hash validation failed. Loaded blob of size %zu fails the "
+        "hash validation, expected hash: %s, computed hash: %s.",
+        sizeWithHash, PrintHash(expectedHash), PrintHash(&actualHash));
     return std::move(blob);
 }
 

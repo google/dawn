@@ -79,6 +79,7 @@ if (tint_build_unittests) {
   if (tint_build_msl_writer) {
     tint_unittests_source_set("unittests") {
       sources = [
+        "alias_test.cc",
         "binary_test.cc",
         "constant_test.cc",
         "discard_test.cc",
@@ -139,7 +140,6 @@ if (tint_build_fuzzers && tint_build_msl_writer) {
       "${tint_src_dir}/lang/msl/writer/common",
       "${tint_src_dir}/lang/msl/writer/printer",
       "${tint_src_dir}/utils",
-      "${tint_src_dir}/utils/bytes",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",

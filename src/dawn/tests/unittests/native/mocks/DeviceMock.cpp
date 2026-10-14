@@ -77,7 +77,7 @@ DeviceMock::DeviceMock(AdapterBase* adapter,
             }));
     ON_CALL(*this, CreateExternalTextureImpl)
         .WillByDefault(WithArgs<0>([this](const ExternalTextureDescriptor* descriptor)
-                                       -> ResultOrError<Ref<ExternalTextureBase>> {
+                                       -> ResultOrUnknownError<Ref<ExternalTextureBase>> {
             return ExternalTextureMock::Create(this, descriptor);
         }));
     ON_CALL(*this, CreatePipelineLayoutImpl)

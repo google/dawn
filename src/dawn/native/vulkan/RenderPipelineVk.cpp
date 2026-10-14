@@ -395,7 +395,7 @@ Ref<RenderPipeline> RenderPipeline::CreateUninitialized(
     return AcquireRef(new RenderPipeline(device, descriptor));
 }
 
-MaybeError RenderPipeline::InitializeImpl() {
+MaybeUnknownError RenderPipeline::InitializeImpl() {
     // Gather list of internal immediates used by this pipeline
     if ((NeedsPixelCenterPolyfill() || UsesFragDepth()) && !HasUnclippedDepth()) {
         mImmediateMask |= GetImmediateBlockBits(offsetof(RenderImmediates, clampFragDepth),
@@ -429,7 +429,7 @@ MaybeError RenderPipeline::InitializeImpl() {
     return {};
 }
 
-ResultOrError<PipelineHandles> RenderPipeline::GetOrCreateSpecializedHandle(
+ResultOrUnknownError<PipelineHandles> RenderPipeline::GetOrCreateSpecializedHandle(
     Specialization&& specializationIn) {
     Specialization specialization = specializationIn;
     specialization.layout.pushConstantBytes = ToPushConstantBytes(mImmediateMask);
@@ -455,7 +455,7 @@ ResultOrError<PipelineHandles> RenderPipeline::GetOrCreateSpecializedHandle(
     SpecializationResult r;
     DAWN_TRY_ASSIGN(r, InitializeSpecialization(specialization, /*buildCacheKey=*/false));
 
-    return mSpecializations.Use([&](auto specializations) -> ResultOrError<PipelineHandles> {
+    return mSpecializations.Use([&](auto specializations) -> ResultOrUnknownError<PipelineHandles> {
         auto handles = PipelineHandles{.pipeline = r.pipeline->Get(), .layout = r.layout->Get()};
 
         auto [it, inserted] = specializations->insert({specialization, r});
@@ -467,7 +467,7 @@ ResultOrError<PipelineHandles> RenderPipeline::GetOrCreateSpecializedHandle(
     });
 }
 
-ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSpecialization(
+ResultOrUnknownError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSpecialization(
     const Specialization& specialization,
     bool buildCacheKey) {
     Device* device = ToBackend(GetDevice());
@@ -528,7 +528,7 @@ ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSp
             }
         }
         if (!pixelCenterPolyfillLocation.has_value()) {
-            return DAWN_INTERNAL_ERROR(
+            return DAWN_UNRECOVERABLE_ERROR(
                 "unable to find a free vertex location for the pixel center polyfill");
         }
 
@@ -658,6 +658,28 @@ ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSp
         for (auto i : GetColorAttachmentsMask()) {
             const ColorTargetState* target = GetColorTargetState(i);
             colorBlendAttachments[i] = ComputeColorDesc(target, fragmentOutputMask[i]);
+        }
+
+        // Force a real but destination-preserving alpha write so the driver cannot strip
+        // the fragment alpha and, with it, the alpha-to-coverage computation. The alpha
+        // blend (src * ZERO + dst * ONE) stores the destination alpha unchanged.
+        if (IsAlphaToCoverageEnabled() &&
+            device->IsToggleEnabled(Toggle::VulkanForceAlphaWriteForAlphaToCoverage)) {
+            constexpr ColorAttachmentIndex kAlphaToCoverageAttachment{uint8_t{0}};
+            DAWN_ASSERT(GetColorAttachmentsMask()[kAlphaToCoverageAttachment]);
+            auto& attachment = colorBlendAttachments[kAlphaToCoverageAttachment];
+
+            // TODO(crbug.com/561839163): We should be able to ASSERT IsBlendable.
+            const Format& format = device->GetValidInternalFormat(
+                GetColorAttachmentFormat(kAlphaToCoverageAttachment));
+            if ((attachment.colorWriteMask & VK_COLOR_COMPONENT_A_BIT) == 0 &&
+                format.IsBlendable()) {
+                attachment.colorWriteMask |= VK_COLOR_COMPONENT_A_BIT;
+                attachment.blendEnable = VK_TRUE;
+                attachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+                attachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+                attachment.alphaBlendOp = VK_BLEND_OP_ADD;
+            }
         }
 
         colorBlend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -907,10 +929,16 @@ ResultOrError<RenderPipeline::SpecializationResult> RenderPipeline::InitializeSp
     platform::metrics::DawnHistogramTimer cacheTimer(GetDevice()->GetPlatform());
     Ref<PipelineCache> cache = ToBackend(GetDevice()->GetOrCreatePipelineCache(GetCacheKey()));
     VkPipeline pipeline;
-    DAWN_TRY(
-        CheckVkSuccess(device->fn.CreateGraphicsPipelines(device->GetVkDevice(), cache->GetHandle(),
-                                                          1, &createInfo, nullptr, &*pipeline),
-                       "CreateGraphicsPipelines"));
+
+    ::VkResult vkResult = device->fn.CreateGraphicsPipelines(
+        device->GetVkDevice(), cache->GetHandle(), 1, &createInfo, nullptr, &*pipeline);
+    if (vkResult == VK_ERROR_UNKNOWN) {
+        return DAWN_PIPELINE_UNCATEGORIZED_ERROR(
+            "CreateGraphicsPipelines failed with VK_ERROR_UNKNOWN");
+    } else {
+        DAWN_TRY(CheckVkSuccess(vkResult, "CreateGraphicsPipelines"));
+    }
+
     result.pipeline = AcquireRef(new RefCountedVkHandle<VkPipeline>(device, pipeline));
     cacheTimer.RecordMicroseconds(cache->CacheHit() ? "Vulkan.CreateGraphicsPipelines.CacheHit"
                                                     : "Vulkan.CreateGraphicsPipelines.CacheMiss");

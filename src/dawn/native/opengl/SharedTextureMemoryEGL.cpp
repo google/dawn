@@ -41,7 +41,7 @@
 
 namespace dawn::native::opengl {
 
-ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemoryEGL::Create(
+ResultOrValError<Ref<SharedTextureMemory>> SharedTextureMemoryEGL::Create(
     Device* device,
     StringView label,
     const SharedTextureMemoryAHardwareBufferDescriptor* descriptor) {

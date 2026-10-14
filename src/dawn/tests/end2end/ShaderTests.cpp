@@ -2844,7 +2844,7 @@ TEST_P(ShaderTests, CollisionHandle_DifferentModules) {
 
 // Regression test for crbug.com/dawn/388870480.
 // length on SSBO on PowerVR device has compile error on ES31 backend.
-// Need to workaround using the arrayLengthFromUniform transform.
+// Need to workaround using the ReplaceArrayAndBufferLength transform.
 // We do not have hardware on test suite to trigger the failure though.
 TEST_P(ShaderTests, SSBOLength) {
     DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersPerShaderStage < 1);

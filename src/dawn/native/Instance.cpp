@@ -442,7 +442,9 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
     RequestAdapterOptions rawOptions = WithTrivialFrontendDefaults(*options);
     UnpackedPtr<RequestAdapterOptions> unpacked = Unpack(&rawOptions);
     if (unpacked.Has<RequestAdapterWebXROptions>()) {
-        ConsumedErrorAndWarnOnce(DAWN_VALIDATION_ERROR("RequestAdapterWebXROptions unsupported."));
+        std::unique_ptr<ValidationError> err =
+            DAWN_VALIDATION_ERROR("RequestAdapterWebXROptions unsupported.");
+        ConsumedErrorAndWarnOnce(std::move(err));
         return {};
     }
     auto* togglesDesc = unpacked.Get<DawnTogglesDescriptor>();
@@ -547,8 +549,9 @@ std::vector<Ref<PhysicalDeviceBase>> InstanceBase::EnumeratePhysicalDevices(
     } else if (options->backendType == wgpu::BackendType::WebGPU) {
         // User is selecting WebGPU-on-WebGPU without RequestAdapterWebGPUBackendOptions.
         // This is invalid, set no backends and warn.
-        ConsumedErrorAndWarnOnce(DAWN_VALIDATION_ERROR(
-            "Select WebGPU backend without RequestAdapterWebGPUBackendOptions is invalid."));
+        std::unique_ptr<ValidationError> err = DAWN_VALIDATION_ERROR(
+            "Select WebGPU backend without RequestAdapterWebGPUBackendOptions is invalid.");
+        ConsumedErrorAndWarnOnce(std::move(err));
     } else if (options->backendType != wgpu::BackendType::Undefined) {
         // User is selecting a specific backend.
         if (!ConsumedErrorAndWarnOnce(ValidateBackendType(options->backendType))) {
@@ -581,17 +584,6 @@ void InstanceBase::EmitLog(WGPULoggingType type, const std::string_view message)
                                       mLoggingCallbackInfo.userdata1,
                                       mLoggingCallbackInfo.userdata2);
     }
-}
-
-bool InstanceBase::ConsumedErrorAndWarnOnce(MaybeError maybeErr) {
-    if (!maybeErr.IsError()) {
-        return false;
-    }
-    std::string message = maybeErr.AcquireError()->GetFormattedMessage();
-    if (mWarningMessages.insert(message).second) {
-        EmitLog(WGPULoggingType_Warning, message);
-    }
-    return true;
 }
 
 bool InstanceBase::IsBackendValidationEnabled() const {
@@ -711,11 +703,10 @@ EventManager* InstanceBase::GetEventManager() {
     return &mEventManager;
 }
 
-void InstanceBase::ConsumeError(std::unique_ptr<InternalError> error,
-                                InternalErrorType additionalAllowedErrors) {
-    // Note: `additionalAllowedErrors` is ignored. The instance considers every type of error to be
-    // an error that is logged.
-    DAWN_ASSERT(error != nullptr);
+void InstanceBase::ConsumeErrorImpl(std::unique_ptr<UnknownError> error,
+                                    InternalErrorType additionalAllowedErrors) {
+    // Note: `additionalAllowedErrors` is ignored. The instance considers every type of error to
+    // be an error that is logged.
     EmitLog(WGPULoggingType_Error, error->GetFormattedMessage());
 }
 
@@ -817,7 +808,7 @@ void InstanceBase::APIGetWGSLLanguageFeatures(SupportedWGSLLanguageFeatures* fea
 
 void APISupportedWGSLLanguageFeaturesFreeMembers(
     WGPUSupportedWGSLLanguageFeatures supportedFeatures) {
-    delete[] supportedFeatures.features;
+    DeleteAllocationFromHeapArray(supportedFeatures.features);
 }
 
 }  // namespace dawn::native

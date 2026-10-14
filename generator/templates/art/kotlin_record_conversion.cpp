@@ -26,10 +26,10 @@
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 {% from 'art/api_jni_types.cpp' import arg_to_jni_type, convert_to_kotlin, jni_signature with context %}
 
-{% macro define_kotlin_record_structure(struct_name, members, structure_name=None) %}
+{% macro define_kotlin_record_structure(struct_name, members) %}
     struct {{struct_name}} {
-        {% for member in kotlin_record_members(members, structure_name) %}
-            {% if not member.skip_serialize %}
+        {% for member in kotlin_record_members(members) %}
+            {% if not member.kotlin_only %}
                 //* HACK: Hardcode that ANativeWindow is a jlong instead of an actual pointer. Instead
                 //* of this, we should have manually written method that directly creates the
                 //* wgpu::Surface from the Java Surface.
@@ -43,14 +43,14 @@
     };
 {% endmacro %}
 
-{% macro define_kotlin_to_struct_conversion(function_name, kotlin_name, struct_name, members, structure_name=None, is_structure_converter=False) %}
+{% macro define_kotlin_to_struct_conversion(function_name, kotlin_name, struct_name, members, is_structure_converter=False) %}
     inline void {{function_name}}(JNIContext* c, const {{kotlin_name}}& inStruct, {{struct_name}}* outStruct) {
         JNIEnv* env = c->env;
         JNIClasses* classes = JNIClasses::getInstance(env);
         *outStruct = {};
 
-        {% for member in kotlin_record_members(members, structure_name) %}
-            {% if not member.skip_serialize %}
+        {% for member in kotlin_record_members(members) %}
+            {% if not member.kotlin_only %}
             {
                 {% if member.type.category == 'callback function' %}
                     if (inStruct.{{ as_varName(member.name) }})

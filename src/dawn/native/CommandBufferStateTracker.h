@@ -54,14 +54,14 @@ class CommandBufferStateTracker {
     CommandBufferStateTracker& operator=(CommandBufferStateTracker&&);
 
     // Non-state-modifying validation functions
-    MaybeError ValidateCanDispatch();
-    MaybeError ValidateCanDraw();
-    MaybeError ValidateCanDrawIndexed();
-    MaybeError ValidateNoDifferentTextureViewsOnSameTexture();
-    MaybeError ValidateBufferInRangeForVertexBuffer(uint32_t vertexCount, uint32_t firstVertex);
-    MaybeError ValidateBufferInRangeForInstanceBuffer(uint32_t instanceCount,
-                                                      uint32_t firstInstance);
-    MaybeError ValidateIndexBufferInRange(uint32_t indexCount, uint32_t firstIndex);
+    MaybeValError ValidateCanDispatch();
+    MaybeValError ValidateCanDraw();
+    MaybeValError ValidateCanDrawIndexed();
+    MaybeValError ValidateNoDifferentTextureViewsOnSameTexture();
+    MaybeValError ValidateBufferInRangeForVertexBuffer(uint32_t vertexCount, uint32_t firstVertex);
+    MaybeValError ValidateBufferInRangeForInstanceBuffer(uint32_t instanceCount,
+                                                         uint32_t firstInstance);
+    MaybeValError ValidateIndexBufferInRange(uint32_t indexCount, uint32_t firstIndex);
 
     // State-modifying methods
     void SetComputePipeline(ComputePipelineBase* pipeline);
@@ -99,9 +99,9 @@ class CommandBufferStateTracker {
     uint64_t GetIndexBufferOffset() const;
 
   private:
-    MaybeError ValidateOperation(ValidationAspects requiredAspects);
+    MaybeValError ValidateOperation(ValidationAspects requiredAspects);
     void RecomputeLazyAspects(ValidationAspects aspects);
-    MaybeError CheckMissingAspects(ValidationAspects aspects);
+    MaybeValError CheckMissingAspects(ValidationAspects aspects);
 
     void SetPipelineCommon(PipelineBase* pipeline);
 

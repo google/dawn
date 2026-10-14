@@ -214,7 +214,7 @@ MaybeError PhysicalDeviceBase::ResetInternalDeviceForTesting() {
 }
 
 MaybeError PhysicalDeviceBase::ResetInternalDeviceForTestingImpl() {
-    return DAWN_INTERNAL_ERROR(
+    return DAWN_UNRECOVERABLE_ERROR(
         "ResetInternalDeviceForTesting should only be used with the D3D12 backend.");
 }
 

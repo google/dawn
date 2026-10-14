@@ -75,29 +75,6 @@ wgpu::Texture Create2DTexture(wgpu::Device device,
     return device.CreateTexture(&descriptor);
 }
 
-wgpu::SharedFence SharedBufferMemoryTestBackend::ImportFenceTo(const wgpu::Device& importingDevice,
-                                                               const wgpu::SharedFence& fence) {
-    wgpu::SharedFenceExportInfo exportInfo;
-    fence.ExportInfo(&exportInfo);
-
-    switch (exportInfo.type) {
-        case wgpu::SharedFenceType::DXGISharedHandle: {
-            wgpu::SharedFenceDXGISharedHandleExportInfo dxgiExportInfo;
-            exportInfo.nextInChain = &dxgiExportInfo;
-            fence.ExportInfo(&exportInfo);
-
-            wgpu::SharedFenceDXGISharedHandleDescriptor dxgiDesc;
-            dxgiDesc.handle = dxgiExportInfo.handle;
-
-            wgpu::SharedFenceDescriptor fenceDesc;
-            fenceDesc.nextInChain = &dxgiDesc;
-            return importingDevice.ImportSharedFence(&fenceDesc);
-        }
-        default:
-            DAWN_UNREACHABLE();
-    }
-}
-
 namespace {
 
 constexpr uint32_t kBufferData = 0x76543210;
@@ -259,7 +236,8 @@ TEST_P(SharedBufferMemoryTests, FenceCountMatchesSignaledValueCount) {
     EXPECT_EQ(memory.BeginAccess(buffer, &beginDesc), wgpu::Status::Success);
 }
 
-// Ensure that EndAccess cannot be called on a mapped or pending mapped buffer.
+// Ensure that EndAccess implicitly unmaps a mapped buffer, but still errors if the buffer is
+// pending map.
 TEST_P(SharedBufferMemoryTests, CallEndAccessOnMappedBuffer) {
     wgpu::SharedBufferMemory memory =
         GetParam().mBackend->CreateSharedBufferMemory(device, kMapWriteUsages, kBufferSize);
@@ -281,7 +259,7 @@ TEST_P(SharedBufferMemoryTests, CallEndAccessOnMappedBuffer) {
                         done = true;
                     });
 
-    // Calling EndAccess should generate an error even if the buffer has not completed being mapped.
+    // Calling EndAccess should generate an error while the buffer is still pending map.
     wgpu::SharedBufferMemoryEndAccessState state;
     ASSERT_DEVICE_ERROR(memory.EndAccess(buffer, &state));
 
@@ -289,8 +267,9 @@ TEST_P(SharedBufferMemoryTests, CallEndAccessOnMappedBuffer) {
         WaitABit();
     }
 
-    // Calling EndAccess should generate an error after being mapped.
-    ASSERT_DEVICE_ERROR(memory.EndAccess(buffer, &state));
+    // Calling EndAccess after the buffer is mapped should succeed and implicitly unmap it.
+    EXPECT_EQ(memory.EndAccess(buffer, &state), wgpu::Status::Success);
+    EXPECT_EQ(buffer.GetMapState(), wgpu::BufferMapState::Unmapped);
 }
 
 // Ensure no queue usage can occur before calling BeginAccess.
@@ -454,8 +433,7 @@ TEST_P(SharedBufferMemoryTests, BeginAccessInitialization) {
     // operations are complete.
     std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
     for (size_t j = 0; j < endState.fenceCount; ++j) {
-        sharedFences[j] =
-            GetParam().mBackend->ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
+        sharedFences[j] = utils::ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
     }
     beginAccessDesc.fenceCount = sharedFences.size();
     beginAccessDesc.fences = sharedFences.data();
@@ -478,8 +456,7 @@ TEST_P(SharedBufferMemoryTests, BeginAccessInitialization) {
     // operations are complete.
     std::vector<wgpu::SharedFence> sharedFences2(endState.fenceCount);
     for (size_t j = 0; j < endState.fenceCount; ++j) {
-        sharedFences2[j] =
-            GetParam().mBackend->ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
+        sharedFences2[j] = utils::ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
     }
     beginAccessDesc.fenceCount = sharedFences2.size();
     beginAccessDesc.fences = sharedFences2.data();
@@ -517,9 +494,6 @@ TEST_P(SharedBufferMemoryTests, UninitializedBufferRemainsUninitialized) {
 
 // Read and write a buffer with MapWrite and CopySrc usages.
 TEST_P(SharedBufferMemoryTests, ReadWriteSharedMapWriteBuffer) {
-    // TODO(crbug.com/468353728): Flaky on Snapdragon X Elite w/ D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D12());
-
     // Create buffer buffer with initialized data.
     wgpu::SharedBufferMemory memory = GetParam().mBackend->CreateSharedBufferMemory(
         device, kMapWriteUsages, kBufferSize, kBufferData);
@@ -548,9 +522,6 @@ TEST_P(SharedBufferMemoryTests, ReadWriteSharedMapWriteBuffer) {
 
 // Read and write a buffer with MapRead and CopyDst usages.
 TEST_P(SharedBufferMemoryTests, ReadWriteSharedMapReadBuffer) {
-    // TODO(crbug.com/468353728): Flaky on Snapdragon X Elite w/ D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D12());
-
     // Create buffer buffer with initialized data.
     wgpu::SharedBufferMemory memory = GetParam().mBackend->CreateSharedBufferMemory(
         device, kMapReadUsages, kBufferSize, kBufferData);
@@ -764,8 +735,7 @@ TEST_P(SharedBufferMemoryTests, ImportExportSharedFences) {
         // Get any fences from the previous loop's SharedBufferMemoryEndAccessState.
         std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
         for (size_t j = 0; j < endState.fenceCount; ++j) {
-            sharedFences[j] =
-                GetParam().mBackend->ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
+            sharedFences[j] = utils::ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
         }
         beginAccessDesc.fenceCount = sharedFences.size();
         beginAccessDesc.fences = sharedFences.data();
@@ -833,8 +803,7 @@ TEST_P(SharedBufferMemoryTests, UseInPassEnsureSynchronization) {
     // operations are complete.
     std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
     for (size_t j = 0; j < endState.fenceCount; ++j) {
-        sharedFences[j] =
-            GetParam().mBackend->ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
+        sharedFences[j] = utils::ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
     }
     beginAccessDesc.fenceCount = sharedFences.size();
     beginAccessDesc.fences = sharedFences.data();
@@ -877,9 +846,6 @@ TEST_P(SharedBufferMemoryTests, UseInPassEnsureSynchronization) {
 
 // Test to ensure WriteBuffer waits on a fence provided to BeginAccess.
 TEST_P(SharedBufferMemoryTests, WriteBufferEnsureSynchronization) {
-    // TODO(crbug.com/468353728): Flaky on Snapdragon X Elite w/ D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D12());
-
     wgpu::SharedBufferMemory memory =
         GetParam().mBackend->CreateSharedBufferMemory(device, kMapReadUsages, kBufferSize * 2);
     wgpu::SharedBufferMemoryProperties properties;
@@ -909,8 +875,7 @@ TEST_P(SharedBufferMemoryTests, WriteBufferEnsureSynchronization) {
     // operations are complete.
     std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
     for (size_t j = 0; j < endState.fenceCount; ++j) {
-        sharedFences[j] =
-            GetParam().mBackend->ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
+        sharedFences[j] = utils::ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
     }
     beginAccessDesc.fenceCount = sharedFences.size();
     beginAccessDesc.fences = sharedFences.data();
@@ -963,8 +928,7 @@ TEST_P(SharedBufferMemoryTests, MapAsyncEnsureSynchronization) {
     // operations are complete.
     std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
     for (size_t j = 0; j < endState.fenceCount; ++j) {
-        sharedFences[j] =
-            GetParam().mBackend->ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
+        sharedFences[j] = utils::ImportFenceTo(device, DAWN_UNSAFE_TODO(endState.fences[j]));
     }
     beginAccessDesc.fenceCount = sharedFences.size();
     beginAccessDesc.fences = sharedFences.data();

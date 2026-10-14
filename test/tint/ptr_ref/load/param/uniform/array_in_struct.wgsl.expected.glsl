@@ -7,16 +7,15 @@ uniform S_block_1_ubo {
 ivec4[4] v_1(uint start_byte_offset) {
   ivec4 a[4] = ivec4[4](ivec4(0), ivec4(0), ivec4(0), ivec4(0));
   {
-    uint v_2 = 0u;
-    v_2 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_3 = v_2;
-      if ((v_3 >= 4u)) {
+      uint v_2 = idx;
+      if ((v_2 >= 4u)) {
         break;
       }
-      a[v_3] = ivec4(v.inner[((start_byte_offset + (v_3 * 16u)) / 16u)]);
+      a[v_2] = ivec4(v.inner[((start_byte_offset + (v_2 * 16u)) / 16u)]);
       {
-        v_2 = (v_3 + 1u);
+        idx = (idx + 1u);
       }
     }
   }

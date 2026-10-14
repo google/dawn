@@ -51,7 +51,7 @@ Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
 
 ComputePipeline::~ComputePipeline() = default;
 
-ResultOrError<Extent3D> ComputePipeline::InitializeImpl() {
+ResultOrUnknownError<Extent3D> ComputePipeline::InitializeImpl() {
     Device* device = ToBackend(GetDevice());
     uint32_t compileFlags = 0;
 

@@ -33,7 +33,9 @@
 #include <utility>
 #include <vector>
 
+#include "dawn/native/DawnNative.h"
 #include "src/dawn/native/vulkan/DeviceVk.h"
+#include "src/dawn/native/vulkan/SharedTextureMemoryVk.h"
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 #include "src/dawn/native/vulkan/VulkanError.h"
 #include "src/dawn/tests/white_box/SharedTextureMemoryTests.h"
@@ -494,6 +496,66 @@ TEST_P(SharedTextureMemoryTests, ProtectedUnsupported) {
     ASSERT_DEVICE_ERROR_MSG(device.ImportSharedTextureMemory(&desc),
                             testing::HasSubstr("Unsupported AHardwareBuffer usage"));
 }
+
+#if defined(DAWN_ENABLE_ERROR_INJECTION)
+class SharedTextureMemoryAHardwareBufferImportTest : public SharedTextureMemoryTests {
+  protected:
+    void CheckImportErrors(AHardwareBuffer_Format format, wgpu::TextureFormat expectedFormat) {
+        auto* backend =
+            static_cast<SharedTextureMemoryTestAndroidVulkanBackend*>(GetParam().mBackend);
+        wgpu::SharedTextureMemory memory = backend->CreateSharedTextureMemoryHelper(
+            4, format, AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE,
+            [&](const wgpu::SharedTextureMemoryDescriptor& desc) {
+                native::ClearErrorInjector();
+                native::EnableErrorInjector();
+                device.ImportSharedTextureMemory(&desc);
+                native::DisableErrorInjector();
+                const uint64_t failureCount = native::AcquireErrorInjectorCallCount();
+                EXPECT_GT(failureCount, 0u);
+                WaitForAllOperations();
+
+                for (uint64_t failureIndex = 0; failureIndex < failureCount; ++failureIndex) {
+                    SCOPED_TRACE(failureIndex);
+                    wgpu::Device importDevice = CreateDevice();
+                    EXPECT_DEVICE_LOSS_ON(importDevice, {
+                        native::ClearErrorInjector();
+                        native::EnableErrorInjector();
+                        native::InjectErrorAt(failureIndex);
+                        importDevice.ImportSharedTextureMemory(&desc);
+                        native::DisableErrorInjector();
+                    });
+                    EXPECT_EQ(native::AcquireErrorInjectorCallCount(), failureIndex + 1);
+                }
+
+                return device.ImportSharedTextureMemory(&desc);
+            });
+        DAWN_TEST_UNSUPPORTED_IF(memory == nullptr);
+        ASSERT_FALSE(native::FromAPI(memory.Get())->IsError());
+        EXPECT_EQ(native::vulkan::ToBackend(native::FromAPI(memory.Get()))->GetQueueFamilyIndex(),
+                  VK_QUEUE_FAMILY_FOREIGN_EXT);
+        wgpu::SharedTextureMemoryProperties properties;
+        ASSERT_EQ(memory.GetProperties(&properties), wgpu::Status::Success);
+        EXPECT_EQ(properties.format, expectedFormat);
+    }
+};
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(SharedTextureMemoryAHardwareBufferImportTest);
+
+// Check that import stops at each injected failure and the AHardwareBuffer can be imported again.
+TEST_P(SharedTextureMemoryAHardwareBufferImportTest, ImportErrors) {
+    CheckImportErrors(AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM, wgpu::TextureFormat::RGBA8Unorm);
+}
+
+// Exercise the external-format path separately so unsupported YUV allocations only skip this case.
+TEST_P(SharedTextureMemoryAHardwareBufferImportTest, ImportErrorsWithExternalFormat) {
+    CheckImportErrors(AHARDWAREBUFFER_FORMAT_Y8Cb8Cr8_420, wgpu::TextureFormat::OpaqueYCbCrAndroid);
+}
+
+DAWN_INSTANTIATE_PREFIXED_TEST_P(Vulkan,
+                                 SharedTextureMemoryAHardwareBufferImportTest,
+                                 {VulkanBackend()},
+                                 {SharedTextureMemoryTestAndroidVulkanBackend::GetInstance()},
+                                 {1});
+#endif  // defined(DAWN_ENABLE_ERROR_INJECTION)
 
 DAWN_INSTANTIATE_PREFIXED_TEST_P(Vulkan,
                                  SharedTextureMemoryNoFeatureTests,

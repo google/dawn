@@ -92,17 +92,18 @@ struct VulkanDeviceKnobs {
 
 struct VulkanDeviceInfo : VulkanDeviceKnobs {
     VkPhysicalDeviceProperties properties;
-    VkPhysicalDeviceMaintenance3Properties propertiesMaintenance3;
+    VkPhysicalDeviceIDProperties idProperties;
+    VkPhysicalDeviceMaintenance3Properties maintenance3Properties;
+    VkPhysicalDeviceMaintenance4Properties maintenance4Properties;
+    VkPhysicalDeviceMaintenance5Properties maintenance5Properties;
     VkPhysicalDeviceDriverProperties driverProperties;
     VkPhysicalDeviceSubgroupSizeControlPropertiesEXT subgroupSizeControlProperties;
     VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR shaderIntegerDotProductProperties;
-    VkPhysicalDeviceMaintenance4Properties propertiesMaintenance4;
     VkPhysicalDeviceSubgroupProperties subgroupProperties;
     VkPhysicalDeviceExternalMemoryHostPropertiesEXT externalMemoryHostProperties;
     VkPhysicalDeviceCooperativeMatrixPropertiesKHR cooperativeMatrixProperties;
     VkPhysicalDeviceDescriptorIndexingProperties descriptorIndexingProperties;
     VkPhysicalDevicePipelineRobustnessProperties pipelineRobustnessProperties;
-    VkPhysicalDeviceMaintenance5Properties propertiesMaintenance5;
     VkPhysicalDeviceDrmPropertiesEXT drmProperties;
 
     std::vector<VkQueueFamilyProperties> queueFamilies;

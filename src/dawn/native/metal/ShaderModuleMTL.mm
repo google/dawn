@@ -47,7 +47,7 @@
 #include "src/dawn/native/metal/UtilsMetal.h"
 #include "src/dawn/native/stream/BlobSource.h"
 #include "src/dawn/native/stream/ByteVectorSink.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/dawn/platform/metrics/HistogramMacros.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
 
@@ -78,7 +78,6 @@ using WorkgroupAllocations = std::vector<uint32_t>;
 #define MSL_COMPILATION_MEMBERS(X)                \
     X(std::string, msl)                           \
     X(std::string, remappedEntryPointName)        \
-    X(bool, needsStorageBufferLength)             \
     X(bool, hasInvariantAttribute)                \
     X(WorkgroupAllocations, workgroupAllocations) \
     X(Extent3D, localWorkgroupSize)
@@ -178,43 +177,24 @@ std::unordered_map<uint32_t, tint::msl::writer::ArgumentBufferInfo> GenerateArgu
         uint32_t argumentBufferIdx = curBufferIdx--;
         // TODO(crbug.com/363031535): The dynamic offsets should all be in a single grouping
         // which is in the immediates buffer.
-        std::optional<uint32_t> dynamicOffsetsBufferIdx = std::nullopt;
+        std::optional<uint32_t> dynamicOffsetsBufferIdx;
         if (uint32_t(bgl->GetDynamicBufferCount()) > 0u) {
             dynamicOffsetsBufferIdx = curBufferIdx--;
         }
 
-        tint::msl::writer::ArgumentBufferInfo argBufferInfo = {
+        tint::msl::writer::ArgumentBufferInfo argumentBufferInfo{
             .id = argumentBufferIdx,
             .dynamic_buffer_id = dynamicOffsetsBufferIdx,
         };
+        bgl->FillTintArgumentBufferInfo(argumentBufferInfo);
 
-        uint32_t curDynamicOffset = 0;
-
-        for (BindingIndex bindingIndex : Range(bgl->GetBindingCount())) {
-            const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
-
-            MatchVariant(
-                bindingInfo.bindingLayout,  //
-                [&](const BufferBindingInfo& binding) {
-                    if (binding.hasDynamicOffset) {
-                        argBufferInfo.binding_info_to_offset_index.insert(
-                            {uint32_t{bindingIndex}, curDynamicOffset++});
-                    }
-                },
-                [&](const SamplerBindingInfo& bindingInfo) {},
-                [&](const StaticSamplerBindingInfo& bindingInfo) {},
-                [&](const TextureBindingInfo& bindingInfo) {}, [](const TexelBufferBindingInfo&) {},
-                [&](const StorageTextureBindingInfo& bindingInfo) {},
-                [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); },
-                [](const ExternalTextureBindingInfo&) { DAWN_UNREACHABLE(); });
-        }
-        info.insert({static_cast<uint32_t>(group), argBufferInfo});
+        info.insert({static_cast<uint32_t>(group), argumentBufferInfo});
     }
 
     return info;
 }
 
-ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
+ResultOrUnknownError<CacheResult<MslCompilation>> TranslateToMSL(
     DeviceBase* device,
     const ProgrammableStage& programmableStage,
     SingleShaderStage stage,
@@ -224,9 +204,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     const BindingInfoArray& moduleBindingInfo,
     bool useStrictMath,
     const ImmediateMask& pipelineImmediateMask) {
-    std::ostringstream errorStream;
-    errorStream << "Tint MSL failure:\n";
-
     bool useArgumentBuffers = device->IsToggleEnabled(Toggle::MetalUseArgumentBuffers);
 
     tint::Bindings bindings =
@@ -272,8 +249,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                 bindings.storage.emplace(srcBindingPoint, dstBindingPoint);
             }
 
-            // Use the ShaderIndex as the indices for the buffer size lookups in the array
-            // length uniform transform.
+            // Use the ShaderIndex as the indices for buffer size lookups in immediate data.
             arrayLengthFromConstants.bindpoint_to_size_index.emplace(srcBindingPoint,
                                                                      dstBindingPoint.binding);
         }
@@ -385,7 +361,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     CacheResult<MslCompilation> mslCompilation;
     DAWN_TRY_LOAD_OR_RUN(
         mslCompilation, device, std::move(req), MslCompilation::FromValidatedBlob,
-        [](MslCompilationRequest r) -> ResultOrError<MslCompilation> {
+        [](MslCompilationRequest r) -> ResultOrUnknownError<MslCompilation> {
             TRACE_EVENT(DAWN_TRACE_CATEGORY(), "tint::msl::writer::Generate");
             // Requires Tint Program here right before actual using.
             auto shaderModule = r.inputProgram.UnsafeGetValue();
@@ -436,7 +412,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                     uint32_t maxComputeWorkgroupStorageSize =
                         r.limits.maxComputeWorkgroupStorageSize;
                     uint64_t size = result->workgroup_allocations.front();
-                    DAWN_INTERNAL_ERROR_IF(
+                    DAWN_PIPELINE_UNCATEGORIZED_IF(
                         size > maxComputeWorkgroupStorageSize,
                         "The total combined workgroup storage (%u bytes) size with all workgroup "
                         "variables combined into a single structure is larger than the maximum "
@@ -481,7 +457,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             return MslCompilation{{
                 std::move(msl),
                 r.tintOptions.remapped_entry_point_name,
-                result->needs_storage_buffer_sizes,
                 result->has_invariant_attribute,
                 std::move(result->workgroup_allocations),
                 localSize,
@@ -500,13 +475,13 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
 
 }  // namespace
 
-MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
-                                        const ProgrammableStage& programmableStage,
-                                        const PipelineLayout* layout,
-                                        const ImmediateMask& pipelineImmediateMask,
-                                        ShaderModule::MetalFunctionData* out,
-                                        uint32_t sampleMask,
-                                        const RenderPipeline* renderPipeline) {
+MaybeUnknownError ShaderModule::CreateFunction(SingleShaderStage stage,
+                                               const ProgrammableStage& programmableStage,
+                                               const PipelineLayout* layout,
+                                               const ImmediateMask& pipelineImmediateMask,
+                                               ShaderModule::MetalFunctionData* out,
+                                               uint32_t sampleMask,
+                                               const RenderPipeline* renderPipeline) {
     TRACE_EVENT(DAWN_TRACE_CATEGORY(), "metal::ShaderModule::CreateFunction", "label",
                 utils::GetLabelForTrace(GetLabel()));
 
@@ -526,7 +501,6 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
                                    renderPipeline, GetEntryPoint(entryPointName).bindings,
                                    GetStrictMath().value_or(false), pipelineImmediateMask));
 
-    out->needsStorageBufferLength = mslCompilation->needsStorageBufferLength;
     out->workgroupAllocations = std::move(mslCompilation->workgroupAllocations);
     out->localWorkgroupSize = MTLSizeMake(mslCompilation->localWorkgroupSize.width,
                                           mslCompilation->localWorkgroupSize.height,
@@ -578,13 +552,11 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
     }
 
     if (error != nullptr) {
-        // clang-format formats the `mslCompilation->msl` below oddly as `mslCompilation -> msl`.
-        // clang-format off
-        DAWN_INVALID_IF(error.code != MTLLibraryErrorCompileWarning,
-                        "ShaderModuleMTL: Unable to create library object: %s from "
-                        "produced MSL shader below:\n\n%s",
-                        [error.localizedDescription UTF8String], mslCompilation->msl);
-        // clang-format on
+        DAWN_PIPELINE_UNCATEGORIZED_IF(error.code != MTLLibraryErrorCompileWarning,
+                                       "ShaderModuleMTL: Unable to create library object: %s from "
+                                       "produced MSL shader below:\n\n%s",
+                                       [error.localizedDescription UTF8String],
+                                       mslCompilation->msl);
     }
     DAWN_ASSERT(library != nil);
     timer.RecordMicroseconds("Metal.newLibraryWithSource.CacheMiss");
@@ -603,7 +575,7 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
                 availableFunctions += "\n - \"";
                 availableFunctions += [fn UTF8String];
             }
-            return DAWN_FORMAT_INTERNAL_ERROR(
+            return DAWN_PIPELINE_UNCATEGORIZED_ERROR(
                 "ShaderModuleMTL: failed to get the MTLFunction \'%s\' from produced MSL "
                 "shader below:\n\n%s\n\nAvailable functions are:%s",
                 mslCompilation->remappedEntryPointName, mslCompilation->msl, availableFunctions);
@@ -614,11 +586,6 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
     labelStream << GetLabel() << "::" << entryPointName;
     SetDebugName(GetDevice(), out->function.Get(), "Dawn_ShaderModule", labelStream.str());
     GetDevice()->GetBlobCache()->EnsureStored(mslCompilation);
-
-    if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
-        GetEntryPoint(entryPointName).usedVertexInputs.any()) {
-        out->needsStorageBufferLength = true;
-    }
 
     // For emitting MSL in error message if render pipeline creation fails.
     out->msl = std::move(mslCompilation->msl);

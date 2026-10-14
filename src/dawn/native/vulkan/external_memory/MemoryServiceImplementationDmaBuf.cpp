@@ -81,10 +81,10 @@ bool GetFormatModifierProps(const VulkanFunctions& fn,
 
 // Some modifiers use multiple planes (for example, see the comment for
 // I915_FORMAT_MOD_Y_TILED_CCS in drm/drm_fourcc.h).
-ResultOrError<uint32_t> GetModifierPlaneCount(const VulkanFunctions& fn,
-                                              VkPhysicalDevice vkPhysicalDevice,
-                                              VkFormat format,
-                                              uint64_t modifier) {
+ResultOrValError<uint32_t> GetModifierPlaneCount(const VulkanFunctions& fn,
+                                                 VkPhysicalDevice vkPhysicalDevice,
+                                                 VkFormat format,
+                                                 uint64_t modifier) {
     VkDrmFormatModifierPropertiesEXT props;
     if (GetFormatModifierProps(fn, vkPhysicalDevice, format, modifier, &props)) {
         return static_cast<uint32_t>(props.drmFormatModifierPlaneCount);
@@ -327,8 +327,8 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
         return allocatedMemory;
     }
 
-    ResultOrError<VkImage> CreateImage(const ExternalImageDescriptor* descriptor,
-                                       const VkImageCreateInfo& baseCreateInfo) override {
+    ResultOrUnknownError<VkImage> CreateImage(const ExternalImageDescriptor* descriptor,
+                                              const VkImageCreateInfo& baseCreateInfo) override {
         DAWN_INVALID_IF(descriptor->GetType() != ExternalImageType::DmaBuf,
                         "ExternalImageDescriptor is not a dma-buf descriptor.");
 

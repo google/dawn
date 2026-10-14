@@ -31,11 +31,19 @@
 namespace tint::core::ir::transform {
 namespace {
 
-Result<SuccessType> PreservePaddingFuzzer(Module& ir, const fuzz::ir::Context&) {
-    return PreservePadding(ir);
+Result<SuccessType> PreservePaddingFuzzer(Module& ir,
+                                          const fuzz::ir::Context& context,
+                                          PreservePaddingConfig config) {
+    if (context.options.verbose) {
+        PrintReflected(std::cout, config);
+        std::cout << "\n";
+    }
+
+    return PreservePadding(ir, config);
 }
 
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::PreservePaddingFuzzer);
+constexpr auto kUnsupportedProperties = tint::core::ir::Properties{};
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::PreservePaddingFuzzer, kUnsupportedProperties);

@@ -58,9 +58,7 @@ class RenderPipeline final : public RenderPipelineBase {
     // vertex buffer table.
     uint32_t GetMtlVertexBufferIndex(VertexBufferSlot slot) const;
 
-    wgpu::ShaderStage GetStagesRequiringStorageBufferLength() const;
-
-    MaybeError InitializeImpl() override;
+    MaybeUnknownError InitializeImpl() override;
 
   private:
     using RenderPipelineBase::RenderPipelineBase;
@@ -74,8 +72,6 @@ class RenderPipeline final : public RenderPipelineBase {
     NSPRef<id<MTLRenderPipelineState>> mMtlRenderPipelineState;
     NSPRef<id<MTLDepthStencilState>> mMtlDepthStencilState;
     PerVertexBuffer<uint32_t> mMtlVertexBufferIndices{};
-
-    wgpu::ShaderStage mStagesRequiringStorageBufferLength = wgpu::ShaderStage::None;
 };
 
 }  // namespace dawn::native::metal

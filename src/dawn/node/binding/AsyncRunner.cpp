@@ -27,8 +27,9 @@
 
 #include "src/dawn/node/binding/AsyncRunner.h"
 
-#include <cassert>
 #include <limits>
+
+#include "src/utils/assert.h"
 
 namespace wgpu::binding {
 
@@ -42,14 +43,14 @@ std::shared_ptr<AsyncRunner> AsyncRunner::Create(dawn::native::Instance* instanc
 AsyncRunner::AsyncRunner(dawn::native::Instance* instance) : instance_(instance) {}
 
 void AsyncRunner::Begin(Napi::Env env) {
-    assert(tasks_waiting_ != std::numeric_limits<decltype(tasks_waiting_)>::max());
+    DAWN_ASSERT(tasks_waiting_ != std::numeric_limits<decltype(tasks_waiting_)>::max());
     if (tasks_waiting_++ == 0) {
         ScheduleProcessEvents(env);
     }
 }
 
 void AsyncRunner::End() {
-    assert(tasks_waiting_ > 0);
+    DAWN_ASSERT(tasks_waiting_ > 0);
     tasks_waiting_--;
 }
 

@@ -279,14 +279,15 @@ WindowsVersion GetCurrentWindowsVersion() {
 bool IsWindowsDeveloperModeEnabled() {
     auto ReadDevModeKey = [](const wchar_t* regPath) -> std::optional<bool> {
         HKEY hKey;
-        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, regPath, 0, KEY_QUERY_VALUE, &hKey) !=
-            ERROR_SUCCESS) {
+        if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, regPath, 0, KEY_QUERY_VALUE | KEY_WOW64_64KEY,
+                          &hKey) != ERROR_SUCCESS) {
             return std::nullopt;
         }
-        if (auto value = ReadFromDWORDRegistryKey(hKey, "AllowDevelopmentWithoutDevLicense")) {
-            return value != 0;
-        }
+        auto value = ReadFromDWORDRegistryKey(hKey, "AllowDevelopmentWithoutDevLicense");
         RegCloseKey(hKey);
+        if (value) {
+            return *value != 0;
+        }
         return std::nullopt;
     };
 

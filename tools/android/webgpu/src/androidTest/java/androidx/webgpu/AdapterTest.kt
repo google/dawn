@@ -20,7 +20,7 @@ import androidx.test.filters.SdkSuppress
 import androidx.test.filters.SmallTest
 import androidx.webgpu.WebGpuTestConstants.EMULATOR_TESTS_MIN_API_LEVEL
 import androidx.webgpu.helper.initLibrary
-import androidx.webgpu.GPU.createInstance
+import androidx.webgpu.GPU.createGPUInstance
 import java.util.concurrent.Executor
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.runBlocking
@@ -44,7 +44,7 @@ class AdapterTest {
   @Before
   fun setup() = runBlocking {
     initLibrary()
-    instance = createInstance()
+    instance = createGPUInstance()
     adapter = instance.requestAdapter()
   }
 

@@ -104,12 +104,12 @@ static constexpr std::array<ExtensionInfo, kExtensionCount> kExtensionInfos{{
 
 }  // anonymous namespace
 
-#define GET_PROC_WITH_NAME(member, name)                                          \
-    do {                                                                          \
-        member = reinterpret_cast<decltype(member)>(GetProcAddress(name));        \
-        if (member == nullptr) {                                                  \
-            return DAWN_INTERNAL_ERROR(std::string("Couldn't get proc ") + name); \
-        }                                                                         \
+#define GET_PROC_WITH_NAME(member, name)                                   \
+    do {                                                                   \
+        member = reinterpret_cast<decltype(member)>(GetProcAddress(name)); \
+        if (member == nullptr) {                                           \
+            return DAWN_UNRECOVERABLE_ERROR("Couldn't get proc %s", name); \
+        }                                                                  \
     } while (0)
 
 #define GET_PROC(name) GET_PROC_WITH_NAME(name, "egl" #name)
@@ -165,7 +165,7 @@ MaybeError EGLFunctions::LoadDisplayProcs(EGLDisplay display) {
     {
         EGLint major, minor;
         DAWN_TRY(CheckEGL(*this, Initialize(display, &major, &minor), "eglInitialize"));
-        DAWN_INVALID_IF(major != 1, "EGL version (%u) is not 1.", major);
+        DAWN_UNRECOVERABLE_ERROR_IF(major != 1, "EGL version (%u) is not 1.", major);
         mMajorVersion = major;
         mMinorVersion = minor;
     }

@@ -38,7 +38,7 @@
 #include "src/dawn/native/Commands.h"
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/InternalPipelineStore.h"
-#include "src/dawn/native/utils/WGPUHelpers.h"
+#include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/dawn/native/vulkan/BindGroupLayoutVk.h"
 #include "src/dawn/native/vulkan/BindGroupVk.h"
 #include "src/dawn/native/vulkan/DeviceVk.h"

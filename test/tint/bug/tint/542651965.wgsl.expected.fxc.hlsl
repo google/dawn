@@ -7,147 +7,141 @@ struct S {
 RWByteAddressBuffer s : register(u0);
 void v(uint offset, float3 obj[3]) {
   {
-    uint v_1 = 0u;
-    v_1 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_2 = v_1;
-      if ((v_2 >= 3u)) {
+      uint v_1 = idx;
+      if ((v_1 >= 3u)) {
         break;
       }
-      s.Store3((offset + (v_2 * 16u)), asuint(obj[v_2]));
+      s.Store3((offset + (v_1 * 16u)), asuint(obj[v_1]));
       {
-        v_1 = (v_2 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
 }
 
-void v_3(uint offset, float3 obj[3][3]) {
+void v_2(uint offset, float3 obj[3][3]) {
   {
-    uint v_4 = 0u;
-    v_4 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_5 = v_4;
-      if ((v_5 >= 3u)) {
+      uint v_3 = idx;
+      if ((v_3 >= 3u)) {
         break;
       }
-      float3 v_6[3] = obj[v_5];
-      v((offset + (v_5 * 48u)), v_6);
+      float3 v_4[3] = obj[v_3];
+      v((offset + (v_3 * 48u)), v_4);
       {
-        v_4 = (v_5 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
 }
 
-void v_7(uint offset, float3x3 obj) {
+void v_5(uint offset, float3x3 obj) {
   s.Store3((offset + 0u), asuint(obj[0u]));
   s.Store3((offset + 16u), asuint(obj[1u]));
   s.Store3((offset + 32u), asuint(obj[2u]));
 }
 
-void v_8(uint offset, float3x3 obj[3]) {
+void v_6(uint offset, float3x3 obj[3]) {
   {
-    uint v_9 = 0u;
-    v_9 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_10 = v_9;
-      if ((v_10 >= 3u)) {
+      uint v_7 = idx;
+      if ((v_7 >= 3u)) {
         break;
       }
-      v_7((offset + (v_10 * 48u)), obj[v_10]);
+      v_5((offset + (v_7 * 48u)), obj[v_7]);
       {
-        v_9 = (v_10 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
 }
 
-void v_11(uint offset, S obj) {
-  float3x3 v_12[3] = obj.a;
-  v_8((offset + 0u), v_12);
-  float3 v_13[3][3] = obj.b;
-  v_3((offset + 144u), v_13);
+void v_8(uint offset, S obj) {
+  float3x3 v_9[3] = obj.a;
+  v_6((offset + 0u), v_9);
+  float3 v_10[3][3] = obj.b;
+  v_2((offset + 144u), v_10);
 }
 
 typedef float3 ary_ret[3];
-ary_ret v_14(uint offset) {
+ary_ret v_11(uint offset) {
   float3 a[3] = (float3[3])0;
   {
-    uint v_15 = 0u;
-    v_15 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_16 = v_15;
-      if ((v_16 >= 3u)) {
+      uint v_12 = idx;
+      if ((v_12 >= 3u)) {
         break;
       }
-      a[v_16] = asfloat(s.Load3((offset + (v_16 * 16u))));
+      a[v_12] = asfloat(s.Load3((offset + (v_12 * 16u))));
       {
-        v_15 = (v_16 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  float3 v_17[3] = a;
-  return v_17;
+  float3 v_13[3] = a;
+  return v_13;
 }
 
 typedef float3 ary_ret_1[3][3];
-ary_ret_1 v_18(uint offset) {
+ary_ret_1 v_14(uint offset) {
   float3 a[3][3] = (float3[3][3])0;
   {
-    uint v_19 = 0u;
-    v_19 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_20 = v_19;
-      if ((v_20 >= 3u)) {
+      uint v_15 = idx;
+      if ((v_15 >= 3u)) {
         break;
       }
-      float3 v_21[3] = v_14((offset + (v_20 * 48u)));
-      a[v_20] = v_21;
+      float3 v_16[3] = v_11((offset + (v_15 * 48u)));
+      a[v_15] = v_16;
       {
-        v_19 = (v_20 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  float3 v_22[3][3] = a;
-  return v_22;
+  float3 v_17[3][3] = a;
+  return v_17;
 }
 
-float3x3 v_23(uint offset) {
+float3x3 v_18(uint offset) {
   return float3x3(asfloat(s.Load3((offset + 0u))), asfloat(s.Load3((offset + 16u))), asfloat(s.Load3((offset + 32u))));
 }
 
 typedef float3x3 ary_ret_2[3];
-ary_ret_2 v_24(uint offset) {
+ary_ret_2 v_19(uint offset) {
   float3x3 a[3] = (float3x3[3])0;
   {
-    uint v_25 = 0u;
-    v_25 = 0u;
+    uint idx = 0u;
     while(true) {
-      uint v_26 = v_25;
-      if ((v_26 >= 3u)) {
+      uint v_20 = idx;
+      if ((v_20 >= 3u)) {
         break;
       }
-      a[v_26] = v_23((offset + (v_26 * 48u)));
+      a[v_20] = v_18((offset + (v_20 * 48u)));
       {
-        v_25 = (v_26 + 1u);
+        idx = (idx + 1u);
       }
     }
   }
-  float3x3 v_27[3] = a;
-  return v_27;
+  float3x3 v_21[3] = a;
+  return v_21;
 }
 
-S v_28(uint offset) {
-  float3x3 v_29[3] = v_24((offset + 0u));
-  float3 v_30[3][3] = v_18((offset + 144u));
-  S v_31 = {v_29, v_30};
-  return v_31;
+S v_22(uint offset) {
+  float3x3 v_23[3] = v_19((offset + 0u));
+  float3 v_24[3][3] = v_14((offset + 144u));
+  S v_25 = {v_23, v_24};
+  return v_25;
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  S v_32 = v_28(0u);
-  v_11(0u, v_32);
+  S v_26 = v_22(0u);
+  v_8(0u, v_26);
 }
 

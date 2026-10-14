@@ -535,6 +535,9 @@ Type Builder::TypesBuilder::multisampled_texture(const Source& source,
     if (dims == core::type::TextureDimension::k2d) {
         return AsType(source, "texture_multisampled_2d", subtype);
     }
+    if (dims == core::type::TextureDimension::k2dArray) {
+        return AsType(source, "texture_multisampled_2d_array", subtype);
+    }
     TINT_ICE() << "invalid multisampled_texture dimensions: " << dims;
 }
 

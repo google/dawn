@@ -80,8 +80,311 @@ enum class ResourceType : uint32_t {
     kSampler_filtering = 40,
     kSampler_non_filtering = 41,
     kSampler_comparison = 42,
+
+    // Format-less storage texture types (we don't need to know the format).
+    kTextureStorage1d_f32_read = 43,
+    kTextureStorage1d_f32_read_write = 44,
+    kTextureStorage1d_f32_write = 45,
+    kTextureStorage1d_i32_read = 46,
+    kTextureStorage1d_i32_read_write = 47,
+    kTextureStorage1d_i32_write = 48,
+    kTextureStorage1d_u32_read = 49,
+    kTextureStorage1d_u32_read_write = 50,
+    kTextureStorage1d_u32_write = 51,
+    kTextureStorage2dArray_f32_read = 52,
+    kTextureStorage2dArray_f32_read_write = 53,
+    kTextureStorage2dArray_f32_write = 54,
+    kTextureStorage2dArray_i32_read = 55,
+    kTextureStorage2dArray_i32_read_write = 56,
+    kTextureStorage2dArray_i32_write = 57,
+    kTextureStorage2dArray_u32_read = 58,
+    kTextureStorage2dArray_u32_read_write = 59,
+    kTextureStorage2dArray_u32_write = 60,
+    kTextureStorage2d_f32_read = 61,
+    kTextureStorage2d_f32_read_write = 62,
+    kTextureStorage2d_f32_write = 63,
+    kTextureStorage2d_i32_read = 64,
+    kTextureStorage2d_i32_read_write = 65,
+    kTextureStorage2d_i32_write = 66,
+    kTextureStorage2d_u32_read = 67,
+    kTextureStorage2d_u32_read_write = 68,
+    kTextureStorage2d_u32_write = 69,
+    kTextureStorage3d_f32_read = 70,
+    kTextureStorage3d_f32_read_write = 71,
+    kTextureStorage3d_f32_write = 72,
+    kTextureStorage3d_i32_read = 73,
+    kTextureStorage3d_i32_read_write = 74,
+    kTextureStorage3d_i32_write = 75,
+    kTextureStorage3d_u32_read = 76,
+    kTextureStorage3d_u32_read_write = 77,
+    kTextureStorage3d_u32_write = 78,
+
+    // Uniform buffer type (we don't need to know the data type of the pointee).
+    kUniformBuffer = 79,
+
+    // Storage buffer type (we don't need to know the data type of the pointee, or the access mode).
+    kReadOnlyStorageBuffer = 80,
+    kWritableStorageBuffer = 81,
+    // NOTE: If adding more items here, be sure to update the range below.
 };
-TINT_REFLECT_ENUM_RANGE(tint::ResourceType, kEmpty, kSampler_comparison);
+TINT_REFLECT_ENUM_RANGE(tint::ResourceType, kEmpty, kWritableStorageBuffer);
+
+/// @param out the stream to write to
+/// @param mode the step mode
+/// @returns @p out so calls can be chained
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
+auto& operator<<(STREAM& out, ResourceType type) {
+    switch (type) {
+        case ResourceType::kEmpty:
+            out << "Empty";
+            break;
+        case ResourceType::kTexture1d_f32_filterable:
+            out << "Texture1d_f32_filterable";
+            break;
+        case ResourceType::kTexture1d_f32_unfilterable:
+            out << "Texture1d_f32_unfilterable";
+            break;
+        case ResourceType::kTexture1d_f32_unknown_filterable:
+            out << "Texture1d_f32_unknown_filterable";
+            break;
+        case ResourceType::kTexture1d_i32:
+            out << "Texture1d_i32";
+            break;
+        case ResourceType::kTexture1d_u32:
+            out << "Texture1d_u32";
+            break;
+        case ResourceType::kTexture2d_f32_filterable:
+            out << "Texture2d_f32_filterable";
+            break;
+        case ResourceType::kTexture2d_f32_unfilterable:
+            out << "Texture2d_f32_unfilterable";
+            break;
+        case ResourceType::kTexture2d_f32_unknown_filterable:
+            out << "Texture2d_f32_unknown_filterable";
+            break;
+        case ResourceType::kTexture2d_i32:
+            out << "Texture2d_i32";
+            break;
+        case ResourceType::kTexture2d_u32:
+            out << "Texture2d_u32";
+            break;
+        case ResourceType::kTexture2dArray_f32_filterable:
+            out << "Texture2dArray_f32_filterable";
+            break;
+        case ResourceType::kTexture2dArray_f32_unfilterable:
+            out << "Texture2dArray_f32_unfilterable";
+            break;
+        case ResourceType::kTexture2dArray_f32_unknown_filterable:
+            out << "Texture2dArray_f32_unknown_filterable";
+            break;
+        case ResourceType::kTexture2dArray_i32:
+            out << "Texture2dArray_i32";
+            break;
+        case ResourceType::kTexture2dArray_u32:
+            out << "Texture2dArray_u32";
+            break;
+        case ResourceType::kTexture3d_f32_filterable:
+            out << "Texture3d_f32_filterable";
+            break;
+        case ResourceType::kTexture3d_f32_unfilterable:
+            out << "Texture3d_f32_unfilterable";
+            break;
+        case ResourceType::kTexture3d_f32_unknown_filterable:
+            out << "Texture3d_f32_unknown_filterable";
+            break;
+        case ResourceType::kTexture3d_i32:
+            out << "Texture3d_i32";
+            break;
+        case ResourceType::kTexture3d_u32:
+            out << "Texture3d_u32";
+            break;
+        case ResourceType::kTextureCube_f32_filterable:
+            out << "TextureCube_f32_filterable";
+            break;
+        case ResourceType::kTextureCube_f32_unfilterable:
+            out << "TextureCube_f32_unfilterable";
+            break;
+        case ResourceType::kTextureCube_f32_unknown_filterable:
+            out << "TextureCube_f32_unknown_filterable";
+            break;
+        case ResourceType::kTextureCube_i32:
+            out << "TextureCube_i32";
+            break;
+        case ResourceType::kTextureCube_u32:
+            out << "TextureCube_u32";
+            break;
+        case ResourceType::kTextureCubeArray_f32_filterable:
+            out << "TextureCubeArray_f32_filterable";
+            break;
+        case ResourceType::kTextureCubeArray_f32_unfilterable:
+            out << "TextureCubeArray_f32_unfilterable";
+            break;
+        case ResourceType::kTextureCubeArray_f32_unknown_filterable:
+            out << "TextureCubeArray_f32_unknown_filterable";
+            break;
+        case ResourceType::kTextureCubeArray_i32:
+            out << "TextureCubeArray_i32";
+            break;
+        case ResourceType::kTextureCubeArray_u32:
+            out << "TextureCubeArray_u32";
+            break;
+        case ResourceType::kTextureMultisampled2d_f32:
+            out << "TextureMultisampled2d_f32";
+            break;
+        case ResourceType::kTextureMultisampled2d_i32:
+            out << "TextureMultisampled2d_i32";
+            break;
+        case ResourceType::kTextureMultisampled2d_u32:
+            out << "TextureMultisampled2d_u32";
+            break;
+        case ResourceType::kTextureDepth2d:
+            out << "TextureDepth2d";
+            break;
+        case ResourceType::kTextureDepth2dArray:
+            out << "TextureDepth2dArray";
+            break;
+        case ResourceType::kTextureDepthCube:
+            out << "TextureDepthCube";
+            break;
+        case ResourceType::kTextureDepthCubeArray:
+            out << "TextureDepthCubeArray";
+            break;
+        case ResourceType::kTextureDepthMultisampled2d:
+            out << "TextureDepthMultisampled2d";
+            break;
+        case ResourceType::kSampler:
+            out << "Sampler";
+            break;
+        case ResourceType::kSampler_filtering:
+            out << "Sampler_filtering";
+            break;
+        case ResourceType::kSampler_non_filtering:
+            out << "Sampler_non_filtering";
+            break;
+        case ResourceType::kSampler_comparison:
+            out << "Sampler_comparison";
+            break;
+        case ResourceType::kTextureStorage1d_f32_read:
+            out << "TextureStorage1d_f32_read";
+            break;
+        case ResourceType::kTextureStorage1d_f32_read_write:
+            out << "TextureStorage1d_f32_read_write";
+            break;
+        case ResourceType::kTextureStorage1d_f32_write:
+            out << "TextureStorage1d_f32_write";
+            break;
+        case ResourceType::kTextureStorage1d_i32_read:
+            out << "TextureStorage1d_i32_read";
+            break;
+        case ResourceType::kTextureStorage1d_i32_read_write:
+            out << "TextureStorage1d_i32_read_write";
+            break;
+        case ResourceType::kTextureStorage1d_i32_write:
+            out << "TextureStorage1d_i32_write";
+            break;
+        case ResourceType::kTextureStorage1d_u32_read:
+            out << "TextureStorage1d_u32_read";
+            break;
+        case ResourceType::kTextureStorage1d_u32_read_write:
+            out << "TextureStorage1d_u32_read_write";
+            break;
+        case ResourceType::kTextureStorage1d_u32_write:
+            out << "TextureStorage1d_u32_write";
+            break;
+        case ResourceType::kTextureStorage2dArray_f32_read:
+            out << "TextureStorage2dArray_f32_read";
+            break;
+        case ResourceType::kTextureStorage2dArray_f32_read_write:
+            out << "TextureStorage2dArray_f32_read_write";
+            break;
+        case ResourceType::kTextureStorage2dArray_f32_write:
+            out << "TextureStorage2dArray_f32_write";
+            break;
+        case ResourceType::kTextureStorage2dArray_i32_read:
+            out << "TextureStorage2dArray_i32_read";
+            break;
+        case ResourceType::kTextureStorage2dArray_i32_read_write:
+            out << "TextureStorage2dArray_i32_read_write";
+            break;
+        case ResourceType::kTextureStorage2dArray_i32_write:
+            out << "TextureStorage2dArray_i32_write";
+            break;
+        case ResourceType::kTextureStorage2dArray_u32_read:
+            out << "TextureStorage2dArray_u32_read";
+            break;
+        case ResourceType::kTextureStorage2dArray_u32_read_write:
+            out << "TextureStorage2dArray_u32_read_write";
+            break;
+        case ResourceType::kTextureStorage2dArray_u32_write:
+            out << "TextureStorage2dArray_u32_write";
+            break;
+        case ResourceType::kTextureStorage2d_f32_read:
+            out << "TextureStorage2d_f32_read";
+            break;
+        case ResourceType::kTextureStorage2d_f32_read_write:
+            out << "TextureStorage2d_f32_read_write";
+            break;
+        case ResourceType::kTextureStorage2d_f32_write:
+            out << "TextureStorage2d_f32_write";
+            break;
+        case ResourceType::kTextureStorage2d_i32_read:
+            out << "TextureStorage2d_i32_read";
+            break;
+        case ResourceType::kTextureStorage2d_i32_read_write:
+            out << "TextureStorage2d_i32_read_write";
+            break;
+        case ResourceType::kTextureStorage2d_i32_write:
+            out << "TextureStorage2d_i32_write";
+            break;
+        case ResourceType::kTextureStorage2d_u32_read:
+            out << "TextureStorage2d_u32_read";
+            break;
+        case ResourceType::kTextureStorage2d_u32_read_write:
+            out << "TextureStorage2d_u32_read_write";
+            break;
+        case ResourceType::kTextureStorage2d_u32_write:
+            out << "TextureStorage2d_u32_write";
+            break;
+        case ResourceType::kTextureStorage3d_f32_read:
+            out << "TextureStorage3d_f32_read";
+            break;
+        case ResourceType::kTextureStorage3d_f32_read_write:
+            out << "TextureStorage3d_f32_read_write";
+            break;
+        case ResourceType::kTextureStorage3d_f32_write:
+            out << "TextureStorage3d_f32_write";
+            break;
+        case ResourceType::kTextureStorage3d_i32_read:
+            out << "TextureStorage3d_i32_read";
+            break;
+        case ResourceType::kTextureStorage3d_i32_read_write:
+            out << "TextureStorage3d_i32_read_write";
+            break;
+        case ResourceType::kTextureStorage3d_i32_write:
+            out << "TextureStorage3d_i32_write";
+            break;
+        case ResourceType::kTextureStorage3d_u32_read:
+            out << "TextureStorage3d_u32_read";
+            break;
+        case ResourceType::kTextureStorage3d_u32_read_write:
+            out << "TextureStorage3d_u32_read_write";
+            break;
+        case ResourceType::kTextureStorage3d_u32_write:
+            out << "TextureStorage3d_u32_write";
+            break;
+        case ResourceType::kUniformBuffer:
+            out << "UniformBuffer";
+            break;
+        case ResourceType::kReadOnlyStorageBuffer:
+            out << "ReadOnlyStorageBuffer";
+            break;
+        case ResourceType::kWritableStorageBuffer:
+            out << "WritableStorageBuffer";
+            break;
+    }
+    return out;
+}
 
 constexpr bool IsSampler(ResourceType res_type) {
     switch (res_type) {

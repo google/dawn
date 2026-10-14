@@ -65,6 +65,15 @@ class Token {
         /// An integer literal with a 'u' suffix
         kIntLiteral_U,
 
+        /// A string literal
+        kStringLiteral,
+        /// The head of an interpolated string literal: `...${
+        kInterpolatedStringHead,
+        /// The middle part of an interpolated string literal: }...${
+        kInterpolatedStringMiddle,
+        /// The tail of an interpolate string literal: }...`
+        kInterpolatedStringTail,
+
         /// A '&'
         kAnd,
         /// A '&&'
@@ -285,12 +294,19 @@ class Token {
     bool IsError() const { return type_ == Type::kError; }
     /// @returns true if the token is an identifier
     bool IsIdentifier() const { return type_ == Type::kIdentifier; }
+    /// @returns true if the token is a string literal
+    bool IsStringLiteral() const { return type_ == Type::kStringLiteral; }
+    /// @returns true if the token is an interpolated string literal token
+    bool IsInterpolatedString() const {
+        return type_ == Type::kInterpolatedStringHead || type_ == Type::kInterpolatedStringMiddle ||
+               type_ == Type::kInterpolatedStringTail;
+    }
     /// @returns true if the token is a literal
     bool IsLiteral() const {
         return type_ == Type::kIntLiteral || type_ == Type::kIntLiteral_I ||
                type_ == Type::kIntLiteral_U || type_ == Type::kFalse || type_ == Type::kTrue ||
                type_ == Type::kFloatLiteral || type_ == Type::kFloatLiteral_F ||
-               type_ == Type::kFloatLiteral_H;
+               type_ == Type::kFloatLiteral_H || type_ == Type::kStringLiteral;
     }
 
     /// @returns the number of placeholder tokens required to follow the token, in order to provide

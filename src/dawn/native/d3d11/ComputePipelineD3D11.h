@@ -53,7 +53,7 @@ class ComputePipeline final : public ComputePipelineBase {
   private:
     using ComputePipelineBase::ComputePipelineBase;
     ~ComputePipeline() override;
-    ResultOrError<Extent3D> InitializeImpl() override;
+    ResultOrUnknownError<Extent3D> InitializeImpl() override;
 
     void SetLabelImpl() override;
 

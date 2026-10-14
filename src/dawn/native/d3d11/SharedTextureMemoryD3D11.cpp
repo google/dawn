@@ -42,7 +42,7 @@ namespace dawn::native::d3d11 {
 
 namespace {
 
-ResultOrError<SharedTextureMemoryProperties> PropertiesFromD3D11Texture(
+ResultOrValError<SharedTextureMemoryProperties> PropertiesFromD3D11Texture(
     Device* device,
     const ComPtr<ID3D11Texture2D>& d3d11Texture,
     bool isSharedWithHandle) {
@@ -110,7 +110,7 @@ ResultOrError<SharedTextureMemoryProperties> PropertiesFromD3D11Texture(
 }  // namespace
 
 // static
-ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
+ResultOrUnknownError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     Device* device,
     StringView label,
     const SharedTextureMemoryDXGISharedHandleDescriptor* descriptor) {
@@ -201,7 +201,7 @@ Ref<SharedResourceMemoryContents> SharedTextureMemory::CreateContents() {
     return AcquireRef(new SharedTextureMemoryContentsD3D11(GetWeakRef(this)));
 }
 
-MaybeError SharedTextureMemory::BeginAccessImpl(
+MaybeValError SharedTextureMemory::BeginAccessImpl(
     TextureBase* texture,
     const UnpackedPtr<SharedTextureMemoryBeginAccessDescriptor>& descriptor) {
     DAWN_TRY(d3d::SharedTextureMemory::BeginAccessImpl(texture, descriptor));
@@ -218,7 +218,7 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
     return {};
 }
 
-ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
+ResultOrUnknownError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     TextureBase* texture,
     ExecutionSerial lastUsageSerial,
     UnpackedPtr<SharedTextureMemoryEndAccessState>& descriptor) {

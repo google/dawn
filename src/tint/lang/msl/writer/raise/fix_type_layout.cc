@@ -156,7 +156,8 @@ struct State {
                         });
                     },
                     [&](msl::ir::BuiltinCall* msl_call) {
-                        if (msl_call->Func() != BuiltinFn::kPointerOffset) {
+                        if (msl_call->Func() != BuiltinFn::kPointerOffset &&
+                            msl_call->Func() != BuiltinFn::kAliasPointerOffset) {
                             return;
                         }
 

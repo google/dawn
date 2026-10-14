@@ -363,8 +363,8 @@ class Stream<std::vector<T>> {
         using SizeT = decltype(std::declval<std::vector<T>>().size());
         SizeT size;
         DAWN_TRY(StreamOut(s, &size));
-        DAWN_INVALID_IF(size >= v->max_size(),
-                        "Trying to reserve a vector of size larger than max_size");
+        DAWN_UNRECOVERABLE_ERROR_IF(size >= v->max_size(),
+                                    "Trying to reserve a vector of size larger than max_size");
         *v = {};
         v->reserve(size);
         for (SizeT i = 0; i < size; ++i) {
@@ -627,7 +627,7 @@ class Stream<std::variant<Types...>> {
         size_t typeId;
         DAWN_TRY(StreamOut(source, &typeId));
         if (typeId >= sizeof...(Types)) {
-            return DAWN_INTERNAL_ERROR("Invalid variant type id");
+            return DAWN_UNRECOVERABLE_ERROR("Invalid variant type id");
         } else {
             return ReadImpl<0, Types...>(source, t, typeId);
         }
