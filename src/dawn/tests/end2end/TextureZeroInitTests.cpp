@@ -2470,6 +2470,75 @@ DAWN_INSTANTIATE_TEST(TextureZeroInitRenderAreaTest,
                       MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
                       VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"}));
 
+class TextureZeroInitExpandResolveTest : public TextureZeroInitTest {
+  protected:
+    void SetUp() override {
+        TextureZeroInitTest::SetUp();
+        DAWN_TEST_UNSUPPORTED_IF(!mLoadResolveSupported);
+    }
+
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        mLoadResolveSupported = SupportsFeatures({wgpu::FeatureName::DawnLoadResolveTexture});
+        if (!mLoadResolveSupported) {
+            return {};
+        }
+        return {wgpu::FeatureName::DawnLoadResolveTexture};
+    }
+
+    bool mLoadResolveSupported = false;
+};
+
+// A fresh, never-written resolve target used with LoadOp::ExpandResolveTexture
+// must be lazy-cleared before it is read by the expand-resolve subpass. If it
+// is not, the readback returns the nonzero "garbage" fill value, indicating
+// Dawn marked the subresource initialized without ever clearing it.
+TEST_P(TextureZeroInitExpandResolveTest, ExpandResolveOnUninitializedResolveTarget) {
+    constexpr uint32_t kTexSize = 64;
+
+    // MSAA color attachment.
+    wgpu::TextureDescriptor msaaDesc;
+    msaaDesc.dimension = wgpu::TextureDimension::e2D;
+    msaaDesc.size = {kTexSize, kTexSize, 1};
+    msaaDesc.format = kColorFormat;
+    msaaDesc.sampleCount = 4;
+    msaaDesc.usage = wgpu::TextureUsage::RenderAttachment;
+    wgpu::Texture msaaTex = device.CreateTexture(&msaaDesc);
+
+    // Uninitialized resolve attachment. nonzero_clear_resources_on_creation_for_testing toggle
+    // fills its backing VkImage with non-zero bytes to simulate recycled GPU heap contents.
+    wgpu::TextureDescriptor resolveDesc;
+    resolveDesc.dimension = wgpu::TextureDimension::e2D;
+    resolveDesc.size = {kTexSize, kTexSize, 1};
+    resolveDesc.format = kColorFormat;
+    resolveDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding |
+                        wgpu::TextureUsage::CopySrc;
+    wgpu::Texture resolveTex = device.CreateTexture(&resolveDesc);
+
+    EXPECT_FALSE(native::IsTextureSubresourceInitialized(resolveTex.Get(), 0, 1, 0, 1));
+
+    utils::ComboRenderPassDescriptor renderPass({msaaTex.CreateView()});
+    renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::ExpandResolveTexture;
+    renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
+    renderPass.cColorAttachments[0].resolveTarget = resolveTex.CreateView();
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.BeginRenderPass(&renderPass).End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_TRUE(native::IsTextureSubresourceInitialized(resolveTex.Get(), 0, 1, 0, 1));
+
+    // The resolve target should have been cleared to zeros.
+    std::vector<utils::RGBA8> expected(kTexSize * kTexSize, {0, 0, 0, 0});
+    EXPECT_TEXTURE_EQ(expected.data(), resolveTex, {0, 0}, {kTexSize, kTexSize}, 0);
+}
+
+DAWN_INSTANTIATE_TEST(TextureZeroInitExpandResolveTest,
+                      D3D11Backend({"nonzero_clear_resources_on_creation_for_testing"}),
+                      D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
+                      MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
+                      VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"}));
+
 class CompressedTextureZeroInitTest : public TextureZeroInitTest {
   protected:
     void SetUp() override {

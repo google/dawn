@@ -215,16 +215,25 @@ MaybeError LazyClearRenderPassAttachments(DeviceBase* device,
             DAWN_CHECK(resolveView->GetLevelCount() == 1);
             if (!resolveView->GetTexture()->IsSubresourceContentInitialized(
                     resolveView->GetSubresourceRange())) {
-                if (partialRenderArea) {
-                    // Using a renderArea that only partially covers the attachment means that the
-                    // resolve target won't have the full subresource copied over.
-                    renderPass->forceFullRenderArea = true;
+                if (attachmentInfo.loadOp == wgpu::LoadOp::ExpandResolveTexture) {
+                    // ExpandResolveTexture loads the resolve target into the color attachment, so
+                    // the resolve target must be cleared before the render pass starts. It would be
+                    // more efficient to clear the color attachment on load but changing the render
+                    // pass structure at this point is difficult.
+                    DAWN_TRY(clearTexture(resolveView->GetTexture(),
+                                          resolveView->GetSubresourceRange()));
+                } else {
+                    if (partialRenderArea) {
+                        // Using a renderArea that only partially covers the attachment means that
+                        // the resolve target won't have the full subresource copied over.
+                        renderPass->forceFullRenderArea = true;
+                    }
+                    // We need to set the resolve target to initialized so that it does not get
+                    // cleared later in the pipeline. The texture will be resolved from the
+                    // source color attachment, which will be correctly initialized.
+                    resolveView->GetTexture()->SetIsSubresourceContentInitialized(
+                        true, resolveView->GetSubresourceRange());
                 }
-                // We need to set the resolve target to initialized so that it does not get
-                // cleared later in the pipeline. The texture will be resolved from the
-                // source color attachment, which will be correctly initialized.
-                resolveView->GetTexture()->SetIsSubresourceContentInitialized(
-                    true, resolveView->GetSubresourceRange());
             }
         }
 
