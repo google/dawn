@@ -209,7 +209,15 @@ ComputePipeline::InitializeSpecialization(const Specialization& specialization,
         return DAWN_PIPELINE_UNCATEGORIZED_ERROR(
             "CreateComputePipelines failed with VK_ERROR_UNKNOWN");
     } else {
-        DAWN_TRY(CheckVkSuccess(vkResult, "CreateComputePipelines"));
+        DAWN_TRY_WITH_CLEANUP(CheckVkSuccess(vkResult, "CreateComputePipelines"), {
+            // The ErrorInjector can swap the result from a VK_SUCCESS to something else. In this
+            // case, the pipeline would have been created successfully, but we now think we have an
+            // error. So, while this should never happen outside the ErrorInjector, make sure we
+            // cleanup the pipeline if needed.
+            if (pipeline != VK_NULL_HANDLE) {
+                device->fn.DestroyPipeline(device->GetVkDevice(), pipeline, nullptr);
+            }
+        });
     }
 
     result.pipeline = AcquireRef(new RefCountedVkHandle<VkPipeline>(device, pipeline));
