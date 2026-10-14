@@ -98,7 +98,12 @@ ResultOrError<ExecutionSerial> Queue::WaitForQueueSerialImpl(ExecutionSerial wai
     // The caller should call UpdateCompletedSerial() which will clear passed system events.
     mSystemEventReceivers->Enqueue(std::move(*receiver), waitSerial);
 
-    return didComplete ? waitSerial : kWaitSerialTimeout;
+    // MSVC x86 can pass this aligned serial by value instead of by address when
+    // constructing ResultOrError from a conditional expression.
+    if (didComplete) {
+        return waitSerial;
+    }
+    return kWaitSerialTimeout;
 }
 
 MaybeError Queue::RecycleSystemEventReceivers(ExecutionSerial completedSerial) {
