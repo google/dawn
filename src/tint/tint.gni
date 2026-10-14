@@ -93,6 +93,12 @@ template("tint_proto_library") {
 template("tint_executable") {
   executable(target_name) {
     forward_variables_from(invoker, "*")
+
+    if (is_win && is_debug) {
+      # TODO(crbug.com/tint/1749): both msvc and clang builds stack overflow on
+      # debug builds. Increase the initial stack size to 4 MB (default is 1MB).
+      ldflags = [ "/STACK:4194304" ]
+    }
   }
 }
 
