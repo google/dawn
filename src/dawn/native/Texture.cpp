@@ -28,6 +28,7 @@
 #include "src/dawn/native/Texture.h"
 
 #include <algorithm>
+#include <limits>
 #include <utility>
 
 #include "absl/strings/str_format.h"
@@ -1085,6 +1086,31 @@ bool IsValidSampleCount(uint32_t sampleCount) {
         default:
             return false;
     }
+}
+
+// Used by the Vulkan and GL backends to check for a certain class of driver bug. Must be called
+// from the backend because OOM errors can't be raised via MaybeValError.
+MaybeError VerifyBaseLevelFootprint(const TextureBase* texture) {
+    if (texture->GetDimension() == wgpu::TextureDimension::e3D &&
+        texture->GetDevice()->IsToggleEnabled(Toggle::Limit3DTexturePotFootprintTo4GB)) {
+        const Extent3D& size = texture->GetBaseSize();
+        const TexelBlockInfo& blockInfo =
+            texture->GetFormat().GetAspectInfo(wgpu::TextureAspect::All).block;
+        uint64_t baseWidth = RoundUp(size.width, blockInfo.width);
+        uint64_t baseHeight = RoundUp(size.height, blockInfo.height);
+        uint64_t baseDepth = size.depthOrArrayLayers;
+        uint64_t potWidth = NextPowerOfTwo(baseWidth);
+        uint64_t potHeight = NextPowerOfTwo(baseHeight);
+        uint64_t potDepth = NextPowerOfTwo(baseDepth);
+        uint64_t potByteSize = (potWidth / blockInfo.width) * (potHeight / blockInfo.height) *
+                               potDepth * blockInfo.byteSize;
+        if (potByteSize > std::numeric_limits<uint32_t>::max()) {
+            return DAWN_OUT_OF_MEMORY_ERROR(
+                "3D texture level power-of-two footprint exceeds 32-bit driver limit.");
+        }
+    }
+
+    return {};
 }
 
 wgpu::TextureComponentSwizzle ComposeSwizzle(wgpu::TextureComponentSwizzle firstSwizzle,

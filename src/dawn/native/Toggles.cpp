@@ -970,6 +970,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Some ImgTec drivers only report 64, which is below the WebGPU requirement. Enabling this "
       "toggle accepts the limit of 64 instead of rejecting the adapter entirely.",
       "https://g-issues.chromium.org/issues/559589664", ToggleStage::Instance}},
+    {Toggle::Limit3DTexturePotFootprintTo4GB,
+     {"limit_3d_texture_pot_footprint_to_4gb",
+      "Synthesize an OutOfMemory error on 3D texture creation if the power-of-two rounded byte "
+      "footprint of the texture is 4 GiB or larger. Works around a PowerVR driver bug.",
+      "https://crbug.com/497202432", ToggleStage::Device}},
 
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};

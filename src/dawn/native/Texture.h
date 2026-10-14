@@ -76,6 +76,8 @@ ResultOrValError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
 
 bool IsValidSampleCount(uint32_t sampleCount);
 
+MaybeError VerifyBaseLevelFootprint(const TextureBase* texture);
+
 // Computes a swizzle which, when applied, is equivalent to applying `firstSwizzle`
 // then `secondSwizzle`, like the order of WGSL swizzles (`value.rgba.rgba`).
 wgpu::TextureComponentSwizzle ComposeSwizzle(wgpu::TextureComponentSwizzle firstSwizzle,

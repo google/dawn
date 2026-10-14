@@ -513,6 +513,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         Toggle::GLUseArrayLengthFromImmediate,
         mVendorId == gpu_info::kVendorID_ImgTec || mVendorId == gpu_info::kVendorID_Nvidia);
 
+    // (crbug.com/497202432): Driver bug when POT-rounded 3D texture footprint is >= 4 GiB.
+    deviceToggles->Default(Toggle::Limit3DTexturePotFootprintTo4GB,
+                           mVendorId == gpu_info::kVendorID_ImgTec);
+
     // Enable the integer range analysis for shader robustness by default if the corresponding
     // platform feature is enabled.
     deviceToggles->Default(

@@ -296,6 +296,10 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device,
         DAWN_TRY(device->EnqueueGL([texture, clear](const OpenGLFunctions& gl) -> MaybeError {
             DAWN_GL_TRY(gl, GenTextures(1, &texture->mTextureHandle));
 
+            // Ensure that the base level of the texture conforms to device-specific limits.
+            // May generate an OOM.
+            DAWN_TRY(VerifyBaseLevelFootprint(texture.Get()));
+
             GLenum target = texture->GetGLTarget();
             uint32_t levels = texture->GetNumMipLevels();
             const GLFormat& glFormat = texture->GetGLFormat();

@@ -1104,6 +1104,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // crbug.com/540087398 - Driver bug miscomputes mip sizes for NPOT depth/stencil textures.
         // TODO(https://crbug.com/540087398): Limit this to old drivers once there's a driver fix.
         deviceToggles->Default(Toggle::VulkanDisallowNPOTDepthStencilMipmaps, true);
+
+        // crbug.com/497202432 - Driver bug in when POT-rounded 3D texture footprint is >= 4 GiB.
+        // TODO(https://crbug.com/497202432): Limit this to old drivers once there's a driver fix.
+        deviceToggles->Default(Toggle::Limit3DTexturePotFootprintTo4GB, true);
     }
 
     // AMD Mesa front end optimizer bug for unary negation and abs.

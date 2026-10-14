@@ -1456,6 +1456,10 @@ MaybeError InternalTexture::Initialize(VkImageUsageFlags extraUsages) {
     DAWN_ASSERT(
         !(GetFormat().HasDepthOrStencil() && (GetUsage() & wgpu::TextureUsage::StorageBinding)));
 
+    // Ensure that the base level of the texture conforms to device-specific limits.
+    // May generate an OOM.
+    DAWN_TRY(VerifyBaseLevelFootprint(this));
+
     // Create the Vulkan image "container". We don't need to check that the format supports the
     // combination of sample, usage etc. because validation should have been done in the Dawn
     // frontend already based on the minimum supported formats in the Vulkan spec
