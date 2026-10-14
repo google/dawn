@@ -857,7 +857,8 @@ MaybeError RecordBeginDynamicRenderPass(CommandRecordingContext* recordingContex
         }
 
         colorAttachment.loadOp = VulkanAttachmentLoadOp(attachmentInfo.loadOp);
-        colorAttachment.storeOp = VulkanAttachmentStoreOp(attachmentInfo.storeOp);
+        colorAttachment.storeOp =
+            VulkanAttachmentStoreOp(device, attachmentInfo.storeOp, /*isReadOnly=*/false);
         colorAttachment.clearValue = ToVkClearValue(
             attachmentInfo.clearColor, view->GetFormat().GetAspectInfo(Aspect::Color).baseType);
     }
@@ -886,7 +887,8 @@ MaybeError RecordBeginDynamicRenderPass(CommandRecordingContext* recordingContex
             depthAttachment.resolveImageView = nullImageView;
             depthAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
             depthAttachment.loadOp = VulkanAttachmentLoadOp(attachmentInfo.depthLoadOp);
-            depthAttachment.storeOp = VulkanAttachmentStoreOp(attachmentInfo.depthStoreOp);
+            depthAttachment.storeOp = VulkanAttachmentStoreOp(device, attachmentInfo.depthStoreOp,
+                                                              attachmentInfo.depthReadOnly);
             depthAttachment.clearValue.depthStencil.depth = attachmentInfo.clearDepth;
             renderInfo.pDepthAttachment = &depthAttachment;
         }
@@ -900,7 +902,8 @@ MaybeError RecordBeginDynamicRenderPass(CommandRecordingContext* recordingContex
             stencilAttachment.resolveImageView = nullImageView;
             stencilAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
             stencilAttachment.loadOp = VulkanAttachmentLoadOp(attachmentInfo.stencilLoadOp);
-            stencilAttachment.storeOp = VulkanAttachmentStoreOp(attachmentInfo.stencilStoreOp);
+            stencilAttachment.storeOp = VulkanAttachmentStoreOp(
+                device, attachmentInfo.stencilStoreOp, attachmentInfo.stencilReadOnly);
             stencilAttachment.clearValue.depthStencil.stencil = attachmentInfo.clearStencil;
             renderInfo.pStencilAttachment = &stencilAttachment;
         }

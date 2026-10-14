@@ -182,9 +182,25 @@ VkAttachmentLoadOp VulkanAttachmentLoadOp(wgpu::LoadOp op) {
     DAWN_UNREACHABLE();
 }
 
-VkAttachmentStoreOp VulkanAttachmentStoreOp(wgpu::StoreOp op) {
-    // TODO(crbug.com/dawn/485): return STORE_OP_STORE_NONE_QCOM if the device has required
-    // extension.
+VkAttachmentStoreOp VulkanAttachmentStoreOp(const Device* device,
+                                            wgpu::StoreOp op,
+                                            bool isReadOnly) {
+    if (isReadOnly) {
+        // For read-only depth/stencil aspects, the frontend always defaults storeOp to Store so
+        // that attachment contents are preserved. In Vulkan, use VK_ATTACHMENT_STORE_OP_NONE when
+        // available to avoid a write access at the end of the render pass.
+        // VK_ATTACHMENT_STORE_OP_NONE is provided by VK_KHR_dynamic_rendering (for
+        // VkRenderingAttachmentInfo) as well as by the load/store op none extensions
+        DAWN_ASSERT(op == wgpu::StoreOp::Store);
+        if (device->GetRenderPassType() == VulkanRenderPassType::DynamicRendering ||
+            device->GetDeviceInfo().HasExt(DeviceExt::LoadStoreOpNone) ||
+            device->GetDeviceInfo().HasExt(DeviceExt::LoadStoreOpNoneEXT) ||
+            device->GetDeviceInfo().HasExt(DeviceExt::RenderPassStoreOpsQCOM)) {
+            return VK_ATTACHMENT_STORE_OP_NONE;
+        }
+        return VK_ATTACHMENT_STORE_OP_STORE;
+    }
+
     switch (op) {
         case wgpu::StoreOp::Store:
             return VK_ATTACHMENT_STORE_OP_STORE;

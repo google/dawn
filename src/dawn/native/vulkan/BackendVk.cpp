@@ -80,53 +80,6 @@ struct SkippedMessage {
 
 // Array of Validation error/warning messages that will be ignored, should include bugID
 constexpr SkippedMessage kSkippedMessages[] = {
-    // These errors are generated when simultaneously using a read-only depth/stencil attachment as
-    // a texture binding. This is valid Vulkan.
-    //
-    // When storeOp=NONE is not present, Dawn uses storeOp=STORE, but Vulkan validation layer
-    // considers the image read-only and produces a hazard. Dawn can't rely on storeOp=NONE and
-    // so this is not expected to be worked around.
-    // See http://crbug.com/dawn/1225 for more details.
-    //
-    {"SYNC-HAZARD-READ-AFTER-WRITE",
-     "Access info (usage: SYNC_FRAGMENT_SHADER_SHADER_SAMPLED_READ, prior_usage: "
-     "SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE"},
-    // Depth used as storage
-    {"SYNC-HAZARD-WRITE-AFTER-READ",
-     "depth aspect during store with storeOp VK_ATTACHMENT_STORE_OP_STORE. Access info (usage: "
-     "SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
-     "SYNC_FRAGMENT_SHADER_SHADER_STORAGE_READ, read_barriers: VkPipelineStageFlags2KHR(0)"},
-    {"SYNC-HAZARD-WRITE-AFTER-READ",
-     "depth aspect during store with storeOp VK_ATTACHMENT_STORE_OP_STORE. Access info (usage: "
-     "SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
-     "SYNC_FRAGMENT_SHADER_SHADER_STORAGE_READ, read_barriers: VkPipelineStageFlags2(0)"},
-    // Depth used in sampling
-    {"SYNC-HAZARD-WRITE-AFTER-READ",
-     "depth aspect during store with storeOp VK_ATTACHMENT_STORE_OP_STORE. Access info (usage: "
-     "SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
-     "SYNC_FRAGMENT_SHADER_SHADER_SAMPLED_READ, read_barriers: VkPipelineStageFlags2KHR(0)"},
-    {"SYNC-HAZARD-WRITE-AFTER-READ",
-     "depth aspect during store with storeOp VK_ATTACHMENT_STORE_OP_STORE. Access info (usage: "
-     "SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
-     "SYNC_FRAGMENT_SHADER_SHADER_SAMPLED_READ, read_barriers: VkPipelineStageFlags2(0)"},
-    // Stencil used as storage
-    {"SYNC-HAZARD-WRITE-AFTER-READ",
-     "stencil aspect during store with stencilStoreOp VK_ATTACHMENT_STORE_OP_STORE. Access info "
-     "(usage: SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
-     "SYNC_FRAGMENT_SHADER_SHADER_STORAGE_READ, read_barriers: VkPipelineStageFlags2KHR(0)"},
-    {"SYNC-HAZARD-WRITE-AFTER-READ",
-     "stencil aspect during store with stencilStoreOp VK_ATTACHMENT_STORE_OP_STORE. Access info "
-     "(usage: SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
-     "SYNC_FRAGMENT_SHADER_SHADER_STORAGE_READ, read_barriers: VkPipelineStageFlags2(0)"},
-    // Stencil used in sampling (note no tests actually hit this)
-    {"SYNC-HAZARD-WRITE-AFTER-READ",
-     "stencil aspect during store with stencilStoreOp VK_ATTACHMENT_STORE_OP_STORE. Access info "
-     "(usage: SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
-     "SYNC_FRAGMENT_SHADER_SHADER_SAMPLED_READ, read_barriers: VkPipelineStageFlags2KHR(0)"},
-    {"SYNC-HAZARD-WRITE-AFTER-READ",
-     "stencil aspect during store with stencilStoreOp VK_ATTACHMENT_STORE_OP_STORE. Access info "
-     "(usage: SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
-     "SYNC_FRAGMENT_SHADER_SHADER_SAMPLED_READ, read_barriers: VkPipelineStageFlags2(0)"},
     // http://crbug.com/360147114
     {"SYNC-HAZARD-WRITE-AFTER-READ",
      "Submitted access info (submitted_usage: SYNC_CLEAR_TRANSFER_WRITE, command: vkCmdFillBuffer"},

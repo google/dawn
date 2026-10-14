@@ -171,7 +171,8 @@ void InitializePassInfo(Device* device, const RenderPassCacheQuery& query, InfoT
         attachmentDesc.samples =
             query.renderToSingleSampleMask[i] ? VK_SAMPLE_COUNT_1_BIT : vkSampleCount;
         attachmentDesc.loadOp = VulkanAttachmentLoadOp(query.colorLoadOp[i]);
-        attachmentDesc.storeOp = VulkanAttachmentStoreOp(query.colorStoreOp[i]);
+        attachmentDesc.storeOp =
+            VulkanAttachmentStoreOp(device, query.colorStoreOp[i], /*isReadOnly=*/false);
         attachmentDesc.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         attachmentDesc.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
@@ -195,9 +196,11 @@ void InitializePassInfo(Device* device, const RenderPassCacheQuery& query, InfoT
         attachmentDesc.samples = vkSampleCount;
 
         attachmentDesc.loadOp = VulkanAttachmentLoadOp(query.depthLoadOp);
-        attachmentDesc.storeOp = VulkanAttachmentStoreOp(query.depthStoreOp);
+        attachmentDesc.storeOp =
+            VulkanAttachmentStoreOp(device, query.depthStoreOp, query.depthReadOnly);
         attachmentDesc.stencilLoadOp = VulkanAttachmentLoadOp(query.stencilLoadOp);
-        attachmentDesc.stencilStoreOp = VulkanAttachmentStoreOp(query.stencilStoreOp);
+        attachmentDesc.stencilStoreOp =
+            VulkanAttachmentStoreOp(device, query.stencilStoreOp, query.stencilReadOnly);
 
         // There is only one subpass, so it is safe to set both initialLayout and finalLayout to
         // the only subpass's layout.
