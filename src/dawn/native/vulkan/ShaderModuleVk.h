@@ -40,6 +40,7 @@
 #include "src/dawn/common/vulkan_platform.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/ShaderModule.h"
+#include "src/dawn/native/vulkan/DeviceVk.h"
 
 namespace dawn::native {
 
@@ -57,13 +58,49 @@ class ShaderModule final : public ShaderModuleBase {
         const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
         const std::vector<tint::wgsl::Extension>& internalExtensions);
 
-    // Caller is responsible for destroying the `VkShaderModule` returned.
     struct ModuleAndSpirv {
-        VkShaderModule module;
+        VkShaderModule module = VK_NULL_HANDLE;
+        raw_ptr<Device> device = nullptr;
         std::vector<uint32_t> spirv;
         bool hasInputAttachment = false;
         Extent3D workgroupSize;
         std::optional<uint32_t> explicitSubgroupSize;
+
+        ModuleAndSpirv() = default;
+        ModuleAndSpirv(ModuleAndSpirv&& o)
+            : module(o.module),
+              device(o.device),
+              spirv(std::move(o.spirv)),
+              hasInputAttachment(o.hasInputAttachment),
+              workgroupSize(o.workgroupSize),
+              explicitSubgroupSize(o.explicitSubgroupSize) {
+            o.module = VK_NULL_HANDLE;
+            o.device = nullptr;
+        }
+
+        ~ModuleAndSpirv() {
+            if (module != VK_NULL_HANDLE && device != nullptr) {
+                device->fn.DestroyShaderModule(device->GetVkDevice(), module, nullptr);
+            }
+        }
+
+        ModuleAndSpirv& operator=(ModuleAndSpirv&& o) {
+            module = o.module;
+            o.module = VK_NULL_HANDLE;
+
+            device = o.device;
+            o.device = nullptr;
+
+            spirv = std::move(o.spirv);
+            hasInputAttachment = o.hasInputAttachment;
+            workgroupSize = o.workgroupSize;
+            explicitSubgroupSize = o.explicitSubgroupSize;
+
+            return *this;
+        }
+
+        ModuleAndSpirv(const ModuleAndSpirv&) = delete;
+        ModuleAndSpirv& operator=(const ModuleAndSpirv&) = delete;
     };
     struct CompileParameters {
         // Kept without defaults as they must be provided.

@@ -486,18 +486,19 @@ ResultOrUnknownError<RenderPipeline::SpecializationResult> RenderPipeline::Initi
     std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
     uint32_t stageCount = 0;
 
+    std::array<ShaderModule::ModuleAndSpirv, 2> modules;
+
     auto AddShaderStage = [&](const ShaderModule::CompileParameters& compileParams) -> MaybeError {
-        ShaderModule::ModuleAndSpirv moduleAndSpirv;
-        DAWN_TRY_ASSIGN(moduleAndSpirv,
+        DAWN_TRY_ASSIGN(modules[stageCount],
                         ToBackend(compileParams.stage->module)->GetHandleAndSpirv(compileParams));
-        mHasInputAttachment = mHasInputAttachment || moduleAndSpirv.hasInputAttachment;
+        mHasInputAttachment = mHasInputAttachment || modules[stageCount].hasInputAttachment;
         if (buildCacheKey) {
             // Record cache key for each shader since it will become inaccessible later on.
-            StreamIn(&mCacheKey, moduleAndSpirv.spirv);
+            StreamIn(&mCacheKey, modules[stageCount].spirv);
         }
 
         VkPipelineShaderStageCreateInfo* shaderStage = &shaderStages[stageCount];
-        shaderStage->module = moduleAndSpirv.module;
+        shaderStage->module = modules[stageCount].module;
         shaderStage->sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         shaderStage->pNext = nullptr;
         shaderStage->flags = 0;
@@ -946,10 +947,6 @@ ResultOrUnknownError<RenderPipeline::SpecializationResult> RenderPipeline::Initi
     DAWN_TRY(cache->DidCompilePipeline());
 
     SetLabelImpl();
-
-    for (uint32_t i = 0; i < stageCount; ++i) {
-        device->fn.DestroyShaderModule(device->GetVkDevice(), shaderStages[i].module, nullptr);
-    }
 
     return result;
 }

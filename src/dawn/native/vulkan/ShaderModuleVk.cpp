@@ -521,11 +521,14 @@ ResultOrUnknownError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpi
     device->GetBlobCache()->EnsureStored(compilation);
     SetDebugName(ToBackend(GetDevice()), newHandle, "Dawn_ShaderModule", GetLabel());
 
-    return ModuleAndSpirv{.module = newHandle,
-                          .spirv = std::move(compilation->spirv),
-                          .hasInputAttachment = hasInputAttachment,
-                          .workgroupSize = compilation->workgroupSize,
-                          .explicitSubgroupSize = compilation->explicitSubgroupSize};
+    ModuleAndSpirv s;
+    s.module = newHandle;
+    s.device = device;
+    s.spirv = std::move(compilation->spirv);
+    s.hasInputAttachment = hasInputAttachment;
+    s.workgroupSize = compilation->workgroupSize;
+    s.explicitSubgroupSize = compilation->explicitSubgroupSize;
+    return s;
 #else
     return DAWN_UNRECOVERABLE_ERROR("TINT_BUILD_SPV_WRITER is not defined.");
 #endif

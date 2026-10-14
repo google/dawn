@@ -220,8 +220,6 @@ ComputePipeline::InitializeSpecialization(const Specialization& specialization,
 
     SetLabelImpl();
 
-    device->fn.DestroyShaderModule(device->GetVkDevice(), moduleAndSpirv.module, nullptr);
-
     return result;
 }
 
