@@ -401,6 +401,43 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
         });
 }
 
+TEST_F(ShaderModuleValidationTest, GetCompilationMessages_InvalidUTF8) {
+    // This test works assuming ShaderModule is backed by a native::ShaderModuleBase, which
+    // is not the case on the wire.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
+    std::string shaderSrc =
+        std::string(R"(const offset: u32`= 17;
+const  7;
+)") +
+        // NOLINTNEXTLINE(readability/utf8)
+        R"(@compute @workgroupsi_zef (n1) main()\\\\\\\����\\\\\wrong ELF class:\\\\\\\\ s: u32s(s,s,offset,count)
+}lo)";
+
+    StartExpectDeviceError();
+    wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shaderSrc);
+    EndExpectDeviceError();
+
+    shaderModule.GetCompilationInfo(
+        wgpu::CallbackMode::AllowSpontaneous,
+        [](wgpu::CompilationInfoRequestStatus status, const wgpu::CompilationInfo* info) {
+            ASSERT_EQ(wgpu::CompilationInfoRequestStatus::Success, status);
+            ASSERT_NE(nullptr, info);
+            ASSERT_EQ(1u, info->messageCount);
+
+            const wgpu::CompilationMessage* message = &info->messages[0];
+            ASSERT_EQ("unknown escape sequence", std::string_view(message->message));
+            ASSERT_EQ(wgpu::CompilationMessageType::Error, message->type);
+            ASSERT_EQ(3u, message->lineNum);
+            ASSERT_EQ(44u, message->linePos);
+            ASSERT_NE(nullptr, message->nextInChain);
+            ASSERT_EQ(wgpu::SType::DawnCompilationMessageUtf16, message->nextInChain->sType);
+            const wgpu::DawnCompilationMessageUtf16* utf16 =
+                reinterpret_cast<const wgpu::DawnCompilationMessageUtf16*>(message->nextInChain);
+            EXPECT_EQ(44u, utf16->linePos);
+        });
+}
+
 // Validate the maximum location of effective inter-stage variables cannot be greater than 16
 // (kMaxInterStageShaderVariables).
 TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
@@ -659,7 +696,9 @@ TEST_F(ShaderModuleValidationTest, CreateErrorShaderModule) {
 TEST_F(ShaderModuleValidationTest, UnicodeValidity) {
     // Referenced from src/tint/utils/text/unicode_test.cc
     constexpr std::array<const char*, 14> kValidTestCases = {{
-        "", "abc", "\xe4\xbd\xa0\xe5\xa5\xbd\xe4\xb8\x96\xe7\x95\x8c",
+        "",
+        "abc",
+        "\xe4\xbd\xa0\xe5\xa5\xbd\xe4\xb8\x96\xe7\x95\x8c",
         "def\xf0\x9f\x91\x8b\xf0\x9f\x8c\x8e",
         "\xed\x9f\xbf",      // CodePoint == 0xD7FF
         "\xed\x9f\xbe",      // CodePoint == 0xD7FF - 1
