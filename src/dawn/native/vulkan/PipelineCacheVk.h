@@ -52,10 +52,9 @@ class PipelineCache final : public PipelineCacheBase {
     ~PipelineCache() override;
 
     void Initialize();
-    MaybeError SerializeToBlobImpl(Blob* blob) override;
+    void SerializeToBlobImpl(Blob* blob) override;
 
     const raw_ptr<Device> mDevice;
-    const bool mInvalidResultWorkaround = false;
 
     VkPipelineCache mHandle = VK_NULL_HANDLE;
 

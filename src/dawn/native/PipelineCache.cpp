@@ -55,19 +55,19 @@ bool PipelineCacheBase::CacheHit() const {
     return mCacheHit;
 }
 
-MaybeError PipelineCacheBase::Flush() {
+void PipelineCacheBase::Flush() {
     // Try to write the data out to the persistent cache.
     Blob blob;
-    DAWN_TRY(SerializeToBlobImpl(&blob));
+    SerializeToBlobImpl(&blob);
+
     if (blob.Size() > 0) {
         // Using a simple heuristic to decide whether to write out the blob right now. May need
         // smarter tracking when we are dealing with monolithic caches.
         mCache->Store(mKey, blob);
     }
-    return {};
 }
 
-MaybeError PipelineCacheBase::DidCompilePipeline() {
+void PipelineCacheBase::DidCompilePipeline() {
     DAWN_ASSERT(mInitialized);
     if (mStoreOnIdle) {
         // Assume pipeline cache was modified by compiling a pipeline. It will be stored in
@@ -77,18 +77,17 @@ MaybeError PipelineCacheBase::DidCompilePipeline() {
         // TODO(dawn:549): Flush is currently synchronously happening on the same thread as pipeline
         // compilation, but it's perhaps deferrable.
         if (!CacheHit()) {
-            return Flush();
+            Flush();
+            return;
         }
     }
-    return {};
 }
 
-MaybeError PipelineCacheBase::StoreOnIdle() {
+void PipelineCacheBase::StoreOnIdle() {
     DAWN_ASSERT(mStoreOnIdle);
     if (mNeedsStore.exchange(false, std::memory_order_relaxed)) {
-        DAWN_TRY(Flush());
+        Flush();
     }
-    return {};
 }
 
 }  // namespace dawn::native

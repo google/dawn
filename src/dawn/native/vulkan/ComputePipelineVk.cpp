@@ -216,7 +216,7 @@ ComputePipeline::InitializeSpecialization(const Specialization& specialization,
     cacheTimer.RecordMicroseconds(cache->CacheHit() ? "Vulkan.CreateComputePipelines.CacheHit"
                                                     : "Vulkan.CreateComputePipelines.CacheMiss");
 
-    DAWN_TRY(cache->DidCompilePipeline());
+    cache->DidCompilePipeline();
 
     SetLabelImpl();
 

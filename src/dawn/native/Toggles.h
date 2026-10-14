@@ -170,7 +170,6 @@ enum class Toggle {
     GLDepthBiasModifier,
     GLForceES31AndNoExtensions,
     VulkanMonolithicPipelineCache,
-    VulkanIncompletePipelineCacheWorkaround,
     MetalSerializeTimestampGenerationAndResolution,
     D3D12RelaxMinSubgroupSizeTo8,
     D3D12RelaxBufferTextureCopyPitchAndOffsetAlignment,

@@ -1089,14 +1089,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::VulkanSampleCompare2DWorkaround, true);
     }
 
-    if (IsPixel10() || IsAndroidSamsung()) {
-        // Pixel 10 has a bug in vkGetPipelineCacheData(), see https://crbug.com/437807243.
-        // Samsung Xclipse GPUs appear to have the same problem, see https://crbug.com/487613497.
-        // TODO(crbug.com/437807243): If newer driver version without bug is released then we can
-        // gate this on driver version.
-        deviceToggles->Default(Toggle::VulkanIncompletePipelineCacheWorkaround, true);
-    }
-
     if (MayBeImaginationProprietary()) {
         // crbug.com/443906252 - Polyfill for case switch with large ranges.
         deviceToggles->Default(Toggle::VulkanPolyfillSwitchWithIf, true);

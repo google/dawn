@@ -1275,12 +1275,7 @@ bool Device::ReduceMemoryUsageImpl() {
 
 void Device::PerformIdleTasksImpl() {
     if (mMonolithicPipelineCache) {
-        MaybeError maybeError = mMonolithicPipelineCache->StoreOnIdle();
-        if (maybeError.IsError()) {
-            std::unique_ptr<UnrecoverableError> error = maybeError.AcquireError();
-            EmitLog(wgpu::LoggingType::Error, error->GetFormattedMessage().c_str());
-            return;
-        }
+        mMonolithicPipelineCache->StoreOnIdle();
     }
 }
 

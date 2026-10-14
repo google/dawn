@@ -944,7 +944,7 @@ ResultOrUnknownError<RenderPipeline::SpecializationResult> RenderPipeline::Initi
     cacheTimer.RecordMicroseconds(cache->CacheHit() ? "Vulkan.CreateGraphicsPipelines.CacheHit"
                                                     : "Vulkan.CreateGraphicsPipelines.CacheMiss");
 
-    DAWN_TRY(cache->DidCompilePipeline());
+    cache->DidCompilePipeline();
 
     SetLabelImpl();
 
