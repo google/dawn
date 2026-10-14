@@ -1179,13 +1179,15 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
             continue;
         }
 
-        if (gpu_info::IsMicrosoftWARP(vendorId, deviceId)) {
-            // On WARP 1.65535.20-preview, CheckFeatureSupport returns shapes for SINT8 and UINT8,
-            // even though these types are not supported.
-            // TODO(crbug.com/527049636): Remove once this is fixed in WARP.
-            if (ByteSize(dataTypeAB) == 1 || ByteSize(dataTypeAcc) == 1) {
-                continue;
-            }
+        // Disable SINT8 and UINT8 until Tint's HLSL backend supports them.
+        // TODO(crbug.com/512455144): Support 8-bit subgroup matrix loads from workgroup memory in
+        // the HLSL writer.
+
+        //  Once supported, keep this check only for WARP 1.65535.20-preview, which incorrectly
+        //  reports these shapes.
+        // TODO(crbug.com/527049636): Remove the WARP workaround once it is fixed in WARP.
+        if (ByteSize(dataTypeAB) == 1 || ByteSize(dataTypeAcc) == 1) {
+            continue;
         }
 
         if (!supportsShaderF16) {
