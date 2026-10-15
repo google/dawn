@@ -1108,7 +1108,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySize) {
     auto* src = R"(
 $B1: {  # root
   %x:u32 = override undef @id(2)
-  %v:ptr<workgroup, array<i32, %x>, read_write> = var undef
+  %v:ptr<workgroup, array<i32, %x>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1120,7 +1120,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, array<i32, 5>, read_write> = var undef
+  %v:ptr<workgroup, array<i32, 5>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1164,7 +1164,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeOverrideOutOfBounds) {
 $B1: {  # root
   %x:u32 = override undef @id(2)
   %y:u32 = override undef @id(3)
-  %v:ptr<workgroup, array<u32, %x>, read_write> = var undef
+  %v:ptr<workgroup, array<u32, %x>, read_write> = var
 }
 
 %foo = func():u32 {
@@ -1207,7 +1207,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeLetOutOfBounds) {
     auto* src = R"(
 $B1: {  # root
   %x:u32 = override undef @id(2)
-  %v:ptr<workgroup, array<u32, %x>, read_write> = var undef
+  %v:ptr<workgroup, array<u32, %x>, read_write> = var
 }
 
 %foo = func():u32 {
@@ -1249,7 +1249,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeOutOfBounds) {
     auto* src = R"(
 $B1: {  # root
   %x:u32 = override undef @id(2)
-  %v:ptr<workgroup, array<u32, %x>, read_write> = var undef
+  %v:ptr<workgroup, array<u32, %x>, read_write> = var
 }
 
 %foo = func():u32 {
@@ -1287,7 +1287,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeExpression) {
 $B1: {  # root
   %x:u32 = override undef @id(2)
   %2:u32 = mul %x, 2u
-  %v:ptr<workgroup, array<i32, %2>, read_write> = var undef
+  %v:ptr<workgroup, array<i32, %2>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1299,7 +1299,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, array<i32, 10>, read_write> = var undef
+  %v:ptr<workgroup, array<i32, 10>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1339,7 +1339,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeIntoLet) {
     auto* src = R"(
 $B1: {  # root
   %x:u32 = override undef @id(2)
-  %v:ptr<workgroup, array<i32, %x>, read_write> = var undef
+  %v:ptr<workgroup, array<i32, %x>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1353,7 +1353,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, array<i32, 5>, read_write> = var undef
+  %v:ptr<workgroup, array<i32, 5>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1845,7 +1845,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideRuntimeSizedArrayFailure) {
     auto* src = R"(
 $B1: {  # root
   %x:i32 = override undef @id(0)
-  %arr:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+  %arr:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo2 = func():u32 {
@@ -2049,7 +2049,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeZeroFailure) {
     auto* src = R"(
 $B1: {  # root
   %x:u32 = override undef @id(2)
-  %v:ptr<workgroup, array<u32, %x>, read_write> = var undef
+  %v:ptr<workgroup, array<u32, %x>, read_write> = var
 }
 
 %foo = func():u32 {
@@ -2092,7 +2092,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeNegativeFailure) {
     auto* src = R"(
 $B1: {  # root
   %x:i32 = override undef @id(2)
-  %v:ptr<workgroup, array<u32, %x>, read_write> = var undef
+  %v:ptr<workgroup, array<u32, %x>, read_write> = var
 }
 
 %foo = func():u32 {
@@ -2137,7 +2137,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeOverflow) {
     auto* src = R"(
 $B1: {  # root
   %x:i32 = override undef @id(0)
-  %v:ptr<workgroup, array<u32, %x>, read_write> = var undef
+  %v:ptr<workgroup, array<u32, %x>, read_write> = var
 }
 
 %foo = func():u32 {
@@ -2184,7 +2184,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideSizedArrayParam) {
 $B1: {  # root
   %x:i32 = override undef @id(0)
   %2:i32 = add %x, 2i
-  %v:ptr<workgroup, array<u32, %2>, read_write> = var undef
+  %v:ptr<workgroup, array<u32, %2>, read_write> = var
 }
 
 %foo = func(%param:ptr<workgroup, array<u32, %2>, read_write>):void {
@@ -2204,7 +2204,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, array<u32, 64>, read_write> = var undef
+  %v:ptr<workgroup, array<u32, 64>, read_write> = var
 }
 
 %foo = func(%param:ptr<workgroup, array<u32, 64>, read_write>):void {
@@ -2255,7 +2255,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideSizedBuffer) {
 $B1: {  # root
   %x:i32 = override undef @id(0)
   %2:i32 = add %x, 2i
-  %v:ptr<workgroup, buffer<%2>, read_write> = var undef
+  %v:ptr<workgroup, buffer<%2>, read_write> = var
 }
 
 %foo = func(%param:ptr<workgroup, buffer<%2>, read_write>):void {
@@ -2275,7 +2275,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, buffer<64>, read_write> = var undef
+  %v:ptr<workgroup, buffer<64>, read_write> = var
 }
 
 %foo = func(%param:ptr<workgroup, buffer<64>, read_write>):void {
@@ -2322,7 +2322,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideSizedBuffer_BufferView_FixedSize) {
     auto* src = R"(
 $B1: {  # root
   %x:i32 = override undef @id(1)
-  %v:ptr<workgroup, buffer<%x>, read_write> = var undef
+  %v:ptr<workgroup, buffer<%x>, read_write> = var
 }
 
 %ep = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2367,7 +2367,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideSizedBuffer_BufferView_FixedSize_Cons
     auto* src = R"(
 $B1: {  # root
   %x:i32 = override undef @id(1)
-  %v:ptr<workgroup, buffer<%x>, read_write> = var undef
+  %v:ptr<workgroup, buffer<%x>, read_write> = var
 }
 
 %ep = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2412,7 +2412,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideSizedBuffer_BufferView_RuntimeArray) 
     auto* src = R"(
 $B1: {  # root
   %x:i32 = override undef @id(1)
-  %v:ptr<workgroup, buffer<%x>, read_write> = var undef
+  %v:ptr<workgroup, buffer<%x>, read_write> = var
 }
 
 %ep = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2457,7 +2457,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideSizedBuffer_BufferView_RuntimeArray_C
     auto* src = R"(
 $B1: {  # root
   %x:i32 = override undef @id(1)
-  %v:ptr<workgroup, buffer<%x>, read_write> = var undef
+  %v:ptr<workgroup, buffer<%x>, read_write> = var
 }
 
 %ep = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2512,7 +2512,7 @@ S = struct @align(16) {
 
 $B1: {  # root
   %x:i32 = override undef @id(1)
-  %v:ptr<workgroup, buffer<%x>, read_write> = var undef
+  %v:ptr<workgroup, buffer<%x>, read_write> = var
 }
 
 %ep = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2567,7 +2567,7 @@ S = struct @align(16) {
 
 $B1: {  # root
   %x:i32 = override undef @id(1)
-  %v:ptr<workgroup, buffer<%x>, read_write> = var undef
+  %v:ptr<workgroup, buffer<%x>, read_write> = var
 }
 
 %ep = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2609,7 +2609,7 @@ TEST_F(IR_SubstituteOverridesTest, BufferView_OverrideSizedOffset) {
     auto* src = R"(
 $B1: {  # root
   %x:u32 = override undef @id(1)
-  %v:ptr<workgroup, buffer<128>, read_write> = var undef
+  %v:ptr<workgroup, buffer<128>, read_write> = var
 }
 
 %ep = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2670,7 +2670,7 @@ $B1: {  # root
   %b:u32 = override undef @id(1)
   %o:u32 = override undef @id(2)
   %s:u32 = override undef @id(3)
-  %v:ptr<workgroup, buffer<%b>, read_write> = var undef
+  %v:ptr<workgroup, buffer<%b>, read_write> = var
 }
 
 %ep = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2733,7 +2733,7 @@ $B1: {  # root
   %b:u32 = override undef @id(1)
   %o:u32 = override undef @id(2)
   %s:u32 = override undef @id(3)
-  %v:ptr<workgroup, buffer<%b>, read_write> = var undef
+  %v:ptr<workgroup, buffer<%b>, read_write> = var
 }
 
 %ep = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2796,7 +2796,7 @@ $B1: {  # root
   %b:u32 = override undef @id(1)
   %o:u32 = override undef @id(2)
   %s:u32 = override undef @id(3)
-  %v:ptr<workgroup, buffer<%b>, read_write> = var undef
+  %v:ptr<workgroup, buffer<%b>, read_write> = var
 }
 
 %ep = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2849,7 +2849,7 @@ TEST_F(IR_SubstituteOverridesTest, BufferView_ThroughCall_Unsized) {
     auto* src = R"(
 $B1: {  # root
   %x:u32 = override undef @id(1)
-  %v:ptr<workgroup, buffer<%x>, read_write> = var undef
+  %v:ptr<workgroup, buffer<%x>, read_write> = var
 }
 
 %foo = func(%p:ptr<workgroup, buffer, read_write>):void {
@@ -2905,7 +2905,7 @@ TEST_F(IR_SubstituteOverridesTest, BufferView_ThroughCall_SmallerSize) {
     auto* src = R"(
 $B1: {  # root
   %x:u32 = override undef @id(1)
-  %v:ptr<workgroup, buffer<128>, read_write> = var undef
+  %v:ptr<workgroup, buffer<128>, read_write> = var
 }
 
 %foo = func(%p:ptr<workgroup, buffer<16>, read_write>):void {

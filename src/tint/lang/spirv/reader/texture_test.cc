@@ -51,7 +51,7 @@ TEST_F(SpirvReaderTest, Handle_Sampler) {
         )",
               R"(
 $B1: {  # root
-  %wg:ptr<handle, sampler, read> = var undef @binding_point(0, 0)
+  %wg:ptr<handle, sampler, read> = var @binding_point(0, 0)
 }
 
 %main = @fragment func():void {
@@ -85,7 +85,7 @@ TEST_F(SpirvReaderTest, Handle_Image_Texture) {
         )",
               R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_1d<f32>, read> = var undef @binding_point(0, 0)
+  %wg:ptr<handle, texture_1d<f32>, read> = var @binding_point(0, 0)
 }
 
 %main = @fragment func():void {
@@ -121,7 +121,7 @@ TEST_F(SpirvReaderTest, Handle_Image_NonWritable) {
         )",
               R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_storage_1d<rg32float, read>, read> = var undef @binding_point(0, 0)
+  %wg:ptr<handle, texture_storage_1d<rg32float, read>, read> = var @binding_point(0, 0)
 }
 
 %main = @fragment func():void {
@@ -157,7 +157,7 @@ TEST_F(SpirvReaderTest, Handle_Image_NonReadable) {
         )",
               R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_storage_1d<rg32float, write>, read> = var undef @binding_point(0, 0)
+  %wg:ptr<handle, texture_storage_1d<rg32float, write>, read> = var @binding_point(0, 0)
 }
 
 %main = @fragment func():void {
@@ -198,8 +198,8 @@ TEST_F(SpirvReaderTest, Handle_SameImageType_TwoVarsWithDifferentAccessModes) {
         )",
               R"(
 $B1: {  # root
-  %write_only_image:ptr<handle, texture_storage_1d<rg32float, write>, read> = var undef @binding_point(0, 0)
-  %read_only_image:ptr<handle, texture_storage_1d<rg32float, read>, read> = var undef @binding_point(0, 1)
+  %write_only_image:ptr<handle, texture_storage_1d<rg32float, write>, read> = var @binding_point(0, 0)
+  %read_only_image:ptr<handle, texture_storage_1d<rg32float, read>, read> = var @binding_point(0, 1)
 }
 
 %main = @fragment func():void {
@@ -234,7 +234,7 @@ TEST_F(SpirvReaderTest, Handle_MS_2D) {
         )",
               R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_multisampled_2d<f32>, read> = var undef @binding_point(0, 0)
+  %wg:ptr<handle, texture_multisampled_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %main = @fragment func():void {
@@ -269,7 +269,7 @@ TEST_F(SpirvReaderTest, Handle_Depth_MS_2D) {
         )",
               R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_depth_multisampled_2d, read> = var undef @binding_point(0, 0)
+  %wg:ptr<handle, texture_depth_multisampled_2d, read> = var @binding_point(0, 0)
 }
 
 %main = @fragment func():void {
@@ -325,8 +325,8 @@ TEST_F(SpirvReaderTest, Image) {
         )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, sampler, read> = var undef @binding_point(0, 0)
-  %wg:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(2, 0)
+  %1:ptr<handle, sampler, read> = var @binding_point(0, 0)
+  %wg:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 0)
 }
 
 %main = @fragment func():void {
@@ -384,8 +384,8 @@ TEST_F(SpirvReaderTest, ImageGather) {
         )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, sampler, read> = var undef @binding_point(0, 0)
-  %wg:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(2, 0)
+  %1:ptr<handle, sampler, read> = var @binding_point(0, 0)
+  %wg:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 0)
 }
 
 %main = @fragment func():void {
@@ -449,8 +449,8 @@ TEST_F(SpirvReaderTest, ImageSampleImplicitLod) {
         )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, sampler, read> = var undef @binding_point(0, 0)
-  %wg:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(2, 0)
+  %1:ptr<handle, sampler, read> = var @binding_point(0, 0)
+  %wg:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 0)
 }
 
 %main = @fragment func():void {
@@ -514,8 +514,8 @@ TEST_F(SpirvReaderTest, ImageSampleExplicitLod) {
         )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, sampler, read> = var undef @binding_point(0, 0)
-  %wg:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(2, 0)
+  %1:ptr<handle, sampler, read> = var @binding_point(0, 0)
+  %wg:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 0)
 }
 
 %main = @fragment func():void {
@@ -560,7 +560,7 @@ TEST_F(SpirvReaderTest, ImageQuerySize) {
         )",
               R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_storage_1d<r32float, read_write>, read> = var undef @binding_point(2, 0)
+  %wg:ptr<handle, texture_storage_1d<r32float, read_write>, read> = var @binding_point(2, 0)
 }
 
 %main = @fragment func():void {
@@ -605,7 +605,7 @@ TEST_F(SpirvReaderTest, ImageQueryLevels) {
         )",
               R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_1d<f32>, read> = var undef @binding_point(2, 0)
+  %wg:ptr<handle, texture_1d<f32>, read> = var @binding_point(2, 0)
 }
 
 %main = @fragment func():void {
@@ -650,7 +650,7 @@ TEST_F(SpirvReaderTest, ImageQuerySamples) {
         )",
               R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_multisampled_2d<f32>, read> = var undef @binding_point(2, 0)
+  %wg:ptr<handle, texture_multisampled_2d<f32>, read> = var @binding_point(2, 0)
 }
 
 %main = @fragment func():void {
@@ -697,7 +697,7 @@ TEST_F(SpirvReaderTest, ImageQuerySizeLod) {
         )",
               R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_1d<f32>, read> = var undef @binding_point(2, 0)
+  %wg:ptr<handle, texture_1d<f32>, read> = var @binding_point(2, 0)
 }
 
 %main = @fragment func():void {
@@ -795,9 +795,9 @@ TEST_P(SamplerTest, Handle) {
         )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, sampler, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, sampler, read> = var @binding_point(0, 0)
   %wg:ptr<handle, )" +
-                  params.wgsl_type + R"(, read> = var undef @binding_point(2, 0)
+                  params.wgsl_type + R"(, read> = var @binding_point(2, 0)
 }
 
 %main = @fragment func():void {
@@ -1343,10 +1343,10 @@ TEST_P(SamplerComparisonTest, Handle) {
         )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, sampler_comparison, read> = var @binding_point(0, 0)
   %wg:ptr<handle, )" +
                   params.wgsl_type +
-                  R"(, read> = var undef @binding_point(2, 0)
+                  R"(, read> = var @binding_point(2, 0)
 }
 
 %main = @fragment func():void {
@@ -1707,9 +1707,9 @@ TEST_F(SpirvReaderTest, ImageSampleImplicitLod_BothDrefAndNonDref) {
         )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, sampler, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
-  %wg:ptr<handle, texture_depth_2d, read> = var undef @binding_point(2, 0)
+  %1:ptr<handle, sampler, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
+  %wg:ptr<handle, texture_depth_2d, read> = var @binding_point(2, 0)
 }
 
 %main = @fragment func():void {
@@ -1798,7 +1798,7 @@ TEST_P(ImageAccessTest, Variable) {
 $B1: {  # root
   %wg:ptr<handle, )" +
                   params.wgsl_type +
-                  R"(, read> = var undef @binding_point(2, 1)
+                  R"(, read> = var @binding_point(2, 1)
 }
 
 %main = @fragment func():void {
@@ -2218,7 +2218,7 @@ TEST_P(SampledImageAccessTest, Variable) {
 $B1: {  # root
   %wg:ptr<handle, )" +
                   params.wgsl_type +
-                  R"(, read> = var undef @binding_point(2, 1)
+                  R"(, read> = var @binding_point(2, 1)
 }
 
 %main = @fragment func():void {
@@ -2551,7 +2551,7 @@ TEST_P(NoSamplerImageAccessTest, Variable) {
 $B1: {  # root
   %wg:ptr<handle, )" +
                   params.wgsl_type +
-                  R"(, read> = var undef @binding_point(2, 1)
+                  R"(, read> = var @binding_point(2, 1)
 }
 
 %main = @fragment func():void {
@@ -2801,10 +2801,10 @@ TEST_P(SampledImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
   )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, sampler, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, sampler, read> = var @binding_point(0, 0)
   %wg:ptr<handle, )" +
                   params.wgsl_type +
-                  R"(, read> = var undef @binding_point(2, 0)
+                  R"(, read> = var @binding_point(2, 0)
 }
 
 %main = @fragment func():void {
@@ -3098,7 +3098,7 @@ TEST_P(NonSampledImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
 $B1: {  # root
   %wg:ptr<handle, )" +
                   params.wgsl_type +
-                  R"(, read> = var undef @binding_point(2, 0)
+                  R"(, read> = var @binding_point(2, 0)
 }
 
 %main = @fragment func():void {
@@ -3326,13 +3326,13 @@ TEST_F(SpirvReaderTest, NeverGenerateConstDeclForHandle_UseVariableDirectly) {
   )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %main = @fragment func():void {
   $B2: {
-    %var:ptr<function, vec4<f32>, read_write> = var undef
+    %var:ptr<function, vec4<f32>, read_write> = var
     %5:texture_2d<f32> = load %1
     %6:sampler = load %2
     %7:vec4<f32> = textureSample %5, %6, vec2<f32>(0.0f)
@@ -3412,8 +3412,8 @@ TEST_F(SpirvReaderTest, SamplerLoadedInEnclosingConstruct_DontGenerateVar) {
   )",
               R"(
 $B1: {  # root
-  %var_im:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %var_s:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %var_im:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %var_s:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %main = @fragment func():void {
@@ -3485,8 +3485,8 @@ TEST_F(SpirvReaderTest, SamplerLoaded_MultiUsage) {
   )",
               R"(
 $B1: {  # root
-  %var_im:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %var_s:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %var_im:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %var_s:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %main = @fragment func():void {
@@ -3570,8 +3570,8 @@ OpFunctionEnd
   )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, sampler, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, texture_1d<f32>, read> = var undef @binding_point(2, 1)
+  %1:ptr<handle, sampler, read> = var @binding_point(0, 0)
+  %2:ptr<handle, texture_1d<f32>, read> = var @binding_point(2, 1)
 }
 
 %main = @fragment func():void {
@@ -3672,8 +3672,8 @@ OpFunctionEnd
   )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, sampler, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, texture_1d<f32>, read> = var undef @binding_point(2, 1)
+  %1:ptr<handle, sampler, read> = var @binding_point(0, 0)
+  %2:ptr<handle, texture_1d<f32>, read> = var @binding_point(2, 1)
 }
 
 %main = @fragment func():void {
@@ -3762,17 +3762,17 @@ TEST_F(SpirvReaderTest, TexelTypeWhenLoop) {
   )",
               R"(
 $B1: {  # root
-  %Output2Texture2D:ptr<handle, texture_storage_2d<rg32float, read_write>, read> = var undef @binding_point(0, 0)
+  %Output2Texture2D:ptr<handle, texture_storage_2d<rg32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(8u, 8u, 1u) func():void {
   $B2: {
-    %3:ptr<function, vec2<f32>, read_write> = var undef
+    %3:ptr<function, vec2<f32>, read_write> = var
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        %4:ptr<function, vec2<f32>, read_write> = var undef
+        %4:ptr<function, vec2<f32>, read_write> = var
         store %4, vec2<f32>(0.0f)
-        %5:ptr<function, i32, read_write> = var undef
+        %5:ptr<function, i32, read_write> = var
         store %5, 0i
         next_iteration  # -> $B4
       }
@@ -3843,7 +3843,7 @@ TEST_F(SpirvReaderTest, ReadWriteStorageTexture) {
   )",
               R"(
 $B1: {  # root
-  %RWTexture2D:ptr<handle, texture_storage_2d<rgba32float, read_write>, read> = var undef @binding_point(0, 0)
+  %RWTexture2D:ptr<handle, texture_storage_2d<rgba32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(8u, 8u, 1u) func():void {
@@ -3892,8 +3892,8 @@ TEST_F(SpirvReaderTest, Image_UnknownDepth_NonDepthUse) {
     )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %main = @fragment func():void {
@@ -3942,8 +3942,8 @@ TEST_F(SpirvReaderTest, Image_UnknownDepth_DepthUse) {
     )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %main = @fragment func():void {
@@ -3997,8 +3997,8 @@ TEST_F(SpirvReaderTest, Let_Sampler) {
 )",
               R"(
 $B1: {  # root
-  %t:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %s:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %t:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %s:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -4052,8 +4052,8 @@ TEST_F(SpirvReaderTest, Let_SampledImage) {
 )",
               R"(
 $B1: {  # root
-  %t:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %s:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %t:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %s:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -4124,8 +4124,8 @@ TEST_F(SpirvReaderTest, Image_UserCall_Params) {
 )",
               R"(
 $B1: {  # root
-  %sampler0:ptr<handle, sampler, read> = var undef @binding_point(0, 0)
-  %texture0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 1)
+  %sampler0:ptr<handle, sampler, read> = var @binding_point(0, 0)
+  %texture0:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 1)
 }
 
 %main = @fragment func(%main_position_Input:vec4<f32> [@position]):void {
@@ -4195,8 +4195,8 @@ TEST_F(SpirvReaderTest, Image_UserCall_Params_NoName) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, sampler, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, sampler, read> = var @binding_point(0, 0)
+  %2:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 1)
 }
 
 %main = @fragment func(%4:vec4<f32> [@position]):void {
@@ -4272,8 +4272,8 @@ TEST_F(SpirvReaderTest, TexSamplerAsParams) {
 )",
               R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 1)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(2, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 1)
+  %samp:ptr<handle, sampler, read> = var @binding_point(2, 1)
 }
 
 %main = @fragment func():void {
@@ -4355,14 +4355,14 @@ TEST_F(SpirvReaderTest, TexSamplerAsParams_Dref) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 13)
-  %2:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 12)
+  %1:ptr<handle, sampler_comparison, read> = var @binding_point(0, 13)
+  %2:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 12)
 }
 
 %main = @fragment func():void {
   $B2: {
-    %4:ptr<function, vec4<f32>, read_write> = var undef
-    %5:ptr<function, f32, read_write> = var undef
+    %4:ptr<function, vec4<f32>, read_write> = var
+    %5:ptr<function, f32, read_write> = var
     %6:texture_depth_2d_array = load %2
     %7:sampler_comparison = load %1
     %8:f32 = call %9, %6, %7

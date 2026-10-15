@@ -729,7 +729,7 @@ TEST_F(IR_FromProgramTest, For) {
   $B1: {
     loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
-        %i:ptr<function, i32, read_write> = var undef
+        %i:ptr<function, i32, read_write> = var
         next_iteration  # -> $B3
       }
       $B3: {  # body
@@ -778,7 +778,7 @@ TEST_F(IR_FromProgramTest, For_Init_NoCondOrContinuing) {
   $B1: {
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
-        %i:ptr<function, i32, read_write> = var undef
+        %i:ptr<function, i32, read_write> = var
         next_iteration  # -> $B3
       }
       $B3: {  # body
@@ -1417,7 +1417,7 @@ fn a() {
     auto m = res.Move();
     EXPECT_EQ(Dis(m), R"($B1: {  # root
   %x:i32 = override 1i @id(0)
-  %arr:ptr<workgroup, array<u32, %x>, read_write> = var undef
+  %arr:ptr<workgroup, array<u32, %x>, read_write> = var
 }
 
 %a = func():void {
@@ -1493,7 +1493,7 @@ fn main() {
     EXPECT_EQ(Dis(m), R"($B1: {  # root
   %x:u32 = override undef @id(0)
   %2:u32 = mul %x, 2u
-  %arr:ptr<workgroup, array<u32, %2>, read_write> = var undef
+  %arr:ptr<workgroup, array<u32, %2>, read_write> = var
 }
 
 %main = @compute @workgroup_size(64i, 1i, 1i) func():void {
@@ -1550,7 +1550,7 @@ fn b() {
     auto m = res.Move();
     EXPECT_EQ(Dis(m), R"($B1: {  # root
   %x:i32 = override 1i @id(0)
-  %arr:ptr<workgroup, array<u32, %x>, read_write> = var undef
+  %arr:ptr<workgroup, array<u32, %x>, read_write> = var
 }
 
 %a = func(%p:ptr<workgroup, array<u32, %x>, read_write>):void {
@@ -1587,7 +1587,7 @@ fn bar() {
     auto m = res.Move();
     EXPECT_EQ(Dis(m), R"($B1: {  # root
   %x:i32 = override 1i @id(0)
-  %b:ptr<workgroup, buffer<%x>, read_write> = var undef
+  %b:ptr<workgroup, buffer<%x>, read_write> = var
 }
 
 %foo = func(%p:ptr<workgroup, buffer<%x>, read_write>):void {

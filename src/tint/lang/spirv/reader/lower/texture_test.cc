@@ -66,7 +66,7 @@ TEST_F(SpirvReader_TextureTest, Type_Image_1d) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -75,7 +75,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_1d<f32>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, texture_1d<f32>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -95,7 +95,7 @@ TEST_F(SpirvReader_TextureTest, Type_Image_2d) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -104,7 +104,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -124,7 +124,7 @@ TEST_F(SpirvReader_TextureTest, Type_Image_3d) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<handle, spirv.image<f32, 3d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, spirv.image<f32, 3d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -133,7 +133,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_3d<f32>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, texture_3d<f32>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -154,7 +154,7 @@ TEST_F(SpirvReader_TextureTest, Type_Image_Cube) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<handle, spirv.image<f32, cube, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, spirv.image<f32, cube, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -163,7 +163,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_cube<f32>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, texture_cube<f32>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -184,7 +184,7 @@ TEST_F(SpirvReader_TextureTest, Type_Image_SubpassData) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<handle, spirv.image<f32, subpass_data, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, spirv.image<f32, subpass_data, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -193,7 +193,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<handle, input_attachment<f32>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, input_attachment<f32>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -213,7 +213,7 @@ TEST_F(SpirvReader_TextureTest, Type_Image_Depth) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<handle, spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -222,7 +222,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_depth_2d, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, texture_depth_2d, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -242,7 +242,7 @@ TEST_F(SpirvReader_TextureTest, Type_Image_DepthUnknown) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<handle, spirv.image<f32, 2d, depth_unknown, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, spirv.image<f32, 2d, depth_unknown, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -251,7 +251,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -271,7 +271,7 @@ TEST_F(SpirvReader_TextureTest, Type_Image_Arrayed) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<handle, spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -280,7 +280,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_2d_array<f32>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -301,7 +301,7 @@ TEST_F(SpirvReader_TextureTest, Type_Image_RW_Ops) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rg32float, read>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rg32float, read>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -310,7 +310,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_storage_1d<rg32float, read>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, texture_storage_1d<rg32float, read>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -330,7 +330,7 @@ TEST_F(SpirvReader_TextureTest, Type_Image_TexelFormat) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, rg32float, read>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, rg32float, read>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -339,7 +339,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_1d<f32>, read> = var undef @binding_point(1, 2)
+  %wg:ptr<handle, texture_1d<f32>, read> = var @binding_point(1, 2)
 }
 
 )";
@@ -371,7 +371,7 @@ TEST_F(SpirvReader_TextureTest, UserCall) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(0, 0)
+  %wg:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var @binding_point(0, 0)
 }
 
 %load = func(%3:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>):void {
@@ -392,7 +392,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %wg:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %main = func():void {
@@ -435,7 +435,7 @@ TEST_F(SpirvReader_TextureTest, FunctionParamPtr) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(0, 0)
+  %wg:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var @binding_point(0, 0)
 }
 
 %load = func(%3:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read>):void {
@@ -456,7 +456,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %wg:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %main = func():void {
@@ -506,7 +506,7 @@ TEST_F(SpirvReader_TextureTest, FunctionParamPtr_Loads) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(0, 0)
+  %wg:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var @binding_point(0, 0)
 }
 
 %load = func(%3:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read>):void {
@@ -532,7 +532,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %wg:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %main = func():void {
@@ -594,7 +594,7 @@ TEST_F(SpirvReader_TextureTest, FunctionParamMultiPtr) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(0, 0)
+  %wg:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var @binding_point(0, 0)
 }
 
 %load3 = func(%3:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read>):void {
@@ -628,7 +628,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %wg:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %main = func():void {

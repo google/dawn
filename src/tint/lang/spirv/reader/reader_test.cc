@@ -84,7 +84,7 @@ TEST_F(SpirvReaderTest, Load_VectorComponent) {
     EXPECT_EQ(got, R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %2:ptr<function, vec4<u32>, read_write> = var
     %3:u32 = load_vector_element %2, 2u
     ret
   }
@@ -118,7 +118,7 @@ TEST_F(SpirvReaderTest, Store_VectorComponent) {
     EXPECT_EQ(got, R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %2:ptr<function, vec4<u32>, read_write> = var
     store_vector_element %2, 2u, 42u
     ret
   }
@@ -235,8 +235,8 @@ tint_symbol_4 = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<private, f32, read_write> = var undef
-  %2:ptr<private, tint_symbol_2, read_write> = var undef
+  %1:ptr<private, f32, read_write> = var
+  %2:ptr<private, tint_symbol_2, read_write> = var
 }
 
 %main_inner = func():void {
@@ -329,8 +329,8 @@ tint_symbol = struct @align(16) {
 }
 
 $B1: {  # root
-  %main_position_Output:ptr<private, vec4<f32>, read_write> = var undef
-  %main_clip_distances_Output:ptr<private, array<f32, 1>, read_write> = var undef
+  %main_position_Output:ptr<private, vec4<f32>, read_write> = var
+  %main_clip_distances_Output:ptr<private, array<f32, 1>, read_write> = var
   %main___point_size_Output:ptr<private, f32, read_write> = var 1.0f
 }
 
@@ -419,7 +419,7 @@ tint_symbol = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<private, gl_PerVertex, read_write> = var undef
+  %1:ptr<private, gl_PerVertex, read_write> = var
 }
 
 %main_inner = func():void {
@@ -482,7 +482,7 @@ TEST_F(SpirvReaderTest, SampleMask) {
     ASSERT_EQ(got, Success);
     EXPECT_EQ(got, R"(
 $B1: {  # root
-  %1:ptr<private, array<u32, 1>, read_write> = var undef
+  %1:ptr<private, array<u32, 1>, read_write> = var
 }
 
 %main_inner = func(%3:array<u32, 1>):void {
@@ -578,8 +578,8 @@ tint_symbol = struct @align(16) {
 }
 
 $B1: {  # root
-  %frag_main_loc0_idx0_Output:ptr<private, vec4<f32>, read_write> = var undef
-  %frag_main_loc0_idx1_Output:ptr<private, vec4<f32>, read_write> = var undef
+  %frag_main_loc0_idx0_Output:ptr<private, vec4<f32>, read_write> = var
+  %frag_main_loc0_idx1_Output:ptr<private, vec4<f32>, read_write> = var
 }
 
 %frag_main_inner = func():FragOutput {
@@ -785,10 +785,10 @@ type.constants_ = struct @align(16) {
 }
 
 $B1: {  # root
-  %constants_:ptr<uniform, type.constants_, read> = var undef @binding_point(0, 0)
-  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 1)
-  %samplerTex:ptr<handle, sampler, read> = var undef @binding_point(0, 2)
-  %out.var.SV_Target:ptr<private, vec4<f32>, read_write> = var undef
+  %constants_:ptr<uniform, type.constants_, read> = var @binding_point(0, 0)
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 1)
+  %samplerTex:ptr<handle, sampler, read> = var @binding_point(0, 2)
+  %out.var.SV_Target:ptr<private, vec4<f32>, read_write> = var
 }
 
 %PS_Viewport_inner = func(%in.var.TEXCOORD0:vec2<f32>):void {
@@ -885,8 +885,8 @@ inputs_block = struct @align(4) {
 }
 
 $B1: {  # root
-  %inputs:ptr<uniform, inputs_block, read> = var undef @binding_point(0, 0)
-  %outputs:ptr<storage, inputs_block, read_write> = var undef @binding_point(0, 1)
+  %inputs:ptr<uniform, inputs_block, read> = var @binding_point(0, 0)
+  %outputs:ptr<storage, inputs_block, read_write> = var @binding_point(0, 1)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func(%global_invocation_id:vec3<u32> [@global_invocation_id]):void {

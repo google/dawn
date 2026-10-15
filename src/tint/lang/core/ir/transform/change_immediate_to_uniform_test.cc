@@ -97,7 +97,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<immediate, SB, read> = var undef
+  %v:ptr<immediate, SB, read> = var
 }
 
 %foo = @fragment func():void {
@@ -124,7 +124,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<uniform, SB, read> = var undef @binding_point(0, 0)
+  %v:ptr<uniform, SB, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -179,7 +179,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<immediate, SB, read> = var undef
+  %v:ptr<immediate, SB, read> = var
 }
 
 %foo = @fragment func():void {
@@ -208,7 +208,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<uniform, SB, read> = var undef @binding_point(0, 0)
+  %v:ptr<uniform, SB, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -245,7 +245,7 @@ TEST_F(IRChangeImmediateToUniformTest, PushConstantAccessVectorLoad) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<immediate, vec4<f32>, read> = var undef
+  %v:ptr<immediate, vec4<f32>, read> = var
 }
 
 %foo = @fragment func():void {
@@ -268,7 +268,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<uniform, vec4<f32>, read> = var undef @binding_point(0, 0)
+  %v:ptr<uniform, vec4<f32>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -308,7 +308,7 @@ TEST_F(IRChangeImmediateToUniformTest, PushConstantAccessMatrix) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<immediate, mat4x4<f32>, read> = var undef
+  %v:ptr<immediate, mat4x4<f32>, read> = var
 }
 
 %foo = @fragment func():void {
@@ -329,7 +329,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<uniform, mat4x4<f32>, read> = var undef @binding_point(0, 0)
+  %v:ptr<uniform, mat4x4<f32>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -374,7 +374,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<immediate, SB, read> = var undef
+  %v:ptr<immediate, SB, read> = var
 }
 
 %foo = @fragment func():void {
@@ -397,7 +397,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<uniform, SB, read> = var undef @binding_point(0, 0)
+  %v:ptr<uniform, SB, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -461,7 +461,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<immediate, SB, read> = var undef
+  %v:ptr<immediate, SB, read> = var
 }
 
 %foo = @fragment func():void {
@@ -494,7 +494,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<uniform, SB, read> = var undef @binding_point(0, 0)
+  %v:ptr<uniform, SB, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -537,7 +537,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<immediate, SB, read> = var undef
+  %v:ptr<immediate, SB, read> = var
 }
 
 %foo = @fragment func():void {
@@ -560,7 +560,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<uniform, SB, read> = var undef @binding_point(0, 0)
+  %v:ptr<uniform, SB, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -609,7 +609,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<immediate, SB, read> = var undef
+  %v:ptr<immediate, SB, read> = var
 }
 
 %foo = @fragment func():void {
@@ -634,7 +634,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<uniform, SB, read> = var undef @binding_point(0, 0)
+  %v:ptr<uniform, SB, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -685,7 +685,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<immediate, SB, read> = var undef
+  %v:ptr<immediate, SB, read> = var
 }
 
 %helper = func(%p:ptr<immediate, SB, read>):void {
@@ -710,7 +710,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<uniform, SB, read> = var undef @binding_point(0, 0)
+  %v:ptr<uniform, SB, read> = var @binding_point(0, 0)
 }
 
 %helper = func(%p:ptr<uniform, SB, read>):void {
@@ -768,7 +768,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<immediate, SB, read> = var undef
+  %v:ptr<immediate, SB, read> = var
 }
 
 %helper = func(%p1:ptr<immediate, i32, read>, %p2:ptr<immediate, i32, read>):void {
@@ -796,7 +796,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<uniform, SB, read> = var undef @binding_point(0, 0)
+  %v:ptr<uniform, SB, read> = var @binding_point(0, 0)
 }
 
 %helper = func(%p1:ptr<uniform, i32, read>, %p2:ptr<uniform, i32, read>):void {
@@ -853,7 +853,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<immediate, SB, read> = var undef
+  %v:ptr<immediate, SB, read> = var
 }
 
 %helper = func(%p:ptr<immediate, i32, read>):void {
@@ -880,7 +880,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<uniform, SB, read> = var undef @binding_point(0, 0)
+  %v:ptr<uniform, SB, read> = var @binding_point(0, 0)
 }
 
 %helper = func(%p:ptr<uniform, i32, read>):void {

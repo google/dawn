@@ -224,8 +224,8 @@ TEST_F(IR_RemoveTerminatorArgsTest, IfResults) {
     auto* expect = R"(
 %foo = func():void {
   $B1: {
-    %2:ptr<function, i32, read_write> = var undef
-    %3:ptr<function, u32, read_write> = var undef
+    %2:ptr<function, i32, read_write> = var
+    %3:ptr<function, u32, read_write> = var
     if true [t: $B2, f: $B3] {  # if_1
       $B2: {  # true
         store %2, 1i
@@ -308,8 +308,8 @@ TEST_F(IR_RemoveTerminatorArgsTest, SwitchResults) {
     auto* expect = R"(
 %foo = func():void {
   $B1: {
-    %2:ptr<function, i32, read_write> = var undef
-    %3:ptr<function, u32, read_write> = var undef
+    %2:ptr<function, i32, read_write> = var
+    %3:ptr<function, u32, read_write> = var
     switch 42i [c: (1i, $B2), c: (2i, $B3), c: (default, $B4)] {  # switch_1
       $B2: {  # case
         store %2, 1i
@@ -401,8 +401,8 @@ TEST_F(IR_RemoveTerminatorArgsTest, Loop_Results) {
     auto* expect = R"(
 %foo = func():void {
   $B1: {
-    %2:ptr<function, i32, read_write> = var undef
-    %3:ptr<function, u32, read_write> = var undef
+    %2:ptr<function, i32, read_write> = var
+    %3:ptr<function, u32, read_write> = var
     loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
         next_iteration  # -> $B3
@@ -499,9 +499,9 @@ TEST_F(IR_RemoveTerminatorArgsTest, Loop_BodyParams) {
   $B1: {
     loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
-        %2:ptr<function, i32, read_write> = var undef
+        %2:ptr<function, i32, read_write> = var
         store %2, 1i
-        %3:ptr<function, u32, read_write> = var undef
+        %3:ptr<function, u32, read_write> = var
         store %3, 2u
         next_iteration  # -> $B3
       }
@@ -598,8 +598,8 @@ TEST_F(IR_RemoveTerminatorArgsTest, Loop_ContinuingParams) {
         next_iteration  # -> $B3
       }
       $B3: {  # body
-        %2:ptr<function, i32, read_write> = var undef
-        %3:ptr<function, u32, read_write> = var undef
+        %2:ptr<function, i32, read_write> = var
+        %3:ptr<function, u32, read_write> = var
         if true [t: $B5] {  # if_1
           $B5: {  # true
             exit_loop  # loop_1
@@ -697,13 +697,13 @@ TEST_F(IR_RemoveTerminatorArgsTest, Loop_BreakIfWithTwoArgLists) {
     auto* expect = R"(
 %foo = func():void {
   $B1: {
-    %2:ptr<function, i32, read_write> = var undef
-    %3:ptr<function, u32, read_write> = var undef
+    %2:ptr<function, i32, read_write> = var
+    %3:ptr<function, u32, read_write> = var
     loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
-        %4:ptr<function, f32, read_write> = var undef
+        %4:ptr<function, f32, read_write> = var
         store %4, 1.0f
-        %5:ptr<function, i32, read_write> = var undef
+        %5:ptr<function, i32, read_write> = var
         store %5, 2i
         next_iteration  # -> $B3
       }
@@ -787,8 +787,8 @@ TEST_F(IR_RemoveTerminatorArgsTest, UndefResults) {
     auto* expect = R"(
 %foo = func():void {
   $B1: {
-    %2:ptr<function, i32, read_write> = var undef
-    %3:ptr<function, u32, read_write> = var undef
+    %2:ptr<function, i32, read_write> = var
+    %3:ptr<function, u32, read_write> = var
     if true [t: $B2, f: $B3] {  # if_1
       $B2: {  # true
         store %2, 1i
@@ -875,9 +875,9 @@ TEST_F(IR_RemoveTerminatorArgsTest, UndefBlockParams) {
   $B1: {
     loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
-        %2:ptr<function, i32, read_write> = var undef
+        %2:ptr<function, i32, read_write> = var
         store %2, 1i
-        %3:ptr<function, u32, read_write> = var undef
+        %3:ptr<function, u32, read_write> = var
         next_iteration  # -> $B3
       }
       $B3: {  # body

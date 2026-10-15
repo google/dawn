@@ -431,7 +431,7 @@ struct State {
             } else {
                 // Change the type to use cooperative_tensor and copy the initializer into it.
                 var->Result()->SetType(RewriteType(ptr));
-                var->SetInitializer(nullptr);
+                var->SetOperands({});
                 b.InsertAfter(var, [&] {  //
                     CopyTensorVar(var->Result(), init);
                 });

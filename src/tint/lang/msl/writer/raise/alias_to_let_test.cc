@@ -58,7 +58,7 @@ TEST_F(MslWriter_AliasToLetTest, AliasPointerOffset_AddLet) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<workgroup, array<u8, 16>, read_write> = var undef
+  %v:ptr<workgroup, array<u8, 16>, read_write> = var
 }
 
 %foo = func():void {
@@ -73,7 +73,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, array<u8, 16>, read_write> = var undef
+  %v:ptr<workgroup, array<u8, 16>, read_write> = var
 }
 
 %foo = func():void {
@@ -110,7 +110,7 @@ TEST_F(MslWriter_AliasToLetTest, PointerOffset_NoLet) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<workgroup, array<u8, 16>, read_write> = var undef
+  %v:ptr<workgroup, array<u8, 16>, read_write> = var
 }
 
 %foo = func():void {

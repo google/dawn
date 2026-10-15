@@ -118,7 +118,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchNonMemberFunction) {
 
 note: # Disassembly
 $B1: {  # root
-  %t:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %t:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = func():u32 {
@@ -174,7 +174,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchIncorrectType) {
 
 note: # Disassembly
 $B1: {  # root
-  %t:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %t:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = func():u32 {
@@ -218,12 +218,12 @@ TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchIncorrectType_NotAllOverloadsAr
 
 note: # Disassembly
 $B1: {  # root
-  %t:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %t:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():u32 {
   $B2: {
-    %var:ptr<function, i32, read_write> = var undef
+    %var:ptr<function, i32, read_write> = var
     %4:void = %t.InterlockedExchange 4.0f, 123i, %var
     ret 0u
   }
@@ -274,7 +274,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, MissingResults) {
 
 note: # Disassembly
 $B1: {  # root
-  %t:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %t:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -375,7 +375,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, TooFewArgs) {
 
 note: # Disassembly
 $B1: {  # root
-  %t:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %t:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -478,7 +478,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, TooManyArgs) {
 
 note: # Disassembly
 $B1: {  # root
-  %t:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %t:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = func():void {

@@ -110,8 +110,8 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest, NonImageVars) {
 
     auto* src = R"(
 $B1: {  # root
-  %wgvar:ptr<storage, f32, read_write> = var undef @binding_point(0, 0)
-  %wgvar_1:ptr<workgroup, f32, read_write> = var undef  # %wgvar_1: 'wgvar'
+  %wgvar:ptr<storage, f32, read_write> = var @binding_point(0, 0)
+  %wgvar_1:ptr<workgroup, f32, read_write> = var  # %wgvar_1: 'wgvar'
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -144,7 +144,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest, StorageTexture_F16Format_Rea
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba16float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba16float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -190,7 +190,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba16float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba16float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -236,7 +236,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba16float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba16float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -277,7 +277,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba16float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba16float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -323,7 +323,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -366,7 +366,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest, StorageTexture_F16Format_Wri
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba16float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba16float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -405,7 +405,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest, StorageTexture_F32Format_Rea
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -447,7 +447,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -487,7 +487,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -526,7 +526,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -571,7 +571,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -624,7 +624,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -678,8 +678,8 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest, SampledTexture_Read_Converte
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(0, 0)
-  %smp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var @binding_point(0, 0)
+  %smp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -732,8 +732,8 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest, SampledTexture_Read_NotConve
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var undef @binding_point(0, 0)
-  %smp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var @binding_point(0, 0)
+  %smp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -774,7 +774,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest, StorageTexture_F16Format_Rea
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba16float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba16float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -818,7 +818,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest, StorageTexture_IntFormat_Rea
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<i32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba16sint, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<i32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba16sint, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -868,7 +868,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%image_param:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>):void {
@@ -923,7 +923,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%image_param:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>):void {
@@ -986,7 +986,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %bar = func(%bar_param:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>):void {
@@ -1054,7 +1054,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%image_param:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>):void {
@@ -1106,7 +1106,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1154,7 +1154,7 @@ TEST_F(SpirvWriter_RelaxedPrecisionDecorationsTest,
 
     auto* src = R"(
 $B1: {  # root
-  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var undef @binding_point(0, 0)
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {

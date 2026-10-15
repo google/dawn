@@ -142,7 +142,7 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -168,7 +168,7 @@ S_1 = struct @align(16) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -318,7 +318,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -344,7 +344,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -383,7 +383,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -409,7 +409,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -448,7 +448,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -474,7 +474,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -519,7 +519,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -546,7 +546,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -591,7 +591,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -616,7 +616,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -655,7 +655,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -681,7 +681,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -721,7 +721,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -748,7 +748,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -794,7 +794,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -819,7 +819,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -857,7 +857,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -882,7 +882,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -920,7 +920,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -945,7 +945,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -983,7 +983,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1007,7 +1007,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1059,7 +1059,7 @@ S = struct @align(64) {
 }
 %bar = func():void {
   $B2: {
-    %var:ptr<function, S, read_write> = var undef
+    %var:ptr<function, S, read_write> = var
     %8:void = call %foo, %var
     ret
   }
@@ -1093,7 +1093,7 @@ S_1 = struct @align(64) {
 }
 %bar = func():void {
   $B2: {
-    %var:ptr<function, S_1, read_write> = var undef
+    %var:ptr<function, S_1, read_write> = var
     %13:void = call %foo, %var
     ret
   }
@@ -1124,7 +1124,7 @@ S = struct @align(64) {
 
 %foo = func():S {
   $B1: {
-    %var:ptr<function, S, read_write> = var undef
+    %var:ptr<function, S, read_write> = var
     %3:S = load %var
     ret %3
   }
@@ -1145,7 +1145,7 @@ S_1 = struct @align(64) {
 
 %foo = func():S_1 {
   $B1: {
-    %var:ptr<function, S_1, read_write> = var undef
+    %var:ptr<function, S_1, read_write> = var
     %3:S_1 = load %var
     ret %3
   }
@@ -1179,7 +1179,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, array<S, 4>, read_write> = var undef
+  %var:ptr<private, array<S, 4>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1205,7 +1205,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, array<S_1, 4>, read_write> = var undef
+  %var:ptr<private, array<S_1, 4>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1251,7 +1251,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, spirv.explicit_layout_array<S, 4, stride=256>, read_write> = var undef
+  %var:ptr<private, spirv.explicit_layout_array<S, 4, stride=256>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1277,7 +1277,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, spirv.explicit_layout_array<S_1, 4, stride=256>, read_write> = var undef
+  %var:ptr<private, spirv.explicit_layout_array<S_1, 4, stride=256>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1331,7 +1331,7 @@ Outer = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, Outer, read_write> = var undef
+  %var:ptr<private, Outer, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1367,7 +1367,7 @@ Outer_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, Outer_1, read_write> = var undef
+  %var:ptr<private, Outer_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1484,7 +1484,7 @@ MyStruct = struct @align(16) {
 }
 
 $B1: {  # root
-  %var:ptr<private, MyStruct, read_write> = var undef
+  %var:ptr<private, MyStruct, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1524,7 +1524,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1550,7 +1550,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1594,7 +1594,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1620,7 +1620,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1702,7 +1702,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1727,7 +1727,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1766,7 +1766,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1791,7 +1791,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1829,7 +1829,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1853,7 +1853,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2040,7 +2040,7 @@ S = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S, read_write> = var undef
+  %var:ptr<private, S, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2068,7 +2068,7 @@ S_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, S_1, read_write> = var undef
+  %var:ptr<private, S_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2123,7 +2123,7 @@ Outer = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, Outer, read_write> = var undef
+  %var:ptr<private, Outer, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2157,7 +2157,7 @@ Outer_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, Outer_1, read_write> = var undef
+  %var:ptr<private, Outer_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2205,7 +2205,7 @@ Outer = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, Outer, read_write> = var undef
+  %var:ptr<private, Outer, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2239,7 +2239,7 @@ Outer_1 = struct @align(64) {
 }
 
 $B1: {  # root
-  %var:ptr<private, Outer_1, read_write> = var undef
+  %var:ptr<private, Outer_1, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2287,7 +2287,7 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %u:ptr<uniform, S, read> = var undef @binding_point(0, 0)
+  %u:ptr<uniform, S, read> = var @binding_point(0, 0)
 }
 
 %helper = func(%3:ptr<uniform, mat3x2<f32>, read>):void {
@@ -2318,7 +2318,7 @@ S_1 = struct @align(16) {
 }
 
 $B1: {  # root
-  %u:ptr<uniform, S_1, read> = var undef @binding_point(0, 0)
+  %u:ptr<uniform, S_1, read> = var @binding_point(0, 0)
 }
 
 %helper = func(%3:ptr<uniform, mat3x2<f32>, read>):void {
@@ -2377,7 +2377,7 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %u:ptr<uniform, S, read> = var undef @binding_point(0, 0)
+  %u:ptr<uniform, S, read> = var @binding_point(0, 0)
 }
 
 %helper = func(%3:ptr<uniform, mat3x2<f32>, read>, %4:ptr<uniform, mat3x2<f32>, read>):void {
@@ -2408,7 +2408,7 @@ S_1 = struct @align(16) {
 }
 
 $B1: {  # root
-  %u:ptr<uniform, S_1, read> = var undef @binding_point(0, 0)
+  %u:ptr<uniform, S_1, read> = var @binding_point(0, 0)
 }
 
 %helper = func(%3:ptr<uniform, mat3x2<f32>, read>, %4:ptr<uniform, mat3x2<f32>, read>):void {
@@ -2481,8 +2481,8 @@ S_1 = struct @align(32) {
 }
 
 $B1: {  # root
-  %u16:ptr<uniform, S, read> = var undef @binding_point(0, 0)
-  %u32:ptr<uniform, S_1, read> = var undef @binding_point(0, 1)
+  %u16:ptr<uniform, S, read> = var @binding_point(0, 0)
+  %u32:ptr<uniform, S_1, read> = var @binding_point(0, 1)
 }
 
 %helper = func(%4:ptr<uniform, mat3x2<f32>, read>):void {
@@ -2527,8 +2527,8 @@ S_1_1 = struct @align(32) {
 }
 
 $B1: {  # root
-  %u16:ptr<uniform, S_2, read> = var undef @binding_point(0, 0)
-  %u32:ptr<uniform, S_1_1, read> = var undef @binding_point(0, 1)
+  %u16:ptr<uniform, S_2, read> = var @binding_point(0, 0)
+  %u32:ptr<uniform, S_1_1, read> = var @binding_point(0, 1)
 }
 
 %helper = func(%4:ptr<uniform, mat3x2<f32>, read>):void {
@@ -2601,7 +2601,7 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %u:ptr<uniform, S, read> = var undef @binding_point(0, 0)
+  %u:ptr<uniform, S, read> = var @binding_point(0, 0)
 }
 
 %helper2 = func(%3:ptr<uniform, mat3x2<f32>, read>):void {
@@ -2638,7 +2638,7 @@ S_1 = struct @align(16) {
 }
 
 $B1: {  # root
-  %u:ptr<uniform, S_1, read> = var undef @binding_point(0, 0)
+  %u:ptr<uniform, S_1, read> = var @binding_point(0, 0)
 }
 
 %helper2 = func(%3:ptr<uniform, mat3x2<f32>, read>):void {
@@ -2723,8 +2723,8 @@ S_1 = struct @align(8) {
 }
 
 $B1: {  # root
-  %u_strided:ptr<uniform, S, read> = var undef @binding_point(0, 0)
-  %u_natural:ptr<uniform, S_1, read> = var undef @binding_point(0, 1)
+  %u_strided:ptr<uniform, S, read> = var @binding_point(0, 0)
+  %u_natural:ptr<uniform, S_1, read> = var @binding_point(0, 1)
 }
 
 %helper = func(%4:ptr<uniform, mat3x2<f32>, read>):void {
@@ -2769,8 +2769,8 @@ S_1_1 = struct @align(8) {
 }
 
 $B1: {  # root
-  %u_strided:ptr<uniform, S_2, read> = var undef @binding_point(0, 0)
-  %u_natural:ptr<uniform, S_1_1, read> = var undef @binding_point(0, 1)
+  %u_strided:ptr<uniform, S_2, read> = var @binding_point(0, 0)
+  %u_natural:ptr<uniform, S_1_1, read> = var @binding_point(0, 1)
 }
 
 %helper = func(%4:ptr<uniform, mat3x2<f32>, read>):void {

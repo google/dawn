@@ -557,7 +557,7 @@ TEST_F(IR_ValidatorTest, EntryPoint_InputLocation_Duplicate_InParamAndMSV) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:2:29 error: var: duplicate location(0) on entry point input
-  %v:ptr<__in, f32, read> = var undef @location(0)
+  %v:ptr<__in, f32, read> = var @location(0)
                             ^^^
 
 :5:27 note: %p1 declared here
@@ -584,7 +584,7 @@ TEST_F(IR_ValidatorTest, EntryPoint_OutputLocation_Duplicate_InReturnAndMSV) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:2:36 error: var: duplicate location(0) on entry point output
-  %v:ptr<__out, f32, read_write> = var undef @location(0)
+  %v:ptr<__out, f32, read_write> = var @location(0)
                                    ^^^
 
 :5:1 note: %my_func declared here
@@ -656,7 +656,7 @@ TEST_F(IR_ValidatorTest, EntryPoint_Compute_InputLocation_InMSV) {
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(
                     R"(:2:29 error: var: location attribute is not valid for compute shader inputs
-  %v:ptr<__in, f32, read> = var undef @location(0)
+  %v:ptr<__in, f32, read> = var @location(0)
                             ^^^
 )")) << res.Failure();
 }
@@ -677,7 +677,7 @@ TEST_F(IR_ValidatorTest, EntryPoint_Workgroup_NotCompute) {
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(
                     R"(:2:40 error: var: workgroup variable cannot be used in a fragment shader
-  %v:ptr<workgroup, f32, read_write> = var undef
+  %v:ptr<workgroup, f32, read_write> = var
                                        ^^^
 )")) << res.Failure();
 }
@@ -699,7 +699,7 @@ TEST_F(IR_ValidatorTest, EntryPoint_PixelLocal_NotFragment) {
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(
                     R"(:6:40 error: var: pixel_local variable cannot be used in a compute shader
-  %v:ptr<pixel_local, S, read_write> = var undef
+  %v:ptr<pixel_local, S, read_write> = var
                                        ^^^
 )")) << res.Failure();
 }
@@ -721,7 +721,7 @@ TEST_F(IR_ValidatorTest, EntryPoint_In_Compute) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:2:29 error: var: module scope variable must have at least one IO annotation, e.g. a binding point, a location, etc
-  %v:ptr<__in, f32, read> = var undef
+  %v:ptr<__in, f32, read> = var
                             ^^^
 )")) << res.Failure();
 }
@@ -1197,7 +1197,7 @@ TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_DuplicateLocation_Used) {
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(
                     R"(:7:36 error: var: duplicate location(0) on entry point output
-  %v:ptr<__out, f32, read_write> = var undef @location(0)
+  %v:ptr<__out, f32, read_write> = var @location(0)
                                    ^^^
 )")) << res.Failure();
 }
@@ -1234,7 +1234,7 @@ TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_ArrayOfStructs) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:7:54 error: var: blend_src cannot be used on members of non-top level structs
-  %v:ptr<__out, array<BlendStruct, 2>, read_write> = var undef
+  %v:ptr<__out, array<BlendStruct, 2>, read_write> = var
                                                      ^^^
 )")) << res.Failure();
 }
@@ -1267,7 +1267,7 @@ TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_NestedStruct) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:11:44 error: var: blend_src cannot be used on members of non-top level structs
-  %v:ptr<__out, OuterStruct, read_write> = var undef
+  %v:ptr<__out, OuterStruct, read_write> = var
                                            ^^^
 )")) << res.Failure();
 }
@@ -1360,7 +1360,7 @@ TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_NonMember_WithoutProperty) {
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(
                     R"(:2:39 error: var: blend_src cannot be used on non-struct-member types
-  %var0:ptr<__out, f32, read_write> = var undef @location(0) @blend_src(0)
+  %var0:ptr<__out, f32, read_write> = var @location(0) @blend_src(0)
                                       ^^^
 )")) << res.Failure();
 }
@@ -2236,7 +2236,7 @@ TEST_F(IR_ValidatorTest, Function_MSV_Color_Input_NonFragment) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:2:35 error: var: color IO attributes cannot be declared for a vertex shader input. They can only be used for a fragment shader input.
-  %v:ptr<__in, vec4<f32>, read> = var undef
+  %v:ptr<__in, vec4<f32>, read> = var
                                   ^^^
 )")) << res.Failure();
 }
@@ -2264,7 +2264,7 @@ TEST_F(IR_ValidatorTest, Function_MSV_Struct_Color_Input_NonFragment) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:6:34 error: var: color IO attributes cannot be declared for a vertex shader input. They can only be used for a fragment shader input.
-  %v:ptr<__in, MyStruct, read> = var undef
+  %v:ptr<__in, MyStruct, read> = var
                                  ^^^
 )")) << res.Failure();
 }
@@ -2360,7 +2360,7 @@ TEST_F(IR_ValidatorTest, Function_MSV_Struct_Color_Output) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:6:41 error: var: color IO attributes cannot be declared for a fragment shader output. They can only be used for a fragment shader input.
-  %v:ptr<__out, MyStruct, read_write> = var undef
+  %v:ptr<__out, MyStruct, read_write> = var
                                         ^^^
 )")) << res.Failure();
 }
@@ -2656,7 +2656,7 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition_ViaMSV)
         res.Failure().reason,
         testing::HasSubstr(
             R"(:6:41 error: var: invariant can only decorate a value if it is also decorated with position
-  %v:ptr<__out, MyStruct, read_write> = var undef
+  %v:ptr<__out, MyStruct, read_write> = var
                                         ^^^
 )")) << res.Failure();
 }
@@ -2703,7 +2703,7 @@ TEST_F(IR_ValidatorTest, Function_Return_InvariantWithoutPosition_ViaMSV) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:2:42 error: var: invariant can only decorate a value if it is also decorated with position
-  %v:ptr<__out, vec4<f32>, read_write> = var undef @invariant
+  %v:ptr<__out, vec4<f32>, read_write> = var @invariant
                                          ^^^
 )")) << res.Failure();
 }
@@ -3411,7 +3411,7 @@ TEST_F(IR_ValidatorTest, Function_Vertex_PositionOnVarWithoutProperty) {
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(
                     R"(:6:41 error: var: position as part of a `var`, it must be part of the return
-  %1:ptr<__out, MyStruct, read_write> = var undef
+  %1:ptr<__out, MyStruct, read_write> = var
 )")) << res.Failure();
 }
 
@@ -3500,7 +3500,7 @@ TEST_F(IR_ValidatorTest, Function_BoolOutput_via_MSV) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:2:37 error: var: IO address space values referenced by shader entry points can only be 'bool' if in the input space, used only by fragment shaders and decorated with @builtin(front_facing)
-  %1:ptr<__out, bool, read_write> = var undef @location(0)
+  %1:ptr<__out, bool, read_write> = var @location(0)
                                     ^^^
 )")) << res.Failure();
 }
@@ -3525,7 +3525,7 @@ TEST_F(IR_ValidatorTest, Function_BoolInputWithoutFrontFacing_via_MSV) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:2:36 error: var: input address space values referenced by fragment shaders can only be 'bool' if decorated with @builtin(front_facing)
-  %invalid:ptr<__in, bool, read> = var undef @location(0)
+  %invalid:ptr<__in, bool, read> = var @location(0)
                                    ^^^
 )")) << res.Failure();
 }

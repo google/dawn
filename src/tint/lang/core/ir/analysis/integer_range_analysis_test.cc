@@ -56,7 +56,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationIndex_u32_XYZ) {
     auto* src = R"(
 %my_func = @compute @workgroup_size(4u, 3u, 2u) func(%localInvocationIndex:u32 [@local_invocation_index]):void {
   $B1: {
-    %3:ptr<function, array<u32, 24>, read_write> = var undef
+    %3:ptr<function, array<u32, 24>, read_write> = var
     %4:ptr<function, u32, read_write> = access %3, %localInvocationIndex
     store %4, %localInvocationIndex
     ret
@@ -92,7 +92,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationIndex_i32_XYZ) {
     auto* src = R"(
 %my_func = @compute @workgroup_size(5i, 4i, 3i) func(%localInvocationIndex:u32 [@local_invocation_index]):void {
   $B1: {
-    %3:ptr<function, array<u32, 60>, read_write> = var undef
+    %3:ptr<function, array<u32, 60>, read_write> = var
     %4:ptr<function, u32, read_write> = access %3, %localInvocationIndex
     store %4, %localInvocationIndex
     ret
@@ -128,7 +128,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationIndex_1_Y_1) {
     auto* src = R"(
 %my_func = @compute @workgroup_size(1u, 8u, 1u) func(%localInvocationIndex:u32 [@local_invocation_index]):void {
   $B1: {
-    %3:ptr<function, array<u32, 8>, read_write> = var undef
+    %3:ptr<function, array<u32, 8>, read_write> = var
     %4:ptr<function, u32, read_write> = access %3, %localInvocationIndex
     store %4, %localInvocationIndex
     ret
@@ -164,7 +164,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationIndex_1_1_Z) {
     auto* src = R"(
 %my_func = @compute @workgroup_size(1u, 1u, 16u) func(%localInvocationIndex:u32 [@local_invocation_index]):void {
   $B1: {
-    %3:ptr<function, array<u32, 16>, read_write> = var undef
+    %3:ptr<function, array<u32, 16>, read_write> = var
     %4:ptr<function, u32, read_write> = access %3, %localInvocationIndex
     store %4, %localInvocationIndex
     ret
@@ -209,15 +209,15 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationID_u32_XYZ) {
     auto* src = R"(
 %my_func = @compute @workgroup_size(4u, 3u, 2u) func(%localInvocationId:vec3<u32> [@local_invocation_id]):void {
   $B1: {
-    %3:ptr<function, array<u32, 4>, read_write> = var undef
+    %3:ptr<function, array<u32, 4>, read_write> = var
     %4:u32 = access %localInvocationId, 0u
     %5:ptr<function, u32, read_write> = access %3, %4
     store %5, %4
-    %6:ptr<function, array<u32, 3>, read_write> = var undef
+    %6:ptr<function, array<u32, 3>, read_write> = var
     %7:u32 = access %localInvocationId, 1u
     %8:ptr<function, u32, read_write> = access %6, %7
     store %8, %7
-    %9:ptr<function, array<u32, 2>, read_write> = var undef
+    %9:ptr<function, array<u32, 2>, read_write> = var
     %10:u32 = access %localInvocationId, 2u
     %11:ptr<function, u32, read_write> = access %9, %10
     store %11, %10
@@ -260,7 +260,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationID_u32_1_Y_1) {
     auto* src = R"(
 %my_func = @compute @workgroup_size(1u, 8u, 1u) func(%localInvocationId:vec3<u32> [@local_invocation_id]):void {
   $B1: {
-    %3:ptr<function, array<u32, 8>, read_write> = var undef
+    %3:ptr<function, array<u32, 8>, read_write> = var
     %4:u32 = access %localInvocationId, 1u
     %5:ptr<function, u32, read_write> = access %3, %4
     store %5, %4
@@ -303,7 +303,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationID_u32_1_1_Z) {
     auto* src = R"(
 %my_func = @compute @workgroup_size(1u, 1u, 16u) func(%localInvocationId:vec3<u32> [@local_invocation_id]):void {
   $B1: {
-    %3:ptr<function, array<u32, 16>, read_write> = var undef
+    %3:ptr<function, array<u32, 16>, read_write> = var
     %4:u32 = access %localInvocationId, 2u
     %5:ptr<function, u32, read_write> = access %3, %4
     store %5, %4
@@ -8670,7 +8670,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LoadFromNonLoopControlVariable) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<workgroup, u32, read_write> = var undef
+  %a:ptr<workgroup, u32, read_write> = var
 }
 
 %foo = @compute @workgroup_size(3u, 5u, 7u) func():void {
@@ -8759,7 +8759,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, NotAccessToFunctionParam) {
     auto* src = R"(
 %func = func():void {
   $B1: {
-    %2:ptr<function, array<u32, 24>, read_write> = var undef
+    %2:ptr<function, array<u32, 24>, read_write> = var
     %3:ptr<function, u32, read_write> = access %2, 0u
     ret
   }
@@ -8851,7 +8851,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, NonConstantAccessIndex) {
     auto* src = R"(
 %my_func = @compute @workgroup_size(4u, 3u, 2u) func(%localInvocationId:vec3<u32> [@local_invocation_id]):void {
   $B1: {
-    %3:ptr<function, u32, read_write> = var undef
+    %3:ptr<function, u32, read_write> = var
     %4:u32 = load %3
     %5:u32 = access %localInvocationId, %4
     ret

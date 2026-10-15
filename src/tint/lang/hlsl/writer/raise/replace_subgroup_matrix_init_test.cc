@@ -51,7 +51,7 @@ TEST_F(HlslWriterReplaceSubgroupMatrixInitTest, Var_Zero) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<f32, 16, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<f32, 16, 8>, read_write> = var
     ret
   }
 }
@@ -82,7 +82,7 @@ TEST_F(HlslWriterReplaceSubgroupMatrixInitTest, Var_Zero_Array) {
     auto* src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, array<subgroup_matrix_result<f32, 16, 8>, 4>, read_write> = var undef
+    %v:ptr<function, array<subgroup_matrix_result<f32, 16, 8>, 4>, read_write> = var
     ret
   }
 }
@@ -127,7 +127,7 @@ S = struct @align(4) {
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, S, read_write> = var undef
+    %v:ptr<function, S, read_write> = var
     ret
   }
 }

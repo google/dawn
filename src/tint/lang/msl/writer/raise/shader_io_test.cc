@@ -413,7 +413,7 @@ foo_outputs = struct @align(16) {
 %foo = @vertex func():foo_outputs {
   $B2: {
     %3:vec4<f32> = call %foo_inner
-    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var undef
+    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var
     %5:ptr<function, vec4<f32>, read_write> = access %tint_wrapper_result, 0u
     store %5, %3
     %6:foo_outputs = load %tint_wrapper_result
@@ -460,7 +460,7 @@ foo_outputs = struct @align(16) {
 %foo = @fragment func():foo_outputs {
   $B2: {
     %3:vec4<f32> = call %foo_inner
-    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var undef
+    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var
     %5:ptr<function, vec4<f32>, read_write> = access %tint_wrapper_result, 0u
     store %5, %3
     %6:foo_outputs = load %tint_wrapper_result
@@ -554,7 +554,7 @@ foo_outputs = struct @align(16) {
     %4:vec4<f32> = access %3, 0u
     %5:f32 = access %3, 1u
     %6:f32 = access %3, 2u
-    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var undef
+    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var
     %8:ptr<function, vec4<f32>, read_write> = access %tint_wrapper_result, 0u
     store %8, %4
     %9:ptr<function, f32, read_write> = access %tint_wrapper_result, 1u
@@ -636,7 +636,7 @@ foo_outputs = struct @align(4) {
     %3:Output = call %foo_inner
     %4:f32 = access %3, 0u
     %5:f32 = access %3, 1u
-    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var undef
+    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var
     %7:ptr<function, f32, read_write> = access %tint_wrapper_result, 0u
     store %7, %4
     %8:ptr<function, f32, read_write> = access %tint_wrapper_result, 1u
@@ -692,7 +692,7 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read> = var undef @binding_point(0, 0)
+  %1:ptr<storage, Outputs, read> = var @binding_point(0, 0)
 }
 
 %vert = @vertex func():Outputs {
@@ -716,7 +716,7 @@ vert_outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read> = var undef @binding_point(0, 0)
+  %1:ptr<storage, Outputs, read> = var @binding_point(0, 0)
 }
 
 %vert_inner = func():Outputs {
@@ -730,7 +730,7 @@ $B1: {  # root
     %5:Outputs = call %vert_inner
     %6:vec4<f32> = access %5, 0u
     %7:vec4<f32> = access %5, 1u
-    %tint_wrapper_result:ptr<function, vert_outputs, read_write> = var undef
+    %tint_wrapper_result:ptr<function, vert_outputs, read_write> = var
     %9:ptr<function, vec4<f32>, read_write> = access %tint_wrapper_result, 0u
     store %9, %6
     %10:ptr<function, vec4<f32>, read_write> = access %tint_wrapper_result, 1u
@@ -789,7 +789,7 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read_write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, Outputs, read_write> = var @binding_point(0, 0)
 }
 
 %frag = @fragment func():void {
@@ -808,7 +808,7 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read_write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, Outputs, read_write> = var @binding_point(0, 0)
 }
 
 %frag = @fragment func():void {
@@ -858,7 +858,7 @@ foo_outputs = struct @align(16) {
 %foo = @vertex func():foo_outputs {
   $B2: {
     %3:vec4<f32> = call %foo_inner
-    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var undef
+    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var
     %5:ptr<function, vec4<f32>, read_write> = access %tint_wrapper_result, 0u
     store %5, %3
     %6:ptr<function, f32, read_write> = access %tint_wrapper_result, 1u
@@ -985,7 +985,7 @@ foo_outputs = struct @align(16) {
     %3:Outputs = call %foo_inner
     %4:vec4<f32> = access %3, 0u
     %5:u32 = access %3, 1u
-    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var undef
+    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var
     %7:ptr<function, vec4<f32>, read_write> = access %tint_wrapper_result, 0u
     store %7, %4
     %8:ptr<function, u32, read_write> = access %tint_wrapper_result, 1u
@@ -1035,7 +1035,7 @@ foo_outputs = struct @align(16) {
 %foo = @fragment func():foo_outputs {
   $B2: {
     %3:vec4<f32> = call %foo_inner
-    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var undef
+    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var
     %5:ptr<function, vec4<f32>, read_write> = access %tint_wrapper_result, 0u
     store %5, %3
     %6:ptr<function, u32, read_write> = access %tint_wrapper_result, 1u
@@ -1108,7 +1108,7 @@ foo_outputs = struct @align(16) {
     %4:vec4<f32> = access %3, 0u
     %5:u32 = access %3, 1u
     %6:u32 = and %5, 12345678u
-    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var undef
+    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var
     %8:ptr<function, vec4<f32>, read_write> = access %tint_wrapper_result, 0u
     store %8, %4
     %9:ptr<function, u32, read_write> = access %tint_wrapper_result, 1u
@@ -1320,7 +1320,7 @@ foo_outputs = struct @align(4) {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo_inner = func():Outputs {
@@ -1338,7 +1338,7 @@ $B1: {  # root
     %9:ptr<immediate, f32, read> = access %tint_immediate_data, 1u
     %10:f32 = load %9
     %11:f32 = clamp %6, %8, %10
-    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var undef
+    %tint_wrapper_result:ptr<function, foo_outputs, read_write> = var
     %13:ptr<function, f32, read_write> = access %tint_wrapper_result, 0u
     store %13, %5
     %14:ptr<function, f32, read_write> = access %tint_wrapper_result, 1u

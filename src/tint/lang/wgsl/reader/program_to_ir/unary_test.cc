@@ -140,7 +140,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_AddressOf) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Dis(m.Get()), R"($B1: {  # root
-  %v1:ptr<private, i32, read_write> = var undef
+  %v1:ptr<private, i32, read_write> = var
 }
 
 %test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -164,7 +164,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Indirection) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Dis(m.Get()), R"($B1: {  # root
-  %v1:ptr<private, i32, read_write> = var undef
+  %v1:ptr<private, i32, read_write> = var
 }
 
 %test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {

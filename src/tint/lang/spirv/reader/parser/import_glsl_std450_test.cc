@@ -709,7 +709,7 @@ TEST_F(SpirvParserTest, Modf_Scalar) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, f32, read_write> = var undef
+    %2:ptr<function, f32, read_write> = var
     %3:f32 = spirv.modf 50.0f, %2
     ret
   }
@@ -727,7 +727,7 @@ TEST_F(SpirvParserTest, Modf_Vector) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec2<f32>, read_write> = var undef
+    %2:ptr<function, vec2<f32>, read_write> = var
     %3:vec2<f32> = spirv.modf vec2<f32>(50.0f, 60.0f), %2
     ret
   }
@@ -745,7 +745,7 @@ TEST_F(SpirvParserTest, Frexp_ScalarSigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, i32, read_write> = var undef
+    %2:ptr<function, i32, read_write> = var
     %3:f32 = spirv.frexp 50.0f, %2
     ret
   }
@@ -763,7 +763,7 @@ TEST_F(SpirvParserTest, Frexp_ScalarUnSigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, u32, read_write> = var undef
+    %2:ptr<function, u32, read_write> = var
     %3:f32 = spirv.frexp 50.0f, %2
     ret
   }
@@ -781,7 +781,7 @@ TEST_F(SpirvParserTest, Frexp_VectorUnSigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec2<u32>, read_write> = var undef
+    %2:ptr<function, vec2<u32>, read_write> = var
     %3:vec2<f32> = spirv.frexp vec2<f32>(50.0f, 60.0f), %2
     ret
   }

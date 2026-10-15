@@ -379,7 +379,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<__out, tint_symbol_1, read_write> = var undef
+  %1:ptr<__out, tint_symbol_1, read_write> = var
 }
 
 %main = @fragment func():void {
@@ -413,7 +413,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<__out, tint_symbol_1, read_write> = var undef @location(0)
+  %1:ptr<__out, tint_symbol_1, read_write> = var @location(0)
 }
 
 %main = @vertex func():void {
@@ -452,7 +452,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<__out, tint_symbol_1, read_write> = var undef
+  %1:ptr<__out, tint_symbol_1, read_write> = var
 }
 
 %main = @fragment func():void {
@@ -491,7 +491,7 @@ tint_symbol_1 = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<__out, tint_symbol_1, read_write> = var undef
+  %1:ptr<__out, tint_symbol_1, read_write> = var
 }
 
 %main = @fragment func():void {
@@ -529,7 +529,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<__out, tint_symbol_1, read_write> = var undef
+  %1:ptr<__out, tint_symbol_1, read_write> = var
 }
 
 %main = @fragment func():void {
@@ -572,7 +572,7 @@ tint_symbol_2 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_2, read_write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, tint_symbol_2, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -616,7 +616,7 @@ tint_symbol_2 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_2, read> = var undef @binding_point(0, 0)
+  %1:ptr<storage, tint_symbol_2, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -659,7 +659,7 @@ tint_symbol_2 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_2, read> = var undef @binding_point(0, 0)
+  %1:ptr<storage, tint_symbol_2, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -703,7 +703,7 @@ tint_symbol_2 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<uniform, tint_symbol_2, read> = var undef @binding_point(0, 0)
+  %1:ptr<uniform, tint_symbol_2, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {

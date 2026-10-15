@@ -985,9 +985,9 @@ TEST_F(SpirvParserTest, Phi_SingleBlockLoopIndex) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<private, u32, read_write> = var undef
-  %2:ptr<private, bool, read_write> = var undef
-  %3:ptr<private, bool, read_write> = var undef
+  %1:ptr<private, u32, read_write> = var
+  %2:ptr<private, bool, read_write> = var
+  %3:ptr<private, bool, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1082,9 +1082,9 @@ TEST_F(SpirvParserTest, Phi_MultiBlockLoopIndex) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<private, u32, read_write> = var undef
-  %2:ptr<private, bool, read_write> = var undef
-  %3:ptr<private, bool, read_write> = var undef
+  %1:ptr<private, u32, read_write> = var
+  %2:ptr<private, bool, read_write> = var
+  %3:ptr<private, bool, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1180,8 +1180,8 @@ TEST_F(SpirvParserTest, Phi_ValueFromLoopBodyAndContinuing) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<private, u32, read_write> = var undef
-  %2:ptr<private, bool, read_write> = var undef
+  %1:ptr<private, u32, read_write> = var
+  %2:ptr<private, bool, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1271,9 +1271,9 @@ TEST_F(SpirvParserTest, Phi_FromElseAndThen) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<private, u32, read_write> = var undef
-  %2:ptr<private, bool, read_write> = var undef
-  %3:ptr<private, bool, read_write> = var undef
+  %1:ptr<private, u32, read_write> = var
+  %2:ptr<private, bool, read_write> = var
+  %3:ptr<private, bool, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1357,9 +1357,9 @@ TEST_F(SpirvParserTest, Phi_FromHeaderAndThen) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<private, u32, read_write> = var undef
-  %2:ptr<private, bool, read_write> = var undef
-  %3:ptr<private, bool, read_write> = var undef
+  %1:ptr<private, u32, read_write> = var
+  %2:ptr<private, bool, read_write> = var
+  %3:ptr<private, bool, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1979,7 +1979,7 @@ TEST_F(SpirvParserTest, Phi_InLoopBody) {
               R"(
 %main = @fragment func():void {
   $B1: {
-    %2:ptr<function, f32, read_write> = var undef
+    %2:ptr<function, f32, read_write> = var
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
         store %2, 2.0f

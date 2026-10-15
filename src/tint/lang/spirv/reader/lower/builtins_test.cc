@@ -2768,7 +2768,7 @@ TEST_F(SpirvReader_BuiltinsTest, Modf_Scalar) {
     auto src = R"(
 %foo = func(%a:f32):void {
   $B1: {
-    %3:ptr<function, f32, read_write> = var undef
+    %3:ptr<function, f32, read_write> = var
     %4:f32 = spirv.modf %a, %3
     %5:f32 = mul %4, %4
     %6:f32 = let %5
@@ -2788,7 +2788,7 @@ __modf_result_f32 = struct @align(4) {
 
 %foo = func(%a:f32):void {
   $B1: {
-    %3:ptr<function, f32, read_write> = var undef
+    %3:ptr<function, f32, read_write> = var
     %4:__modf_result_f32 = modf %a
     %5:f32 = access %4, 1u
     store %3, %5
@@ -2817,7 +2817,7 @@ TEST_F(SpirvReader_BuiltinsTest, Modf_Vector) {
     auto src = R"(
 %foo = func(%a:vec2<f32>):void {
   $B1: {
-    %3:ptr<function, vec2<f32>, read_write> = var undef
+    %3:ptr<function, vec2<f32>, read_write> = var
     %4:vec2<f32> = spirv.modf %a, %3
     %5:vec2<f32> = mul %4, %4
     %6:vec2<f32> = let %5
@@ -2837,7 +2837,7 @@ __modf_result_vec2_f32 = struct @align(8) {
 
 %foo = func(%a:vec2<f32>):void {
   $B1: {
-    %3:ptr<function, vec2<f32>, read_write> = var undef
+    %3:ptr<function, vec2<f32>, read_write> = var
     %4:__modf_result_vec2_f32 = modf %a
     %5:vec2<f32> = access %4, 1u
     store %3, %5
@@ -2866,7 +2866,7 @@ TEST_F(SpirvReader_BuiltinsTest, Frexp_ScalarSigned) {
     auto src = R"(
 %foo = func(%a:f32):void {
   $B1: {
-    %3:ptr<function, i32, read_write> = var undef
+    %3:ptr<function, i32, read_write> = var
     %4:f32 = spirv.frexp %a, %3
     %5:f32 = mul %4, %4
     %6:f32 = let %5
@@ -2886,7 +2886,7 @@ __frexp_result_f32 = struct @align(4) {
 
 %foo = func(%a:f32):void {
   $B1: {
-    %3:ptr<function, i32, read_write> = var undef
+    %3:ptr<function, i32, read_write> = var
     %4:__frexp_result_f32 = frexp %a
     %5:i32 = access %4, 1u
     store %3, %5
@@ -2915,7 +2915,7 @@ TEST_F(SpirvReader_BuiltinsTest, Frexp_ScalarUnSigned) {
     auto src = R"(
 %foo = func(%a:f32):void {
   $B1: {
-    %3:ptr<function, u32, read_write> = var undef
+    %3:ptr<function, u32, read_write> = var
     %4:f32 = spirv.frexp %a, %3
     %5:f32 = mul %4, %4
     %6:f32 = let %5
@@ -2935,7 +2935,7 @@ __frexp_result_f32 = struct @align(4) {
 
 %foo = func(%a:f32):void {
   $B1: {
-    %3:ptr<function, u32, read_write> = var undef
+    %3:ptr<function, u32, read_write> = var
     %4:__frexp_result_f32 = frexp %a
     %5:i32 = access %4, 1u
     %6:u32 = bitcast<u32> %5
@@ -2965,7 +2965,7 @@ TEST_F(SpirvReader_BuiltinsTest, Frexp_VectorSigned) {
     auto src = R"(
 %foo = func(%a:vec2<f32>):void {
   $B1: {
-    %3:ptr<function, vec2<i32>, read_write> = var undef
+    %3:ptr<function, vec2<i32>, read_write> = var
     %4:vec2<f32> = spirv.frexp %a, %3
     %5:vec2<f32> = mul %4, %4
     %6:vec2<f32> = let %5
@@ -2985,7 +2985,7 @@ __frexp_result_vec2_f32 = struct @align(8) {
 
 %foo = func(%a:vec2<f32>):void {
   $B1: {
-    %3:ptr<function, vec2<i32>, read_write> = var undef
+    %3:ptr<function, vec2<i32>, read_write> = var
     %4:__frexp_result_vec2_f32 = frexp %a
     %5:vec2<i32> = access %4, 1u
     store %3, %5
@@ -3014,7 +3014,7 @@ TEST_F(SpirvReader_BuiltinsTest, Frexp_VectorUnsigned) {
     auto src = R"(
 %foo = func(%a:vec2<f32>):void {
   $B1: {
-    %3:ptr<function, vec2<u32>, read_write> = var undef
+    %3:ptr<function, vec2<u32>, read_write> = var
     %4:vec2<f32> = spirv.frexp %a, %3
     %5:vec2<f32> = mul %4, %4
     %6:vec2<f32> = let %5
@@ -3034,7 +3034,7 @@ __frexp_result_vec2_f32 = struct @align(8) {
 
 %foo = func(%a:vec2<f32>):void {
   $B1: {
-    %3:ptr<function, vec2<u32>, read_write> = var undef
+    %3:ptr<function, vec2<u32>, read_write> = var
     %4:__frexp_result_vec2_f32 = frexp %a
     %5:vec2<i32> = access %4, 1u
     %6:vec2<u32> = bitcast<vec2<u32>> %5

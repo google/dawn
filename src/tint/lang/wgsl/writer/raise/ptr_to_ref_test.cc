@@ -68,7 +68,7 @@ TEST_F(WgslWriter_PtrToRefTest, Var) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<private, i32, read_write> = var undef
+  %1:ptr<private, i32, read_write> = var
 }
 
 )";
@@ -76,7 +76,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ref<private, i32, read_write> = var undef
+  %1:ref<private, i32, read_write> = var
 }
 
 )";
@@ -96,7 +96,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadVar) {
     auto* src = R"(
 %1 = func():i32 {
   $B1: {
-    %2:ptr<function, i32, read_write> = var undef
+    %2:ptr<function, i32, read_write> = var
     %3:i32 = load %2
     ret %3
   }
@@ -107,7 +107,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadVar) {
     auto* expect = R"(
 %1 = func():i32 {
   $B1: {
-    %2:ref<function, i32, read_write> = var undef
+    %2:ref<function, i32, read_write> = var
     %3:i32 = load %2
     ret %3
   }
@@ -130,7 +130,7 @@ TEST_F(WgslWriter_PtrToRefTest, StoreVar) {
     auto* src = R"(
 %1 = func():void {
   $B1: {
-    %2:ptr<function, i32, read_write> = var undef
+    %2:ptr<function, i32, read_write> = var
     store %2, 42i
     ret
   }
@@ -141,7 +141,7 @@ TEST_F(WgslWriter_PtrToRefTest, StoreVar) {
     auto* expect = R"(
 %1 = func():void {
   $B1: {
-    %2:ref<function, i32, read_write> = var undef
+    %2:ref<function, i32, read_write> = var
     store %2, 42i
     ret
   }
@@ -237,7 +237,7 @@ TEST_F(WgslWriter_PtrToRefTest, VarUsedAsPtrArg) {
 }
 %3 = func():void {
   $B2: {
-    %4:ptr<function, i32, read_write> = var undef
+    %4:ptr<function, i32, read_write> = var
     %5:void = call %1, %4
     ret
   }
@@ -253,7 +253,7 @@ TEST_F(WgslWriter_PtrToRefTest, VarUsedAsPtrArg) {
 }
 %3 = func():void {
   $B2: {
-    %4:ref<function, i32, read_write> = var undef
+    %4:ref<function, i32, read_write> = var
     %5:ptr<function, i32, read_write> = ref-to-ptr %4
     %6:void = call %1, %5
     ret

@@ -63,7 +63,7 @@ TEST_F(IR_DeadCodeEliminationTest, NoModify) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<__out, i32, read_write> = var undef @location(1) @interpolate(flat)
+  %buffer:ptr<__out, i32, read_write> = var @location(1) @interpolate(flat)
 }
 
 %used = func():f32 {
@@ -111,7 +111,7 @@ TEST_F(IR_DeadCodeEliminationTest, RemoveFunction) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<__in, i32, read> = var undef @location(1) @interpolate(flat)
+  %buffer:ptr<__in, i32, read> = var @location(1) @interpolate(flat)
 }
 
 %unused = func():f32 {
@@ -131,7 +131,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<__in, i32, read> = var undef @location(1) @interpolate(flat)
+  %buffer:ptr<__in, i32, read> = var @location(1) @interpolate(flat)
 }
 
 %ep = @fragment func():f32 [@location(0)] {
@@ -168,7 +168,7 @@ TEST_F(IR_DeadCodeEliminationTest, RemoveFunction_Recursive) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<private, i32, read_write> = var undef
+  %buffer:ptr<private, i32, read_write> = var
 }
 
 %unused2 = func():f32 {
@@ -193,7 +193,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<private, i32, read_write> = var undef
+  %buffer:ptr<private, i32, read_write> = var
 }
 
 %ep = @fragment func():f32 [@location(0)] {
@@ -234,7 +234,7 @@ TEST_F(IR_DeadCodeEliminationTest, RemoveVarIn_Nested) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<__in, i32, read> = var undef
+  %buffer:ptr<__in, i32, read> = var
 }
 
 %unused2 = func():f32 {
@@ -295,7 +295,7 @@ TEST_F(IR_DeadCodeEliminationTest, RemoveVarOut_Nested) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<__out, i32, write> = var undef
+  %buffer:ptr<__out, i32, write> = var
 }
 
 %unused2 = func():f32 {
@@ -353,7 +353,7 @@ TEST_F(IR_DeadCodeEliminationTest, RemoveVarPrivate_Nested) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<private, i32, read_write> = var undef
+  %buffer:ptr<private, i32, read_write> = var
 }
 
 %unused2 = func():f32 {
@@ -410,11 +410,11 @@ TEST_F(IR_DeadCodeEliminationTest, RemoveMultipleVarPrivate) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer1:ptr<private, i32, read_write> = var undef
-  %buffer2:ptr<private, f32, read_write> = var undef
-  %buffer3:ptr<private, vec4<f32>, read_write> = var undef
-  %buffer4:ptr<private, mat2x2<f32>, read_write> = var undef
-  %buffer5:ptr<private, bool, read_write> = var undef
+  %buffer1:ptr<private, i32, read_write> = var
+  %buffer2:ptr<private, f32, read_write> = var
+  %buffer3:ptr<private, vec4<f32>, read_write> = var
+  %buffer4:ptr<private, mat2x2<f32>, read_write> = var
+  %buffer5:ptr<private, bool, read_write> = var
 }
 
 %ep = @fragment func():f32 [@location(0)] {
@@ -428,7 +428,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer3:ptr<private, vec4<f32>, read_write> = var undef
+  %buffer3:ptr<private, vec4<f32>, read_write> = var
 }
 
 %ep = @fragment func():f32 [@location(0)] {

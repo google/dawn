@@ -78,7 +78,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, LoadElement) {
 
     auto* before = R"(
 $B1: {  # root
-  %var:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -96,7 +96,7 @@ tint_padded_array_element = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -128,7 +128,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, LoadArray) {
 
     auto* before = R"(
 $B1: {  # root
-  %var:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -145,7 +145,7 @@ tint_padded_array_element = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -176,7 +176,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, StoreElement) {
 
     auto* before = R"(
 $B1: {  # root
-  %var:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -193,7 +193,7 @@ tint_padded_array_element = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -225,7 +225,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, StoreArray) {
 
     auto* before = R"(
 $B1: {  # root
-  %var:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -241,7 +241,7 @@ tint_padded_array_element = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -272,7 +272,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, LoadElement_ViaLet) {
 
     auto* before = R"(
 $B1: {  # root
-  %var:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -291,7 +291,7 @@ tint_padded_array_element = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -325,7 +325,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, LoadElement_ViaAccessLet) {
 
     auto* before = R"(
 $B1: {  # root
-  %var:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -344,7 +344,7 @@ tint_padded_array_element = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -385,7 +385,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, LoadElement_ViaFuncParam) {
 
     auto* before = R"(
 $B1: {  # root
-  %var:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var @binding_point(0, 0)
 }
 
 %callee = func(%param:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write>):u32 {
@@ -409,7 +409,7 @@ tint_padded_array_element = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var @binding_point(0, 0)
 }
 
 %callee = func(%param:ptr<storage, array<tint_padded_array_element, 8>, read_write>):u32 {
@@ -452,7 +452,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, LoadArray_ViaFuncReturn) {
 
     auto* before = R"(
 $B1: {  # root
-  %var:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var @binding_point(0, 0)
 }
 
 %callee = func():spirv.explicit_layout_array<u32, 8, stride=16> {
@@ -475,7 +475,7 @@ tint_padded_array_element = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var @binding_point(0, 0)
 }
 
 %callee = func():array<tint_padded_array_element, 8> {
@@ -513,7 +513,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, NestedArray_LoadInnerElement) {
 
     auto* before = R"(
 $B1: {  # root
-  %var:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 8, stride=16>, 8, stride=1024>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 8, stride=16>, 8, stride=1024>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -535,7 +535,7 @@ tint_padded_array_element_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, array<tint_padded_array_element_1, 8>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, array<tint_padded_array_element_1, 8>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -569,7 +569,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, NestedArray_LoadInnerArray) {
 
     auto* before = R"(
 $B1: {  # root
-  %var:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 8, stride=16>, 8, stride=1024>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 8, stride=16>, 8, stride=1024>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -591,7 +591,7 @@ tint_padded_array_element_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, array<tint_padded_array_element_1, 8>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, array<tint_padded_array_element_1, 8>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -624,7 +624,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, NestedArray_LoadOuterArray) {
 
     auto* before = R"(
 $B1: {  # root
-  %var:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 8, stride=16>, 8, stride=1024>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 8, stride=16>, 8, stride=1024>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -645,7 +645,7 @@ tint_padded_array_element_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, array<tint_padded_array_element_1, 8>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, array<tint_padded_array_element_1, 8>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -686,7 +686,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, NestedArray_LoadInnerElement_ViaFu
 
     auto* before = R"(
 $B1: {  # root
-  %var:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 8, stride=16>, 8, stride=1024>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 8, stride=16>, 8, stride=1024>, read_write> = var @binding_point(0, 0)
 }
 
 %callee = func(%param:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write>):u32 {
@@ -715,7 +715,7 @@ tint_padded_array_element_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, array<tint_padded_array_element_1, 8>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, array<tint_padded_array_element_1, 8>, read_write> = var @binding_point(0, 0)
 }
 
 %callee = func(%param:ptr<storage, array<tint_padded_array_element, 8>, read_write>):u32 {
@@ -755,7 +755,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, NestedArray_OuterIsNotExplicit) {
 
     auto* before = R"(
 $B1: {  # root
-  %var:ptr<storage, array<spirv.explicit_layout_array<u32, 8, stride=16>, 8>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, array<spirv.explicit_layout_array<u32, 8, stride=16>, 8>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -773,7 +773,7 @@ tint_padded_array_element = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, array<array<tint_padded_array_element, 8>, 8>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, array<array<tint_padded_array_element, 8>, 8>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -814,7 +814,7 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -842,7 +842,7 @@ MyStruct_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, MyStruct_1, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, MyStruct_1, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -883,7 +883,7 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -910,7 +910,7 @@ MyStruct_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, MyStruct_1, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, MyStruct_1, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -950,7 +950,7 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -976,7 +976,7 @@ MyStruct_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, MyStruct_1, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, MyStruct_1, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1008,7 +1008,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, RuntimeArray) {
 
     auto* before = R"(
 $B1: {  # root
-  %var:ptr<storage, spirv.explicit_layout_array<u32, stride=16>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, spirv.explicit_layout_array<u32, stride=16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1029,7 +1029,7 @@ tint_padded_array_element = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, array<tint_padded_array_element>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, array<tint_padded_array_element>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1088,11 +1088,11 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, MultipleVariables_DifferentElement
 
     auto* before = R"(
 $B1: {  # root
-  %a:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var undef @binding_point(0, 0)
-  %b:ptr<storage, spirv.explicit_layout_array<i32, 4, stride=8>, read_write> = var undef @binding_point(0, 1)
-  %c:ptr<storage, spirv.explicit_layout_array<f32, 2, stride=32>, read_write> = var undef @binding_point(0, 2)
-  %d:ptr<storage, spirv.explicit_layout_array<vec4<f32>, 1, stride=16>, read_write> = var undef @binding_point(0, 3)
-  %e:ptr<storage, spirv.explicit_layout_array<vec2<i32>, stride=64>, read_write> = var undef @binding_point(0, 4)
+  %a:ptr<storage, spirv.explicit_layout_array<u32, 8, stride=16>, read_write> = var @binding_point(0, 0)
+  %b:ptr<storage, spirv.explicit_layout_array<i32, 4, stride=8>, read_write> = var @binding_point(0, 1)
+  %c:ptr<storage, spirv.explicit_layout_array<f32, 2, stride=32>, read_write> = var @binding_point(0, 2)
+  %d:ptr<storage, spirv.explicit_layout_array<vec4<f32>, 1, stride=16>, read_write> = var @binding_point(0, 3)
+  %e:ptr<storage, spirv.explicit_layout_array<vec2<i32>, stride=64>, read_write> = var @binding_point(0, 4)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1134,11 +1134,11 @@ tint_padded_array_element_3 = struct @align(8) {
 }
 
 $B1: {  # root
-  %a:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var undef @binding_point(0, 0)
-  %b:ptr<storage, array<tint_padded_array_element_1, 4>, read_write> = var undef @binding_point(0, 1)
-  %c:ptr<storage, array<tint_padded_array_element_2, 2>, read_write> = var undef @binding_point(0, 2)
-  %d:ptr<storage, array<vec4<f32>, 1>, read_write> = var undef @binding_point(0, 3)
-  %e:ptr<storage, array<tint_padded_array_element_3>, read_write> = var undef @binding_point(0, 4)
+  %a:ptr<storage, array<tint_padded_array_element, 8>, read_write> = var @binding_point(0, 0)
+  %b:ptr<storage, array<tint_padded_array_element_1, 4>, read_write> = var @binding_point(0, 1)
+  %c:ptr<storage, array<tint_padded_array_element_2, 2>, read_write> = var @binding_point(0, 2)
+  %d:ptr<storage, array<vec4<f32>, 1>, read_write> = var @binding_point(0, 3)
+  %e:ptr<storage, array<tint_padded_array_element_3>, read_write> = var @binding_point(0, 4)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1185,7 +1185,7 @@ TEST_F(SpirvReader_DecomposeStridedArrayTest, NaturalStride) {
 
     auto* before = R"(
 $B1: {  # root
-  %var:ptr<storage, spirv.explicit_layout_array<u32, stride=4>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, spirv.explicit_layout_array<u32, stride=4>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1202,7 +1202,7 @@ $B1: {  # root
 )";
     auto* after = R"(
 $B1: {  # root
-  %var:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1247,7 +1247,7 @@ MyStruct = struct @align(16) {
 }
 
 $B1: {  # root
-  %var:ptr<private, MyStruct, read_write> = var undef
+  %var:ptr<private, MyStruct, read_write> = var
 }
 
 %foo = @vertex func():MyStruct {
@@ -1271,7 +1271,7 @@ MyStruct_1 = struct @align(16) {
 }
 
 $B1: {  # root
-  %var:ptr<private, MyStruct_1, read_write> = var undef
+  %var:ptr<private, MyStruct_1, read_write> = var
 }
 
 %foo = @vertex func():MyStruct_1 {

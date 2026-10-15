@@ -1085,7 +1085,7 @@ __frexp_result_f32 = struct @align(4) {
 
 %foo = func(%value:f32):f32 {
   $B1: {
-    %3:ptr<function, __frexp_result_f32, read_write> = var undef
+    %3:ptr<function, __frexp_result_f32, read_write> = var
     %4:ptr<function, i32, read_write> = access %3, 1u
     %5:i32 = load %4
     %6:f32 = msl.frexp %value, %5
@@ -1146,7 +1146,7 @@ __frexp_result_vec4_f32 = struct @align(16) {
 
 %foo = func(%value:vec4<f32>):vec4<f32> {
   $B1: {
-    %3:ptr<function, __frexp_result_vec4_f32, read_write> = var undef
+    %3:ptr<function, __frexp_result_vec4_f32, read_write> = var
     %4:ptr<function, vec4<i32>, read_write> = access %3, 1u
     %5:vec4<i32> = load %4
     %6:vec4<f32> = msl.frexp %value, %5
@@ -1274,7 +1274,7 @@ __modf_result_f32 = struct @align(4) {
 
 %foo = func(%value:f32):f32 {
   $B1: {
-    %3:ptr<function, __modf_result_f32, read_write> = var undef
+    %3:ptr<function, __modf_result_f32, read_write> = var
     %4:ptr<function, f32, read_write> = access %3, 1u
     %5:f32 = load %4
     %6:f32 = msl.modf %value, %5
@@ -1333,7 +1333,7 @@ __modf_result_vec4_f32 = struct @align(16) {
 
 %foo = func(%value:vec4<f32>):vec4<f32> {
   $B1: {
-    %3:ptr<function, __modf_result_vec4_f32, read_write> = var undef
+    %3:ptr<function, __modf_result_vec4_f32, read_write> = var
     %4:ptr<function, vec4<f32>, read_write> = access %3, 1u
     %5:vec4<f32> = load %4
     %6:vec4<f32> = msl.modf %value, %5
@@ -3579,7 +3579,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_F32) {
   $B1: {
     %3:ptr<storage, f32, read_write> = access %p, 64u
     %4:u64 = msl.convert 32u
-    %5:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %5:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %6:subgroup_matrix_result<f32, 8, 8> = load %5
     %7:void = msl.simdgroup_load %6, %3, %4, vec2<u64>(0u64), false
     %8:subgroup_matrix_result<f32, 8, 8> = load %5
@@ -3625,7 +3625,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_SignedOffsetAndStride) 
     %5:u32 = bitcast<u32> %stride
     %6:ptr<storage, f32, read_write> = access %p, %offset
     %7:u64 = msl.convert %5
-    %8:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %8:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %9:subgroup_matrix_result<f32, 8, 8> = load %8
     %10:void = msl.simdgroup_load %9, %6, %7, vec2<u64>(0u64), false
     %11:subgroup_matrix_result<f32, 8, 8> = load %8
@@ -3667,7 +3667,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_F32_ColMajorTem
   $B1: {
     %3:ptr<storage, f32, read_write> = access %p, 64u
     %4:u64 = msl.convert 32u
-    %5:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %5:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %6:subgroup_matrix_result<f32, 8, 8> = load %5
     %7:void = msl.simdgroup_load %6, %3, %4, vec2<u64>(0u64), true
     %8:subgroup_matrix_result<f32, 8, 8> = load %5
@@ -3709,7 +3709,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_F32_RowMajorTem
   $B1: {
     %3:ptr<storage, f32, read_write> = access %p, 64u
     %4:u64 = msl.convert 32u
-    %5:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %5:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %6:subgroup_matrix_result<f32, 8, 8> = load %5
     %7:void = msl.simdgroup_load %6, %3, %4, vec2<u64>(0u64), false
     %8:subgroup_matrix_result<f32, 8, 8> = load %5
@@ -3751,7 +3751,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_F16) {
   $B1: {
     %3:ptr<workgroup, f16, read_write> = access %p, 64u
     %4:u64 = msl.convert 32u
-    %5:ptr<function, subgroup_matrix_result<f16, 8, 8>, read_write> = var undef
+    %5:ptr<function, subgroup_matrix_result<f16, 8, 8>, read_write> = var
     %6:subgroup_matrix_result<f16, 8, 8> = load %5
     %7:void = msl.simdgroup_load %6, %3, %4, vec2<u64>(0u64), false
     %8:subgroup_matrix_result<f16, 8, 8> = load %5
@@ -3989,7 +3989,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_F32) {
     auto* expect = R"(
 %foo = func(%left:subgroup_matrix_left<f32, 4, 8>, %right:subgroup_matrix_right<f32, 8, 4>):subgroup_matrix_result<f32, 8, 8> {
   $B1: {
-    %4:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %4:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %5:subgroup_matrix_result<f32, 8, 8> = load %4
     %6:void = msl.simdgroup_multiply %5, %left, %right
     %7:subgroup_matrix_result<f32, 8, 8> = load %4
@@ -4029,7 +4029,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_F16) {
     auto* expect = R"(
 %foo = func(%left:subgroup_matrix_left<f16, 8, 4>, %right:subgroup_matrix_right<f16, 2, 8>):subgroup_matrix_result<f16, 2, 4> {
   $B1: {
-    %4:ptr<function, subgroup_matrix_result<f16, 2, 4>, read_write> = var undef
+    %4:ptr<function, subgroup_matrix_result<f16, 2, 4>, read_write> = var
     %5:subgroup_matrix_result<f16, 2, 4> = load %4
     %6:void = msl.simdgroup_multiply %5, %left, %right
     %7:subgroup_matrix_result<f16, 2, 4> = load %4
@@ -4070,7 +4070,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixMultiplyAccumulate_F32) {
     auto* expect = R"(
 %foo = func(%left:subgroup_matrix_left<f32, 4, 8>, %right:subgroup_matrix_right<f32, 8, 4>, %acc:subgroup_matrix_result<f32, 8, 8>):subgroup_matrix_result<f32, 8, 8> {
   $B1: {
-    %5:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %5:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %6:subgroup_matrix_result<f32, 8, 8> = load %5
     %7:void = msl.simdgroup_multiply_accumulate %6, %left, %right, %acc
     %8:subgroup_matrix_result<f32, 8, 8> = load %5
@@ -4111,7 +4111,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixMultiplyAccumulate_F16) {
     auto* expect = R"(
 %foo = func(%left:subgroup_matrix_left<f16, 8, 4>, %right:subgroup_matrix_right<f16, 2, 8>, %acc:subgroup_matrix_result<f16, 2, 4>):subgroup_matrix_result<f16, 2, 4> {
   $B1: {
-    %5:ptr<function, subgroup_matrix_result<f16, 2, 4>, read_write> = var undef
+    %5:ptr<function, subgroup_matrix_result<f16, 2, 4>, read_write> = var
     %6:subgroup_matrix_result<f16, 2, 4> = load %5
     %7:void = msl.simdgroup_multiply_accumulate %6, %left, %right, %acc
     %8:subgroup_matrix_result<f16, 2, 4> = load %5
@@ -4139,7 +4139,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %3:subgroup_matrix_result<f32, 8, 8> = load %v
     %4:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixScalarAdd %3, 3.0f
     %r:subgroup_matrix_result<f32, 8, 8> = let %4
@@ -4152,9 +4152,9 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd) {
     auto* expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %3:subgroup_matrix_result<f32, 8, 8> = load %v
-    %4:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %4:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %5:subgroup_matrix_left<f32, 8, 8> = msl.convert<subgroup_matrix_left<f32, 8, 8>> %3
     %6:subgroup_matrix_right<f32, 8, 8> = msl.make_diagonal_simdgroup_matrix<subgroup_matrix_right<f32, 8, 8>> 1.0f
     %7:subgroup_matrix_result<f32, 8, 8> = msl.make_filled_simdgroup_matrix<subgroup_matrix_result<f32, 8, 8>> 3.0f
@@ -4187,7 +4187,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %3:subgroup_matrix_result<f32, 8, 8> = load %v
     %4:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixScalarSubtract %3, 3.0f
     %r:subgroup_matrix_result<f32, 8, 8> = let %4
@@ -4200,9 +4200,9 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract) {
     auto* expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %3:subgroup_matrix_result<f32, 8, 8> = load %v
-    %4:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %4:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %5:subgroup_matrix_left<f32, 8, 8> = msl.convert<subgroup_matrix_left<f32, 8, 8>> %3
     %6:subgroup_matrix_right<f32, 8, 8> = msl.make_diagonal_simdgroup_matrix<subgroup_matrix_right<f32, 8, 8>> 1.0f
     %7:subgroup_matrix_result<f32, 8, 8> = msl.make_filled_simdgroup_matrix<subgroup_matrix_result<f32, 8, 8>> -3.0f
@@ -4378,7 +4378,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, AtomicStoreMin) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, atomic<u64>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%arg1:vec2<u32>):void {
@@ -4393,7 +4393,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, atomic<u64>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%arg1:vec2<u32>):void {
@@ -4427,7 +4427,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, AtomicStoreMax) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, atomic<u64>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%arg1:vec2<u32>):void {
@@ -4442,7 +4442,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, atomic<u64>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%arg1:vec2<u32>):void {
@@ -4857,7 +4857,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Mat_F16_Array_U32) {
     %6:ptr<storage, f16, read_write> = msl.pointer_offset<f16> %ptr, %5
     %7:u32 = mul %stride, 2u
     %8:u64 = msl.convert %7
-    %9:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var undef
+    %9:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var
     %10:subgroup_matrix_left<f16, 8, 8> = load %9
     %11:void = msl.simdgroup_load %10, %6, %8, vec2<u64>(0u64), true
     %12:subgroup_matrix_left<f16, 8, 8> = load %9
@@ -4903,7 +4903,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Mat_F16_Array_Vec2U) {
     %6:ptr<storage, f16, read_write> = msl.pointer_offset<f16> %ptr, %5
     %7:u32 = mul %stride, 4u
     %8:u64 = msl.convert %7
-    %9:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var undef
+    %9:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var
     %10:subgroup_matrix_left<f16, 8, 8> = load %9
     %11:void = msl.simdgroup_load %10, %6, %8, vec2<u64>(0u64), true
     %12:subgroup_matrix_left<f16, 8, 8> = load %9
@@ -4953,7 +4953,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Mat_F16_Array_Vec3U) {
     %6:ptr<storage, f16, read_write> = msl.pointer_offset<f16> %ptr, %5
     %7:u32 = mul %stride, 8u
     %8:u64 = msl.convert %7
-    %9:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var undef
+    %9:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var
     %10:subgroup_matrix_left<f16, 8, 8> = load %9
     %11:void = msl.simdgroup_load %10, %6, %8, vec2<u64>(0u64), true
     %12:subgroup_matrix_left<f16, 8, 8> = load %9
@@ -5003,7 +5003,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Mat_F16_Array_Vec3U_Ali
     %6:ptr<storage, f16, read_write> = msl.alias_pointer_offset<f16> %ptr, %5
     %7:u32 = mul %stride, 8u
     %8:u64 = msl.convert %7
-    %9:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var undef
+    %9:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var
     %10:subgroup_matrix_left<f16, 8, 8> = load %9
     %11:void = msl.simdgroup_load %10, %6, %8, vec2<u64>(0u64), true
     %12:subgroup_matrix_left<f16, 8, 8> = load %9
@@ -5049,7 +5049,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Mat_F16_Array_Vec4U) {
     %6:ptr<storage, f16, read_write> = msl.pointer_offset<f16> %ptr, %5
     %7:u32 = mul %stride, 8u
     %8:u64 = msl.convert %7
-    %9:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var undef
+    %9:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var
     %10:subgroup_matrix_left<f16, 8, 8> = load %9
     %11:void = msl.simdgroup_load %10, %6, %8, vec2<u64>(0u64), true
     %12:subgroup_matrix_left<f16, 8, 8> = load %9

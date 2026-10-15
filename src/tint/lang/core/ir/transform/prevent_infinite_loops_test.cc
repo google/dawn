@@ -71,7 +71,7 @@ TEST_F(IR_PreventInfiniteLoopsTest, NoModify_SimpleFiniteLoop) {
   $B1: {
     loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
-        %idx:ptr<function, u32, read_write> = var undef
+        %idx:ptr<function, u32, read_write> = var
         next_iteration  # -> $B3
       }
       $B3: {  # body
@@ -140,7 +140,7 @@ TEST_F(IR_PreventInfiniteLoopsTest, InfiniteLoop) {
   $B1: {
     loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
-        %idx:ptr<function, u32, read_write> = var undef
+        %idx:ptr<function, u32, read_write> = var
         next_iteration  # -> $B3
       }
       $B3: {  # body
@@ -176,7 +176,7 @@ TEST_F(IR_PreventInfiniteLoopsTest, InfiniteLoop) {
     loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
         %tint_loop_idx:ptr<function, vec2<u32>, read_write> = var vec2<u32>(4294967295u)
-        %idx:ptr<function, u32, read_write> = var undef
+        %idx:ptr<function, u32, read_write> = var
         next_iteration  # -> $B3
       }
       $B3: {  # body
@@ -339,7 +339,7 @@ TEST_F(IR_PreventInfiniteLoopsTest, EmptyContinuing) {
   $B1: {
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
-        %idx:ptr<function, u32, read_write> = var undef
+        %idx:ptr<function, u32, read_write> = var
         next_iteration  # -> $B3
       }
       $B3: {  # body
@@ -368,7 +368,7 @@ TEST_F(IR_PreventInfiniteLoopsTest, EmptyContinuing) {
     loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
         %tint_loop_idx:ptr<function, vec2<u32>, read_write> = var vec2<u32>(4294967295u)
-        %idx:ptr<function, u32, read_write> = var undef
+        %idx:ptr<function, u32, read_write> = var
         next_iteration  # -> $B3
       }
       $B3: {  # body
@@ -760,7 +760,7 @@ TEST_F(IR_PreventInfiniteLoopsTest, LoopResults) {
   $B1: {
     %2:u32, %3:i32, %4:f32, %5:bool = loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
-        %idx:ptr<function, u32, read_write> = var undef
+        %idx:ptr<function, u32, read_write> = var
         next_iteration  # -> $B3
       }
       $B3: {  # body
@@ -796,7 +796,7 @@ TEST_F(IR_PreventInfiniteLoopsTest, LoopResults) {
     %2:u32, %3:i32, %4:f32, %5:bool = loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
         %tint_loop_idx:ptr<function, vec2<u32>, read_write> = var vec2<u32>(4294967295u)
-        %idx:ptr<function, u32, read_write> = var undef
+        %idx:ptr<function, u32, read_write> = var
         next_iteration  # -> $B3
       }
       $B3: {  # body

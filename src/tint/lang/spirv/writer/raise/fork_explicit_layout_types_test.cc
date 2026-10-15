@@ -71,7 +71,7 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg_buffer:ptr<workgroup, MyStruct, read_write> = var undef
+  %wg_buffer:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %foo = func():void {
@@ -101,7 +101,7 @@ TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, NoModify_Array_NotInHostShareabl
 
     auto* src = R"(
 $B1: {  # root
-  %wg_buffer:ptr<workgroup, array<u32, 4>, read_write> = var undef
+  %wg_buffer:ptr<workgroup, array<u32, 4>, read_write> = var
 }
 
 %foo = func():void {
@@ -151,7 +151,7 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%param:MyStruct):void {
@@ -176,7 +176,7 @@ MyStruct = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%param:MyStruct):void {
@@ -207,7 +207,7 @@ TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, Array_InHostShareable_NotShared)
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<u32, 4>, read_write> = var @binding_point(0, 0)
 }
 
 )";
@@ -215,7 +215,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var @binding_point(0, 0)
 }
 
 )";
@@ -239,8 +239,8 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<immediate, MyStruct, read> = var undef
-  %local:ptr<private, MyStruct, read_write> = var undef
+  %buffer:ptr<immediate, MyStruct, read> = var
+  %local:ptr<private, MyStruct, read_write> = var
 }
 
 )";
@@ -252,8 +252,8 @@ MyStruct = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<immediate, MyStruct, read> = var undef
-  %local:ptr<private, MyStruct, read_write> = var undef
+  %buffer:ptr<immediate, MyStruct, read> = var
+  %local:ptr<private, MyStruct, read_write> = var
 }
 
 )";
@@ -277,8 +277,8 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<immediate, MyStruct, read> = var undef
-  %local:ptr<private, MyStruct, read_write> = var undef
+  %buffer:ptr<immediate, MyStruct, read> = var
+  %local:ptr<private, MyStruct, read_write> = var
 }
 
 )";
@@ -294,8 +294,8 @@ MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<immediate, MyStruct_tint_explicit_layout, read> = var undef
-  %local:ptr<private, MyStruct, read_write> = var undef
+  %buffer:ptr<immediate, MyStruct_tint_explicit_layout, read> = var
+  %local:ptr<private, MyStruct, read_write> = var
 }
 
 )";
@@ -321,8 +321,8 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
-  %local:ptr<private, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %local:ptr<private, MyStruct, read_write> = var
 }
 
 )";
@@ -334,8 +334,8 @@ MyStruct = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
-  %local:ptr<private, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %local:ptr<private, MyStruct, read_write> = var
 }
 
 )";
@@ -361,8 +361,8 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
-  %local:ptr<private, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %local:ptr<private, MyStruct, read_write> = var
 }
 
 )";
@@ -378,8 +378,8 @@ MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
-  %local:ptr<private, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var @binding_point(0, 0)
+  %local:ptr<private, MyStruct, read_write> = var
 }
 
 )";
@@ -405,8 +405,8 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct, read> = var undef @binding_point(0, 0)
-  %local:ptr<private, MyStruct, read_write> = var undef
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
+  %local:ptr<private, MyStruct, read_write> = var
 }
 
 )";
@@ -418,8 +418,8 @@ MyStruct = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct, read> = var undef @binding_point(0, 0)
-  %local:ptr<private, MyStruct, read_write> = var undef
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
+  %local:ptr<private, MyStruct, read_write> = var
 }
 
 )";
@@ -445,8 +445,8 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct, read> = var undef @binding_point(0, 0)
-  %local:ptr<private, MyStruct, read_write> = var undef
+  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
+  %local:ptr<private, MyStruct, read_write> = var
 }
 
 )";
@@ -462,8 +462,8 @@ MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct_tint_explicit_layout, read> = var undef @binding_point(0, 0)
-  %local:ptr<private, MyStruct, read_write> = var undef
+  %buffer:ptr<uniform, MyStruct_tint_explicit_layout, read> = var @binding_point(0, 0)
+  %local:ptr<private, MyStruct, read_write> = var
 }
 
 )";
@@ -489,8 +489,8 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
-  %local:ptr<workgroup, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %local:ptr<workgroup, MyStruct, read_write> = var
 }
 
 )";
@@ -506,8 +506,8 @@ MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
-  %local:ptr<workgroup, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var @binding_point(0, 0)
+  %local:ptr<workgroup, MyStruct, read_write> = var
 }
 
 )";
@@ -533,8 +533,8 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
-  %local:ptr<workgroup, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %local:ptr<workgroup, MyStruct, read_write> = var
 }
 
 )";
@@ -550,8 +550,8 @@ MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
-  %local:ptr<workgroup, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var @binding_point(0, 0)
+  %local:ptr<workgroup, MyStruct, read_write> = var
 }
 
 )";
@@ -574,9 +574,9 @@ TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, Storage_SharedWithInOut) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<u32, 1>, read_write> = var undef @binding_point(0, 0)
-  %mask_in:ptr<__in, array<u32, 1>, read> = var undef @builtin(sample_mask)
-  %mask_out:ptr<__out, array<u32, 1>, read_write> = var undef @builtin(sample_mask)
+  %buffer:ptr<storage, array<u32, 1>, read_write> = var @binding_point(0, 0)
+  %mask_in:ptr<__in, array<u32, 1>, read> = var @builtin(sample_mask)
+  %mask_out:ptr<__out, array<u32, 1>, read_write> = var @builtin(sample_mask)
 }
 
 )";
@@ -584,9 +584,9 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 1, stride=4>, read_write> = var undef @binding_point(0, 0)
-  %mask_in:ptr<__in, array<u32, 1>, read> = var undef @builtin(sample_mask)
-  %mask_out:ptr<__out, array<u32, 1>, read_write> = var undef @builtin(sample_mask)
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 1, stride=4>, read_write> = var @binding_point(0, 0)
+  %mask_in:ptr<__in, array<u32, 1>, read> = var @builtin(sample_mask)
+  %mask_out:ptr<__out, array<u32, 1>, read_write> = var @builtin(sample_mask)
 }
 
 )";
@@ -617,7 +617,7 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -635,7 +635,7 @@ MyStruct = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -672,7 +672,7 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -694,7 +694,7 @@ MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -735,8 +735,8 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %foo = func():void {
@@ -761,8 +761,8 @@ MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %foo = func():void {
@@ -822,8 +822,8 @@ Outer = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, Outer, read_write> = var undef
+  %buffer:ptr<storage, Outer, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, Outer, read_write> = var
 }
 
 %foo = func():void {
@@ -858,8 +858,8 @@ Outer_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, Outer, read_write> = var undef
+  %buffer:ptr<storage, Outer_tint_explicit_layout, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, Outer, read_write> = var
 }
 
 %foo = func():void {
@@ -920,8 +920,8 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %foo = func():void {
@@ -946,8 +946,8 @@ MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %foo = func():void {
@@ -1007,8 +1007,8 @@ Outer = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, Outer, read_write> = var undef
+  %buffer:ptr<storage, Outer, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, Outer, read_write> = var
 }
 
 %foo = func():void {
@@ -1043,8 +1043,8 @@ Outer_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, Outer, read_write> = var undef
+  %buffer:ptr<storage, Outer_tint_explicit_layout, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, Outer, read_write> = var
 }
 
 %foo = func():void {
@@ -1115,8 +1115,8 @@ Outer = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, Inner, read_write> = var undef
+  %buffer:ptr<storage, Outer, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, Inner, read_write> = var
 }
 
 %foo = func():void {
@@ -1152,8 +1152,8 @@ Outer_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, Inner, read_write> = var undef
+  %buffer:ptr<storage, Outer_tint_explicit_layout, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, Inner, read_write> = var
 }
 
 %foo = func():void {
@@ -1236,8 +1236,8 @@ Outer = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, InnerShared, read_write> = var undef
+  %buffer:ptr<storage, Outer, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, InnerShared, read_write> = var
 }
 
 %foo = func():void {
@@ -1276,8 +1276,8 @@ Outer_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, InnerShared, read_write> = var undef
+  %buffer:ptr<storage, Outer_tint_explicit_layout, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, InnerShared, read_write> = var
 }
 
 %foo = func():void {
@@ -1339,8 +1339,8 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %foo = func():void {
@@ -1369,8 +1369,8 @@ MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %foo = func():void {
@@ -1438,8 +1438,8 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %foo = func():void {
@@ -1465,8 +1465,8 @@ MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %foo = func():void {
@@ -1528,8 +1528,8 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %foo = func():void {
@@ -1556,8 +1556,8 @@ MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %foo = func():void {
@@ -1611,8 +1611,8 @@ Outer = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, Outer, read_write> = var undef
+  %buffer:ptr<storage, Outer, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, Outer, read_write> = var
 }
 
 %foo = func():void {
@@ -1649,8 +1649,8 @@ Outer_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, Outer, read_write> = var undef
+  %buffer:ptr<storage, Outer_tint_explicit_layout, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, Outer, read_write> = var
 }
 
 %foo = func():void {
@@ -1720,10 +1720,10 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer_0:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
-  %buffer_1:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 1)
-  %buffer_2:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 2)
-  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+  %buffer_0:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer_1:ptr<storage, MyStruct, read_write> = var @binding_point(0, 1)
+  %buffer_2:ptr<storage, MyStruct, read_write> = var @binding_point(0, 2)
+  %wg:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %foo = func():void {
@@ -1752,10 +1752,10 @@ MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer_0:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
-  %buffer_1:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 1)
-  %buffer_2:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 2)
-  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+  %buffer_0:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var @binding_point(0, 0)
+  %buffer_1:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var @binding_point(0, 1)
+  %buffer_2:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var @binding_point(0, 2)
+  %wg:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %foo = func():void {
@@ -1842,12 +1842,12 @@ S_2 = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer_0:ptr<storage, S_0, read_write> = var undef @binding_point(0, 0)
-  %buffer_1:ptr<storage, S_1, read_write> = var undef @binding_point(0, 1)
-  %buffer_2:ptr<storage, S_2, read_write> = var undef @binding_point(0, 2)
-  %wg_0:ptr<workgroup, S_0, read_write> = var undef
-  %wg_1:ptr<workgroup, S_1, read_write> = var undef
-  %wg_2:ptr<workgroup, S_2, read_write> = var undef
+  %buffer_0:ptr<storage, S_0, read_write> = var @binding_point(0, 0)
+  %buffer_1:ptr<storage, S_1, read_write> = var @binding_point(0, 1)
+  %buffer_2:ptr<storage, S_2, read_write> = var @binding_point(0, 2)
+  %wg_0:ptr<workgroup, S_0, read_write> = var
+  %wg_1:ptr<workgroup, S_1, read_write> = var
+  %wg_2:ptr<workgroup, S_2, read_write> = var
 }
 
 %foo = func():void {
@@ -1896,12 +1896,12 @@ S_2_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer_0:ptr<storage, S_0_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
-  %buffer_1:ptr<storage, S_1_tint_explicit_layout, read_write> = var undef @binding_point(0, 1)
-  %buffer_2:ptr<storage, S_2_tint_explicit_layout, read_write> = var undef @binding_point(0, 2)
-  %wg_0:ptr<workgroup, S_0, read_write> = var undef
-  %wg_1:ptr<workgroup, S_1, read_write> = var undef
-  %wg_2:ptr<workgroup, S_2, read_write> = var undef
+  %buffer_0:ptr<storage, S_0_tint_explicit_layout, read_write> = var @binding_point(0, 0)
+  %buffer_1:ptr<storage, S_1_tint_explicit_layout, read_write> = var @binding_point(0, 1)
+  %buffer_2:ptr<storage, S_2_tint_explicit_layout, read_write> = var @binding_point(0, 2)
+  %wg_0:ptr<workgroup, S_0, read_write> = var
+  %wg_1:ptr<workgroup, S_1, read_write> = var
+  %wg_2:ptr<workgroup, S_2, read_write> = var
 }
 
 %foo = func():void {
@@ -1962,7 +1962,7 @@ TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, LoadFromStorage_Array_Shared) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<u32, 4>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1977,7 +1977,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1990,7 +1990,7 @@ $B1: {  # root
 }
 %tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<u32, 4, stride=4>):array<u32, 4> {
   $B3: {
-    %8:ptr<function, array<u32, 4>, read_write> = var undef
+    %8:ptr<function, array<u32, 4>, read_write> = var
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
         %idx:ptr<function, u32, read_write> = var 0u
@@ -2040,7 +2040,7 @@ TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, LoadFromStorage_NestedArray_Shar
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<array<u32, 4>, 3>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<array<u32, 4>, 3>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -2055,7 +2055,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 3, stride=16>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 3, stride=16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -2068,7 +2068,7 @@ $B1: {  # root
 }
 %tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 3, stride=16>):array<array<u32, 4>, 3> {
   $B3: {
-    %8:ptr<function, array<array<u32, 4>, 3>, read_write> = var undef
+    %8:ptr<function, array<array<u32, 4>, 3>, read_write> = var
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
         %idx:ptr<function, u32, read_write> = var 0u
@@ -2101,7 +2101,7 @@ $B1: {  # root
 }
 %tint_convert_explicit_layout_1 = func(%tint_source_1:spirv.explicit_layout_array<u32, 4, stride=4>):array<u32, 4> {  # %tint_convert_explicit_layout_1: 'tint_convert_explicit_layout', %tint_source_1: 'tint_source'
   $B8: {
-    %20:ptr<function, array<u32, 4>, read_write> = var undef
+    %20:ptr<function, array<u32, 4>, read_write> = var
     loop [i: $B9, b: $B10, c: $B11] {  # loop_2
       $B9: {  # initializer
         %idx_1:ptr<function, u32, read_write> = var 0u  # %idx_1: 'idx'
@@ -2152,12 +2152,12 @@ TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, StoreToStorage_Array_Shared) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<u32, 4>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
-    %local:ptr<function, array<u32, 4>, read_write> = var undef
+    %local:ptr<function, array<u32, 4>, read_write> = var
     %4:array<u32, 4> = load %local
     store %buffer, %4
     ret
@@ -2168,12 +2168,12 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
-    %local:ptr<function, array<u32, 4>, read_write> = var undef
+    %local:ptr<function, array<u32, 4>, read_write> = var
     %4:array<u32, 4> = load %local
     %5:spirv.explicit_layout_array<u32, 4, stride=4> = call %tint_convert_explicit_layout, %4
     store %buffer, %5
@@ -2182,7 +2182,7 @@ $B1: {  # root
 }
 %tint_convert_explicit_layout = func(%tint_source:array<u32, 4>):spirv.explicit_layout_array<u32, 4, stride=4> {
   $B3: {
-    %8:ptr<function, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef
+    %8:ptr<function, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
         %idx:ptr<function, u32, read_write> = var 0u
@@ -2233,12 +2233,12 @@ TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, StoreToStorage_NestedArray_Share
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<array<u32, 4>, 3>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<array<u32, 4>, 3>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
-    %local:ptr<function, array<array<u32, 4>, 3>, read_write> = var undef
+    %local:ptr<function, array<array<u32, 4>, 3>, read_write> = var
     %4:array<array<u32, 4>, 3> = load %local
     store %buffer, %4
     ret
@@ -2249,12 +2249,12 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 3, stride=16>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 3, stride=16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
-    %local:ptr<function, array<array<u32, 4>, 3>, read_write> = var undef
+    %local:ptr<function, array<array<u32, 4>, 3>, read_write> = var
     %4:array<array<u32, 4>, 3> = load %local
     %5:spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 3, stride=16> = call %tint_convert_explicit_layout, %4
     store %buffer, %5
@@ -2263,7 +2263,7 @@ $B1: {  # root
 }
 %tint_convert_explicit_layout = func(%tint_source:array<array<u32, 4>, 3>):spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 3, stride=16> {
   $B3: {
-    %8:ptr<function, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 3, stride=16>, read_write> = var undef
+    %8:ptr<function, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 3, stride=16>, read_write> = var
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
         %idx:ptr<function, u32, read_write> = var 0u
@@ -2296,7 +2296,7 @@ $B1: {  # root
 }
 %tint_convert_explicit_layout_1 = func(%tint_source_1:array<u32, 4>):spirv.explicit_layout_array<u32, 4, stride=4> {  # %tint_convert_explicit_layout_1: 'tint_convert_explicit_layout', %tint_source_1: 'tint_source'
   $B8: {
-    %20:ptr<function, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef
+    %20:ptr<function, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var
     loop [i: $B9, b: $B10, c: $B11] {  # loop_2
       $B9: {  # initializer
         %idx_1:ptr<function, u32, read_write> = var 0u  # %idx_1: 'idx'
@@ -2350,12 +2350,12 @@ TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, SharedArray_UsesViaLet) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<u32, 4>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
-    %local:ptr<function, array<u32, 4>, read_write> = var undef
+    %local:ptr<function, array<u32, 4>, read_write> = var
     %let_ptr:ptr<storage, array<u32, 4>, read_write> = let %buffer
     %5:array<u32, 4> = load %let_ptr
     store %let_ptr, %5
@@ -2367,12 +2367,12 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
-    %local:ptr<function, array<u32, 4>, read_write> = var undef
+    %local:ptr<function, array<u32, 4>, read_write> = var
     %let_ptr:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = let %buffer
     %5:spirv.explicit_layout_array<u32, 4, stride=4> = load %let_ptr
     %6:array<u32, 4> = call %tint_convert_explicit_layout, %5
@@ -2383,7 +2383,7 @@ $B1: {  # root
 }
 %tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<u32, 4, stride=4>):array<u32, 4> {
   $B3: {
-    %11:ptr<function, array<u32, 4>, read_write> = var undef
+    %11:ptr<function, array<u32, 4>, read_write> = var
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
         %idx:ptr<function, u32, read_write> = var 0u
@@ -2415,7 +2415,7 @@ $B1: {  # root
 }
 %tint_convert_explicit_layout_1 = func(%tint_source_1:array<u32, 4>):spirv.explicit_layout_array<u32, 4, stride=4> {  # %tint_convert_explicit_layout_1: 'tint_convert_explicit_layout', %tint_source_1: 'tint_source'
   $B8: {
-    %21:ptr<function, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef
+    %21:ptr<function, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var
     loop [i: $B9, b: $B10, c: $B11] {  # loop_2
       $B9: {  # initializer
         %idx_1:ptr<function, u32, read_write> = var 0u  # %idx_1: 'idx'
@@ -2468,12 +2468,12 @@ TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, SharedArray_AccessScalarMember) 
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<u32, 4>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
-    %local:ptr<function, array<u32, 4>, read_write> = var undef
+    %local:ptr<function, array<u32, 4>, read_write> = var
     %4:ptr<storage, u32, read_write> = access %buffer, 1u
     %5:u32 = load %4
     %6:ptr<storage, u32, read_write> = access %buffer, 2u
@@ -2486,12 +2486,12 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
-    %local:ptr<function, array<u32, 4>, read_write> = var undef
+    %local:ptr<function, array<u32, 4>, read_write> = var
     %4:ptr<storage, u32, read_write> = access %buffer, 1u
     %5:u32 = load %4
     %6:ptr<storage, u32, read_write> = access %buffer, 2u
@@ -2523,12 +2523,12 @@ TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, SharedArray_AccessNestedArray) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<array<u32, 4>, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<array<u32, 4>, 4>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
-    %local:ptr<function, array<array<u32, 4>, 4>, read_write> = var undef
+    %local:ptr<function, array<array<u32, 4>, 4>, read_write> = var
     %4:ptr<storage, array<u32, 4>, read_write> = access %buffer, 1u
     %5:array<u32, 4> = load %4
     %6:ptr<storage, array<u32, 4>, read_write> = access %buffer, 2u
@@ -2541,12 +2541,12 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 4, stride=16>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, spirv.explicit_layout_array<spirv.explicit_layout_array<u32, 4, stride=4>, 4, stride=16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
-    %local:ptr<function, array<array<u32, 4>, 4>, read_write> = var undef
+    %local:ptr<function, array<array<u32, 4>, 4>, read_write> = var
     %4:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = access %buffer, 1u
     %5:spirv.explicit_layout_array<u32, 4, stride=4> = load %4
     %6:array<u32, 4> = call %tint_convert_explicit_layout, %5
@@ -2558,7 +2558,7 @@ $B1: {  # root
 }
 %tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<u32, 4, stride=4>):array<u32, 4> {
   $B3: {
-    %12:ptr<function, array<u32, 4>, read_write> = var undef
+    %12:ptr<function, array<u32, 4>, read_write> = var
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
         %idx:ptr<function, u32, read_write> = var 0u
@@ -2590,7 +2590,7 @@ $B1: {  # root
 }
 %tint_convert_explicit_layout_1 = func(%tint_source_1:array<u32, 4>):spirv.explicit_layout_array<u32, 4, stride=4> {  # %tint_convert_explicit_layout_1: 'tint_convert_explicit_layout', %tint_source_1: 'tint_source'
   $B8: {
-    %22:ptr<function, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef
+    %22:ptr<function, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var
     loop [i: $B9, b: $B10, c: $B11] {  # loop_2
       $B9: {  # initializer
         %idx_1:ptr<function, u32, read_write> = var 0u  # %idx_1: 'idx'
@@ -2650,9 +2650,9 @@ TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, SharedArray_MultipleVars) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer_0:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
-  %buffer_1:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 1)
-  %buffer_2:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 2)
+  %buffer_0:ptr<storage, array<u32, 4>, read_write> = var @binding_point(0, 0)
+  %buffer_1:ptr<storage, array<u32, 4>, read_write> = var @binding_point(0, 1)
+  %buffer_2:ptr<storage, array<u32, 4>, read_write> = var @binding_point(0, 2)
 }
 
 %foo = func():void {
@@ -2672,9 +2672,9 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer_0:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 0)
-  %buffer_1:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 1)
-  %buffer_2:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 2)
+  %buffer_0:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var @binding_point(0, 0)
+  %buffer_1:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var @binding_point(0, 1)
+  %buffer_2:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var @binding_point(0, 2)
 }
 
 %foo = func():void {
@@ -2694,7 +2694,7 @@ $B1: {  # root
 }
 %tint_convert_explicit_layout = func(%tint_source:spirv.explicit_layout_array<u32, 4, stride=4>):array<u32, 4> {
   $B3: {
-    %17:ptr<function, array<u32, 4>, read_write> = var undef
+    %17:ptr<function, array<u32, 4>, read_write> = var
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
         %idx:ptr<function, u32, read_write> = var 0u
@@ -2757,7 +2757,7 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -2781,7 +2781,7 @@ MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -2824,8 +2824,8 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %ssbo:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+  %ssbo:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %foo = func():void {
@@ -2850,8 +2850,8 @@ MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %ssbo:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+  %ssbo:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %foo = func():void {
@@ -2896,8 +2896,8 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %ssbo:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+  %ssbo:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %foo = func():void {
@@ -2922,8 +2922,8 @@ MyStruct_tint_explicit_layout = struct @align(4), @core.explicit_layout {
 }
 
 $B1: {  # root
-  %ssbo:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, MyStruct, read_write> = var undef
+  %ssbo:ptr<storage, MyStruct_tint_explicit_layout, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %foo = func():void {
@@ -2959,8 +2959,8 @@ TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, Spv14_CopyLogical_ArrayRemoveLay
 
     auto* src = R"(
 $B1: {  # root
-  %ssbo:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
+  %ssbo:ptr<storage, array<u32, 4>, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, array<u32, 4>, read_write> = var
 }
 
 %foo = func():void {
@@ -2975,8 +2975,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %ssbo:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
+  %ssbo:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, array<u32, 4>, read_write> = var
 }
 
 %foo = func():void {
@@ -3012,8 +3012,8 @@ TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, Spv14_CopyLogical_ArrayAddLayout
 
     auto* src = R"(
 $B1: {  # root
-  %ssbo:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
+  %ssbo:ptr<storage, array<u32, 4>, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, array<u32, 4>, read_write> = var
 }
 
 %foo = func():void {
@@ -3028,8 +3028,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %ssbo:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var undef @binding_point(0, 0)
-  %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
+  %ssbo:ptr<storage, spirv.explicit_layout_array<u32, 4, stride=4>, read_write> = var @binding_point(0, 0)
+  %wg:ptr<workgroup, array<u32, 4>, read_write> = var
 }
 
 %foo = func():void {

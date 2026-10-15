@@ -48,7 +48,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_SingleNamedRootBlockVar) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<private, i32, read_write> = var undef
+  %v:ptr<private, i32, read_write> = var
 }
 
 )";
@@ -69,8 +69,8 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_TwoRootBlockVarsWithSameName) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<private, i32, read_write> = var undef
-  %v_1:ptr<private, u32, read_write> = var undef  # %v_1: 'v'
+  %v:ptr<private, i32, read_write> = var
+  %v_1:ptr<private, u32, read_write> = var  # %v_1: 'v'
 }
 
 )";
@@ -78,8 +78,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<private, i32, read_write> = var undef
-  %v_1:ptr<private, u32, read_write> = var undef
+  %v:ptr<private, i32, read_write> = var
+  %v_1:ptr<private, u32, read_write> = var
 }
 
 )";
@@ -99,7 +99,7 @@ v = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<private, v, read_write> = var undef
+  %v:ptr<private, v, read_write> = var
 }
 
 )";
@@ -111,7 +111,7 @@ v = struct @align(4) {
 }
 
 $B1: {  # root
-  %v_1:ptr<private, v, read_write> = var undef
+  %v_1:ptr<private, v, read_write> = var
 }
 
 )";
@@ -129,7 +129,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_RootBlockVarAndFnWithSameName) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<private, i32, read_write> = var undef
+  %v:ptr<private, i32, read_write> = var
 }
 
 %v_1 = func():void {  # %v_1: 'v'
@@ -142,7 +142,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<private, i32, read_write> = var undef
+  %v:ptr<private, i32, read_write> = var
 }
 
 %v_1 = func():void {
@@ -176,13 +176,13 @@ TEST_F(IRToProgramRenameConflictsTest, RootBlockVar_ShadowedBy_FnVar) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<private, i32, read_write> = var undef
+  %v:ptr<private, i32, read_write> = var
 }
 
 %f = func():i32 {
   $B2: {
     %3:i32 = load %v
-    %v_1:ptr<function, i32, read_write> = var undef  # %v_1: 'v'
+    %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
     %5:i32 = load %v_1
     %6:i32 = add %3, %5
     ret %6
@@ -193,13 +193,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<private, i32, read_write> = var undef
+  %v:ptr<private, i32, read_write> = var
 }
 
 %f = func():i32 {
   $B2: {
     %3:i32 = load %v
-    %v_1:ptr<function, i32, read_write> = var undef
+    %v_1:ptr<function, i32, read_write> = var
     %5:i32 = load %v_1
     %6:i32 = add %3, %5
     ret %6
@@ -236,12 +236,12 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_FnVar_After_IfVar) {
   $B1: {
     if true [t: $B2] {  # if_1
       $B2: {  # true
-        %v:ptr<function, i32, read_write> = var undef
+        %v:ptr<function, i32, read_write> = var
         %3:i32 = load %v
         ret %3
       }
     }
-    %v_1:ptr<function, i32, read_write> = var undef  # %v_1: 'v'
+    %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
     %5:i32 = load %v_1
     ret %5
   }
@@ -278,10 +278,10 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_FnVar_ShadowedBy_IfVar) {
     auto* src = R"(
 %f = func():i32 {
   $B1: {
-    %v:ptr<function, i32, read_write> = var undef
+    %v:ptr<function, i32, read_write> = var
     if true [t: $B2] {  # if_1
       $B2: {  # true
-        %v_1:ptr<function, i32, read_write> = var undef  # %v_1: 'v'
+        %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
         %4:i32 = load %v
         %5:i32 = load %v_1
         %6:i32 = add %4, %5
@@ -297,10 +297,10 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_FnVar_ShadowedBy_IfVar) {
     auto* expect = R"(
 %f = func():i32 {
   $B1: {
-    %v:ptr<function, i32, read_write> = var undef
+    %v:ptr<function, i32, read_write> = var
     if true [t: $B2] {  # if_1
       $B2: {  # true
-        %v_1:ptr<function, i32, read_write> = var undef
+        %v_1:ptr<function, i32, read_write> = var
         %4:i32 = load %v
         %5:i32 = load %v_1
         %6:i32 = add %4, %5
@@ -336,7 +336,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_FnLet_ShadowedBy_IfVar) {
     auto* src = R"(
 %f = func():i32 {
   $B1: {
-    %v:ptr<function, i32, read_write> = var undef
+    %v:ptr<function, i32, read_write> = var
     if true [t: $B2] {  # if_1
       $B2: {  # true
         %v_1:i32 = let 42i  # %v_1: 'v'
@@ -354,7 +354,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_FnLet_ShadowedBy_IfVar) {
     auto* expect = R"(
 %f = func():i32 {
   $B1: {
-    %v:ptr<function, i32, read_write> = var undef
+    %v:ptr<function, i32, read_write> = var
     if true [t: $B2] {  # if_1
       $B2: {  # true
         %v_1:i32 = let 42i
@@ -401,12 +401,12 @@ TEST_F(IRToProgramRenameConflictsTest, LoopInitVar_ShadowedBy_LoopBodyVar) {
   $B1: {
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
-        %v:ptr<function, i32, read_write> = var undef
+        %v:ptr<function, i32, read_write> = var
         next_iteration  # -> $B3
       }
       $B3: {  # body
         %3:i32 = load %v
-        %v_1:ptr<function, i32, read_write> = var undef  # %v_1: 'v'
+        %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
         %5:i32 = load %v_1
         %6:i32 = add %3, %5
         ret %6
@@ -423,12 +423,12 @@ TEST_F(IRToProgramRenameConflictsTest, LoopInitVar_ShadowedBy_LoopBodyVar) {
   $B1: {
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
-        %v:ptr<function, i32, read_write> = var undef
+        %v:ptr<function, i32, read_write> = var
         next_iteration  # -> $B3
       }
       $B3: {  # body
         %3:i32 = load %v
-        %v_1:ptr<function, i32, read_write> = var undef
+        %v_1:ptr<function, i32, read_write> = var
         %5:i32 = load %v_1
         %6:i32 = add %3, %5
         ret %6
@@ -477,12 +477,12 @@ TEST_F(IRToProgramRenameConflictsTest, LoopBodyVar_ShadowedBy_LoopContVar) {
         next_iteration  # -> $B3
       }
       $B3: {  # body
-        %v:ptr<function, i32, read_write> = var undef
+        %v:ptr<function, i32, read_write> = var
         continue  # -> $B4
       }
       $B4: {  # continuing
         %3:i32 = load %v
-        %v_1:ptr<function, i32, read_write> = var undef  # %v_1: 'v'
+        %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
         %5:i32 = load %v_1
         %6:i32 = add %3, %5
         %add:i32 = let %6
@@ -503,12 +503,12 @@ TEST_F(IRToProgramRenameConflictsTest, LoopBodyVar_ShadowedBy_LoopContVar) {
         next_iteration  # -> $B3
       }
       $B3: {  # body
-        %v:ptr<function, i32, read_write> = var undef
+        %v:ptr<function, i32, read_write> = var
         continue  # -> $B4
       }
       $B4: {  # continuing
         %3:i32 = load %v
-        %v_1:ptr<function, i32, read_write> = var undef
+        %v_1:ptr<function, i32, read_write> = var
         %5:i32 = load %v_1
         %6:i32 = add %3, %5
         %add:i32 = let %6
@@ -539,7 +539,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinScalar_ShadowedBy_Param) 
     auto* src = R"(
 %f = func(%i32:i32):void {
   $B1: {
-    %3:ptr<function, i32, read_write> = var undef
+    %3:ptr<function, i32, read_write> = var
     ret
   }
 }
@@ -549,7 +549,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinScalar_ShadowedBy_Param) 
     auto* expect = R"(
 %f = func(%i32_1:i32):void {
   $B1: {
-    %3:ptr<function, i32, read_write> = var undef
+    %3:ptr<function, i32, read_write> = var
     ret
   }
 }
@@ -574,7 +574,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinVector_ShadowedBy_Param) 
     auto* src = R"(
 %f = func(%vec2:i32):void {
   $B1: {
-    %3:ptr<function, vec3<i32>, read_write> = var undef
+    %3:ptr<function, vec3<i32>, read_write> = var
     ret
   }
 }
@@ -602,7 +602,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinVector_ShadowedBy_Param) 
     auto* src = R"(
 %f = func(%vec3:i32):void {
   $B1: {
-    %3:ptr<function, vec3<i32>, read_write> = var undef
+    %3:ptr<function, vec3<i32>, read_write> = var
     ret
   }
 }
@@ -612,7 +612,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinVector_ShadowedBy_Param) 
     auto* expect = R"(
 %f = func(%vec3_1:i32):void {
   $B1: {
-    %3:ptr<function, vec3<i32>, read_write> = var undef
+    %3:ptr<function, vec3<i32>, read_write> = var
     ret
   }
 }
@@ -637,7 +637,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinMatrix_ShadowedBy_Param) 
     auto* src = R"(
 %f = func(%mat3x2:i32):void {
   $B1: {
-    %3:ptr<function, mat2x4<f32>, read_write> = var undef
+    %3:ptr<function, mat2x4<f32>, read_write> = var
     ret
   }
 }
@@ -665,7 +665,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinMatrix_ShadowedBy_Param) 
     auto* src = R"(
 %f = func(%mat2x4:i32):void {
   $B1: {
-    %3:ptr<function, mat2x4<f32>, read_write> = var undef
+    %3:ptr<function, mat2x4<f32>, read_write> = var
     ret
   }
 }
@@ -675,7 +675,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinMatrix_ShadowedBy_Param) 
     auto* expect = R"(
 %f = func(%mat2x4_1:i32):void {
   $B1: {
-    %3:ptr<function, mat2x4<f32>, read_write> = var undef
+    %3:ptr<function, mat2x4<f32>, read_write> = var
     ret
   }
 }
@@ -766,7 +766,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinScalar_ShadowedBy_FnVar) 
     auto* src = R"(
 %f = func():i32 {
   $B1: {
-    %f32:ptr<function, i32, read_write> = var undef
+    %f32:ptr<function, i32, read_write> = var
     ret 0i
   }
 }
@@ -792,7 +792,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinScalar_ShadowedBy_FnVar) 
     auto* src = R"(
 %f = func():i32 {
   $B1: {
-    %i32:ptr<function, i32, read_write> = var undef
+    %i32:ptr<function, i32, read_write> = var
     ret 0i
   }
 }
@@ -802,7 +802,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinScalar_ShadowedBy_FnVar) 
     auto* expect = R"(
 %f = func():i32 {
   $B1: {
-    %i32_1:ptr<function, i32, read_write> = var undef
+    %i32_1:ptr<function, i32, read_write> = var
     ret 0i
   }
 }
@@ -879,7 +879,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinAddressSpace_ShadowedBy_R
 
     auto* src = R"(
 $B1: {  # root
-  %function:ptr<private, i32, read_write> = var undef
+  %function:ptr<private, i32, read_write> = var
 }
 
 )";
@@ -899,7 +899,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinAddressSpace_ShadowedBy_R
 
     auto* src = R"(
 $B1: {  # root
-  %private:ptr<private, i32, read_write> = var undef
+  %private:ptr<private, i32, read_write> = var
 }
 
 )";
@@ -907,7 +907,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %private_1:ptr<private, i32, read_write> = var undef
+  %private_1:ptr<private, i32, read_write> = var
 }
 
 )";
@@ -924,7 +924,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinAccess_ShadowedBy_RootBlo
 
     auto* src = R"(
 $B1: {  # root
-  %read:ptr<private, i32, read_write> = var undef
+  %read:ptr<private, i32, read_write> = var
 }
 
 )";
@@ -944,7 +944,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinAccess_ShadowedBy_RootBlo
 
     auto* src = R"(
 $B1: {  # root
-  %read_write:ptr<private, i32, read_write> = var undef
+  %read_write:ptr<private, i32, read_write> = var
 }
 
 )";
@@ -952,7 +952,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %read_write_1:ptr<private, i32, read_write> = var undef
+  %read_write_1:ptr<private, i32, read_write> = var
 }
 
 )";
@@ -977,7 +977,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinFn_ShadowedBy_RootBlockVa
 
     auto* src = R"(
 $B1: {  # root
-  %min:ptr<private, i32, read_write> = var undef
+  %min:ptr<private, i32, read_write> = var
 }
 
 %f = func():i32 {
@@ -1012,7 +1012,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinFn_ShadowedBy_RootBlockVa
 
     auto* src = R"(
 $B1: {  # root
-  %max:ptr<private, i32, read_write> = var undef
+  %max:ptr<private, i32, read_write> = var
 }
 
 %f = func():i32 {
@@ -1027,7 +1027,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %max_1:ptr<private, i32, read_write> = var undef
+  %max_1:ptr<private, i32, read_write> = var
 }
 
 %f = func():i32 {
@@ -1062,7 +1062,7 @@ s = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<private, s, read_write> = var undef
+  %1:ptr<private, s, read_write> = var
 }
 
 %f32 = func():void {
@@ -1079,7 +1079,7 @@ s = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<private, s, read_write> = var undef
+  %1:ptr<private, s, read_write> = var
 }
 
 %f32_1 = func():void {
@@ -1111,7 +1111,7 @@ s = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<private, s, read_write> = var undef
+  %1:ptr<private, s, read_write> = var
 }
 
 )";
@@ -1124,7 +1124,7 @@ s = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<private, s, read_write> = var undef
+  %1:ptr<private, s, read_write> = var
 }
 
 )";

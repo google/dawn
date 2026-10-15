@@ -216,7 +216,7 @@ $B1: {  # root
   %1:u32 = override 1u @id(0)
   %2:u32 = override 1u @id(1)
   %3:u32 = override 1u @id(2)
-  %4:ptr<storage, tint_symbol_1, read_write> = var undef @binding_point(0, 0)
+  %4:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -268,7 +268,7 @@ TEST_F(SpirvParserTest, Capability_Supported_SampledCubeArray) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, cube, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, spirv.image<f32, cube, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var @binding_point(0, 0)
 }
 )");
 }

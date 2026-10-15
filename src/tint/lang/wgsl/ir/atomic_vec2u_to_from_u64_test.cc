@@ -47,7 +47,7 @@ TEST_F(AtomicVec2uToFromU64Test, NoChange_ToU64) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<u32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<u32>, read_write> = var @binding_point(0, 0)
 }
 
 )";
@@ -67,7 +67,7 @@ TEST_F(AtomicVec2uToFromU64Test, NoChange_FromU64) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<u32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<u32>, read_write> = var @binding_point(0, 0)
 }
 
 )";
@@ -87,7 +87,7 @@ TEST_F(AtomicVec2uToFromU64Test, Simple_ToU64) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<vec2<u32>>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<vec2<u32>>, read_write> = var @binding_point(0, 0)
 }
 
 )";
@@ -95,7 +95,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<u64>, read_write> = var @binding_point(0, 0)
 }
 
 )";
@@ -112,7 +112,7 @@ TEST_F(AtomicVec2uToFromU64Test, Simple_FromU64) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<u64>, read_write> = var @binding_point(0, 0)
 }
 
 )";
@@ -120,7 +120,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<vec2<u32>>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<vec2<u32>>, read_write> = var @binding_point(0, 0)
 }
 
 )";
@@ -143,7 +143,7 @@ S = struct @align(8) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, S, read_write> = var @binding_point(0, 0)
 }
 
 )";
@@ -159,7 +159,7 @@ S_a64 = struct @align(8) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, S_a64, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, S_a64, read_write> = var @binding_point(0, 0)
 }
 
 )";
@@ -181,7 +181,7 @@ S = struct @align(8) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, S, read_write> = var @binding_point(0, 0)
 }
 
 )";
@@ -197,7 +197,7 @@ S_a64 = struct @align(8) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, S_a64, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, S_a64, read_write> = var @binding_point(0, 0)
 }
 
 )";
@@ -214,7 +214,7 @@ TEST_F(AtomicVec2uToFromU64Test, Array_ToU64) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<atomic<vec2<u32>>, 4>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<atomic<vec2<u32>>, 4>, read_write> = var @binding_point(0, 0)
 }
 
 )";
@@ -222,7 +222,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, array<atomic<u64>, 4>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<atomic<u64>, 4>, read_write> = var @binding_point(0, 0)
 }
 
 )";
@@ -239,7 +239,7 @@ TEST_F(AtomicVec2uToFromU64Test, Array_FromU64) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<atomic<u64>, 4>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<atomic<u64>, 4>, read_write> = var @binding_point(0, 0)
 }
 
 )";
@@ -247,7 +247,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, array<atomic<vec2<u32>>, 4>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<atomic<vec2<u32>>, 4>, read_write> = var @binding_point(0, 0)
 }
 
 )";
@@ -271,7 +271,7 @@ TEST_F(AtomicVec2uToFromU64Test, AtomicStoreMax_ToU64) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<vec2<u32>>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<vec2<u32>>, read_write> = var @binding_point(0, 0)
 }
 
 %f = func():void {
@@ -285,7 +285,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<u64>, read_write> = var @binding_point(0, 0)
 }
 
 %f = func():void {
@@ -318,7 +318,7 @@ TEST_F(AtomicVec2uToFromU64Test, AtomicStoreMax_FromU64) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<u64>, read_write> = var @binding_point(0, 0)
 }
 
 %f = func():void {
@@ -333,7 +333,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<vec2<u32>>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<vec2<u32>>, read_write> = var @binding_point(0, 0)
 }
 
 %f = func():void {
@@ -363,7 +363,7 @@ TEST_F(AtomicVec2uToFromU64Test, AtomicStoreMin_ToU64) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<vec2<u32>>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<vec2<u32>>, read_write> = var @binding_point(0, 0)
 }
 
 %f = func():void {
@@ -377,7 +377,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<u64>, read_write> = var @binding_point(0, 0)
 }
 
 %f = func():void {
@@ -410,7 +410,7 @@ TEST_F(AtomicVec2uToFromU64Test, AtomicStoreMin_FromU64) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<u64>, read_write> = var @binding_point(0, 0)
 }
 
 %f = func():void {
@@ -425,7 +425,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<vec2<u32>>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<vec2<u32>>, read_write> = var @binding_point(0, 0)
 }
 
 %f = func():void {

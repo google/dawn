@@ -54,7 +54,7 @@ TEST_F(SpirvReader_AtomicsTest, ArrayStore) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
+  %wg:ptr<workgroup, array<u32, 4>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -70,7 +70,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<atomic<u32>, 4>, read_write> = var undef
+  %wg:ptr<workgroup, array<atomic<u32>, 4>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -101,7 +101,7 @@ TEST_F(SpirvReader_AtomicsTest, ArrayStore_CopiedObject) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
+  %wg:ptr<workgroup, array<u32, 4>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -118,7 +118,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<atomic<u32>, 4>, read_write> = var undef
+  %wg:ptr<workgroup, array<atomic<u32>, 4>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -153,7 +153,7 @@ TEST_F(SpirvReader_AtomicsTest, ArrayStore_CopiedObject_AfterAtomicOp) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
+  %wg:ptr<workgroup, array<u32, 4>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -172,7 +172,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<atomic<u32>, 4>, read_write> = var undef
+  %wg:ptr<workgroup, array<atomic<u32>, 4>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -205,7 +205,7 @@ TEST_F(SpirvReader_AtomicsTest, ArrayNested) {
     });
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<array<array<u32, 1>, 2>, 3>, read_write> = var undef
+  %wg:ptr<workgroup, array<array<array<u32, 1>, 2>, 3>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -222,7 +222,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<array<array<atomic<u32>, 1>, 2>, 3>, read_write> = var undef
+  %wg:ptr<workgroup, array<array<array<atomic<u32>, 1>, 2>, 3>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -266,7 +266,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, S, read_write> = var undef
+  %wg:ptr<workgroup, S, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -299,7 +299,7 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, S_atomic, read_write> = var undef
+  %wg:ptr<workgroup, S_atomic, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -348,7 +348,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, S, read_write> = var undef
+  %wg:ptr<workgroup, S, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -381,7 +381,7 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, S_atomic, read_write> = var undef
+  %wg:ptr<workgroup, S_atomic, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -460,7 +460,7 @@ S2 = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, S2, read_write> = var undef
+  %wg:ptr<workgroup, S2, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -523,7 +523,7 @@ S2_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, S2_atomic, read_write> = var undef
+  %wg:ptr<workgroup, S2_atomic, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -567,7 +567,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, array<S, 10>, read_write> = var undef
+  %wg:ptr<workgroup, array<S, 10>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -594,7 +594,7 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, array<S_atomic, 10>, read_write> = var undef
+  %wg:ptr<workgroup, array<S_atomic, 10>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -635,7 +635,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, array<S, 10>, read_write> = var undef
+  %wg:ptr<workgroup, array<S, 10>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -663,7 +663,7 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, array<S_atomic, 10>, read_write> = var undef
+  %wg:ptr<workgroup, array<S_atomic, 10>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -704,7 +704,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, S, read_write> = var undef
+  %wg:ptr<workgroup, S, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -733,7 +733,7 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, S_atomic, read_write> = var undef
+  %wg:ptr<workgroup, S_atomic, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -773,7 +773,7 @@ TEST_F(SpirvReader_AtomicsTest, FunctionParam) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
+  %wg:ptr<workgroup, array<u32, 4>, read_write> = var
 }
 
 %c = func(%param:ptr<workgroup, array<u32, 4>, read_write>):void {
@@ -796,7 +796,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<atomic<u32>, 4>, read_write> = var undef
+  %wg:ptr<workgroup, array<atomic<u32>, 4>, read_write> = var
 }
 
 %c = func(%param:ptr<workgroup, array<atomic<u32>, 4>, read_write>):void {
@@ -855,9 +855,9 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, i32, read_write> = var undef
-  %wg_u32:ptr<workgroup, u32, read_write> = var undef
+  %sb:ptr<storage, S, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, i32, read_write> = var
+  %wg_u32:ptr<workgroup, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -888,9 +888,9 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
-  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %sb:ptr<storage, S_atomic, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -947,9 +947,9 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, i32, read_write> = var undef
-  %wg_u32:ptr<workgroup, u32, read_write> = var undef
+  %sb:ptr<storage, S, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, i32, read_write> = var
+  %wg_u32:ptr<workgroup, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -980,9 +980,9 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
-  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %sb:ptr<storage, S_atomic, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1039,9 +1039,9 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, i32, read_write> = var undef
-  %wg_u32:ptr<workgroup, u32, read_write> = var undef
+  %sb:ptr<storage, S, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, i32, read_write> = var
+  %wg_u32:ptr<workgroup, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1072,9 +1072,9 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
-  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %sb:ptr<storage, S_atomic, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1130,9 +1130,9 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, i32, read_write> = var undef
-  %wg_u32:ptr<workgroup, u32, read_write> = var undef
+  %sb:ptr<storage, S, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, i32, read_write> = var
+  %wg_u32:ptr<workgroup, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1163,9 +1163,9 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
-  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %sb:ptr<storage, S_atomic, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1222,9 +1222,9 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, i32, read_write> = var undef
-  %wg_u32:ptr<workgroup, u32, read_write> = var undef
+  %sb:ptr<storage, S, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, i32, read_write> = var
+  %wg_u32:ptr<workgroup, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1255,9 +1255,9 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
-  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %sb:ptr<storage, S_atomic, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1314,9 +1314,9 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, i32, read_write> = var undef
-  %wg_u32:ptr<workgroup, u32, read_write> = var undef
+  %sb:ptr<storage, S, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, i32, read_write> = var
+  %wg_u32:ptr<workgroup, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1347,9 +1347,9 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
-  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %sb:ptr<storage, S_atomic, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1406,9 +1406,9 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, i32, read_write> = var undef
-  %wg_u32:ptr<workgroup, u32, read_write> = var undef
+  %sb:ptr<storage, S, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, i32, read_write> = var
+  %wg_u32:ptr<workgroup, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1439,9 +1439,9 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
-  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %sb:ptr<storage, S_atomic, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1500,9 +1500,9 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, i32, read_write> = var undef
-  %wg_u32:ptr<workgroup, u32, read_write> = var undef
+  %sb:ptr<storage, S, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, i32, read_write> = var
+  %wg_u32:ptr<workgroup, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1533,9 +1533,9 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
-  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %sb:ptr<storage, S_atomic, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1594,9 +1594,9 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, i32, read_write> = var undef
-  %wg_u32:ptr<workgroup, u32, read_write> = var undef
+  %sb:ptr<storage, S, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, i32, read_write> = var
+  %wg_u32:ptr<workgroup, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1637,9 +1637,9 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
-  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %sb:ptr<storage, S_atomic, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1698,9 +1698,9 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, i32, read_write> = var undef
-  %wg_u32:ptr<workgroup, u32, read_write> = var undef
+  %sb:ptr<storage, S, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, i32, read_write> = var
+  %wg_u32:ptr<workgroup, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1731,9 +1731,9 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
-  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %sb:ptr<storage, S_atomic, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1792,9 +1792,9 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, i32, read_write> = var undef
-  %wg_u32:ptr<workgroup, u32, read_write> = var undef
+  %sb:ptr<storage, S, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, i32, read_write> = var
+  %wg_u32:ptr<workgroup, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1825,9 +1825,9 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
-  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %sb:ptr<storage, S_atomic, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1884,9 +1884,9 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, i32, read_write> = var undef
-  %wg_u32:ptr<workgroup, u32, read_write> = var undef
+  %sb:ptr<storage, S, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, i32, read_write> = var
+  %wg_u32:ptr<workgroup, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1917,9 +1917,9 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
-  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %sb:ptr<storage, S_atomic, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1976,9 +1976,9 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, i32, read_write> = var undef
-  %wg_u32:ptr<workgroup, u32, read_write> = var undef
+  %sb:ptr<storage, S, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, i32, read_write> = var
+  %wg_u32:ptr<workgroup, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2009,9 +2009,9 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
-  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var undef
-  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %sb:ptr<storage, S_atomic, read_write> = var @binding_point(0, 0)
+  %wg_i32:ptr<workgroup, atomic<i32>, read_write> = var
+  %wg_u32:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2048,12 +2048,12 @@ TEST_F(SpirvReader_AtomicsTest, ReplaceAssignsAndDecls_Scalar) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, u32, read_write> = var undef
+  %wg:ptr<workgroup, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, u32, read_write> = var undef
+    %b:ptr<function, u32, read_write> = var
     %4:u32 = spirv.atomic_i_add %wg, 1u, 0u, 0u
     store %wg, 0u
     %5:u32 = load %wg
@@ -2070,12 +2070,12 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %wg:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, u32, read_write> = var undef
+    %b:ptr<function, u32, read_write> = var
     %4:u32 = atomicAdd %wg, 0u
     %5:void = atomicStore %wg, 0u
     %6:u32 = atomicLoad %wg
@@ -2123,12 +2123,12 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, S, read_write> = var undef
+  %wg:ptr<workgroup, S, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, u32, read_write> = var undef
+    %b:ptr<function, u32, read_write> = var
     %4:ptr<workgroup, u32, read_write> = access %wg, 0u
     %5:u32 = spirv.atomic_i_add %4, 1u, 0u, 4u
     %6:ptr<workgroup, u32, read_write> = access %wg, 0u
@@ -2157,12 +2157,12 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, S_atomic, read_write> = var undef
+  %wg:ptr<workgroup, S_atomic, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, u32, read_write> = var undef
+    %b:ptr<function, u32, read_write> = var
     %4:ptr<workgroup, atomic<u32>, read_write> = access %wg, 0u
     %5:u32 = atomicAdd %4, 4u
     %6:ptr<workgroup, atomic<u32>, read_write> = access %wg, 0u
@@ -2222,12 +2222,12 @@ S1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, S1, read_write> = var undef
+  %wg:ptr<workgroup, S1, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, u32, read_write> = var undef
+    %b:ptr<function, u32, read_write> = var
     %4:ptr<workgroup, u32, read_write> = access %wg, 0u, 0u
     %5:u32 = spirv.atomic_i_add %4, 1u, 0u, 4u
     %6:ptr<workgroup, u32, read_write> = access %wg, 0u, 0u
@@ -2264,12 +2264,12 @@ S1_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, S1_atomic, read_write> = var undef
+  %wg:ptr<workgroup, S1_atomic, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, u32, read_write> = var undef
+    %b:ptr<function, u32, read_write> = var
     %4:ptr<workgroup, atomic<u32>, read_write> = access %wg, 0u, 0u
     %5:u32 = atomicAdd %4, 4u
     %6:ptr<workgroup, atomic<u32>, read_write> = access %wg, 0u, 0u
@@ -2352,14 +2352,14 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, S, read_write> = var undef
+  %wg:ptr<workgroup, S, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %d:ptr<function, u32, read_write> = var undef
-    %e:ptr<function, u32, read_write> = var undef
-    %f:ptr<function, u32, read_write> = var undef
+    %d:ptr<function, u32, read_write> = var
+    %e:ptr<function, u32, read_write> = var
+    %f:ptr<function, u32, read_write> = var
     %6:ptr<workgroup, u32, read_write> = access %wg, 0u
     %7:u32 = spirv.atomic_i_add %6, 1u, 0u, 3u
     %8:ptr<workgroup, u32, read_write> = access %wg, 1u
@@ -2410,14 +2410,14 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, S_atomic, read_write> = var undef
+  %wg:ptr<workgroup, S_atomic, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %d:ptr<function, u32, read_write> = var undef
-    %e:ptr<function, u32, read_write> = var undef
-    %f:ptr<function, u32, read_write> = var undef
+    %d:ptr<function, u32, read_write> = var
+    %e:ptr<function, u32, read_write> = var
+    %f:ptr<function, u32, read_write> = var
     %6:ptr<workgroup, atomic<u32>, read_write> = access %wg, 0u
     %7:u32 = atomicAdd %6, 3u
     %8:ptr<workgroup, atomic<u32>, read_write> = access %wg, 1u
@@ -2481,12 +2481,12 @@ TEST_F(SpirvReader_AtomicsTest, ReplaceAssignsAndDecls_ArrayOfScalar) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<u32, 4>, read_write> = var undef
+  %wg:ptr<workgroup, array<u32, 4>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, u32, read_write> = var undef
+    %b:ptr<function, u32, read_write> = var
     %4:ptr<workgroup, u32, read_write> = access %wg, 1i
     %5:u32 = spirv.atomic_i_add %4, 1u, 0u, 4u
     %6:ptr<workgroup, u32, read_write> = access %wg, 1i
@@ -2507,12 +2507,12 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<atomic<u32>, 4>, read_write> = var undef
+  %wg:ptr<workgroup, array<atomic<u32>, 4>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, u32, read_write> = var undef
+    %b:ptr<function, u32, read_write> = var
     %4:ptr<workgroup, atomic<u32>, read_write> = access %wg, 1i
     %5:u32 = atomicAdd %4, 4u
     %6:ptr<workgroup, atomic<u32>, read_write> = access %wg, 1i
@@ -2565,12 +2565,12 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, array<S, 4>, read_write> = var undef
+  %wg:ptr<workgroup, array<S, 4>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, u32, read_write> = var undef
+    %b:ptr<function, u32, read_write> = var
     %4:ptr<workgroup, u32, read_write> = access %wg, 1i, 0u
     %5:u32 = spirv.atomic_i_add %4, 1u, 0u, 9u
     %6:ptr<workgroup, u32, read_write> = access %wg, 1i, 0u
@@ -2599,12 +2599,12 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, array<S_atomic, 4>, read_write> = var undef
+  %wg:ptr<workgroup, array<S_atomic, 4>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, u32, read_write> = var undef
+    %b:ptr<function, u32, read_write> = var
     %4:ptr<workgroup, atomic<u32>, read_write> = access %wg, 1i, 0u
     %5:u32 = atomicAdd %4, 9u
     %6:ptr<workgroup, atomic<u32>, read_write> = access %wg, 1i, 0u
@@ -2660,12 +2660,12 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %sg:ptr<storage, S, read_write> = var undef @binding_point(0, 1)
+  %sg:ptr<storage, S, read_write> = var @binding_point(0, 1)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, u32, read_write> = var undef
+    %b:ptr<function, u32, read_write> = var
     %4:ptr<storage, u32, read_write> = access %sg, 0u, 4i
     %5:u32 = spirv.atomic_i_add %4, 1u, 0u, 3u
     %6:ptr<storage, u32, read_write> = access %sg, 0u, 2i
@@ -2694,12 +2694,12 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %sg:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 1)
+  %sg:ptr<storage, S_atomic, read_write> = var @binding_point(0, 1)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, u32, read_write> = var undef
+    %b:ptr<function, u32, read_write> = var
     %4:ptr<storage, atomic<u32>, read_write> = access %sg, 0u, 4i
     %5:u32 = atomicAdd %4, 3u
     %6:ptr<storage, atomic<u32>, read_write> = access %sg, 0u, 2i
@@ -2754,12 +2754,12 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %s:ptr<storage, S, read_write> = var undef @binding_point(0, 1)
+  %s:ptr<storage, S, read_write> = var @binding_point(0, 1)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, u32, read_write> = var undef
+    %b:ptr<function, u32, read_write> = var
     %4:ptr<storage, S, read_write> = let %s
     %5:ptr<storage, u32, read_write> = access %4, 0u
     %6:ptr<storage, u32, read_write> = let %5
@@ -2787,12 +2787,12 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %s:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 1)
+  %s:ptr<storage, S_atomic, read_write> = var @binding_point(0, 1)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, u32, read_write> = var undef
+    %b:ptr<function, u32, read_write> = var
     %4:ptr<storage, S_atomic, read_write> = let %s
     %5:ptr<storage, atomic<u32>, read_write> = access %4, 0u
     %6:ptr<storage, atomic<u32>, read_write> = let %5
@@ -2829,12 +2829,12 @@ TEST_F(SpirvReader_AtomicsTest, ReplaceBitcastArgument_Scalar) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, u32, read_write> = var undef
+  %wg:ptr<workgroup, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, f32, read_write> = var undef
+    %b:ptr<function, f32, read_write> = var
     %4:u32 = spirv.atomic_i_add %wg, 1u, 0u, 3u
     store %wg, 0u
     %5:u32 = load %wg
@@ -2850,12 +2850,12 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %wg:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, f32, read_write> = var undef
+    %b:ptr<function, f32, read_write> = var
     %4:u32 = atomicAdd %wg, 3u
     %5:void = atomicStore %wg, 0u
     %6:u32 = atomicLoad %wg
@@ -2899,12 +2899,12 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, S, read_write> = var undef
+  %wg:ptr<workgroup, S, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, f32, read_write> = var undef
+    %b:ptr<function, f32, read_write> = var
     %4:ptr<workgroup, u32, read_write> = access %wg, 0u
     %5:u32 = spirv.atomic_i_add %4, 1u, 0u, 2u
     %6:ptr<workgroup, u32, read_write> = access %wg, 0u
@@ -2931,12 +2931,12 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %wg:ptr<workgroup, S_atomic, read_write> = var undef
+  %wg:ptr<workgroup, S_atomic, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %b:ptr<function, f32, read_write> = var undef
+    %b:ptr<function, f32, read_write> = var
     %4:ptr<workgroup, atomic<u32>, read_write> = access %wg, 0u
     %5:u32 = atomicAdd %4, 2u
     %6:ptr<workgroup, atomic<u32>, read_write> = access %wg, 0u
@@ -2990,8 +2990,8 @@ TEST_F(SpirvReader_AtomicsTest, FunctionParam_AnotherCallWithNonAtomicUse) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg_atomic:ptr<workgroup, u32, read_write> = var undef
-  %wg_nonatomic:ptr<workgroup, u32, read_write> = var undef
+  %wg_atomic:ptr<workgroup, u32, read_write> = var
+  %wg_nonatomic:ptr<workgroup, u32, read_write> = var
 }
 
 %f_atomic = func(%param:ptr<workgroup, u32, read_write>):u32 {
@@ -3022,8 +3022,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg_atomic:ptr<workgroup, atomic<u32>, read_write> = var undef
-  %wg_nonatomic:ptr<workgroup, u32, read_write> = var undef
+  %wg_atomic:ptr<workgroup, atomic<u32>, read_write> = var
+  %wg_nonatomic:ptr<workgroup, u32, read_write> = var
 }
 
 %f_atomic = func(%param:ptr<workgroup, atomic<u32>, read_write>):u32 {
@@ -3104,8 +3104,8 @@ TEST_F(SpirvReader_AtomicsTest, FunctionParam_MixedCalls) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg_atomic:ptr<workgroup, u32, read_write> = var undef
-  %wg_nonatomic:ptr<workgroup, u32, read_write> = var undef
+  %wg_atomic:ptr<workgroup, u32, read_write> = var
+  %wg_nonatomic:ptr<workgroup, u32, read_write> = var
 }
 
 %f_atomic = func(%param:ptr<workgroup, u32, read_write>):u32 {
@@ -3143,8 +3143,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg_atomic:ptr<workgroup, atomic<u32>, read_write> = var undef
-  %wg_nonatomic:ptr<workgroup, u32, read_write> = var undef
+  %wg_atomic:ptr<workgroup, atomic<u32>, read_write> = var
+  %wg_nonatomic:ptr<workgroup, u32, read_write> = var
 }
 
 %f_atomic = func(%param:ptr<workgroup, atomic<u32>, read_write>):u32 {
@@ -3223,7 +3223,7 @@ TEST_F(SpirvReader_AtomicsTest, ArrayLength) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -3240,7 +3240,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<atomic<u32>>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<atomic<u32>>, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -3280,7 +3280,7 @@ TEST_F(SpirvReader_AtomicsTest, RewriteLoad_SameAccessChain) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -3308,7 +3308,7 @@ __atomic_compare_exchange_result_u32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, array<atomic<u32>>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<atomic<u32>>, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -3360,7 +3360,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, S, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -3386,7 +3386,7 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, S_atomic, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -3447,7 +3447,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, S, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, S, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -3457,8 +3457,8 @@ $B1: {  # root
     %5:S = load %buffer
     %6:f32 = access %5, 0u
     %7:u32 = access %5, 1u
-    %local_a:ptr<function, f32, read_write> = var undef
-    %local_b:ptr<function, u32, read_write> = var undef
+    %local_a:ptr<function, f32, read_write> = var
+    %local_b:ptr<function, u32, read_write> = var
     store %local_a, %6
     store %local_b, %7
     ret
@@ -3478,7 +3478,7 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, S_atomic, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, S_atomic, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -3492,8 +3492,8 @@ $B1: {  # root
     %9:S = construct %6, %8
     %10:f32 = access %9, 0u
     %11:u32 = access %9, 1u
-    %local_a:ptr<function, f32, read_write> = var undef
-    %local_b:ptr<function, u32, read_write> = var undef
+    %local_a:ptr<function, f32, read_write> = var
+    %local_b:ptr<function, u32, read_write> = var
     store %local_a, %10
     store %local_b, %11
     ret
@@ -3532,7 +3532,7 @@ TEST_F(SpirvReader_AtomicsTest, LoadArrayOfAtomic) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<u32, 4>, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -3541,7 +3541,7 @@ $B1: {  # root
     %4:u32 = spirv.atomic_i_add %3, 1u, 0u, 1u
     %5:array<u32, 4> = load %buffer
     %6:u32 = access %5, 0u
-    %local:ptr<function, u32, read_write> = var undef
+    %local:ptr<function, u32, read_write> = var
     store %local, %6
     ret
   }
@@ -3550,7 +3550,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<atomic<u32>, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<atomic<u32>, 4>, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -3567,7 +3567,7 @@ $B1: {  # root
     %12:u32 = atomicLoad %11
     %13:array<u32, 4> = construct %6, %8, %10, %12
     %14:u32 = access %13, 0u
-    %local:ptr<function, u32, read_write> = var undef
+    %local:ptr<function, u32, read_write> = var
     store %local, %14
     ret
   }
@@ -3602,7 +3602,7 @@ TEST_F(SpirvReader_AtomicsTest, StoreArrayOfAtomic) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<u32, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<u32, 4>, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -3617,7 +3617,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<atomic<u32>, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<atomic<u32>, 4>, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -3683,7 +3683,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, array<S, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<S, 4>, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -3693,8 +3693,8 @@ $B1: {  # root
     %5:array<S, 4> = load %buffer
     %6:f32 = access %5, 2u, 0u
     %7:u32 = access %5, 2u, 1u
-    %local_a:ptr<function, f32, read_write> = var undef
-    %local_b:ptr<function, u32, read_write> = var undef
+    %local_a:ptr<function, f32, read_write> = var
+    %local_b:ptr<function, u32, read_write> = var
     store %local_a, %6
     store %local_b, %7
     ret
@@ -3714,7 +3714,7 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, array<S_atomic, 4>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<S_atomic, 4>, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -3748,8 +3748,8 @@ $B1: {  # root
     %29:array<S, 4> = construct %10, %16, %22, %28
     %30:f32 = access %29, 2u, 0u
     %31:u32 = access %29, 2u, 1u
-    %local_a:ptr<function, f32, read_write> = var undef
-    %local_b:ptr<function, u32, read_write> = var undef
+    %local_a:ptr<function, f32, read_write> = var
+    %local_b:ptr<function, u32, read_write> = var
     store %local_a, %30
     store %local_b, %31
     ret
@@ -3815,7 +3815,7 @@ Outer = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, Outer, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -3826,9 +3826,9 @@ $B1: {  # root
     %6:i32 = access %5, 0u
     %7:f32 = access %5, 1u, 0u
     %8:u32 = access %5, 1u, 1u
-    %local_a:ptr<function, i32, read_write> = var undef
-    %local_ba:ptr<function, f32, read_write> = var undef
-    %local_bb:ptr<function, u32, read_write> = var undef
+    %local_a:ptr<function, i32, read_write> = var
+    %local_ba:ptr<function, f32, read_write> = var
+    %local_bb:ptr<function, u32, read_write> = var
     store %local_a, %6
     store %local_ba, %7
     store %local_bb, %8
@@ -3859,7 +3859,7 @@ Outer_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer_atomic, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, Outer_atomic, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -3878,9 +3878,9 @@ $B1: {  # root
     %14:i32 = access %13, 0u
     %15:f32 = access %13, 1u, 0u
     %16:u32 = access %13, 1u, 1u
-    %local_a:ptr<function, i32, read_write> = var undef
-    %local_ba:ptr<function, f32, read_write> = var undef
-    %local_bb:ptr<function, u32, read_write> = var undef
+    %local_a:ptr<function, i32, read_write> = var
+    %local_ba:ptr<function, f32, read_write> = var
+    %local_bb:ptr<function, u32, read_write> = var
     store %local_a, %14
     store %local_ba, %15
     store %local_bb, %16
@@ -3959,7 +3959,7 @@ Outer = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, Outer, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -3970,9 +3970,9 @@ $B1: {  # root
     %6:f32 = access %5, 0u, 0u
     %7:u32 = access %5, 0u, 1u
     %8:NonAtomicInner = access %5, 1u
-    %local_a:ptr<function, f32, read_write> = var undef
-    %local_b:ptr<function, u32, read_write> = var undef
-    %local_second:ptr<function, NonAtomicInner, read_write> = var undef
+    %local_a:ptr<function, f32, read_write> = var
+    %local_b:ptr<function, u32, read_write> = var
+    %local_second:ptr<function, NonAtomicInner, read_write> = var
     store %local_a, %6
     store %local_b, %7
     store %local_second, %8
@@ -4008,7 +4008,7 @@ Outer_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer_atomic, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, Outer_atomic, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -4027,9 +4027,9 @@ $B1: {  # root
     %14:f32 = access %13, 0u, 0u
     %15:u32 = access %13, 0u, 1u
     %16:NonAtomicInner = access %13, 1u
-    %local_a:ptr<function, f32, read_write> = var undef
-    %local_b:ptr<function, u32, read_write> = var undef
-    %local_second:ptr<function, NonAtomicInner, read_write> = var undef
+    %local_a:ptr<function, f32, read_write> = var
+    %local_b:ptr<function, u32, read_write> = var
+    %local_second:ptr<function, NonAtomicInner, read_write> = var
     store %local_a, %14
     store %local_b, %15
     store %local_second, %16
@@ -4077,7 +4077,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, array<S, 2>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<S, 2>, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -4102,7 +4102,7 @@ S_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, array<S_atomic, 2>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<S_atomic, 2>, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -4170,7 +4170,7 @@ Outer = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, Outer, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -4205,7 +4205,7 @@ Outer_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer_atomic, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, Outer_atomic, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -4283,7 +4283,7 @@ Outer = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, Outer, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -4323,7 +4323,7 @@ Outer_atomic = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer_atomic, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, Outer_atomic, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64u, 1u, 1u) func():void {
@@ -4390,7 +4390,7 @@ Outer = struct @align(16) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, Outer, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -4420,7 +4420,7 @@ Outer_atomic = struct @align(16) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer_atomic, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, Outer_atomic, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -4483,7 +4483,7 @@ Outer = struct @align(16) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, Outer, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -4513,7 +4513,7 @@ Outer_atomic = struct @align(16) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, Outer_atomic, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, Outer_atomic, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {

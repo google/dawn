@@ -53,7 +53,7 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, SimdgroupMatrix_F16_8x8) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var
     ret
   }
 }
@@ -73,7 +73,7 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, SimdgroupMatrix_F32_8x8) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_left<f32, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_left<f32, 8, 8>, read_write> = var
     ret
   }
 }
@@ -93,7 +93,7 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, SimdgroupMatrix_Left8x2) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_left<f32, 8, 2>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_left<f32, 8, 2>, read_write> = var
     ret
   }
 }
@@ -117,7 +117,7 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, SimdgroupMatrix_Right2x8) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_right<f32, 2, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_right<f32, 2, 8>, read_write> = var
     ret
   }
 }
@@ -141,7 +141,7 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, SimdgroupMatrix_Result8x2) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<f32, 8, 2>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<f32, 8, 2>, read_write> = var
     ret
   }
 }
@@ -165,7 +165,7 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, SimdgroupMatrix_i8) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_left<i8, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_left<i8, 8, 8>, read_write> = var
     ret
   }
 }
@@ -201,7 +201,7 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, SimdgroupMatrix_FunctionParam) {
 }
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %v:ptr<function, subgroup_matrix_left<f32, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_left<f32, 8, 8>, read_write> = var
     %5:subgroup_matrix_left<f32, 8, 8> = load %v
     %6:void = call %f, %5
     ret
@@ -236,7 +236,7 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, SimdgroupMatrix_InvalidFunctionPara
 }
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %v:ptr<function, subgroup_matrix_left<i8, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_left<i8, 8, 8>, read_write> = var
     %5:subgroup_matrix_left<i8, 8, 8> = load %v
     %6:void = call %f, %5
     ret
@@ -340,7 +340,7 @@ S = struct @align(4) {
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, S, read_write> = var undef
+    %v:ptr<function, S, read_write> = var
     ret
   }
 }
@@ -369,7 +369,7 @@ S = struct @align(4) {
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, S, read_write> = var undef
+    %v:ptr<function, S, read_write> = var
     ret
   }
 }
@@ -399,7 +399,7 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, SimdgroupMatrix_Nested_F32_8x8) {
   $B1: {
     if true [t: $B2] {  # if_1
       $B2: {  # true
-        %v:ptr<function, subgroup_matrix_left<f32, 8, 8>, read_write> = var undef
+        %v:ptr<function, subgroup_matrix_left<f32, 8, 8>, read_write> = var
         exit_if  # if_1
       }
     }
@@ -428,7 +428,7 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, SimdgroupMatrix_Nested_F32_8x2) {
   $B1: {
     if true [t: $B2] {  # if_1
       $B2: {  # true
-        %v:ptr<function, subgroup_matrix_left<f32, 8, 2>, read_write> = var undef
+        %v:ptr<function, subgroup_matrix_left<f32, 8, 2>, read_write> = var
         exit_if  # if_1
       }
     }
@@ -457,9 +457,9 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, Tensors_F32_32x32x32) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %lhs:ptr<function, subgroup_matrix_left<f32, 32, 32>, read_write> = var undef
-    %rhs:ptr<function, subgroup_matrix_right<f32, 32, 32>, read_write> = var undef
-    %acc:ptr<function, subgroup_matrix_result<f32, 32, 32>, read_write> = var undef
+    %lhs:ptr<function, subgroup_matrix_left<f32, 32, 32>, read_write> = var
+    %rhs:ptr<function, subgroup_matrix_right<f32, 32, 32>, read_write> = var
+    %acc:ptr<function, subgroup_matrix_result<f32, 32, 32>, read_write> = var
     ret
   }
 }
@@ -481,9 +481,9 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, Tensors_F16_32x16x16) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %lhs:ptr<function, subgroup_matrix_left<f16, 16, 32>, read_write> = var undef
-    %rhs:ptr<function, subgroup_matrix_right<f16, 16, 16>, read_write> = var undef
-    %acc:ptr<function, subgroup_matrix_result<f16, 16, 32>, read_write> = var undef
+    %lhs:ptr<function, subgroup_matrix_left<f16, 16, 32>, read_write> = var
+    %rhs:ptr<function, subgroup_matrix_right<f16, 16, 16>, read_write> = var
+    %acc:ptr<function, subgroup_matrix_result<f16, 16, 32>, read_write> = var
     ret
   }
 }
@@ -503,7 +503,7 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, Tensors_Left8x8) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_left<f32, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_left<f32, 8, 8>, read_write> = var
     ret
   }
 }
@@ -527,7 +527,7 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, Tensors_Right8x8) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_right<f32, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_right<f32, 8, 8>, read_write> = var
     ret
   }
 }
@@ -551,7 +551,7 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, Tensors_Result8x8) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     ret
   }
 }
@@ -582,9 +582,9 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, Tensors_Multiply_16x16x16) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %lhs:ptr<function, subgroup_matrix_left<f16, 16, 16>, read_write> = var undef
-    %rhs:ptr<function, subgroup_matrix_right<f16, 16, 16>, read_write> = var undef
-    %acc:ptr<function, subgroup_matrix_result<f16, 16, 16>, read_write> = var undef
+    %lhs:ptr<function, subgroup_matrix_left<f16, 16, 16>, read_write> = var
+    %rhs:ptr<function, subgroup_matrix_right<f16, 16, 16>, read_write> = var
+    %acc:ptr<function, subgroup_matrix_result<f16, 16, 16>, read_write> = var
     %5:subgroup_matrix_left<f16, 16, 16> = load %lhs
     %6:subgroup_matrix_right<f16, 16, 16> = load %rhs
     %7:subgroup_matrix_result<f16, 16, 16> = load %acc
@@ -619,9 +619,9 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, MixedPrecisionRejected) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %lhs:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var undef
-    %rhs:ptr<function, subgroup_matrix_right<f16, 8, 8>, read_write> = var undef
-    %acc:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %lhs:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var
+    %rhs:ptr<function, subgroup_matrix_right<f16, 8, 8>, read_write> = var
+    %acc:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %5:subgroup_matrix_left<f16, 8, 8> = load %lhs
     %6:subgroup_matrix_right<f16, 8, 8> = load %rhs
     %7:subgroup_matrix_result<f32, 8, 8> = load %acc

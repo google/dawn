@@ -131,7 +131,7 @@ TEST_F(IR_ValidatorTest, Builtin_DuplicateOutput) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:3:38 error: var: duplicate instance of builtin 'sample_mask' on entry point output, must be unique per entry point i/o direction
-  %sm2:ptr<__out, u32, read_write> = var undef @builtin(sample_mask)
+  %sm2:ptr<__out, u32, read_write> = var @builtin(sample_mask)
                                      ^^^
 )")) << res.Failure();
 }
@@ -177,7 +177,7 @@ TEST_F(IR_ValidatorTest, Builtin_ClipDistance_Duplicate) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:7:48 error: var: duplicate instance of builtin 'clip_distances' on entry point output, must be unique per entry point i/o direction
-  %outs:ptr<__out, OutputStruct, read_write> = var undef
+  %outs:ptr<__out, OutputStruct, read_write> = var
                                                ^^^
 )")) << res.Failure();
 }
@@ -233,7 +233,7 @@ TEST_F(IR_ValidatorTest, Builtin_ClipDistance_Triple_WithProperty) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:8:48 error: var: too many instances of builtin 'clip_distances' on entry point output, only two allowed with 'kAllowClipDistancesOnF32ScalarAndVector' property enabled
-  %outs:ptr<__out, OutputStruct, read_write> = var undef
+  %outs:ptr<__out, OutputStruct, read_write> = var
                                                ^^^
 )")) << res.Failure();
 }

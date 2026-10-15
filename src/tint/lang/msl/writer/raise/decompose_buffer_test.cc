@@ -60,7 +60,7 @@ TEST_F(MslWriter_DecomposeBufferTest, BufferView_u32_ZeroOffset) {
 
     auto* src = R"(
 $B1: {  # root
-  %gv:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %gv:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -76,7 +76,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %gv:ptr<storage, array<u8>, read_write> = var undef @binding_point(0, 0)
+  %gv:ptr<storage, array<u8>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -112,7 +112,7 @@ TEST_F(MslWriter_DecomposeBufferTest, BufferArrayView_ArrayU32) {
 
     auto* src = R"(
 $B1: {  # root
-  %gv:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %gv:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:i32, %size:i32):void {
@@ -129,7 +129,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %gv:ptr<storage, array<u8>, read_write> = var undef @binding_point(0, 0)
+  %gv:ptr<storage, array<u8>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:i32, %size:i32):void {
@@ -167,7 +167,7 @@ TEST_F(MslWriter_DecomposeBufferTest, MultipleCallsFromVariable) {
 
     auto* src = R"(
 $B1: {  # root
-  %gv:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %gv:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -186,7 +186,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %gv:ptr<storage, array<u8>, read_write> = var undef @binding_point(0, 0)
+  %gv:ptr<storage, array<u8>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -245,8 +245,8 @@ TEST_F(MslWriter_DecomposeBufferTest, UnifyParameters) {
 
     auto* src = R"(
 $B1: {  # root
-  %large:ptr<storage, buffer<1024>, read_write> = var undef @binding_point(0, 0)
-  %small:ptr<workgroup, buffer<512>, read_write> = var undef
+  %large:ptr<storage, buffer<1024>, read_write> = var @binding_point(0, 0)
+  %small:ptr<workgroup, buffer<512>, read_write> = var
 }
 
 %baz = func(%baz_p1:ptr<storage, buffer, read_write>, %baz_p2:ptr<workgroup, buffer, read_write>):void {
@@ -278,8 +278,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %large:ptr<storage, array<u8, 1024>, read_write> = var undef @binding_point(0, 0)
-  %small:ptr<workgroup, array<u8, 512>, read_write> = var undef
+  %large:ptr<storage, array<u8, 1024>, read_write> = var @binding_point(0, 0)
+  %small:ptr<workgroup, array<u8, 512>, read_write> = var
 }
 
 %baz = func(%baz_p1:ptr<storage, array<u8>, read_write>, %baz_p2:ptr<workgroup, array<u8>, read_write>):void {
@@ -358,8 +358,8 @@ TEST_F(MslWriter_DecomposeBufferTest, UnifyParameters_Lets) {
 
     auto* src = R"(
 $B1: {  # root
-  %large:ptr<storage, buffer<1024>, read_write> = var undef @binding_point(0, 0)
-  %small:ptr<workgroup, buffer<512>, read_write> = var undef
+  %large:ptr<storage, buffer<1024>, read_write> = var @binding_point(0, 0)
+  %small:ptr<workgroup, buffer<512>, read_write> = var
 }
 
 %baz = func(%baz_p1:ptr<storage, buffer, read_write>, %baz_p2:ptr<workgroup, buffer, read_write>):void {
@@ -394,8 +394,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %large:ptr<storage, array<u8, 1024>, read_write> = var undef @binding_point(0, 0)
-  %small:ptr<workgroup, array<u8, 512>, read_write> = var undef
+  %large:ptr<storage, array<u8, 1024>, read_write> = var @binding_point(0, 0)
+  %small:ptr<workgroup, array<u8, 512>, read_write> = var
 }
 
 %baz = func(%baz_p1:ptr<storage, array<u8>, read_write>, %baz_p2:ptr<workgroup, array<u8>, read_write>):void {
@@ -521,8 +521,8 @@ TEST_F(MslWriter_DecomposeBufferTest, UnifyParameters_WithUses) {
 
     auto* src = R"(
 $B1: {  # root
-  %large:ptr<storage, buffer<1024>, read_write> = var undef @binding_point(0, 0)
-  %small:ptr<workgroup, buffer<512>, read_write> = var undef
+  %large:ptr<storage, buffer<1024>, read_write> = var @binding_point(0, 0)
+  %small:ptr<workgroup, buffer<512>, read_write> = var
 }
 
 %baz = func(%baz_p1:ptr<storage, array<u32, 64>, read_write>, %baz_p2:ptr<workgroup, array<u32>, read_write>):void {
@@ -557,8 +557,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %large:ptr<storage, array<u8, 1024>, read_write> = var undef @binding_point(0, 0)
-  %small:ptr<workgroup, array<u8, 512>, read_write> = var undef
+  %large:ptr<storage, array<u8, 1024>, read_write> = var @binding_point(0, 0)
+  %small:ptr<workgroup, array<u8, 512>, read_write> = var
 }
 
 %baz = func(%baz_p1:ptr<storage, array<u32, 64>, read_write>, %baz_p2:ptr<workgroup, array<u32>, read_write>):void {
@@ -631,9 +631,9 @@ TEST_F(MslWriter_DecomposeBufferTest, FunctionCall_MultiCallSite_SameCaller) {
 
     auto* src = R"(
 $B1: {  # root
-  %gv1:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
-  %gv2:ptr<storage, buffer<128>, read_write> = var undef @binding_point(0, 0)
-  %gv3:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+  %gv1:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
+  %gv2:ptr<storage, buffer<128>, read_write> = var @binding_point(0, 0)
+  %gv3:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%param:ptr<storage, array<u32>, read_write>):void {
@@ -658,9 +658,9 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %gv1:ptr<storage, array<u8>, read_write> = var undef @binding_point(0, 0)
-  %gv2:ptr<storage, array<u8, 128>, read_write> = var undef @binding_point(0, 0)
-  %gv3:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+  %gv1:ptr<storage, array<u8>, read_write> = var @binding_point(0, 0)
+  %gv2:ptr<storage, array<u8, 128>, read_write> = var @binding_point(0, 0)
+  %gv3:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%param:ptr<storage, array<u32>, read_write>):void {
@@ -723,9 +723,9 @@ TEST_F(MslWriter_DecomposeBufferTest, FunctionCall_MultiCallSite_SameCaller_With
 
     auto* src = R"(
 $B1: {  # root
-  %gv1:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
-  %gv2:ptr<storage, buffer<128>, read_write> = var undef @binding_point(0, 0)
-  %gv3:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+  %gv1:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
+  %gv2:ptr<storage, buffer<128>, read_write> = var @binding_point(0, 0)
+  %gv3:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%param:ptr<storage, array<u32>, read_write>):void {
@@ -752,9 +752,9 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %gv1:ptr<storage, array<u8>, read_write> = var undef @binding_point(0, 0)
-  %gv2:ptr<storage, array<u8, 128>, read_write> = var undef @binding_point(0, 0)
-  %gv3:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+  %gv1:ptr<storage, array<u8>, read_write> = var @binding_point(0, 0)
+  %gv2:ptr<storage, array<u8, 128>, read_write> = var @binding_point(0, 0)
+  %gv3:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%param:ptr<storage, array<u32>, read_write>):void {

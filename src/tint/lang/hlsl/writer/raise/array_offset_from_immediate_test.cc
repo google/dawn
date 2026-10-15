@@ -100,8 +100,8 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %buffer:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -135,7 +135,7 @@ TEST_F(IR_ArrayOffsetFromImmediateTest, NoModify_EmptyBindpointToOffsetIndex) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %buffer:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -153,8 +153,8 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %buffer:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -197,7 +197,7 @@ TEST_F(IR_ArrayOffsetFromImmediateTest, NoModify_NoMatchingBindpoint) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %buffer:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -215,8 +215,8 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %buffer:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -260,12 +260,12 @@ TEST_F(IR_ArrayOffsetFromImmediateTest, NoModify_GetDimensions) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %buffer:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %width:ptr<function, u32, read_write> = var undef
+    %width:ptr<function, u32, read_write> = var
     %4:void = %buffer.GetDimensions %width
     ret
   }
@@ -279,13 +279,13 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %buffer:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %width:ptr<function, u32, read_write> = var undef
+    %width:ptr<function, u32, read_write> = var
     %5:void = %buffer.GetDimensions %width
     ret
   }
@@ -345,8 +345,8 @@ TEST_F(IR_ArrayOffsetFromImmediateTest, AllLoadsAndStoresU32) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:hlsl.byte_address_buffer<read> = var undef @binding_point(5, 6)
-  %buffer_1:hlsl.byte_address_buffer<read_write> = var undef @binding_point(7, 8)  # %buffer_1: 'buffer'
+  %buffer:hlsl.byte_address_buffer<read> = var @binding_point(5, 6)
+  %buffer_1:hlsl.byte_address_buffer<read_write> = var @binding_point(7, 8)  # %buffer_1: 'buffer'
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -371,9 +371,9 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %buffer:hlsl.byte_address_buffer<read> = var undef @binding_point(5, 6)
-  %buffer_1:hlsl.byte_address_buffer<read_write> = var undef @binding_point(7, 8)  # %buffer_1: 'buffer'
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:hlsl.byte_address_buffer<read> = var @binding_point(5, 6)
+  %buffer_1:hlsl.byte_address_buffer<read_write> = var @binding_point(7, 8)  # %buffer_1: 'buffer'
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -517,9 +517,9 @@ TEST_F(IR_ArrayOffsetFromImmediateTest, MultipleBuffersWithDifferentVec4Indices)
 
     auto* src = R"(
 $B1: {  # root
-  %buffer0:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
-  %buffer1:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 1)
-  %buffer2:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 2)
+  %buffer0:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
+  %buffer1:hlsl.byte_address_buffer<read> = var @binding_point(0, 1)
+  %buffer2:hlsl.byte_address_buffer<read> = var @binding_point(0, 2)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -539,10 +539,10 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %buffer0:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
-  %buffer1:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 1)
-  %buffer2:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 2)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer0:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
+  %buffer1:hlsl.byte_address_buffer<read> = var @binding_point(0, 1)
+  %buffer2:hlsl.byte_address_buffer<read> = var @binding_point(0, 2)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -604,7 +604,7 @@ TEST_F(IR_ArrayOffsetFromImmediateTest, SubgroupMatrixLoad) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %buffer:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -622,8 +622,8 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %buffer:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -674,7 +674,7 @@ TEST_F(IR_ArrayOffsetFromImmediateTest, SubgroupMatrixStore) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %buffer:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
@@ -692,8 +692,8 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %buffer:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {

@@ -213,7 +213,7 @@ TEST_F(SpirvParserTest, FragmentShader_DepthReplacing) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<__out, f32, read_write> = var undef @builtin(frag_depth)
+  %1:ptr<__out, f32, read_write> = var @builtin(frag_depth)
 }
 
 %main = @fragment func():void {
@@ -251,7 +251,7 @@ tint_symbol_1 = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<__out, tint_symbol_1, read_write> = var undef
+  %1:ptr<__out, tint_symbol_1, read_write> = var
 }
 
 %main = @vertex func():void {
@@ -298,7 +298,7 @@ tint_symbol_1 = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<__out, tint_symbol_1, read_write> = var undef
+  %1:ptr<__out, tint_symbol_1, read_write> = var
 }
 
 %main = @vertex func():void {
@@ -332,7 +332,7 @@ TEST_F(SpirvParserTest, VertexShader_PositionUnused) {
 )",
               R"(
 $B1: {  # root
-  %position:ptr<__out, vec4<f32>, read_write> = var undef @builtin(position)
+  %position:ptr<__out, vec4<f32>, read_write> = var @builtin(position)
 }
 
 %main = @vertex func():void {
@@ -370,7 +370,7 @@ TEST_F(SpirvParserTest, VertexShader_PositionUsed) {
 )",
               R"(
 $B1: {  # root
-  %position:ptr<__out, vec4<f32>, read_write> = var undef @builtin(position)
+  %position:ptr<__out, vec4<f32>, read_write> = var @builtin(position)
 }
 
 %main = @vertex func():void {
@@ -419,7 +419,7 @@ TEST_F(SpirvParserTest, VertexShader_PositionUsed_Transitive) {
 )",
               R"(
 $B1: {  # root
-  %position:ptr<__out, vec4<f32>, read_write> = var undef @builtin(position)
+  %position:ptr<__out, vec4<f32>, read_write> = var @builtin(position)
 }
 
 %2 = func():void {

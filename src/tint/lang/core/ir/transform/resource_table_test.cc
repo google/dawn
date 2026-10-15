@@ -91,7 +91,7 @@ TEST_F(IR_ResourceTableTest, NoResources) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(3, 2)
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(3, 2)
 }
 
 %foo = func():void {
@@ -172,10 +172,10 @@ tint_resource_table_metadata_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<handle, resource_table<texture_1d<f32>>, read> = var undef @binding_point(0, 1)
-  %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
-  %3:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var undef @binding_point(0, 1)
-  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, resource_table<texture_1d<f32>>, read> = var @binding_point(0, 1)
+  %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var @binding_point(0, 1)
+  %3:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var @binding_point(0, 1)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -246,10 +246,10 @@ tint_resource_table_metadata_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<handle, resource_table<texture_1d<f32>>, read> = var undef @binding_point(0, 1)
-  %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
-  %3:ptr<handle, resource_table<texture_2d<f32>>, read> = var undef @binding_point(0, 1)
-  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, resource_table<texture_1d<f32>>, read> = var @binding_point(0, 1)
+  %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var @binding_point(0, 1)
+  %3:ptr<handle, resource_table<texture_2d<f32>>, read> = var @binding_point(0, 1)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -322,10 +322,10 @@ tint_resource_table_metadata_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<handle, resource_table<texture_1d<f32>>, read> = var undef @binding_point(0, 1)
-  %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
-  %3:ptr<handle, resource_table<texture_2d<f32>>, read> = var undef @binding_point(0, 1)
-  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, resource_table<texture_1d<f32>>, read> = var @binding_point(0, 1)
+  %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var @binding_point(0, 1)
+  %3:ptr<handle, resource_table<texture_2d<f32>>, read> = var @binding_point(0, 1)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -399,10 +399,10 @@ tint_resource_table_metadata_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<handle, resource_table<texture_1d<f32>>, read> = var undef @binding_point(0, 1)
-  %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
-  %3:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var undef @binding_point(0, 1)
-  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, resource_table<texture_1d<f32>>, read> = var @binding_point(0, 1)
+  %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var @binding_point(0, 1)
+  %3:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var @binding_point(0, 1)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -493,11 +493,11 @@ tint_resource_table_metadata_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<handle, resource_table<texture_2d<f32>>, read> = var undef @binding_point(0, 1)
-  %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
-  %3:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var undef @binding_point(0, 1)
-  %4:ptr<handle, resource_table<sampler>, read> = var undef @binding_point(0, 1)
-  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, resource_table<texture_2d<f32>>, read> = var @binding_point(0, 1)
+  %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var @binding_point(0, 1)
+  %3:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var @binding_point(0, 1)
+  %4:ptr<handle, resource_table<sampler>, read> = var @binding_point(0, 1)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -646,7 +646,7 @@ TEST_F(IR_ResourceTableTest, GetResource_ResourceTexture_VarSampler) {
 
     auto* src = R"(
 $B1: {  # root
-  %sampler:ptr<handle, sampler, read> = var undef @binding_point(3, 2)
+  %sampler:ptr<handle, sampler, read> = var @binding_point(3, 2)
 }
 
 %foo = func():void {
@@ -666,12 +666,12 @@ tint_resource_table_metadata_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %sampler:ptr<handle, sampler, read> = var undef @binding_point(3, 2)
-  %2:ptr<handle, resource_table<texture_2d<f32>>, read> = var undef @binding_point(0, 1)
-  %3:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
-  %4:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var undef @binding_point(0, 1)
-  %5:ptr<handle, resource_table<sampler>, read> = var undef @binding_point(0, 1)
-  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
+  %sampler:ptr<handle, sampler, read> = var @binding_point(3, 2)
+  %2:ptr<handle, resource_table<texture_2d<f32>>, read> = var @binding_point(0, 1)
+  %3:ptr<handle, resource_table<texture_3d<i32>>, read> = var @binding_point(0, 1)
+  %4:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var @binding_point(0, 1)
+  %5:ptr<handle, resource_table<sampler>, read> = var @binding_point(0, 1)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -776,7 +776,7 @@ TEST_F(IR_ResourceTableTest, GetResource_ResourceTexture_VarSamplerNonFiltering)
 
     auto* src = R"(
 $B1: {  # root
-  %sampler:ptr<handle, sampler, read> = var undef @binding_point(3, 2)
+  %sampler:ptr<handle, sampler, read> = var @binding_point(3, 2)
 }
 
 %foo = func():void {
@@ -796,12 +796,12 @@ tint_resource_table_metadata_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %sampler:ptr<handle, sampler, read> = var undef @binding_point(3, 2)
-  %2:ptr<handle, resource_table<texture_2d<f32>>, read> = var undef @binding_point(0, 1)
-  %3:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
-  %4:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var undef @binding_point(0, 1)
-  %5:ptr<handle, resource_table<sampler>, read> = var undef @binding_point(0, 1)
-  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
+  %sampler:ptr<handle, sampler, read> = var @binding_point(3, 2)
+  %2:ptr<handle, resource_table<texture_2d<f32>>, read> = var @binding_point(0, 1)
+  %3:ptr<handle, resource_table<texture_3d<i32>>, read> = var @binding_point(0, 1)
+  %4:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var @binding_point(0, 1)
+  %5:ptr<handle, resource_table<sampler>, read> = var @binding_point(0, 1)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -898,7 +898,7 @@ TEST_F(IR_ResourceTableTest, GetResource_VarTexture_ResourceSampler) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(3, 2)
+  %texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(3, 2)
 }
 
 %foo = func():void {
@@ -918,12 +918,12 @@ tint_resource_table_metadata_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %texture:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(3, 2)
-  %2:ptr<handle, resource_table<texture_2d<f32>>, read> = var undef @binding_point(0, 1)
-  %3:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
-  %4:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var undef @binding_point(0, 1)
-  %5:ptr<handle, resource_table<sampler>, read> = var undef @binding_point(0, 1)
-  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(3, 2)
+  %2:ptr<handle, resource_table<texture_2d<f32>>, read> = var @binding_point(0, 1)
+  %3:ptr<handle, resource_table<texture_3d<i32>>, read> = var @binding_point(0, 1)
+  %4:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var @binding_point(0, 1)
+  %5:ptr<handle, resource_table<sampler>, read> = var @binding_point(0, 1)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -1020,7 +1020,7 @@ TEST_F(IR_ResourceTableTest, GetResource_VarTexture_ResourceSampler_unfilterable
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(3, 2)
+  %texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(3, 2)
 }
 
 %foo = func():void {
@@ -1040,12 +1040,12 @@ tint_resource_table_metadata_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %texture:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(3, 2)
-  %2:ptr<handle, resource_table<texture_2d<f32>>, read> = var undef @binding_point(0, 1)
-  %3:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
-  %4:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var undef @binding_point(0, 1)
-  %5:ptr<handle, resource_table<sampler>, read> = var undef @binding_point(0, 1)
-  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(3, 2)
+  %2:ptr<handle, resource_table<texture_2d<f32>>, read> = var @binding_point(0, 1)
+  %3:ptr<handle, resource_table<texture_3d<i32>>, read> = var @binding_point(0, 1)
+  %4:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var @binding_point(0, 1)
+  %5:ptr<handle, resource_table<sampler>, read> = var @binding_point(0, 1)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -1170,10 +1170,10 @@ tint_resource_table_metadata_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<handle, resource_table<texture_1d<f32>>, read> = var undef @binding_point(0, 1)
-  %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
-  %3:ptr<handle, resource_table<texture_2d_array<f32>>, read> = var undef @binding_point(0, 1)
-  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, resource_table<texture_1d<f32>>, read> = var @binding_point(0, 1)
+  %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var @binding_point(0, 1)
+  %3:ptr<handle, resource_table<texture_2d_array<f32>>, read> = var @binding_point(0, 1)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -1309,10 +1309,10 @@ tint_resource_table_metadata_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<handle, resource_table<texture_1d<f32>>, read> = var undef @binding_point(0, 1)
-  %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
-  %3:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var undef @binding_point(0, 1)
-  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, resource_table<texture_1d<f32>>, read> = var @binding_point(0, 1)
+  %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var @binding_point(0, 1)
+  %3:ptr<handle, resource_table<texture_2d_array<u32>>, read> = var @binding_point(0, 1)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -1431,10 +1431,10 @@ tint_resource_table_metadata_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<handle, resource_table<texture_1d<f32>>, read> = var undef @binding_point(0, 1)
-  %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var undef @binding_point(0, 1)
-  %3:ptr<handle, resource_table<texture_2d<f32>>, read> = var undef @binding_point(0, 1)
-  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, resource_table<texture_1d<f32>>, read> = var @binding_point(0, 1)
+  %2:ptr<handle, resource_table<texture_3d<i32>>, read> = var @binding_point(0, 1)
+  %3:ptr<handle, resource_table<texture_2d<f32>>, read> = var @binding_point(0, 1)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -1490,8 +1490,8 @@ tint_resource_table_metadata_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<handle, resource_table<sampler>, read> = var undef @binding_point(0, 1)
-  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, resource_table<sampler>, read> = var @binding_point(0, 1)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -1560,7 +1560,7 @@ TEST_F(IR_ResourceTableTest, GetResource_GetSamplerIndexFromMetadata) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(3, 2)
+  %texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(3, 2)
 }
 
 %foo = func():void {
@@ -1580,9 +1580,9 @@ tint_resource_table_metadata_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %texture:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(3, 2)
-  %2:ptr<handle, resource_table<sampler>, read> = var undef @binding_point(0, 1)
-  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(3, 2)
+  %2:ptr<handle, resource_table<sampler>, read> = var @binding_point(0, 1)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -1678,7 +1678,7 @@ TEST_F(IR_ResourceTableTest, GetResource_ResourceTexture_VarComparisonSampler) {
 
     auto* src = R"(
 $B1: {  # root
-  %comparison_sampler:ptr<handle, sampler_comparison, read> = var undef @binding_point(3, 2)
+  %comparison_sampler:ptr<handle, sampler_comparison, read> = var @binding_point(3, 2)
 }
 
 %foo = func():void {
@@ -1698,11 +1698,11 @@ tint_resource_table_metadata_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %comparison_sampler:ptr<handle, sampler_comparison, read> = var undef @binding_point(3, 2)
-  %2:ptr<handle, resource_table<texture_depth_2d>, read> = var undef @binding_point(0, 1)
-  %3:ptr<handle, resource_table<sampler>, read> = var undef @binding_point(0, 1)
-  %4:ptr<handle, resource_table<sampler_comparison>, read> = var undef @binding_point(0, 1)
-  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
+  %comparison_sampler:ptr<handle, sampler_comparison, read> = var @binding_point(3, 2)
+  %2:ptr<handle, resource_table<texture_depth_2d>, read> = var @binding_point(0, 1)
+  %3:ptr<handle, resource_table<sampler>, read> = var @binding_point(0, 1)
+  %4:ptr<handle, resource_table<sampler_comparison>, read> = var @binding_point(0, 1)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -1798,10 +1798,10 @@ tint_resource_table_metadata_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<handle, resource_table<texture_depth_2d>, read> = var undef @binding_point(0, 1)
-  %2:ptr<handle, resource_table<sampler>, read> = var undef @binding_point(0, 1)
-  %3:ptr<handle, resource_table<sampler_comparison>, read> = var undef @binding_point(0, 1)
-  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, resource_table<texture_depth_2d>, read> = var @binding_point(0, 1)
+  %2:ptr<handle, resource_table<sampler>, read> = var @binding_point(0, 1)
+  %3:ptr<handle, resource_table<sampler_comparison>, read> = var @binding_point(0, 1)
+  %tint_resource_table_metadata:ptr<storage, tint_resource_table_metadata_struct, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {

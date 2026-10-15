@@ -752,7 +752,7 @@ TEST_F(SpirvParserTest, Bug42252062) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, i32, read_write> = var undef
+    %2:ptr<function, i32, read_write> = var
     store %2, 200i
     ret
   }

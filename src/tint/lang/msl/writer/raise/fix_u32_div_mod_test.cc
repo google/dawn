@@ -121,7 +121,7 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = func(%lhs:u32, %rhs:u32):u32 {
@@ -168,7 +168,7 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = func(%lhs:u32, %rhs:u32):u32 {
@@ -215,7 +215,7 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = func(%lhs:vec4<u32>, %rhs:vec4<u32>):vec4<u32> {

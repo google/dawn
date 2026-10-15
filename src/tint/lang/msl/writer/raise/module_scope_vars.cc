@@ -229,7 +229,9 @@ struct State {
                     case core::AddressSpace::kPrivate: {
                         // Private variables become function-scope variables.
                         auto* local_var = b.Var(ptr);
-                        local_var->SetInitializer(var->Initializer());
+                        if (auto* init = var->Initializer()) {
+                            local_var->SetInitializer(init);
+                        }
                         decl = local_var->Result();
                         break;
                     }
