@@ -68,6 +68,7 @@
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
 #include "src/tint/lang/core/ir/traverse.h"
+#include "src/tint/lang/core/ir/undef.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/ir/user_call.h"
@@ -746,15 +747,16 @@ class Printer : public tint::TextGenerator {
         EmitType(out, ptr->UnwrapPtr());
         out << " " << NameOf(v->Result());
 
-        if (v->Initializer()) {
-            out << " = ";
-            EmitValue(out, v->Initializer());
-        } else if (space == core::AddressSpace::kPrivate ||
-                   space == core::AddressSpace::kFunction) {
-            if (!ptr->StoreType()->Is<type::CooperativeTensor>()) {
+        auto* init = v->Initializer();
+        if (!init) {
+            // No initializer means implicit zero-initialization.
+            if (space == core::AddressSpace::kPrivate || space == core::AddressSpace::kFunction) {
                 out << " = ";
                 EmitZeroValue(out, ptr->StoreType());
             }
+        } else if (!init->Is<core::ir::Undef>()) {
+            out << " = ";
+            EmitValue(out, init);
         }
         out << ";";
     }

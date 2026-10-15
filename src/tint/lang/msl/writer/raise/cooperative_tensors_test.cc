@@ -72,11 +72,11 @@ TEST_F(MslWriter_CooperativeTensorsTest, Construct_ZeroValue) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<32, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<32, 32, 32, f16, f16>, read_write> = var undef
     %3:void = msl.fill_cooperative_tensor %2, 0.0h
-    %4:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
+    %4:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
     %5:void = msl.fill_cooperative_tensor %4, 0.0f
-    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, u8, u8>, read_write> = var
+    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, u8, u8>, read_write> = var undef
     %7:void = msl.fill_cooperative_tensor %6, 0u8
     ret
   }
@@ -112,11 +112,11 @@ TEST_F(MslWriter_CooperativeTensorsTest, Construct_WithValue) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<32, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<32, 32, 32, f16, f16>, read_write> = var undef
     %3:void = msl.fill_cooperative_tensor %2, 1.0h
-    %4:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
+    %4:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
     %5:void = msl.fill_cooperative_tensor %4, 2.0f
-    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, u8, u8>, read_write> = var
+    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, u8, u8>, read_write> = var undef
     %7:void = msl.fill_cooperative_tensor %6, 3u8
     ret
   }
@@ -148,8 +148,8 @@ TEST_F(MslWriter_CooperativeTensorsTest, Construct_Array_ZeroValue) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write>, 2> = construct %2, %3
     %5:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = access %4, 0u
     %6:void = msl.fill_cooperative_tensor %5, 0.0f
@@ -189,13 +189,13 @@ TEST_F(MslWriter_CooperativeTensorsTest, Construct_Array_WithValues) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
     %3:void = msl.fill_cooperative_tensor %2, 1.0f
-    %4:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
+    %4:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
     %5:void = msl.fill_cooperative_tensor %4, 2.0f
-    %6:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
+    %6:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
     %7:void = msl.copy_cooperative_tensor %6, %4
-    %8:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
+    %8:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
     %9:void = msl.copy_cooperative_tensor %8, %4
     %10:array<ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write>, 3> = construct %2, %6, %8
     ret
@@ -228,14 +228,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, Construct_ArrayOfArray_ZeroValue) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write>, 2> = construct %2, %3
-    %5:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
-    %6:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
+    %5:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
+    %6:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
     %7:array<ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write>, 2> = construct %5, %6
-    %8:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
-    %9:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
+    %8:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
+    %9:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
     %10:array<ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write>, 2> = construct %8, %9
     %11:array<array<ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write>, 2>, 3> = construct %4, %7, %10
     %12:array<ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write>, 2> = access %11, 0u
@@ -288,22 +288,22 @@ TEST_F(MslWriter_CooperativeTensorsTest, Construct_ArrayOfArray_WithValues) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write>, 2> = construct %2, %3
     %5:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = access %4, 0u
     %6:void = msl.fill_cooperative_tensor %5, 0.0f
     %7:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = access %4, 1u
     %8:void = msl.fill_cooperative_tensor %7, 0.0f
-    %9:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
-    %10:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
+    %9:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
+    %10:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
     %11:array<ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write>, 2> = construct %9, %10
     %12:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = access %11, 0u
     %13:void = msl.fill_cooperative_tensor %12, 0.0f
     %14:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = access %11, 1u
     %15:void = msl.fill_cooperative_tensor %14, 0.0f
-    %16:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
-    %17:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
+    %16:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
+    %17:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
     %18:array<ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write>, 2> = construct %16, %17
     %19:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = access %18, 0u
     %20:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = access %11, 0u
@@ -311,8 +311,8 @@ TEST_F(MslWriter_CooperativeTensorsTest, Construct_ArrayOfArray_WithValues) {
     %22:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = access %18, 1u
     %23:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = access %11, 1u
     %24:void = msl.copy_cooperative_tensor %22, %23
-    %25:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
-    %26:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var
+    %25:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
+    %26:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = var undef
     %27:array<ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write>, 2> = construct %25, %26
     %28:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = access %27, 0u
     %29:ptr<function, msl.cooperative_tensor_result<32, 16, 32, f32, f32>, read_write> = access %11, 0u
@@ -355,11 +355,11 @@ TEST_F(MslWriter_CooperativeTensorsTest, VarWithNoInitializer) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %lhs:ptr<function, msl.cooperative_tensor_left<32, 32, 32, f16, f16>, read_write> = var
+    %lhs:ptr<function, msl.cooperative_tensor_left<32, 32, 32, f16, f16>, read_write> = var undef
     %3:void = msl.fill_cooperative_tensor %lhs, 0.0h
-    %rhs:ptr<function, msl.cooperative_tensor_right<32, 16, 32, f32, f32>, read_write> = var
+    %rhs:ptr<function, msl.cooperative_tensor_right<32, 16, 32, f32, f32>, read_write> = var undef
     %5:void = msl.fill_cooperative_tensor %rhs, 0.0f
-    %acc:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:void = msl.fill_cooperative_tensor %acc, 0.0h
     ret
   }
@@ -391,8 +391,8 @@ TEST_F(MslWriter_CooperativeTensorsTest, VarWithNoInitializer_Array) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
     %acc:ptr<function, array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, read_write> = var %4
     %6:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc, 0u
@@ -432,14 +432,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, VarWithNoInitializer_ArrayOfArray) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
-    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %5, %6
-    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %10:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %8, %9
     %11:array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3> = construct %4, %7, %10
     %acc:ptr<function, array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3>, read_write> = var %11
@@ -495,7 +495,7 @@ TEST_F(MslWriter_CooperativeTensorsTest, VarWithSingleUseInitializer) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %acc:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %3:void = msl.fill_cooperative_tensor %acc, 0.0h
     ret
   }
@@ -528,8 +528,8 @@ TEST_F(MslWriter_CooperativeTensorsTest, VarWithSingleUseInitializer_Array) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
     %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %4, 0u
     %6:void = msl.fill_cooperative_tensor %5, 0.0h
@@ -568,14 +568,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, VarWithSingleUseInitializer_ArrayOfArra
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
-    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %5, %6
-    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %10:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %8, %9
     %11:array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3> = construct %4, %7, %10
     %12:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = access %11, 0u
@@ -628,11 +628,11 @@ TEST_F(MslWriter_CooperativeTensorsTest, VarWithMultipleUseInitializer) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %3:void = msl.fill_cooperative_tensor %2, 0.0h
-    %acc1:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc1:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %5:void = msl.copy_cooperative_tensor %acc1, %2
-    %acc2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:void = msl.copy_cooperative_tensor %acc2, %2
     ret
   }
@@ -668,14 +668,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, VarWithMultipleUseInitializer_Array) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
     %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %4, 0u
     %6:void = msl.fill_cooperative_tensor %5, 0.0h
     %7:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %4, 1u
     %8:void = msl.fill_cooperative_tensor %7, 0.0h
-    %acc1:ptr<function, array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, read_write> = var
+    %acc1:ptr<function, array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, read_write> = var undef
     %10:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc1, 0u
     %11:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %4, 0u
     %12:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %10
@@ -684,7 +684,7 @@ TEST_F(MslWriter_CooperativeTensorsTest, VarWithMultipleUseInitializer_Array) {
     %15:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %4, 1u
     %16:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %14
     %17:void = msl.copy_cooperative_tensor %16, %15
-    %acc2:ptr<function, array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, read_write> = var
+    %acc2:ptr<function, array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, read_write> = var undef
     %19:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc2, 0u
     %20:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %4, 0u
     %21:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %19
@@ -728,14 +728,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, VarWithMultipleUseInitializer_ArrayOfAr
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
-    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %5, %6
-    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %10:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %8, %9
     %11:array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3> = construct %4, %7, %10
     %12:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = access %11, 0u
@@ -753,7 +753,7 @@ TEST_F(MslWriter_CooperativeTensorsTest, VarWithMultipleUseInitializer_ArrayOfAr
     %24:void = msl.fill_cooperative_tensor %23, 0.0h
     %25:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %22, 1u
     %26:void = msl.fill_cooperative_tensor %25, 0.0h
-    %acc1:ptr<function, array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3>, read_write> = var
+    %acc1:ptr<function, array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3>, read_write> = var undef
     %28:ptr<function, array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, read_write> = access %acc1, 0u
     %29:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = access %11, 0u
     %30:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %28, 0u
@@ -784,7 +784,7 @@ TEST_F(MslWriter_CooperativeTensorsTest, VarWithMultipleUseInitializer_ArrayOfAr
     %55:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %49, 1u
     %56:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %54
     %57:void = msl.copy_cooperative_tensor %56, %55
-    %acc2:ptr<function, array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3>, read_write> = var
+    %acc2:ptr<function, array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3>, read_write> = var undef
     %59:ptr<function, array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, read_write> = access %acc2, 0u
     %60:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = access %11, 0u
     %61:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %59, 0u
@@ -846,7 +846,7 @@ TEST_F(MslWriter_CooperativeTensorsTest, LetWithSingleUseInitializer) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %acc:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %3:void = msl.fill_cooperative_tensor %acc, 0.0h
     ret
   }
@@ -879,8 +879,8 @@ TEST_F(MslWriter_CooperativeTensorsTest, LetWithSingleUseInitializer_Array) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %acc:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
     %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %acc, 0u
     %6:void = msl.fill_cooperative_tensor %5, 0.0h
@@ -918,14 +918,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, LetWithSingleUseInitializer_ArrayOfArra
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
-    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %5, %6
-    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %10:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %8, %9
     %acc:array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3> = construct %4, %7, %10
     %12:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = access %acc, 0u
@@ -977,11 +977,11 @@ TEST_F(MslWriter_CooperativeTensorsTest, LetWithMultipleUseInitializer) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %3:void = msl.fill_cooperative_tensor %2, 0.0h
-    %acc1:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc1:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %5:void = msl.copy_cooperative_tensor %acc1, %2
-    %acc2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:void = msl.copy_cooperative_tensor %acc2, %2
     ret
   }
@@ -1017,15 +1017,15 @@ TEST_F(MslWriter_CooperativeTensorsTest, LetWithMultipleUseInitializer_Array) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
     %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %4, 0u
     %6:void = msl.fill_cooperative_tensor %5, 0.0h
     %7:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %4, 1u
     %8:void = msl.fill_cooperative_tensor %7, 0.0h
-    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %10:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %10:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %acc1:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %9, %10
     %12:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %acc1, 0u
     %13:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %4, 0u
@@ -1033,8 +1033,8 @@ TEST_F(MslWriter_CooperativeTensorsTest, LetWithMultipleUseInitializer_Array) {
     %15:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %acc1, 1u
     %16:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %4, 1u
     %17:void = msl.copy_cooperative_tensor %15, %16
-    %18:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %19:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %18:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %19:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %acc2:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %18, %19
     %21:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %acc2, 0u
     %22:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %4, 0u
@@ -1077,14 +1077,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, LetWithMultipleUseInitializer_ArrayOfAr
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
-    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %5, %6
-    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %10:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %8, %9
     %11:array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3> = construct %4, %7, %10
     %12:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = access %11, 0u
@@ -1102,14 +1102,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, LetWithMultipleUseInitializer_ArrayOfAr
     %24:void = msl.fill_cooperative_tensor %23, 0.0h
     %25:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %22, 1u
     %26:void = msl.fill_cooperative_tensor %25, 0.0h
-    %27:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %28:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %27:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %28:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %29:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %27, %28
-    %30:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %31:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %30:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %31:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %32:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %30, %31
-    %33:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %34:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %33:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %34:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %35:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %33, %34
     %acc1:array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3> = construct %29, %32, %35
     %37:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = access %acc1, 0u
@@ -1136,14 +1136,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, LetWithMultipleUseInitializer_ArrayOfAr
     %58:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %53, 1u
     %59:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %54, 1u
     %60:void = msl.copy_cooperative_tensor %58, %59
-    %61:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %62:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %61:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %62:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %63:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %61, %62
-    %64:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %65:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %64:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %65:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %66:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %64, %65
-    %67:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %68:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %67:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %68:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %69:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %67, %68
     %acc2:array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3> = construct %63, %66, %69
     %71:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = access %acc2, 0u
@@ -1212,17 +1212,17 @@ TEST_F(MslWriter_CooperativeTensorsTest, LetChains) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %acc1:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc1:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %3:void = msl.fill_cooperative_tensor %acc1, 0.0h
-    %acc2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %5:void = msl.copy_cooperative_tensor %acc2, %acc1
-    %acc3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:void = msl.copy_cooperative_tensor %acc3, %acc1
-    %acc4:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc4:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %9:void = msl.copy_cooperative_tensor %acc4, %acc1
-    %acc5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %11:void = msl.copy_cooperative_tensor %acc5, %acc3
-    %acc6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %13:void = msl.copy_cooperative_tensor %acc6, %acc3
     ret
   }
@@ -1273,15 +1273,15 @@ TEST_F(MslWriter_CooperativeTensorsTest, LetVar_SingleUseInit_AcrossBlocks) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %acc1:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc1:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %3:void = msl.fill_cooperative_tensor %acc1, 0.0h
-    %acc2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %5:void = msl.fill_cooperative_tensor %acc2, 0.0h
     loop [b: $B2] {  # loop_1
       $B2: {  # body
-        %inner_let:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+        %inner_let:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
         %7:void = msl.copy_cooperative_tensor %inner_let, %acc1
-        %inner_var:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+        %inner_var:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
         %9:void = msl.copy_cooperative_tensor %inner_var, %acc2
         exit_loop  # loop_1
       }
@@ -1324,8 +1324,8 @@ TEST_F(MslWriter_CooperativeTensorsTest, LetPointer) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
     %acc:ptr<function, array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, read_write> = var %4
     %6:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc, 0u
@@ -1375,15 +1375,15 @@ TEST_F(MslWriter_CooperativeTensorsTest, Access_Array_Element) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %acc:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
     %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %acc, 0u
     %6:void = msl.fill_cooperative_tensor %5, 0.0h
     %7:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %acc, 1u
     %8:void = msl.fill_cooperative_tensor %7, 0.0h
     %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %acc, 1u
-    %x:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %x:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %11:void = msl.copy_cooperative_tensor %x, %9
     ret
   }
@@ -1421,14 +1421,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, Access_ArrayOfArray_Inner) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
-    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %5, %6
-    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %10:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %8, %9
     %acc:array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3> = construct %4, %7, %10
     %12:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = access %acc, 0u
@@ -1447,8 +1447,8 @@ TEST_F(MslWriter_CooperativeTensorsTest, Access_ArrayOfArray_Inner) {
     %25:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %22, 1u
     %26:void = msl.fill_cooperative_tensor %25, 0.0h
     %27:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = access %acc, 2u
-    %28:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %29:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %28:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %29:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %x:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %28, %29
     %31:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %x, 0u
     %32:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %27, 0u
@@ -1492,14 +1492,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, Access_ArrayOfArray_Element) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
-    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %5, %6
-    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %10:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %8, %9
     %acc:array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3> = construct %4, %7, %10
     %12:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = access %acc, 0u
@@ -1518,7 +1518,7 @@ TEST_F(MslWriter_CooperativeTensorsTest, Access_ArrayOfArray_Element) {
     %25:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %22, 1u
     %26:void = msl.fill_cooperative_tensor %25, 0.0h
     %27:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %acc, 2u, 1u
-    %x:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %x:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %29:void = msl.copy_cooperative_tensor %x, %27
     ret
   }
@@ -1554,9 +1554,9 @@ TEST_F(MslWriter_CooperativeTensorsTest, Load) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %acc:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %3:void = msl.fill_cooperative_tensor %acc, 0.0h
-    %x:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %x:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %5:void = msl.copy_cooperative_tensor %x, %acc
     ret
   }
@@ -1593,8 +1593,8 @@ TEST_F(MslWriter_CooperativeTensorsTest, Load_Array_Whole) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
     %acc:ptr<function, array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, read_write> = var %4
     %6:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc, 0u
@@ -1603,8 +1603,8 @@ TEST_F(MslWriter_CooperativeTensorsTest, Load_Array_Whole) {
     %9:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc, 1u
     %10:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %9
     %11:void = msl.fill_cooperative_tensor %10, 0.0h
-    %12:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %13:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %12:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %13:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %x:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %12, %13
     %15:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %x, 0u
     %16:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc, 0u
@@ -1651,8 +1651,8 @@ TEST_F(MslWriter_CooperativeTensorsTest, Load_Array_Element) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
     %acc:ptr<function, array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, read_write> = var %4
     %6:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc, 0u
@@ -1663,7 +1663,7 @@ TEST_F(MslWriter_CooperativeTensorsTest, Load_Array_Element) {
     %11:void = msl.fill_cooperative_tensor %10, 0.0h
     %12:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc, 1u
     %13:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %12
-    %x:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %x:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %15:void = msl.copy_cooperative_tensor %x, %13
     ret
   }
@@ -1701,14 +1701,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, Load_ArrayOfArray_Whole) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
-    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %5, %6
-    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %10:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %8, %9
     %11:array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3> = construct %4, %7, %10
     %acc:ptr<function, array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3>, read_write> = var %11
@@ -1733,14 +1733,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, Load_ArrayOfArray_Whole) {
     %31:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %27, 1u
     %32:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %31
     %33:void = msl.fill_cooperative_tensor %32, 0.0h
-    %34:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %35:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %34:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %35:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %36:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %34, %35
-    %37:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %38:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %37:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %38:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %39:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %37, %38
-    %40:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %41:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %40:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %41:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %42:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %40, %41
     %x:array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3> = construct %36, %39, %42
     %44:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = access %x, 0u
@@ -1811,14 +1811,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, Load_ArrayOfArray_Inner) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
-    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %5, %6
-    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %10:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %8, %9
     %11:array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3> = construct %4, %7, %10
     %acc:ptr<function, array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3>, read_write> = var %11
@@ -1844,8 +1844,8 @@ TEST_F(MslWriter_CooperativeTensorsTest, Load_ArrayOfArray_Inner) {
     %32:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %31
     %33:void = msl.fill_cooperative_tensor %32, 0.0h
     %34:ptr<function, array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, read_write> = access %acc, 2u
-    %35:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %36:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %35:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %36:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %x:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %35, %36
     %38:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %x, 0u
     %39:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %34, 0u
@@ -1893,14 +1893,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, Load_ArrayOfArray_Element) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
-    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %5, %6
-    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %10:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %8, %9
     %11:array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3> = construct %4, %7, %10
     %acc:ptr<function, array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3>, read_write> = var %11
@@ -1927,7 +1927,7 @@ TEST_F(MslWriter_CooperativeTensorsTest, Load_ArrayOfArray_Element) {
     %33:void = msl.fill_cooperative_tensor %32, 0.0h
     %34:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc, 2u, 1u
     %35:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %34
-    %x:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %x:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %37:void = msl.copy_cooperative_tensor %x, %35
     ret
   }
@@ -1965,13 +1965,13 @@ TEST_F(MslWriter_CooperativeTensorsTest, LoadWithMultipleUses) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %acc:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %3:void = msl.fill_cooperative_tensor %acc, 0.0h
-    %4:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %4:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %5:void = msl.copy_cooperative_tensor %4, %acc
-    %x:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %x:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:void = msl.copy_cooperative_tensor %x, %4
-    %y:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %y:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %9:void = msl.copy_cooperative_tensor %y, %4
     ret
   }
@@ -2007,9 +2007,9 @@ TEST_F(MslWriter_CooperativeTensorsTest, Store) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %acc:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %acc:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %3:void = msl.fill_cooperative_tensor %acc, 0.0h
-    %4:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %4:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %5:void = msl.fill_cooperative_tensor %4, 1.0h
     %6:void = msl.copy_cooperative_tensor %acc, %4
     ret
@@ -2047,8 +2047,8 @@ TEST_F(MslWriter_CooperativeTensorsTest, Store_Array_Whole) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
     %acc:ptr<function, array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, read_write> = var %4
     %6:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc, 0u
@@ -2057,8 +2057,8 @@ TEST_F(MslWriter_CooperativeTensorsTest, Store_Array_Whole) {
     %9:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc, 1u
     %10:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %9
     %11:void = msl.fill_cooperative_tensor %10, 0.0h
-    %12:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %13:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %12:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %13:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %14:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %12, %13
     %15:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %14, 0u
     %16:void = msl.fill_cooperative_tensor %15, 0.0h
@@ -2109,8 +2109,8 @@ TEST_F(MslWriter_CooperativeTensorsTest, Store_Array_Element) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
     %acc:ptr<function, array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, read_write> = var %4
     %6:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc, 0u
@@ -2119,7 +2119,7 @@ TEST_F(MslWriter_CooperativeTensorsTest, Store_Array_Element) {
     %9:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc, 1u
     %10:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %9
     %11:void = msl.fill_cooperative_tensor %10, 0.0h
-    %12:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %12:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %13:void = msl.fill_cooperative_tensor %12, 1.0h
     %14:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc, 1u
     %15:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %14
@@ -2161,14 +2161,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, Store_ArrayOfArray_Whole) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
-    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %5, %6
-    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %10:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %8, %9
     %11:array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3> = construct %4, %7, %10
     %acc:ptr<function, array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3>, read_write> = var %11
@@ -2193,14 +2193,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, Store_ArrayOfArray_Whole) {
     %31:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %27, 1u
     %32:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %31
     %33:void = msl.fill_cooperative_tensor %32, 0.0h
-    %34:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %35:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %34:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %35:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %36:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %34, %35
-    %37:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %38:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %37:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %38:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %39:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %37, %38
-    %40:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %41:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %40:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %41:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %42:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %40, %41
     %43:array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3> = construct %36, %39, %42
     %44:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = access %43, 0u
@@ -2287,14 +2287,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, Store_ArrayOfArray_Inner) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
-    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %5, %6
-    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %10:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %8, %9
     %11:array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3> = construct %4, %7, %10
     %acc:ptr<function, array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3>, read_write> = var %11
@@ -2319,8 +2319,8 @@ TEST_F(MslWriter_CooperativeTensorsTest, Store_ArrayOfArray_Inner) {
     %31:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %27, 1u
     %32:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %31
     %33:void = msl.fill_cooperative_tensor %32, 0.0h
-    %34:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %35:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %34:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %35:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %36:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %34, %35
     %37:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = access %36, 0u
     %38:void = msl.fill_cooperative_tensor %37, 0.0h
@@ -2374,14 +2374,14 @@ TEST_F(MslWriter_CooperativeTensorsTest, Store_ArrayOfArray_Element) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %3:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %4:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %2, %3
-    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %5:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %7:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %5, %6
-    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
-    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
+    %9:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %10:array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2> = construct %8, %9
     %11:array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3> = construct %4, %7, %10
     %acc:ptr<function, array<array<ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, 2>, 3>, read_write> = var %11
@@ -2406,7 +2406,7 @@ TEST_F(MslWriter_CooperativeTensorsTest, Store_ArrayOfArray_Element) {
     %31:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %27, 1u
     %32:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %31
     %33:void = msl.fill_cooperative_tensor %32, 0.0h
-    %34:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var
+    %34:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = var undef
     %35:void = msl.fill_cooperative_tensor %34, 1.0h
     %36:ptr<function, ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write>, read_write> = access %acc, 2u, 1u
     %37:ptr<function, msl.cooperative_tensor_result<16, 32, 32, f16, f16>, read_write> = load %36
@@ -2457,7 +2457,7 @@ $B1: {  # root
 
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:ptr<function, msl.cooperative_tensor_left<8, 32, 8, f32, f32>, read_write> = var
+    %3:ptr<function, msl.cooperative_tensor_left<8, 32, 8, f32, f32>, read_write> = var undef
     %4:void = msl.fill_cooperative_tensor %3, 0.0f
     %5:ptr<storage, f32, read_write> = access %buffer, 0u
     %6:msl.tensor_inline = msl.make_tensor_inline %5, vec2<u32>(8u), 64u
@@ -2548,7 +2548,7 @@ $B1: {  # root
 
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:ptr<function, msl.cooperative_tensor_result<16, 16, 32, f32, f32>, read_write> = var
+    %3:ptr<function, msl.cooperative_tensor_result<16, 16, 32, f32, f32>, read_write> = var undef
     %4:void = msl.fill_cooperative_tensor %3, 0.0f
     %5:ptr<storage, f32, read_write> = msl.pointer_offset<f32> %buffer, 32u
     %6:msl.tensor_inline = msl.make_tensor_inline %5, vec2<u32>(16u), 256u
@@ -2605,7 +2605,7 @@ $B1: {  # root
 
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:ptr<function, msl.cooperative_tensor_result<16, 16, 32, f32, f32>, read_write> = var
+    %3:ptr<function, msl.cooperative_tensor_result<16, 16, 32, f32, f32>, read_write> = var undef
     %4:void = msl.fill_cooperative_tensor %3, 0.0f
     %5:ptr<storage, f32, read_write> = msl.pointer_offset<f32> %buffer, 32u
     %6:msl.tensor_inline = msl.make_tensor_inline %5, vec2<u32>(16u), 256u
@@ -2662,7 +2662,7 @@ $B1: {  # root
 
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:ptr<function, msl.cooperative_tensor_result<16, 16, 32, f32, f32>, read_write> = var
+    %3:ptr<function, msl.cooperative_tensor_result<16, 16, 32, f32, f32>, read_write> = var undef
     %4:void = msl.fill_cooperative_tensor %3, 0.0f
     %5:ptr<storage, f32, read_write> = msl.alias_pointer_offset<f32> %buffer, 32u
     %6:msl.tensor_inline = msl.make_tensor_inline %5, vec2<u32>(16u), 256u
@@ -2715,7 +2715,7 @@ $B1: {  # root
 
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:ptr<function, msl.cooperative_tensor_right<32, 8, 8, f32, f32>, read_write> = var
+    %3:ptr<function, msl.cooperative_tensor_right<32, 8, 8, f32, f32>, read_write> = var undef
     %4:void = msl.fill_cooperative_tensor %3, 0.0f
     %5:ptr<storage, f32, read_write> = access %buffer, 4i
     %6:msl.tensor_inline = msl.make_tensor_inline %5, vec2<u32>(8u), 32u
@@ -2767,7 +2767,7 @@ $B1: {  # root
 
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:ptr<function, msl.cooperative_tensor_left<16, 32, 16, f16, f16>, read_write> = var
+    %3:ptr<function, msl.cooperative_tensor_left<16, 32, 16, f16, f16>, read_write> = var undef
     %4:void = msl.fill_cooperative_tensor %3, 0.0h
     %5:ptr<workgroup, f16, read_write> = access %buffer, 0u
     %6:msl.tensor_inline = msl.make_tensor_inline %5, vec2<u32>(16u), 16u
@@ -2825,7 +2825,7 @@ $B1: {  # root
     %3:ptr<storage, f32, read> = access %buffer, 0u
     %4:msl.tensor_inline = msl.make_tensor_inline %3, vec2<u32>(8u), 64u
     %tint_src_tensor:msl.tensor_inline = let %4
-    %x:ptr<function, msl.cooperative_tensor_left<8, 32, 8, f32, f32>, read_write> = var
+    %x:ptr<function, msl.cooperative_tensor_left<8, 32, 8, f32, f32>, read_write> = var undef
     %7:msl.cooperative_tensor_left<8, 32, 8, f32, f32> = load %x
     %8:void = %7.load %tint_src_tensor
     ret
@@ -2919,7 +2919,7 @@ $B1: {  # root
     %3:ptr<storage, f32, read> = msl.pointer_offset<f32> %buffer, 16u
     %4:msl.tensor_inline = msl.make_tensor_inline %3, vec2<u32>(8u), 64u
     %tint_src_tensor:msl.tensor_inline = let %4
-    %x:ptr<function, msl.cooperative_tensor_left<8, 32, 8, f32, f32>, read_write> = var
+    %x:ptr<function, msl.cooperative_tensor_left<8, 32, 8, f32, f32>, read_write> = var undef
     %7:msl.cooperative_tensor_left<8, 32, 8, f32, f32> = load %x
     %8:void = %7.load %tint_src_tensor
     ret
@@ -2977,7 +2977,7 @@ $B1: {  # root
     %3:ptr<storage, f32, read> = access %buffer, 0u
     %4:msl.tensor_inline = msl.make_tensor_inline %3, vec2<u32>(8u), 64u
     %tint_src_tensor:msl.tensor_inline = let %4
-    %x:ptr<function, msl.cooperative_tensor_left<8, 32, 8, f32, f32>, read_write> = var
+    %x:ptr<function, msl.cooperative_tensor_left<8, 32, 8, f32, f32>, read_write> = var undef
     %7:msl.cooperative_tensor_left<8, 32, 8, f32, f32> = load %x
     %8:void = %7.load %tint_src_tensor
     ret
@@ -3035,7 +3035,7 @@ $B1: {  # root
     %3:ptr<storage, f32, read> = access %buffer, 0u
     %4:msl.tensor_inline = msl.make_tensor_inline %3, vec2<u32>(8u), 64u
     %tint_src_tensor:msl.tensor_inline = let %4
-    %x:ptr<function, msl.cooperative_tensor_left<8, 32, 8, f32, f32>, read_write> = var
+    %x:ptr<function, msl.cooperative_tensor_left<8, 32, 8, f32, f32>, read_write> = var undef
     %7:msl.cooperative_tensor_left<8, 32, 8, f32, f32> = load %x
     %8:void = %7.load %tint_src_tensor
     ret
@@ -3089,7 +3089,7 @@ $B1: {  # root
     %3:ptr<storage, f32, read> = access %buffer, 4i
     %4:msl.tensor_inline = msl.make_tensor_inline %3, vec2<u32>(8u), 32u
     %tint_src_tensor:msl.tensor_inline = let %4
-    %x:ptr<function, msl.cooperative_tensor_right<32, 8, 8, f32, f32>, read_write> = var
+    %x:ptr<function, msl.cooperative_tensor_right<32, 8, 8, f32, f32>, read_write> = var undef
     %7:msl.cooperative_tensor_right<32, 8, 8, f32, f32> = load %x
     %8:void = %7.load %tint_src_tensor
     ret
@@ -3142,7 +3142,7 @@ $B1: {  # root
     %3:ptr<workgroup, f16, read_write> = access %buffer, 0u
     %4:msl.tensor_inline = msl.make_tensor_inline %3, vec2<u32>(16u), 16u
     %tint_src_tensor:msl.tensor_inline = let %4
-    %x:ptr<function, msl.cooperative_tensor_left<16, 32, 16, f16, f16>, read_write> = var
+    %x:ptr<function, msl.cooperative_tensor_left<16, 32, 16, f16, f16>, read_write> = var undef
     %7:msl.cooperative_tensor_left<16, 32, 16, f16, f16> = load %x
     %8:void = %7.load %tint_src_tensor
     ret
@@ -3183,11 +3183,11 @@ TEST_F(MslWriter_CooperativeTensorsTest, SubgroupMatrixMultiply) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_left<32, 32, 32, f32, f32>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_left<32, 32, 32, f32, f32>, read_write> = var undef
     %3:void = msl.fill_cooperative_tensor %2, 0.0f
-    %4:ptr<function, msl.cooperative_tensor_right<32, 32, 32, f32, f32>, read_write> = var
+    %4:ptr<function, msl.cooperative_tensor_right<32, 32, 32, f32, f32>, read_write> = var undef
     %5:void = msl.fill_cooperative_tensor %4, 0.0f
-    %x:ptr<function, msl.cooperative_tensor_result<32, 32, 32, f32, f32>, read_write> = var
+    %x:ptr<function, msl.cooperative_tensor_result<32, 32, 32, f32, f32>, read_write> = var undef
     %7:msl.cooperative_tensor_left<32, 32, 32, f32, f32> = load %2
     %8:msl.cooperative_tensor_right<32, 32, 32, f32, f32> = load %4
     %9:msl.cooperative_tensor_result<32, 32, 32, f32, f32> = load %x
@@ -3231,13 +3231,13 @@ TEST_F(MslWriter_CooperativeTensorsTest, SubgroupMatrixMultiplyAccumulate) {
     auto* expect = R"(
 %entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, msl.cooperative_tensor_left<32, 32, 32, f32, f32>, read_write> = var
+    %2:ptr<function, msl.cooperative_tensor_left<32, 32, 32, f32, f32>, read_write> = var undef
     %3:void = msl.fill_cooperative_tensor %2, 0.0f
-    %4:ptr<function, msl.cooperative_tensor_right<32, 32, 32, f32, f32>, read_write> = var
+    %4:ptr<function, msl.cooperative_tensor_right<32, 32, 32, f32, f32>, read_write> = var undef
     %5:void = msl.fill_cooperative_tensor %4, 0.0f
-    %6:ptr<function, msl.cooperative_tensor_result<32, 32, 32, f32, f32>, read_write> = var
+    %6:ptr<function, msl.cooperative_tensor_result<32, 32, 32, f32, f32>, read_write> = var undef
     %7:void = msl.fill_cooperative_tensor %6, 0.0f
-    %x:ptr<function, msl.cooperative_tensor_result<32, 32, 32, f32, f32>, read_write> = var
+    %x:ptr<function, msl.cooperative_tensor_result<32, 32, 32, f32, f32>, read_write> = var undef
     %9:void = msl.copy_cooperative_tensor %x, %6
     %10:msl.cooperative_tensor_left<32, 32, 32, f32, f32> = load %2
     %11:msl.cooperative_tensor_right<32, 32, 32, f32, f32> = load %4
