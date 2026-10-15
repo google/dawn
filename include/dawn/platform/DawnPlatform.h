@@ -139,7 +139,6 @@ enum class Features {
     kWebGPUUseDXC,
     kWebGPUEnableRangeAnalysisForRobustness,
     kWebGPUUseSpirv14,
-    kWebGPUDecomposeUniformBuffers,
     kWebGPUUseHLSL2021,
     kWebGPUUseSpirvReconvergenceMode,
 };
