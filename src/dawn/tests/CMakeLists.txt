@@ -403,6 +403,7 @@ if (DAWN_ENABLE_OPENGLES)
     list(APPEND whitebox_sources
         "white_box/EGLImageWrappingTests.cpp"
         "white_box/GLBufferTests.cpp"
+        "white_box/GLDeferredWorkTests.cpp"
         "white_box/GLFramebufferCompletenessTests.cpp"
         "white_box/GLTextureWrappingTests.cpp"
     )
