@@ -425,9 +425,9 @@ bool Validator::CheckOperand(const Instruction* inst, size_t idx) {
     auto* operand = inst->Operand(idx);
 
     if (DAWN_UNLIKELY(operand == nullptr)) {
-        // var and override instructions are allowed to have a nullptr initializers.
+        // var instructions are allowed to have a nullptr initializers.
         // terminator instructions use nullptr operands to signal 'undef'.
-        if (inst->IsAnyOf<Terminator, Var, Override>()) {
+        if (inst->IsAnyOf<Terminator, Var>()) {
             return true;
         }
 

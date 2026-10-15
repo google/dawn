@@ -1679,19 +1679,6 @@ TEST_F(IR_ValidatorTest, SubgroupMatrix_Constant) {
                 testing::HasSubstr("error: let: subgroup_matrix values cannot be constant"));
 }
 
-TEST_F(IR_ValidatorTest, Override_RequiresInitOperand) {
-    mod.properties.Add(core::ir::Property::kAllowOverrides);
-    auto* o = mod.CreateInstruction<Override>();
-    o->AddResult(b.InstructionResult<core::type::U32>());
-    o->SetOverrideId(OverrideId{1});
-    mod.root_block->Append(o);
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr("error: override: expected exactly 1 operands, got 0"));
-}
-
 TEST_F(IR_ValidatorTest, Override_TooManyOperands) {
     mod.properties.Add(core::ir::Property::kAllowOverrides);
     auto* o = mod.CreateInstruction<Override>();
@@ -1703,19 +1690,7 @@ TEST_F(IR_ValidatorTest, Override_TooManyOperands) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr("error: override: expected exactly 1 operands, got 2"));
-}
-
-TEST_F(IR_ValidatorTest, Override_NullInitializer) {
-    mod.properties.Add(core::ir::Property::kAllowOverrides);
-    auto* o = mod.CreateInstruction<Override>();
-    o->AddResult(b.InstructionResult<core::type::U32>());
-    o->SetOperands(Vector<ir::Value*, 1>{nullptr});
-    o->SetOverrideId(OverrideId{1});
-    mod.root_block->Append(o);
-
-    auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success) << res.Failure();
+                testing::HasSubstr("error: override: expected between 0 and 1 operands, got 2"));
 }
 
 TEST_F(IR_ValidatorTest, Alignment_InvalidInstruction) {

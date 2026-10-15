@@ -271,7 +271,8 @@ void Validator::CheckInstruction(const Instruction* inst) {
 }
 
 void Validator::CheckOverride(const Override* o) {
-    if (!CheckResultsAndOperands(o, Override::kNumResults, Override::kNumOperands)) {
+    if (!CheckResultsAndOperandRange(o, Override::kNumResults, Override::kMinOperands,
+                                     Override::kMaxOperands)) {
         return;
     }
 

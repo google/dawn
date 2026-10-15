@@ -1200,7 +1200,7 @@ TEST_F(IR_FromProgramTest, OverrideNoInitializer) {
     EXPECT_EQ(m.SourceOf(override).range.begin, loc);
 
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %a:i32 = override undef @id(0)
+  %a:i32 = override @id(0)
 }
 
 )");
@@ -1265,7 +1265,7 @@ TEST_F(IR_FromProgramTest, OverrideWithShortCircuitExpressionInRHS) {
     auto m = res.Move();
 
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %b:u32 = override undef @id(0)
+  %b:u32 = override @id(0)
   %2:bool = constexpr_if false [t: $B2, f: $B3] {  # constexpr_if_1
     $B2: {  # true
       exit_if true  # constexpr_if_1
@@ -1293,8 +1293,8 @@ TEST_F(IR_FromProgramTest, OverrideWithShortCircuitExpression) {
     auto m = res.Move();
 
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %a:u32 = override undef @id(0)
-  %b:bool = override undef @id(1)
+  %a:u32 = override @id(0)
+  %b:bool = override @id(1)
   %3:bool = constexpr_if %b [t: $B2, f: $B3] {  # constexpr_if_1
     $B2: {  # true
       %4:u32 = div 1u, %a
@@ -1325,8 +1325,8 @@ TEST_F(IR_FromProgramTest, OverrideShortCircuitStatementInFunction) {
     ASSERT_EQ(1u, m.functions.Length());
 
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %a:u32 = override undef @id(0)
-  %b:bool = override undef @id(1)
+  %a:u32 = override @id(0)
+  %b:bool = override @id(1)
 }
 
 %test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1362,7 +1362,7 @@ TEST_F(IR_FromProgramTest, NonOverrideShortCircuitStatementInFunction) {
     ASSERT_EQ(1u, m.functions.Length());
 
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %a:u32 = override undef @id(0)
+  %a:u32 = override @id(0)
 }
 
 %test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1394,7 +1394,7 @@ TEST_F(IR_FromProgramTest, OverrideWithOverrideAddInitializer) {
 
     auto m = res.Move();
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %z:u32 = override undef @id(0)
+  %z:u32 = override @id(0)
   %2:u32 = add %z, 2u
   %a:u32 = override %2 @id(1)
 }
@@ -1448,7 +1448,7 @@ _ = foo;
 
     auto m = res.Move();
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %cond:bool = override undef @id(0)
+  %cond:bool = override @id(0)
   %zero_i32:i32 = override 0i @id(1)
   %one_f32:f32 = override 1.0f @id(2)
   %thirty_one:u32 = override 31u @id(3)
@@ -1491,7 +1491,7 @@ fn main() {
 
     auto m = res.Move();
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %x:u32 = override undef @id(0)
+  %x:u32 = override @id(0)
   %2:u32 = mul %x, 2u
   %arr:ptr<workgroup, array<u32, %2>, read_write> = var
 }
@@ -1519,7 +1519,7 @@ fn main() { }
 
     auto m = res.Move();
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %x:u32 = override undef @id(0)
+  %x:u32 = override @id(0)
   %2:u32 = mul %x, 2u
 }
 

@@ -1970,7 +1970,7 @@ TEST_F(IR_ValidatorTest, OverrideWithInvalidType) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(R"(:2:18 error: override: override type 'vec3<u32>' is not a scalar
-  %1:vec3<u32> = override undef
+  %1:vec3<u32> = override
                  ^^^^^^^^
 )")) << res.Failure();
 }
@@ -2010,7 +2010,7 @@ TEST_F(IR_ValidatorTest, OverrideDuplicateId) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:3:12 error: override: duplicate override id encountered: 2
-  %2:i32 = override undef @id(2)
+  %2:i32 = override @id(2)
            ^^^^^^^^
 )")) << res.Failure();
 }
@@ -2187,7 +2187,7 @@ TEST_F(IR_ValidatorTest, OverrideWithoutIdOrInitializer) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:2:12 error: override: must have an id or an initializer
-  %1:u32 = override undef
+  %1:u32 = override
            ^^^^^^^^
 )")) << res.Failure();
 }
