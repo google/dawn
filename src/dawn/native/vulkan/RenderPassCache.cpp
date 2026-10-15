@@ -489,6 +489,11 @@ ResultOrError<RenderPassCache::RenderPassInfo> RenderPassCache::CreateRenderPass
             break;
     }
 
+    if (mDevice->HasFeature(Feature::RenderPassRenderArea)) {
+        mDevice->fn.GetRenderAreaGranularity(mDevice->GetVkDevice(), renderPassInfo.renderPass,
+                                             &renderPassInfo.renderAreaGranularity);
+    }
+
     return renderPassInfo;
 }
 

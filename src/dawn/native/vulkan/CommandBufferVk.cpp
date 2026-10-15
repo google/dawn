@@ -235,17 +235,6 @@ VkRect2D GetAlignedRenderArea(VkExtent2D granularity, BeginRenderPassCmd* render
     return renderArea;
 }
 
-// Returns the render area from `renderPassCmd` aligned to render area granularity for
-// `renderPassVk`.
-VkRect2D GetAlignedRenderArea(Device* device,
-                              VkRenderPass renderPassVk,
-                              BeginRenderPassCmd* renderPassCmd) {
-    VkExtent2D granularity;
-    device->fn.GetRenderAreaGranularity(device->GetVkDevice(), renderPassVk, &granularity);
-
-    return GetAlignedRenderArea(granularity, renderPassCmd);
-}
-
 class DescriptorSetTracker : public BindGroupTrackerBase<true> {
   public:
     bool AreLayoutsCompatible() override {
@@ -937,8 +926,7 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
     VkCommandBuffer commands = recordingContext->commandBuffer;
 
     // Query a VkRenderPass from the cache
-    VkRenderPass renderPassVK = VK_NULL_HANDLE;
-    uint64_t renderPassId = 0;
+    RenderPassCache::RenderPassInfo renderPassInfo;
     {
         RenderPassCacheQuery query;
 
@@ -963,10 +951,7 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
 
         query.SetSampleCount(renderPass->attachmentState->GetSampleCount());
 
-        RenderPassCache::RenderPassInfo renderPassInfo;
         DAWN_TRY_ASSIGN(renderPassInfo, device->GetRenderPassCache()->GetRenderPass(query));
-        renderPassVK = renderPassInfo.renderPass;
-        renderPassId = renderPassInfo.uniqueId;
     }
 
     // Query a framebuffer from the cache and gather the clear values for the attachments at the
@@ -974,7 +959,8 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
     FramebufferCacheQuery framebufferQuery;
     VkFramebuffer framebuffer = VK_NULL_HANDLE;
     {
-        framebufferQuery.SetRenderPass(renderPassId, renderPass->width, renderPass->height);
+        framebufferQuery.SetRenderPass(renderPassInfo.uniqueId, renderPass->width,
+                                       renderPass->height);
 
         // Fill in the attachment info that will be chained in the framebuffer create info.
         for (auto i : renderPass->attachmentState->GetColorAttachmentsMask()) {
@@ -1019,7 +1005,7 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
                     createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
                     createInfo.pNext = nullptr;
                     createInfo.flags = 0;
-                    createInfo.renderPass = renderPassVK;
+                    createInfo.renderPass = renderPassInfo.renderPass;
                     createInfo.attachmentCount = query.attachmentCount;
                     createInfo.pAttachments = AsVkArray(query.attachments.data());
                     createInfo.width = query.width;
@@ -1038,9 +1024,9 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
     VkRenderPassBeginInfo beginInfo;
     beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     beginInfo.pNext = nullptr;
-    beginInfo.renderPass = renderPassVK;
+    beginInfo.renderPass = renderPassInfo.renderPass;
     beginInfo.framebuffer = framebuffer;
-    beginInfo.renderArea = GetAlignedRenderArea(device, renderPassVK, renderPass);
+    beginInfo.renderArea = GetAlignedRenderArea(renderPassInfo.renderAreaGranularity, renderPass);
     beginInfo.clearValueCount = framebufferQuery.attachmentCount;
     beginInfo.pClearValues = framebufferQuery.clearValues.data();
 
