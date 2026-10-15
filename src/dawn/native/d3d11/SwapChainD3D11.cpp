@@ -31,6 +31,7 @@
 #include <windows.ui.xaml.media.dxinterop.h>
 #endif  // defined(DAWN_USE_WINDOWS_UI)
 
+#include <limits>
 #include <utility>
 
 #include "src/dawn/native/ChainUtils.h"
@@ -38,6 +39,7 @@
 #include "src/dawn/native/d3d/D3DError.h"
 #include "src/dawn/native/d3d/UtilsD3D.h"
 #include "src/dawn/native/d3d11/DeviceD3D11.h"
+#include "src/dawn/native/d3d11/QueueD3D11.h"
 #include "src/dawn/native/d3d11/TextureD3D11.h"
 
 namespace dawn::native::d3d11 {
@@ -98,7 +100,15 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureImpl() {
 
 MaybeError SwapChain::DetachAndWaitForDeallocation() {
     DetachFromSurface();
-    return {};
+
+    // DetachFromSurfaceImpl calls Flush() on the immediate context to submit D3D11's deferred
+    // destruction of the swapchain and its backbuffer/views, but Flush() is asynchronous. When
+    // recreating a swapchain on the same HWND, we must also wait for in-flight GPU work on the
+    // previous swapchain to finish, otherwise presenting on the new swapchain can fail with
+    // DXGI_ERROR_DEVICE_REMOVED.
+    Queue* queue = ToBackend(GetDevice()->GetQueue());
+    return queue->WaitForQueueSerial(queue->GetPendingCommandSerial(),
+                                     std::numeric_limits<Nanoseconds>::max());
 }
 
 void SwapChain::DetachFromSurfaceImpl() {
@@ -109,6 +119,11 @@ void SwapChain::DetachFromSurfaceImpl() {
 
     mBuffer = nullptr;
     ReleaseDXGISwapChain();
+
+    // D3D11 defers the destruction of resources and flip-model swapchains until Flush() is called
+    // on the immediate context after all references are released.
+    Queue* queue = ToBackend(GetDevice()->GetQueue());
+    queue->GetScopedPendingCommandContext(ExecutionQueueBase::SubmitMode::Passive).Flush();
 }
 
 }  // namespace dawn::native::d3d11

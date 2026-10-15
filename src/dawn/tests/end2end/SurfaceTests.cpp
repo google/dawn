@@ -336,10 +336,6 @@ TEST_P(SurfaceTests, SwitchPresentMode) {
     // crbug.com/358166481
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 
-    // TODO(crbug.com/568452623): Flakily fails with DXGI_ERROR_DEVICE_REMOVED in
-    // IDXGISwapChain::Present on D3D11 WARP.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsWARP());
-
     constexpr wgpu::PresentMode kAllPresentModes[] = {
         wgpu::PresentMode::Immediate,
         wgpu::PresentMode::Fifo,
@@ -635,11 +631,6 @@ TEST_P(SurfaceTests, ReleaseSurfaceAfterDeviceReleased) {
 
 // A surface configured with a destroyed device can be configured again with a new device.
 TEST_P(SurfaceTests, ReconfigureWithNewDeviceAfterDestroy) {
-    // TODO(crbug.com/dawn/269): Creating the IDXGISwapChain1 for the new device fails with
-    // E_ACCESSDENIED on D3D11 because the swapchain of the destroyed device is still alive, like
-    // in SwitchingDevice.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
-
     // TODO(crbug.com/500766623): Fails due to backend validation errors on
     // Windows 11/AMD RX 5500 XT w/ D3D12.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsD3D12() && IsBackendValidationEnabled());
