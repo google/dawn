@@ -78,13 +78,15 @@ class ShaderModule final : public ShaderModuleBase {
             o.device = nullptr;
         }
 
-        ~ModuleAndSpirv() {
-            if (module != VK_NULL_HANDLE && device != nullptr) {
-                device->fn.DestroyShaderModule(device->GetVkDevice(), module, nullptr);
-            }
-        }
+        ~ModuleAndSpirv() { CleanupVkModule(); }
 
         ModuleAndSpirv& operator=(ModuleAndSpirv&& o) {
+            if (this == &o) {
+                return *this;
+            }
+
+            CleanupVkModule();
+
             module = o.module;
             o.module = VK_NULL_HANDLE;
 
@@ -97,6 +99,14 @@ class ShaderModule final : public ShaderModuleBase {
             explicitSubgroupSize = o.explicitSubgroupSize;
 
             return *this;
+        }
+
+        void CleanupVkModule() {
+            if (module != VK_NULL_HANDLE && device != nullptr) {
+                device->fn.DestroyShaderModule(device->GetVkDevice(), module, nullptr);
+            }
+            module = VK_NULL_HANDLE;
+            device = nullptr;
         }
 
         ModuleAndSpirv(const ModuleAndSpirv&) = delete;
