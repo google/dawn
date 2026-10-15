@@ -367,5 +367,9 @@ if (checkout_v8 && dawn_node) {
       "//third_party/v8/src:v8",
       "//third_party/v8/src:v8_libplatform",
     ]
+    if (defined(dawn_partition_alloc_dir)) {
+      defines = [ "DAWN_ENABLE_PARTITION_ALLOC" ]
+      deps += [ "${dawn_root}/src/dawn/partition_alloc" ]
+    }
   }
 }
