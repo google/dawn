@@ -2846,7 +2846,7 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamUndefined) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(R"(:1:1 error: a @workgroup_size param is undefined or missing a type
-%f = @compute @workgroup_size(undef, 2u, 3u) func():void {
+%f = @compute @workgroup_size(<nullptr>, 2u, 3u) func():void {
 ^^
 )")) << res.Failure();
 }
@@ -3086,7 +3086,7 @@ TEST_F(IR_ValidatorTest, Function_SubgroupSize_Nullptr) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
                                           R"(:1:1 error: a @subgroup_size param must have a value
-%f = @compute @workgroup_size(1u, 2u, 3u) @subgroup_size(undef) func():void {
+%f = @compute @workgroup_size(1u, 2u, 3u) @subgroup_size(<nullptr>) func():void {
 ^^
 )")) << res.Failure();
 }

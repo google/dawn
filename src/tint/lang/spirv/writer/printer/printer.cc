@@ -2970,7 +2970,7 @@ class Printer {
             }
             OperandList ops{Type(ty), Value(result)};
             for (auto& branch : branches) {
-                if (branch.value == nullptr) {
+                if (branch.value == nullptr || branch.value->Is<core::ir::Undef>()) {
                     ops.push_back(Undef(ty));
                 } else {
                     ops.push_back(Value(branch.value));

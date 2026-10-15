@@ -145,9 +145,9 @@ TEST_F(IR_MslMemberBuiltinCallTest, MissingResults) {
     auto res = core::ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason,
-              R"(:3:16 error: get_width: expected exactly 1 results, got 0
-    undef = %t.get_width 0u
-               ^^^^^^^^^
+              R"(:3:20 error: get_width: expected exactly 1 results, got 0
+    <nullptr> = %t.get_width 0u
+                   ^^^^^^^^^
 
 :2:3 note: in block
   $B1: {
@@ -156,7 +156,7 @@ TEST_F(IR_MslMemberBuiltinCallTest, MissingResults) {
 note: # Disassembly
 %foo = func(%t:texture_2d<f32>):void {
   $B1: {
-    undef = %t.get_width 0u
+    <nullptr> = %t.get_width 0u
     ret
   }
 }

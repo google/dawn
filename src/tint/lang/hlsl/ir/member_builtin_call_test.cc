@@ -264,9 +264,9 @@ TEST_F(IR_HlslMemberBuiltinCallTest, MissingResults) {
     auto res = core::ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason,
-              R"(:7:16 error: Load: expected exactly 1 results, got 0
-    undef = %t.Load 0u
-               ^^^^
+              R"(:7:20 error: Load: expected exactly 1 results, got 0
+    <nullptr> = %t.Load 0u
+                   ^^^^
 
 :6:3 note: in block
   $B2: {
@@ -279,7 +279,7 @@ $B1: {  # root
 
 %foo = func():void {
   $B2: {
-    undef = %t.Load 0u
+    <nullptr> = %t.Load 0u
     ret
   }
 }

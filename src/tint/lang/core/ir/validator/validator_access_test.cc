@@ -100,9 +100,9 @@ TEST_F(IR_ValidatorTest, Access_NoResults) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:13 error: access: expected exactly 1 results, got 0
-    undef = access %2, 0i
-            ^^^^^^
+                testing::HasSubstr(R"(:3:17 error: access: expected exactly 1 results, got 0
+    <nullptr> = access %2, 0i
+                ^^^^^^
 )")) << res.Failure();
 }
 
@@ -115,10 +115,9 @@ TEST_F(IR_ValidatorTest, Access_NullObject) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:21 error: access: operand is undefined
-    %2:f32 = access undef, 0u
-                    ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:21 error: access: operand is nullptr
+    %2:f32 = access <nullptr>, 0u
+                    ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -135,10 +134,9 @@ TEST_F(IR_ValidatorTest, Access_NullIndex) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:25 error: access: operand is undefined
-    %3:f32 = access %2, undef
-                        ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:25 error: access: operand is nullptr
+    %3:f32 = access %2, <nullptr>
+                        ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -534,9 +532,9 @@ TEST_F(IR_ValidatorTest, Load_NullFrom) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:19 error: load: operand is undefined
-    %2:i32 = load undef
-                  ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:19 error: load: operand is nullptr
+    %2:i32 = load <nullptr>
+                  ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -592,9 +590,9 @@ TEST_F(IR_ValidatorTest, Load_MissingResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:4:13 error: load: expected exactly 1 results, got 0
-    undef = load %2
-            ^^^^
+                testing::HasSubstr(R"(:4:17 error: load: expected exactly 1 results, got 0
+    <nullptr> = load %2
+                ^^^^
 )")) << res.Failure();
 }
 
@@ -716,9 +714,9 @@ TEST_F(IR_ValidatorTest, Store_NullTo) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:11 error: store: operand is undefined
-    store undef, 42i
-          ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:11 error: store: operand is nullptr
+    store <nullptr>, 42i
+          ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -733,9 +731,9 @@ TEST_F(IR_ValidatorTest, Store_NullFrom) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:4:15 error: store: operand is undefined
-    store %2, undef
-              ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:4:15 error: store: operand is nullptr
+    store %2, <nullptr>
+              ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -897,8 +895,8 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullResult) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:4:5 error: load_vector_element: result is undefined
-    undef = load_vector_element %2, 1i
-    ^^^^^
+    <nullptr> = load_vector_element %2, 1i
+    ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -914,9 +912,9 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullFrom) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:34 error: load_vector_element: operand is undefined
-    %2:f32 = load_vector_element undef, 1i
-                                 ^^^^^
+                testing::HasSubstr(R"(:3:34 error: load_vector_element: operand is nullptr
+    %2:f32 = load_vector_element <nullptr>, 1i
+                                 ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -933,9 +931,9 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullIndex) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:4:38 error: load_vector_element: operand is undefined
-    %3:f32 = load_vector_element %2, undef
-                                     ^^^^^
+                testing::HasSubstr(R"(:4:38 error: load_vector_element: operand is nullptr
+    %3:f32 = load_vector_element %2, <nullptr>
+                                     ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -953,9 +951,9 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_MissingResult) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
-        testing::HasSubstr(R"(:4:13 error: load_vector_element: expected exactly 1 results, got 0
-    undef = load_vector_element %2, 1i
-            ^^^^^^^^^^^^^^^^^^^
+        testing::HasSubstr(R"(:4:17 error: load_vector_element: expected exactly 1 results, got 0
+    <nullptr> = load_vector_element %2, 1i
+                ^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1052,9 +1050,9 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullTo) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:26 error: store_vector_element: operand is undefined
-    store_vector_element undef, 1i, 2.0f
-                         ^^^^^
+                testing::HasSubstr(R"(:3:26 error: store_vector_element: operand is nullptr
+    store_vector_element <nullptr>, 1i, 2.0f
+                         ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1071,9 +1069,9 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullIndex) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:4:30 error: store_vector_element: operand is undefined
-    store_vector_element %2, undef, 2.0f
-                             ^^^^^
+                testing::HasSubstr(R"(:4:30 error: store_vector_element: operand is nullptr
+    store_vector_element %2, <nullptr>, 2.0f
+                             ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1090,9 +1088,9 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullValue) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:4:34 error: store_vector_element: operand is undefined
-    store_vector_element %2, 1i, undef
-                                 ^^^^^
+                testing::HasSubstr(R"(:4:34 error: store_vector_element: operand is nullptr
+    store_vector_element %2, 1i, <nullptr>
+                                 ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1266,7 +1264,7 @@ TEST_F(IR_ValidatorTest, Swizzle_MissingValue) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:5:20 error: swizzle: expected exactly 1 operands, got 0
-    %4:vec4<f32> = swizzle undef, wzyx
+    %4:vec4<f32> = swizzle <nullptr>, wzyx
                    ^^^^^^^
 )")) << res.Failure();
 }
@@ -1282,7 +1280,7 @@ TEST_F(IR_ValidatorTest, Swizzle_NullValue) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(error: swizzle: operand is undefined
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(error: swizzle: operand is nullptr
 )")) << res.Failure();
 }
 
@@ -1298,9 +1296,9 @@ TEST_F(IR_ValidatorTest, Swizzle_MissingResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:5:13 error: swizzle: expected exactly 1 results, got 0
-    undef = swizzle %3, wzyx
-            ^^^^^^^
+                testing::HasSubstr(R"(:5:17 error: swizzle: expected exactly 1 results, got 0
+    <nullptr> = swizzle %3, wzyx
+                ^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1316,8 +1314,8 @@ TEST_F(IR_ValidatorTest, Swizzle_NullResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:5:5 error: swizzle: result is undefined
-    undef = swizzle %3, wzyx
-    ^^^^^
+    <nullptr> = swizzle %3, wzyx
+    ^^^^^^^^^
 )")) << res.Failure();
 }
 

@@ -752,10 +752,10 @@ TEST_F(IR_RemoveTerminatorArgsTest, UndefResults) {
         auto* ifelse = b.If(true);
         ifelse->SetResults(Vector{res_a, res_b});
         b.Append(ifelse->True(), [&] {  //
-            b.ExitIf(ifelse, 1_i, nullptr);
+            b.ExitIf(ifelse, 1_i, b.Undef(ty.u32()));
         });
         b.Append(ifelse->False(), [&] {  //
-            b.ExitIf(ifelse, nullptr, 2_u);
+            b.ExitIf(ifelse, b.Undef(ty.i32()), 2_u);
         });
 
         // Use the results to make sure the uses get updated.
@@ -823,7 +823,7 @@ TEST_F(IR_RemoveTerminatorArgsTest, UndefBlockParams) {
         loop->Body()->SetParams(Vector{param_a, param_b});
 
         b.Append(loop->Initializer(), [&] {  //
-            b.NextIteration(loop, 1_i, nullptr);
+            b.NextIteration(loop, 1_i, b.Undef(ty.u32()));
         });
         b.Append(loop->Body(), [&] {  //
             // Use the parameters to make sure the uses get updated.
@@ -837,7 +837,7 @@ TEST_F(IR_RemoveTerminatorArgsTest, UndefBlockParams) {
             b.Continue(loop);
         });
         b.Append(loop->Continuing(), [&] {  //
-            b.BreakIf(loop, true, Vector{b.Constant(3_i), nullptr}, Empty);
+            b.BreakIf(loop, true, Vector{b.Constant(3_i), b.Undef(ty.u32())}, Empty);
         });
 
         b.Return(func);

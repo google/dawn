@@ -50,13 +50,26 @@ namespace tint::core::ir {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
+TEST_F(IR_ValidatorTest, Var_RootBlock_UndefOperand) {
+    auto* v = b.Var(ty.ptr(private_, ty.i32()));
+    v->SetOperands(Vector{b.Undef(ty.i32())});
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
 TEST_F(IR_ValidatorTest, Var_RootBlock_NullOperand) {
     auto* v = b.Var(ty.ptr(private_, ty.i32()));
     v->SetOperands(Vector{static_cast<ir::Value*>(nullptr)});
     mod.root_block->Append(v);
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:2:42 error: var: operand is nullptr
+  %1:ptr<private, i32, read_write> = var <nullptr>
+                                         ^^^^^^^^^
+)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Var_RootBlock_TooManyOperands) {
@@ -81,8 +94,8 @@ TEST_F(IR_ValidatorTest, Var_RootBlock_NullResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:2:3 error: var: result is undefined
-  undef = var 0i
-  ^^^^^
+  <nullptr> = var 0i
+  ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -126,8 +139,8 @@ TEST_F(IR_ValidatorTest, Var_Function_NullResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:5 error: var: result is undefined
-    undef = var 0i
-    ^^^^^
+    <nullptr> = var 0i
+    ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -144,9 +157,9 @@ TEST_F(IR_ValidatorTest, Var_Function_NoResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:13 error: var: expected exactly 1 results, got 0
-    undef = var 1i
-            ^^^
+                testing::HasSubstr(R"(:3:17 error: var: expected exactly 1 results, got 0
+    <nullptr> = var 1i
+                ^^^
 )")) << res.Failure();
 }
 
@@ -1101,8 +1114,8 @@ TEST_F(IR_ValidatorTest, Let_NullResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:5 error: let: result is undefined
-    undef = let 1i
-    ^^^^^
+    <nullptr> = let 1i
+    ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1119,14 +1132,30 @@ TEST_F(IR_ValidatorTest, Let_EmptyResults) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:13 error: let: expected exactly 1 results, got 0
-    undef = let 1i
-            ^^^
+                testing::HasSubstr(R"(:3:17 error: let: expected exactly 1 results, got 0
+    <nullptr> = let 1i
+                ^^^
 )")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Let_NullValue) {
     auto* v = mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.f32()), nullptr);
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.Append(f->Block());
+    sb.Append(v);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:18 error: let: operand is nullptr
+    %2:f32 = let <nullptr>
+                 ^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Let_UndefValue) {
+    auto* v = mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.f32()), b.Undef(ty.f32()));
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
@@ -1414,9 +1443,9 @@ TEST_F(IR_ValidatorTest, Phony_NullValue) {
     mod.properties.Add(Property::kAllowPhonyInstructions);
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:11 error: phony: operand is undefined
-    phony undef
-          ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:11 error: phony: operand is nullptr
+    phony <nullptr>
+          ^^^^^^^^^
 )")) << res.Failure();
 }
 

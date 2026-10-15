@@ -439,7 +439,7 @@ TEST_F(SpirvWriter_MergeReturnTest,
         auto* ifelse = b.If(cond);
         ifelse->SetResult(b.InstructionResult(ty.i32()));
         b.Append(ifelse->True(), [&] { b.Return(func, 1_i); });
-        b.Append(ifelse->False(), [&] { b.ExitIf(ifelse, nullptr); });
+        b.Append(ifelse->False(), [&] { b.ExitIf(ifelse, b.Undef(ty.i32())); });
 
         b.Return(func, ifelse->Result());
     });

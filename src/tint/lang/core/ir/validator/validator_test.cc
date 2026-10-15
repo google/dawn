@@ -610,9 +610,9 @@ TEST_F(IR_ValidatorTest, Construct_NullArg) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:9:33 error: construct: operand is undefined
-    %3:MyStruct = construct 1i, undef
-                                ^^^^^
+                testing::HasSubstr(R"(:9:33 error: construct: operand is nullptr
+    %3:MyStruct = construct 1i, <nullptr>
+                                ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -634,8 +634,8 @@ TEST_F(IR_ValidatorTest, Construct_NullResult) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:9:5 error: construct: result is undefined
-    undef = construct %l, 2u
-    ^^^^^
+    <nullptr> = construct %l, 2u
+    ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -656,9 +656,9 @@ TEST_F(IR_ValidatorTest, Construct_EmptyResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:9:13 error: construct: expected exactly 1 results, got 0
-    undef = construct %l, 2u
-            ^^^^^^^^^
+                testing::HasSubstr(R"(:9:17 error: construct: expected exactly 1 results, got 0
+    <nullptr> = construct %l, 2u
+                ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -752,10 +752,9 @@ TEST_F(IR_ValidatorTest, Convert_NullArg) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:4:22 error: convert: operand is undefined
-    %3:i32 = convert undef
-                     ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:4:22 error: convert: operand is nullptr
+    %3:i32 = convert <nullptr>
+                     ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -770,9 +769,9 @@ TEST_F(IR_ValidatorTest, Convert_MissingResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:4:13 error: convert: expected exactly 1 results, got 0
-    undef = convert %l
-            ^^^^^^^
+                testing::HasSubstr(R"(:4:17 error: convert: expected exactly 1 results, got 0
+    <nullptr> = convert %l
+                ^^^^^^^
 )")) << res.Failure();
 }
 
@@ -787,8 +786,8 @@ TEST_F(IR_ValidatorTest, Convert_NullResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:4:5 error: convert: result is undefined
-    undef = convert %l
-    ^^^^^
+    <nullptr> = convert %l
+    ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1455,10 +1454,9 @@ TEST_F(IR_ValidatorTest, Binary_LHS_Nullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:18 error: binary: operand is undefined
-    %2:i32 = add undef, 2i
-                 ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:18 error: binary: operand is nullptr
+    %2:i32 = add <nullptr>, 2i
+                 ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1474,10 +1472,9 @@ TEST_F(IR_ValidatorTest, Binary_RHS_Nullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:22 error: binary: operand is undefined
-    %2:i32 = add 2i, undef
-                     ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:22 error: binary: operand is nullptr
+    %2:i32 = add 2i, <nullptr>
+                     ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1494,8 +1491,8 @@ TEST_F(IR_ValidatorTest, Binary_Result_Nullptr) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:5 error: binary: result is undefined
-    undef = add 3i, 2i
-    ^^^^^
+    <nullptr> = add 3i, 2i
+    ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1530,8 +1527,8 @@ TEST_F(IR_ValidatorTest, Binary_MissingResult) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:4:5 error: binary: expected exactly 1 results, got 0
-    undef = add %l, 2i
-    ^^^^^^^^^^^^^^^^^^
+    <nullptr> = add %l, 2i
+    ^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1676,9 +1673,9 @@ TEST_F(IR_ValidatorTest, Unary_Value_Nullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:23 error: unary: operand is undefined
-    %2:u32 = negation undef
-                      ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:23 error: unary: operand is nullptr
+    %2:u32 = negation <nullptr>
+                      ^^^^^^^^^
 
 :2:3 note: in block
   $B1: {
@@ -1698,8 +1695,8 @@ TEST_F(IR_ValidatorTest, Unary_Result_Nullptr) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:5 error: unary: result is undefined
-    undef = negation 2i
-    ^^^^^
+    <nullptr> = negation 2i
+    ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1757,8 +1754,8 @@ TEST_F(IR_ValidatorTest, Unary_MissingResults) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:4:5 error: unary: expected exactly 1 results, got 0
-    undef = negation %l
-    ^^^^^^^^^^^^^^^^^^^
+    <nullptr> = negation %l
+    ^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 

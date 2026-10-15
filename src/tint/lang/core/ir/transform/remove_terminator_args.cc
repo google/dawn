@@ -103,7 +103,7 @@ struct State {
                 } else {
                     value = exit.Value()->Args()[i];
                 }
-                if (value) {
+                if (!value->Is<Undef>()) {
                     auto* store = b.Store(var, value);
                     store->InsertBefore(exit.Value());
                 }
@@ -140,7 +140,7 @@ struct State {
                 } else {
                     value = branch->Args()[i];
                 }
-                if (value) {
+                if (!value->Is<Undef>()) {
                     auto* store = b.Store(var, value);
                     store->InsertBefore(branch);
                 }

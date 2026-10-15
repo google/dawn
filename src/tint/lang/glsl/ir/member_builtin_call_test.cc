@@ -175,9 +175,9 @@ TEST_F(IR_GlslMemberBuiltinCallTest, MissingResult) {
     auto res = core::ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason,
-              R"(:12:16 error: length: expected exactly 1 results, got 0
-    undef = %3.length
-               ^^^^^^
+              R"(:12:20 error: length: expected exactly 1 results, got 0
+    <nullptr> = %3.length
+                   ^^^^^^
 
 :10:3 note: in block
   $B2: {
@@ -195,7 +195,7 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:ptr<storage, array<u32>, read_write> = access %v, 0u
-    undef = %3.length
+    <nullptr> = %3.length
     ret
   }
 }

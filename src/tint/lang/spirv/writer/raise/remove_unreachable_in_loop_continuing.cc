@@ -82,7 +82,9 @@ struct State {
 
         // Fill the exit argument with `undef`.
         Vector<core::ir::Value*, 4> exit_args;
-        exit_args.Resize(control->Results().Length());
+        for (auto* result : control->Results()) {
+            exit_args.Push(b.Undef(result->Type()));
+        }
 
         // Replace the `unreachable` with an instruction that exits from the control construct.
         auto* exit = b.Exit(unreachable->Block()->Parent(), std::move(exit_args));

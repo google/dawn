@@ -34,6 +34,7 @@
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/referenced_functions.h"
+#include "src/tint/lang/core/ir/undef.h"
 #include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
@@ -425,9 +426,14 @@ bool Validator::CheckOperand(const Instruction* inst, size_t idx) {
     auto* operand = inst->Operand(idx);
 
     if (DAWN_UNLIKELY(operand == nullptr)) {
-        // var instructions are allowed to have a nullptr initializers.
-        // terminator instructions use nullptr operands to signal 'undef'.
-        if (inst->IsAnyOf<Terminator, Var>()) {
+        AddError(inst, idx) << "operand is nullptr";
+        return false;
+    }
+
+    if (DAWN_UNLIKELY(operand->Is<ir::Undef>())) {
+        // var instructions are allowed to have a undef initializers.
+        // terminator instructions can also undef when they are dynamically unreachable.
+        if (inst->IsAnyOf<Terminator, Var, Override>()) {
             return true;
         }
 
@@ -876,7 +882,7 @@ void Validator::CheckRootBlock(const Block* blk) {
             if (!op) {
                 continue;
             }
-            if (op->Is<Constant>()) {
+            if (op->IsAnyOf<Constant, Undef>()) {
                 continue;
             }
             if (pipeline_evaluatable.Contains(op)) {

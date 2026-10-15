@@ -1614,7 +1614,7 @@ TEST_P(IR_ValidatorRefTypeTest, BlockParam) {
         auto* loop = b.Loop();
         loop->Continuing()->SetParams({b.BlockParam(type)});
         b.Append(loop->Body(), [&] {  //
-            b.Continue(loop, nullptr);
+            b.Continue(loop, b.Undef(type));
         });
         b.Append(loop->Continuing(), [&] {  //
             b.NextIteration(loop);
@@ -1796,7 +1796,7 @@ TEST_P(IR_Validator8BitIntTypeTest, BlockParam) {
         auto* loop = b.Loop();
         loop->Continuing()->SetParams({b.BlockParam(type)});
         b.Append(loop->Body(), [&] {  //
-            b.Continue(loop, nullptr);
+            b.Continue(loop, b.Undef(type));
         });
         b.Append(loop->Continuing(), [&] {  //
             b.NextIteration(loop);
@@ -2008,7 +2008,7 @@ TEST_P(IR_Validator64BitIntTypeTest, BlockParam) {
         auto* loop = b.Loop();
         loop->Continuing()->SetParams({b.BlockParam(type)});
         b.Append(loop->Body(), [&] {  //
-            b.Continue(loop, nullptr);
+            b.Continue(loop, b.Undef(type));
         });
         b.Append(loop->Continuing(), [&] {  //
             b.NextIteration(loop);

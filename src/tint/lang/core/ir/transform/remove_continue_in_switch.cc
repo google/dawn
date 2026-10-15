@@ -88,7 +88,9 @@ struct State {
             // If the switch produces result values, just use `undef` as the switch result will not
             // be used in this codepath.
             Vector<Value*, 1> results;
-            results.Resize(swtch->Results().Length(), nullptr);
+            for (auto* result : swtch->Results()) {
+                results.Push(b.Undef(result->Type()));
+            }
             b.ExitSwitch(swtch, std::move(results));
         });
         cont->Destroy();

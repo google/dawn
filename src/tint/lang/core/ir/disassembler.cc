@@ -66,6 +66,7 @@
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
 #include "src/tint/lang/core/ir/unary.h"
+#include "src/tint/lang/core/ir/undef.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/ir/user_call.h"
@@ -438,7 +439,7 @@ void Disassembler::EmitValueWithType(const Value* val) {
 StyledText Disassembler::ValueToStyledText(const Value* val) {
     StyledText text{};
     if (!val) {
-        text << StyleLiteral("undef");
+        text << StyleError("<nullptr>");
         return text;
     }
 
@@ -500,6 +501,7 @@ StyledText Disassembler::ValueToStyledText(const Value* val) {
                 };
             emit(constant->Value());
         },
+        [&](const tint::core::ir::Undef*) { text << StyleLiteral("undef"); },
         [&](const tint::core::ir::Unused*) { text << StyleLiteral("unused"); },
         [&](Default) { text << NameOf(val); });
     return text;
@@ -616,7 +618,7 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
             out_ << " = ";
             EmitInstructionName(s);
             out_ << " ";
-            EmitValue(s->Object());
+            EmitOperand(s, Swizzle::kObjectOperandOffset);
 
             out_ << ",";
             if (!s->Indices().IsEmpty()) {
@@ -929,7 +931,7 @@ void Disassembler::EmitTerminator(const Terminator* term) {
         [&](const ir::BreakIf* bi) {
             out_ << StyleInstruction("break_if");
             out_ << " ";
-            EmitValue(bi->Condition());
+            EmitOperand(bi, ir::BreakIf::kConditionOperandOffset);
             auto next_iter_values = bi->NextIterValues();
             auto exit_values = bi->ExitValues();
             if (!next_iter_values.empty()) {
@@ -1131,7 +1133,10 @@ StyledText Disassembler::NameOf(const Block* node) {
 
 StyledText Disassembler::NameOf(const Value* value) {
     if (!value) {
-        return StyledText{} << StyleError("undef");
+        return StyledText{} << StyleError("<nullptr>");
+    }
+    if (value->Is<Undef>()) {
+        return StyledText{} << StyleLiteral("undef");
     }
 
     auto id = value_ids_.GetOrAdd(value, [&] {

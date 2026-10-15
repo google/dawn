@@ -92,7 +92,9 @@ struct State {
                 // If the loop produces result values, just use `undef` as this exit condition
                 // should never actually be hit.
                 Vector<Value*, 1> results;
-                results.Resize(loop->Results().Length(), nullptr);
+                for (auto* result : loop->Results()) {
+                    results.Push(b.Undef(result->Type()));
+                }
                 b.ExitLoop(loop, std::move(results));
             });
         });

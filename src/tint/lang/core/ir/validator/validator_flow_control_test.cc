@@ -508,9 +508,9 @@ TEST_F(IR_ValidatorTest, If_ConditionIsNullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:8 error: if: operand is undefined
-    if undef [t: $B2, f: $B3] {  # if_1
-       ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:8 error: if: operand is nullptr
+    if <nullptr> [t: $B2, f: $B3] {  # if_1
+       ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -529,8 +529,8 @@ TEST_F(IR_ValidatorTest, If_NullResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:5 error: if: result is undefined
-    undef = if true [t: $B2, f: $B3] {  # if_1
-    ^^^^^
+    <nullptr> = if true [t: $B2, f: $B3] {  # if_1
+    ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -612,8 +612,8 @@ TEST_F(IR_ValidatorTest, Loop_NullResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:5 error: loop: result is undefined
-    undef = loop [b: $B2] {  # loop_1
-    ^^^^^
+    <nullptr> = loop [b: $B2] {  # loop_1
+    ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1666,11 +1666,10 @@ TEST_F(IR_ValidatorTest, BreakIf_UndefCondition) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(
-                    R"(:8:9 error: break_if: break_if condition cannot be nullptr
-        break_if undef  # -> [t: exit_loop loop_1, f: $B2]
-        ^^^^^^^^^^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(:8:18 error: break_if: operand is nullptr
+        break_if <nullptr>  # -> [t: exit_loop loop_1, f: $B2]
+                 ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1716,7 +1715,8 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMissingValues) {
     b.Append(f->Block(), [&] {
         auto* loop = b.Loop();
         loop->Body()->SetParams({b.BlockParam<i32>(), b.BlockParam<i32>()});
-        b.Append(loop->Initializer(), [&] { b.NextIteration(loop, nullptr, nullptr); });
+        b.Append(loop->Initializer(),
+                 [&] { b.NextIteration(loop, b.Undef(ty.i32()), b.Undef(ty.i32())); });
         b.Append(loop->Body(), [&] { b.Continue(loop); });
         b.Append(loop->Continuing(), [&] { b.BreakIf(loop, true, Empty, Empty); });
         b.Return(f);
@@ -1739,8 +1739,10 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMismatchedInt) {
         auto* loop = b.Loop();
         loop->Body()->SetParams(
             {b.BlockParam<i32>(), b.BlockParam<f32>(), b.BlockParam<u32>(), b.BlockParam<bool>()});
-        b.Append(loop->Initializer(),
-                 [&] { b.NextIteration(loop, nullptr, nullptr, nullptr, nullptr); });
+        b.Append(loop->Initializer(), [&] {
+            b.NextIteration(loop, b.Undef(ty.i32()), b.Undef(ty.f32()), b.Undef(ty.u32()),
+                            b.Undef(ty.bool_()));
+        });
         b.Append(loop->Body(), [&] { b.Continue(loop); });
         b.Append(loop->Continuing(),
                  [&] { b.BreakIf(loop, true, b.Values(1_i, 2_i, 3_u, false), Empty); });
@@ -1764,8 +1766,10 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMismatchedFloat) {
         auto* loop = b.Loop();
         loop->Body()->SetParams(
             {b.BlockParam<i32>(), b.BlockParam<f32>(), b.BlockParam<u32>(), b.BlockParam<bool>()});
-        b.Append(loop->Initializer(),
-                 [&] { b.NextIteration(loop, nullptr, nullptr, nullptr, nullptr); });
+        b.Append(loop->Initializer(), [&] {
+            b.NextIteration(loop, b.Undef(ty.i32()), b.Undef(ty.f32()), b.Undef(ty.u32()),
+                            b.Undef(ty.bool_()));
+        });
         b.Append(loop->Body(), [&] { b.Continue(loop); });
         b.Append(loop->Continuing(),
                  [&] { b.BreakIf(loop, true, b.Values(1_i, 2_f, 3_f, false), Empty); });
@@ -1789,8 +1793,10 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMatchedTypes) {
         auto* loop = b.Loop();
         loop->Body()->SetParams(
             {b.BlockParam<i32>(), b.BlockParam<f32>(), b.BlockParam<u32>(), b.BlockParam<bool>()});
-        b.Append(loop->Initializer(),
-                 [&] { b.NextIteration(loop, nullptr, nullptr, nullptr, nullptr); });
+        b.Append(loop->Initializer(), [&] {
+            b.NextIteration(loop, b.Undef(ty.i32()), b.Undef(ty.f32()), b.Undef(ty.u32()),
+                            b.Undef(ty.bool_()));
+        });
         b.Append(loop->Body(), [&] { b.Continue(loop); });
         b.Append(loop->Continuing(),
                  [&] { b.BreakIf(loop, true, b.Values(1_i, 2_f, 3_u, false), Empty); });
@@ -2372,10 +2378,10 @@ TEST_F(IR_ValidatorTest, Return_UnexpectedValue) {
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Return_UnexpectedValue_NullValue_WithVoid) {
+TEST_F(IR_ValidatorTest, Return_UnexpectedValue_UndefValue_WithVoid) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {  //
-        b.Return(f, nullptr);
+        b.Return(f, b.Undef(ty.i32()));
     });
 
     auto res = ir::Validate(mod);
@@ -2646,8 +2652,8 @@ TEST_F(IR_ValidatorTest, Switch_NullResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(error: switch: result is undefined
-    undef = switch 1u [c: (default, $B2)] {  # switch_1
-    ^^^^^
+    <nullptr> = switch 1u [c: (default, $B2)] {  # switch_1
+    ^^^^^^^^^
 )")) << res.Failure();
 }
 

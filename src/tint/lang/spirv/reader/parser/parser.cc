@@ -2233,7 +2233,9 @@ class Parser {
         auto phis = continue_blk_phis_.find(continue_id);
         if (phis != continue_blk_phis_.end()) {
             for (auto value_id : phis->second) {
-                auto* value = skipped_continue ? nullptr : Value(value_id, false);
+                auto* def = spirv_context_->get_def_use_mgr()->GetDef(value_id);
+                auto* value =
+                    skipped_continue ? b_.Undef(Type(def->type_id())) : Value(value_id, false);
 
                 tint::Switch(
                     loop->Continuing()->Terminator(),  //

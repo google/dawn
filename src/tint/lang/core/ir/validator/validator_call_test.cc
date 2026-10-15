@@ -162,9 +162,9 @@ TEST_F(IR_ValidatorTest, CallToFunctionNullArg) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:8:24 error: call: operand is undefined
-    %4:void = call %g, undef
-                       ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:8:24 error: call: operand is nullptr
+    %4:void = call %g, <nullptr>
+                       ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -181,9 +181,9 @@ TEST_F(IR_ValidatorTest, CallToNullFunction) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:8:20 error: call: operand is undefined
-    %3:void = call undef
-                   ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:8:20 error: call: operand is nullptr
+    %3:void = call <nullptr>
+                   ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -201,9 +201,9 @@ TEST_F(IR_ValidatorTest, CallToFunctionNoResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:8:13 error: call: expected exactly 1 results, got 0
-    undef = call %g
-            ^^^^
+                testing::HasSubstr(R"(:8:17 error: call: expected exactly 1 results, got 0
+    <nullptr> = call %g
+                ^^^^
 )")) << res.Failure();
 }
 
@@ -280,8 +280,8 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_MissingResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:4:5 error: abs: result is undefined
-    undef = abs %arg
-    ^^^^^
+    <nullptr> = abs %arg
+    ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -319,9 +319,9 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_MissingArg) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:5:18 error: abs: operand is undefined
-    %4:f32 = abs undef
-                 ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:5:18 error: abs: operand is nullptr
+    %4:f32 = abs <nullptr>
+                 ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -361,9 +361,9 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_TooFewResults) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:5:13 error: abs: expected exactly 1 results, got 0
-    undef = abs %3
-            ^^^
+                testing::HasSubstr(R"(:5:17 error: abs: expected exactly 1 results, got 0
+    <nullptr> = abs %3
+                ^^^
 )")) << res.Failure();
 }
 
