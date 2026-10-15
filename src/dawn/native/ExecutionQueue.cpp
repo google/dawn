@@ -204,7 +204,7 @@ void ExecutionQueueBase::WaitForIdleForDestruction() {
 
     // Call the callbacks without holding the lock on the ExecutionQueue to avoid lock-inversion
     // issues when dealing with potential re-entrant callbacks.
-    for (auto task : tasks) {
+    for (const auto& task : tasks) {
         task();
     }
 
@@ -326,7 +326,7 @@ void ExecutionQueueBase::UpdateCompletedSerialToInternal(QueuePriority priority,
 
     // Call the callbacks without holding the lock on the ExecutionQueue to avoid lock-inversion
     // issues when dealing with potential re-entrant callbacks.
-    for (auto task : tasks) {
+    for (const auto& task : tasks) {
         task();
     }
 

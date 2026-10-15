@@ -211,7 +211,7 @@ MaybeError ResourceTableBase::InitializeBase() {
 void ResourceTableBase::DestroyImpl(DestroyReason reason) {
     DAWN_CHECK(!mDestroyed);
 
-    for (auto [texture, _] : mTextureState) {
+    for (const auto& [texture, _] : mTextureState) {
         texture->RemoveResourceTableUse(this);
     }
 

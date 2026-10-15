@@ -94,7 +94,7 @@ void AsyncTask::Run() {
         completionCallbacks = std::move(state->completionCallbacks);
         state->completionCallbacks.clear();
     });
-    for (auto completionCallback : completionCallbacks) {
+    for (const auto& completionCallback : completionCallbacks) {
         completionCallback();
     }
 
