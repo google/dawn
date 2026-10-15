@@ -67,7 +67,7 @@ TEST_F(WgslWriter_RaiseTest, BuiltinConversion) {
   $B1: {
     %l:i32 = let 1i
     %3:i32 = wgsl.max %l, 2i
-    undef = phony %3
+    phony %3
     ret
   }
 }
@@ -218,7 +218,7 @@ TEST_F(WgslWriter_RaiseTest, BuiltinShadowedByUserFunction) {
   $B2: {
     %l:u32 = let 1u
     %7:u32 = wgsl.min %l, 2u
-    undef = phony %7
+    phony %7
     ret
   }
 }

@@ -418,7 +418,7 @@ $B1: {  # root
 
 %main = @vertex func():void {
   $B2: {
-    undef = phony %1
+    phony %1
     ret
   }
 }

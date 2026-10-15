@@ -58,6 +58,7 @@
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/override.h"
+#include "src/tint/lang/core/ir/phony.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/store_vector_element.h"
@@ -639,6 +640,10 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
             }
         },
         [&](const Terminator* b) { EmitTerminator(b); },
+        [&](const Phony* p) {
+            EmitInstructionName(p);
+            EmitOperandList(p);
+        },
         [&](Default) {
             EmitValueWithType(inst);
             out_ << " = ";

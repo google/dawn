@@ -218,7 +218,7 @@ $B1: {  # root
 
 %main = @fragment func():void {
   $B2: {
-    undef = phony %1
+    phony %1
     store %1, 42.0f
     ret
   }
@@ -256,7 +256,7 @@ $B1: {  # root
 
 %main = @vertex func():void {
   $B2: {
-    undef = phony %1
+    phony %1
     ret
   }
 }
@@ -303,7 +303,7 @@ $B1: {  # root
 
 %main = @vertex func():void {
   $B2: {
-    undef = phony %1
+    phony %1
     %3:ptr<__out, vec4<f32>, read_write> = access %1, 0u
     store %3, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
     ret
@@ -337,7 +337,7 @@ $B1: {  # root
 
 %main = @vertex func():void {
   $B2: {
-    undef = phony %position
+    phony %position
     ret
   }
 }
@@ -375,7 +375,7 @@ $B1: {  # root
 
 %main = @vertex func():void {
   $B2: {
-    undef = phony %position
+    phony %position
     store %position, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
     ret
   }
@@ -436,7 +436,7 @@ $B1: {  # root
 }
 %main = @vertex func():void {
   $B4: {
-    undef = phony %position
+    phony %position
     %6:void = call %3
     ret
   }

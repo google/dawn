@@ -1414,9 +1414,9 @@ TEST_F(IR_ValidatorTest, Phony_NullValue) {
     mod.properties.Add(Property::kAllowPhonyInstructions);
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:19 error: phony: operand is undefined
-    undef = phony undef
-                  ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:11 error: phony: operand is undefined
+    phony undef
+          ^^^^^
 )")) << res.Failure();
 }
 
@@ -1434,9 +1434,9 @@ TEST_F(IR_ValidatorTest, Phony_EmptyValue) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:13 error: phony: expected exactly 1 operands, got 0
-    undef = phony
-            ^^^^^
+                testing::HasSubstr(R"(:3:5 error: phony: expected exactly 1 operands, got 0
+    phony
+    ^^^^^
 )")) << res.Failure();
 }
 
@@ -1452,9 +1452,9 @@ TEST_F(IR_ValidatorTest, Phony_MissingProperty) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:13 error: phony: missing property 'kAllowPhonyInstructions'
-    undef = phony 1i
-            ^^^^^
+                testing::HasSubstr(R"(:3:5 error: phony: missing property 'kAllowPhonyInstructions'
+    phony 1i
+    ^^^^^
 )")) << res.Failure();
 }
 

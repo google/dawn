@@ -3410,7 +3410,7 @@ $B1: {  # root
 
 %main = @fragment func():void {
   $B2: {
-    undef = phony %1
+    phony %1
     %3:u32 = load %1
     ret
   }
@@ -3444,7 +3444,7 @@ $B1: {  # root
 
 %main = @fragment func():void {
   $B2: {
-    undef = phony %1
+    phony %1
     ret
   }
 }
@@ -3506,8 +3506,8 @@ $B1: {  # root
 }
 %main = @fragment func():void {
   $B3: {
-    undef = phony %main_loc0_Output
-    undef = phony %main_primitive_id_Input
+    phony %main_loc0_Output
+    phony %main_primitive_id_Input
     %8:u32 = load %main_primitive_id_Input
     %9:vec4<f32> = call %main_inner, %8
     store %main_loc0_Output, %9
@@ -3546,7 +3546,7 @@ $B1: {  # root
 
 %main = @fragment func():void {
   $B2: {
-    undef = phony %view_index
+    phony %view_index
     %3:u32 = load %view_index
     ret
   }

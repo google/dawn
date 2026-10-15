@@ -122,7 +122,7 @@ $B1: {  # root
 %ep = @fragment func():f32 [@location(0)] {
   $B3: {
     %4:i32 = load %buffer
-    undef = phony %4
+    phony %4
     ret 0.5f
   }
 }
@@ -137,7 +137,7 @@ $B1: {  # root
 %ep = @fragment func():f32 [@location(0)] {
   $B2: {
     %3:i32 = load %buffer
-    undef = phony %3
+    phony %3
     ret 0.5f
   }
 }
@@ -240,7 +240,7 @@ $B1: {  # root
 %unused2 = func():f32 {
   $B2: {
     %3:i32 = load %buffer
-    undef = phony %3
+    phony %3
     ret 0.5f
   }
 }
