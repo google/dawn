@@ -394,7 +394,7 @@ class BasicTest : public UniformityAnalysisTestBase,
             case kEndOfConditionRange:
                 break;
         }
-        name += "_";
+        name += '_';
         switch (f) {
             CASE(kUserNoRestriction);
             CASE(kMin);
@@ -834,7 +834,7 @@ TEST_P(FragmentBuiltin, AsParam) {
         src += "enable chromium_experimental_barycentric_coord;\n";
         asScalar = "vec3(b).x";
     } else {
-        src += "\n";
+        src += '\n';
     }
 
     src += R"(
@@ -882,7 +882,7 @@ TEST_P(FragmentBuiltin, InStruct) {
         src += "enable chromium_experimental_barycentric_coord;\n";
         asScalar = "vec3(s.b).x";
     } else {
-        src += "\n";
+        src += '\n';
     }
 
     src += R"(
@@ -4020,12 +4020,12 @@ struct Role {
                     ss << "  ";
                     break;
             }
-            if (remaining.starts_with(" ")) {
+            if (remaining.starts_with(' ')) {
                 remaining.remove_prefix(1);
                 ss << ";/* empty statement */\n";
                 continue;
             }
-            if (remaining.starts_with("_")) {
+            if (remaining.starts_with('_')) {
                 remaining.remove_prefix(1);
                 if (enable_detect) {
                     ss << "workgroupBarrier();\n";
@@ -4034,7 +4034,7 @@ struct Role {
                 }
                 continue;
             }
-            if (remaining.starts_with("#")) {
+            if (remaining.starts_with('#')) {
                 remaining.remove_prefix(1);
                 if (enable_attack) {
                     switch (part) {

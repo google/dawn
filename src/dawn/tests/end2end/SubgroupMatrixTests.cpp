@@ -1580,7 +1580,7 @@ fn main() {
         std::string storeResult;
         loadInput = "let input_matrix = subgroup_matrix_left<ComponentType, K, M>(";
         if (withArgument) {
-            loadInput += "5";
+            loadInput += '5';
         }
         loadInput += ");";
         storeResult = "subgroupMatrixStore<row_major>(&output, 0, input_matrix, kStride);";

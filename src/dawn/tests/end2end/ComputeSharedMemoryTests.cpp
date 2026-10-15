@@ -220,7 +220,7 @@ TEST_P(ComputeSharedMemoryTests, ComplexZeroInit) {
     // For example, on a Pixel 5 where this test fails, the string contains "Date: 11/30/20".
     if (IsAndroid() && IsQualcomm()) {
         auto driver = GetAdapterProperties().driverDescription;
-        auto date = driver.find("/");
+        auto date = driver.find('/');
         if (date != std::string::npos) {
             auto year = driver.substr(date + 4, 2);
             DAWN_SUPPRESS_TEST_IF(std::stoi(year) < 23);

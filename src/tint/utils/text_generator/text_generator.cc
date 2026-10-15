@@ -137,7 +137,7 @@ std::string TextGenerator::TextBuffer::MinifiedString() const {
                 // emit a space between them. Use a newline in these cases to reduce the maximum
                 // line length of generated shaders.
                 if (previous_is_ident && is_ident_char(c)) {
-                    result += "\n";
+                    result += '\n';
                 }
             }
 

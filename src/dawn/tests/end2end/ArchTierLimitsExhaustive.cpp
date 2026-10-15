@@ -793,7 +793,7 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, SemiExhaustiveTestSubgroupMatrixConfigs
             "  AddDevice({";
         for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
             auto& config = DAWN_UNSAFE_TODO(subgroupMatrixConfigs.configs[i]);
-            expected_str += "{";
+            expected_str += '{';
             expected_str += SubgroupMatrixComponentTypeToString(config.componentType);
             expected_str += ", ";
             expected_str += SubgroupMatrixComponentTypeToString(config.resultComponentType);

@@ -83,7 +83,7 @@ Result<SuccessType> Validate(const std::string& xcrun_path,
     }
     if (!res.err.empty()) {
         if (!err.empty()) {
-            err += "\n";
+            err += '\n';
         }
         err += res.err;
     }

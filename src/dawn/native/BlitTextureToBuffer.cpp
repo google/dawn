@@ -1264,7 +1264,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kCommonHead;
             shader += kCommonStart;
             shader += kLoadRGBA16ToU32;
-            shader += "}";
+            shader += '}';
             textureSampleType = wgpu::TextureSampleType::Uint;
             break;
         case wgpu::TextureFormat::RGBA16Sint:
@@ -1274,7 +1274,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kCommonHead;
             shader += kCommonStart;
             shader += kLoadRGBA16ToU32;
-            shader += "}";
+            shader += '}';
             textureSampleType = wgpu::TextureSampleType::Sint;
             break;
         case wgpu::TextureFormat::R32Uint:
@@ -1283,7 +1283,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kCommonHead;
             shader += kCommonStart;
             shader += kLoadR32Uint;
-            shader += "}";
+            shader += '}';
             textureSampleType = wgpu::TextureSampleType::Uint;
             break;
         case wgpu::TextureFormat::R32Sint:
@@ -1292,7 +1292,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kCommonHead;
             shader += kCommonStart;
             shader += kLoadR32Sint;
-            shader += "}";
+            shader += '}';
             textureSampleType = wgpu::TextureSampleType::Sint;
             break;
         case wgpu::TextureFormat::RG32Uint:
@@ -1301,7 +1301,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kCommonHead;
             shader += kCommonStart;
             shader += kLoadRG32Uint;
-            shader += "}";
+            shader += '}';
             textureSampleType = wgpu::TextureSampleType::Uint;
             break;
         case wgpu::TextureFormat::RG32Sint:
@@ -1310,7 +1310,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kCommonHead;
             shader += kCommonStart;
             shader += kLoadRG32Sint;
-            shader += "}";
+            shader += '}';
             textureSampleType = wgpu::TextureSampleType::Sint;
             break;
         case wgpu::TextureFormat::RGBA32Uint:
@@ -1319,7 +1319,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kCommonHead;
             shader += kCommonStart;
             shader += kLoadRGBA32Uint;
-            shader += "}";
+            shader += '}';
             textureSampleType = wgpu::TextureSampleType::Uint;
             break;
         case wgpu::TextureFormat::RGBA32Sint:
@@ -1328,7 +1328,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kCommonHead;
             shader += kCommonStart;
             shader += kLoadRGBA32Sint;
-            shader += "}";
+            shader += '}';
             textureSampleType = wgpu::TextureSampleType::Sint;
             break;
         case wgpu::TextureFormat::RGBA16Float:
@@ -1338,7 +1338,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kCommonHead;
             shader += kCommonStart;
             shader += kLoadRGBA16ToU32;
-            shader += "}";
+            shader += '}';
             textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
             break;
         case wgpu::TextureFormat::Depth16Unorm:
@@ -1360,7 +1360,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kCommonHead;
             shader += kCommonStart;
             shader += kLoadR32Float;
-            shader += "}";
+            shader += '}';
             textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
             break;
         case wgpu::TextureFormat::RG32Float:
@@ -1369,7 +1369,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kCommonHead;
             shader += kCommonStart;
             shader += kLoadRG32Float;
-            shader += "}";
+            shader += '}';
             textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
             break;
         case wgpu::TextureFormat::RGBA32Float:
@@ -1378,7 +1378,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kCommonHead;
             shader += kCommonStart;
             shader += kLoadRGBA32Float;
-            shader += "}";
+            shader += '}';
             textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
             break;
         case wgpu::TextureFormat::Stencil8:
@@ -1404,7 +1404,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
                     shader += kCommonHead;
                     shader += kCommonStart;
                     shader += kLoadR32Float;
-                    shader += "}";
+                    shader += '}';
                     textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
                     break;
                 case Aspect::Stencil:
