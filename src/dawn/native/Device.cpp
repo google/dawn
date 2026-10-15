@@ -1324,9 +1324,10 @@ Future DeviceBase::APICreateComputePipelineAsync(
     };
 
     if (IsLost()) {
-        // Device lost error: create an async event that completes when created.
+        // Async pipeline creation must succeed with an invalid pipeline on a lost device.
         return GetFuture(AcquireRef(new CreateComputePipelineAsyncEvent(
-            this, callbackInfo, DAWN_BACKEND_DEVICE_LOST_ERROR("Device lost"), descriptor->label)));
+            this, callbackInfo, ComputePipelineBase::MakeError(this, descriptor->label),
+            /*readyAtCreation=*/true)));
     }
 
     ResultOrUnknownError<Ref<ComputePipelineBase>> resultOrError =
@@ -1402,9 +1403,10 @@ Future DeviceBase::APICreateRenderPipelineAsync(
     };
 
     if (IsLost()) {
-        // Device lost error: create an async event that completes when created.
+        // Async pipeline creation must succeed with an invalid pipeline on a lost device.
         return GetFuture(AcquireRef(new CreateRenderPipelineAsyncEvent(
-            this, callbackInfo, DAWN_BACKEND_DEVICE_LOST_ERROR("Device lost"), descriptor->label)));
+            this, callbackInfo, RenderPipelineBase::MakeError(this, descriptor->label),
+            /*readyAtCreation=*/true)));
     }
 
     auto resultOrError = CreateUninitializedRenderPipeline(descriptor);

@@ -32,11 +32,13 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <tuple>
 #include <utility>
 
 #include "dawn/native/DawnNative.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/tests/MockCallback.h"
+#include "src/dawn/tests/StringViewMatchers.h"
 #include "src/dawn/tests/unittests/native/mocks/ComputePipelineMock.h"
 #include "src/dawn/tests/unittests/native/mocks/DawnMockTest.h"
 #include "src/dawn/tests/unittests/native/mocks/RenderPipelineMock.h"
@@ -72,6 +74,100 @@ class CreatePipelineAsyncEventTests : public DawnMockTest {
     MockComputePipelineAsyncCallback mockComputePipelineCb;
     MockRenderPipelineAsyncCallback mockRenderPipelineCb;
 };
+
+class CreatePipelineAsyncAfterDeviceLossTests
+    : public CreatePipelineAsyncEventTests,
+      public ::testing::WithParamInterface<std::tuple<wgpu::DeviceLostReason, wgpu::CallbackMode>> {
+  protected:
+    void SetUp() override {
+        CreatePipelineAsyncEventTests::SetUp();
+        wgpu::DeviceLostReason reason = std::get<0>(GetParam());
+        EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), reason, _)).Times(1);
+        if (reason == wgpu::DeviceLostReason::Destroyed) {
+            device.Destroy();
+        } else {
+            device.ForceLoss(reason, "Device lost for testing");
+        }
+        ASSERT_TRUE(mDeviceMock->IsLost());
+    }
+
+    wgpu::CallbackMode GetCallbackMode() const { return std::get<1>(GetParam()); }
+
+    void CompleteFuture(wgpu::Future future) {
+        // Only spontaneous callbacks may have fired during pipeline creation.
+        EXPECT_EQ(mCallbackCalled, GetCallbackMode() == wgpu::CallbackMode::AllowSpontaneous);
+        switch (GetCallbackMode()) {
+            case wgpu::CallbackMode::WaitAnyOnly: {
+                ProcessEvents();
+                EXPECT_FALSE(mCallbackCalled);
+                wgpu::Instance instance(ToAPI(mDeviceMock->GetInstance()));
+                EXPECT_EQ(instance.WaitAny(future, 0), wgpu::WaitStatus::Success);
+                break;
+            }
+            case wgpu::CallbackMode::AllowProcessEvents:
+                ProcessEvents();
+                break;
+            case wgpu::CallbackMode::AllowSpontaneous:
+                // A ready-at-creation event must already have called the callback.
+                break;
+        }
+        EXPECT_TRUE(mCallbackCalled);
+    }
+
+    bool mCallbackCalled = false;
+};
+
+INSTANTIATE_TEST_SUITE_P(
+    ,
+    CreatePipelineAsyncAfterDeviceLossTests,
+    ::testing::Combine(::testing::Values(wgpu::DeviceLostReason::Unknown,
+                                         wgpu::DeviceLostReason::Destroyed),
+                       ::testing::Values(wgpu::CallbackMode::WaitAnyOnly,
+                                         wgpu::CallbackMode::AllowProcessEvents,
+                                         wgpu::CallbackMode::AllowSpontaneous)));
+
+// Even an invalid descriptor must resolve successfully after device loss, without backend work.
+TEST_P(CreatePipelineAsyncAfterDeviceLossTests, CreateComputePipelineAsync) {
+    wgpu::ComputePipelineDescriptor desc = {};
+    desc.label = "lost compute pipeline";
+    // No shader module: this descriptor would fail validation on a live device.
+    EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl).Times(0);
+    EXPECT_CALL(mockComputePipelineCb, Call(wgpu::CreatePipelineAsyncStatus::Success,
+                                            ::testing::NotNull(), ::testing::EmptySizedString()))
+        .WillOnce([this](wgpu::CreatePipelineAsyncStatus, wgpu::ComputePipeline pipeline,
+                         wgpu::StringView) {
+            mCallbackCalled = true;
+            ASSERT_NE(pipeline, nullptr);
+            EXPECT_TRUE(CheckIsErrorForTesting(pipeline.Get()));
+            EXPECT_EQ(FromAPI(pipeline.Get())->GetLabel(), "lost compute pipeline");
+        });
+
+    wgpu::Future future = device.CreateComputePipelineAsync(&desc, GetCallbackMode(),
+                                                            mockComputePipelineCb.Callback());
+    CompleteFuture(future);
+    ASSERT_TRUE(::testing::Mock::VerifyAndClearExpectations(&mockComputePipelineCb));
+}
+
+TEST_P(CreatePipelineAsyncAfterDeviceLossTests, CreateRenderPipelineAsync) {
+    wgpu::RenderPipelineDescriptor desc = {};
+    desc.label = "lost render pipeline";
+    // No shader module: this descriptor would fail validation on a live device.
+    EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl).Times(0);
+    EXPECT_CALL(mockRenderPipelineCb, Call(wgpu::CreatePipelineAsyncStatus::Success,
+                                           ::testing::NotNull(), ::testing::EmptySizedString()))
+        .WillOnce([this](wgpu::CreatePipelineAsyncStatus, wgpu::RenderPipeline pipeline,
+                         wgpu::StringView) {
+            mCallbackCalled = true;
+            ASSERT_NE(pipeline, nullptr);
+            EXPECT_TRUE(CheckIsErrorForTesting(pipeline.Get()));
+            EXPECT_EQ(FromAPI(pipeline.Get())->GetLabel(), "lost render pipeline");
+        });
+
+    wgpu::Future future =
+        device.CreateRenderPipelineAsync(&desc, GetCallbackMode(), mockRenderPipelineCb.Callback());
+    CompleteFuture(future);
+    ASSERT_TRUE(::testing::Mock::VerifyAndClearExpectations(&mockRenderPipelineCb));
+}
 
 // Verify CreateRenderPipelineAsync and the internal CreateRenderPipelineAsyncEvent behavior
 // on creating compute pipeline with validation error.
