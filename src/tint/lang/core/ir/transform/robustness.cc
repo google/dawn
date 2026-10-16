@@ -313,16 +313,21 @@ struct State {
                     }
                     TINT_IR_ASSERT(ir, arr->Count()->Is<core::type::RuntimeArrayCount>());
 
-                    // Skip clamping runtime-sized array indices if requested.
-                    if (config.disable_runtime_sized_array_index_clamping) {
+                    // Skip clamping runtime-sized array indices if requested, but not for the
+                    // workgroup address space. No platform has bounds checking on workgroup address
+                    // space and buffer_view can introduce runtime array accesses there.
+                    // Note: possible address spaces with runtime arrays: storage, uniform, and
+                    // workgroup.
+                    auto* object = access->Object();
+                    auto* base_ptr = object->Type()->As<core::type::Pointer>();
+                    if (config.disable_runtime_sized_array_index_clamping &&
+                        base_ptr->AddressSpace() != AddressSpace::kWorkgroup) {
                         return nullptr;
                     }
 
-                    auto* object = access->Object();
                     if (i > 0) {
                         // Generate a pointer to the runtime-sized array if it isn't the base of
                         // this access instruction.
-                        auto* base_ptr = object->Type()->As<core::type::Pointer>();
                         TINT_IR_ASSERT(ir, base_ptr != nullptr);
                         TINT_IR_ASSERT(ir, i == 1);
                         auto* arr_ptr = ty.ptr(base_ptr->AddressSpace(), arr, base_ptr->Access());

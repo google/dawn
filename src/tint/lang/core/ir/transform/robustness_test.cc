@@ -7417,6 +7417,142 @@ S = struct @align(16) {
     EXPECT_EQ(GetParam() ? expect : src, str());
 }
 
+TEST_F(IR_RobustnessTest, Workgroup_RuntimeArray_DisableRuntimeSizedArrayIndexClamping) {
+    mod.properties.Add(Property::kAllowBufferTypes);
+    auto* v = b.Var("v", ty.ptr(workgroup, ty.buffer(256)));
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* idx = b.FunctionParam("idx", ty.u32());
+    foo->SetParams({idx});
+    b.Append(foo->Block(), [&] {
+        auto* view = b.CallExplicit(
+            ty.ptr(workgroup, ty.runtime_array(ty.u32())), BuiltinFn::kBufferArrayView,
+            Vector<TemplateParameter, 1>{ty.runtime_array(ty.u32())}, v, 0_u, 256_u);
+        b.Load(b.Access(ty.ptr(workgroup, ty.u32()), view, idx));
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, buffer<256>, read_write> = var
+}
+
+%foo = func(%idx:u32):void {
+  $B2: {
+    %4:ptr<workgroup, array<u32>, read_write> = bufferArrayView<array<u32>> %v, 0u, 256u
+    %5:ptr<workgroup, u32, read_write> = access %4, %idx
+    %6:u32 = load %5
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<workgroup, buffer<256>, read_write> = var
+}
+
+%foo = func(%idx:u32):void {
+  $B2: {
+    %4:u32 = bufferLength %v
+    %5:bool = lt %4, 256u
+    %6:u32 = select 0u, 0u, %5
+    %7:u32 = select 256u, 4u, %5
+    %8:ptr<workgroup, array<u32>, read_write> = bufferArrayView<array<u32>> %v, %6, %7
+    %9:u32 = arrayLength %8
+    %10:u32 = sub %9, 1u
+    %11:u32 = min %idx, %10
+    %12:ptr<workgroup, u32, read_write> = access %8, %11
+    %13:u32 = load %12
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.disable_runtime_sized_array_index_clamping = !GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_F(IR_RobustnessTest, Workgroup_RuntimeStruct_DisableRuntimeSizedArrayIndexClamping) {
+    mod.properties.Add(Property::kAllowBufferTypes);
+    auto* S =
+        ty.Struct(mod.symbols.New("S"), {
+                                            {mod.symbols.New("a"), ty.runtime_array(ty.u32())},
+                                        });
+    auto* v = b.Var("v", ty.ptr(workgroup, ty.buffer(256)));
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    auto* idx = b.FunctionParam("idx", ty.u32());
+    foo->SetParams({idx});
+    b.Append(foo->Block(), [&] {
+        auto* view = b.CallExplicit(ty.ptr(workgroup, S), BuiltinFn::kBufferArrayView,
+                                    Vector<TemplateParameter, 1>{S}, v, 0_u, 256_u);
+        b.Load(b.Access(ty.ptr(workgroup, ty.u32()), view, 0_u, idx));
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+S = struct @align(4) {
+  a:array<u32> @offset(0)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, buffer<256>, read_write> = var
+}
+
+%foo = func(%idx:u32):void {
+  $B2: {
+    %4:ptr<workgroup, S, read_write> = bufferArrayView<S> %v, 0u, 256u
+    %5:ptr<workgroup, u32, read_write> = access %4, 0u, %idx
+    %6:u32 = load %5
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(4) {
+  a:array<u32> @offset(0)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, buffer<256>, read_write> = var
+}
+
+%foo = func(%idx:u32):void {
+  $B2: {
+    %4:u32 = bufferLength %v
+    %5:bool = lt %4, 256u
+    %6:u32 = select 0u, 0u, %5
+    %7:u32 = select 256u, 4u, %5
+    %8:ptr<workgroup, S, read_write> = bufferArrayView<S> %v, %6, %7
+    %9:ptr<workgroup, array<u32>, read_write> = access %8, 0u
+    %10:u32 = arrayLength %9
+    %11:u32 = sub %10, 1u
+    %12:u32 = min %idx, %11
+    %13:ptr<workgroup, u32, read_write> = access %8, 0u, %12
+    %14:u32 = load %13
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.disable_runtime_sized_array_index_clamping = !GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
 TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithIndex_MaxBound_Equal_Limit) {
     auto* func = b.Function("func", ty.void_());
     b.Append(func->Block(), [&] {
