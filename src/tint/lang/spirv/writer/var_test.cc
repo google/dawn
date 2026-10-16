@@ -62,6 +62,21 @@ TEST_F(SpirvWriterTest, FunctionVar_WithInit) {
     EXPECT_INST("OpStore %v %int_42");
 }
 
+TEST_F(SpirvWriterTest, FunctionVar_UndefInit) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("v", ty.ptr<function, i32>());
+        v->SetInitializer(b.Undef(ty.i32()));
+        b.Return(func);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("%8 = OpUndef %int");
+    EXPECT_INST("%v = OpVariable %_ptr_Function_int Function\n");
+    EXPECT_INST("OpStore %v %8");
+}
+
 TEST_F(SpirvWriterTest, FunctionVar_DeclInsideBlock) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {

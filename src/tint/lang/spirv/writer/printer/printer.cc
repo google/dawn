@@ -65,6 +65,7 @@
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
 #include "src/tint/lang/core/ir/terminator.h"
+#include "src/tint/lang/core/ir/undef.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator/validate.h"
@@ -697,6 +698,7 @@ class Printer {
         return Switch(
             value,  //
             [&](const core::ir::Constant* constant) { return Constant(constant); },
+            [&](const core::ir::Undef* undef) { return Undef(undef->Type()); },
             [&](const core::ir::Value*) {
                 return values_.GetOrAdd(value, [&] { return module_.NextId(); });
             });
