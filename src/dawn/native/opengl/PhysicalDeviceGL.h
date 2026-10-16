@@ -41,7 +41,8 @@ class DisplayEGL;
 
 class PhysicalDevice : public PhysicalDeviceBase {
   public:
-    static ResultOrError<Ref<PhysicalDevice>> Create(wgpu::BackendType backendType,
+    static ResultOrError<Ref<PhysicalDevice>> Create(InstanceBase* instance,
+                                                     wgpu::BackendType backendType,
                                                      Ref<DisplayEGL> display,
                                                      bool forceES31AndMinExtensions,
                                                      EGLint angleVirtualizationGroup);
@@ -52,16 +53,15 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
     // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
-    bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
-                              InstanceBase* instance) const override;
+    bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel) const override;
     ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
-        InstanceBase* instance,
         const Surface* surface) const override;
 
     bool SupportTextureComponentSwizzle() const;
 
   private:
-    PhysicalDevice(wgpu::BackendType backendType,
+    PhysicalDevice(InstanceBase* instance,
+                   wgpu::BackendType backendType,
                    Ref<DisplayEGL> display,
                    EGLint angleVirtualizationGroup);
 

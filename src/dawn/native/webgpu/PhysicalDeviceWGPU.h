@@ -42,11 +42,9 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
     bool SupportsExternalImages() const override;
 
-    bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
-                              InstanceBase* instance) const override;
+    bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel) const override;
 
     ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
-        InstanceBase* instance,
         const Surface* surface) const override;
 
     const DawnProcTable& GetFunctions() const;

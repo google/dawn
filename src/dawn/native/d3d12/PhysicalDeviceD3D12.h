@@ -48,8 +48,7 @@ class PhysicalDevice : public d3d::PhysicalDevice {
 
     // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
-    bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
-                              InstanceBase* instance) const override;
+    bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel) const override;
 
     // Get the applied shader model version under the given adapter or device toggle state, which
     // may be lower than the shader model reported in mDeviceInfo.

@@ -102,8 +102,8 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
 
         Ref<PhysicalDevice> device;
         DAWN_TRY_ASSIGN(
-            device, PhysicalDevice::Create(GetType(), std::move(display), forceES31AndMinExtensions,
-                                           angleVirtualizationGroup));
+            device, PhysicalDevice::Create(GetInstance(), GetType(), std::move(display),
+                                           forceES31AndMinExtensions, angleVirtualizationGroup));
         devices.push_back(device);
 
         return {};

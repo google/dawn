@@ -273,8 +273,7 @@ class AdapterSurfaceCapCache {
             const PhysicalDeviceBase* physicalDevice = adapter->GetPhysicalDevice();
             // TODO(536639352): This will probably require special attention as we split the error
             // types apart. Figure out if this should be Internal or Validation, or Unknown.
-            DAWN_TRY_ASSIGN(mCachedCapabilities, physicalDevice->GetSurfaceCapabilities(
-                                                     adapter->GetInstance(), surface));
+            DAWN_TRY_ASSIGN(mCachedCapabilities, physicalDevice->GetSurfaceCapabilities(surface));
             mCachedCapabilitiesAdapter = GetWeakRef(adapter);
         }
         DAWN_TRY(f(mCachedCapabilities));

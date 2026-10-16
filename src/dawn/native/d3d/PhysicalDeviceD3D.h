@@ -49,7 +49,6 @@ class PhysicalDevice : public PhysicalDeviceBase {
     const LUID& GetAdapterLUID() const;
 
     ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
-        InstanceBase* instance,
         const Surface* surface) const override;
 
   protected:

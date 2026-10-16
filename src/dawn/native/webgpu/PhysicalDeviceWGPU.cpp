@@ -51,7 +51,7 @@ Ref<PhysicalDevice> PhysicalDevice::Create(Backend* backend, WGPUAdapter innerAd
 }
 
 PhysicalDevice::PhysicalDevice(Backend* backend, WGPUAdapter innerAdapter)
-    : PhysicalDeviceBase(wgpu::BackendType::WebGPU),
+    : PhysicalDeviceBase(backend->GetInstance(), wgpu::BackendType::WebGPU),
       mBackend(backend),
       mInnerAdapter(innerAdapter) {
     WGPUAdapterInfo info = {};
@@ -95,13 +95,11 @@ bool PhysicalDevice::SupportsExternalImages() const {
     return false;
 }
 
-bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
-                                          InstanceBase* instance) const {
+bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel) const {
     return true;
 }
 
 ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(
-    InstanceBase* instance,
     const Surface* surface) const {
     // Create a inner surface to query the surface capabilities.
     WGPUSurface innerSurface;

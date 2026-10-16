@@ -32,6 +32,7 @@
 #include <vector>
 
 #include "dawn/native/DawnNative.h"
+#include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/GPUInfo.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/RefCounted.h"
@@ -68,7 +69,7 @@ struct FeatureValidationResult {
 
 class PhysicalDeviceBase : public RefCounted {
   public:
-    explicit PhysicalDeviceBase(wgpu::BackendType backend);
+    PhysicalDeviceBase(InstanceBase* instance, wgpu::BackendType backend);
     ~PhysicalDeviceBase() override;
 
     MaybeError Initialize();
@@ -78,6 +79,7 @@ class PhysicalDeviceBase : public RefCounted {
                                                 const TogglesState& deviceToggles,
                                                 Ref<DeviceBase::DeviceLostEvent>&& lostEvent);
 
+    InstanceBase* GetInstance() const;
     uint32_t GetVendorId() const;
     uint32_t GetDeviceId() const;
     const std::string& GetVendorName() const;
@@ -103,9 +105,7 @@ class PhysicalDeviceBase : public RefCounted {
 
     virtual bool SupportsExternalImages() const = 0;
 
-    // `instance` is an optional parameter used to log warnings but may be null.
-    virtual bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
-                                      InstanceBase* instance) const = 0;
+    virtual bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel) const = 0;
 
     // Backend-specific force-setting and defaulting device toggles
     virtual void SetupBackendAdapterToggles(dawn::platform::Platform* platform,
@@ -134,7 +134,6 @@ class PhysicalDeviceBase : public RefCounted {
         UnpackedPtr<DawnFormatCapabilities>& capabilities) const;
 
     virtual ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
-        InstanceBase* instance,
         const Surface* surface) const = 0;
 
   protected:
@@ -180,6 +179,10 @@ class PhysicalDeviceBase : public RefCounted {
         const TogglesState& toggles) const = 0;
 
     virtual MaybeError ResetInternalDeviceForTestingImpl();
+
+    // The instance always outlives the physical device: physical devices are only kept alive by
+    // BackendConnections owned by the instance and by AdapterBase, which holds a Ref<InstanceBase>.
+    raw_ptr<InstanceBase> mInstance;
     wgpu::BackendType mBackend = wgpu::BackendType::Undefined;
 
     // Features set that CAN be supported by devices of this adapter. Some features in this set may

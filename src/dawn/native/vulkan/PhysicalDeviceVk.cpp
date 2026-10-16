@@ -139,9 +139,8 @@ constexpr bool SafeGreaterThan(T a, U b) {
 PhysicalDevice::PhysicalDevice(InstanceBase* instance,
                                VulkanInstance* vulkanInstance,
                                VkPhysicalDevice physicalDevice)
-    : PhysicalDeviceBase(wgpu::BackendType::Vulkan),
+    : PhysicalDeviceBase(instance, wgpu::BackendType::Vulkan),
       mVkPhysicalDevice(physicalDevice),
-      mInstance(instance),
       mVulkanInstance(vulkanInstance) {}
 
 PhysicalDevice::~PhysicalDevice() = default;
@@ -898,8 +897,8 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     // Vulkan backend), accept that floor for these devices. 64 components leave room for 14
     // inter-stage variables (14 * 4 + 8) instead of the 16 required above.
     uint32_t interStageShaderVariablesBase = baseLimits.v1.maxInterStageShaderVariables;
-    if (gpu_info::IsImgTec(GetVendorId()) &&
-        mInstance->GetTogglesState().IsEnabled(Toggle::VulkanRelaxMaxInterStageShaderVariables)) {
+    if (gpu_info::IsImgTec(GetVendorId()) && GetInstance()->GetTogglesState().IsEnabled(
+                                                 Toggle::VulkanRelaxMaxInterStageShaderVariables)) {
         interStageShaderVariablesBase = std::min(interStageShaderVariablesBase, 14u);
     }
     if (vkLimits.maxVertexOutputComponents < interStageShaderVariablesBase * 4 + 8 ||
@@ -998,15 +997,14 @@ bool PhysicalDevice::SupportsExternalImages() const {
                                                      mVulkanInstance->GetFunctions());
 }
 
-bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
-                                          InstanceBase* instance) const {
+bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel) const {
     if (featureLevel == wgpu::FeatureLevel::Core && !mSupportsCoreFeatureLevel) {
-        if (mCoreError && instance) {
-            // Log a warning explaining why this device doesn't support core the first time a core
-            // adapter is requested.
+        if (mCoreError) {
+            // Log why this device doesn't support core. Moving mCoreError ensures this warning
+            // is only logged once.
             mCoreError->AppendContext(
                 absl::StrFormat("checking core feature level support on \"%s\"", GetName()));
-            instance->ConsumedErrorAndWarnOnce(std::move(mCoreError));
+            GetInstance()->ConsumedErrorAndWarnOnce(std::move(mCoreError));
         }
         return false;
     }
@@ -1656,7 +1654,6 @@ std::optional<uint32_t> PhysicalDevice::GetDefaultComputeSubgroupSize() const {
 }
 
 ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(
-    InstanceBase* instance,
     const Surface* surface) const {
     // Gather the Vulkan surface capabilities.
     VulkanSurfaceInfo vkCaps;
@@ -1665,7 +1662,7 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
         VkInstance vkInstance = GetVulkanInstance()->GetVkInstance();
 
         VkSurfaceKHR vkSurface;
-        DAWN_TRY_ASSIGN(vkSurface, CreateVulkanSurface(instance, this, surface));
+        DAWN_TRY_ASSIGN(vkSurface, CreateVulkanSurface(GetInstance(), this, surface));
         DAWN_TRY_ASSIGN_WITH_CLEANUP(vkCaps, GatherSurfaceInfo(*this, vkSurface),
                                      { fn.DestroySurfaceKHR(vkInstance, vkSurface, nullptr); });
 

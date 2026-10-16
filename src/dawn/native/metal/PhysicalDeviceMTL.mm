@@ -291,7 +291,7 @@ ResultOrError<MTLGPUFamily> GetMTLGPUFamily(id<MTLDevice> device) {
 PhysicalDevice::PhysicalDevice(InstanceBase* instance,
                                NSPRef<id<MTLDevice>> device,
                                bool metalValidationEnabled)
-    : PhysicalDeviceBase(wgpu::BackendType::Metal),
+    : PhysicalDeviceBase(instance, wgpu::BackendType::Metal),
       mDevice(std::move(device)),
       mMetalValidationEnabled(metalValidationEnabled) {
     mName = std::string([[*mDevice name] UTF8String]);
@@ -340,12 +340,11 @@ bool PhysicalDevice::SupportsExternalImages() const {
     return false;
 }
 
-bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel, InstanceBase* instance) const {
+bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel) const {
     return true;
 }
 
 ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(
-    InstanceBase* instance,
     const Surface*) const {
     PhysicalDeviceSurfaceCapabilities capabilities;
 

@@ -106,7 +106,8 @@ bool IsSwiftShader(std::string_view renderer) {
 }  // anonymous namespace
 
 // static
-ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType backendType,
+ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(InstanceBase* instance,
+                                                          wgpu::BackendType backendType,
                                                           Ref<DisplayEGL> display,
                                                           bool forceES31AndMinExtensions,
                                                           EGLint angleVirtualizationGroup) {
@@ -126,8 +127,8 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType back
     // Needed to request extensions here to initialize supported gl extensions set
     context->RequestRequiredExtensionsExplicitly();
 
-    Ref<PhysicalDevice> physicalDevice =
-        AcquireRef(new PhysicalDevice(backendType, std::move(display), angleVirtualizationGroup));
+    Ref<PhysicalDevice> physicalDevice = AcquireRef(
+        new PhysicalDevice(instance, backendType, std::move(display), angleVirtualizationGroup));
     DAWN_TRY(physicalDevice->Initialize());
 
     DAWN_TRY(scopedCurrentContext.End());
@@ -135,10 +136,11 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType back
     return physicalDevice;
 }
 
-PhysicalDevice::PhysicalDevice(wgpu::BackendType backendType,
+PhysicalDevice::PhysicalDevice(InstanceBase* instance,
+                               wgpu::BackendType backendType,
                                Ref<DisplayEGL> display,
                                EGLint angleVirtualizationGroup)
-    : PhysicalDeviceBase(backendType),
+    : PhysicalDeviceBase(instance, backendType),
       mDisplay(std::move(display)),
       mAngleVirtualizationGroup(angleVirtualizationGroup) {}
 
@@ -555,13 +557,11 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
                           std::move(lostEvent));
 }
 
-bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
-                                          InstanceBase* instance) const {
+bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel) const {
     return featureLevel == wgpu::FeatureLevel::Compatibility;
 }
 
 ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(
-    InstanceBase*,
     const Surface*) const {
     PhysicalDeviceSurfaceCapabilities capabilities;
 

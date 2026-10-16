@@ -593,7 +593,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
                 }
             }
 
-            if (physicalDevice->SupportsFeatureLevel(options->featureLevel, instance)) {
+            if (physicalDevice->SupportsFeatureLevel(options->featureLevel)) {
                 physicalDevices.push_back(physicalDevice);
             }
         }

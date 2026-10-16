@@ -51,8 +51,8 @@ class FeatureTests : public testing::Test {
               };
               return dawn::native::APICreateInstance(&instanceDesc);
           }()),
-          mPhysicalDevice(native::null::PhysicalDevice::Create()),
-          mUnsafePhysicalDevice(native::null::PhysicalDevice::Create()),
+          mPhysicalDevice(native::null::PhysicalDevice::Create(mInstanceBase.Get())),
+          mUnsafePhysicalDevice(native::null::PhysicalDevice::Create(mInstanceBase.Get())),
           mAdapterBase(mInstanceBase.Get(),
                        mPhysicalDevice.Get(),
                        wgpu::FeatureLevel::Core,

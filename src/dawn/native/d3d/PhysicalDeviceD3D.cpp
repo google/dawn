@@ -39,7 +39,7 @@ namespace dawn::native::d3d {
 PhysicalDevice::PhysicalDevice(Backend* backend,
                                ComPtr<IDXGIAdapter3> hardwareAdapter,
                                wgpu::BackendType backendType)
-    : PhysicalDeviceBase(backendType),
+    : PhysicalDeviceBase(backend->GetInstance(), backendType),
       mHardwareAdapter(std::move(hardwareAdapter)),
       mBackend(backend) {}
 
@@ -58,7 +58,6 @@ const LUID& PhysicalDevice::GetAdapterLUID() const {
 }
 
 ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(
-    InstanceBase*,
     const Surface*) const {
     PhysicalDeviceSurfaceCapabilities capabilities;
 

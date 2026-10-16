@@ -451,7 +451,7 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
 
     std::vector<Ref<AdapterBase>> adapters;
     for (const auto& physicalDevice : EnumeratePhysicalDevices(unpacked)) {
-        DAWN_CHECK(physicalDevice->SupportsFeatureLevel(unpacked->featureLevel, this));
+        DAWN_CHECK(physicalDevice->SupportsFeatureLevel(unpacked->featureLevel));
         adapters.push_back(CreateAdapter(physicalDevice, unpacked->featureLevel, togglesDesc,
                                          unpacked->powerPreference));
     }
