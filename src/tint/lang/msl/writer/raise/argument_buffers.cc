@@ -261,6 +261,7 @@ struct State {
             }
 
             // Only deal with vars which have binding points.
+            // Note, bp->binding is the remapped (MSL) binding point, not the WGSL binding point
             auto bp = var->BindingPoint();
             if (!bp.has_value()) {
                 continue;

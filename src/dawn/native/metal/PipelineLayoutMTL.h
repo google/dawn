@@ -30,6 +30,8 @@
 
 #import <Metal/Metal.h>
 
+#include <utility>
+
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/common/ityp_stack_vec.h"
 #include "src/dawn/native/BindingInfo.h"
@@ -48,8 +50,21 @@ inline constexpr size_t kImmediateBlockBufferSlot = kMetalBufferTableSize - 1;
 // The number of Metal buffers Dawn can use in a generic way (i.e. that aren't reserved)
 inline constexpr size_t kGenericMetalBufferSlots = kMetalBufferTableSize - 1;
 
-// The Last buffer slot to be used by argument buffers
-inline constexpr size_t kArgumentBufferSlotMax = kImmediateBlockBufferSlot - 1;
+// Get the [[buffer()]] number for an argument buffer and its dynamic offset buffer,
+// from the SetBindGroup() slot number.
+// TODO(crbug.com/363031535): The dynamic offsets should all be in a single grouping
+// which is in the immediates buffer. Then this will just return a single uint32_t.
+inline std::pair<uint32_t, uint32_t> BindGroupSlotToArgumentBufferID(BindGroupIndex slot) {
+    // The last buffer slot to be used by argument buffers
+    constexpr uint32_t kArgumentBufferSlotMax = kImmediateBlockBufferSlot - 1;
+
+    // Maps slots as follows (AB = Argument Buffer, DOB = Dynamic Offset Buffer):
+    // AB3 DOB3 AB2 DOB2 AB1 DOB1 AB0 DOB0
+    // TODO(crbug.com/363031535): After removing DOBs, decide on a more compact layout for bindings,
+    // e.g. [immediate buffer, BG0, BG1, BG2, BG3, ... all the vertex buffers].
+    uint32_t index = kArgumentBufferSlotMax - uint32_t{slot} * 2;
+    return {index - 1, index};
+}
 
 inline uint32_t GetImmediateBufferSizesByteOffset(ImmediateMask pipelineImmediateMask) {
     return static_cast<uint32_t>(pipelineImmediateMask.count()) * kImmediateElementByteSize;

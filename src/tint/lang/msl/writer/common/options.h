@@ -71,7 +71,7 @@ struct ArgumentBufferInfo {
     std::unordered_map<uint32_t, uint32_t> binding_info_to_offset_index{};
 
     struct MemberInfo {
-        // [[id()]] annotation
+        // [[id()]] annotation (matching MTLArgumentDescriptor.index)
         uint32_t id = 0;
         // The type to use for the resource **if** not declared in the shader. Otherwise ignored.
         tint::ResourceType placeholder_type = tint::ResourceType::kEmpty;

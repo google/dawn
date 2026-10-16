@@ -168,19 +168,12 @@ std::unordered_map<uint32_t, tint::msl::writer::ArgumentBufferInfo> GenerateArgu
 
     std::unordered_map<uint32_t, tint::msl::writer::ArgumentBufferInfo> info = {};
 
-    uint32_t curBufferIdx = kArgumentBufferSlotMax;
     for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
 
-        // Note, both of these buffer index values need to match up to the value set in the
-        // CommandBufferMTL #argument-buffer-and-dynamic-offsets-buffer-indices
-        uint32_t argumentBufferIdx = curBufferIdx--;
-        // TODO(crbug.com/363031535): The dynamic offsets should all be in a single grouping
-        // which is in the immediates buffer.
-        std::optional<uint32_t> dynamicOffsetsBufferIdx;
-        if (uint32_t(bgl->GetDynamicBufferCount()) > 0u) {
-            dynamicOffsetsBufferIdx = curBufferIdx--;
-        }
+        uint32_t argumentBufferIdx, dynamicOffsetsBufferIdx;
+        std::tie(argumentBufferIdx, dynamicOffsetsBufferIdx) =
+            BindGroupSlotToArgumentBufferID(group);
 
         tint::msl::writer::ArgumentBufferInfo argumentBufferInfo{
             .id = argumentBufferIdx,
