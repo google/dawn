@@ -244,7 +244,6 @@ class ImportedTextureBase : public Texture {
     //   can happen before initialization, or after destruction.
     enum class ExternalState { PendingAcquire, Acquired, EagerlyTransitioned, Released };
     ExternalState mExternalState = ExternalState::Released;
-    ExternalState mLastExternalState = ExternalState::Released;
 
     // The layouts to use for the queue ownership transfer barrier when a texture is used the first
     // time after being imported. The layouts must match the ones from the queue ownership transfer

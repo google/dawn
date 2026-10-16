@@ -1698,7 +1698,8 @@ bool ImportedTextureBase::CanReuseWithoutBarrier(wgpu::TextureUsage lastUsage,
                                                  wgpu::TextureUsage usage,
                                                  wgpu::ShaderStage lastShaderStage,
                                                  wgpu::ShaderStage shaderStage) {
-    return mLastExternalState == mExternalState &&
+    DAWN_ASSERT(mExternalState != ExternalState::Released);
+    return mExternalState == ExternalState::Acquired &&
            Texture::CanReuseWithoutBarrier(lastUsage, usage, lastShaderStage, shaderStage);
 }
 
@@ -1781,18 +1782,12 @@ void ImportedTextureBase::TweakTransition(CommandRecordingContext* recordingCont
 
         mExternalState = ExternalState::Acquired;
     }
-
-    mLastExternalState = mExternalState;
 }
 
 MaybeError ImportedTextureBase::EndAccess(ExternalSemaphoreHandle* handle,
                                           VkImageLayout* releasedOldLayout,
                                           VkImageLayout* releasedNewLayout) {
     DAWN_ASSERT(GetNumMipLevels() == 1 && GetArrayLayers() == 1);
-
-    // Release the texture
-    mExternalState = ExternalState::Released;
-    mLastExternalState = ExternalState::Released;
 
     // Compute the layouts for the queue transition for export. desiredLayout == UNDEFINED is a tag
     // value used to export with whatever the current layout is. However queue transitioning to the
@@ -1820,6 +1815,9 @@ MaybeError ImportedTextureBase::EndAccess(ExternalSemaphoreHandle* handle,
         currentLayout = targetLayout;
     }
     DAWN_ASSERT(mExternalSemaphoreHandle != kNullExternalSemaphoreHandle);
+
+    // Release the texture
+    mExternalState = ExternalState::Released;
 
     // Write out the layouts and signal semaphore
     *releasedOldLayout = currentLayout;
@@ -1921,7 +1919,6 @@ MaybeUnknownError ExternalVkImageTexture::Initialize(
     DAWN_ASSERT(!GetFormat().IsMultiPlanar() || mCombinedAspect == Aspect::Color);
 
     mExternalState = ExternalState::PendingAcquire;
-    mLastExternalState = ExternalState::Released;
     mExportQueueFamilyIndex = externalMemoryService->GetQueueFamilyIndex(descriptor->GetType());
 
     mPendingAcquireOldLayout = descriptor->releasedOldLayout;
@@ -2052,7 +2049,6 @@ void SharedTexture::SetPendingAcquire(VkImageLayout pendingAcquireOldLayout,
                                       VkImageLayout pendingAcquireNewLayout) {
     DAWN_ASSERT(GetSharedResourceMemoryContents() != nullptr);
     mExternalState = ExternalState::PendingAcquire;
-    mLastExternalState = ExternalState::Released;
 
     mPendingAcquireOldLayout = pendingAcquireOldLayout;
     mPendingAcquireNewLayout = pendingAcquireNewLayout;
