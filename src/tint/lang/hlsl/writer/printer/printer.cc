@@ -71,6 +71,7 @@
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
+#include "src/tint/lang/core/ir/undef.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator/validate.h"
@@ -716,13 +717,16 @@ class Printer : public tint::TextGenerator {
 
         EmitTypeAndName(out, var->Result()->Type(), NameOf(var->Result()));
 
-        if (var->Initializer()) {
+        auto* init = var->Initializer();
+        if (!init) {
+            // No initializer means implicit zero-initialization.
+            if (space == core::AddressSpace::kPrivate || space == core::AddressSpace::kFunction) {
+                out << " = ";
+                EmitZeroValue(out, ptr->UnwrapPtr());
+            }
+        } else if (!init->Is<core::ir::Undef>()) {
             out << " = ";
-            EmitValue(out, var->Initializer());
-        } else if (space == core::AddressSpace::kPrivate ||
-                   space == core::AddressSpace::kFunction) {
-            out << " = ";
-            EmitZeroValue(out, ptr->UnwrapPtr());
+            EmitValue(out, init);
         }
         out << ";";
     }

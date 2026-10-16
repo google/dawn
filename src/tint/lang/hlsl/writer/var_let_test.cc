@@ -80,6 +80,25 @@ void main() {
 )");
 }
 
+TEST_F(HlslWriterTest, Var_UndefInitializer) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* var = b.Var("a", function, ty.f32());
+        var->SetInitializer(b.Undef(ty.f32()));
+        b.Return(func);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
+void main() {
+  float a;
+}
+
+)");
+}
+
 TEST_F(HlslWriterTest, Let) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
