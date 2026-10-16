@@ -44,6 +44,8 @@ namespace tint::core::ir::transform {
 /// Configuration options that control when to clamp accesses.
 struct RobustnessConfig {
     /// Should texture accesses be clamped?
+    /// Note that the `sample_index` parameter of `textureLoad` will still be clamped if clamping is
+    /// disabled.
     bool clamp_texture = true;
 
     /// Should accesses to pointers with the 'immediate' address space be clamped?

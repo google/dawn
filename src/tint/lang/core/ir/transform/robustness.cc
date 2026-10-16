@@ -104,11 +104,9 @@ struct State {
                 },
                 [&](ir::CoreBuiltinCall* call) {
                     // Check if this is a texture builtin that needs to be clamped.
-                    if (config.clamp_texture) {
-                        if (call->Func() == core::BuiltinFn::kTextureDimensions ||
-                            call->Func() == core::BuiltinFn::kTextureLoad) {
-                            texture_calls.Push(call);
-                        }
+                    if (call->Func() == core::BuiltinFn::kTextureDimensions ||
+                        call->Func() == core::BuiltinFn::kTextureLoad) {
+                        texture_calls.Push(call);
                     }
                     // Check if this is a subgroup matrix builtin that needs to be clamped.
                     if (call->Func() == core::BuiltinFn::kSubgroupMatrixLoad ||
@@ -400,7 +398,7 @@ struct State {
         // Select which arguments to clamp based on the function overload.
         switch (call->Func()) {
             case core::BuiltinFn::kTextureDimensions: {
-                if (args.size() > 1) {
+                if (config.clamp_texture && args.size() > 1) {
                     clamp_level(1u);
                 }
                 break;
@@ -408,16 +406,26 @@ struct State {
             case core::BuiltinFn::kTextureLoad: {
                 uint32_t next_arg = 2u;
                 if (core::type::IsTextureArray(texture->Dim())) {
-                    clamp_array_index(next_arg++);
+                    if (config.clamp_texture) {
+                        clamp_array_index(next_arg);
+                    }
+                    next_arg++;
                 }
                 if (texture->IsAnyOf<core::type::SampledTexture, core::type::DepthTexture>()) {
-                    clamp_level(next_arg++);
+                    if (config.clamp_texture) {
+                        clamp_level(next_arg);
+                    }
+                    next_arg++;
                 }
                 if (texture->IsAnyOf<core::type::MultisampledTexture,
                                      core::type::DepthMultisampledTexture>()) {
+                    // Always clamp the sample index, even when `clamp_texture` is false, as
+                    // underlying APIs do not guarantee robustness for out-of-bounds sample indices.
                     clamp_sample_index(next_arg++);
                 }
-                clamp_coords(1u);  // Must run after clamp_level
+                if (config.clamp_texture) {
+                    clamp_coords(1u);  // Must run after clamp_level
+                }
                 break;
             }
             default:

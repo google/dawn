@@ -2371,11 +2371,39 @@ $B1: {  # root
 }
 )";
 
+    auto* expect_sample_index_only = R"(
+$B1: {  # root
+  %texture:ptr<handle, texture_multisampled_2d<f32>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %level:i32):vec4<f32> {
+  $B2: {
+    %5:texture_multisampled_2d<f32> = load %texture
+    %6:u32 = textureNumSamples %5
+    %7:u32 = sub %6, 1u
+    %8:u32 = convert %level
+    %9:u32 = min %8, %7
+    %10:vec4<f32> = textureLoad %5, %coords, %9
+    ret %10
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %level_1:u32):vec4<f32> {  # %coords_1: 'coords', %level_1: 'level'
+  $B3: {
+    %14:texture_multisampled_2d<f32> = load %texture
+    %15:u32 = textureNumSamples %14
+    %16:u32 = sub %15, 1u
+    %17:u32 = min %level_1, %16
+    %18:vec4<f32> = textureLoad %14, %coords_1, %17
+    ret %18
+  }
+}
+)";
+
     RobustnessConfig cfg;
     cfg.clamp_texture = GetParam().enabled;
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam().enabled ? expect : src, str());
+    EXPECT_EQ(GetParam().enabled ? expect : expect_sample_index_only, str());
 }
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_Depth2D) {
@@ -2665,11 +2693,39 @@ $B1: {  # root
 }
 )";
 
+    auto* expect_sample_index_only = R"(
+$B1: {  # root
+  %texture:ptr<handle, texture_depth_multisampled_2d, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %index:i32):f32 {
+  $B2: {
+    %5:texture_depth_multisampled_2d = load %texture
+    %6:u32 = textureNumSamples %5
+    %7:u32 = sub %6, 1u
+    %8:u32 = convert %index
+    %9:u32 = min %8, %7
+    %10:f32 = textureLoad %5, %coords, %9
+    ret %10
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %index_1:u32):f32 {  # %coords_1: 'coords', %index_1: 'index'
+  $B3: {
+    %14:texture_depth_multisampled_2d = load %texture
+    %15:u32 = textureNumSamples %14
+    %16:u32 = sub %15, 1u
+    %17:u32 = min %index_1, %16
+    %18:f32 = textureLoad %14, %coords_1, %17
+    ret %18
+  }
+}
+)";
+
     RobustnessConfig cfg;
     cfg.clamp_texture = GetParam().enabled;
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam().enabled ? expect : src, str());
+    EXPECT_EQ(GetParam().enabled ? expect : expect_sample_index_only, str());
 }
 
 TEST_P(IR_BindingVariableRobustnessTest, TextureLoad_External) {

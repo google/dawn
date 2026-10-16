@@ -197,6 +197,8 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         // Direct3D guarantees to return zero for any resource that is accessed out of bounds, and
         // according to the description of the assembly store_uav_typed, out of bounds addressing
         // means nothing gets written to memory.
+        // Note that the sample_index parameter of multisampled textureLoad will still be clamped by
+        // the Robustness transform, as Direct3D leaves out-of-bounds sample indices undefined.
         config.clamp_texture = false;
 
         config.use_integer_range_analysis = !options.disable_integer_range_analysis;
