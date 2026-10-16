@@ -433,7 +433,7 @@ deps = {
   },
 
   'third_party/directx-shader-compiler/src': {
-    'url': '{chromium_git}/external/github.com/microsoft/DirectXShaderCompiler@78d896efe7640f9a817e30fb10c490520ed62611',
+    'url': '{chromium_git}/external/github.com/microsoft/DirectXShaderCompiler@61e9771fc34bc914565dfc95a11f731f853e8ac9',
   },
 
   'third_party/directx-headers/src': {
