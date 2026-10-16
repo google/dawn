@@ -1070,11 +1070,11 @@ void Texture::TransitionUsageForPassImpl(
         lastSyncInfo->usage = newUsage;
     });
 
-    TweakTransition(recordingContext, imageBarriers, transitionBarrierStart);
-
     // Skip adding pipeline stages if no barrier was needed to avoid putting TOP_OF_PIPE in the
     // destination stages.
     if (allNewUsages != wgpu::TextureUsage::None) {
+        TweakTransition(recordingContext, imageBarriers, transitionBarrierStart);
+
         *srcStages |= VulkanPipelineStage(allLastUsages, allLastShaderStages, format);
         *dstStages |= VulkanPipelineStage(allNewUsages, allNewShaderStages, format);
     }
@@ -1092,9 +1092,9 @@ void Texture::TransitionUsageNow(CommandRecordingContext* recordingContext,
     TransitionUsageAndGetResourceBarrier(usage, shaderStages, range, &barriers, &srcStages,
                                          &dstStages);
 
-    TweakTransition(recordingContext, &barriers, 0);
-
     if (!barriers.empty()) {
+        TweakTransition(recordingContext, &barriers, 0);
+
         DAWN_ASSERT(srcStages != 0 && dstStages != 0);
         ToBackend(GetDevice())
             ->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages, 0, 0,
@@ -1707,21 +1707,16 @@ void ImportedTextureBase::TweakTransition(CommandRecordingContext* recordingCont
                                           size_t transitionBarrierStart) {
     DAWN_ASSERT(GetNumMipLevels() == 1 && GetArrayLayers() == 1);
 
-    mLastSharedTextureMemoryUsageSerial = GetDevice()->GetQueue()->GetPendingCommandSerial();
-
     // transitionBarrierStart specify the index where barriers for current transition start in
     // the vector. barriers->size() - transitionBarrierStart is the number of barriers that we
     // have already added into the vector during current transition.
-    DAWN_ASSERT(barriers->size() - transitionBarrierStart <= 1);
+    DAWN_ASSERT(barriers->size() - transitionBarrierStart == 1);
+
+    mLastSharedTextureMemoryUsageSerial = GetDevice()->GetQueue()->GetPendingCommandSerial();
 
     if (mExternalState == ExternalState::PendingAcquire ||
         mExternalState == ExternalState::EagerlyTransitioned) {
         recordingContext->specialSyncTextures.insert(this);
-        if (barriers->size() == transitionBarrierStart) {
-            barriers->push_back(BuildMemoryBarrier(
-                this, wgpu::TextureUsage::None, wgpu::TextureUsage::None,
-                SubresourceRange::SingleMipAndLayer(0, 0, GetDisjointVulkanAspects())));
-        }
 
         VkImageMemoryBarrier* barrier = &(*barriers)[transitionBarrierStart];
         // Transfer texture from external queue to graphics queue

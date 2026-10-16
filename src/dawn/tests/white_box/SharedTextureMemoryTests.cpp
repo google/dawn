@@ -2420,6 +2420,172 @@ TEST_P(SharedTextureMemoryTests, RenderThenSampleSameReadOnlyTextureAcrossAccess
     }
 }
 
+// Test that binding an acquired SharedTexture in a BindGroup whose layout entry has
+// wgpu::ShaderStage::None visibility is a no-op for the texture and does not interfere with
+// acquiring and sampling the texture in a subsequent pass. On Vulkan, this ensures
+// TransitionUsageForPassImpl does not call TweakTransition when no barrier is emitted.
+TEST_P(SharedTextureMemoryTests, BoundWithShaderStageNoneBeforeSampling) {
+    // TODO(crbug.com/523272965): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
+    // crbug.com/475503907
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsImgTec());
+
+    wgpu::ShaderModule noopModule = utils::CreateShaderModule(device, R"(
+      @vertex fn vert_main() -> @builtin(position) vec4f {
+          return vec4f(0.0, 0.0, 0.0, 1.0);
+      }
+      @fragment fn frag_main() -> @location(0) vec4f {
+          return vec4f(0.0, 0.0, 0.0, 1.0);
+      }
+    )");
+
+    wgpu::BindGroupLayout noneBgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::None, wgpu::TextureSampleType::UnfilterableFloat}});
+
+    utils::ComboRenderPipelineDescriptor noopPipelineDesc;
+    noopPipelineDesc.layout = utils::MakePipelineLayout(device, {noneBgl});
+    noopPipelineDesc.vertex.module = noopModule;
+    noopPipelineDesc.cFragment.module = noopModule;
+    noopPipelineDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    wgpu::RenderPipeline noopPipeline = device.CreateRenderPipeline(&noopPipelineDesc);
+
+    for (const auto& memories :
+         GetParam().mBackend->CreatePerDeviceSharedTextureMemoriesFilterByUsage(
+             {device}, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding,
+             GetParam().mLayerCount)) {
+        auto memory = memories[0];
+        wgpu::SharedTextureMemoryProperties properties;
+        memory.GetProperties(&properties);
+
+        wgpu::Texture writeTexture = memory.CreateTexture();
+
+        wgpu::TextureDescriptor readTextureDesc = {};
+        readTextureDesc.format = properties.format;
+        readTextureDesc.size = properties.size;
+        readTextureDesc.usage = wgpu::TextureUsage::TextureBinding;
+        readTextureDesc.label = "read texture";
+        wgpu::Texture readTexture = memory.CreateTexture(&readTextureDesc);
+
+        // Clear the texture.
+        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+        beginDesc.concurrentRead = false;
+        beginDesc.initialized = false;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+        memory.BeginAccess(writeTexture, &beginDesc);
+
+        wgpu::CommandBuffer commandBuffer = MakeFourColorsClearCommandBuffer(device, writeTexture);
+        device.GetQueue().Submit(1, &commandBuffer);
+
+        wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
+        memory.EndAccess(writeTexture, &endState);
+        EXPECT_TRUE(endState.initialized);
+
+        // Begin access on readTexture, bind it in a pass with ShaderStage::None visibility, then
+        // sample it in a subsequent pass before ending access.
+        std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
+        for (size_t j = 0; j < endState.fenceCount; ++j) {
+            sharedFences[j] = utils::ImportFenceTo(device, endState.fences[j]);
+        }
+        beginDesc.fenceCount = endState.fenceCount;
+        beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValueCount = endState.signaledValueCount;
+        beginDesc.signaledValues = endState.signaledValues;
+        beginDesc.concurrentRead = false;
+        beginDesc.initialized = endState.initialized;
+        backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
+
+        memory.BeginAccess(readTexture, &beginDesc);
+
+        wgpu::TextureViewDescriptor viewDesc;
+        viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+        viewDesc.baseArrayLayer = 0;
+        viewDesc.arrayLayerCount = 1;
+        wgpu::BindGroup noneBindGroup =
+            utils::MakeBindGroup(device, noneBgl, {{0, readTexture.CreateView(&viewDesc)}});
+
+        utils::BasicRenderPass placeholderRenderPass = utils::CreateBasicRenderPass(device, 1, 1);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass =
+            encoder.BeginRenderPass(&placeholderRenderPass.renderPassInfo);
+        pass.SetPipeline(noopPipeline);
+        pass.SetBindGroup(0, noneBindGroup);
+        pass.Draw(1);
+        pass.End();
+        wgpu::CommandBuffer noopCommandBuffer = encoder.Finish();
+
+        wgpu::Texture colorTarget;
+        std::tie(commandBuffer, colorTarget) =
+            MakeCheckBySamplingCommandBuffer(device, readTexture);
+        wgpu::CommandBuffer commands[] = {noopCommandBuffer, commandBuffer};
+        device.GetQueue().Submit(2, commands);
+
+        memory.EndAccess(readTexture, &endState);
+        EXPECT_TRUE(endState.initialized);
+
+        CheckFourColors(device, readTexture.GetFormat(), colorTarget);
+    }
+}
+
+// Test copying from the same SharedTexture to a buffer twice in a single command buffer. The
+// first copy acquires the texture and transitions it to CopySrc, and the second copy reuses the
+// read-only CopySrc usage without needing a barrier.
+TEST_P(SharedTextureMemoryTests, CopyTextureToBufferTwiceInSameCommandBuffer) {
+    // TODO(crbug.com/523272965): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
+    // crbug.com/475503907
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsImgTec());
+
+    for (wgpu::SharedTextureMemory memory :
+         GetParam().mBackend->CreateSinglePlanarSharedTextureMemories(device,
+                                                                      GetParam().mLayerCount)) {
+        wgpu::SharedTextureMemoryProperties properties;
+        memory.GetProperties(&properties);
+        if (!(properties.usage & wgpu::TextureUsage::CopySrc)) {
+            continue;
+        }
+
+        wgpu::Texture texture = memory.CreateTexture();
+
+        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+        beginDesc.concurrentRead = false;
+        beginDesc.initialized = true;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+        memory.BeginAccess(texture, &beginDesc);
+
+        wgpu::BufferDescriptor bufferDesc = {};
+        bufferDesc.size = 128;
+        bufferDesc.usage = wgpu::BufferUsage::CopyDst;
+        wgpu::Buffer destinationBuffer = device.CreateBuffer(&bufferDesc);
+
+        wgpu::TexelCopyTextureInfo source = {};
+        source.texture = texture;
+        wgpu::TexelCopyBufferInfo destination = {};
+        destination.buffer = destinationBuffer;
+        wgpu::Extent3D size = {1, 1, 1};
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyTextureToBuffer(&source, &destination, &size);
+        encoder.CopyTextureToBuffer(&source, &destination, &size);
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
+        device.GetQueue().Submit(1, &commandBuffer);
+
+        wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
+        memory.EndAccess(texture, &endState);
+        EXPECT_TRUE(endState.initialized);
+    }
+}
+
 // Test rendering to a texture memory on one device, then sampling it using another device.
 // Destroy the texture from the first device after submitting the commands, but before performing
 // EndAccess. The second device should still be able to wait on the first device and see the
