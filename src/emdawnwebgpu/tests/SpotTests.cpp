@@ -166,8 +166,8 @@ TEST_P(SpotTests, BufferGetMapState) {
 }
 
 TEST_P(SpotTests, DebugMarkers) {
-    // These methods pass StringView by value. Missing pointer signatures cause
-    // BigInt/Number exceptions in the JS bindings when built with MEMORY64.
+    // These methods pass StringView by value. If we are missing pointer signatures, that will
+    // cause BigInt/Number exceptions in the JS bindings when built with MEMORY64.
     auto testDebugMarkers = [](const auto& encoder) {
         for (wgpu::StringView label : {wgpu::StringView("debug marker"),
                                        wgpu::StringView("debug marker trailing text", 12)}) {
