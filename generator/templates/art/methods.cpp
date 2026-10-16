@@ -76,10 +76,11 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     {% set KotlinRecord = FunctionSuffix + "KotlinRecord" %}
     {% set ArgsStruct = FunctionSuffix + "ArgsStruct" %}
 
+    {% set unwrap_objs = (object is not none) %}
     //* Define the helper structs to perform most of the conversion.
     struct {{KotlinRecord}} {
         {% for arg in kotlin_record_members(method.arguments) %}
-            {{ arg_to_jni_type(arg) }} {{ as_varName(arg.name) }};
+            {{ 'jlong' if (unwrap_objs and arg.type.category == 'object' and not arg.length) else arg_to_jni_type(arg) }} {{ as_varName(arg.name) }};
         {% endfor %}
     };
     struct {{ArgsStruct}} {
@@ -88,22 +89,30 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
         {% endfor %}
     };
 
-    {{ define_kotlin_to_struct_conversion("ConvertInternal", KotlinRecord, ArgsStruct, method.arguments)}}
+    {{ define_kotlin_to_struct_conversion("ConvertInternal", KotlinRecord, ArgsStruct, method.arguments, unwrap_objects=unwrap_objs)}}
 
     {% set _kotlin_return = kotlin_return(method) %}
     //*  A JNI-external method is built with the JNI signature expected to match the host Kotlin.
+    //*  Object methods bind to the top-level static native on {{ kotlin_name(object) }}Kt, receiving the handle as a jlong.
     DEFAULT extern "C"
     {{ arg_to_jni_type(_kotlin_return) }}
-    Java_{{ kotlin_package.replace('.', '_') }}_{{ FunctionSuffix }}
-            (JNIEnv *env{{ ', jobject obj' if object else ', jclass clazz' -}}
+    {% if object %}
+        Java_{{ kotlin_package.replace('.', '_') }}_{{ kotlin_name(object) }}Kt_native{{ method.name.CamelCase() }}
+                (JNIEnv *env, jclass clazz, jlong _handle
+    {%- else %}
+        Java_{{ kotlin_package.replace('.', '_') }}_{{ FunctionSuffix }}
+                (JNIEnv *env, jclass clazz
+    {%- endif -%}
 
     //* Make the signature for each argument in turn.
-    {% for arg in kotlin_record_members(method.arguments) %},
-        {{ arg_to_jni_type(arg) }} _{{ as_varName(arg.name) }}
-    {% endfor %}) {
+    {%- for arg in kotlin_record_members(method.arguments) %},
+        {{ 'jlong' if (unwrap_objs and arg.type.category == 'object' and not arg.length) else arg_to_jni_type(arg) }} _{{ as_varName(arg.name) }}
+    {%- endfor %}) {
 
     // * Helper context for the duration of this method call.
-    JNIClasses* classes = JNIClasses::getInstance(env);
+    {% if _kotlin_return and (_kotlin_return.type.category == 'object' or (_kotlin_return.length == 'size_t' and (_kotlin_return.type.category == 'structure' or _kotlin_return.type.name.get() == 'char'))) %}
+        JNIClasses* classes = JNIClasses::getInstance(env);
+    {% endif %}
     JNIContext c(env);
 
     //* Perform the conversion of arguments.
@@ -115,10 +124,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     ConvertInternal(&c, kotlinRecord, &args);
 
     {% if object %}
-        jclass memberClass = classes->{{ object.name.camelCase() }};
-        jmethodID getHandle = env->GetMethodID(memberClass, "getHandle", "()J");
-        auto handle =
-                reinterpret_cast<{{ as_cType(object.name) }}>(env->CallLongMethod(obj, getHandle));
+        auto handle = reinterpret_cast<{{ as_cType(object.name) }}>(_handle);
     {% endif %}
 
     //* Actually invoke the native version of the method.
@@ -215,15 +221,12 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     {% endfor %}
 
     //* Every object gets a Release method, to supply a Kotlin AutoCloseable.
-    extern "C"
-    JNIEXPORT void JNICALL
-    Java_{{ kotlin_package.replace('.', '_') }}_{{ kotlin_name(obj) }}_close(
-            JNIEnv *env, jobject obj) {
-        JNIClasses* classes = JNIClasses::getInstance(env);
-        jclass clz = classes->{{ obj.name.camelCase() }};
-        const {{ as_cType(obj.name) }} handle = reinterpret_cast<{{ as_cType(obj.name) }}>(
-                env->CallLongMethod(obj, env->GetMethodID(clz, "getHandle", "()J")));
-        wgpu{{ obj.name.CamelCase() }}Release(handle);
+    //* The handle is unwrapped on the Kotlin side and passed to the top-level static native on {{ kotlin_name(obj) }}Kt.
+    DEFAULT extern "C"
+    void
+    Java_{{ kotlin_package.replace('.', '_') }}_{{ kotlin_name(obj) }}Kt_nativeClose(
+            JNIEnv *env, jclass clazz, jlong _handle) {
+        wgpu{{ obj.name.CamelCase() }}Release(reinterpret_cast<{{ as_cType(obj.name) }}>(_handle));
     }
 {% endfor %}
 

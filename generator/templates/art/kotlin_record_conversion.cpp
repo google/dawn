@@ -43,10 +43,23 @@
     };
 {% endmacro %}
 
-{% macro define_kotlin_to_struct_conversion(function_name, kotlin_name, struct_name, members, is_structure_converter=False) %}
+{% macro define_kotlin_to_struct_conversion(function_name, kotlin_name, struct_name, members, is_structure_converter=False, unwrap_objects=False) %}
     inline void {{function_name}}(JNIContext* c, const {{kotlin_name}}& inStruct, {{struct_name}}* outStruct) {
-        JNIEnv* env = c->env;
-        JNIClasses* classes = JNIClasses::getInstance(env);
+        {% set ns = namespace(needs_env=false, needs_classes=false) %}
+        {% for member in kotlin_record_members(members) if not member.kotlin_only %}
+            {% if member.type.category == 'object' and ((member.length and member.length != 'constant') or (not member.length and not unwrap_objects)) %}
+                {% set ns.needs_classes = true %}
+                {% set ns.needs_env = true %}
+            {% elif member.type.category in ['callback function', 'structure'] or (member.length and member.constant_length != 1) %}
+                {% set ns.needs_env = true %}
+            {% endif %}
+        {% endfor %}
+        {% if ns.needs_env %}
+            JNIEnv* env = c->env;
+        {% endif %}
+        {% if ns.needs_classes %}
+            JNIClasses* classes = JNIClasses::getInstance(env);
+        {% endif %}
         *outStruct = {};
 
         {% for member in kotlin_record_members(members) %}
@@ -308,14 +321,19 @@
                     {% endif %}
                 //* From here members are single values.
                 {% elif member.type.category == 'object' %}
-                    if (in != nullptr) {
-                        jclass memberClass = classes->{{ member.type.name.camelCase() }};
-                        jmethodID getHandle = env->GetMethodID(memberClass, "getHandle", "()J");
-                        out = reinterpret_cast<{{as_cType(member.type.name)}}>(
-                                env->CallLongMethod(in, getHandle));
-                    } else {
-                        out = nullptr;
-                    }
+                    {% if unwrap_objects %}
+                        //* Handle was already unwrapped on the Kotlin side. 0 maps to nullptr.
+                        out = reinterpret_cast<{{as_cType(member.type.name)}}>(in);
+                    {% else %}
+                        if (in != nullptr) {
+                            jclass memberClass = classes->{{ member.type.name.camelCase() }};
+                            jmethodID getHandle = env->GetMethodID(memberClass, "getHandle", "()J");
+                            out = reinterpret_cast<{{as_cType(member.type.name)}}>(
+                                    env->CallLongMethod(in, getHandle));
+                        } else {
+                            out = nullptr;
+                        }
+                    {% endif %}
                 {% elif member.type.category == 'callback function' %}
                     //* Do nothing for this case.
                 {% elif member.type.category == 'structure' %}
