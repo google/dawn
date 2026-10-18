@@ -15,8 +15,9 @@ consistent.
 
 Since errors are expected to be an exceptional case, it's important that code that produces an error
 doesn't adversely impact the performance of the error-free path. The best way to ensure that is to
-make sure that all errors are returned from within an `if` statement that uses the `DAWN_UNLIKELY()`
-macro to indicate that the expression is not expected to evaluate to true. For example:
+make sure that all errors are returned from within an `if` statement that uses the
+`DAWN_UNLIKELY()` macro to indicate that the expression is not expected to evaluate to true. For
+example:
 
 ```C++
 if (DAWN_UNLIKELY(offset > buffer.size)) {
@@ -126,7 +127,8 @@ request to the Vulkan API fails due to Out of Memory).
 Within all of this, Dawn may need to execute backend functionality in service of a user API call.
 For example, when uploading a texture, Dawn internally may need to allocate a transfer buffer, copy
 the user data into that buffer and then upload. (This is what is referred to as reentrant in Dawn).
-Any validation error in this reentrant behaviour *must* be upgraded to a DeviceLost because the system internally is in an invalid state.
+Any validation error in this reentrant behaviour *must* be upgraded to a DeviceLost because the
+system internally is in an invalid state.
 
 ## Error Types
 

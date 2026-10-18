@@ -63,9 +63,11 @@ If you are developing Dawn itself, see also
 
 ### Using `depot_tools`
 
-Dawn uses the Chromium build system and dependency management so you need to [install depot_tools] and add it to the PATH.
+Dawn uses the Chromium build system and dependency management so you need to [install depot_tools]
+and add it to the PATH.
 
-[install depot_tools]: http://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up
+[install depot_tools]:
+http://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up
 
 ```sh
 # Clone the repo as "dawn"
@@ -91,7 +93,8 @@ By downloading the Microsoft Direct 3D WARP software you agree to the EULA terms
 
 ### Without `depot_tools`
 
-If you cannot or do not want to depend on `depot_tools`, you may use the `tools/fetch_dawn_dependencies.py` to clone the dependencies' repositories:
+If you cannot or do not want to depend on `depot_tools`, you may use the
+`tools/fetch_dawn_dependencies.py` to clone the dependencies' repositories:
 
 ```sh
 # Clone the repo as "dawn"
@@ -101,8 +104,8 @@ git clone https://dawn.googlesource.com/dawn dawn && cd dawn
 python tools/fetch_dawn_dependencies.py
 ```
 
-Use `python tools/fetch_dawn_dependencies.py -h` to know more about the available options.
-Contrary to `depot_tools`, this scripts does not figure out option-dependent requirements automatically.
+Use `python tools/fetch_dawn_dependencies.py -h` to know more about the available options. Contrary
+to `depot_tools`, this scripts does not figure out option-dependent requirements automatically.
 
 On Windows, configuring CMake with both `DAWN_FETCH_DEPENDENCIES=ON` and
 `DAWN_USE_AGILITY_SDK=ON` downloads the Agility SDK version pinned in `DEPS`.
@@ -249,6 +252,7 @@ flags + contents of the source file.
 ### Weird CMake build breaks on Linux
 
 If you see errors like this:
+
 ```
 error: satisfaction of constraint 'is_constructible_v<_Tp, _Up>' depends on itself
   && is_constructible_v<_Tp, _Up>
@@ -275,6 +279,7 @@ In this case you will need to install a parallel GCC toolchain and
 tell Clang to use that.
 
 For Debian based systems this can be done as follows:
+
 ```sh
 sudo apt-get install gcc-14 libgcc-14-dev
 ...
@@ -299,6 +304,7 @@ workaround does not work for XCode 26.X, which is supported by Chromium.
 
 If you attempt to build and run the fuzzers without a workaround, you will
 either get build failures like this:
+
 ```sh
 ld: file not found:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.0/lib/darwin/libclang_rt.fuzzer_osx.a
 ```
@@ -337,6 +343,7 @@ CommandLineTools toolchain directory. (Cannot be the XCode toolchain directory,
 because that is write protected).
 
 You will then need to be using the CLT toolchain as your active toolchain
+
 ```sh
 sudo xcode-select -s /Library/Developer/CommandLineTools
 ```
@@ -374,6 +381,7 @@ system installed toolchain, there is a script supplied to set up the
 environment.
 
 Instead of using the system batch file to set up the environment, i.e.
+
 ```sh
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat
 ```
