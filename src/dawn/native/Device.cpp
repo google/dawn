@@ -897,7 +897,7 @@ void DeviceBase::APIForceLoss(wgpu::DeviceLostReason reason, StringView messageI
     // Note that since we are passing None as the allowedErrors, an additional message will be
     // appended noting that the error was unexpected. Since this call is for testing only it is not
     // too important, but useful for users to understand where the extra message is coming from.
-    HandleError(DAWN_MAKE_UNRECOVERABLE_ERROR(std::string(message)).ReleaseData(),
+    HandleError(DAWN_MAKE_UNRECOVERABLE_ERROR(std::string(message))->ReleaseData(),
                 InternalErrorType::None, reason);
 }
 
@@ -1542,7 +1542,7 @@ BufferBase* DeviceBase::APICreateErrorBuffer(const BufferDescriptor* desc) {
         auto* clientErrorInfo = unpacked.Get<DawnBufferDescriptorErrorInfoFromWireClient>();
         if (clientErrorInfo != nullptr && clientErrorInfo->outOfMemory) {
             HandleError(DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate memory for buffer mapping")
-                            .ReleaseData(),
+                            ->ReleaseData(),
                         InternalErrorType::OutOfMemory);
         }
     }
@@ -1963,7 +1963,7 @@ void DeviceBase::APIInjectError(wgpu::ErrorType type, StringView message) {
     if (type != wgpu::ErrorType::Validation && type != wgpu::ErrorType::OutOfMemory) {
         HandleError(
             DAWN_VALIDATION_ERROR("Invalid injected error, must be Validation or OutOfMemory")
-                .ReleaseData());
+                ->ReleaseData());
         return;
     }
 
@@ -1971,9 +1971,9 @@ void DeviceBase::APIInjectError(wgpu::ErrorType type, StringView message) {
 
     InternalErrorType errorType = FromWGPUErrorType(type);
     if (errorType == InternalErrorType::Validation) {
-        HandleError(DAWN_MAKE_VALIDATION_ERROR(std::string(message)).ReleaseData());
+        HandleError(DAWN_MAKE_VALIDATION_ERROR(std::string(message))->ReleaseData());
     } else {
-        HandleError(DAWN_MAKE_ERROR(errorType, std::string(message)).ReleaseData(),
+        HandleError(DAWN_MAKE_ERROR(errorType, std::string(message))->ReleaseData(),
                     InternalErrorType::OutOfMemory);
     }
 }
@@ -2809,7 +2809,7 @@ std::pair<std::string, bool> DeviceBase::GetTraceInfo() {
 tint::InternalCompilerErrorCallbackInfo DeviceBase::GetTintInternalCompilerErrorCallback() {
     static auto tintInternalCompilerErrorCallback = [](std::string err, void* userdata) {
         static_cast<DeviceBase*>(userdata)->HandleError(
-            DAWN_MAKE_UNRECOVERABLE_ERROR(err).ReleaseData());
+            DAWN_MAKE_UNRECOVERABLE_ERROR(err)->ReleaseData());
     };
     return tint::InternalCompilerErrorCallbackInfo{
         .callback = tintInternalCompilerErrorCallback,

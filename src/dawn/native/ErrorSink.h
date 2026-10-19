@@ -114,11 +114,6 @@ class ErrorSink {
         return false;
     }
 
-    template <typename T>
-    void ConsumeError(ErrorAdapter<T> error) {
-        ConsumeErrorImpl(error);
-    }
-
     template <typename T, typename... Args>
         requires(IsError<T>)
     void ConsumeError(std::unique_ptr<T> error) {
@@ -128,7 +123,7 @@ class ErrorSink {
     template <typename T, typename... Args>
         requires(IsError<T>)
     void ConsumeError(std::unique_ptr<T> error, InternalErrorType additionalAllowedErrors) {
-        return ConsumeErrorImpl(ErrorAdapter{std::move(error)}, additionalAllowedErrors);
+        return ConsumeErrorImpl(std::move(error), additionalAllowedErrors);
     }
 
     template <typename T, typename... Args>
@@ -143,18 +138,10 @@ class ErrorSink {
                       InternalErrorType additionalAllowedErrors,
                       const char* formatStr,
                       const Args&... args) {
-        ConsumeError(ErrorAdapter{std::move(error)}, additionalAllowedErrors, formatStr, args...);
-    }
-
-    template <typename T, typename... Args>
-    void ConsumeError(ErrorAdapter<T> error,
-                      InternalErrorType additionalAllowedErrors,
-                      const char* formatStr,
-                      const Args&... args) {
-        if (static_cast<uint32_t>(error.GetData()->GetType()) &
+        if (static_cast<uint32_t>(error->GetType()) &
             (static_cast<uint32_t>(additionalAllowedErrors) |
              static_cast<uint32_t>(InternalErrorType::Validation))) {
-            error.GetData()->AppendContext(formatStr, args...);
+            error->AppendContext(formatStr, args...);
         }
         ConsumeErrorImpl(std::move(error), additionalAllowedErrors);
     }
