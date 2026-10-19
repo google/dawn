@@ -83,9 +83,9 @@ MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
     Device* device = ToBackend(GetDevice());
     return device->EnqueueAndFlushGL([commands](const OpenGLFunctions& gl) -> MaybeError {
         {
-            TRACE_EVENT(DAWN_TRACE_CATEGORY("recording"), "CommandBufferGL::Execute");
+            TRACE_EVENT(DAWN_TRACE_CATEGORY("recording"), "CommandBufferGL::RecordCommands");
             for (CommandBufferBase* commandBuffer : commands) {
-                DAWN_TRY(ToBackend(commandBuffer)->Execute(gl));
+                DAWN_TRY(ToBackend(commandBuffer)->RecordCommands(gl));
             }
         }
         return {};

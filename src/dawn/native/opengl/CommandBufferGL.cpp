@@ -777,7 +777,7 @@ class ImmediateTracker : public T {
 CommandBuffer::CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor)
     : CommandBufferBase(encoder, descriptor) {}
 
-MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
+MaybeError CommandBuffer::RecordCommands(const OpenGLFunctions& gl) {
     auto LazyClearSyncScope = [gl](const SyncScopeResourceUsage& scope) -> MaybeError {
         for (size_t i = 0; i < scope.textures.size(); i++) {
             Texture* texture = ToBackend(scope.textures[i]);

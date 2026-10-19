@@ -47,7 +47,7 @@ class CommandBuffer final : public CommandBufferBase {
   public:
     static Ref<CommandBuffer> Create(CommandEncoder* encoder,
                                      const CommandBufferDescriptor* descriptor);
-    MaybeError Execute(const ScopedSwapStateCommandRecordingContext* commandContext);
+    MaybeError RecordCommands(const ScopedSwapStateCommandRecordingContext* commandContext);
 
   private:
     using CommandBufferBase::CommandBufferBase;

@@ -293,7 +293,8 @@ Ref<CommandBuffer> CommandBuffer::Create(CommandEncoder* encoder,
     return AcquireRef(new CommandBuffer(encoder, descriptor));
 }
 
-MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* commandContext) {
+MaybeError CommandBuffer::RecordCommands(
+    const ScopedSwapStateCommandRecordingContext* commandContext) {
     ExecutionSerial pendingSerial = GetDevice()->GetQueue()->GetPendingCommandSerial();
 
     auto LazyClearSyncScope = [&commandContext,

@@ -72,7 +72,7 @@ class CommandBuffer final : public CommandBufferBase {
     CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
     ~CommandBuffer() override;
 
-    MaybeError FillCommands(CommandRecordingContext* commandContext);
+    MaybeError RecordCommands(CommandRecordingContext* commandContext);
 
   private:
     using CommandBufferBase::CommandBufferBase;

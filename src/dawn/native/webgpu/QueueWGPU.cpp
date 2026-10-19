@@ -91,7 +91,7 @@ MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
 
     std::vector<WGPUCommandBuffer> innerCommandBuffers(commands.size());
     for (auto [i, commandBuffer] : Enumerate(commands)) {
-        DAWN_TRY_ASSIGN(innerCommandBuffers[i], ToBackend(commandBuffer)->Encode());
+        DAWN_TRY_ASSIGN(innerCommandBuffers[i], ToBackend(commandBuffer)->RecordCommands());
     }
 
     auto& wgpu = ToBackend(GetDevice())->wgpu.get();

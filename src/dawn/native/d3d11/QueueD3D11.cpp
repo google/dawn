@@ -316,16 +316,16 @@ MaybeError Queue::SubmitPendingCommandsImpl() {
 }
 
 MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
-    // CommandBuffer::Execute() will modify the state of the global immediate device context, it may
-    // affect following usage of it.
+    // CommandBuffer::RecordCommands() will modify the state of the global immediate device
+    // context, it may affect following usage of it.
     // TODO(dawn:1770): figure how if we need to track and restore the state of the immediate device
     // context.
-    TRACE_EVENT_BEGIN(DAWN_TRACE_CATEGORY("recording"), "CommandBufferD3D11::Execute");
+    TRACE_EVENT_BEGIN(DAWN_TRACE_CATEGORY("recording"), "CommandBufferD3D11::RecordCommands");
     {
         auto commandContext =
             GetScopedSwapStatePendingCommandContext(QueueBase::SubmitMode::Normal);
         for (CommandBufferBase* commandBuffer : commands) {
-            DAWN_TRY(ToBackend(commandBuffer)->Execute(&commandContext));
+            DAWN_TRY(ToBackend(commandBuffer)->RecordCommands(&commandContext));
         }
     }
     DAWN_TRY(SubmitPendingCommandsImpl());

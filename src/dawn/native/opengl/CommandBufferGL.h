@@ -43,7 +43,7 @@ class CommandBuffer final : public CommandBufferBase {
   public:
     CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
 
-    MaybeError Execute(const OpenGLFunctions& gl);
+    MaybeError RecordCommands(const OpenGLFunctions& gl);
 
   private:
     MaybeError ExecuteComputePass(const OpenGLFunctions& gl);

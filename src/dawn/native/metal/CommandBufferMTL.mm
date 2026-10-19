@@ -1071,7 +1071,7 @@ CommandBuffer::CommandBuffer(CommandEncoder* enc, const CommandBufferDescriptor*
 
 CommandBuffer::~CommandBuffer() = default;
 
-MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) {
+MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext) {
     PassIndex nextComputePassNumber{0u};
     PassIndex nextRenderPassNumber{0u};
 
