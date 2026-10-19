@@ -7473,7 +7473,7 @@ S = struct @align(16) {
     EXPECT_EQ(GetParam() ? expect : src, str());
 }
 
-TEST_F(IR_RobustnessTest, Workgroup_RuntimeArray_DisableRuntimeSizedArrayIndexClamping) {
+TEST_P(IR_RobustnessTest, Workgroup_RuntimeArray_DisableRuntimeSizedArrayIndexClamping) {
     mod.properties.Add(Property::kAllowBufferTypes);
     auto* v = b.Var("v", ty.ptr(workgroup, ty.buffer(256)));
     mod.root_block->Append(v);
@@ -7532,10 +7532,10 @@ $B1: {  # root
     cfg.disable_runtime_sized_array_index_clamping = !GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RobustnessTest, Workgroup_RuntimeStruct_DisableRuntimeSizedArrayIndexClamping) {
+TEST_P(IR_RobustnessTest, Workgroup_RuntimeStruct_DisableRuntimeSizedArrayIndexClamping) {
     mod.properties.Add(Property::kAllowBufferTypes);
     auto* S =
         ty.Struct(mod.symbols.New("S"), {
@@ -7606,7 +7606,7 @@ $B1: {  # root
     cfg.disable_runtime_sized_array_index_clamping = !GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
 TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithIndex_MaxBound_Equal_Limit) {
