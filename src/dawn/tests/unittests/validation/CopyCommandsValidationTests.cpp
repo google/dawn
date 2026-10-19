@@ -263,6 +263,143 @@ TEST_F(CopyCommandTest_UseBlitForDepthTextureToTextureCopyToNonzeroSubresource,
     device.GetQueue().Submit(1, &commands);
 }
 
+struct CopyCommandTest_BlitForBufferToDepthStencil : CopyCommandTest {
+    std::vector<const char*> GetEnabledToggles() override {
+        return {"use_blit_for_buffer_to_depth_texture_copy",
+                "use_blit_for_buffer_to_stencil_texture_copy"};
+    }
+};
+// Regression test for crbug.com/571648522. Checks that a B2T copy with zero layers to the
+// depth/stencil aspect of a texture doesn't crash during submit after its buffer and texture have
+// been released. Depth/stencil destinations must cover the whole width/height of the subresource,
+// but the layer count isn't restricted, so {width, height, 0} is a valid no-op copy that still
+// reaches the blit workaround.
+TEST_F(CopyCommandTest_BlitForBufferToDepthStencil, EmptyCopy_Depth) {
+    wgpu::Buffer buffer;
+    wgpu::Texture texture;
+    wgpu::CommandBuffer commands;
+    {
+        buffer = CreateBuffer(256, wgpu::BufferUsage::CopySrc);
+        texture = Create2DTexture(4, 4, 1, 1, wgpu::TextureFormat::Depth16Unorm,
+                                  wgpu::TextureUsage::CopyDst);
+
+        wgpu::TexelCopyBufferInfo bufferInfo = utils::CreateTexelCopyBufferInfo(buffer, 0, 256, 4);
+        wgpu::TexelCopyTextureInfo textureInfo = utils::CreateTexelCopyTextureInfo(texture, 0);
+
+        constexpr uint32_t layersToCopy = 0;  // Crucial for reproducing the crash
+        wgpu::Extent3D copySize = {4, 4, layersToCopy};
+
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        commandEncoder.CopyBufferToTexture(&bufferInfo, &textureInfo, &copySize);
+        commands = commandEncoder.Finish();
+    }
+
+    buffer = nullptr;
+    texture = nullptr;
+
+    // This used to result in a UAF in QueueBase::ValidateSubmit accessing the deleted
+    // buffer/texture.
+    device.GetQueue().Submit(1, &commands);
+}
+
+TEST_F(CopyCommandTest_BlitForBufferToDepthStencil, EmptyCopy_Stencil) {
+    wgpu::Buffer buffer;
+    wgpu::Texture texture;
+    wgpu::CommandBuffer commands;
+    {
+        buffer = CreateBuffer(256, wgpu::BufferUsage::CopySrc);
+        texture =
+            Create2DTexture(4, 4, 1, 1, wgpu::TextureFormat::Stencil8, wgpu::TextureUsage::CopyDst);
+
+        wgpu::TexelCopyBufferInfo bufferInfo = utils::CreateTexelCopyBufferInfo(buffer, 0, 256, 4);
+        wgpu::TexelCopyTextureInfo textureInfo = utils::CreateTexelCopyTextureInfo(texture, 0);
+
+        constexpr uint32_t layersToCopy = 0;  // Crucial for reproducing the crash
+        wgpu::Extent3D copySize = {4, 4, layersToCopy};
+
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        commandEncoder.CopyBufferToTexture(&bufferInfo, &textureInfo, &copySize);
+        commands = commandEncoder.Finish();
+    }
+
+    buffer = nullptr;
+    texture = nullptr;
+
+    // This used to result in a UAF in QueueBase::ValidateSubmit accessing the deleted
+    // buffer/texture.
+    device.GetQueue().Submit(1, &commands);
+}
+
+struct CopyCommandTest_SplitBufferTextureCopyForOversizedRow : CopyCommandTest {
+    std::vector<const char*> GetEnabledToggles() override {
+        return {"split_buffer_texture_copy_for_oversized_row"};
+    }
+};
+// Regression test for crbug.com/571648522. Checks that an empty B2T/T2B copy doesn't crash during
+// submit after its buffer and texture have been released. The crash reproduced with
+// split_buffer_texture_copy_for_oversized_row enabled: encode a 0-height copy with oversized
+// bytesPerRow, drop all buffer and texture refs to force their deletion, then submit.
+TEST_F(CopyCommandTest_SplitBufferTextureCopyForOversizedRow, EmptyCopy_B2T) {
+    constexpr uint32_t kOversizedBytesPerRow = 1u << 18;
+
+    wgpu::Buffer buffer;
+    wgpu::CommandBuffer commands;
+    {
+        buffer = CreateBuffer(256, wgpu::BufferUsage::CopySrc);
+        wgpu::Texture texture = Create2DTexture(4, 4, 1, 1, wgpu::TextureFormat::RGBA8Unorm,
+                                                wgpu::TextureUsage::CopyDst);
+
+        wgpu::TexelCopyBufferInfo bufferInfo = {};
+        bufferInfo.buffer = buffer;
+        bufferInfo.layout.bytesPerRow = kOversizedBytesPerRow;
+        wgpu::TexelCopyTextureInfo textureInfo = utils::CreateTexelCopyTextureInfo(texture, 0);
+
+        constexpr uint32_t heightToCopy = 0;  // Crucial for reproducing the crash
+        wgpu::Extent3D copySize = {4, heightToCopy, 1};
+
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        commandEncoder.CopyBufferToTexture(&bufferInfo, &textureInfo, &copySize);
+        commands = commandEncoder.Finish();
+    }
+
+    buffer = nullptr;
+
+    // This used to result in a UAF in QueueBase::ValidateSubmit accessing the deleted buffer.
+    device.GetQueue().Submit(1, &commands);
+}
+
+TEST_F(CopyCommandTest_SplitBufferTextureCopyForOversizedRow, EmptyCopy_T2B) {
+    constexpr uint32_t kOversizedBytesPerRow = 1u << 18;
+
+    wgpu::Buffer buffer;
+    wgpu::Texture texture;
+    wgpu::CommandBuffer commands;
+    {
+        texture = Create2DTexture(4, 4, 1, 1, wgpu::TextureFormat::RGBA8Unorm,
+                                  wgpu::TextureUsage::CopySrc);
+        buffer = CreateBuffer(256, wgpu::BufferUsage::CopyDst);
+
+        wgpu::TexelCopyTextureInfo textureInfo = utils::CreateTexelCopyTextureInfo(texture, 0);
+        wgpu::TexelCopyBufferInfo bufferInfo = {};
+        bufferInfo.buffer = buffer;
+        bufferInfo.layout.bytesPerRow = kOversizedBytesPerRow;
+
+        constexpr uint32_t heightToCopy = 0;  // Crucial for reproducing the crash
+        wgpu::Extent3D copySize = {4, heightToCopy, 1};
+
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        commandEncoder.CopyTextureToBuffer(&textureInfo, &bufferInfo, &copySize);
+        commands = commandEncoder.Finish();
+    }
+
+    buffer = nullptr;
+    texture = nullptr;
+
+    // This used to result in a UAF in QueueBase::ValidateSubmit accessing the deleted
+    // buffer/texture.
+    device.GetQueue().Submit(1, &commands);
+}
+
 // Test copies between buffer and multiple array layers of an uncompressed texture
 TEST_F(CopyCommandTest, CopyToMultipleArrayLayers) {
     wgpu::Texture destination =

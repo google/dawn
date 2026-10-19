@@ -1546,6 +1546,7 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
                                const BufferCopy& dst,
                                const BlockExtent3D& copyExtent) {
     DAWN_ASSERT(!src.texture->GetFormat().isCompressed);
+    DAWN_CHECK(!copyExtent.IsEmpty());
 
     wgpu::TextureViewDimension textureViewDimension;
     {

@@ -59,6 +59,7 @@ void SplitBufferTextureCopyByRow(const BufferCopy& bufferCopy,
                                  const BlockExtent3D& copySize,
                                  const TypedTexelBlockInfo& blockInfo,
                                  Func&& func) {
+    DAWN_CHECK(!copySize.IsEmpty());
     const BlockOrigin3D origin = blockInfo.ToBlock(textureCopy.origin);
     const uint64_t bytesPerRow = blockInfo.ToBytes(bufferCopy.blocksPerRow);
 

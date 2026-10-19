@@ -280,6 +280,7 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
     DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
     DAWN_ASSERT(dst.texture->GetFormat().format == wgpu::TextureFormat::Depth16Unorm);
     DAWN_ASSERT(dataTexture->GetFormat().format == wgpu::TextureFormat::RG8Uint);
+    DAWN_CHECK(!copyExtent.IsEmpty());
 
     // Allow internal usages since we need to use the destination
     // as a render attachment.
@@ -379,6 +380,8 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
     DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
     const Format& format = dst.texture->GetFormat();
     DAWN_ASSERT(dst.aspect == Aspect::Stencil);
+    DAWN_CHECK(copyExtent.width != 0 && copyExtent.height != 0 &&
+               copyExtent.depthOrArrayLayers != 0);
 
     // Allow internal usages since we need to use the destination
     // as a render attachment.
