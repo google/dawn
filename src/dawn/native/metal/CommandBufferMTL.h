@@ -77,9 +77,20 @@ class CommandBuffer final : public CommandBufferBase {
   private:
     using CommandBufferBase::CommandBufferBase;
 
+    MaybeError LazyClearSyncScope(const SyncScopeResourceUsage& scope,
+                                  CommandRecordingContext* commandContext);
+
+    MaybeError RecordBeginComputePass(CommandRecordingContext* commandContext,
+                                      BeginComputePassCmd* cmd,
+                                      PassIndex* nextComputePassNumber);
+
     MaybeError RecordComputePass(CommandRecordingContext* commandContext,
                                  BeginComputePassCmd* computePassCmd,
                                  const ComputePassResourceUsage& resourceUsage);
+
+    MaybeError RecordBeginRenderPass(CommandRecordingContext* commandContext,
+                                     BeginRenderPassCmd* cmd,
+                                     PassIndex* nextRenderPassNumber);
 
     // Empty occlusion queries aren't filled to zero on Apple GPUs. This set is used to
     // track which results should be explicitly zero'ed as a workaround. Use of empty queries
@@ -91,6 +102,21 @@ class CommandBuffer final : public CommandBufferBase {
                                 EmptyOcclusionQueries* emptyOcclusionQueries,
                                 const std::vector<MultiDrawExecutionData>& multiDrawExecutions,
                                 PassIndex renderPassIndex);
+
+    void RecordCopyBufferToBuffer(CommandRecordingContext* commandContext,
+                                  CopyBufferToBufferCmd* cmd);
+    MaybeError RecordCopyBufferToTexture(CommandRecordingContext* commandContext,
+                                         CopyBufferToTextureCmd* cmd);
+    MaybeError RecordCopyTextureToBuffer(CommandRecordingContext* commandContext,
+                                         CopyTextureToBufferCmd* cmd);
+    MaybeError RecordCopyTextureToTexture(CommandRecordingContext* commandContext,
+                                          CopyTextureToTextureCmd* cmd);
+
+    void RecordClearBuffer(CommandRecordingContext* commandContext, ClearBufferCmd* cmd);
+    MaybeError RecordResolveQuerySet(CommandRecordingContext* commandContext,
+                                     ResolveQuerySetCmd* cmd);
+    void RecordWriteTimestamp(CommandRecordingContext* commandContext, WriteTimestampCmd* cmd);
+    MaybeError RecordWriteBuffer(CommandRecordingContext* commandContext, WriteBufferCmd* cmd);
 };
 
 }  // namespace dawn::native::metal
