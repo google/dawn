@@ -2028,12 +2028,13 @@ napi_status napi_get_typedarray_info(napi_env env,
         *byte_offset = ta->ByteOffset();
     }
     if (arraybuffer != nullptr) {
-        *arraybuffer = dawn::napi_v8::ToNapi(ta->Buffer());
+        *arraybuffer = dawn::napi_v8::ToNapi(ta->GetBuffer());
     }
     if (data != nullptr) {
         // SAFETY: ta->Buffer() provides data storage of at least ta->ByteOffset() +
         // ta->ByteLength() bytes.
-        *data = DAWN_UNSAFE_BUFFERS(static_cast<uint8_t*>(ta->Buffer()->Data()) + ta->ByteOffset());
+        *data =
+            DAWN_UNSAFE_BUFFERS(static_cast<uint8_t*>(ta->GetBuffer()->Data()) + ta->ByteOffset());
     }
     return napi_ok;
 }
