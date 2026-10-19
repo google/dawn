@@ -546,6 +546,8 @@ std::vector<Inspector::LevelSampleInfo> Inspector::GetTextureQueries(
     const auto& metadata = ComputeTextureMetadata(entry_point);
 
     std::vector<LevelSampleInfo> result;
+    result.reserve(metadata.textures_with_num_levels.size() +
+                   metadata.textures_with_num_samples.size());
     for (const auto& texture : metadata.textures_with_num_levels) {
         result.push_back({TextureQueryType::kTextureNumLevels, texture.group, texture.binding});
     }
