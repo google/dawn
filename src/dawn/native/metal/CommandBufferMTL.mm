@@ -1115,7 +1115,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                 }
                 commandContext->EndBlit();
 
-                DAWN_TRY(EncodeComputePass(commandContext, cmd, resourceUsage));
+                DAWN_TRY(RecordComputePass(commandContext, cmd, resourceUsage));
 
                 nextComputePassNumber++;
                 break;
@@ -1182,7 +1182,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                     cmd->height,
                     [&](id<MTLRenderCommandEncoder> encoder,
                         BeginRenderPassCmd* cmd) -> MaybeError {
-                        return this->EncodeRenderPass(
+                        return this->RecordRenderPass(
                             encoder, cmd,
                             device->IsToggleEnabled(Toggle::MetalFillEmptyOcclusionQueriesWithZero)
                                 ? &emptyOcclusionQueries
@@ -1557,7 +1557,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
     return {};
 }
 
-MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandContext,
+MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandContext,
                                             BeginComputePassCmd* computePassCmd,
                                             const ComputePassResourceUsage& resourceUsage) {
     uint64_t currentDispatch = 0;
@@ -1735,7 +1735,7 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
     DAWN_UNREACHABLE();
 }
 
-MaybeError CommandBuffer::EncodeRenderPass(
+MaybeError CommandBuffer::RecordRenderPass(
     id<MTLRenderCommandEncoder> encoder,
     BeginRenderPassCmd* renderPassCmd,
     EmptyOcclusionQueries* emptyOcclusionQueries,

@@ -77,7 +77,7 @@ class CommandBuffer final : public CommandBufferBase {
   private:
     using CommandBufferBase::CommandBufferBase;
 
-    MaybeError EncodeComputePass(CommandRecordingContext* commandContext,
+    MaybeError RecordComputePass(CommandRecordingContext* commandContext,
                                  BeginComputePassCmd* computePassCmd,
                                  const ComputePassResourceUsage& resourceUsage);
 
@@ -86,7 +86,7 @@ class CommandBuffer final : public CommandBufferBase {
     // *should* mostly be a degenerate scenario, so this std::set shouldn't be performance-critical.
     // The set is passed as nullptr to `EncodeRenderPass` if the workaround is not in use.
     using EmptyOcclusionQueries = std::set<std::pair<QuerySet*, QueryIndex>>;
-    MaybeError EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
+    MaybeError RecordRenderPass(id<MTLRenderCommandEncoder> encoder,
                                 BeginRenderPassCmd* renderPassCmd,
                                 EmptyOcclusionQueries* emptyOcclusionQueries,
                                 const std::vector<MultiDrawExecutionData>& multiDrawExecutions,

@@ -816,7 +816,7 @@ MaybeError CommandBuffer::RecordCommands(const OpenGLFunctions& gl) {
                      GetResourceUsages().computePasses[nextComputePassNumber].dispatchUsages) {
                     DAWN_TRY(LazyClearSyncScope(scope));
                 }
-                DAWN_TRY(ExecuteComputePass(gl));
+                DAWN_TRY(RecordComputePass(gl));
 
                 nextComputePassNumber++;
                 break;
@@ -834,7 +834,7 @@ MaybeError CommandBuffer::RecordCommands(const OpenGLFunctions& gl) {
                     GetDevice(), cmd, [&](TextureBase* texture, const SubresourceRange& range) {
                         return ToBackend(texture)->EnsureSubresourceContentInitialized(gl, range);
                     }));
-                DAWN_TRY(ExecuteRenderPass(cmd, gl, nextRenderPassNumber));
+                DAWN_TRY(RecordRenderPass(cmd, gl, nextRenderPassNumber));
 
                 nextRenderPassNumber++;
                 break;
@@ -1234,7 +1234,7 @@ MaybeError CommandBuffer::RecordCommands(const OpenGLFunctions& gl) {
     return {};
 }
 
-MaybeError CommandBuffer::ExecuteComputePass(const OpenGLFunctions& gl) {
+MaybeError CommandBuffer::RecordComputePass(const OpenGLFunctions& gl) {
     ComputePipeline* lastPipeline = nullptr;
     BindGroupTracker bindGroupTracker = {};
 
@@ -1325,9 +1325,9 @@ MaybeError CommandBuffer::ExecuteComputePass(const OpenGLFunctions& gl) {
     DAWN_UNREACHABLE();
 }
 
-MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
-                                            const OpenGLFunctions& gl,
-                                            PassIndex renderPassIndex) {
+MaybeError CommandBuffer::RecordRenderPass(BeginRenderPassCmd* renderPass,
+                                           const OpenGLFunctions& gl,
+                                           PassIndex renderPassIndex) {
     GLuint fbo = 0;
 
     const IndirectDrawMetadata& metadata = GetIndirectDrawMetadata()[renderPassIndex];

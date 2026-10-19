@@ -342,7 +342,7 @@ MaybeError CommandBuffer::RecordCommands(
                     }
                     DAWN_TRY(LazyClearSyncScope(scope));
                 }
-                DAWN_TRY(ExecuteComputePass(commandContext, &pipelineStateTracker));
+                DAWN_TRY(RecordComputePass(commandContext, &pipelineStateTracker));
 
                 nextComputePassNumber++;
                 break;
@@ -365,8 +365,8 @@ MaybeError CommandBuffer::RecordCommands(
                 }
                 DAWN_TRY(
                     LazyClearSyncScope(GetResourceUsages().renderPasses[nextRenderPassNumber]));
-                DAWN_TRY(ExecuteRenderPass(cmd, commandContext, &pipelineStateTracker,
-                                           nextRenderPassNumber));
+                DAWN_TRY(RecordRenderPass(cmd, commandContext, &pipelineStateTracker,
+                                          nextRenderPassNumber));
 
                 nextRenderPassNumber++;
                 break;
@@ -565,7 +565,7 @@ MaybeError CommandBuffer::RecordCommands(
     return {};
 }
 
-MaybeError CommandBuffer::ExecuteComputePass(
+MaybeError CommandBuffer::RecordComputePass(
     const ScopedSwapStateCommandRecordingContext* commandContext,
     PipelineStateTracker* pipelineStateTracker) {
     ComputePipeline* lastPipeline = nullptr;
@@ -664,7 +664,7 @@ MaybeError CommandBuffer::ExecuteComputePass(
     DAWN_UNREACHABLE();
 }
 
-MaybeError CommandBuffer::ExecuteRenderPass(
+MaybeError CommandBuffer::RecordRenderPass(
     BeginRenderPassCmd* renderPass,
     const ScopedSwapStateCommandRecordingContext* commandContext,
     PipelineStateTracker* pipelineStateTracker,
