@@ -524,6 +524,7 @@ if (DAWN_ENABLE_METAL)
         "metal/BackendMTL.h"
         "metal/BindGroupLayoutMTL.h"
         "metal/BindGroupMTL.h"
+        "metal/BindGroupTrackerMTL.h"
         "metal/BufferMTL.h"
         "metal/CommandBufferMTL.h"
         "metal/CommandRecordingContext.h"
@@ -531,6 +532,7 @@ if (DAWN_ENABLE_METAL)
         "metal/DeviceMTL.h"
         "metal/Forward.h"
         "metal/ImmediatesLayoutMTL.h"
+        "metal/ImmediatesTrackerMTL.h"
         "metal/MultiDrawEncoder.h"
         "metal/MultiDrawEncoder.mm"
         "metal/PhysicalDeviceMTL.h"
@@ -542,9 +544,11 @@ if (DAWN_ENABLE_METAL)
         "metal/ShaderModuleMTL.h"
         "metal/SharedFenceMTL.h"
         "metal/SharedTextureMemoryMTL.h"
+        "metal/StorageBufferLengthTrackerMTL.h"
         "metal/SwapChainMTL.h"
         "metal/TextureMTL.h"
         "metal/UtilsMetal.h"
+        "metal/VertexBufferTrackerMTL.h"
     )
     list(APPEND sources
         "metal/BackendMTL.mm"
