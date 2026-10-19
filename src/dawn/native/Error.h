@@ -146,6 +146,7 @@ class UnrecoverableError : public UnknownError {
 
     explicit UnrecoverableError(std::unique_ptr<ErrorData> d) : UnknownError(std::move(d)) {}
     explicit(false) UnrecoverableError(std::unique_ptr<UnknownError> d);
+    explicit(false) UnrecoverableError(std::unique_ptr<ValidationError> d);
 
     void SetType(InternalErrorType type) { GetData()->SetType(type); }
 };
@@ -489,7 +490,6 @@ std::string MakeIncreaseLimitMessage(std::string_view limitName, T adapterLimitV
 
 // Assert that errors are device loss so that we can continue with destruction
 void IgnoreErrors(MaybeUnknownError maybeError);
-void IgnoreErrors(MaybeError maybeError);
 
 wgpu::ErrorType ToWGPUErrorType(InternalErrorType type);
 InternalErrorType FromWGPUErrorType(wgpu::ErrorType type);

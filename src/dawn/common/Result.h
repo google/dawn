@@ -55,6 +55,27 @@ namespace dawn {
 template <typename T, typename E>
 class Result;
 
+template <typename TChild, typename T>
+concept ValidResultConversions = std::same_as<TChild, T> || std::derived_from<TChild, T>;
+
+template <typename E2, typename E>
+concept ValidErrorConversions = std::same_as<E2, E> || std::convertible_to<std::unique_ptr<E2>, E>;
+
+namespace detail {
+template <typename E, typename E2>
+    requires ValidErrorConversions<E2, E>
+std::unique_ptr<E> MoveError(std::unique_ptr<E2> error) {
+    if constexpr (std::same_as<E, E2>) {
+        return error;
+    } else {
+        if (error == nullptr) {
+            return nullptr;
+        }
+        return std::make_unique<E>(std::move(error));
+    }
+}
+}  // namespace detail
+
 // The interface of Result<T, E> should look like the following.
 //  public:
 //    Result(T&& success);
@@ -77,10 +98,19 @@ template <typename E>
 class [[nodiscard]] Result<void, E> {
   public:
     Result();
-    explicit(false) Result(std::unique_ptr<E> error);
+    template <typename E2>
+        requires ValidErrorConversions<E2, E>
+    explicit(false) Result(std::unique_ptr<E2> error);
+    template <typename E2>
+        requires ValidErrorConversions<E2, E>
+    Result<void, E>& operator=(std::unique_ptr<E2> error);
 
-    Result(Result<void, E>&& other);
-    Result<void, E>& operator=(Result<void, E>&& other);
+    template <typename E2>
+        requires ValidErrorConversions<E2, E>
+    explicit(false) Result(Result<void, E2>&& other);
+    template <typename E2>
+        requires ValidErrorConversions<E2, E>
+    Result<void, E>& operator=(Result<void, E2>&& other);
 
     ~Result();
 
@@ -133,15 +163,17 @@ class [[nodiscard]] Result<T*, E> {
                   "Result<T*, E*> reserves two bits for tagging pointers");
 
     explicit(false) Result(T* success);
-    explicit(false) Result(std::unique_ptr<E> error);
+    template <typename E2>
+        requires ValidErrorConversions<E2, E>
+    explicit(false) Result(std::unique_ptr<E2> error);
 
-    // Support returning a Result<T*, E*> from a Result<TChild*, E*>
-    template <typename TChild>
-        requires std::same_as<TChild, T> || std::derived_from<TChild, T>
-    explicit(false) Result(Result<TChild*, E>&& other);
-    template <typename TChild>
-        requires std::same_as<TChild, T> || std::derived_from<TChild, T>
-    Result<T*, E>& operator=(Result<TChild*, E>&& other);
+    // Support returning a Result<T*, E*> from a Result<TChild*, E2*>
+    template <typename TChild, typename E2>
+        requires(ValidResultConversions<TChild, T> && ValidErrorConversions<E2, E>)
+    explicit(false) Result(Result<TChild*, E2>&& other);
+    template <typename TChild, typename E2>
+        requires(ValidResultConversions<TChild, T> && ValidErrorConversions<E2, E>)
+    Result<T*, E>& operator=(Result<TChild*, E2>&& other);
 
     ~Result();
 
@@ -167,10 +199,16 @@ class [[nodiscard]] Result<const T*, E> {
                   "Result<T*, E*> reserves two bits for tagging pointers");
 
     explicit(false) Result(const T* success);
-    explicit(false) Result(std::unique_ptr<E> error);
+    template <typename E2>
+        requires ValidErrorConversions<E2, E>
+    explicit(false) Result(std::unique_ptr<E2> error);
 
-    Result(Result<const T*, E>&& other);
-    Result<const T*, E>& operator=(Result<const T*, E>&& other);
+    template <typename TChild, typename E2>
+        requires(ValidResultConversions<TChild, T> && ValidErrorConversions<E2, E>)
+    explicit(false) Result(Result<const TChild*, E2>&& other);
+    template <typename TChild, typename E2>
+        requires(ValidResultConversions<TChild, T> && ValidErrorConversions<E2, E>)
+    Result<const T*, E>& operator=(Result<const TChild*, E2>&& other);
 
     ~Result();
 
@@ -181,6 +219,9 @@ class [[nodiscard]] Result<const T*, E> {
     std::unique_ptr<E> AcquireError();
 
   private:
+    template <typename T2, typename E2>
+    friend class Result;
+
     intptr_t mPayload = detail::kEmptyPayload;
 };
 
@@ -195,27 +236,24 @@ class [[nodiscard]] Result<Ref<T>, E> {
     static_assert(alignof_if_defined_else_default<E, 4> >= 4,
                   "Result<Ref<T>, E> reserves two bits for tagging pointers");
 
-    template <typename U>
-        requires std::convertible_to<U*, T*>
-    explicit(false) Result(Ref<U>&& success);
-    template <typename U>
-        requires std::convertible_to<U*, T*>
-    explicit(false) Result(const Ref<U>& success);
-    explicit(false) Result(std::unique_ptr<E> error);
+    template <typename TChild>
+        requires ValidResultConversions<TChild, T>
+    explicit(false) Result(Ref<TChild>&& success);
+    template <typename TChild>
+        requires ValidResultConversions<TChild, T>
+    explicit(false) Result(const Ref<TChild>& success);
+    template <typename E2>
+        requires ValidErrorConversions<E2, E>
+    explicit(false) Result(std::unique_ptr<E2> error);
     explicit(false) constexpr Result(std::nullptr_t);
 
-    template <typename U>
-        requires std::convertible_to<U*, T*>
-    explicit(false) Result(Result<Ref<U>, E>&& other);
+    template <typename TChild, typename E2>
+        requires(ValidResultConversions<TChild, T> && ValidErrorConversions<E2, E>)
+    explicit(false) Result(Result<Ref<TChild>, E2>&& other);
 
-    template <typename U>
-        requires std::convertible_to<U*, T*>
-    Result<Ref<U>, E>& operator=(Result<Ref<U>, E>&& other);
-
-    template <typename E2, typename U>
-        requires(std::convertible_to<U*, T*> && !std::same_as<E, E2> &&
-                 std::constructible_from<E, std::unique_ptr<E2>>)
-    explicit(false) Result(Result<Ref<U>, E2>&& other);
+    template <typename TChild, typename E2>
+        requires(ValidResultConversions<TChild, T> && ValidErrorConversions<E2, E>)
+    Result<Ref<T>, E>& operator=(Result<Ref<TChild>, E2>&& other);
 
     ~Result();
 
@@ -239,10 +277,16 @@ template <typename T, typename E>
 class [[nodiscard]] Result {
   public:
     explicit(false) Result(T success);
-    explicit(false) Result(std::unique_ptr<E> error);
+    template <typename E2>
+        requires ValidErrorConversions<E2, E>
+    explicit(false) Result(std::unique_ptr<E2> error);
 
-    Result(Result<T, E>&& other);
-    Result<T, E>& operator=(Result<T, E>&& other);
+    template <typename E2>
+        requires ValidErrorConversions<E2, E>
+    explicit(false) Result(Result<T, E2>&& other);
+    template <typename E2>
+        requires ValidErrorConversions<E2, E>
+    Result<T, E>& operator=(Result<T, E2>&& other);
 
     ~Result();
 
@@ -261,15 +305,30 @@ template <typename E>
 Result<void, E>::Result() {}
 
 template <typename E>
-Result<void, E>::Result(std::unique_ptr<E> error) : mError(std::move(error)) {}
+template <typename E2>
+    requires ValidErrorConversions<E2, E>
+Result<void, E>::Result(std::unique_ptr<E2> error)
+    : mError(detail::MoveError<E>(std::move(error))) {}
 
 template <typename E>
-Result<void, E>::Result(Result<void, E>&& other) : mError(std::move(other.mError)) {}
-
-template <typename E>
-Result<void, E>& Result<void, E>::operator=(Result<void, E>&& other) {
+template <typename E2>
+    requires ValidErrorConversions<E2, E>
+Result<void, E>& Result<void, E>::operator=(std::unique_ptr<E2> error) {
     DAWN_ASSERT(mError == nullptr);
-    mError = std::move(other.mError);
+    mError = detail::MoveError<E>(std::move(error));
+    return *this;
+}
+
+template <typename E>
+template <typename E2>
+    requires ValidErrorConversions<E2, E>
+Result<void, E>::Result(Result<void, E2>&& other) : Result(other.AcquireError()) {}
+
+template <typename E>
+template <typename E2>
+    requires ValidErrorConversions<E2, E>
+Result<void, E>& Result<void, E>::operator=(Result<void, E2>&& other) {
+    *this = other.AcquireError();
     return *this;
 }
 
@@ -318,23 +377,31 @@ template <typename T, typename E>
 Result<T*, E>::Result(T* success) : mPayload(detail::MakePayload(success, detail::Success)) {}
 
 template <typename T, typename E>
-Result<T*, E>::Result(std::unique_ptr<E> error)
-    : mPayload(detail::MakePayload(error.release(), detail::Error)) {}
+template <typename E2>
+    requires ValidErrorConversions<E2, E>
+Result<T*, E>::Result(std::unique_ptr<E2> error)
+    : mPayload(
+          detail::MakePayload(detail::MoveError<E>(std::move(error)).release(), detail::Error)) {}
 
 template <typename T, typename E>
-template <typename TChild>
-    requires std::same_as<TChild, T> || std::derived_from<TChild, T>
-Result<T*, E>::Result(Result<TChild*, E>&& other) : mPayload(other.mPayload) {
-    other.mPayload = detail::kEmptyPayload;
+template <typename TChild, typename E2>
+    requires(ValidResultConversions<TChild, T> && ValidErrorConversions<E2, E>)
+Result<T*, E>::Result(Result<TChild*, E2>&& other) {
+    *this = std::move(other);
 }
 
 template <typename T, typename E>
-template <typename TChild>
-    requires std::same_as<TChild, T> || std::derived_from<TChild, T>
-Result<T*, E>& Result<T*, E>::operator=(Result<TChild*, E>&& other) {
+template <typename TChild, typename E2>
+    requires(ValidResultConversions<TChild, T> && ValidErrorConversions<E2, E>)
+Result<T*, E>& Result<T*, E>::operator=(Result<TChild*, E2>&& other) {
     DAWN_ASSERT(mPayload == detail::kEmptyPayload);
-    mPayload = other.mPayload;
-    other.mPayload = detail::kEmptyPayload;
+    if (other.IsError()) {
+        mPayload = detail::MakePayload(detail::MoveError<E>(other.AcquireError()).release(),
+                                       detail::Error);
+    } else {
+        mPayload = other.mPayload;
+        other.mPayload = detail::kEmptyPayload;
+    }
     return *this;
 }
 
@@ -373,19 +440,31 @@ Result<const T*, E>::Result(const T* success)
     : mPayload(detail::MakePayload(success, detail::Success)) {}
 
 template <typename T, typename E>
-Result<const T*, E>::Result(std::unique_ptr<E> error)
-    : mPayload(detail::MakePayload(error.release(), detail::Error)) {}
+template <typename E2>
+    requires ValidErrorConversions<E2, E>
+Result<const T*, E>::Result(std::unique_ptr<E2> error)
+    : mPayload(
+          detail::MakePayload(detail::MoveError<E>(std::move(error)).release(), detail::Error)) {}
 
 template <typename T, typename E>
-Result<const T*, E>::Result(Result<const T*, E>&& other) : mPayload(other.mPayload) {
-    other.mPayload = detail::kEmptyPayload;
+template <typename TChild, typename E2>
+    requires(ValidResultConversions<TChild, T> && ValidErrorConversions<E2, E>)
+Result<const T*, E>::Result(Result<const TChild*, E2>&& other) {
+    *this = std::move(other);
 }
 
 template <typename T, typename E>
-Result<const T*, E>& Result<const T*, E>::operator=(Result<const T*, E>&& other) {
+template <typename TChild, typename E2>
+    requires(ValidResultConversions<TChild, T> && ValidErrorConversions<E2, E>)
+Result<const T*, E>& Result<const T*, E>::operator=(Result<const TChild*, E2>&& other) {
     DAWN_ASSERT(mPayload == detail::kEmptyPayload);
-    mPayload = other.mPayload;
-    other.mPayload = detail::kEmptyPayload;
+    if (other.IsError()) {
+        mPayload = detail::MakePayload(detail::MoveError<E>(other.AcquireError()).release(),
+                                       detail::Error);
+    } else {
+        mPayload = other.mPayload;
+        other.mPayload = detail::kEmptyPayload;
+    }
     return *this;
 }
 
@@ -423,42 +502,42 @@ template <typename T, typename E>
 constexpr Result<Ref<T>, E>::Result(std::nullptr_t) : Result(Ref<T>(nullptr)) {}
 
 template <typename T, typename E>
-template <typename U>
-    requires std::convertible_to<U*, T*>
-Result<Ref<T>, E>::Result(Ref<U>&& success)
+template <typename TChild>
+    requires ValidResultConversions<TChild, T>
+Result<Ref<T>, E>::Result(Ref<TChild>&& success)
     : mPayload(detail::MakePayload(success.Detach(), detail::Success)) {}
 
 template <typename T, typename E>
-template <typename U>
-    requires std::convertible_to<U*, T*>
-Result<Ref<T>, E>::Result(const Ref<U>& success) : Result(Ref<U>(success)) {}
+template <typename TChild>
+    requires ValidResultConversions<TChild, T>
+Result<Ref<T>, E>::Result(const Ref<TChild>& success) : Result(Ref<TChild>(success)) {}
 
 template <typename T, typename E>
-Result<Ref<T>, E>::Result(std::unique_ptr<E> error)
-    : mPayload(detail::MakePayload(error.release(), detail::Error)) {}
+template <typename E2>
+    requires ValidErrorConversions<E2, E>
+Result<Ref<T>, E>::Result(std::unique_ptr<E2> error)
+    : mPayload(
+          detail::MakePayload(detail::MoveError<E>(std::move(error)).release(), detail::Error)) {}
 
 template <typename T, typename E>
-template <typename U>
-    requires std::convertible_to<U*, T*>
-Result<Ref<T>, E>::Result(Result<Ref<U>, E>&& other) : mPayload(other.mPayload) {
-    other.mPayload = detail::kEmptyPayload;
+template <typename TChild, typename E2>
+    requires(ValidResultConversions<TChild, T> && ValidErrorConversions<E2, E>)
+Result<Ref<T>, E>::Result(Result<Ref<TChild>, E2>&& other) {
+    *this = std::move(other);
 }
 
 template <typename T, typename E>
-template <typename E2, typename U>
-    requires(std::convertible_to<U*, T*> && !std::same_as<E, E2> &&
-             std::constructible_from<E, std::unique_ptr<E2>>)
-Result<Ref<T>, E>::Result(Result<Ref<U>, E2>&& other)
-    : Result(other.IsError() ? Result(std::make_unique<E>(other.AcquireError()))
-                             : Result(other.AcquireSuccess())) {}
-
-template <typename T, typename E>
-template <typename U>
-    requires std::convertible_to<U*, T*>
-Result<Ref<U>, E>& Result<Ref<T>, E>::operator=(Result<Ref<U>, E>&& other) {
+template <typename TChild, typename E2>
+    requires(ValidResultConversions<TChild, T> && ValidErrorConversions<E2, E>)
+Result<Ref<T>, E>& Result<Ref<T>, E>::operator=(Result<Ref<TChild>, E2>&& other) {
     DAWN_ASSERT(mPayload == detail::kEmptyPayload);
-    mPayload = other.mPayload;
-    other.mPayload = detail::kEmptyPayload;
+    if (other.IsError()) {
+        mPayload = detail::MakePayload(detail::MoveError<E>(other.AcquireError()).release(),
+                                       detail::Error);
+    } else {
+        mPayload = other.mPayload;
+        other.mPayload = detail::kEmptyPayload;
+    }
     return *this;
 }
 
@@ -498,7 +577,10 @@ template <typename T, typename E>
 Result<T, E>::Result(T success) : mPayload(std::move(success)) {}
 
 template <typename T, typename E>
-Result<T, E>::Result(std::unique_ptr<E> error) : mPayload(std::move(error)) {}
+template <typename E2>
+    requires ValidErrorConversions<E2, E>
+Result<T, E>::Result(std::unique_ptr<E2> error)
+    : mPayload(detail::MoveError<E>(std::move(error))) {}
 
 template <typename T, typename E>
 Result<T, E>::~Result() {
@@ -507,14 +589,22 @@ Result<T, E>::~Result() {
 }
 
 template <typename T, typename E>
-Result<T, E>::Result(Result<T, E>&& other) {
+template <typename E2>
+    requires ValidErrorConversions<E2, E>
+Result<T, E>::Result(Result<T, E2>&& other) {
     *this = std::move(other);
 }
 
 template <typename T, typename E>
-Result<T, E>& Result<T, E>::operator=(Result<T, E>&& other) {
+template <typename E2>
+    requires ValidErrorConversions<E2, E>
+Result<T, E>& Result<T, E>::operator=(Result<T, E2>&& other) {
     DAWN_ASSERT(std::holds_alternative<std::monostate>(mPayload));
-    std::swap(mPayload, other.mPayload);
+    if (other.IsError()) {
+        mPayload = detail::MoveError<E>(other.AcquireError());
+    } else if (other.IsSuccess()) {
+        mPayload = other.AcquireSuccess();
+    }
     return *this;
 }
 
