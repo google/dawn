@@ -998,9 +998,11 @@ class ShaderModuleExtensionValidationTest : public ValidationTest {
     }
 
     std::vector<wgpu::FeatureName> GetAllFeatures() {
-        std::vector<wgpu::FeatureName> requiredFeatures;
         wgpu::SupportedFeatures supportedFeatures;
         adapter.GetFeatures(&supportedFeatures);
+
+        std::vector<wgpu::FeatureName> requiredFeatures;
+        requiredFeatures.reserve(supportedFeatures.featureCount);
         for (uint32_t i = 0; i < supportedFeatures.featureCount; ++i) {
             requiredFeatures.push_back(DAWN_UNSAFE_TODO(supportedFeatures.features[i]));
         }

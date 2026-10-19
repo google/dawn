@@ -234,6 +234,7 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncStressManyThreads) {
     constexpr size_t kNumThreads = 100;
 
     std::vector<std::thread> threads;
+    threads.reserve(kNumThreads);
     for (size_t t = 0; t < kNumThreads; t++) {
         threads.emplace_back(f, t);
     }
@@ -407,6 +408,7 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncStressManyThreads) {
     constexpr size_t kNumThreads = 100;
 
     std::vector<std::thread> threads;
+    threads.reserve(kNumThreads);
     for (size_t t = 0; t < kNumThreads; t++) {
         threads.emplace_back(f, t);
     }

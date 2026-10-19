@@ -162,11 +162,15 @@ int SampleBase::Run(unsigned int delay) {
 
     // Set up this extension struct which will be used three times (instance, adapter, device).
     wgpu::DawnTogglesDescriptor dawnTogglesDesc = {};
+
     std::vector<const char*> enableToggleNames;
-    std::vector<const char*> disabledToggleNames;
+    enableToggleNames.reserve(enableToggles.size());
     for (const std::string& toggle : enableToggles) {
         enableToggleNames.push_back(toggle.c_str());
     }
+
+    std::vector<const char*> disabledToggleNames;
+    disabledToggleNames.reserve(disableToggles.size());
     for (const std::string& toggle : disableToggles) {
         disabledToggleNames.push_back(toggle.c_str());
     }

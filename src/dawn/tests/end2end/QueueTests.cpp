@@ -163,6 +163,7 @@ TEST_P(QueueWriteBufferTests, LargeWriteBuffer) {
     wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     std::vector<uint32_t> expectedData;
+    expectedData.reserve(kElements);
     for (uint32_t i = 0; i < kElements; ++i) {
         expectedData.push_back(i);
     }
@@ -182,6 +183,7 @@ TEST_P(QueueWriteBufferTests, SuperLargeWriteBuffer) {
     wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     std::vector<uint32_t> expectedData;
+    expectedData.reserve(kElements);
     for (uint32_t i = 0; i < kElements; ++i) {
         expectedData.push_back(i);
     }

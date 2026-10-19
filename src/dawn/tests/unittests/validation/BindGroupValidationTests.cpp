@@ -1675,11 +1675,6 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimitsWithExternalTexture) {
 
 // Check that dynamic buffer numbers exceed maximum value in one bind group layout.
 TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
-    wgpu::BindGroupLayout bgl[2];
-    std::vector<wgpu::BindGroupLayoutEntry> maxUniformDB;
-    std::vector<wgpu::BindGroupLayoutEntry> maxStorageDB;
-    std::vector<wgpu::BindGroupLayoutEntry> maxReadonlyStorageDB;
-
     const auto& limits = GetSupportedLimits();
 
     // In this test, we use all the same shader stage. Ensure that this does not exceed the
@@ -1689,20 +1684,28 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
     DAWN_ASSERT(limits.maxDynamicStorageBuffersPerPipelineLayout <=
                 limits.maxStorageBuffersPerShaderStage);
 
+    std::vector<wgpu::BindGroupLayoutEntry> maxUniformDB;
+    maxUniformDB.reserve(limits.maxDynamicUniformBuffersPerPipelineLayout);
     for (uint32_t i = 0; i < limits.maxDynamicUniformBuffersPerPipelineLayout; ++i) {
         maxUniformDB.push_back(utils::BindingLayoutEntryInitializationHelper(
             i, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform, true));
     }
 
+    std::vector<wgpu::BindGroupLayoutEntry> maxStorageDB;
+    maxStorageDB.reserve(limits.maxDynamicStorageBuffersPerPipelineLayout);
     for (uint32_t i = 0; i < limits.maxDynamicStorageBuffersPerPipelineLayout; ++i) {
         maxStorageDB.push_back(utils::BindingLayoutEntryInitializationHelper(
             i, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage, true));
     }
 
+    std::vector<wgpu::BindGroupLayoutEntry> maxReadonlyStorageDB;
+    maxReadonlyStorageDB.reserve(limits.maxDynamicStorageBuffersPerPipelineLayout);
     for (uint32_t i = 0; i < limits.maxDynamicStorageBuffersPerPipelineLayout; ++i) {
         maxReadonlyStorageDB.push_back(utils::BindingLayoutEntryInitializationHelper(
             i, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::ReadOnlyStorage, true));
     }
+
+    wgpu::BindGroupLayout bgl[2];
 
     // Test creating with the maxes works
     {

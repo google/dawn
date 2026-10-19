@@ -1903,6 +1903,7 @@ TEST_F(RenderPassDescriptorValidationTest, RenderPassColorAttachmentBytesPerSamp
 
     for (const TestCase& testCase : kTestCases) {
         std::vector<wgpu::TextureView> colorAttachmentInfo;
+        colorAttachmentInfo.reserve(testCase.formats.size());
         for (size_t i = 0; i < testCase.formats.size(); i++) {
             colorAttachmentInfo.push_back(Create2DAttachment(device, 1, 1, testCase.formats.at(i)));
         }

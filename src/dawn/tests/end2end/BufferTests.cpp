@@ -219,6 +219,7 @@ TEST_P(BufferMappingTests, MapRead_Large) {
     wgpu::Buffer buffer = CreateMapReadBuffer(kByteSize);
 
     std::vector<uint32_t> myData;
+    myData.reserve(kDataSize);
     for (uint32_t i = 0; i < kDataSize; ++i) {
         myData.push_back(i);
     }
@@ -463,6 +464,7 @@ TEST_P(BufferMappingTests, MapWrite_Large) {
     wgpu::Buffer buffer = CreateMapWriteBuffer(kDataSize * sizeof(uint32_t));
 
     std::vector<uint32_t> myData;
+    myData.reserve(kDataSize);
     for (uint32_t i = 0; i < kDataSize; ++i) {
         myData.push_back(i);
     }
@@ -484,6 +486,7 @@ TEST_P(BufferMappingTests, MapWrite_ManySimultaneous) {
 
     constexpr uint32_t kDataSize = 1000;
     std::vector<uint32_t> myData;
+    myData.reserve(kDataSize);
     for (uint32_t i = 0; i < kDataSize; ++i) {
         myData.push_back(i);
     }
@@ -1041,6 +1044,7 @@ TEST_P(BufferMappedAtCreationTests, NonMappableUsageSmall) {
 TEST_P(BufferMappedAtCreationTests, MapWriteUsageLarge) {
     constexpr uint64_t kDataSize = 1000ULL * 1000;
     std::vector<uint32_t> myData;
+    myData.reserve(kDataSize);
     for (uint32_t i = 0; i < kDataSize; ++i) {
         myData.push_back(i);
     }
@@ -1059,6 +1063,7 @@ TEST_P(BufferMappedAtCreationTests, MapReadUsageLarge) {
 
     constexpr uint64_t kDataSize = 1000ULL * 1000;
     std::vector<uint32_t> myData;
+    myData.reserve(kDataSize);
     for (uint32_t i = 0; i < kDataSize; ++i) {
         myData.push_back(i);
     }
@@ -1076,6 +1081,7 @@ TEST_P(BufferMappedAtCreationTests, MapReadUsageLarge) {
 TEST_P(BufferMappedAtCreationTests, NonMappableUsageLarge) {
     constexpr uint64_t kDataSize = 1000ULL * 1000;
     std::vector<uint32_t> myData;
+    myData.reserve(kDataSize);
     for (uint32_t i = 0; i < kDataSize; ++i) {
         myData.push_back(i);
     }

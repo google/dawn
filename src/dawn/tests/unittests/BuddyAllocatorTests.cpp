@@ -262,6 +262,7 @@ TEST(BuddyAllocatorTests, MultipleSplitBlocksInterleaved) {
     // Allocate leaf blocks
     constexpr uint64_t minBlockSizeInBytes = 32;
     std::vector<uint64_t> blockOffsets;
+    blockOffsets.reserve(maxBlockSize / minBlockSizeInBytes);
     for (uint64_t i = 0; i < maxBlockSize / minBlockSizeInBytes; i++) {
         blockOffsets.push_back(allocator.Allocate(minBlockSizeInBytes));
     }

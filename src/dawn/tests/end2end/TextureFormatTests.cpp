@@ -540,6 +540,7 @@ class TextureFormatTest : public DawnTest {
         std::vector<float> uncompressedData = {+0.0f,  -0.0f, 1.0f,     1.01e-4f,
                                                1.0e4f, NAN,   INFINITY, -INFINITY};
         std::vector<uint16_t> textureData;
+        textureData.reserve(uncompressedData.size());
         for (float value : uncompressedData) {
             textureData.push_back(Float32ToFloat16(value));
         }

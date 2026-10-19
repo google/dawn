@@ -204,6 +204,7 @@ class ResourceTableTests : public DawnTest {
 
         // Check we have the expected results.
         std::vector<uint32_t> expectedU32;
+        expectedU32.reserve(expected.size());
         for (bool b : expected) {
             expectedU32.push_back(b ? 1u : 0u);
         }
@@ -413,6 +414,7 @@ class ResourceTableTests : public DawnTest {
 
         // Check we have the expected results.
         std::vector<uint32_t> expectedU32;
+        expectedU32.reserve(expected.size());
         for (auto optValue : expected) {
             expectedU32.push_back(optValue ? *optValue : 0xBEEFu);
         }

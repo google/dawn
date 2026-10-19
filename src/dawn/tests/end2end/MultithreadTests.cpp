@@ -269,6 +269,7 @@ TEST_P(MultithreadTests, Buffers_MapInParallel) {
 TEST_P(MultithreadTests, MapUnmapDestroyInParallel) {
     constexpr uint32_t kDataSize = 1000;
     std::vector<uint32_t> myData;
+    myData.reserve(kDataSize);
     for (uint32_t i = 0; i < kDataSize; ++i) {
         myData.push_back(i);
     }
@@ -305,6 +306,7 @@ TEST_P(MultithreadTests, MapUnmapDestroyInParallel) {
 TEST_P(MultithreadTests, MapUnmapMultipleCyclesInParallel) {
     constexpr uint32_t kDataSize = 1000;
     std::vector<uint32_t> myData;
+    myData.reserve(kDataSize);
     for (uint32_t i = 0; i < kDataSize; ++i) {
         myData.push_back(i);
     }

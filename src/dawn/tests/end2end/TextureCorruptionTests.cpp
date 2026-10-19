@@ -324,6 +324,7 @@ class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsP
         std::vector<wgpu::Texture> textures;
         wgpu::TextureFormat format = GetParam().mTextureFormat;
         uint32_t texNum = 2;
+        textures.reserve(texNum);
         for (uint32_t i = 0; i < texNum; ++i) {
             textures.push_back(Create2DTexture(textureSize, format, mipLevelCount, sampleCount));
         }
