@@ -623,19 +623,19 @@ void DeviceBase::HandleDeviceLost(wgpu::DeviceLostReason reason, std::string_vie
     }
 }
 
-void DeviceBase::HandleError(std::unique_ptr<ErrorData> data,
+void DeviceBase::HandleError(std::unique_ptr<UnknownError> error,
                              InternalErrorType additionalAllowedErrors,
                              wgpu::DeviceLostReason lostReason,
                              ForwardToErrorScope forwardToErrorScope) {
     auto deviceGuard = GetGuard();
-    AppendDebugLayerMessages(data.get());
+    AppendDebugLayerMessages(error->GetData());
 
-    InternalErrorType type = data->GetType();
+    InternalErrorType type = error->GetType();
     if (type != InternalErrorType::Validation) {
         // D3D device can provide additional device removed reason. We would
         // like to query and log the device removed reason if the error is
         // not validation error.
-        AppendDeviceLostMessage(data.get());
+        AppendDeviceLostMessage(error->GetData());
     }
 
     InternalErrorType allowedErrors = InternalErrorType::Validation | additionalAllowedErrors;
@@ -644,8 +644,8 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> data,
         // If we receive an error which we did not explicitly allow, assume the backend can't
         // recover and lose the device now. Cleanup for the device will be deferred until the
         // last external reference of the device is dropped, or an explicit call to Destroy.
-        data->AppendContext("handling unexpected error type %s when allowed errors are %s.", type,
-                            allowedErrors);
+        error->AppendContext("handling unexpected error type %s when allowed errors are %s.", type,
+                             allowedErrors);
 
         // Handle the remainder of this error as if it caused a device lost.
         type = InternalErrorType::BackendDeviceLost;
@@ -660,7 +660,7 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> data,
         mIsValidationEnabled = true;
     }
 
-    const std::string messageStr = data->GetFormattedMessage();
+    const std::string messageStr = error->GetFormattedMessage();
     if (type == InternalErrorType::BackendDeviceLost) {
         HandleDeviceLost(lostReason, messageStr);
 
@@ -707,14 +707,14 @@ void DeviceBase::HandleErrorGeneratingAsyncTask(Ref<ErrorGeneratingAsyncTask> ta
         // representable as wgpu::ErrorType. Forward it to HandleError but disable error scope
         // capturing. This will handle device loss and call the uncaptured error callback if one is
         // set.
-        HandleError(task->AcquireError()->ReleaseData(), InternalErrorType::None,
-                    wgpu::DeviceLostReason::Unknown, ForwardToErrorScope::No);
+        HandleError(task->AcquireError(), InternalErrorType::None, wgpu::DeviceLostReason::Unknown,
+                    ForwardToErrorScope::No);
     });
 }
 
 void DeviceBase::ConsumeErrorImpl(std::unique_ptr<UnknownError> err,
                                   InternalErrorType additionalAllowedErrors) {
-    HandleError(err->ReleaseData(), additionalAllowedErrors);
+    HandleError(std::move(err), additionalAllowedErrors);
 }
 
 void DeviceBase::APISetLoggingCallback(const WGPULoggingCallbackInfo& callbackInfo) {
@@ -897,8 +897,8 @@ void DeviceBase::APIForceLoss(wgpu::DeviceLostReason reason, StringView messageI
     // Note that since we are passing None as the allowedErrors, an additional message will be
     // appended noting that the error was unexpected. Since this call is for testing only it is not
     // too important, but useful for users to understand where the extra message is coming from.
-    HandleError(DAWN_MAKE_UNRECOVERABLE_ERROR(std::string(message))->ReleaseData(),
-                InternalErrorType::None, reason);
+    HandleError(DAWN_MAKE_UNRECOVERABLE_ERROR(std::string(message)), InternalErrorType::None,
+                reason);
 }
 
 DeviceBase::State DeviceBase::GetState() const {
@@ -1541,8 +1541,7 @@ BufferBase* DeviceBase::APICreateErrorBuffer(const BufferDescriptor* desc) {
                        desc)) {
         auto* clientErrorInfo = unpacked.Get<DawnBufferDescriptorErrorInfoFromWireClient>();
         if (clientErrorInfo != nullptr && clientErrorInfo->outOfMemory) {
-            HandleError(DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate memory for buffer mapping")
-                            ->ReleaseData(),
+            HandleError(DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate memory for buffer mapping"),
                         InternalErrorType::OutOfMemory);
         }
     }
@@ -1962,8 +1961,7 @@ void DeviceBase::APIInjectError(wgpu::ErrorType type, StringView message) {
     // the LoseForTesting function that can be used instead.
     if (type != wgpu::ErrorType::Validation && type != wgpu::ErrorType::OutOfMemory) {
         HandleError(
-            DAWN_VALIDATION_ERROR("Invalid injected error, must be Validation or OutOfMemory")
-                ->ReleaseData());
+            DAWN_VALIDATION_ERROR("Invalid injected error, must be Validation or OutOfMemory"));
         return;
     }
 
@@ -1971,9 +1969,9 @@ void DeviceBase::APIInjectError(wgpu::ErrorType type, StringView message) {
 
     InternalErrorType errorType = FromWGPUErrorType(type);
     if (errorType == InternalErrorType::Validation) {
-        HandleError(DAWN_MAKE_VALIDATION_ERROR(std::string(message))->ReleaseData());
+        HandleError(DAWN_MAKE_VALIDATION_ERROR(std::string(message)));
     } else {
-        HandleError(DAWN_MAKE_ERROR(errorType, std::string(message))->ReleaseData(),
+        HandleError(DAWN_MAKE_ERROR(errorType, std::string(message)),
                     InternalErrorType::OutOfMemory);
     }
 }
@@ -2808,8 +2806,7 @@ std::pair<std::string, bool> DeviceBase::GetTraceInfo() {
 
 tint::InternalCompilerErrorCallbackInfo DeviceBase::GetTintInternalCompilerErrorCallback() {
     static auto tintInternalCompilerErrorCallback = [](std::string err, void* userdata) {
-        static_cast<DeviceBase*>(userdata)->HandleError(
-            DAWN_MAKE_UNRECOVERABLE_ERROR(err)->ReleaseData());
+        static_cast<DeviceBase*>(userdata)->HandleError(DAWN_MAKE_UNRECOVERABLE_ERROR(err));
     };
     return tint::InternalCompilerErrorCallbackInfo{
         .callback = tintInternalCompilerErrorCallback,
