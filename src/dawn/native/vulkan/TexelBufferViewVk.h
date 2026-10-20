@@ -40,6 +40,7 @@ class TexelBufferView final : public TexelBufferViewBase {
         const UnpackedPtr<TexelBufferViewDescriptor>& descriptor);
 
     VkBufferView GetHandle() const;
+    VkBufferView GetHandleOrPlaceholder() const;
 
   private:
     using TexelBufferViewBase::TexelBufferViewBase;
@@ -52,6 +53,8 @@ class TexelBufferView final : public TexelBufferViewBase {
     void SetLabelImpl() override;
 
     VkBufferView mHandle = VK_NULL_HANDLE;
+    // True if mHandle is owned by this object rather than a shared Device placeholder.
+    bool mOwnsHandle = false;
 };
 
 }  // namespace dawn::native::vulkan

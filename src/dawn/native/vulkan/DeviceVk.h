@@ -165,6 +165,16 @@ class Device final : public DeviceBase {
     VulkanRenderPassType GetRenderPassType() const { return mRenderPassType; }
     VulkanFramebufferFetchMode GetFramebufferFetchMode() const { return mFramebufferFetchMode; }
 
+    // WebGPU allows creating bind groups with destroyed buffers, textures, or views of destroyed
+    // resources, while Vulkan requires valid handles in vkUpdateDescriptorSets. When a Buffer,
+    // TextureView, or TexelBufferView is destroyed (or created from an already-destroyed resource),
+    // its mHandle is set to one of these shared device placeholders and its mOwnsHandle flag is
+    // false. GetHandle() asserts mOwnsHandle so non-bindgroup commands cannot accidentally use a
+    // placeholder, while BindGroup creation uses GetHandleOrPlaceholder().
+    VkBuffer GetPlaceholderBufferHandle() const;
+    VkBufferView GetPlaceholderTexelBufferViewHandle() const;
+    VkImageView GetPlaceholderTextureViewHandle(const Format& format) const;
+
   private:
     Device(AdapterBase* adapter,
            const UnpackedPtr<DeviceDescriptor>& descriptor,
@@ -259,6 +269,13 @@ class Device final : public DeviceBase {
 
     VulkanRenderPassType mRenderPassType = VulkanRenderPassType::CreateRenderPass;
     VulkanFramebufferFetchMode mFramebufferFetchMode = VulkanFramebufferFetchMode::kDisabled;
+
+    MaybeError InitializePlaceholderResources();
+
+    Ref<Buffer> mPlaceholderBuffer;
+    Ref<TexelBufferView> mPlaceholderTexelBufferView;
+    Ref<TextureView> mPlaceholderColorTextureView;
+    Ref<TextureView> mPlaceholderDepthStencilTextureView;
 
     MaybeError ImportExternalImage(const ExternalImageDescriptorVk* descriptor,
                                    ExternalMemoryHandle memoryHandle,

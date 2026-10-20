@@ -2097,12 +2097,15 @@ MaybeError TextureView::Initialize(const UnpackedPtr<TextureViewDescriptor>& des
         return {};
     }
 
-    // Texture could be destroyed by the time we make a view.
+    Device* device = ToBackend(GetTexture()->GetDevice());
+
     if (GetTexture()->IsDestroyed()) {
+        VkImageView placeholderHandle = device->GetPlaceholderTextureViewHandle(GetFormat());
+        mHandle = placeholderHandle;
+        mHandleForBGRA8UnormStorage = placeholderHandle;
         return {};
     }
 
-    Device* device = ToBackend(GetTexture()->GetDevice());
     VkImageViewCreateInfo createInfo = GetCreateInfo(descriptor->format, descriptor->dimension);
 
     VkImageViewUsageCreateInfo usageInfo = {};
@@ -2155,6 +2158,7 @@ MaybeError TextureView::Initialize(const UnpackedPtr<TextureViewDescriptor>& des
     DAWN_TRY(CheckVkSuccess(
         device->fn.CreateImageView(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
         "CreateImageView"));
+    mOwnsHandle = true;
 
     // We should create an image view with format RGBA8Unorm on the BGRA8Unorm texture when the
     // texture is used as storage texture. See http://crbug.com/dawn/1641 for more details.
@@ -2185,15 +2189,16 @@ void TextureView::DestroyImpl(DestroyReason reason) {
         mSamplerYCbCrConversion = VK_NULL_HANDLE;
     }
 
-    if (mHandle != VK_NULL_HANDLE) {
+    if (mOwnsHandle) {
         device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
-        mHandle = VK_NULL_HANDLE;
+        if (mHandleForBGRA8UnormStorage != VK_NULL_HANDLE) {
+            device->GetFencedDeleter()->DeleteWhenUnused(mHandleForBGRA8UnormStorage);
+        }
+        mOwnsHandle = false;
     }
-
-    if (mHandleForBGRA8UnormStorage != VK_NULL_HANDLE) {
-        device->GetFencedDeleter()->DeleteWhenUnused(mHandleForBGRA8UnormStorage);
-        mHandleForBGRA8UnormStorage = VK_NULL_HANDLE;
-    }
+    VkImageView placeholderHandle = device->GetPlaceholderTextureViewHandle(GetFormat());
+    mHandle = placeholderHandle;
+    mHandleForBGRA8UnormStorage = placeholderHandle;
 
     for (auto& handle : mHandlesFor2DViewOn3D) {
         if (handle != VK_NULL_HANDLE) {
@@ -2204,10 +2209,20 @@ void TextureView::DestroyImpl(DestroyReason reason) {
 }
 
 VkImageView TextureView::GetHandle() const {
+    DAWN_ASSERT(mOwnsHandle);
+    return mHandle;
+}
+
+VkImageView TextureView::GetHandleOrPlaceholder() const {
     return mHandle;
 }
 
 VkImageView TextureView::GetHandleForBGRA8UnormStorage() const {
+    DAWN_ASSERT(mOwnsHandle);
+    return mHandleForBGRA8UnormStorage;
+}
+
+VkImageView TextureView::GetHandleForBGRA8UnormStorageOrPlaceholder() const {
     return mHandleForBGRA8UnormStorage;
 }
 
@@ -2300,7 +2315,9 @@ VkImageLayout TextureView::VulkanImageLayout(wgpu::TextureUsage usage) const {
 }
 
 void TextureView::SetLabelImpl() {
-    SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_TextureView", GetLabel());
+    if (mOwnsHandle) {
+        SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_TextureView", GetLabel());
+    }
 }
 
 }  // namespace dawn::native::vulkan

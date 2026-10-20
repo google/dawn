@@ -57,6 +57,7 @@
 #include "src/dawn/native/vulkan/QueueVk.h"
 #include "src/dawn/native/vulkan/RenderPassCache.h"
 #include "src/dawn/native/vulkan/RenderPipelineVk.h"
+#include "src/dawn/native/vulkan/ResourceHeapVk.h"
 #include "src/dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "src/dawn/native/vulkan/ResourceTableVk.h"
 #include "src/dawn/native/vulkan/SamplerVk.h"
@@ -202,7 +203,116 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
         mFramebufferFetchHelper = std::make_unique<FramebufferFetchHelper>(this);
     }
 
-    return DeviceBase::Initialize(descriptor, std::move(queue));
+    DAWN_TRY(DeviceBase::Initialize(descriptor, std::move(queue)));
+
+    // The device guard isn't needed for thread safety since device creation happens on a single
+    // thread, but it is required to satisfy assertions during reentrant object creation.
+    auto deviceGuard = GetGuard();
+    DAWN_TRY(InitializePlaceholderResources());
+
+    return {};
+}
+
+MaybeError Device::InitializePlaceholderResources() {
+    // Create a small placeholder buffer with Uniform, Storage, and (if enabled) TexelBuffer usages
+    // so it can back any destroyed buffer binding in a descriptor set (which Vulkan requires to
+    // have the matching VK_BUFFER_USAGE_*_BIT flags).
+    {
+        BufferDescriptor bufferDesc = {
+            .label = "Dawn_Placeholder_Buffer",
+            .usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage |
+                     (AreTexelBuffersEnabled() ? wgpu::BufferUsage::TexelBuffer
+                                               : wgpu::BufferUsage::None),
+            .size = 16,
+        };
+        Ref<BufferBase> buffer;
+        DAWN_TRY_ASSIGN(buffer, CreateBuffer(&bufferDesc));
+        mPlaceholderBuffer = ToBackend(std::move(buffer));
+
+        if (AreTexelBuffersEnabled()) {
+            TexelBufferViewDescriptor viewDesc = {
+                .label = "Dawn_Placeholder_TexelBufferView",
+                .format = wgpu::TextureFormat::R32Uint,
+                .offset = 0,
+                .size = 16,
+            };
+            Ref<TexelBufferViewBase> view;
+            DAWN_TRY_ASSIGN(view, CreateTexelBufferView(mPlaceholderBuffer.Get(), &viewDesc));
+            mPlaceholderTexelBufferView = ToBackend(std::move(view));
+        }
+    }
+
+    // Create a placeholder color texture and view with TextureBinding, StorageBinding, and
+    // RenderAttachment usages. A view of a destroyed color texture can be bound as a sampled
+    // texture (VK_IMAGE_USAGE_SAMPLED_BIT), storage texture (VK_IMAGE_USAGE_STORAGE_BIT), or
+    // input attachment (VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT, which VulkanImageUsage adds when
+    // TextureBinding | RenderAttachment is combined with DawnLoadResolveTexture or
+    // FramebufferFetch).
+    {
+        TextureDescriptor textureDesc = {
+            .label = "Dawn_Placeholder_ColorTexture",
+            .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding |
+                     wgpu::TextureUsage::RenderAttachment,
+            .dimension = wgpu::TextureDimension::e2D,
+            .size = {1, 1, 1},
+            .format = wgpu::TextureFormat::RGBA8Unorm,
+        };
+        Ref<TextureBase> texture;
+        DAWN_TRY_ASSIGN(texture, CreateTexture(&textureDesc));
+
+        TextureViewDescriptor viewDesc = {
+            .label = "Dawn_Placeholder_ColorTextureView",
+        };
+        Ref<TextureViewBase> view;
+        DAWN_TRY_ASSIGN(view, CreateTextureView(texture.Get(), &viewDesc));
+        mPlaceholderColorTextureView = ToBackend(std::move(view));
+    }
+
+    // Create a placeholder depth/stencil texture and view. Sampled depth/stencil texture views
+    // use VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL in descriptor writes, which Vulkan
+    // requires to be paired with a view of a depth/stencil image that has
+    // VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT (both added by
+    // VulkanImageUsage for Depth16Unorm with TextureBinding).
+    {
+        TextureDescriptor textureDesc = {
+            .label = "Dawn_Placeholder_DepthStencilTexture",
+            .usage = wgpu::TextureUsage::TextureBinding,
+            .dimension = wgpu::TextureDimension::e2D,
+            .size = {1, 1, 1},
+            .format = wgpu::TextureFormat::Depth16Unorm,
+        };
+        Ref<TextureBase> texture;
+        DAWN_TRY_ASSIGN(texture, CreateTexture(&textureDesc));
+
+        TextureViewDescriptor viewDesc = {
+            .label = "Dawn_Placeholder_DepthStencilTextureView",
+        };
+        Ref<TextureViewBase> view;
+        DAWN_TRY_ASSIGN(view, CreateTextureView(texture.Get(), &viewDesc));
+        mPlaceholderDepthStencilTextureView = ToBackend(std::move(view));
+    }
+
+    return {};
+}
+
+// Placeholders may be null if InitializePlaceholderResources() fails while creating them (since
+// the failed object's destructor still runs DestroyImpl), or after Device::DestroyImpl() clears
+// them to break the Device -> ObjectBase -> mDevice reference cycle.
+VkBuffer Device::GetPlaceholderBufferHandle() const {
+    return mPlaceholderBuffer != nullptr ? mPlaceholderBuffer->GetHandleOrPlaceholder()
+                                         : VK_NULL_HANDLE;
+}
+
+VkBufferView Device::GetPlaceholderTexelBufferViewHandle() const {
+    return mPlaceholderTexelBufferView != nullptr
+               ? mPlaceholderTexelBufferView->GetHandleOrPlaceholder()
+               : VK_NULL_HANDLE;
+}
+
+VkImageView Device::GetPlaceholderTextureViewHandle(const Format& format) const {
+    const Ref<TextureView>& view = format.HasDepthOrStencil() ? mPlaceholderDepthStencilTextureView
+                                                              : mPlaceholderColorTextureView;
+    return view != nullptr ? view->GetHandleOrPlaceholder() : VK_NULL_HANDLE;
 }
 
 Device::~Device() {
@@ -1121,6 +1231,12 @@ void Device::DestroyImpl(DestroyReason reason) {
         }
         pending->ClearUpTo(kMaxExecutionSerial);
     });
+
+    // Clear placeholder refs to break the Device -> ObjectBase -> mDevice reference cycle.
+    mPlaceholderBuffer = nullptr;
+    mPlaceholderTexelBufferView = nullptr;
+    mPlaceholderColorTextureView = nullptr;
+    mPlaceholderDepthStencilTextureView = nullptr;
 
     // mResourceMemoryAllocator may not be created if the device creation fails before its creation.
     // For example, as mResourceMemoryAllocator is created with a queue, it won't be created when

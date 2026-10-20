@@ -1191,6 +1191,34 @@ TEST_P(BGRA8UnormStorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
     CheckOutputStorageTexture(writeonlyStorageTexture, kFormat, {kWidth, kHeight});
 }
 
+// Test creating a bind group with a destroyed BGRA8Unorm storage texture.
+TEST_P(BGRA8UnormStorageTextureTests, CreateBindGroupWithDestroyedResource) {
+    DAWN_TEST_UNSUPPORTED_IF(!IsBGRA8UnormStorageSupported());
+
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly,
+                  wgpu::TextureFormat::BGRA8Unorm}});
+
+    // Create view, then destroy.
+    {
+        wgpu::Texture texture = CreateTexture(
+            wgpu::TextureFormat::BGRA8Unorm, wgpu::TextureUsage::StorageBinding, {kWidth, kHeight});
+        wgpu::TextureView textureView = texture.CreateView();
+
+        texture.Destroy();
+        wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, textureView}});
+    }
+    // Destroy, then create view.
+    {
+        wgpu::Texture texture = CreateTexture(
+            wgpu::TextureFormat::BGRA8Unorm, wgpu::TextureUsage::StorageBinding, {kWidth, kHeight});
+        texture.Destroy();
+        wgpu::TextureView textureView = texture.CreateView();
+
+        wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, textureView}});
+    }
+}
+
 DAWN_INSTANTIATE_TEST(BGRA8UnormStorageTextureTests,
                       D3D11Backend(),
                       D3D12Backend(),

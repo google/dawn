@@ -1838,12 +1838,16 @@ TEST_P(BindGroupTests, CreateWithDestroyedResource) {
             utils::MakeBindGroupLayout(device, {{0, wgpu::ShaderStage::Fragment, bindingType}});
 
         wgpu::BufferDescriptor bufferDesc;
-        bufferDesc.size = sizeof(float);
+        bufferDesc.size = 1024;
         bufferDesc.usage = usage;
         wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
         buffer.Destroy();
 
         wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, sizeof(float)}});
+        // Also test a non-zero offset and size larger than the backend's placeholder buffer (e.g.
+        // 16 bytes on Vulkan) to verify that the backend clamps the descriptor range to the
+        // placeholder buffer's bounds when the buffer is destroyed.
+        wgpu::BindGroup bgWithOffset = utils::MakeBindGroup(device, bgl, {{0, buffer, 256, 512}});
     };
 
     // Test various usages and binding types since they take different backend code paths.
@@ -1862,6 +1866,36 @@ TEST_P(BindGroupTests, CreateWithDestroyedResource) {
         textureDesc.usage = wgpu::TextureUsage::TextureBinding;
         textureDesc.size = {1, 1, 1};
         textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+
+        // Create view, then destroy.
+        {
+            wgpu::Texture texture = device.CreateTexture(&textureDesc);
+            wgpu::TextureView textureView = texture.CreateView();
+
+            texture.Destroy();
+            wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, textureView}});
+        }
+        // Destroy, then create view.
+        {
+            wgpu::Texture texture = device.CreateTexture(&textureDesc);
+            texture.Destroy();
+            wgpu::TextureView textureView = texture.CreateView();
+
+            wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, textureView}});
+        }
+    }
+
+    // Test a sampled depth texture (which uses a depth/stencil image layout on Vulkan and
+    // requires a depth/stencil placeholder image view).
+    {
+        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth}});
+
+        wgpu::TextureDescriptor textureDesc;
+        textureDesc.usage =
+            wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
+        textureDesc.size = {1, 1, 1};
+        textureDesc.format = wgpu::TextureFormat::Depth16Unorm;
 
         // Create view, then destroy.
         {

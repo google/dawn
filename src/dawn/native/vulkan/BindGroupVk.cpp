@@ -122,20 +122,11 @@ void BindGroup::WriteDescriptorSet(VkDescriptorSet dsSet,
         DoWrite(writeIndex, &write);
     };
 
-    // Loop over bindings for each binding type. Skip over already destroyed handles as it produces
-    // a VVL error. The descriptor set will have null entries, which is invalid to use, but we'll
-    // never do that since the WebGPU command buffers will be errors.
-    // TODO(https://crbug.com/438554019): Instead, consider replacing the handles with placeholder
-    // handles, to skip over branches and later allow for the use of Vulkan descriptor update
-    // templates.
-
     for (BindingIndex i : layout->GetBufferIndices()) {
         BufferBinding binding = GetBindingAsBufferBinding(i);
 
-        VkBuffer handle = ToBackend(binding.buffer)->GetHandle();
-        if (handle == VK_NULL_HANDLE) {
-            continue;
-        }
+        VkBuffer handle = ToBackend(binding.buffer)->GetHandleOrPlaceholder();
+        DAWN_ASSERT(handle != VK_NULL_HANDLE);
 
         // Round uniform buffer binding sizes up to a multiple of 16 bytes since Tint will polyfill
         // them as array<vec4u, ...>.
@@ -146,8 +137,16 @@ void BindGroup::WriteDescriptorSet(VkDescriptorSet dsSet,
 
         AddWrite(i, [&](BindingIndex writeIndex, VkWriteDescriptorSet* write) {
             writeBufferInfo[writeIndex].buffer = handle;
-            writeBufferInfo[writeIndex].offset = binding.offset;
-            writeBufferInfo[writeIndex].range = binding.size;
+            // If the buffer is destroyed, `handle` is the device's small placeholder VkBuffer.
+            // Use offset 0 and VK_WHOLE_SIZE so the descriptor range remains within the bounds of
+            // the placeholder buffer regardless of the original buffer's offset and size.
+            if (binding.buffer->IsDestroyed()) [[unlikely]] {
+                writeBufferInfo[writeIndex].offset = 0;
+                writeBufferInfo[writeIndex].range = VK_WHOLE_SIZE;
+            } else {
+                writeBufferInfo[writeIndex].offset = binding.offset;
+                writeBufferInfo[writeIndex].range = binding.size;
+            }
             write->pBufferInfo = &writeBufferInfo[writeIndex];
         });
     }
@@ -164,10 +163,8 @@ void BindGroup::WriteDescriptorSet(VkDescriptorSet dsSet,
     for (BindingIndex i : layout->GetSampledTextureIndices()) {
         TextureView* view = ToBackend(GetBindingAsTextureView(i));
 
-        VkImageView handle = view->GetHandle();
-        if (handle == VK_NULL_HANDLE) {
-            continue;
-        }
+        VkImageView handle = view->GetHandleOrPlaceholder();
+        DAWN_ASSERT(handle != VK_NULL_HANDLE);
 
         AddWrite(i, [&](BindingIndex writeIndex, VkWriteDescriptorSet* write) {
             // TODO(crbug.com/41488897): Add GetVkDescriptorSet{Index, Type}(BindingIndex) functions
@@ -195,13 +192,11 @@ void BindGroup::WriteDescriptorSet(VkDescriptorSet dsSet,
 
         VkImageView handle = VK_NULL_HANDLE;
         if (view->GetFormat().format == wgpu::TextureFormat::BGRA8Unorm) {
-            handle = view->GetHandleForBGRA8UnormStorage();
+            handle = view->GetHandleForBGRA8UnormStorageOrPlaceholder();
         } else {
-            handle = view->GetHandle();
+            handle = view->GetHandleOrPlaceholder();
         }
-        if (handle == VK_NULL_HANDLE) {
-            continue;
-        }
+        DAWN_ASSERT(handle != VK_NULL_HANDLE);
 
         AddWrite(i, [&](BindingIndex writeIndex, VkWriteDescriptorSet* write) {
             writeImageInfo[writeIndex].imageView = handle;
@@ -212,10 +207,8 @@ void BindGroup::WriteDescriptorSet(VkDescriptorSet dsSet,
 
     for (BindingIndex i : layout->GetTexelBufferIndices()) {
         TexelBufferView* view = ToBackend(GetBindingAsTexelBufferView(i));
-        VkBufferView handle = view->GetHandle();
-        if (handle == VK_NULL_HANDLE) {
-            continue;
-        }
+        VkBufferView handle = view->GetHandleOrPlaceholder();
+        DAWN_ASSERT(handle != VK_NULL_HANDLE);
 
         AddWrite(i, [&](BindingIndex writeIndex, VkWriteDescriptorSet* write) {
             writeTexelBufferViews[writeIndex] = handle;
@@ -226,10 +219,8 @@ void BindGroup::WriteDescriptorSet(VkDescriptorSet dsSet,
     for (BindingIndex i : layout->GetInputAttachmentIndices()) {
         TextureView* view = ToBackend(GetBindingAsTextureView(i));
 
-        VkImageView handle = view->GetHandle();
-        if (handle == VK_NULL_HANDLE) {
-            continue;
-        }
+        VkImageView handle = view->GetHandleOrPlaceholder();
+        DAWN_ASSERT(handle != VK_NULL_HANDLE);
 
         AddWrite(i, [&](BindingIndex writeIndex, VkWriteDescriptorSet* write) {
             writeImageInfo[writeIndex].imageView = handle;

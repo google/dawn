@@ -679,6 +679,45 @@ TEST_P(TexelBufferTests, CopyBetweenViews) {
     EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), dst, dstDesc.offset, expected.size());
 }
 
+// Test creating a bind group with a destroyed texel buffer.
+TEST_P(TexelBufferTests, CreateBindGroupWithDestroyedResource) {
+    for (auto access : {wgpu::TexelBufferAccess::ReadOnly, wgpu::TexelBufferAccess::ReadWrite}) {
+        wgpu::TexelBufferBindingLayout layout = {};
+        layout.format = wgpu::TextureFormat::R32Uint;
+        layout.access = access;
+
+        wgpu::BindGroupLayout bgl =
+            utils::MakeBindGroupLayout(device, {{0, wgpu::ShaderStage::Compute, &layout}});
+
+        wgpu::BufferDescriptor bufDesc = {};
+        bufDesc.size = sizeof(uint32_t);
+        bufDesc.usage = wgpu::BufferUsage::TexelBuffer;
+        if (access == wgpu::TexelBufferAccess::ReadWrite) {
+            bufDesc.usage |= wgpu::BufferUsage::Storage;
+        }
+
+        wgpu::TexelBufferViewDescriptor viewDesc = {};
+        viewDesc.format = wgpu::TextureFormat::R32Uint;
+
+        // Create view, then destroy.
+        {
+            wgpu::Buffer buffer = device.CreateBuffer(&bufDesc);
+            wgpu::TexelBufferView view = buffer.CreateTexelView(&viewDesc);
+
+            buffer.Destroy();
+            wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, view}});
+        }
+        // Destroy, then create view.
+        {
+            wgpu::Buffer buffer = device.CreateBuffer(&bufDesc);
+            buffer.Destroy();
+            wgpu::TexelBufferView view = buffer.CreateTexelView(&viewDesc);
+
+            wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, view}});
+        }
+    }
+}
+
 DAWN_INSTANTIATE_TEST(TexelBufferTests, VulkanBackend());
 
 }  // anonymous namespace
