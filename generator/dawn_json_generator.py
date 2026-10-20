@@ -1662,6 +1662,10 @@ class MultiGeneratorFromDawnJSON(Generator):
                             required=True,
                             type=str,
                             help='The DAWN JSON definition to use.')
+        parser.add_argument('--version-json',
+                            default=None,
+                            type=str,
+                            help='The DAWN VERSION JSON definition to use.')
         parser.add_argument('--wire-json',
                             default=None,
                             type=str,
@@ -1699,6 +1703,11 @@ class MultiGeneratorFromDawnJSON(Generator):
             loaded_json = json.loads(f.read())
 
         targets = args.targets.split(',')
+
+        version_json = None
+        if args.version_json:
+            with open(args.version_json) as f:
+                version_json = json.loads(f.read())
 
         wire_json = None
         if args.wire_json:
@@ -1828,7 +1837,8 @@ class MultiGeneratorFromDawnJSON(Generator):
 
             params_upstream = parse_json(loaded_json,
                                          enabled_tags=['native'],
-                                         disabled_tags=['dawn'])
+                                         disabled_tags=['dawn'],
+                                         metadata=version_json['metadata'])
             renders.append(
                 FileRender('api.h', 'webgpu-headers/' + api + '.h',
                            [RENDER_PARAMS_BASE, params_upstream]))
@@ -2265,6 +2275,8 @@ class MultiGeneratorFromDawnJSON(Generator):
 
     def get_dependencies(self, args):
         deps = [os.path.abspath(args.dawn_json)]
+        if args.version_json != None:
+            deps += [os.path.abspath(args.version_json)]
         if args.wire_json != None:
             deps += [os.path.abspath(args.wire_json)]
         if args.native_json != None:

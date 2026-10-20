@@ -177,6 +177,8 @@ function(DawnJSONGenerator)
         EXTRA_PARAMETERS
              --dawn-json
              "${Dawn_SOURCE_DIR}/src/dawn/dawn.json"
+             --version-json
+             "${Dawn_SOURCE_DIR}/src/dawn/dawn_version.json"
              --wire-json
              "${Dawn_SOURCE_DIR}/src/dawn/dawn_wire.json"
              --native-json

@@ -109,6 +109,7 @@ dawn_component("proc") {
 dawn_json_generator("webgpu_headers_gen") {
   target = "webgpu_headers"
   inputs = [
+    "${dawn_root}/src/dawn/dawn_version.json",
     "${dawn_template_dir}/api.h",
     "${dawn_template_dir}/api_cpp.h",
     "${dawn_template_dir}/api_cpp_chained_struct.h",

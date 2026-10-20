@@ -570,17 +570,36 @@ def CheckWebgpuHeaderDiff(input_api, output_api):
 def CheckDawnHeaderVersion(input_api, output_api):
     """Checks that Dawn header version files and stable_version are valid."""
     results = []
-    try:
-        input_api.subprocess.check_call_out(
-            [sys.executable, "generator/dawn_version_generator.py", "check"],
-            stdout=input_api.subprocess.PIPE,
-            stderr=input_api.subprocess.PIPE,
-            cwd=input_api.change.RepositoryRoot())
-    except input_api.subprocess.CalledProcessError as e:
-        if input_api.is_committing:
-            results.append(output_api.PresubmitError('%s' % (e, )))
-        else:
-            results.append(output_api.PresubmitPromptWarning('%s' % (e, )))
+    for file in input_api.AffectedFiles(
+            include_deletes=False,
+            file_filter=lambda f: f.LocalPath().replace(
+                '\\', '/') == "src/dawn/dawn_version.json"):
+        with input_api.CreateTemporaryFile() as old_file, \
+             input_api.CreateTemporaryFile() as new_file:
+            old_file.write("\n".join(file.OldContents()).encode("utf8"))
+            old_file.close()
+            new_file.write("\n".join(file.NewContents()).encode("utf8"))
+            new_file.close()
+            try:
+                input_api.subprocess.check_call_out(
+                    [
+                        sys.executable,
+                        "generator/dawn_version_generator.py",
+                        "check",
+                        "--old-version-json",
+                        old_file.name,
+                        "--new-version-json",
+                        new_file.name,
+                    ],
+                    stdout=input_api.subprocess.PIPE,
+                    stderr=input_api.subprocess.PIPE,
+                    cwd=input_api.change.RepositoryRoot())
+            except input_api.subprocess.CalledProcessError as e:
+                if input_api.is_committing:
+                    results.append(output_api.PresubmitError('%s' % (e, )))
+                else:
+                    results.append(
+                        output_api.PresubmitPromptWarning('%s' % (e, )))
     return results
 
 

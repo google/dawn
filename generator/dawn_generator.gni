@@ -102,6 +102,14 @@ template("dawn_json_generator") {
     # Automatically add generator arguments based on the presence of optional
     # JSON files in the inputs list. This avoids hardcoding target names in the
     # generator.
+    _has_version = filter_include(inputs, [ "*dawn_version.json" ]) != []
+    if (_has_version) {
+      args += [
+        "--version-json",
+        rebase_path("${dawn_root}/src/dawn/dawn_version.json", root_build_dir),
+      ]
+    }
+
     _has_wire = filter_include(inputs, [ "*dawn_wire.json" ]) != []
     if (_has_wire) {
       args += [

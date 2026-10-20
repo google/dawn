@@ -26,7 +26,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import argparse, os, subprocess, sys, shutil
+import argparse, json, os, subprocess, sys, shutil
 
 from generator_lib import Generator, run_generator, FileRender, GeneratorOutput
 
@@ -177,6 +177,63 @@ class DawnVersionGenerator(Generator):
         return GeneratorOutput(renders=renders, imported_templates=[])
 
 
+def _get_stable_versions(json_filepath):
+    versions = []
+    with open(json_filepath) as f:
+        content = f.read().strip()
+        if content:
+            addins = json.loads(content).get("metadata", {}).get("addins", {})
+            versions = [
+                v["stable_version"] for v in addins.values()
+                if "stable_version" in v
+            ]
+    return len(versions), max(versions, default=0)
+
+
+def run_check(args):
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--old-version-json",
+        required=True,
+        type=str,
+        help="The old dawn_version.json file path before changes.",
+    )
+    parser.add_argument(
+        "--new-version-json",
+        required=True,
+        type=str,
+        help="The new dawn_version.json file path after changes.",
+    )
+    options = parser.parse_args(args)
+
+    # TODO(crbug.com/575526443): Currently, we are just using heuristic checks
+    # on the number of entries and the max version number. We can probably do
+    # a dictionary diff on the addins once we have the infrastructure in place.
+    old_count, old_max = _get_stable_versions(options.old_version_json)
+    new_count, new_max = _get_stable_versions(options.new_version_json)
+
+    if new_count < old_count:
+        print(f"The number of 'stable_version' entries in dawn_version.json "
+              f"decreased from {old_count} to {new_count}. Stable API entries "
+              f"cannot be removed.")
+        return 1
+
+    if new_count == old_count and new_max != old_max:
+        print(
+            f"The number of 'stable_version' entries in dawn_version.json did "
+            f"not change ({new_count}), but the maximum 'stable_version' "
+            f"changed from {old_max} to {new_max}.")
+        return 1
+
+    if new_count > old_count and new_max <= old_max:
+        print(f"The number of 'stable_version' entries in dawn_version.json "
+              f"increased from {old_count} to {new_count}, but the maximum "
+              f"'stable_version' ({new_max}) did not increase from {old_max}.")
+        return 1
+
+    return 0
+
+
 def main(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("action", choices=("gen", "check"))
@@ -186,7 +243,7 @@ def main(args):
         return run_generator(DawnVersionGenerator(), remaining_args)
 
     if options.action == "check":
-        return 0
+        return run_check(remaining_args)
 
 
 if __name__ == "__main__":
