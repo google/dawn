@@ -262,19 +262,23 @@ MaybeError CheckError(const OpenGLFunctions& gl,
                       const char* file,
                       const char* function,
                       unsigned int line) {
-    GLenum error = gl.GetError();
+    GLenum error = INJECT_ERROR_OR_RUN(gl.GetError(), static_cast<GLenum>(GL_OUT_OF_MEMORY));
     if (error == GL_NO_ERROR) [[likely]] {
         return {};
     }
 
+    // The error may also have been left pending by an earlier unchecked call.
     std::string message = std::string(call) + " failed with " + GLErrorAsString(error);
 
-    // Check that only one GL error was generated, ClearErrors should have been called first.
+    // Drain and report all the pending errors. Keep track of whether a context loss was reported
+    // by any of them, so that it isn't hidden by an earlier error.
+    bool contextLost = error == GL_CONTEXT_LOST;
     GLenum nextError = gl.GetError();
     while (nextError != GL_NO_ERROR) {
         // Skip GL_CONTEXT_LOST errors, they will be generated continuously and result in an
         // infinite loop.
         if (nextError == GL_CONTEXT_LOST) {
+            contextLost = true;
             break;
         }
 
@@ -284,14 +288,20 @@ MaybeError CheckError(const OpenGLFunctions& gl,
 
     DebugLog(file, function, line) << message;
 
+    if (contextLost) {
+        return DAWN_BACKEND_DEVICE_LOST_ERROR(message);
+    }
     switch (error) {
         case GL_OUT_OF_MEMORY:
             return DAWN_OUT_OF_MEMORY_ERROR(message);
-        case GL_CONTEXT_LOST:
-            return DAWN_BACKEND_DEVICE_LOST_ERROR(message);
         default:
             return DAWN_MAKE_UNRECOVERABLE_ERROR(message);
     }
+}
+
+MaybeError CheckPendingErrorBeforeUserVisibleData(const OpenGLFunctions& gl,
+                                                  const char* description) {
+    return CheckError(gl, description, __FILE__, __func__, __LINE__);
 }
 
 }  // namespace dawn::native::opengl

@@ -64,15 +64,24 @@ void ClearErrors(const OpenGLFunctions& gl,
                  const char* function,
                  unsigned int line);
 
-// Check for a single GL error.
+// Check for a GL error, also reporting the errors left pending by earlier unchecked calls. Returns
+// a device lost error if any of them is a context loss.
 MaybeError CheckError(const OpenGLFunctions& gl,
                       const char* call,
                       const char* file,
                       const char* function,
                       unsigned int line);
 
-#define DAWN_GL_TRY_ALWAYS_CHECK(gl, call)                      \
-    (ClearErrors(gl, __FILE__, __func__, __LINE__), (gl.call)); \
+// Checks for any GL error pending on the context. Call it explicitly before data becomes visible to
+// the application, so that errors from unchecked GL calls lose the device before the data becomes
+// visible to app.
+MaybeError CheckPendingErrorBeforeUserVisibleData(const OpenGLFunctions& gl,
+                                                  const char* description);
+
+// Errors left pending by earlier unchecked calls are not cleared, so that they are reported by
+// CheckError instead of being silently dropped.
+#define DAWN_GL_TRY_ALWAYS_CHECK(gl, call) \
+    (gl.call);                             \
     DAWN_TRY(CheckError(gl, "gl" #call, __FILE__, __func__, __LINE__))
 #define DAWN_GL_TRY_ALWAYS_CHECK_IGNORE_ERRORS(gl, call)        \
     (ClearErrors(gl, __FILE__, __func__, __LINE__), (gl.call)); \

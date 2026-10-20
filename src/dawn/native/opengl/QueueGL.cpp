@@ -88,6 +88,9 @@ MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
                 DAWN_TRY(ToBackend(commandBuffer)->RecordCommands(gl));
             }
         }
+        // Results of the submitted work can become visible to the application (e.g. on present).
+        DAWN_TRY(
+            CheckPendingErrorBeforeUserVisibleData(gl, "Unchecked OpenGL calls in Queue::Submit"));
         return {};
     });
 }
@@ -279,6 +282,11 @@ ResultOrError<Ref<SharedFence>> Queue::GetOrCreateSharedFence(ExecutionSerial la
 
     return device->ExecuteGL(
         SubmitMode::Passive, [&](const OpenGLFunctions& gl) -> ResultOrError<Ref<SharedFence>> {
+            // The shared fence lets another API read the resources written so far, so check for
+            // unchecked GL errors first.
+            DAWN_TRY(CheckPendingErrorBeforeUserVisibleData(
+                gl, "Unchecked OpenGL calls before exporting a shared fence"));
+
             if (sync == nullptr) {
                 DisplayEGL* display = ToBackend(device->GetPhysicalDevice())->GetDisplay();
                 DAWN_TRY_ASSIGN(sync, WrappedEGLSync::Create(display, gl, requestedSyncType, {}));

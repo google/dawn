@@ -406,6 +406,7 @@ if (DAWN_ENABLE_OPENGLES)
         "white_box/GLDeferredWorkTests.cpp"
         "white_box/GLFramebufferCompletenessTests.cpp"
         "white_box/GLTextureWrappingTests.cpp"
+        "white_box/GLUncheckedErrorTests.cpp"
     )
 endif()
 

@@ -27,11 +27,15 @@
 
 #include "src/dawn/native/opengl/ContextEGL.h"
 
+#include <array>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
+#include "absl/container/flat_hash_set.h"
+#include "absl/strings/str_split.h"
 #include "src/dawn/native/opengl/DisplayEGL.h"
 #include "src/dawn/native/opengl/UtilsEGL.h"
 
@@ -57,6 +61,11 @@
 // https://chromium.googlesource.com/angle/angle/+/main/extensions/EGL_ANGLE_create_context_webgl_compatibility.txt
 #ifndef EGL_CONTEXT_HARDENED_ANGLE
 #define EGL_CONTEXT_HARDENED_ANGLE 0x34F8
+#endif
+
+// https://chromium.googlesource.com/angle/angle/+/main/extensions/ANGLE_request_extension.txt
+#ifndef GL_REQUESTABLE_EXTENSIONS_ANGLE
+#define GL_REQUESTABLE_EXTENSIONS_ANGLE 0x93A8
 #endif
 
 namespace dawn::native::opengl {
@@ -253,16 +262,39 @@ void ContextEGL::RequestRequiredExtensionsExplicitly() {
 
     auto glRequestExtension = reinterpret_cast<PFNGLREQUESTEXTENSIONANGLEPROC>(proc);
 
+    // Requesting an extension that isn't requestable generates a GL error, so only request the
+    // extensions listed in GL_REQUESTABLE_EXTENSIONS_ANGLE.
+    typedef const GLubyte*(KHRONOS_APIENTRY * PFNGLGETSTRINGPROC)(GLenum name);
+    auto getStringProc = egl.GetProcAddress("glGetString");
+    if (!getStringProc) {
+        return;
+    }
+    auto glGetString = reinterpret_cast<PFNGLGETSTRINGPROC>(getStringProc);
+    const char* rawRequestableExtensions =
+        reinterpret_cast<const char*>(glGetString(GL_REQUESTABLE_EXTENSIONS_ANGLE));
+    if (rawRequestableExtensions == nullptr) {
+        return;
+    }
+    absl::flat_hash_set<std::string_view> requestableExtensions =
+        absl::StrSplit(rawRequestableExtensions, " ");
+
     // src/dawn/native/opengl/supported_extensions.json
-    glRequestExtension("GL_OES_texture_stencil8");
-    glRequestExtension("GL_EXT_texture_compression_s3tc");
-    glRequestExtension("GL_EXT_texture_compression_s3tc_srgb");
-    glRequestExtension("GL_OES_EGL_image");
-    glRequestExtension("GL_EXT_texture_format_BGRA8888");
-    glRequestExtension("GL_APPLE_texture_format_BGRA8888");
-    glRequestExtension("GL_EXT_color_buffer_float");
-    glRequestExtension("GL_EXT_color_buffer_half_float");
-    glRequestExtension("GL_EXT_multisampled_render_to_texture");
+    constexpr std::array kExtensions = {
+        "GL_OES_texture_stencil8",
+        "GL_EXT_texture_compression_s3tc",
+        "GL_EXT_texture_compression_s3tc_srgb",
+        "GL_OES_EGL_image",
+        "GL_EXT_texture_format_BGRA8888",
+        "GL_APPLE_texture_format_BGRA8888",
+        "GL_EXT_color_buffer_float",
+        "GL_EXT_color_buffer_half_float",
+        "GL_EXT_multisampled_render_to_texture",
+    };
+    for (const char* extension : kExtensions) {
+        if (requestableExtensions.contains(extension)) {
+            glRequestExtension(extension);
+        }
+    }
 }
 
 bool ContextEGL::IsInScopedMakeCurrent() const {
