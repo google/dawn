@@ -147,6 +147,7 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
     {DeviceExt::LoadStoreOpNone, "VK_KHR_load_store_op_none"},
 
     // Not promoted to core in any version
+    {DeviceExt::Maintenance9, "VK_KHR_maintenance9"},
     {DeviceExt::DepthClipEnable, "VK_EXT_depth_clip_enable"},
     {DeviceExt::ImageDrmFormatModifier, "VK_EXT_image_drm_format_modifier"},
     {DeviceExt::Swapchain, "VK_KHR_swapchain"},
@@ -224,6 +225,7 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
             case DeviceExt::ZeroInitializeWorkgroupMemory:
             case DeviceExt::DemoteToHelperInvocation:
             case DeviceExt::Maintenance4:
+            case DeviceExt::Maintenance9:
             case DeviceExt::PipelineRobustness:
             case DeviceExt::Robustness2:
             case DeviceExt::SubgroupSizeControl:

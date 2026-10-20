@@ -547,6 +547,11 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         featuresChain.Add(&usedKnobs.demoteToHelperInvocationFeatures);
     }
 
+    if (mDeviceInfo.HasExt(DeviceExt::Maintenance9)) {
+        usedKnobs.maintenance9Features = mDeviceInfo.maintenance9Features;
+        featuresChain.Add(&usedKnobs.maintenance9Features);
+    }
+
     if (HasFeature(Feature::FramebufferFetch)) {
         if (IsToggleEnabled(Toggle::VulkanUseRasterizationOrderAttachmentAccess)) {
             // Prefer to use the rasterization order extension over subpass self-dependencies when

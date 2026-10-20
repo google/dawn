@@ -106,6 +106,7 @@ enum class DeviceExt : uint32_t {
     LoadStoreOpNone,
 
     // Others
+    Maintenance9,
     DepthClipEnable,
     ImageDrmFormatModifier,
     Swapchain,

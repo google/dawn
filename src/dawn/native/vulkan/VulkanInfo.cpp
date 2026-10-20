@@ -309,6 +309,16 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_4_PROPERTIES);
     }
 
+    if (info.extensions[DeviceExt::Maintenance5]) {
+        propertiesChain.Add(&info.maintenance5Properties,
+                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_5_PROPERTIES);
+    }
+
+    if (info.extensions[DeviceExt::Maintenance9]) {
+        propertiesChain.Add(&info.maintenance9Features,
+                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_9_FEATURES_KHR);
+    }
+
     if (info.extensions[DeviceExt::ZeroInitializeWorkgroupMemory]) {
         featuresChain.Add(
             &info.zeroInitializeWorkgroupMemoryFeatures,
@@ -376,11 +386,6 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_ROBUSTNESS_FEATURES);
         propertiesChain.Add(&info.pipelineRobustnessProperties,
                             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_ROBUSTNESS_PROPERTIES);
-    }
-
-    if (info.extensions[DeviceExt::Maintenance5]) {
-        propertiesChain.Add(&info.maintenance5Properties,
-                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_5_PROPERTIES);
     }
 
     if (info.extensions[DeviceExt::RasterizationOrderAttachmentAccess]) {
