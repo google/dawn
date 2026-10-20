@@ -668,6 +668,69 @@ TEST_P(MultisampledRenderingTest, ResolveOneMultisampledTextureTwice) {
     VerifyResolveTarget(kGreen, resolveTexture2);
 }
 
+// Test doing an MSAA resolve with no work, as that triggered a bug on the Pixel 4 driver.
+TEST_P(MultisampledRenderingTest, ResolveWithPassWithNoWork) {
+    utils::ComboRenderPassDescriptor renderPass({mMultisampledColorView});
+    renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+    renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
+    renderPass.cColorAttachments[0].resolveTarget = mResolveView;
+
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+    renderPassEncoder.End();
+    wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+
+    queue.Submit(1, &commandBuffer);
+
+    VerifyResolveTarget(kClearColor, mResolveTexture);
+}
+
+// Test doing an MSAA resolve with noop draw and drawIndexed calls, as that triggered a bug on the
+// Pixel 4 driver.
+TEST_P(MultisampledRenderingTest, ResolveWithPassWithNoopDraws) {
+    // Make the pipeline and index buffer required for the noop draws
+    wgpu::BufferDescriptor indexBufferDesc{
+        .usage = wgpu::BufferUsage::Index,
+        .size = 4,
+    };
+    wgpu::Buffer indexBuffer = device.CreateBuffer(&indexBufferDesc);
+
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0, 0, 0, 0);
+        }
+        @fragment fn fs() -> @location(0) vec4f {
+            return vec4f(0, 0, 0, 0);
+        }
+    )");
+
+    utils::ComboRenderPipelineDescriptor pDesc;
+    pDesc.vertex.module = module;
+    pDesc.cFragment.module = module;
+    pDesc.multisample.count = kSampleCount;
+    pDesc.cTargets[0].format = kColorFormat;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pDesc);
+
+    // Run the pass with the noop draw and drawIndexed.
+    utils::ComboRenderPassDescriptor renderPass({mMultisampledColorView});
+    renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+    renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
+    renderPass.cColorAttachments[0].resolveTarget = mResolveView;
+
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
+    pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+    pass.SetPipeline(pipeline);
+    pass.Draw(0);
+    pass.DrawIndexed(0);
+    pass.End();
+    wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+
+    queue.Submit(1, &commandBuffer);
+
+    VerifyResolveTarget(kClearColor, mResolveTexture);
+}
+
 // Test using a layer of a 2D texture as resolve target works correctly.
 TEST_P(MultisampledRenderingTest, ResolveIntoOneMipmapLevelOf2DTexture) {
     // TODO(crbug.com/522869943): Produces incorrect result on Pixel 10.

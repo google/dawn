@@ -1787,7 +1787,6 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
     auto EncodeRenderBundleCommand = [&](CommandIterator* iter, Command type) -> MaybeError {
         switch (type) {
             case Command::Draw: {
-                workCommandCount++;
                 DrawCmd* draw = iter->NextCommand<DrawCmd>();
 
                 if (draw->vertexCount > 0 && draw->instanceCount > 0) {
@@ -1796,12 +1795,12 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                             vk.CmdDraw(commands, draw->vertexCount, draw->instanceCount,
                                        draw->firstVertex, draw->firstInstance);
                         }));
+                    workCommandCount++;
                 }
                 break;
             }
 
             case Command::DrawIndexed: {
-                workCommandCount++;
                 DrawIndexedCmd* draw = iter->NextCommand<DrawIndexedCmd>();
 
                 if (draw->indexCount > 0 && draw->instanceCount > 0) {
@@ -1810,12 +1809,12 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                         vk.CmdDrawIndexed(commands, draw->indexCount, draw->instanceCount,
                                           draw->firstIndex, draw->baseVertex, draw->firstInstance);
                     }));
+                    workCommandCount++;
                 }
                 break;
             }
 
             case Command::DrawIndirect: {
-                workCommandCount++;
                 DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
 
                 IndirectDrawMetadata::ValidatedIndirectDraw validatedDraw =
@@ -1828,11 +1827,12 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                     vk.CmdDrawIndirect(commands, indirectBuffer->GetHandle(),
                                        validatedDraw.indirectOffset, 1, 0);
                 }));
+
+                workCommandCount++;
                 break;
             }
 
             case Command::DrawIndexedIndirect: {
-                workCommandCount++;
                 DrawIndexedIndirectCmd* draw = iter->NextCommand<DrawIndexedIndirectCmd>();
 
                 IndirectDrawMetadata::ValidatedIndirectDraw validatedDraw =
@@ -1845,11 +1845,12 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                     vk.CmdDrawIndexedIndirect(commands, indirectBuffer->GetHandle(),
                                               validatedDraw.indirectOffset, 1, 0);
                 }));
+
+                workCommandCount++;
                 break;
             }
 
             case Command::MultiDrawIndirect: {
-                workCommandCount++;
                 MultiDrawIndirectCmd* cmd = iter->NextCommand<MultiDrawIndirectCmd>();
 
                 Buffer* indirectBuffer = ToBackend(cmd->indirectBuffer.Get());
@@ -1870,11 +1871,11 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                                                    static_cast<VkDeviceSize>(cmd->drawCountOffset),
                                                    cmd->maxDrawCount, kDrawIndirectSize);
                     }
+                    workCommandCount++;
                 }));
                 break;
             }
             case Command::MultiDrawIndexedIndirect: {
-                workCommandCount++;
                 MultiDrawIndexedIndirectCmd* cmd = iter->NextCommand<MultiDrawIndexedIndirectCmd>();
 
                 Buffer* indirectBuffer = ToBackend(cmd->indirectBuffer.Get());
@@ -1896,6 +1897,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                             static_cast<VkDeviceSize>(cmd->drawCountOffset), cmd->maxDrawCount,
                             kDrawIndexedIndirectSize);
                     }
+                    workCommandCount++;
                 }));
 
                 break;
@@ -2113,33 +2115,36 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             }
 
             case Command::BeginOcclusionQuery: {
-                workCommandCount++;
                 BeginOcclusionQueryCmd* cmd = mCommands.NextCommand<BeginOcclusionQueryCmd>();
 
                 device->fn.CmdBeginQuery(commands, ToBackend(cmd->querySet.Get())->GetHandle(),
                                          uint32_t{cmd->queryIndex}, 0);
+
+                workCommandCount++;
                 break;
             }
 
             case Command::EndOcclusionQuery: {
-                workCommandCount++;
                 EndOcclusionQueryCmd* cmd = mCommands.NextCommand<EndOcclusionQueryCmd>();
 
                 device->fn.CmdEndQuery(commands, ToBackend(cmd->querySet.Get())->GetHandle(),
                                        uint32_t{cmd->queryIndex});
 
                 UpdateQueryAvailability(cmd);
+
+                workCommandCount++;
                 break;
             }
 
             case Command::WriteTimestamp: {
-                workCommandCount++;
                 WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
 
                 RecordWriteTimestampCmd(recordingContext, device, cmd->querySet.Get(),
                                         cmd->queryIndex, true, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
 
                 UpdateQueryAvailability(cmd);
+
+                workCommandCount++;
                 break;
             }
 
