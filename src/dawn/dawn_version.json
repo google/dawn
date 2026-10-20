@@ -1,0 +1,857 @@
+{
+    "_comment": [
+        "Copyright 2026 The Dawn & Tint Authors",
+        "",
+        "Redistribution and use in source and binary forms, with or without",
+        "modification, are permitted provided that the following conditions are met:",
+        "",
+        "  1. Redistributions of source code must retain the above copyright notice, this",
+        "     list of conditions and the following disclaimer.",
+        "",
+        "  2. Redistributions in binary form must reproduce the above copyright notice,",
+        "     this list of conditions and the following disclaimer in the documentation",
+        "     and/or other materials provided with the distribution.",
+        "",
+        "  3. Neither the name of the copyright holder nor the names of its",
+        "     contributors may be used to endorse or promote products derived from",
+        "     this software without specific prior written permission.",
+        "  ",
+        "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"",
+        "AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE",
+        "IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE",
+        "DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE",
+        "FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL",
+        "DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR",
+        "SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER",
+        "CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,",
+        "OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE",
+        "OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+    ],
+
+    "_doc": [
+        "See docs/dawn/codegen.md. In general new entries should be appended to the end to keep",
+        "the stable_version numbers monotonically increasing. Keeping the rest of the entries",
+        "alphabetically sorted is otherwise optional."
+    ],
+
+    "metadata": {
+        "addins": {
+            "adapter": {
+                "stable_version": 2026100200
+            },
+            "adapter::get features": {
+                "stable_version": 2026100200
+            },
+            "adapter::get info": {
+                "stable_version": 2026100200
+            },
+            "adapter::get limits": {
+                "stable_version": 2026100200
+            },
+            "adapter::has feature": {
+                "stable_version": 2026100200
+            },
+            "adapter::request device": {
+                "stable_version": 2026100200
+            },
+            "adapter info": {
+                "stable_version": 2026100200
+            },
+            "bind group": {
+                "stable_version": 2026100200
+            },
+            "bind group::set label": {
+                "stable_version": 2026100200
+            },
+            "bind group descriptor": {
+                "stable_version": 2026100200
+            },
+            "bind group entry": {
+                "stable_version": 2026100200
+            },
+            "bind group layout": {
+                "stable_version": 2026100200
+            },
+            "bind group layout::set label": {
+                "stable_version": 2026100200
+            },
+            "bind group layout descriptor": {
+                "stable_version": 2026100200
+            },
+            "bind group layout entry": {
+                "stable_version": 2026100200
+            },
+            "blend component": {
+                "stable_version": 2026100200
+            },
+            "blend state": {
+                "stable_version": 2026100200
+            },
+            "buffer": {
+                "stable_version": 2026100200
+            },
+            "buffer::destroy": {
+                "stable_version": 2026100200
+            },
+            "buffer::get const mapped range": {
+                "stable_version": 2026100200
+            },
+            "buffer::get map state": {
+                "stable_version": 2026100200
+            },
+            "buffer::get mapped range": {
+                "stable_version": 2026100200
+            },
+            "buffer::get size": {
+                "stable_version": 2026100200
+            },
+            "buffer::get usage": {
+                "stable_version": 2026100200
+            },
+            "buffer::map async": {
+                "stable_version": 2026100200
+            },
+            "buffer::read mapped range": {
+                "stable_version": 2026100200
+            },
+            "buffer::set label": {
+                "stable_version": 2026100200
+            },
+            "buffer::unmap": {
+                "stable_version": 2026100200
+            },
+            "buffer::write mapped range": {
+                "stable_version": 2026100200
+            },
+            "buffer binding layout": {
+                "stable_version": 2026100200
+            },
+            "buffer descriptor": {
+                "stable_version": 2026100200
+            },
+            "buffer map callback": {
+                "stable_version": 2026100200
+            },
+            "buffer map callback info": {
+                "stable_version": 2026100200
+            },
+            "color": {
+                "stable_version": 2026100200
+            },
+            "color target state": {
+                "stable_version": 2026100200
+            },
+            "command buffer": {
+                "stable_version": 2026100200
+            },
+            "command buffer::set label": {
+                "stable_version": 2026100200
+            },
+            "command buffer descriptor": {
+                "stable_version": 2026100200
+            },
+            "command encoder": {
+                "stable_version": 2026100200
+            },
+            "command encoder::begin compute pass": {
+                "stable_version": 2026100200
+            },
+            "command encoder::begin render pass": {
+                "stable_version": 2026100200
+            },
+            "command encoder::clear buffer": {
+                "stable_version": 2026100200
+            },
+            "command encoder::copy buffer to buffer": {
+                "stable_version": 2026100200
+            },
+            "command encoder::copy buffer to texture": {
+                "stable_version": 2026100200
+            },
+            "command encoder::copy texture to buffer": {
+                "stable_version": 2026100200
+            },
+            "command encoder::copy texture to texture": {
+                "stable_version": 2026100200
+            },
+            "command encoder::finish": {
+                "stable_version": 2026100200
+            },
+            "command encoder::insert debug marker": {
+                "stable_version": 2026100200
+            },
+            "command encoder::pop debug group": {
+                "stable_version": 2026100200
+            },
+            "command encoder::push debug group": {
+                "stable_version": 2026100200
+            },
+            "command encoder::resolve query set": {
+                "stable_version": 2026100200
+            },
+            "command encoder::set label": {
+                "stable_version": 2026100200
+            },
+            "command encoder::write timestamp": {
+                "stable_version": 2026100200
+            },
+            "command encoder descriptor": {
+                "stable_version": 2026100200
+            },
+            "compatibility mode limits": {
+                "stable_version": 2026100200
+            },
+            "compilation info": {
+                "stable_version": 2026100200
+            },
+            "compilation info callback": {
+                "stable_version": 2026100200
+            },
+            "compilation info callback info": {
+                "stable_version": 2026100200
+            },
+            "compilation message": {
+                "stable_version": 2026100200
+            },
+            "compute pass descriptor": {
+                "stable_version": 2026100200
+            },
+            "compute pass encoder": {
+                "stable_version": 2026100200
+            },
+            "compute pass encoder::dispatch workgroups": {
+                "stable_version": 2026100200
+            },
+            "compute pass encoder::dispatch workgroups indirect": {
+                "stable_version": 2026100200
+            },
+            "compute pass encoder::end": {
+                "stable_version": 2026100200
+            },
+            "compute pass encoder::insert debug marker": {
+                "stable_version": 2026100200
+            },
+            "compute pass encoder::pop debug group": {
+                "stable_version": 2026100200
+            },
+            "compute pass encoder::push debug group": {
+                "stable_version": 2026100200
+            },
+            "compute pass encoder::set bind group": {
+                "stable_version": 2026100200
+            },
+            "compute pass encoder::set immediates": {
+                "stable_version": 2026100200
+            },
+            "compute pass encoder::set label": {
+                "stable_version": 2026100200
+            },
+            "compute pass encoder::set pipeline": {
+                "stable_version": 2026100200
+            },
+            "compute pipeline": {
+                "stable_version": 2026100200
+            },
+            "compute pipeline::get bind group layout": {
+                "stable_version": 2026100200
+            },
+            "compute pipeline::set label": {
+                "stable_version": 2026100200
+            },
+            "compute pipeline descriptor": {
+                "stable_version": 2026100200
+            },
+            "compute state": {
+                "stable_version": 2026100200
+            },
+            "constant entry": {
+                "stable_version": 2026100200
+            },
+            "create compute pipeline async callback": {
+                "stable_version": 2026100200
+            },
+            "create compute pipeline async callback info": {
+                "stable_version": 2026100200
+            },
+            "create instance": {
+                "stable_version": 2026100200
+            },
+            "create render pipeline async callback": {
+                "stable_version": 2026100200
+            },
+            "create render pipeline async callback info": {
+                "stable_version": 2026100200
+            },
+            "depth stencil state": {
+                "stable_version": 2026100200
+            },
+            "device": {
+                "stable_version": 2026100200
+            },
+            "device::create bind group": {
+                "stable_version": 2026100200
+            },
+            "device::create bind group layout": {
+                "stable_version": 2026100200
+            },
+            "device::create buffer": {
+                "stable_version": 2026100200
+            },
+            "device::create command encoder": {
+                "stable_version": 2026100200
+            },
+            "device::create compute pipeline": {
+                "stable_version": 2026100200
+            },
+            "device::create compute pipeline async": {
+                "stable_version": 2026100200
+            },
+            "device::create pipeline layout": {
+                "stable_version": 2026100200
+            },
+            "device::create query set": {
+                "stable_version": 2026100200
+            },
+            "device::create render bundle encoder": {
+                "stable_version": 2026100200
+            },
+            "device::create render pipeline": {
+                "stable_version": 2026100200
+            },
+            "device::create render pipeline async": {
+                "stable_version": 2026100200
+            },
+            "device::create sampler": {
+                "stable_version": 2026100200
+            },
+            "device::create shader module": {
+                "stable_version": 2026100200
+            },
+            "device::create texture": {
+                "stable_version": 2026100200
+            },
+            "device::destroy": {
+                "stable_version": 2026100200
+            },
+            "device::get adapter info": {
+                "stable_version": 2026100200
+            },
+            "device::get features": {
+                "stable_version": 2026100200
+            },
+            "device::get limits": {
+                "stable_version": 2026100200
+            },
+            "device::get lost future": {
+                "stable_version": 2026100200
+            },
+            "device::get queue": {
+                "stable_version": 2026100200
+            },
+            "device::has feature": {
+                "stable_version": 2026100200
+            },
+            "device::pop error scope": {
+                "stable_version": 2026100200
+            },
+            "device::push error scope": {
+                "stable_version": 2026100200
+            },
+            "device::set label": {
+                "stable_version": 2026100200
+            },
+            "device descriptor": {
+                "stable_version": 2026100200
+            },
+            "device lost callback": {
+                "stable_version": 2026100200
+            },
+            "device lost callback info": {
+                "stable_version": 2026100200
+            },
+            "extent 3D": {
+                "stable_version": 2026100200
+            },
+            "external texture": {
+                "stable_version": 2026100200
+            },
+            "external texture::set label": {
+                "stable_version": 2026100200
+            },
+            "external texture binding entry": {
+                "stable_version": 2026100200
+            },
+            "external texture binding layout": {
+                "stable_version": 2026100200
+            },
+            "fragment state": {
+                "stable_version": 2026100200
+            },
+            "future": {
+                "stable_version": 2026100200
+            },
+            "future wait info": {
+                "stable_version": 2026100200
+            },
+            "get instance features": {
+                "stable_version": 2026100200
+            },
+            "get instance limits": {
+                "stable_version": 2026100200
+            },
+            "has instance feature": {
+                "stable_version": 2026100200
+            },
+            "instance": {
+                "stable_version": 2026100200
+            },
+            "instance::create surface": {
+                "stable_version": 2026100200
+            },
+            "instance::get WGSL language features": {
+                "stable_version": 2026100200
+            },
+            "instance::has WGSL language feature": {
+                "stable_version": 2026100200
+            },
+            "instance::process events": {
+                "stable_version": 2026100200
+            },
+            "instance::request adapter": {
+                "stable_version": 2026100200
+            },
+            "instance::wait any": {
+                "stable_version": 2026100200
+            },
+            "instance descriptor": {
+                "stable_version": 2026100200
+            },
+            "instance limits": {
+                "stable_version": 2026100200
+            },
+            "limits": {
+                "stable_version": 2026100200
+            },
+            "multisample state": {
+                "stable_version": 2026100200
+            },
+            "origin 3D": {
+                "stable_version": 2026100200
+            },
+            "pass timestamp writes": {
+                "stable_version": 2026100200
+            },
+            "pipeline layout": {
+                "stable_version": 2026100200
+            },
+            "pipeline layout::set label": {
+                "stable_version": 2026100200
+            },
+            "pipeline layout descriptor": {
+                "stable_version": 2026100200
+            },
+            "pop error scope callback": {
+                "stable_version": 2026100200
+            },
+            "pop error scope callback info": {
+                "stable_version": 2026100200
+            },
+            "primitive state": {
+                "stable_version": 2026100200
+            },
+            "query set": {
+                "stable_version": 2026100200
+            },
+            "query set::destroy": {
+                "stable_version": 2026100200
+            },
+            "query set::get count": {
+                "stable_version": 2026100200
+            },
+            "query set::get type": {
+                "stable_version": 2026100200
+            },
+            "query set::set label": {
+                "stable_version": 2026100200
+            },
+            "query set descriptor": {
+                "stable_version": 2026100200
+            },
+            "queue": {
+                "stable_version": 2026100200
+            },
+            "queue::on submitted work done": {
+                "stable_version": 2026100200
+            },
+            "queue::set label": {
+                "stable_version": 2026100200
+            },
+            "queue::submit": {
+                "stable_version": 2026100200
+            },
+            "queue::write buffer": {
+                "stable_version": 2026100200
+            },
+            "queue::write texture": {
+                "stable_version": 2026100200
+            },
+            "queue descriptor": {
+                "stable_version": 2026100200
+            },
+            "queue work done callback": {
+                "stable_version": 2026100200
+            },
+            "queue work done callback info": {
+                "stable_version": 2026100200
+            },
+            "render bundle": {
+                "stable_version": 2026100200
+            },
+            "render bundle::set label": {
+                "stable_version": 2026100200
+            },
+            "render bundle descriptor": {
+                "stable_version": 2026100200
+            },
+            "render bundle encoder": {
+                "stable_version": 2026100200
+            },
+            "render bundle encoder::draw": {
+                "stable_version": 2026100200
+            },
+            "render bundle encoder::draw indexed": {
+                "stable_version": 2026100200
+            },
+            "render bundle encoder::draw indexed indirect": {
+                "stable_version": 2026100200
+            },
+            "render bundle encoder::draw indirect": {
+                "stable_version": 2026100200
+            },
+            "render bundle encoder::finish": {
+                "stable_version": 2026100200
+            },
+            "render bundle encoder::insert debug marker": {
+                "stable_version": 2026100200
+            },
+            "render bundle encoder::pop debug group": {
+                "stable_version": 2026100200
+            },
+            "render bundle encoder::push debug group": {
+                "stable_version": 2026100200
+            },
+            "render bundle encoder::set bind group": {
+                "stable_version": 2026100200
+            },
+            "render bundle encoder::set immediates": {
+                "stable_version": 2026100200
+            },
+            "render bundle encoder::set index buffer": {
+                "stable_version": 2026100200
+            },
+            "render bundle encoder::set label": {
+                "stable_version": 2026100200
+            },
+            "render bundle encoder::set pipeline": {
+                "stable_version": 2026100200
+            },
+            "render bundle encoder::set vertex buffer": {
+                "stable_version": 2026100200
+            },
+            "render bundle encoder descriptor": {
+                "stable_version": 2026100200
+            },
+            "render pass color attachment": {
+                "stable_version": 2026100200
+            },
+            "render pass depth stencil attachment": {
+                "stable_version": 2026100200
+            },
+            "render pass descriptor": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::begin occlusion query": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::draw": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::draw indexed": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::draw indexed indirect": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::draw indirect": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::end": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::end occlusion query": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::execute bundles": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::insert debug marker": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::pop debug group": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::push debug group": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::set bind group": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::set blend constant": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::set immediates": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::set index buffer": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::set label": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::set pipeline": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::set scissor rect": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::set stencil reference": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::set vertex buffer": {
+                "stable_version": 2026100200
+            },
+            "render pass encoder::set viewport": {
+                "stable_version": 2026100200
+            },
+            "render pass max draw count": {
+                "stable_version": 2026100200
+            },
+            "render pipeline": {
+                "stable_version": 2026100200
+            },
+            "render pipeline::get bind group layout": {
+                "stable_version": 2026100200
+            },
+            "render pipeline::set label": {
+                "stable_version": 2026100200
+            },
+            "render pipeline descriptor": {
+                "stable_version": 2026100200
+            },
+            "request adapter callback": {
+                "stable_version": 2026100200
+            },
+            "request adapter callback info": {
+                "stable_version": 2026100200
+            },
+            "request adapter options": {
+                "stable_version": 2026100200
+            },
+            "request adapter WebXR options": {
+                "stable_version": 2026100200
+            },
+            "request device callback": {
+                "stable_version": 2026100200
+            },
+            "request device callback info": {
+                "stable_version": 2026100200
+            },
+            "sampler": {
+                "stable_version": 2026100200
+            },
+            "sampler::set label": {
+                "stable_version": 2026100200
+            },
+            "sampler binding layout": {
+                "stable_version": 2026100200
+            },
+            "sampler descriptor": {
+                "stable_version": 2026100200
+            },
+            "shader module": {
+                "stable_version": 2026100200
+            },
+            "shader module::get compilation info": {
+                "stable_version": 2026100200
+            },
+            "shader module::set label": {
+                "stable_version": 2026100200
+            },
+            "shader module descriptor": {
+                "stable_version": 2026100200
+            },
+            "shader source SPIRV": {
+                "stable_version": 2026100200
+            },
+            "shader source WGSL": {
+                "stable_version": 2026100200
+            },
+            "stencil face state": {
+                "stable_version": 2026100200
+            },
+            "storage texture binding layout": {
+                "stable_version": 2026100200
+            },
+            "supported features": {
+                "stable_version": 2026100200
+            },
+            "supported instance features": {
+                "stable_version": 2026100200
+            },
+            "supported WGSL language features": {
+                "stable_version": 2026100200
+            },
+            "surface": {
+                "stable_version": 2026100200
+            },
+            "surface::configure": {
+                "stable_version": 2026100200
+            },
+            "surface::get capabilities": {
+                "stable_version": 2026100200
+            },
+            "surface::get current texture": {
+                "stable_version": 2026100200
+            },
+            "surface::present": {
+                "stable_version": 2026100200
+            },
+            "surface::set label": {
+                "stable_version": 2026100200
+            },
+            "surface::unconfigure": {
+                "stable_version": 2026100200
+            },
+            "surface capabilities": {
+                "stable_version": 2026100200
+            },
+            "surface configuration": {
+                "stable_version": 2026100200
+            },
+            "surface descriptor": {
+                "stable_version": 2026100200
+            },
+            "surface source android native window": {
+                "stable_version": 2026100200
+            },
+            "surface source metal layer": {
+                "stable_version": 2026100200
+            },
+            "surface source wayland surface": {
+                "stable_version": 2026100200
+            },
+            "surface source windows HWND": {
+                "stable_version": 2026100200
+            },
+            "surface source XCB window": {
+                "stable_version": 2026100200
+            },
+            "surface source xlib window": {
+                "stable_version": 2026100200
+            },
+            "surface texture": {
+                "stable_version": 2026100200
+            },
+            "texel copy buffer info": {
+                "stable_version": 2026100200
+            },
+            "texel copy buffer layout": {
+                "stable_version": 2026100200
+            },
+            "texel copy texture info": {
+                "stable_version": 2026100200
+            },
+            "texture": {
+                "stable_version": 2026100200
+            },
+            "texture::create view": {
+                "stable_version": 2026100200
+            },
+            "texture::destroy": {
+                "stable_version": 2026100200
+            },
+            "texture::get depth or array layers": {
+                "stable_version": 2026100200
+            },
+            "texture::get dimension": {
+                "stable_version": 2026100200
+            },
+            "texture::get format": {
+                "stable_version": 2026100200
+            },
+            "texture::get height": {
+                "stable_version": 2026100200
+            },
+            "texture::get mip level count": {
+                "stable_version": 2026100200
+            },
+            "texture::get sample count": {
+                "stable_version": 2026100200
+            },
+            "texture::get texture binding view dimension": {
+                "stable_version": 2026100200
+            },
+            "texture::get usage": {
+                "stable_version": 2026100200
+            },
+            "texture::get width": {
+                "stable_version": 2026100200
+            },
+            "texture::set label": {
+                "stable_version": 2026100200
+            },
+            "texture binding layout": {
+                "stable_version": 2026100200
+            },
+            "texture binding view dimension": {
+                "stable_version": 2026100200
+            },
+            "texture component swizzle": {
+                "stable_version": 2026100200
+            },
+            "texture component swizzle descriptor": {
+                "stable_version": 2026100200
+            },
+            "texture descriptor": {
+                "stable_version": 2026100200
+            },
+            "texture view": {
+                "stable_version": 2026100200
+            },
+            "texture view::set label": {
+                "stable_version": 2026100200
+            },
+            "texture view descriptor": {
+                "stable_version": 2026100200
+            },
+            "uncaptured error callback": {
+                "stable_version": 2026100200
+            },
+            "uncaptured error callback info": {
+                "stable_version": 2026100200
+            },
+            "vertex attribute": {
+                "stable_version": 2026100200
+            },
+            "vertex buffer layout": {
+                "stable_version": 2026100200
+            },
+            "vertex state": {
+                "stable_version": 2026100200
+            }
+        }
+    }
+}
