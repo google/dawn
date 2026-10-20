@@ -67,34 +67,34 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
         wgpu::TextureUsage usage,
         bool isCheckerboard,
         bool initialized) override {
-        IOSurfaceRef surface =
+        CFRef<IOSurfaceRef> surface =
             CreateMultiPlanarIOSurface(format, VideoViewsTestsBase::kYUVAImageDataWidthInTexels,
                                        VideoViewsTestsBase::kYUVAImageDataHeightInTexels);
 
         if (initialized) {
             const size_t numPlanes = utils::GetMultiPlaneTextureNumPlanes(format);
 
-            IOSurfaceLock(surface, 0, nullptr);
+            IOSurfaceLock(surface.Get(), 0, nullptr);
 
             for (size_t plane = 0; plane < numPlanes; ++plane) {
-                void* pointer = IOSurfaceGetBaseAddressOfPlane(surface, plane);
+                void* pointer = IOSurfaceGetBaseAddressOfPlane(surface.Get(), plane);
                 if (utils::GetMultiPlaneTextureBitDepth(format) == 16) {
                     std::vector<uint16_t> data =
                         VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex<uint16_t>(
-                            format, plane, IOSurfaceGetBytesPerRowOfPlane(surface, plane),
-                            IOSurfaceGetHeightOfPlane(surface, plane), isCheckerboard,
+                            format, plane, IOSurfaceGetBytesPerRowOfPlane(surface.Get(), plane),
+                            IOSurfaceGetHeightOfPlane(surface.Get(), plane), isCheckerboard,
                             /*hasAlpha=*/false);
                     DAWN_UNSAFE_TODO(memcpy(pointer, data.data(), data.size() * 2));
                 } else {
                     std::vector<uint8_t> data =
                         VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex<uint8_t>(
-                            format, plane, IOSurfaceGetBytesPerRowOfPlane(surface, plane),
-                            IOSurfaceGetHeightOfPlane(surface, plane), isCheckerboard,
+                            format, plane, IOSurfaceGetBytesPerRowOfPlane(surface.Get(), plane),
+                            IOSurfaceGetHeightOfPlane(surface.Get(), plane), isCheckerboard,
                             /*hasAlpha=*/format == wgpu::TextureFormat::R8BG8A8Triplanar420Unorm);
                     DAWN_UNSAFE_TODO(memcpy(pointer, data.data(), data.size()));
                 }
             }
-            IOSurfaceUnlock(surface, 0, nullptr);
+            IOSurfaceUnlock(surface.Get(), 0, nullptr);
         }
 
         wgpu::TextureDescriptor textureDesc;
@@ -109,7 +109,7 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
         textureDesc.nextInChain = &internalDesc;
 
         wgpu::SharedTextureMemoryIOSurfaceDescriptor ioSurfaceDesc;
-        ioSurfaceDesc.ioSurface = surface;
+        ioSurfaceDesc.ioSurface = surface.Get();
         wgpu::SharedTextureMemoryDescriptor desc;
         desc.nextInChain = &ioSurfaceDesc;
 

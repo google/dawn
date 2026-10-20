@@ -31,14 +31,22 @@
 #include <IOSurface/IOSurfaceRef.h>
 #include <webgpu/webgpu_cpp.h>
 
+#include "src/dawn/common/CoreFoundationRef.h"
+
 namespace dawn {
 
-// TODO(dawn:2134) Implement a function to create a single plane IOSurface.
+// Create an IOSurface from a native pixel format without an explicit plane layout.
+// Returns an owning reference, or an empty reference on failure.
+CFRef<IOSurfaceRef> CreateIOSurface(uint32_t width,
+                                    uint32_t height,
+                                    uint32_t pixelFormat,
+                                    uint32_t bytesPerElement);
 
 // Create a multiplanar IOSurface. Note single plane format won't be supported.
-IOSurfaceRef CreateMultiPlanarIOSurface(wgpu::TextureFormat format,
-                                        uint32_t width,
-                                        uint32_t height);
+// Returns an owning reference, or an empty reference on failure.
+CFRef<IOSurfaceRef> CreateMultiPlanarIOSurface(wgpu::TextureFormat format,
+                                               uint32_t width,
+                                               uint32_t height);
 }  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_IOSURFACEUTILS_H_

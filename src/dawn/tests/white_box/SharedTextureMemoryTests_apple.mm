@@ -25,9 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <CoreFoundation/CoreFoundation.h>
 #include <CoreVideo/CVPixelBuffer.h>
-#include <IOSurface/IOSurface.h>
 #import <Metal/Metal.h>
 #include <webgpu/webgpu_cpp.h>
 
@@ -35,6 +33,7 @@
 
 #include "dawn/native/MetalBackend.h"
 #include "src/dawn/common/CoreFoundationRef.h"
+#include "src/dawn/common/IOSurfaceUtils.h"
 #include "src/dawn/common/NSRef.h"
 #include "src/dawn/native/metal/Forward.h"
 #include "src/dawn/native/metal/SharedTextureMemoryMTL.h"
@@ -43,22 +42,12 @@
 namespace dawn {
 namespace {
 
-void AddIntegerValue(CFMutableDictionaryRef dictionary, const CFStringRef key, int32_t value) {
-    auto number = AcquireCFRef(CFNumberCreate(nullptr, kCFNumberSInt32Type, &value));
-    CFDictionaryAddValue(dictionary, key, number.Get());
-}
-
 wgpu::SharedTextureMemory CreateSharedTextureMemoryHelper(const wgpu::Device& device,
                                                           bool allowStorageBinding = true) {
-    auto dict = AcquireCFRef(CFDictionaryCreateMutable(
-        kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
-    AddIntegerValue(dict.Get(), kIOSurfaceWidth, 16);
-    AddIntegerValue(dict.Get(), kIOSurfaceHeight, 16);
-    AddIntegerValue(dict.Get(), kIOSurfacePixelFormat, kCVPixelFormatType_32RGBA);
-    AddIntegerValue(dict.Get(), kIOSurfaceBytesPerElement, 4);
+    auto surface = CreateIOSurface(16, 16, kCVPixelFormatType_32RGBA, 4);
 
     wgpu::SharedTextureMemoryIOSurfaceDescriptor ioSurfaceDesc;
-    ioSurfaceDesc.ioSurface = IOSurfaceCreate(dict.Get());
+    ioSurfaceDesc.ioSurface = surface.Get();
     ioSurfaceDesc.allowStorageBinding = allowStorageBinding;
 
     wgpu::SharedTextureMemoryDescriptor desc;
@@ -195,16 +184,10 @@ class Backend : public SharedTextureMemoryTestBackend {
 
         for (auto f : kFormats) {
             for (uint32_t size : {4, 64}) {
-                auto dict = AcquireCFRef(CFDictionaryCreateMutable(
-                    kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks,
-                    &kCFTypeDictionaryValueCallBacks));
-                AddIntegerValue(dict.Get(), kIOSurfaceWidth, size);
-                AddIntegerValue(dict.Get(), kIOSurfaceHeight, size);
-                AddIntegerValue(dict.Get(), kIOSurfacePixelFormat, f.format);
-                AddIntegerValue(dict.Get(), kIOSurfaceBytesPerElement, f.bytesPerElement);
+                auto surface = CreateIOSurface(size, size, f.format, f.bytesPerElement);
 
                 wgpu::SharedTextureMemoryIOSurfaceDescriptor ioSurfaceDesc;
-                ioSurfaceDesc.ioSurface = IOSurfaceCreate(dict.Get());
+                ioSurfaceDesc.ioSurface = surface.Get();
                 ioSurfaceDesc.allowStorageBinding = true;
 
                 // Internally, the CV enums are defined as their fourcc values. Cast to that and use
