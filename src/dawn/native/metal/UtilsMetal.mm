@@ -405,7 +405,8 @@ MTLPixelFormat MetalPixelFormat(const DeviceBase* device, wgpu::TextureFormat fo
             }
             return MTLPixelFormatStencil8;
 
-#if DAWN_PLATFORM_IS(MACOS)
+#if DAWN_PLATFORM_IS(MACOS) || \
+    (defined(__IPHONE_16_4) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_16_4)
         case wgpu::TextureFormat::BC1RGBAUnorm:
             return MTLPixelFormatBC1_RGBA;
         case wgpu::TextureFormat::BC1RGBAUnormSrgb:
