@@ -122,10 +122,38 @@ def get_version_byte_array(version_str):
     return ", ".join(byte_values)
 
 
+def _get_stable_versions(json_filepath):
+    versions = []
+    with open(json_filepath) as f:
+        content = f.read().strip()
+        if content:
+            addins = json.loads(content).get("metadata", {}).get("addins", {})
+            versions = [
+                v["stable_version"] for v in addins.values()
+                if "stable_version" in v
+            ]
+    return len(versions), max(versions)
+
+
+# Hard-coded to 1 for now since we don't anticipate needing to ever increment
+# the major version (i.e. Dawn will always be backwards compatible), but we
+# introduce the major version nonetheless to provide a mechanism to make
+# breaking changes if it's ever needed.
+def get_major_version():
+    return 1
+
+
+def get_minor_version(json_filepath):
+    return _get_stable_versions(json_filepath)[1]
+
+
 def compute_params(args):
     version = get_version(args)
+    version_json = os.path.abspath(args.version_json)
     return {
         "get_version_byte_array": lambda: get_version_byte_array(version),
+        "get_major_version": get_major_version,
+        "get_minor_version": lambda: get_minor_version(version_json),
     }
 
 
@@ -150,20 +178,27 @@ class DawnVersionGenerator(Generator):
             help=
             ("Path to one-liner version string file used when git may not be present. "
              "In general the version string is a git hash."))
+        parser.add_argument(
+            "--version-json",
+            required=True,
+            type=str,
+            help="The DAWN VERSION JSON definition to use.",
+        )
 
     def get_dependencies(self, args):
         dawn_dir = os.path.abspath(args.dawn_dir)
         version_file = args.version_file
 
+        deps = [os.path.abspath(args.version_json)]
         if version_file:
-            return [version_file]
+            return deps + [version_file]
         if git_exists(dawn_dir):
             try:
-                return [get_git_head(dawn_dir)
-                        ] + get_git_resolved_head(dawn_dir)
+                return deps + [get_git_head(dawn_dir)
+                               ] + get_git_resolved_head(dawn_dir)
             except Exception:
-                return []
-        return []
+                return deps
+        return deps
 
     def get_outputs(self, args):
         params = compute_params(args)
@@ -175,19 +210,6 @@ class DawnVersionGenerator(Generator):
                        "src/dawn/common/Version_autogen.h", [params]),
         ]
         return GeneratorOutput(renders=renders, imported_templates=[])
-
-
-def _get_stable_versions(json_filepath):
-    versions = []
-    with open(json_filepath) as f:
-        content = f.read().strip()
-        if content:
-            addins = json.loads(content).get("metadata", {}).get("addins", {})
-            versions = [
-                v["stable_version"] for v in addins.values()
-                if "stable_version" in v
-            ]
-    return len(versions), max(versions, default=0)
 
 
 def run_check(args):

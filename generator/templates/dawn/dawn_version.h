@@ -28,8 +28,17 @@
 #ifndef INCLUDE_DAWN_DAWN_VERSION_H_
 #define INCLUDE_DAWN_DAWN_VERSION_H_
 
+#include <stdint.h>
+
+// The full 64-bit Dawn version reserves the top 24 bits for the major version and the bottom 40
+// bits for the minor version.
+#define DAWN_MAKE_VERSION(major, minor) ((UINT64_C(major) << UINT64_C(40)) | UINT64_C(minor))
+#define DAWN_MAJOR_VERSION {{get_major_version()}}
+#define DAWN_MINOR_VERSION {{get_minor_version()}}
+#define DAWN_VERSION DAWN_MAKE_VERSION(DAWN_MAJOR_VERSION, DAWN_MINOR_VERSION)
+
+#ifdef __cplusplus
 #include <array>
-#include <cstdint>
 
 namespace dawn {
 
@@ -37,5 +46,6 @@ namespace dawn {
 static constexpr std::array<uint8_t, 20> kDawnVersion = { {{get_version_byte_array()}} };
 
 }  // namespace dawn
+#endif  // __cplusplus
 
 #endif  // INCLUDE_DAWN_DAWN_VERSION_H_

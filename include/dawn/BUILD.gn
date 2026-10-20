@@ -51,9 +51,13 @@ dawn_json_generator("headers_gen") {
 
 source_set("headers") {
   all_dependent_configs = [ ":public" ]
-  public_deps = [ ":headers_gen" ]
+  public_deps = [
+    ":headers_gen",
+    "${dawn_root}/src/dawn:dawn_version_gen",
+  ]
 
   sources = get_target_outputs(":headers_gen")
+  sources += [ "${dawn_gen_root}/include/dawn/dawn_version.h" ]
 }
 
 ###############################################################################

@@ -210,6 +210,9 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <math.h>
+{% if 'dawn' in enabled_tags %}
+    #include "dawn/dawn_version.h"
+{% endif %}
 
 #define _{{api}}_COMMA ,
 #if defined(__cplusplus)

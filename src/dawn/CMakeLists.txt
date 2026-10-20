@@ -36,6 +36,8 @@ DawnGenerator(
     EXTRA_PARAMETERS "gen"
          "--dawn-dir"
          "${Dawn_SOURCE_DIR}"
+         "--version-json"
+         "${Dawn_SOURCE_DIR}/src/dawn/dawn_version.json"
 )
 
 dawn_add_library(
@@ -68,6 +70,7 @@ dawn_add_library(
         ${DAWN_HEADERS_GEN_HEADERS}
     DEPENDS
         dawn_public_config
+        dawn::dawn_version
 )
 
 if(BUILD_SHARED_LIBS)

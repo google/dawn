@@ -36,11 +36,16 @@ import("${dawn_root}/scripts/dawn_component.gni")
 
 dawn_generator("dawn_version_gen") {
   script = "${dawn_root}/generator/dawn_version_generator.py"
-  inputs = [ "${dawn_template_dir}/dawn/dawn_version.h" ]
+  inputs = [
+    "${dawn_root}/src/dawn/dawn_version.json",
+    "${dawn_template_dir}/dawn/dawn_version.h",
+  ]
   args = [
     "gen",
     "--dawn-dir",
     rebase_path("${dawn_root}", root_build_dir),
+    "--version-json",
+    rebase_path("${dawn_root}/src/dawn/dawn_version.json", root_build_dir),
   ]
 
   # We can use the explicit version file if it is generated instead of relying
