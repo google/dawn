@@ -519,6 +519,15 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     deviceToggles->Default(Toggle::Limit3DTexturePotFootprintTo4GB,
                            mVendorId == gpu_info::kVendorID_ImgTec);
 
+    // Workaround hardware/driver limitations on ARM Mali (crbug.com/569161611),
+    // ImgTec PowerVR (crbug.com/529867799), Intel (crbug.com/481934465), and
+    // Qualcomm Adreno (crbug.com/380487895) where buffer<->texture copies with a
+    // large row pitch overflow or wrap around.
+    if (gpu_info::IsARM(mVendorId) || gpu_info::IsImgTec(mVendorId) ||
+        gpu_info::IsIntel(mVendorId) || gpu_info::IsQualcommPCI(mVendorId)) {
+        deviceToggles->Default(Toggle::SplitBufferTextureCopyForOversizedRow, true);
+    }
+
     // Enable the integer range analysis for shader robustness by default if the corresponding
     // platform feature is enabled.
     deviceToggles->Default(

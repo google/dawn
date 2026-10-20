@@ -996,6 +996,9 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // See https://crbug.com/411268750 for more information.
     if (gpu_info::IsQualcommACPI(vendorId)) {
         deviceToggles->Default(Toggle::UsePackedDepth24UnormStencil8Format, true);
+        // Workaround a Qualcomm GPU limitation that wraps row offsets at 256 MiB in
+        // buffer<->texture copies (crbug.com/380487895).
+        deviceToggles->Default(Toggle::SplitBufferTextureCopyForOversizedRow, true);
     }
 
     // Enable the integer range analysis for shader robustness by default if the corresponding

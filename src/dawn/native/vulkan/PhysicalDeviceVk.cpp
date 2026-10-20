@@ -1161,9 +1161,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::VulkanForceAlphaWriteForAlphaToCoverage, true);
     }
 
-    if (gpu_info::IsIntel(GetVendorId())) {
-        // crbug.com/481934465: Workaround an Intel GPU hardware limitation that corrupts
-        // buffer<->texture copies with a large row pitch.
+    if (gpu_info::IsIntel(GetVendorId()) || gpu_info::IsImgTec(GetVendorId()) ||
+        gpu_info::IsQualcommPCI(GetVendorId()) || gpu_info::IsQualcommACPI(GetVendorId())) {
+        // Workaround Intel (crbug.com/481934465), ImgTec (crbug.com/529867799), and Qualcomm
+        // (crbug.com/380487895) GPU hardware/driver limitations that corrupt buffer<->texture
+        // copies with a large row pitch.
         deviceToggles->Default(Toggle::SplitBufferTextureCopyForOversizedRow, true);
     }
 

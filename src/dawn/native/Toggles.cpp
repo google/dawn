@@ -530,8 +530,9 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
     {Toggle::SplitBufferTextureCopyForOversizedRow,
      {"split_buffer_texture_copy_for_oversized_row",
       "Split a buffer-to-texture or texture-to-buffer copy into one copy command per row so its "
-      "row pitch (bytes) and row width (texels) never overflow the 18-bit and 14-bit hardware "
-      "register fields. Workaround for an Intel GPU hardware limitation.",
+      "row pitch (bytes) and row width (texels) never overflow hardware register fields or driver "
+      "stride calculations. Workaround for Intel, ARM, ImgTec, and Qualcomm GPU hardware/driver "
+      "limitations.",
       "https://crbug.com/481934465", ToggleStage::Device}},
     {Toggle::GLUseArrayLengthFromImmediate,
      {"gl_use_array_length_from_immediate",

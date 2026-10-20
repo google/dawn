@@ -2334,7 +2334,68 @@ DAWN_INSTANTIATE_TEST_P(
         wgpu::TextureFormat::BGRA8Unorm,
     });
 
-class CopyTests_T2B_No_Format_Param : public CopyTests, public DawnTest {};
+class CopyTests_T2B_No_Format_Param : public CopyTests, public DawnTest {
+  protected:
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        required.maxBufferSize = supported.maxBufferSize;
+        required.maxStorageBufferBindingSize = supported.maxStorageBufferBindingSize;
+    }
+};
+
+// Regression test for crbug.com/569161611, crbug.com/529867799, and crbug.com/380487895: when
+// copying a multi-row texture to a buffer with bytesPerRow >= 0x10000000 (256 MiB), ARM Mali GLES
+// drivers overflow a signed 32-bit bit-stride calculation ((int32_t)(GL_PACK_ROW_LENGTH * bpp) * 8)
+// and write row 1 at a negative offset before the PBO, ImgTec PowerVR GLES drivers fail with
+// GL_INVALID_OPERATION, and Qualcomm Adreno GPUs wrap row 1's offset back to 0. Verify that row 0
+// and row 1 land at the expected offsets.
+TEST_P(CopyTests_T2B_No_Format_Param, LargeBytesPerRow256MiB) {
+    constexpr uint32_t kWidth = 2;
+    constexpr uint32_t kHeight = 2;
+    constexpr uint32_t kBytesPerTexel = 4;
+    constexpr uint32_t kBytesPerRow = 0x10000000u;  // 256 MiB
+    constexpr uint64_t kBufferSize = kBytesPerRow + kWidth * kBytesPerTexel;
+
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxBufferSize < kBufferSize);
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("use_blit_for_t2b") &&
+                             GetSupportedLimits().maxStorageBufferBindingSize < kBufferSize);
+
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDesc.size = {kWidth, kHeight, 1};
+    textureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+    constexpr std::array<uint8_t, 8> kRow0 = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+    constexpr std::array<uint8_t, 8> kRow1 = {0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x12};
+    std::array<uint8_t, 256 + 8> uploadData{};
+    std::ranges::copy(kRow0, uploadData.begin());
+    std::ranges::copy(kRow1, uploadData.begin() + 256);
+
+    wgpu::TexelCopyTextureInfo dstTextureView =
+        utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+    wgpu::TexelCopyBufferLayout uploadLayout = utils::CreateTexelCopyBufferLayout(0, 256, kHeight);
+    wgpu::Extent3D copySize = {kWidth, kHeight, 1};
+    queue.WriteTexture(&dstTextureView, uploadData.data(), uploadData.size(), &uploadLayout,
+                       &copySize);
+
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.size = kBufferSize;
+    bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::TexelCopyTextureInfo srcTextureView =
+        utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+    wgpu::TexelCopyBufferInfo dstBufferView =
+        utils::CreateTexelCopyBufferInfo(buffer, 0, kBytesPerRow, kHeight);
+    encoder.CopyTextureToBuffer(&srcTextureView, &dstBufferView, &copySize);
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U8_RANGE_EQ(kRow0.data(), buffer, 0, kRow0.size());
+    EXPECT_BUFFER_U8_RANGE_EQ(kRow1.data(), buffer, kBytesPerRow, kRow1.size());
+}
 
 // A regression test for a bug on D3D12 backend that causes crash when doing texture-to-texture
 // copy one row with the texture format Depth32Float.
@@ -2586,6 +2647,7 @@ DAWN_INSTANTIATE_TEST(CopyTests_T2B_No_Format_Param,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       OpenGLESBackend({"gl_defer"}),
+                      OpenGLESBackend({"split_buffer_texture_copy_for_oversized_row"}),
                       OpenGLESBackend({"use_blit_for_rg11b10ufloat_texture_copy"}),
                       VulkanBackend(),
                       VulkanBackend({"use_blit_for_depth32float_texture_to_buffer_copy"}),

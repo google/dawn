@@ -45,7 +45,10 @@ namespace {
 // hardware register fields: bytes per row is 18 bits and texels per row is 14 bits. The two must
 // be checked independently: bytesPerRow == texelsPerRow * bytesPerBlock, so a format with a small
 // bytesPerBlock (e.g. R8Unorm, 1 byte/texel) can push texelsPerRow past 2^14 while bytesPerRow is
-// still nowhere near 2^18. See https://crbug.com/481934465.
+// still nowhere near 2^18. See crbug.com/481934465.
+// These thresholds also cover the larger 256 MiB (2^28 bytes) row pitch overflow / wrap-around
+// limits on ARM Mali (crbug.com/569161611), ImgTec PowerVR (crbug.com/529867799),
+// and Qualcomm Adreno (crbug.com/380487895).
 constexpr uint64_t kMaxBytesPerRow = 1u << 18;
 constexpr uint64_t kMaxTexelsPerRow = 1u << 14;
 

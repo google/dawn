@@ -38,8 +38,9 @@ class DeviceBase;
 
 // Determines whether a buffer<->texture copy needs to be split for oversized rows. This happens
 // if the SplitBufferTextureCopyForOversizedRow toggle is enabled and `bufferCopy`'s bytes per row
-// or texels per row overflows the limited-width hardware register field used to store it,
-// respectively. See https://crbug.com/481934465.
+// or texels per row overflows the limited-width hardware register field or driver stride
+// calculation used to store it. See crbug.com/481934465, crbug.com/569161611,
+// crbug.com/529867799, and crbug.com/380487895.
 bool NeedsBufferTextureCopySplitForOversizedRow(const DeviceBase* device,
                                                 const BufferCopy& bufferCopy,
                                                 const TypedTexelBlockInfo& blockInfo);
