@@ -121,11 +121,11 @@ class Token:
     """Describes a parsed token."""
 
     kind: Kind
-    runes: str = ""
+    str: str = ""
     source: Source = field(default_factory=Source)
 
     def __str__(self) -> str:
-        return f"[{self.source} {self.kind.value} {self.runes}]"
+        return f"[{self.source} {self.kind.value} {self.str}]"
 
 
 Invalid = Token(kind=Kind.InvalidToken)

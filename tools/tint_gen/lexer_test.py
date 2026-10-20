@@ -47,7 +47,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Identifier,
-                        runes="ident",
+                        str="ident",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 6)),
                     )
                 ],
@@ -57,7 +57,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Identifier,
-                        runes="ident_123",
+                        str="ident_123",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 10)),
                     )
                 ],
@@ -67,7 +67,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Identifier,
-                        runes="_ident_",
+                        str="_ident_",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 8)),
                     )
                 ],
@@ -77,7 +77,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Integer,
-                        runes="123456789",
+                        str="123456789",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 10)),
                     )
                 ],
@@ -87,7 +87,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Integer,
-                        runes="-123456789",
+                        str="-123456789",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 11)),
                     )
                 ],
@@ -97,7 +97,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Float,
-                        runes="1234.56789",
+                        str="1234.56789",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 11)),
                     )
                 ],
@@ -107,7 +107,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Float,
-                        runes="-1234.56789",
+                        str="-1234.56789",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 12)),
                     )
                 ],
@@ -117,17 +117,17 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Float,
-                        runes="123.456",
+                        str="123.456",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 8)),
                     ),
                     tok.Token(
                         kind=tok.Kind.Dot,
-                        runes=".",
+                        str=".",
                         source=tok.Source(s=loc(1, 8), e=loc(1, 9)),
                     ),
                     tok.Token(
                         kind=tok.Kind.Integer,
-                        runes="789",
+                        str="789",
                         source=tok.Source(s=loc(1, 9), e=loc(1, 12)),
                     ),
                 ],
@@ -137,12 +137,12 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Float,
-                        runes="-123.456",
+                        str="-123.456",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 9)),
                     ),
                     tok.Token(
                         kind=tok.Kind.Integer,
-                        runes="-789",
+                        str="-789",
                         source=tok.Source(s=loc(1, 9), e=loc(1, 13)),
                     ),
                 ],
@@ -152,7 +152,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Match,
-                        runes="match",
+                        str="match",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 6)),
                     )
                 ],
@@ -162,7 +162,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Function,
-                        runes="fn",
+                        str="fn",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 3)),
                     )
                 ],
@@ -172,7 +172,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Operator,
-                        runes="op",
+                        str="op",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 3)),
                     )
                 ],
@@ -182,7 +182,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Identifier,
-                        runes="operation",
+                        str="operation",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 10)),
                     )
                 ],
@@ -192,7 +192,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Type,
-                        runes="type",
+                        str="type",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 5)),
                     )
                 ],
@@ -202,7 +202,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Constructor,
-                        runes="ctor",
+                        str="ctor",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 5)),
                     )
                 ],
@@ -212,7 +212,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Converter,
-                        runes="conv",
+                        str="conv",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 5)),
                     )
                 ],
@@ -222,7 +222,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Enum,
-                        runes="enum",
+                        str="enum",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 5)),
                     )
                 ],
@@ -232,7 +232,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Import,
-                        runes="import",
+                        str="import",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 7)),
                     )
                 ],
@@ -242,7 +242,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Colon,
-                        runes=":",
+                        str=":",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -252,7 +252,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Comma,
-                        runes=",",
+                        str=",",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -262,7 +262,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Minus,
-                        runes="-",
+                        str="-",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -272,7 +272,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Lt,
-                        runes="<",
+                        str="<",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -282,7 +282,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Gt,
-                        runes=">",
+                        str=">",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -292,7 +292,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Lbrace,
-                        runes="{",
+                        str="{",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -302,7 +302,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Rbrace,
-                        runes="}",
+                        str="}",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -312,7 +312,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.AndAnd,
-                        runes="&&",
+                        str="&&",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 3)),
                     )
                 ],
@@ -322,7 +322,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.And,
-                        runes="&",
+                        str="&",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -332,7 +332,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.OrOr,
-                        runes="||",
+                        str="||",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 3)),
                     )
                 ],
@@ -342,7 +342,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Or,
-                        runes="|",
+                        str="|",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -352,7 +352,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Not,
-                        runes="!",
+                        str="!",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -362,7 +362,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.NotEqual,
-                        runes="!=",
+                        str="!=",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 3)),
                     )
                 ],
@@ -372,7 +372,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Equal,
-                        runes="==",
+                        str="==",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 3)),
                     )
                 ],
@@ -382,7 +382,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Assign,
-                        runes="=",
+                        str="=",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -392,7 +392,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Shl,
-                        runes="<<",
+                        str="<<",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 3)),
                     )
                 ],
@@ -402,7 +402,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Le,
-                        runes="<=",
+                        str="<=",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 3)),
                     )
                 ],
@@ -412,7 +412,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Lt,
-                        runes="<",
+                        str="<",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -422,7 +422,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Ge,
-                        runes=">=",
+                        str=">=",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 3)),
                     )
                 ],
@@ -432,7 +432,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Shr,
-                        runes=">>",
+                        str=">>",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 3)),
                     )
                 ],
@@ -442,7 +442,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Gt,
-                        runes=">",
+                        str=">",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -452,7 +452,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Attr,
-                        runes="@",
+                        str="@",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -462,7 +462,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Lparen,
-                        runes="(",
+                        str="(",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -472,7 +472,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Rparen,
-                        runes=")",
+                        str=")",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -482,7 +482,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Or,
-                        runes="|",
+                        str="|",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -492,7 +492,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Star,
-                        runes="*",
+                        str="*",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -502,7 +502,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Arrow,
-                        runes="->",
+                        str="->",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 3)),
                     )
                 ],
@@ -512,7 +512,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Identifier,
-                        runes="x",
+                        str="x",
                         source=tok.Source(s=loc(1, 1), e=loc(1, 2)),
                     )
                 ],
@@ -522,7 +522,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.String,
-                        runes="abc",
+                        str="abc",
                         source=tok.Source(s=loc(1, 2), e=loc(1, 5)),
                     )
                 ],
@@ -532,7 +532,7 @@ class LexerTest(unittest.TestCase):
                 [
                     tok.Token(
                         kind=tok.Kind.Identifier,
-                        runes="ident",
+                        str="ident",
                         source=tok.Source(s=loc(3, 4), e=loc(3, 9)),
                     )
                 ],
@@ -569,7 +569,7 @@ class LexerTest(unittest.TestCase):
         self.assertFalse(tok.Source().is_valid())
         self.assertEqual(str(src), "foo.def:1:2")
 
-        token = tok.Token(kind=tok.Kind.Identifier, runes="abc", source=src)
+        token = tok.Token(kind=tok.Kind.Identifier, str="abc", source=src)
         self.assertEqual(str(token), "[foo.def:1:2 ident abc]")
 
 

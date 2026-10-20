@@ -203,13 +203,13 @@ class _Lexer:
 
     def _append_tok(self, n: int, kind: tok.Kind) -> None:
         start = self.loc
-        runes = self.src[self.pos:self.pos + n]
+        str = self.src[self.pos:self.pos + n]
         self._skip(n)
         end = self.loc
         self.tokens.append(
             tok.Token(
                 kind=kind,
-                runes=runes,
+                str=str,
                 source=tok.Source(s=start, e=end),
             ))
 
