@@ -2030,38 +2030,42 @@ Maybe<const ast::Expression*> Parser::interpolated_string() {
         elements.Push(create<ast::StringLiteralExpression>(head.source(), head.to_str()));
     }
 
-    while (continue_parsing()) {
-        auto expr = expect_expression("interpolated string");
-        if (expr.errored) {
-            return Failure::kErrored;
-        }
-        elements.Push(expr.value);
+    return sync(
+        Token::Type::kInterpolatedStringTail,
+        [&]() -> Expect<const ast::InterpolatedStringExpression*> {
+            while (continue_parsing()) {
+                auto expr = expect_expression("interpolated string");
+                if (expr.errored) {
+                    return Failure::kErrored;
+                }
+                elements.Push(expr.value);
 
-        if (peek_is(Token::Type::kInterpolatedStringMiddle)) {
-            auto& mid = next();
-            if (!mid.to_str().empty()) {
-                elements.Push(create<ast::StringLiteralExpression>(mid.source(), mid.to_str()));
+                if (peek_is(Token::Type::kInterpolatedStringMiddle)) {
+                    auto& mid = next();
+                    if (!mid.to_str().empty()) {
+                        elements.Push(
+                            create<ast::StringLiteralExpression>(mid.source(), mid.to_str()));
+                    }
+                    continue;
+                }
+
+                if (peek_is(Token::Type::kInterpolatedStringTail)) {
+                    auto& tail = next();
+                    if (!tail.to_str().empty()) {
+                        elements.Push(
+                            create<ast::StringLiteralExpression>(tail.source(), tail.to_str()));
+                    }
+                    return create<ast::InterpolatedStringExpression>(source(), std::move(elements));
+                }
+
+                auto& next_tok = peek();
+                if (handle_error(next_tok)) {
+                    return Failure::kErrored;
+                }
+                return AddError(next_tok.source(), "expected '}' for interpolated string");
             }
-            continue;
-        }
-
-        if (peek_is(Token::Type::kInterpolatedStringTail)) {
-            auto& tail = next();
-            if (!tail.to_str().empty()) {
-                elements.Push(create<ast::StringLiteralExpression>(tail.source(), tail.to_str()));
-            }
-            return create<ast::InterpolatedStringExpression>(source(), std::move(elements));
-        }
-
-        auto& next_tok = peek();
-        if (handle_error(next_tok)) {
             return Failure::kErrored;
-        }
-
-        return AddError(next_tok.source(), "expected '}' for interpolated string");
-    }
-
-    return Failure::kErrored;
+        });
 }
 
 // primary_expression
