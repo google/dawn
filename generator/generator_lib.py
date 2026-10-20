@@ -98,106 +98,79 @@ class Generator:
         return []
 
 
-# Allow custom Jinja2 installation path through an additional python
-# path from the arguments if present. This isn't done through the regular
-# argparse because PreprocessingLoader uses jinja2 in the global scope before
-# "main" gets to run.
-#
-# NOTE: If this argument appears several times, this only uses the first
-#       value, while argparse would typically keep the last one!
-kJinja2Path = '--jinja2-path'
-try:
-    jinja2_path_argv_index = sys.argv.index(kJinja2Path)
-    # Add parent path for the import to succeed.
-    path = os.path.join(sys.argv[jinja2_path_argv_index + 1], os.pardir)
-    sys.path.insert(1, path)
-except ValueError:
-    # --jinja2-path isn't passed, ignore the exception and just import Jinja2
-    # assuming it already is in the Python PATH.
-    pass
-kMarkupSafePath = '--markupsafe-path'
-try:
-    markupsafe_path_argv_index = sys.argv.index(kMarkupSafePath)
-    # Add parent path for the import to succeed.
-    path = os.path.join(sys.argv[markupsafe_path_argv_index + 1], os.pardir)
-    sys.path.insert(1, path)
-except ValueError:
-    # --markupsafe-path isn't passed, ignore the exception and just import
-    # assuming it already is in the Python PATH.
-    pass
-
-import jinja2
-
-
-# A custom Jinja2 template loader that removes the extra indentation
-# of the template blocks so that the output is correctly indented
-class _PreprocessingLoader(jinja2.BaseLoader):
-
-    def __init__(self, path, allow_list):
-        self.path = path
-        self.allow_list = set(allow_list)
-
-        # Check that all the listed templates exist.
-        for template in self.allow_list:
-            if not os.path.exists(os.path.join(self.path, template)):
-                raise jinja2.TemplateNotFound(template)
-
-    def get_source(self, environment, template):
-        if not template in self.allow_list:
-            raise jinja2.TemplateNotFound(template)
-
-        path = os.path.join(self.path, template)
-        mtime = os.path.getmtime(path)
-        with open(path) as f:
-            source = self.preprocess(f.read())
-        return source, path, lambda: mtime == os.path.getmtime(path)
-
-    blockstart = re.compile(r'{%-?\s*(if|elif|else|for|block|macro)[^}]*%}')
-    blockend = re.compile(r'{%-?\s*(end(if|for|block|macro)|elif|else)[^}]*%}')
-
-    def preprocess(self, source):
-        lines = source.split('\n')
-
-        # Compute the current indentation level of the template blocks and
-        # remove their indentation
-        result = []
-        indentation_level = 0
-
-        # Filter lines that are pure comments. line_comment_prefix is not
-        # enough because it removes the comment but doesn't completely remove
-        # the line, resulting in more verbose output.
-        lines = filter(lambda line: not line.strip().startswith('//*'), lines)
-
-        # Remove indentation templates have for the Jinja control flow.
-        for line in lines:
-            # The capture in the regex adds one element per block start or end,
-            # so we divide by two. There is also an extra line chunk
-            # corresponding to the line end, so we subtract it.
-            numends = (len(self.blockend.split(line)) - 1) // 2
-            indentation_level -= numends
-
-            result.append(self.remove_indentation(line, indentation_level))
-
-            numstarts = (len(self.blockstart.split(line)) - 1) // 2
-            indentation_level += numstarts
-
-        return '\n'.join(result) + '\n'
-
-    def remove_indentation(self, line, n):
-        for _ in range(n):
-            if line.startswith(' '):
-                line = line[4:]
-            elif line.startswith('\t'):
-                line = line[1:]
-            else:
-                assert line.strip() == ''
-        return line
-
-
 _FileOutput = namedtuple('FileOutput', ['name', 'content'])
 
 
 def _do_renders(output, template_dir):
+    import jinja2
+
+    # A custom Jinja2 template loader that removes the extra indentation
+    # of the template blocks so that the output is correctly indented
+    class _PreprocessingLoader(jinja2.BaseLoader):
+
+        def __init__(self, path, allow_list):
+            self.path = path
+            self.allow_list = set(allow_list)
+
+            # Check that all the listed templates exist.
+            for template in self.allow_list:
+                if not os.path.exists(os.path.join(self.path, template)):
+                    raise jinja2.TemplateNotFound(template)
+
+        def get_source(self, environment, template):
+            if not template in self.allow_list:
+                raise jinja2.TemplateNotFound(template)
+
+            path = os.path.join(self.path, template)
+            mtime = os.path.getmtime(path)
+            with open(path) as f:
+                source = self.preprocess(f.read())
+            return source, path, lambda: mtime == os.path.getmtime(path)
+
+        blockstart = re.compile(
+            r'{%-?\s*(if|elif|else|for|block|macro)[^}]*%}')
+        blockend = re.compile(
+            r'{%-?\s*(end(if|for|block|macro)|elif|else)[^}]*%}')
+
+        def preprocess(self, source):
+            lines = source.split('\n')
+
+            # Compute the current indentation level of the template blocks and
+            # remove their indentation
+            result = []
+            indentation_level = 0
+
+            # Filter lines that are pure comments. line_comment_prefix is not
+            # enough because it removes the comment but doesn't completely remove
+            # the line, resulting in more verbose output.
+            lines = filter(lambda line: not line.strip().startswith('//*'),
+                           lines)
+
+            # Remove indentation templates have for the Jinja control flow.
+            for line in lines:
+                # The capture in the regex adds one element per block start or end,
+                # so we divide by two. There is also an extra line chunk
+                # corresponding to the line end, so we subtract it.
+                numends = (len(self.blockend.split(line)) - 1) // 2
+                indentation_level -= numends
+
+                result.append(self.remove_indentation(line, indentation_level))
+
+                numstarts = (len(self.blockstart.split(line)) - 1) // 2
+                indentation_level += numstarts
+
+            return '\n'.join(result) + '\n'
+
+        def remove_indentation(self, line, n):
+            for _ in range(n):
+                if line.startswith(' '):
+                    line = line[4:]
+                elif line.startswith('\t'):
+                    line = line[1:]
+                else:
+                    assert line.strip() == ''
+            return line
+
     template_allow_list = [render.template for render in output.renders
                            ] + list(output.imported_templates)
     loader = _PreprocessingLoader(template_dir, template_allow_list)
@@ -290,20 +263,24 @@ def run_generator(generator):
     )
 
     generator.add_commandline_arguments(parser)
-    parser.add_argument('--template-dir',
-                        default='templates',
-                        type=str,
-                        help='Directory with template files.')
+    # Allow custom Jinja2 (and MarkupSafe, which is a required dependency for
+    # Jinja2) installation path through an additional python path from the
+    # arguments if present.
     parser.add_argument(
-        kJinja2Path,
+        '--jinja2-path',
         default=None,
         type=str,
         help='Additional python path to set before loading Jinja2')
     parser.add_argument(
-        kMarkupSafePath,
+        '--markupsafe-path',
         default=None,
         type=str,
         help='Additional python path to set before loading MarkupSafe')
+
+    parser.add_argument('--template-dir',
+                        default='templates',
+                        type=str,
+                        help='Directory with template files.')
     parser.add_argument(
         '--output-json-tarball',
         default=None,
@@ -349,6 +326,11 @@ def run_generator(generator):
                         help='Directory where to output generate files.')
 
     args = parser.parse_args()
+
+    if args.jinja2_path != None:
+        sys.path.insert(1, os.path.join(args.jinja2_path, os.pardir))
+    if args.markupsafe_path != None:
+        sys.path.insert(1, os.path.join(args.markupsafe_path, os.pardir))
 
     output = generator.get_outputs(args)
 
