@@ -408,6 +408,15 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "an occlusion query is empty. Workaround this by explicitly filling it with zero if there "
       "are no draw calls.",
       "https://crbug.com/dawn/1707", ToggleStage::Device}},
+    {Toggle::MetalIgnoreNotPermittedCommandBufferErrors,
+     {"metal_ignore_not_permitted_command_buffer_errors",
+      "Do not lose the device when a command buffer fails with MTLCommandBufferErrorNotPermitted. "
+      "iOS reports this error for command buffers committed, or not yet scheduled, while the "
+      "application is in the background, where GPU access is restricted; the device itself stays "
+      "usable. The work of such a command buffer is discarded and a warning is logged. Resources "
+      "it wrote keep their previous, possibly uninitialized, contents, which later mappings and "
+      "copies expose. Only for applications that accept this trade-off.",
+      "https://github.com/wcandillon/react-native-skia/issues/4290", ToggleStage::Device}},
     {Toggle::UseBlitForBufferToDepthTextureCopy,
      {"use_blit_for_buffer_to_depth_texture_copy",
       "Use a blit instead of a copy command to copy buffer data to the depth aspect of a "

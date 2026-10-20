@@ -25,9 +25,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <string>
+#include <string_view>
+#include <vector>
+
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/MetalBackend.h"
 #include "src/dawn/tests/DawnTest.h"
+#include "src/utils/compiler.h"
 
 namespace dawn::native {
 namespace {
@@ -214,9 +219,105 @@ TEST_P(MetalBackendTests, MapAsyncOnFailedCommandBuffer) {
     }
 }
 
+// Test that by default a command buffer failing with MTLCommandBufferErrorNotPermitted loses the
+// device like any other execution error.
+TEST_P(MetalBackendTests, NotPermittedCommandBufferErrorTriggersDeviceLost) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("metal_ignore_not_permitted_command_buffer_errors"));
+
+    bool deviceLostCalled = false;
+    EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
+                                          testing::HasSubstr("Metal command buffer failed")))
+        .WillOnce([&](auto, auto, auto) { deviceLostCalled = true; });
+
+    wgpu::BufferDescriptor desc;
+    desc.size = 4;
+    desc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer src = device.CreateBuffer(&desc);
+    wgpu::Buffer dst = device.CreateBuffer(&desc);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyBufferToBuffer(src, 0, dst, 0, 4);
+    wgpu::CommandBuffer commands = encoder.Finish();
+
+    EnableErrorInjector();
+    // Index 1 fakes a MTLCommandBufferErrorNotPermitted failure, see QueueMTL.mm.
+    InjectErrorAt(1u);
+
+    queue.Submit(1, &commands);
+
+    while (!deviceLostCalled) {
+        WaitABit();
+    }
+}
+
+// Test that with metal_ignore_not_permitted_command_buffer_errors, a command buffer failing with
+// MTLCommandBufferErrorNotPermitted (iOS refuses GPU work from an application in the background)
+// does not lose the device, is reported through the logging callback, and that later submissions
+// execute normally.
+TEST_P(MetalBackendTests, NotPermittedCommandBufferErrorIsDiscardedWithToggle) {
+    DAWN_TEST_UNSUPPORTED_IF(!HasToggleEnabled("metal_ignore_not_permitted_command_buffer_errors"));
+
+    EXPECT_CALL(mDeviceLostCallback,
+                Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown, testing::_))
+        .Times(0);
+
+    std::vector<std::string> warnings;
+    device.SetLoggingCallback(
+        [](wgpu::LoggingType type, wgpu::StringView message, void* userdata) {
+            if (type == wgpu::LoggingType::Warning) {
+                static_cast<std::vector<std::string>*>(userdata)->emplace_back(
+                    DAWN_UNSAFE_TODO(std::string_view(message.data, message.length)));
+            }
+        },
+        static_cast<void*>(&warnings));
+
+    wgpu::BufferDescriptor desc;
+    desc.size = 4;
+    desc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer src = device.CreateBuffer(&desc);
+    wgpu::Buffer dst = device.CreateBuffer(&desc);
+
+    uint32_t valueA = 1010;
+    queue.WriteBuffer(src, 0, &valueA, sizeof(valueA));
+    WaitForAllOperations();
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(src, 0, dst, 0, 4);
+        wgpu::CommandBuffer commands = encoder.Finish();
+
+        EnableErrorInjector();
+        // Index 1 fakes a MTLCommandBufferErrorNotPermitted failure, see QueueMTL.mm.
+        InjectErrorAt(1u);
+
+        queue.Submit(1, &commands);
+        WaitForAllOperations();
+
+        DisableErrorInjector();
+        ClearErrorInjector();
+    }
+
+    // The device is still usable and the discarded command buffer was reported.
+    uint32_t valueB = 2020;
+    queue.WriteBuffer(src, 0, &valueB, sizeof(valueB));
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(src, 0, dst, 0, 4);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+    }
+    EXPECT_BUFFER_U32_EQ(valueB, dst, 0);
+
+    ASSERT_EQ(warnings.size(), 1u);
+    EXPECT_THAT(warnings[0], testing::HasSubstr("1 Metal command buffer(s)"));
+    EXPECT_THAT(warnings[0], testing::HasSubstr("MTLCommandBufferErrorNotPermitted"));
+}
+
 #endif  // defined(DAWN_ENABLE_ERROR_INJECTION)
 
-DAWN_INSTANTIATE_TEST(MetalBackendTests, MetalBackend());
+DAWN_INSTANTIATE_TEST(MetalBackendTests,
+                      MetalBackend(),
+                      MetalBackend({"metal_ignore_not_permitted_command_buffer_errors"}));
 
 }  // anonymous namespace
 }  // namespace dawn::native

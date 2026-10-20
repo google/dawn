@@ -30,6 +30,7 @@
 
 #import <Metal/Metal.h>
 
+#include <atomic>
 #include <map>
 #include <optional>
 #include <string>
@@ -92,6 +93,10 @@ class Queue final : public QueueBase {
         mCommandsScheduledEvents;
     // - Error message from the Metal command-buffer-completed handler if completion failed.
     MutexProtected<std::optional<std::string>> mExecutionError;
+    // - Number of command buffers whose work was discarded because they failed with
+    //   MTLCommandBufferErrorNotPermitted while Toggle::MetalIgnoreNotPermittedCommandBufferErrors
+    //   is enabled. Reset by SubmitPendingCommandBuffer() when it emits the warning.
+    std::atomic<uint32_t> mDiscardedCommandBufferCount = 0;
 
     // A shared event that can be exported for synchronization with other users of Metal.
     // MTLSharedEvent is not available until macOS 10.14+ so use just `id`.

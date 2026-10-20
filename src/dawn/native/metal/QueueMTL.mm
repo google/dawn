@@ -60,6 +60,30 @@ class CommandsScheduledEvent : public EventManager::TrackedEvent {
         // There's nothing to do here since there are no callbacks associated with this event.
     }
 };
+
+// How a Metal command buffer ended, as seen from its completed handler.
+enum class CommandBufferOutcome {
+    Completed,
+    // The command buffer failed with MTLCommandBufferErrorNotPermitted. iOS reports this error
+    // for command buffers committed, or not yet scheduled, while the application is in the
+    // background, where GPU access is restricted. The device stays usable: only the work of this
+    // command buffer is lost. See Toggle::MetalIgnoreNotPermittedCommandBufferErrors.
+    NotPermitted,
+    // The command buffer failed for any other reason.
+    Failed,
+};
+
+CommandBufferOutcome GetCommandBufferOutcome(id<MTLCommandBuffer> commandBuffer) {
+    if (commandBuffer.status != MTLCommandBufferStatusError) [[likely]] {
+        return CommandBufferOutcome::Completed;
+    }
+    NSError* error = commandBuffer.error;
+    if (error != nil && [error.domain isEqualToString:MTLCommandBufferErrorDomain] &&
+        error.code == MTLCommandBufferErrorNotPermitted) {
+        return CommandBufferOutcome::NotPermitted;
+    }
+    return CommandBufferOutcome::Failed;
+}
 }  // namespace
 
 ResultOrError<Ref<Queue>> Queue::Create(Device* device, const QueueDescriptor* descriptor) {
@@ -232,6 +256,18 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
     // (for example when this is called by Tick(), which happens even if nothing is pending).
     DAWN_TRY(CheckExecutionError());
 
+    // Report command buffers discarded by the completed handler, which cannot log itself.
+    if (uint32_t discarded = mDiscardedCommandBufferCount.exchange(0, std::memory_order_relaxed);
+        discarded != 0) [[unlikely]] {
+        GetDevice()->EmitLog(
+            wgpu::LoggingType::Warning,
+            absl::StrFormat("Discarded the work of %u Metal command buffer(s) that failed with "
+                            "MTLCommandBufferErrorNotPermitted (GPU access is restricted while the "
+                            "application is in the background). Resources written by that work may "
+                            "hold stale contents.",
+                            discarded));
+    }
+
     if (!mCommandContext.NeedsSubmit()) {
         return {};
     }
@@ -284,9 +320,19 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
                        deviceState == DeviceBase::State::Disconnecting);
         }
 
-        MTLCommandBufferStatus status =
-            INJECT_ERROR_OR_RUN(commandBuffer.status, MTLCommandBufferStatusError);
-        if (status == MTLCommandBufferStatusError) [[unlikely]] {
+        // For testing, the first injected error fakes a generic failure and the second one a
+        // MTLCommandBufferErrorNotPermitted failure.
+        CommandBufferOutcome outcome =
+            INJECT_ERROR_OR_RUN(GetCommandBufferOutcome(commandBuffer),
+                                CommandBufferOutcome::Failed, CommandBufferOutcome::NotPermitted);
+        if (outcome == CommandBufferOutcome::NotPermitted &&
+            device->IsToggleEnabled(  // Thread-safe (immutable data).
+                Toggle::MetalIgnoreNotPermittedCommandBufferErrors)) [[unlikely]] {
+            // Only the work of this command buffer is lost, so let the serial advance as if it had
+            // completed. The warning is emitted by SubmitPendingCommandBuffer() since this handler
+            // runs on a Metal thread and cannot call into the device.
+            queue->mDiscardedCommandBufferCount.fetch_add(1, std::memory_order_relaxed);
+        } else if (outcome != CommandBufferOutcome::Completed) [[unlikely]] {
             NSError* error = commandBuffer.error;
             std::string message =
                 error ? absl::StrFormat("Metal command buffer failed: %s (domain=%s, code=%ld)",
