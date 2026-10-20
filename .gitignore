@@ -83,6 +83,9 @@
 # Tint test validation cache file
 /test/tint/validation.cache
 
+# Claude code
+.claude/*
+
 # Modified from https://www.gitignore.io/api/vim,macos,linux,emacs,windows,sublimetext,visualstudio,visualstudiocode,intellij
 
 ### Emacs ###
