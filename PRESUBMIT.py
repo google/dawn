@@ -567,6 +567,23 @@ def CheckWebgpuHeaderDiff(input_api, output_api):
     return results
 
 
+def CheckDawnHeaderVersion(input_api, output_api):
+    """Checks that Dawn header version files and stable_version are valid."""
+    results = []
+    try:
+        input_api.subprocess.check_call_out(
+            [sys.executable, "generator/dawn_version_generator.py", "check"],
+            stdout=input_api.subprocess.PIPE,
+            stderr=input_api.subprocess.PIPE,
+            cwd=input_api.change.RepositoryRoot())
+    except input_api.subprocess.CalledProcessError as e:
+        if input_api.is_committing:
+            results.append(output_api.PresubmitError('%s' % (e, )))
+        else:
+            results.append(output_api.PresubmitPromptWarning('%s' % (e, )))
+    return results
+
+
 def _HasNoStrayWhitespaceFilter(file):
     """Filters files that are exempt from the canned no stray whitespace check."""
     filter_list = [

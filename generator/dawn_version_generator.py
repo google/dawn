@@ -26,7 +26,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import os, subprocess, sys, shutil
+import argparse, os, subprocess, sys, shutil
 
 from generator_lib import Generator, run_generator, FileRender, GeneratorOutput
 
@@ -177,5 +177,17 @@ class DawnVersionGenerator(Generator):
         return GeneratorOutput(renders=renders, imported_templates=[])
 
 
+def main(args):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("action", choices=("gen", "check"))
+    options, remaining_args = parser.parse_known_args(args[1:])
+
+    if options.action == "gen":
+        return run_generator(DawnVersionGenerator(), remaining_args)
+
+    if options.action == "check":
+        return 0
+
+
 if __name__ == "__main__":
-    sys.exit(run_generator(DawnVersionGenerator()))
+    sys.exit(main(sys.argv))

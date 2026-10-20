@@ -64,13 +64,13 @@ function(DawnGenerator)
     set(BASE_ARGS
         ${Python3_EXECUTABLE}
         ${arg_SCRIPT}
+        ${arg_EXTRA_PARAMETERS}
         --template-dir
         "${DAWN_TEMPLATE_DIR}"
         --root-dir
         "${Dawn_SOURCE_DIR}"
         --output-dir
         "${DAWN_BUILD_GEN_DIR}"
-        ${arg_EXTRA_PARAMETERS}
     )
     if (DAWN_JINJA2_DIR)
         list(APPEND BASE_ARGS --jinja2-path ${DAWN_JINJA2_DIR})

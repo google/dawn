@@ -33,7 +33,8 @@ DawnGenerator(
     SCRIPT "${Dawn_SOURCE_DIR}/generator/dawn_version_generator.py"
     PRINT_NAME "Dawn version based utilities"
     OUTPUT_HEADERS DAWN_VERSION_AUTOGEN_HEADERS
-    EXTRA_PARAMETERS "--dawn-dir"
+    EXTRA_PARAMETERS "gen"
+         "--dawn-dir"
          "${Dawn_SOURCE_DIR}"
 )
 

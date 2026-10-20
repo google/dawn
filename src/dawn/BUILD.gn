@@ -38,6 +38,7 @@ dawn_generator("dawn_version_gen") {
   script = "${dawn_root}/generator/dawn_version_generator.py"
   inputs = [ "${dawn_template_dir}/dawn/dawn_version.h" ]
   args = [
+    "gen",
     "--dawn-dir",
     rebase_path("${dawn_root}", root_build_dir),
   ]

@@ -256,7 +256,7 @@ def _cmake_path_list(paths):
         return ";".join(paths)
 
 
-def run_generator(generator):
+def run_generator(generator, args=None):
     parser = argparse.ArgumentParser(
         description=generator.get_description(),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -325,7 +325,7 @@ def run_generator(generator):
                         type=str,
                         help='Directory where to output generate files.')
 
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     if args.jinja2_path != None:
         sys.path.insert(1, os.path.join(args.jinja2_path, os.pardir))
