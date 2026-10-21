@@ -34,8 +34,8 @@
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Limits.h"
 
-namespace dawn {
-namespace native {
+namespace dawn::native {
+namespace {
 
 // Test |GetDefaultLimits| returns the default for FeatureLeveL::Core.
 TEST(Limits, GetDefaultLimits) {
@@ -658,5 +658,5 @@ TEST(Limits, FixupDeviceLimits) {
     }
 }
 
-}  // namespace native
-}  // namespace dawn
+}  // anonymous namespace
+}  // namespace dawn::native

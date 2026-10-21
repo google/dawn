@@ -40,8 +40,8 @@
 namespace dawn::native {
 namespace {
 
-using testing::_;
-using testing::MockCppCallback;
+using ::testing::_;
+using ::testing::MockCppCallback;
 
 CacheKey CreateValidKey() {
     CacheKey key;

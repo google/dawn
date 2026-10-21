@@ -29,9 +29,9 @@
 
 #include "src/dawn/tests/unittests/native/mocks/DeviceMock.h"
 
-using testing::WithArgs;
-
 namespace dawn::native {
+
+using ::testing::WithArgs;
 
 QueueMock::QueueMock(DeviceMock* device, const QueueDescriptor* descriptor)
     : QueueBase(device, descriptor) {

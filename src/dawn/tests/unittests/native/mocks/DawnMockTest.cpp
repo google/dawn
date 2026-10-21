@@ -32,10 +32,11 @@
 #include "dawn/dawn_proc.h"
 #include "src/dawn/native/ChainUtils.h"
 
-using testing::_;
-using testing::AtMost;
-
 namespace dawn::native {
+
+using ::testing::_;
+using ::testing::AtMost;
+using ::testing::NiceMock;
 
 DawnMockTest::DawnMockTest() : mDeviceToggles(ToggleStage::Device) {}
 
@@ -61,8 +62,8 @@ void DawnMockTest::SetUp() {
     Ref<DeviceBase::DeviceLostEvent> lostEvent = DeviceBase::DeviceLostEvent::Create(nativeDesc);
 
     mDeviceToggles.SetForTesting(Toggle::AllowUnsafeAPIs, true, true);
-    auto deviceMock = AcquireRef(new ::testing::NiceMock<DeviceMock>(
-        adapters[0].Get(), unpackedDesc, mDeviceToggles, lostEvent.Get()));
+    auto deviceMock = AcquireRef(
+        new NiceMock<DeviceMock>(adapters[0].Get(), unpackedDesc, mDeviceToggles, lostEvent.Get()));
     mDeviceMock = deviceMock.Get();
     device = wgpu::Device::Acquire(ToAPI(ReturnToAPI<DeviceBase>(std::move(deviceMock))));
     instance->GetEventManager()->TrackEvent(std::move(lostEvent));

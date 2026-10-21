@@ -39,14 +39,16 @@
 #include "src/utils/log.h"
 #include "webgpu/webgpu_cpp.h"
 
-using testing::_;
-using testing::AnyOf;
-using testing::Eq;
-using testing::HasSubstr;
-using testing::Return;
-
 namespace dawn::native {
 namespace {
+
+using ::testing::_;
+using ::testing::AnyOf;
+using ::testing::Eq;
+using ::testing::HasSubstr;
+using ::testing::MockCppCallback;
+using ::testing::Return;
+using ::testing::StrictMock;
 
 using BufferState = BufferBase::BufferState;
 
@@ -74,7 +76,7 @@ class WaitableEvent {
 };
 
 using MockMapAsyncCallback =
-    testing::StrictMock<testing::MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)>>;
+    StrictMock<MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)>>;
 
 class BufferBaseTest : public DawnMockTest {
   protected:

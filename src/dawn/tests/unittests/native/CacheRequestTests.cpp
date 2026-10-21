@@ -47,14 +47,15 @@ using ::testing::_;
 using ::testing::MockFunction;
 using ::testing::Return;
 using ::testing::StrictMock;
+using ::testing::Values;
 using ::testing::WithArg;
+using ::testing::WithParamInterface;
 
 struct CacheRequestTestParam {
     bool enableHashValidation;
 };
 
-class CacheRequestTests : public DawnNativeTest,
-                          public ::testing::WithParamInterface<CacheRequestTestParam> {
+class CacheRequestTests : public DawnNativeTest, public WithParamInterface<CacheRequestTestParam> {
   public:
     wgpu::DawnTogglesDescriptor DeviceToggles() override {
         wgpu::DawnTogglesDescriptor toggles = {};
@@ -520,8 +521,8 @@ TEST_P(CacheRequestTests, CacheHitHashValidationFailed) {
 
 INSTANTIATE_TEST_SUITE_P(,
                          CacheRequestTests,
-                         testing::Values(CacheRequestTestParam{.enableHashValidation = false},
-                                         CacheRequestTestParam{.enableHashValidation = true}));
+                         Values(CacheRequestTestParam{.enableHashValidation = false},
+                                CacheRequestTestParam{.enableHashValidation = true}));
 
 }  // anonymous namespace
 }  // namespace dawn::native

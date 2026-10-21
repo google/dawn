@@ -56,6 +56,12 @@
 namespace dawn::native::stream {
 namespace {
 
+using ::testing::NotNull;
+using ::testing::PrintToString;
+using ::testing::Ref;
+using ::testing::Test;
+using ::testing::Types;
+
 // Testing classes with mock serializing implemented for testing.
 class A {
   public:
@@ -90,10 +96,6 @@ void PrintTo(const ByteVectorSink& key, std::ostream* stream) {
 }
 
 namespace {
-
-using ::testing::NotNull;
-using ::testing::PrintToString;
-using ::testing::Ref;
 
 using TypedIntegerForTest = TypedInteger<struct TypedIntegerForTestTag, uint32_t>;
 
@@ -741,7 +743,7 @@ struct StreamValueTestTypesImpl;
 template <typename... T, typename... T2>
 struct StreamValueTestTypesImpl<std::tuple<std::vector<T>...>,
                                 std::tuple<std::initializer_list<T2>...>> {
-    using type = ::testing::Types<T..., T2...>;
+    using type = Types<T..., T2...>;
 };
 
 using StreamValueTestTypes =
@@ -749,7 +751,7 @@ using StreamValueTestTypes =
                                       decltype(kStreamValueInitListParams)>::type;
 
 template <typename T>
-class StreamParameterizedTests : public ::testing::Test {
+class StreamParameterizedTests : public Test {
   protected:
     static std::vector<T> GetParams() { return std::get<std::vector<T>>(kStreamValueVectorParams); }
 
@@ -757,7 +759,7 @@ class StreamParameterizedTests : public ::testing::Test {
 };
 
 template <typename T, size_t N>
-class StreamParameterizedTests<T[N]> : public ::testing::Test {
+class StreamParameterizedTests<T[N]> : public Test {
   protected:
     static std::initializer_list<T[N]> GetParams() {
         return std::get<std::initializer_list<T[N]>>(kStreamValueInitListParams);

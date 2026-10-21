@@ -46,16 +46,19 @@
 namespace dawn::native {
 namespace {
 
-using testing::_;
-using testing::Contains;
-using testing::EmptySizedString;
-using testing::IsNull;
-using testing::MockCppCallback;
-using testing::NonEmptySizedString;
-using testing::StrEq;
-using testing::WithArg;
+using ::testing::_;
+using ::testing::Contains;
+using ::testing::EmptySizedString;
+using ::testing::IsNull;
+using ::testing::MockCppCallback;
+using ::testing::NonEmptySizedString;
+using ::testing::StrEq;
+using ::testing::Test;
+using ::testing::ValuesIn;
+using ::testing::WithArg;
+using ::testing::WithParamInterface;
 
-class DeviceCreationTest : public testing::Test {
+class DeviceCreationTest : public Test {
   protected:
     void SetUp() override {
         dawnProcSetProcs(&GetProcs());
@@ -400,7 +403,7 @@ TEST_F(DeviceCreationTest, AdapterIsConsumedWithConsumeAdapterDescriptor) {
 }
 
 class DeviceCreationFutureTest : public DeviceCreationTest,
-                                 public ::testing::WithParamInterface<wgpu::CallbackMode> {
+                                 public WithParamInterface<wgpu::CallbackMode> {
   protected:
     void RequestDevice(const wgpu::DeviceDescriptor* descriptor) {
         wgpu::Adapter wgpuAdapter(adapter.Get());
@@ -426,7 +429,7 @@ class DeviceCreationFutureTest : public DeviceCreationTest,
 
 INSTANTIATE_TEST_SUITE_P(,
                          DeviceCreationFutureTest,
-                         ::testing::ValuesIn(std::initializer_list<wgpu::CallbackMode>{
+                         ValuesIn(std::initializer_list<wgpu::CallbackMode>{
                              wgpu::CallbackMode::WaitAnyOnly,
                              wgpu::CallbackMode::AllowProcessEvents,
                              wgpu::CallbackMode::AllowSpontaneous}));

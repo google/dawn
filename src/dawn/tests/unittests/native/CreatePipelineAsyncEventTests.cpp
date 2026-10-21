@@ -49,11 +49,17 @@ namespace {
 
 using ::testing::_;
 using ::testing::ByMove;
+using ::testing::Combine;
+using ::testing::EmptySizedString;
 using ::testing::HasSubstr;
 using ::testing::InSequence;
 using ::testing::IsNull;
+using ::testing::Mock;
 using ::testing::MockCppCallback;
+using ::testing::NotNull;
 using ::testing::Return;
+using ::testing::Values;
+using ::testing::WithParamInterface;
 
 using MockComputePipelineAsyncCallback = MockCppCallback<
     void (*)(wgpu::CreatePipelineAsyncStatus, wgpu::ComputePipeline, wgpu::StringView)>;
@@ -80,7 +86,7 @@ class CreatePipelineAsyncEventTests : public DawnMockTest {
 
 class CreatePipelineAsyncAfterDeviceLossTests
     : public CreatePipelineAsyncEventTests,
-      public ::testing::WithParamInterface<std::tuple<wgpu::DeviceLostReason, wgpu::CallbackMode>> {
+      public WithParamInterface<std::tuple<wgpu::DeviceLostReason, wgpu::CallbackMode>> {
   protected:
     void SetUp() override {
         CreatePipelineAsyncEventTests::SetUp();
@@ -120,14 +126,13 @@ class CreatePipelineAsyncAfterDeviceLossTests
     bool mCallbackCalled = false;
 };
 
-INSTANTIATE_TEST_SUITE_P(
-    ,
-    CreatePipelineAsyncAfterDeviceLossTests,
-    ::testing::Combine(::testing::Values(wgpu::DeviceLostReason::Unknown,
-                                         wgpu::DeviceLostReason::Destroyed),
-                       ::testing::Values(wgpu::CallbackMode::WaitAnyOnly,
-                                         wgpu::CallbackMode::AllowProcessEvents,
-                                         wgpu::CallbackMode::AllowSpontaneous)));
+INSTANTIATE_TEST_SUITE_P(,
+                         CreatePipelineAsyncAfterDeviceLossTests,
+                         Combine(Values(wgpu::DeviceLostReason::Unknown,
+                                        wgpu::DeviceLostReason::Destroyed),
+                                 Values(wgpu::CallbackMode::WaitAnyOnly,
+                                        wgpu::CallbackMode::AllowProcessEvents,
+                                        wgpu::CallbackMode::AllowSpontaneous)));
 
 // Even an invalid descriptor must resolve successfully after device loss, without backend work.
 TEST_P(CreatePipelineAsyncAfterDeviceLossTests, CreateComputePipelineAsync) {
@@ -135,8 +140,8 @@ TEST_P(CreatePipelineAsyncAfterDeviceLossTests, CreateComputePipelineAsync) {
     desc.label = "lost compute pipeline";
     // No shader module: this descriptor would fail validation on a live device.
     EXPECT_CALL(*mDeviceMock, CreateUninitializedComputePipelineImpl).Times(0);
-    EXPECT_CALL(mockComputePipelineCb, Call(wgpu::CreatePipelineAsyncStatus::Success,
-                                            ::testing::NotNull(), ::testing::EmptySizedString()))
+    EXPECT_CALL(mockComputePipelineCb,
+                Call(wgpu::CreatePipelineAsyncStatus::Success, NotNull(), EmptySizedString()))
         .WillOnce([this](wgpu::CreatePipelineAsyncStatus, wgpu::ComputePipeline pipeline,
                          wgpu::StringView) {
             mCallbackCalled = true;
@@ -148,7 +153,7 @@ TEST_P(CreatePipelineAsyncAfterDeviceLossTests, CreateComputePipelineAsync) {
     wgpu::Future future = device.CreateComputePipelineAsync(&desc, GetCallbackMode(),
                                                             mockComputePipelineCb.Callback());
     CompleteFuture(future);
-    ASSERT_TRUE(::testing::Mock::VerifyAndClearExpectations(&mockComputePipelineCb));
+    ASSERT_TRUE(Mock::VerifyAndClearExpectations(&mockComputePipelineCb));
 }
 
 TEST_P(CreatePipelineAsyncAfterDeviceLossTests, CreateRenderPipelineAsync) {
@@ -156,8 +161,8 @@ TEST_P(CreatePipelineAsyncAfterDeviceLossTests, CreateRenderPipelineAsync) {
     desc.label = "lost render pipeline";
     // No shader module: this descriptor would fail validation on a live device.
     EXPECT_CALL(*mDeviceMock, CreateUninitializedRenderPipelineImpl).Times(0);
-    EXPECT_CALL(mockRenderPipelineCb, Call(wgpu::CreatePipelineAsyncStatus::Success,
-                                           ::testing::NotNull(), ::testing::EmptySizedString()))
+    EXPECT_CALL(mockRenderPipelineCb,
+                Call(wgpu::CreatePipelineAsyncStatus::Success, NotNull(), EmptySizedString()))
         .WillOnce([this](wgpu::CreatePipelineAsyncStatus, wgpu::RenderPipeline pipeline,
                          wgpu::StringView) {
             mCallbackCalled = true;
@@ -169,7 +174,7 @@ TEST_P(CreatePipelineAsyncAfterDeviceLossTests, CreateRenderPipelineAsync) {
     wgpu::Future future =
         device.CreateRenderPipelineAsync(&desc, GetCallbackMode(), mockRenderPipelineCb.Callback());
     CompleteFuture(future);
-    ASSERT_TRUE(::testing::Mock::VerifyAndClearExpectations(&mockRenderPipelineCb));
+    ASSERT_TRUE(Mock::VerifyAndClearExpectations(&mockRenderPipelineCb));
 }
 
 // Verify CreateRenderPipelineAsync and the internal CreateRenderPipelineAsyncEvent behavior
@@ -254,7 +259,7 @@ TEST_F(CreatePipelineAsyncEventTests, LongAsyncTaskFinishesBeforeDeviceIsDropped
         return {};
     });
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)
-        .WillByDefault(testing::Return(testing::ByMove(renderPipelineMock)));
+        .WillByDefault(Return(ByMove(renderPipelineMock)));
 
     EXPECT_CALL(mockRenderPipelineCb, Call(_, _, _)).Times(1);
 
@@ -326,7 +331,7 @@ TEST_F(CreatePipelineAsyncEventTests, NoexceptCallbackInCreateComputePipelineAsy
     ON_CALL(*computePipelineMock.Get(), InitializeImpl)
         .WillByDefault([]() -> ResultOrUnknownError<Extent3D> { return Extent3D{}; });
     ON_CALL(*mDeviceMock.get(), CreateUninitializedComputePipelineImpl)
-        .WillByDefault(testing::Return(testing::ByMove(computePipelineMock)));
+        .WillByDefault(Return(ByMove(computePipelineMock)));
 
     bool called = false;
     device.CreateComputePipelineAsync(
@@ -358,7 +363,7 @@ TEST_F(CreatePipelineAsyncEventTests, NoexceptCallbackInCreateRenderPipelineAsyn
         return {};
     });
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)
-        .WillByDefault(testing::Return(testing::ByMove(renderPipelineMock)));
+        .WillByDefault(Return(ByMove(renderPipelineMock)));
 
     bool called = false;
     device.CreateRenderPipelineAsync(
@@ -383,7 +388,7 @@ TEST_F(CreatePipelineAsyncEventTests, NoexceptFunctionPtrInCreateComputePipeline
     ON_CALL(*computePipelineMock.Get(), InitializeImpl)
         .WillByDefault([]() -> ResultOrUnknownError<Extent3D> { return Extent3D{}; });
     ON_CALL(*mDeviceMock.get(), CreateUninitializedComputePipelineImpl)
-        .WillByDefault(testing::Return(testing::ByMove(computePipelineMock)));
+        .WillByDefault(Return(ByMove(computePipelineMock)));
 
     static bool called = false;
     called = false;
@@ -413,7 +418,7 @@ TEST_F(CreatePipelineAsyncEventTests, NoexceptFunctionPtrInCreateRenderPipelineA
         return {};
     });
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)
-        .WillByDefault(testing::Return(testing::ByMove(renderPipelineMock)));
+        .WillByDefault(Return(ByMove(renderPipelineMock)));
 
     static bool called = false;
     called = false;
