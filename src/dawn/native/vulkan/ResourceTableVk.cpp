@@ -302,10 +302,9 @@ MaybeError ResourceTable::UpdateResourceBindings(const std::vector<ResourceDiff>
                 if (textureView->GetTexture()->IsDestroyed()) {
                     return;
                 }
+
                 VkImageView handle = ToBackend(textureView)->GetHandle();
-                if (handle == nullptr) {
-                    return;
-                }
+                DAWN_CHECK(handle != VK_NULL_HANDLE);
 
                 VkDescriptorImageInfo imageWrite = {
                     .sampler = placeholderSampler->GetHandle(),
@@ -318,9 +317,7 @@ MaybeError ResourceTable::UpdateResourceBindings(const std::vector<ResourceDiff>
             },
             [&](Ref<SamplerBase> sampler) {
                 VkSampler handle = ToBackend(sampler)->GetHandle();
-                if (handle == nullptr) {
-                    return;
-                }
+                DAWN_CHECK(handle != VK_NULL_HANDLE);
 
                 VkDescriptorImageInfo imageWrite = {
                     .sampler = handle,
