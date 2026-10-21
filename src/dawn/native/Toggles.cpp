@@ -874,6 +874,10 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Killswitch for a fix to the validation where non-blendable formats where allowed for "
       "alphaToCoverageEnabled",
       "https://crbug.com/550350271", ToggleStage::Device}},
+    {Toggle::GLHoistConstantArrayInitializers,
+     {"gl_hoist_constant_array_initializers",
+      "Hoist constant array initializers inside structures to work around a driver crash.",
+      "https://crbug.com/569195060", ToggleStage::Device}},
     {Toggle::WaitIsThreadSafe,
      {"wait_is_thread_safe",
       "WaitFor* functions are thread-safe and can be called without the device-lock if implicit "

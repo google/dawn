@@ -64,6 +64,7 @@
 #include "src/tint/lang/glsl/writer/raise/binary_polyfill.h"
 #include "src/tint/lang/glsl/writer/raise/bitcast_polyfill.h"
 #include "src/tint/lang/glsl/writer/raise/builtin_polyfill.h"
+#include "src/tint/lang/glsl/writer/raise/hoist_constant_array_initializers.h"
 #include "src/tint/lang/glsl/writer/raise/offset_first_index.h"
 #include "src/tint/lang/glsl/writer/raise/shader_io.h"
 #include "src/tint/lang/glsl/writer/raise/texture_builtins_from_uniform.h"
@@ -272,6 +273,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         core::ir::transform::ValueToLetConfig cfg;
         cfg.replace_pointer_lets = true;
         TINT_CHECK_RESULT(core::ir::transform::ValueToLet(module, cfg));
+    }
+
+    // Needs to run alongside ValueToLet, after any transform that could introduce an expression
+    // that may need to be explicitly not inlined.
+    if (options.workarounds.hoist_constant_array_initializers) {
+        TINT_CHECK_RESULT(raise::HoistConstantArrayInitializers(module));
     }
 
     return Success;

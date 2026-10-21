@@ -139,6 +139,23 @@ struct Options {
     /// Copy constructor
     Options(const Options&);
 
+    /// The set of options which control workarounds for driver issues.
+    struct Workarounds {
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // NOTE: When adding a new option here, it should also be added to the FuzzedOptions     //
+        // structure in writer_fuzz.cc (if fuzzing is desired).                                  //
+        ///////////////////////////////////////////////////////////////////////////////////////////
+
+        /// Set to `true` to hoist constant array initializers inside structures.
+        bool hoist_constant_array_initializers = false;
+
+        /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+        TINT_REFLECT(Workarounds, hoist_constant_array_initializers);
+        TINT_REFLECT_HASH_CODE(Workarounds);
+
+        bool operator==(const Workarounds&) const = default;
+    };
+
     ///////////////////////////////////////////////////////////////////////////////////////////
     // NOTE: When adding a new option here, it should also be added to the FuzzedOptions     //
     // structure in writer_fuzz.cc (if fuzzing is desired).                                  //
@@ -215,6 +232,9 @@ struct Options {
     /// Override substitutions
     SubstituteOverridesConfig substitute_overrides_config{};
 
+    /// Any workarounds to enable/disable.
+    Workarounds workarounds{};
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
                  strip_all_names,
@@ -235,7 +255,8 @@ struct Options {
                  sampler_texture_to_name,
                  placeholder_sampler_bind_point,
                  bindings,
-                 substitute_overrides_config);
+                 substitute_overrides_config,
+                 workarounds);
 };
 
 }  // namespace tint::glsl::writer

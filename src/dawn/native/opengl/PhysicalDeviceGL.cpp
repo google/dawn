@@ -528,6 +528,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::SplitBufferTextureCopyForOversizedRow, true);
     }
 
+    // (crbug.com/569195060): Driver crash evaluating structure constructors containing arrays.
+    deviceToggles->Default(Toggle::GLHoistConstantArrayInitializers,
+                           mVendorId == gpu_info::kVendorID_ImgTec);
+
     // Enable the integer range analysis for shader robustness by default if the corresponding
     // platform feature is enabled.
     deviceToggles->Default(

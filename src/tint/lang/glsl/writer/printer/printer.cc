@@ -338,8 +338,10 @@ class Printer : public tint::TextGenerator {
 
         for (auto* inst : *ir_.root_block) {
             tint::Switch(
-                inst,  //
-                [&](core::ir::Var* v) { EmitGlobalVar(v); },
+                inst,                                         //
+                [&](core::ir::Var* v) { EmitGlobalVar(v); },  //
+                [&](core::ir::Let* l) { EmitLet(l); },        //
+                [&](core::ir::Construct*) { /* inlined */ },
 
                 TINT_ICE_ON_NO_MATCH);
         }
@@ -656,6 +658,10 @@ class Printer : public tint::TextGenerator {
         TINT_IR_ASSERT(ir_, !l->Result()->Type()->Is<core::type::Pointer>());
 
         auto out = Line();
+
+        if (current_block_ == ir_.root_block) {
+            out << "const ";
+        }
 
         // TODO(dsinclair): Investigate using `const` here as well, the AST printer doesn't emit
         //                  const with a let, but we should be able to.
