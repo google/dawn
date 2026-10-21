@@ -2051,6 +2051,10 @@ TEST_F(IR_MultiplanarExternalTextureTest, Ycbcr_ViaUserFunctionParameter) {
     var->SetBindingPoint(1, 2);
     mod.root_block->Append(var);
 
+    auto* sampler_var = b.Var("sampler", ty.ptr(handle, ty.sampler()));
+    sampler_var->SetBindingPoint(1, 5);
+    mod.root_block->Append(sampler_var);
+
     auto* foo = b.Function("foo", ty.vec4f());
     {
         auto* texture = b.FunctionParam("texture", ty.external_texture());
@@ -2065,14 +2069,16 @@ TEST_F(IR_MultiplanarExternalTextureTest, Ycbcr_ViaUserFunctionParameter) {
         });
     }
 
-    auto* bar = b.Function("bar", ty.vec4f());
+    auto* bar = b.Function("bar", ty.vec4f(), Function::PipelineStage::kFragment);
+    bar->SetReturnLocation(0);
     {
-        auto* sampler = b.FunctionParam("sampler", ty.sampler());
         auto* coords = b.FunctionParam("coords", ty.vec2f());
-        bar->SetParams({sampler, coords});
+        coords->SetLocation(0);
+        bar->SetParams({coords});
         b.Append(bar->Block(), [&] {
             auto* load = b.Load(var->Result());
-            auto* result = b.Call(ty.vec4f(), foo, load, sampler, coords);
+            auto* load_sampler = b.Load(sampler_var->Result());
+            auto* result = b.Call(ty.vec4f(), foo, load, load_sampler, coords);
             b.Return(bar, result);
             mod.SetName(result, "result");
         });
@@ -2081,18 +2087,20 @@ TEST_F(IR_MultiplanarExternalTextureTest, Ycbcr_ViaUserFunctionParameter) {
     auto* src = R"(
 $B1: {  # root
   %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
+  %sampler:ptr<handle, sampler, read> = var @binding_point(1, 5)
 }
 
-%foo = func(%texture_1:texture_external, %sampler:sampler, %coords:vec2<f32>):vec4<f32> {  # %texture_1: 'texture'
+%foo = func(%texture_1:texture_external, %sampler_1:sampler, %coords:vec2<f32>):vec4<f32> {  # %texture_1: 'texture', %sampler_1: 'sampler'
   $B2: {
-    %result:vec4<f32> = textureSampleBaseClampToEdge %texture_1, %sampler, %coords
+    %result:vec4<f32> = textureSampleBaseClampToEdge %texture_1, %sampler_1, %coords
     ret %result
   }
 }
-%bar = func(%sampler_1:sampler, %coords_1:vec2<f32>):vec4<f32> {  # %sampler_1: 'sampler', %coords_1: 'coords'
+%bar = @fragment func(%coords_1:vec2<f32> [@location(0)]):vec4<f32> [@location(0)] {  # %coords_1: 'coords'
   $B3: {
     %10:texture_external = load %texture
-    %result_1:vec4<f32> = call %foo, %10, %sampler_1, %coords_1  # %result_1: 'result'
+    %11:sampler = load %sampler
+    %result_1:vec4<f32> = call %foo, %10, %11, %coords_1  # %result_1: 'result'
     ret %result_1
   }
 }
@@ -2102,94 +2110,96 @@ $B1: {  # root
   %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
   %texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
   %texture_ycbcr_sampler:ptr<handle, sampler, read> = var @binding_point(1, 3)
+  %sampler:ptr<handle, sampler, read> = var @binding_point(1, 5)
 }
 
-%foo = func(%sampler:sampler, %coords:vec2<f32>):vec4<f32> {
+%foo = func(%sampler_1:sampler, %coords:vec2<f32>):vec4<f32> {  # %sampler_1: 'sampler'
   $B2: {
-    %7:texture_2d<f32> = load %texture
-    %8:sampler = load %texture_ycbcr_sampler
-    %9:tint_ExternalTextureParams = load %texture_params
-    %10:vec4<f32> = call %tint_TextureSampleClampToEdgeYcbcrExternal, %7, %8, %9, %coords
-    ret %10
+    %8:texture_2d<f32> = load %texture
+    %9:sampler = load %texture_ycbcr_sampler
+    %10:tint_ExternalTextureParams = load %texture_params
+    %11:vec4<f32> = call %tint_TextureSampleClampToEdgeYcbcrExternal, %8, %9, %10, %coords
+    ret %11
   }
 }
-%bar = func(%sampler_1:sampler, %coords_1:vec2<f32>):vec4<f32> {  # %sampler_1: 'sampler', %coords_1: 'coords'
+%bar = @fragment func(%coords_1:vec2<f32> [@location(0)]):vec4<f32> [@location(0)] {  # %coords_1: 'coords'
   $B3: {
-    %result:vec4<f32> = call %foo, %sampler_1, %coords_1
+    %15:sampler = load %sampler
+    %result:vec4<f32> = call %foo, %15, %coords_1
     ret %result
   }
 }
 %tint_TextureSampleClampToEdgeYcbcrExternal = func(%texture_1:texture_2d<f32>, %ycbcr_sampler:sampler, %params:tint_ExternalTextureParams, %coords_2:vec2<f32>):vec4<f32> {  # %texture_1: 'texture', %coords_2: 'coords'
   $B4: {
-    %20:mat3x4<f32> = access %params, 2u
-    %21:mat3x2<f32> = access %params, 6u
-    %22:vec2<f32> = access %params, 8u
-    %23:vec2<f32> = access %params, 9u
-    %24:vec3<f32> = construct %coords_2, 1.0f
-    %25:vec2<f32> = mul %21, %24
-    %26:vec2<f32> = clamp %25, %22, %23
-    %27:vec4<f32> = textureSampleLevel %texture_1, %ycbcr_sampler, %26, 0.0f
-    %28:vec3<f32> = swizzle %27, xyz
-    %29:vec4<f32> = construct %28, 1.0f
-    %30:vec3<f32> = mul %29, %20
-    %31:f32 = swizzle %27, w
-    %32:u32 = access %params, 1u
-    %33:bool = eq %32, 0u
-    %34:vec3<f32> = if %33 [t: $B5, f: $B6] {  # if_1
+    %21:mat3x4<f32> = access %params, 2u
+    %22:mat3x2<f32> = access %params, 6u
+    %23:vec2<f32> = access %params, 8u
+    %24:vec2<f32> = access %params, 9u
+    %25:vec3<f32> = construct %coords_2, 1.0f
+    %26:vec2<f32> = mul %22, %25
+    %27:vec2<f32> = clamp %26, %23, %24
+    %28:vec4<f32> = textureSampleLevel %texture_1, %ycbcr_sampler, %27, 0.0f
+    %29:vec3<f32> = swizzle %28, xyz
+    %30:vec4<f32> = construct %29, 1.0f
+    %31:vec3<f32> = mul %30, %21
+    %32:f32 = swizzle %28, w
+    %33:u32 = access %params, 1u
+    %34:bool = eq %33, 0u
+    %35:vec3<f32> = if %34 [t: $B5, f: $B6] {  # if_1
       $B5: {  # true
-        %35:tint_TransferFunctionParams = access %params, 3u
-        %36:tint_TransferFunctionParams = access %params, 4u
-        %37:mat3x3<f32> = access %params, 5u
-        %38:vec4<f32> = access %params, 14u
-        %39:vec3<f32> = call %tint_ApplySrcTransferFunction, %30, %35
-        %41:f32 = swizzle %38, w
-        %42:bool = neq %41, 0.0f
-        %43:vec3<f32> = if %42 [t: $B7, f: $B8] {  # if_2
+        %36:tint_TransferFunctionParams = access %params, 3u
+        %37:tint_TransferFunctionParams = access %params, 4u
+        %38:mat3x3<f32> = access %params, 5u
+        %39:vec4<f32> = access %params, 14u
+        %40:vec3<f32> = call %tint_ApplySrcTransferFunction, %31, %36
+        %42:f32 = swizzle %39, w
+        %43:bool = neq %42, 0.0f
+        %44:vec3<f32> = if %43 [t: $B7, f: $B8] {  # if_2
           $B7: {  # true
-            %44:vec3<f32> = swizzle %38, xyz
-            %45:f32 = dot %44, %39
-            %46:f32 = abs %45
-            %47:f32 = pow %46, %41
-            %48:f32 = sign %45
-            %49:f32 = mul %48, %47
-            %50:vec3<f32> = mul %39, %49
-            exit_if %50  # if_2
+            %45:vec3<f32> = swizzle %39, xyz
+            %46:f32 = dot %45, %40
+            %47:f32 = abs %46
+            %48:f32 = pow %47, %42
+            %49:f32 = sign %46
+            %50:f32 = mul %49, %48
+            %51:vec3<f32> = mul %40, %50
+            exit_if %51  # if_2
           }
           $B8: {  # false
-            exit_if %39  # if_2
+            exit_if %40  # if_2
           }
         }
-        %51:vec3<f32> = mul %37, %43
-        %52:vec3<f32> = call %tint_ApplyGammaTransferFunction, %51, %36
-        exit_if %52  # if_1
+        %52:vec3<f32> = mul %38, %44
+        %53:vec3<f32> = call %tint_ApplyGammaTransferFunction, %52, %37
+        exit_if %53  # if_1
       }
       $B6: {  # false
-        exit_if %30  # if_1
+        exit_if %31  # if_1
       }
     }
-    %54:vec4<f32> = construct %34, %31
-    ret %54
+    %55:vec4<f32> = construct %35, %32
+    ret %55
   }
 }
 %tint_ApplySrcTransferFunction = func(%v:vec3<f32>, %params_1:tint_TransferFunctionParams):vec3<f32> {  # %params_1: 'params'
   $B9: {
     %mode:u32 = access %params_1, 0u
-    %58:bool = eq %mode, 0u
-    if %58 [t: $B10, f: $B11] {  # if_3
+    %59:bool = eq %mode, 0u
+    if %59 [t: $B10, f: $B11] {  # if_3
       $B10: {  # true
-        %59:vec3<f32> = call %tint_ApplyGammaTransferFunction, %v, %params_1
-        ret %59
+        %60:vec3<f32> = call %tint_ApplyGammaTransferFunction, %v, %params_1
+        ret %60
       }
       $B11: {  # false
-        %60:bool = eq %mode, 1u
-        if %60 [t: $B12, f: $B13] {  # if_4
+        %61:bool = eq %mode, 1u
+        if %61 [t: $B12, f: $B13] {  # if_4
           $B12: {  # true
-            %61:vec3<f32> = call %tint_ApplyHLGTransferFunction, %v, %params_1
-            ret %61
+            %62:vec3<f32> = call %tint_ApplyHLGTransferFunction, %v, %params_1
+            ret %62
           }
           $B13: {  # false
-            %63:vec3<f32> = call %tint_ApplyPQTransferFunction, %v, %params_1
-            ret %63
+            %64:vec3<f32> = call %tint_ApplyPQTransferFunction, %v, %params_1
+            ret %64
           }
         }
         unreachable
@@ -2207,21 +2217,21 @@ $B1: {  # root
     %E:f32 = access %params_2, 5u
     %F:f32 = access %params_2, 6u
     %G:f32 = access %params_2, 7u
-    %74:vec3<f32> = construct %G
-    %75:vec3<f32> = construct %D
-    %76:vec3<f32> = abs %v_1
-    %77:vec3<f32> = sign %v_1
-    %78:vec3<bool> = lt %76, %75
-    %79:vec3<f32> = mul %C, %76
-    %80:vec3<f32> = add %79, %F
-    %81:vec3<f32> = mul %77, %80
-    %82:vec3<f32> = mul %A, %76
-    %83:vec3<f32> = add %82, %B
-    %84:vec3<f32> = pow %83, %74
-    %85:vec3<f32> = add %84, %E
-    %86:vec3<f32> = mul %77, %85
-    %87:vec3<f32> = select %86, %81, %78
-    ret %87
+    %75:vec3<f32> = construct %G
+    %76:vec3<f32> = construct %D
+    %77:vec3<f32> = abs %v_1
+    %78:vec3<f32> = sign %v_1
+    %79:vec3<bool> = lt %77, %76
+    %80:vec3<f32> = mul %C, %77
+    %81:vec3<f32> = add %80, %F
+    %82:vec3<f32> = mul %78, %81
+    %83:vec3<f32> = mul %A, %77
+    %84:vec3<f32> = add %83, %B
+    %85:vec3<f32> = pow %84, %75
+    %86:vec3<f32> = add %85, %E
+    %87:vec3<f32> = mul %78, %86
+    %88:vec3<f32> = select %87, %82, %79
+    ret %88
   }
 }
 %tint_ApplyHLGSingleChannel = func(%v_2:f32, %params_3:tint_TransferFunctionParams):f32 {  # %v_2: 'v', %params_3: 'params'
@@ -2232,20 +2242,20 @@ $B1: {  # root
     %cutoff:f32 = access %params_3, 4u
     %lower_scale:f32 = access %params_3, 5u
     %upper_scale:f32 = access %params_3, 6u
-    %97:bool = lte %v_2, %cutoff
-    if %97 [t: $B16, f: $B17] {  # if_5
+    %98:bool = lte %v_2, %cutoff
+    if %98 [t: $B16, f: $B17] {  # if_5
       $B16: {  # true
-        %98:f32 = mul %v_2, %v_2
-        %99:f32 = div %98, %lower_scale
-        ret %99
+        %99:f32 = mul %v_2, %v_2
+        %100:f32 = div %99, %lower_scale
+        ret %100
       }
       $B17: {  # false
-        %100:f32 = sub %v_2, %C_1
-        %101:f32 = div %100, %A_1
-        %102:f32 = exp %101
-        %103:f32 = add %B_1, %102
-        %104:f32 = div %103, %upper_scale
-        ret %104
+        %101:f32 = sub %v_2, %C_1
+        %102:f32 = div %101, %A_1
+        %103:f32 = exp %102
+        %104:f32 = add %B_1, %103
+        %105:f32 = div %104, %upper_scale
+        ret %105
       }
     }
     unreachable
@@ -2253,14 +2263,14 @@ $B1: {  # root
 }
 %tint_ApplyHLGTransferFunction = func(%v_3:vec3<f32>, %params_4:tint_TransferFunctionParams):vec3<f32> {  # %v_3: 'v', %params_4: 'params'
   $B18: {
-    %107:f32 = swizzle %v_3, x
-    %108:f32 = call %tint_ApplyHLGSingleChannel, %107, %params_4
-    %109:f32 = swizzle %v_3, y
-    %110:f32 = call %tint_ApplyHLGSingleChannel, %109, %params_4
-    %111:f32 = swizzle %v_3, z
-    %112:f32 = call %tint_ApplyHLGSingleChannel, %111, %params_4
-    %113:vec3<f32> = construct %108, %110, %112
-    ret %113
+    %108:f32 = swizzle %v_3, x
+    %109:f32 = call %tint_ApplyHLGSingleChannel, %108, %params_4
+    %110:f32 = swizzle %v_3, y
+    %111:f32 = call %tint_ApplyHLGSingleChannel, %110, %params_4
+    %112:f32 = swizzle %v_3, z
+    %113:f32 = call %tint_ApplyHLGSingleChannel, %112, %params_4
+    %114:vec3<f32> = construct %109, %111, %113
+    ret %114
   }
 }
 %tint_ApplyPQTransferFunction = func(%v_4:vec3<f32>, %params_5:tint_TransferFunctionParams):vec3<f32> {  # %v_4: 'v', %params_5: 'params'
@@ -2270,22 +2280,22 @@ $B1: {  # root
     %c1:f32 = access %params_5, 3u
     %c2:f32 = access %params_5, 4u
     %c3:f32 = access %params_5, 5u
-    %121:vec3<f32> = construct %c1
-    %122:vec3<f32> = construct %c2
-    %123:vec3<f32> = construct %c3
-    %124:vec3<f32> = construct %m1
-    %125:vec3<f32> = construct %m2
-    %126:vec3<f32> = clamp %v_4, vec3<f32>(0.0f), vec3<f32>(1.0f)
-    %127:vec3<f32> = div vec3<f32>(1.0f), %125
-    %128:vec3<f32> = pow %126, %127
-    %129:vec3<f32> = sub %128, %121
-    %130:vec3<f32> = max %129, vec3<f32>(0.0f)
-    %131:vec3<f32> = mul %123, %128
-    %132:vec3<f32> = sub %122, %131
-    %133:vec3<f32> = div %130, %132
-    %134:vec3<f32> = div vec3<f32>(1.0f), %124
-    %135:vec3<f32> = pow %133, %134
-    ret %135
+    %122:vec3<f32> = construct %c1
+    %123:vec3<f32> = construct %c2
+    %124:vec3<f32> = construct %c3
+    %125:vec3<f32> = construct %m1
+    %126:vec3<f32> = construct %m2
+    %127:vec3<f32> = clamp %v_4, vec3<f32>(0.0f), vec3<f32>(1.0f)
+    %128:vec3<f32> = div vec3<f32>(1.0f), %126
+    %129:vec3<f32> = pow %127, %128
+    %130:vec3<f32> = sub %129, %122
+    %131:vec3<f32> = max %130, vec3<f32>(0.0f)
+    %132:vec3<f32> = mul %124, %129
+    %133:vec3<f32> = sub %123, %132
+    %134:vec3<f32> = div %131, %133
+    %135:vec3<f32> = div vec3<f32>(1.0f), %125
+    %136:vec3<f32> = pow %134, %135
+    ret %136
   }
 }
 )";

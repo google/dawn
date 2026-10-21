@@ -65,12 +65,16 @@ struct RootModuleScopeVar {
 struct RootPtrParameter {
     /// The parameter pointer type
     const core::type::Pointer* type = nullptr;
+    /// The index of the first parameter that provides this root pointer.
+    size_t param_index = 0;
 
     /// @return a hash value for this object
-    tint::HashCode HashCode() const { return Hash(type); }
+    tint::HashCode HashCode() const { return Hash(type, param_index); }
 
     /// Inequality operator
-    bool operator!=(const RootPtrParameter& other) const { return type != other.type; }
+    bool operator!=(const RootPtrParameter& other) const {
+        return type != other.type || param_index != other.param_index;
+    }
 };
 
 /// An access root. Either a RootModuleScopeVar or RootPtrParameter.
@@ -240,16 +244,6 @@ struct AccessChain {
 /// This is a map of pointer parameter index to access shape.
 using VariantSignature = Hashmap<size_t, AccessShape, 4>;
 
-/// FnInfo describes a function that has pointer parameters which need replacing.
-/// This function will be replaced by zero, one or many variants. Each variant will have a unique
-/// access shape for the function's the pointer arguments.
-struct FnInfo {
-    /// A map of variant signature to the variant's unique IR function.
-    Hashmap<VariantSignature, Function*, 4> variants_by_sig;
-    /// The order to emit the variants in the final module.
-    Vector<Function*, 4> ordered_variants;
-};
-
 /// FnVariant describes a unique variant of a function that has pointer parameters that need
 /// replacing.
 struct FnVariant {
@@ -257,8 +251,16 @@ struct FnVariant {
     VariantSignature signature;
     /// The IR function for this variant.
     Function* fn = nullptr;
-    /// The function information of the original function that this variant is based off.
-    FnInfo* info = nullptr;
+};
+
+/// FnInfo describes a function that has pointer parameters which need replacing.
+/// This function will be replaced by zero, one or many variants. Each variant will have a unique
+/// access shape for the function's pointer arguments.
+struct FnInfo {
+    /// A map of variant signature to the variant's unique IR function.
+    Hashmap<VariantSignature, Function*, 4> variants_by_sig;
+    /// The order to emit the variants in the final module.
+    Vector<FnVariant, 4> ordered_variants;
 };
 
 /// PIMPL state for the transform.
@@ -278,12 +280,8 @@ struct State {
     /// The symbol table.
     SymbolTable& sym{ir.symbols};
 
-    /// The functions that have pointer parameters that need transforming.
-    /// These functions will be replaced with zero, one or many forked variants.
-    Hashmap<ir::Function*, FnInfo*, 8> need_forking{};
-
-    /// Queue of variants that need building
-    Vector<FnVariant, 8> variants_to_build{};
+    /// Map of original function to its forked variants info.
+    Hashmap<ir::Function*, FnInfo*, 8> fn_infos{};
 
     /// Allocator for FnInfo
     BlockAllocator<FnInfo> fn_info_allocator{};
@@ -293,63 +291,85 @@ struct State {
         // Make a copy of all the functions in the IR module.
         auto input_fns = ir.functions;
 
-        // Populate #need_forking
-        GatherFnsThatNeedForking();
-
-        // Transform the functions that make calls to #need_forking, which aren't in #need_forking
-        // themselves.
-        BuildRootFns();
-
-        // Build variants of the functions in #need_forking.
-        BuildFnVariants();
+        // Visit functions in reverse topological order (callers before callees).
+        auto ordered_fns = ir.DependencyOrderedFunctions();
+        for (auto* fn : Reverse(ordered_fns)) {
+            if (auto info = fn_infos.Get(fn)) {
+                for (auto& variant : (*info)->ordered_variants) {
+                    BuildFnVariantParams(variant);
+                    TransformCalls(variant.fn);
+                }
+            }
+            if (fn->IsEntryPoint() || HasCallers(fn)) {
+                TransformCalls(fn);
+            } else {
+                fn->Destroy();
+            }
+        }
 
         // Rebuild ir.functions.
         EmitFunctions(input_fns);
     }
 
-    /// Populates #need_forking with all the functions that have pointer parameters which need
-    /// transforming. These functions will be replaced with variants based on the access shapes.
-    void GatherFnsThatNeedForking() {
-        for (auto& fn : ir.functions) {
-            if (!fn->Alive()) {
-                continue;
-            }
-            for (auto* param : fn->Params()) {
-                if (!NeedsTransforming(param)) {
-                    continue;
-                }
-                need_forking.Add(fn, fn_info_allocator.Create());
-                break;
-            }
-        }
+    /// @return true if @p fn is called by any alive UserCall instruction.
+    bool HasCallers(Function* fn) const {
+        return fn->UsagesUnsorted().Any(
+            [](const Usage& u) { return u.instruction->Alive() && u.instruction->Is<UserCall>(); });
     }
 
-    /// Adjusts the calls of all the functions that make calls to #need_forking, which aren't in
-    /// #need_forking themselves. This populates #variants_to_build with the called functions.
-    void BuildRootFns() {
-        for (auto& fn : ir.functions) {
-            if (!need_forking.Contains(fn)) {
-                TransformCalls(fn);
+    /// @return the root pointer value for @p value by walking through Access and Let instructions.
+    Value* RootPtrFor(Value* value) const {
+        while (value) {
+            if (auto* res = value->As<InstructionResult>()) {
+                if (auto* access = res->Instruction()->As<Access>()) {
+                    value = access->Object();
+                    continue;
+                }
+                if (auto* let = res->Instruction()->As<Let>()) {
+                    value = let->Value();
+                    continue;
+                }
             }
+            return value;
         }
+        return nullptr;
     }
 
     /// Applies the necessary transformations to all the pointer arguments of calls made to
-    /// functions in #need_forking. Also populates #variants_to_build with the variants of the
-    /// callee functions.
+    /// functions that need transforming.
     /// @param fn the function to transform
     void TransformCalls(Function* fn) {
         // For all the function calls in the function...
         Traverse(fn->Block(), [&](UserCall* call) {
             auto* target = call->Target();
-            auto target_info = need_forking.Get(target);
-            if (!target_info) {
-                // Not a call to a function in #need_forking. Leave alone.
+
+            // Count occurrences of each root pointer among 'function' address space arguments,
+            // and check whether any parameter of the callee needs transforming for this call.
+            Hashmap<Value*, size_t, 4> fn_root_counts;
+            bool needs_fork = false;
+            for (size_t i = 0, n = call->Args().size(); i < n; i++) {
+                auto* param = target->Params()[i];
+                if (NeedsTransforming(param)) {
+                    needs_fork = true;
+                }
+                if (IsPtrFunction(param)) {
+                    auto* root = RootPtrFor(call->Args()[i]);
+                    if (++fn_root_counts.GetOrAddZero(root) > 1) {
+                        needs_fork = true;
+                    }
+                }
+            }
+
+            if (!needs_fork) {
+                // None of the parameters of target need transforming for this call.
                 return;
             }
 
-            // Found a call to a function in #need_forking.
-            // This call needs transforming to call the generated variant.
+            auto* target_info =
+                fn_infos.GetOrAdd(target, [&] { return fn_info_allocator.Create(); });
+
+            // Map of root pointer to the first parameter index that used it.
+            Hashmap<Value*, size_t, 4> root_ptr_to_param_index;
 
             // New arguments to the call. This includes transformed and untransformed arguments.
             Vector<Value*, 8> new_args;
@@ -365,28 +385,41 @@ struct State {
                 auto* arg = call->Args()[i];
                 auto* param = target->Params()[i];
 
+                bool is_aliased_fn_ptr = fn_root_counts.GetOr(RootPtrFor(arg), 0) > 1;
+
                 // Argument does not need transformation, push the existing argument to new_args.
-                if (!NeedsTransforming(param)) {
+                if (!NeedsTransforming(param) && !is_aliased_fn_ptr) {
                     new_args.Push(arg);
                     continue;
                 }
 
                 // This argument needs replacing with:
-                // * Nothing: root is a module-scope var and the access chain has no indices.
+                // * Nothing: root is a module-scope var (or an already-passed aliased root pointer)
+                //   and the access chain has no indices.
                 // * A single pointer argument to the root variable: The root is a pointer
-                //   parameter or a function-scoped variable, and the access chain has no
-                //   indices.
-                // * A single indices array argument: The root is a module-scope var and the
-                //   access chain has indices.
+                //   parameter or a function-scoped variable (and is the first parameter using this
+                //   root), and the access chain has no indices.
+                // * A single indices array argument: The root is a module-scope var (or an
+                //   already-passed aliased root pointer) and the access chain has indices.
                 // * Both a pointer argument and indices array argument: The root is a pointer
-                //   parameter or a function-scoped variable and the access chain has indices.
+                //   parameter or a function-scoped variable (and is the first parameter using this
+                //   root) and the access chain has indices.
                 b.InsertBefore(call, [&] {
                     // Get the access chain for the pointer argument.
                     auto chain = AccessChainFor(arg);
                     // If the root is not a module-scope variable, then pass this root pointer
-                    // as an argument.
-                    if (std::holds_alternative<RootPtrParameter>(chain.shape.root)) {
-                        new_args.Push(chain.root_ptr);
+                    // as an argument only on its first occurrence in the call.
+                    if (auto* root_ptr_param = std::get_if<RootPtrParameter>(&chain.shape.root)) {
+                        bool is_new_root = false;
+                        size_t root_param_idx =
+                            root_ptr_to_param_index.GetOrAdd(chain.root_ptr, [&] {
+                                is_new_root = true;
+                                return i;
+                            });
+                        root_ptr_param->param_index = root_param_idx;
+                        if (is_new_root) {
+                            new_args.Push(chain.root_ptr);
+                        }
                     }
                     // The bufferView/bufferArrayView must be the first op.
                     if (!chain.shape.ops.IsEmpty() &&
@@ -428,42 +461,16 @@ struct State {
             }
 
             // Look to see if this callee signature already has a variant created.
-            auto* new_target = (*target_info)->variants_by_sig.GetOrAdd(signature, [&] {
-                // New signature.
-
-                // Clone the original function to seed the new variant.
+            auto* new_target = target_info->variants_by_sig.GetOrAdd(signature, [&] {
+                // New signature. Clone the original function to seed the new variant.
                 auto* variant_fn = CloneContext{ir}.Clone(target);
-                (*target_info)->ordered_variants.Push(variant_fn);
-
-                // Copy the original name for the variant
-                if (auto fn_name = ir.NameOf(fn)) {
-                    ir.SetName(fn, fn_name);
-                }
-
-                // Create an entry for the variant, and add it to the queue of variants that need to
-                // be built. We don't do this here to avoid unbounded stack usage.
-                variants_to_build.Push(FnVariant{/* signature */ signature,
-                                                 /* fn */ variant_fn,
-                                                 /* info */ *target_info});
+                target_info->ordered_variants.Push(FnVariant{signature, variant_fn});
                 return variant_fn;
             });
 
             // Re-point the target of the call to the variant.
             call->SetTarget(new_target);
         });
-    }
-
-    /// Builds all the variants in #variants_to_build by:
-    /// * Replacing the pointer parameters with zero, one or two parameters (root pointer, indices).
-    /// * Transforming any calls made by that variant to other functions found in #need_forking.
-    /// Note: The transformation of calls can add more variants to #variants_to_build.
-    /// BuildFnVariants() will continue to build variants until #variants_to_build is empty.
-    void BuildFnVariants() {
-        while (!variants_to_build.IsEmpty()) {
-            auto variant = variants_to_build.Pop();
-            BuildFnVariantParams(variant);
-            TransformCalls(variant.fn);
-        }
     }
 
     /// Walks the instructions that built #value to obtain the root variable and the pointer
@@ -596,8 +603,15 @@ struct State {
     /// pointer parameters from the access chain using the root pointer and access ops.
     /// @param variant the variant function to transform
     void BuildFnVariantParams(const FnVariant& variant) {
+        if (variant.signature.IsEmpty()) {
+            return;
+        }
+
         // Insert new instructions at the top of the function block...
         b.InsertBefore(variant.fn->Block()->Front(), [&] {
+            // Map of first parameter index to its created root pointer parameter.
+            Hashmap<size_t, FunctionParam*, 4> root_params_by_index;
+
             // The replacement parameters for the variant function
             Vector<ir::FunctionParam*, 8> new_params;
             const auto& old_params = variant.fn->Params();
@@ -605,25 +619,30 @@ struct State {
             for (size_t param_idx = 0; param_idx < old_params.Length(); param_idx++) {
                 auto* old_param = old_params[param_idx];
 
-                // Parameter does not need transforming.
-                if (!NeedsTransforming(old_param)) {
+                // Grab the access shape of the pointer parameter from the signature.
+                auto shape = variant.signature.Get(param_idx);
+                if (!shape) {
+                    // Parameter does not need transforming.
                     new_params.Push(old_param);
                     continue;
                 }
 
-                // Pointer parameter that needs transforming
-                // Grab the access shape of the pointer parameter from the signature
-                auto shape = variant.signature.Get(param_idx);
                 // The pointer value for the root of the chain.
                 Value* root_ptr = nullptr;
 
                 // Build the root pointer parameter, if required.
                 FunctionParam* root_ptr_param = nullptr;
                 if (auto* ptr_param = std::get_if<RootPtrParameter>(&shape->root)) {
-                    // Root pointer is passed as a parameter
-                    root_ptr_param = b.FunctionParam(ptr_param->type);
-                    new_params.Push(root_ptr_param);
-                    root_ptr = root_ptr_param;
+                    // Root pointer is passed as a parameter on its first occurrence, or reused if
+                    // it aliases an earlier parameter.
+                    if (ptr_param->param_index == param_idx) {
+                        root_ptr_param = b.FunctionParam(ptr_param->type);
+                        new_params.Push(root_ptr_param);
+                        root_params_by_index.Add(param_idx, root_ptr_param);
+                        root_ptr = root_ptr_param;
+                    } else {
+                        root_ptr = *root_params_by_index.Get(ptr_param->param_index);
+                    }
                 } else if (auto* global = std::get_if<RootModuleScopeVar>(&shape->root)) {
                     // Root pointer is a module-scope var
                     root_ptr = global->var->Result();
@@ -743,19 +762,18 @@ struct State {
         });
     }
 
-    /// Repopulates #ir.functions with the functions in #need_forking replaced with their generated
-    /// variants.
+    /// Repopulates #ir.functions with kept original functions and generated variants.
     /// @param input_fns the content of #ir.functions before transformation began.
     void EmitFunctions(VectorRef<Function*> input_fns) {
         ir.functions.Clear();
         for (auto& fn : input_fns) {
-            if (auto info = need_forking.Get(fn)) {
-                fn->Destroy();
-                for (auto variant : (*info)->ordered_variants) {
-                    ir.functions.Push(variant);
-                }
-            } else {
+            if (fn->Alive()) {
                 ir.functions.Push(fn);
+            }
+            if (auto info = fn_infos.Get(fn)) {
+                for (auto& variant : (*info)->ordered_variants) {
+                    ir.functions.Push(variant.fn);
+                }
             }
         }
     }
@@ -771,8 +789,17 @@ struct State {
                param->Is<core::type::ExternalTexture>();
     }
 
-    /// @return true if @p param is a parameter that requires transforming, based on the
-    /// transform options.
+    /// @return true if @p param is a pointer in the 'function' address space.
+    /// @param param the function parameter
+    bool IsPtrFunction(FunctionParam* param) const {
+        if (auto* ptr = param->Type()->As<core::type::Pointer>()) {
+            return ptr->AddressSpace() == core::AddressSpace::kFunction;
+        }
+        return false;
+    }
+
+    /// @return true if @p param is a parameter that unconditionally requires transforming, based on
+    /// the transform options.
     /// @param param the function parameter
     bool NeedsTransforming(FunctionParam* param) const {
         auto* param_type = param->Type();
