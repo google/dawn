@@ -193,7 +193,7 @@ class _Parser:
         self._expect(tok.Kind.Colon, "matcher declaration")
         if self._peek_is(1, tok.Kind.Dot):  # enum list
             while True:
-                m.options.enums.append(self._member_name())
+                m.options.enumerants.append(self._member_name())
                 if self._match(tok.Kind.Or) is None:
                     break
         else:  # type list

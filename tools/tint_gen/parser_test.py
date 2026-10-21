@@ -146,7 +146,8 @@ class ParserTest(unittest.TestCase):
                     ast.MatcherDecl(
                         name="M",
                         options=ast.MatcherOptions(
-                            enums=[ast.MemberName(owner="A", member="B")]),
+                            enumerants=[ast.MemberName(owner="A", member="B")
+                                        ]),
                     )
                 ]),
             ),
@@ -155,7 +156,7 @@ class ParserTest(unittest.TestCase):
                 ast.AST(matchers=[
                     ast.MatcherDecl(
                         name="M",
-                        options=ast.MatcherOptions(enums=[
+                        options=ast.MatcherOptions(enumerants=[
                             ast.MemberName(owner="A", member="B"),
                             ast.MemberName(owner="B", member="C"),
                         ]),

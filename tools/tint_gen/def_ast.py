@@ -168,14 +168,14 @@ class MatcherOptions:
     """A list of TemplatedNames or MemberNames in a matcher declaration."""
 
     types: list[TemplatedName] = field(default_factory=list)
-    enums: list[MemberName] = field(default_factory=list)
+    enumerants: list[MemberName] = field(default_factory=list)
 
     def __str__(self) -> str:
         parts: list[str] = []
         if self.types:
             parts.append(" | ".join(str(t) for t in self.types))
-        if self.enums:
-            parts.append(" | ".join(str(e) for e in self.enums))
+        if self.enumerants:
+            parts.append(" | ".join(str(e) for e in self.enumerants))
         return "".join(parts)
 
 
