@@ -851,6 +851,1521 @@
             },
             "vertex state": {
                 "stable_version": 2026100200
+            },
+            "adapter type": {
+                "stable_version": 2026101200
+            },
+            "adapter type::CPU": {
+                "stable_version": 2026101200
+            },
+            "adapter type::discrete GPU": {
+                "stable_version": 2026101200
+            },
+            "adapter type::integrated GPU": {
+                "stable_version": 2026101200
+            },
+            "adapter type::unknown": {
+                "stable_version": 2026101200
+            },
+            "address mode": {
+                "stable_version": 2026101200
+            },
+            "address mode::clamp to edge": {
+                "stable_version": 2026101200
+            },
+            "address mode::mirror repeat": {
+                "stable_version": 2026101200
+            },
+            "address mode::repeat": {
+                "stable_version": 2026101200
+            },
+            "address mode::undefined": {
+                "stable_version": 2026101200
+            },
+            "backend type": {
+                "stable_version": 2026101200
+            },
+            "backend type::D3D11": {
+                "stable_version": 2026101200
+            },
+            "backend type::D3D12": {
+                "stable_version": 2026101200
+            },
+            "backend type::metal": {
+                "stable_version": 2026101200
+            },
+            "backend type::null": {
+                "stable_version": 2026101200
+            },
+            "backend type::openGL": {
+                "stable_version": 2026101200
+            },
+            "backend type::openGLES": {
+                "stable_version": 2026101200
+            },
+            "backend type::undefined": {
+                "stable_version": 2026101200
+            },
+            "backend type::vulkan": {
+                "stable_version": 2026101200
+            },
+            "backend type::WebGPU": {
+                "stable_version": 2026101200
+            },
+            "blend factor": {
+                "stable_version": 2026101200
+            },
+            "blend factor::constant": {
+                "stable_version": 2026101200
+            },
+            "blend factor::dst": {
+                "stable_version": 2026101200
+            },
+            "blend factor::dst alpha": {
+                "stable_version": 2026101200
+            },
+            "blend factor::one": {
+                "stable_version": 2026101200
+            },
+            "blend factor::one minus constant": {
+                "stable_version": 2026101200
+            },
+            "blend factor::one minus dst": {
+                "stable_version": 2026101200
+            },
+            "blend factor::one minus dst alpha": {
+                "stable_version": 2026101200
+            },
+            "blend factor::one minus src": {
+                "stable_version": 2026101200
+            },
+            "blend factor::one minus src alpha": {
+                "stable_version": 2026101200
+            },
+            "blend factor::one minus src1": {
+                "stable_version": 2026101200
+            },
+            "blend factor::one minus src1 alpha": {
+                "stable_version": 2026101200
+            },
+            "blend factor::src": {
+                "stable_version": 2026101200
+            },
+            "blend factor::src alpha": {
+                "stable_version": 2026101200
+            },
+            "blend factor::src alpha saturated": {
+                "stable_version": 2026101200
+            },
+            "blend factor::src1": {
+                "stable_version": 2026101200
+            },
+            "blend factor::src1 alpha": {
+                "stable_version": 2026101200
+            },
+            "blend factor::undefined": {
+                "stable_version": 2026101200
+            },
+            "blend factor::zero": {
+                "stable_version": 2026101200
+            },
+            "blend operation": {
+                "stable_version": 2026101200
+            },
+            "blend operation::add": {
+                "stable_version": 2026101200
+            },
+            "blend operation::max": {
+                "stable_version": 2026101200
+            },
+            "blend operation::min": {
+                "stable_version": 2026101200
+            },
+            "blend operation::reverse subtract": {
+                "stable_version": 2026101200
+            },
+            "blend operation::subtract": {
+                "stable_version": 2026101200
+            },
+            "blend operation::undefined": {
+                "stable_version": 2026101200
+            },
+            "buffer binding type": {
+                "stable_version": 2026101200
+            },
+            "buffer binding type::binding not used": {
+                "stable_version": 2026101200
+            },
+            "buffer binding type::read only storage": {
+                "stable_version": 2026101200
+            },
+            "buffer binding type::storage": {
+                "stable_version": 2026101200
+            },
+            "buffer binding type::undefined": {
+                "stable_version": 2026101200
+            },
+            "buffer binding type::uniform": {
+                "stable_version": 2026101200
+            },
+            "buffer map state": {
+                "stable_version": 2026101200
+            },
+            "buffer map state::mapped": {
+                "stable_version": 2026101200
+            },
+            "buffer map state::pending": {
+                "stable_version": 2026101200
+            },
+            "buffer map state::unmapped": {
+                "stable_version": 2026101200
+            },
+            "buffer usage": {
+                "stable_version": 2026101200
+            },
+            "buffer usage::copy dst": {
+                "stable_version": 2026101200
+            },
+            "buffer usage::copy src": {
+                "stable_version": 2026101200
+            },
+            "buffer usage::index": {
+                "stable_version": 2026101200
+            },
+            "buffer usage::indirect": {
+                "stable_version": 2026101200
+            },
+            "buffer usage::map read": {
+                "stable_version": 2026101200
+            },
+            "buffer usage::map write": {
+                "stable_version": 2026101200
+            },
+            "buffer usage::none": {
+                "stable_version": 2026101200
+            },
+            "buffer usage::query resolve": {
+                "stable_version": 2026101200
+            },
+            "buffer usage::storage": {
+                "stable_version": 2026101200
+            },
+            "buffer usage::uniform": {
+                "stable_version": 2026101200
+            },
+            "buffer usage::vertex": {
+                "stable_version": 2026101200
+            },
+            "callback mode": {
+                "stable_version": 2026101200
+            },
+            "callback mode::allow process events": {
+                "stable_version": 2026101200
+            },
+            "callback mode::allow spontaneous": {
+                "stable_version": 2026101200
+            },
+            "callback mode::wait any only": {
+                "stable_version": 2026101200
+            },
+            "color write mask": {
+                "stable_version": 2026101200
+            },
+            "color write mask::all": {
+                "stable_version": 2026101200
+            },
+            "color write mask::alpha": {
+                "stable_version": 2026101200
+            },
+            "color write mask::blue": {
+                "stable_version": 2026101200
+            },
+            "color write mask::green": {
+                "stable_version": 2026101200
+            },
+            "color write mask::none": {
+                "stable_version": 2026101200
+            },
+            "color write mask::red": {
+                "stable_version": 2026101200
+            },
+            "compare function": {
+                "stable_version": 2026101200
+            },
+            "compare function::always": {
+                "stable_version": 2026101200
+            },
+            "compare function::equal": {
+                "stable_version": 2026101200
+            },
+            "compare function::greater": {
+                "stable_version": 2026101200
+            },
+            "compare function::greater equal": {
+                "stable_version": 2026101200
+            },
+            "compare function::less": {
+                "stable_version": 2026101200
+            },
+            "compare function::less equal": {
+                "stable_version": 2026101200
+            },
+            "compare function::never": {
+                "stable_version": 2026101200
+            },
+            "compare function::not equal": {
+                "stable_version": 2026101200
+            },
+            "compare function::undefined": {
+                "stable_version": 2026101200
+            },
+            "compilation info request status": {
+                "stable_version": 2026101200
+            },
+            "compilation info request status::callback cancelled": {
+                "stable_version": 2026101200
+            },
+            "compilation info request status::success": {
+                "stable_version": 2026101200
+            },
+            "compilation message type": {
+                "stable_version": 2026101200
+            },
+            "compilation message type::error": {
+                "stable_version": 2026101200
+            },
+            "compilation message type::info": {
+                "stable_version": 2026101200
+            },
+            "compilation message type::warning": {
+                "stable_version": 2026101200
+            },
+            "component swizzle": {
+                "stable_version": 2026101200
+            },
+            "component swizzle::a": {
+                "stable_version": 2026101200
+            },
+            "component swizzle::b": {
+                "stable_version": 2026101200
+            },
+            "component swizzle::g": {
+                "stable_version": 2026101200
+            },
+            "component swizzle::one": {
+                "stable_version": 2026101200
+            },
+            "component swizzle::r": {
+                "stable_version": 2026101200
+            },
+            "component swizzle::undefined": {
+                "stable_version": 2026101200
+            },
+            "component swizzle::zero": {
+                "stable_version": 2026101200
+            },
+            "composite alpha mode": {
+                "stable_version": 2026101200
+            },
+            "composite alpha mode::auto": {
+                "stable_version": 2026101200
+            },
+            "composite alpha mode::inherit": {
+                "stable_version": 2026101200
+            },
+            "composite alpha mode::opaque": {
+                "stable_version": 2026101200
+            },
+            "composite alpha mode::premultiplied": {
+                "stable_version": 2026101200
+            },
+            "composite alpha mode::unpremultiplied": {
+                "stable_version": 2026101200
+            },
+            "create pipeline async status": {
+                "stable_version": 2026101200
+            },
+            "create pipeline async status::callback cancelled": {
+                "stable_version": 2026101200
+            },
+            "create pipeline async status::internal error": {
+                "stable_version": 2026101200
+            },
+            "create pipeline async status::success": {
+                "stable_version": 2026101200
+            },
+            "create pipeline async status::validation error": {
+                "stable_version": 2026101200
+            },
+            "cull mode": {
+                "stable_version": 2026101200
+            },
+            "cull mode::back": {
+                "stable_version": 2026101200
+            },
+            "cull mode::front": {
+                "stable_version": 2026101200
+            },
+            "cull mode::none": {
+                "stable_version": 2026101200
+            },
+            "cull mode::undefined": {
+                "stable_version": 2026101200
+            },
+            "device lost reason": {
+                "stable_version": 2026101200
+            },
+            "device lost reason::callback cancelled": {
+                "stable_version": 2026101200
+            },
+            "device lost reason::destroyed": {
+                "stable_version": 2026101200
+            },
+            "device lost reason::failed creation": {
+                "stable_version": 2026101200
+            },
+            "device lost reason::unknown": {
+                "stable_version": 2026101200
+            },
+            "error filter": {
+                "stable_version": 2026101200
+            },
+            "error filter::internal": {
+                "stable_version": 2026101200
+            },
+            "error filter::out of memory": {
+                "stable_version": 2026101200
+            },
+            "error filter::validation": {
+                "stable_version": 2026101200
+            },
+            "error type": {
+                "stable_version": 2026101200
+            },
+            "error type::internal": {
+                "stable_version": 2026101200
+            },
+            "error type::no error": {
+                "stable_version": 2026101200
+            },
+            "error type::out of memory": {
+                "stable_version": 2026101200
+            },
+            "error type::unknown": {
+                "stable_version": 2026101200
+            },
+            "error type::validation": {
+                "stable_version": 2026101200
+            },
+            "feature level": {
+                "stable_version": 2026101200
+            },
+            "feature level::compatibility": {
+                "stable_version": 2026101200
+            },
+            "feature level::core": {
+                "stable_version": 2026101200
+            },
+            "feature level::undefined": {
+                "stable_version": 2026101200
+            },
+            "feature name": {
+                "stable_version": 2026101200
+            },
+            "feature name::atomic vec2u min max": {
+                "stable_version": 2026101200
+            },
+            "feature name::BGRA8 unorm storage": {
+                "stable_version": 2026101200
+            },
+            "feature name::clip distances": {
+                "stable_version": 2026101200
+            },
+            "feature name::core features and limits": {
+                "stable_version": 2026101200
+            },
+            "feature name::depth clip control": {
+                "stable_version": 2026101200
+            },
+            "feature name::depth32 float stencil8": {
+                "stable_version": 2026101200
+            },
+            "feature name::dual source blending": {
+                "stable_version": 2026101200
+            },
+            "feature name::float32 blendable": {
+                "stable_version": 2026101200
+            },
+            "feature name::float32 filterable": {
+                "stable_version": 2026101200
+            },
+            "feature name::indirect first instance": {
+                "stable_version": 2026101200
+            },
+            "feature name::primitive index": {
+                "stable_version": 2026101200
+            },
+            "feature name::RG11B10 ufloat renderable": {
+                "stable_version": 2026101200
+            },
+            "feature name::shader f16": {
+                "stable_version": 2026101200
+            },
+            "feature name::subgroup size control": {
+                "stable_version": 2026101200
+            },
+            "feature name::subgroups": {
+                "stable_version": 2026101200
+            },
+            "feature name::texture component swizzle": {
+                "stable_version": 2026101200
+            },
+            "feature name::texture compression ASTC": {
+                "stable_version": 2026101200
+            },
+            "feature name::texture compression ASTC sliced 3D": {
+                "stable_version": 2026101200
+            },
+            "feature name::texture compression BC": {
+                "stable_version": 2026101200
+            },
+            "feature name::texture compression BC sliced 3D": {
+                "stable_version": 2026101200
+            },
+            "feature name::texture compression ETC2": {
+                "stable_version": 2026101200
+            },
+            "feature name::texture compression unaligned": {
+                "stable_version": 2026101200
+            },
+            "feature name::texture formats tier1": {
+                "stable_version": 2026101200
+            },
+            "feature name::texture formats tier2": {
+                "stable_version": 2026101200
+            },
+            "feature name::timestamp query": {
+                "stable_version": 2026101200
+            },
+            "filter mode": {
+                "stable_version": 2026101200
+            },
+            "filter mode::linear": {
+                "stable_version": 2026101200
+            },
+            "filter mode::nearest": {
+                "stable_version": 2026101200
+            },
+            "filter mode::undefined": {
+                "stable_version": 2026101200
+            },
+            "front face": {
+                "stable_version": 2026101200
+            },
+            "front face::CCW": {
+                "stable_version": 2026101200
+            },
+            "front face::CW": {
+                "stable_version": 2026101200
+            },
+            "front face::undefined": {
+                "stable_version": 2026101200
+            },
+            "index format": {
+                "stable_version": 2026101200
+            },
+            "index format::uint16": {
+                "stable_version": 2026101200
+            },
+            "index format::uint32": {
+                "stable_version": 2026101200
+            },
+            "index format::undefined": {
+                "stable_version": 2026101200
+            },
+            "instance feature name": {
+                "stable_version": 2026101200
+            },
+            "instance feature name::multiple devices per adapter": {
+                "stable_version": 2026101200
+            },
+            "instance feature name::shader source SPIRV": {
+                "stable_version": 2026101200
+            },
+            "instance feature name::timed wait any": {
+                "stable_version": 2026101200
+            },
+            "load op": {
+                "stable_version": 2026101200
+            },
+            "load op::clear": {
+                "stable_version": 2026101200
+            },
+            "load op::load": {
+                "stable_version": 2026101200
+            },
+            "load op::undefined": {
+                "stable_version": 2026101200
+            },
+            "map async status": {
+                "stable_version": 2026101200
+            },
+            "map async status::aborted": {
+                "stable_version": 2026101200
+            },
+            "map async status::callback cancelled": {
+                "stable_version": 2026101200
+            },
+            "map async status::error": {
+                "stable_version": 2026101200
+            },
+            "map async status::success": {
+                "stable_version": 2026101200
+            },
+            "map mode": {
+                "stable_version": 2026101200
+            },
+            "map mode::none": {
+                "stable_version": 2026101200
+            },
+            "map mode::read": {
+                "stable_version": 2026101200
+            },
+            "map mode::write": {
+                "stable_version": 2026101200
+            },
+            "mipmap filter mode": {
+                "stable_version": 2026101200
+            },
+            "mipmap filter mode::linear": {
+                "stable_version": 2026101200
+            },
+            "mipmap filter mode::nearest": {
+                "stable_version": 2026101200
+            },
+            "mipmap filter mode::undefined": {
+                "stable_version": 2026101200
+            },
+            "optional bool": {
+                "stable_version": 2026101200
+            },
+            "optional bool::false": {
+                "stable_version": 2026101200
+            },
+            "optional bool::true": {
+                "stable_version": 2026101200
+            },
+            "optional bool::undefined": {
+                "stable_version": 2026101200
+            },
+            "pop error scope status": {
+                "stable_version": 2026101200
+            },
+            "pop error scope status::callback cancelled": {
+                "stable_version": 2026101200
+            },
+            "pop error scope status::error": {
+                "stable_version": 2026101200
+            },
+            "pop error scope status::success": {
+                "stable_version": 2026101200
+            },
+            "power preference": {
+                "stable_version": 2026101200
+            },
+            "power preference::high performance": {
+                "stable_version": 2026101200
+            },
+            "power preference::low power": {
+                "stable_version": 2026101200
+            },
+            "power preference::undefined": {
+                "stable_version": 2026101200
+            },
+            "predefined color space": {
+                "stable_version": 2026101200
+            },
+            "predefined color space::display p3": {
+                "stable_version": 2026101200
+            },
+            "predefined color space::sRGB": {
+                "stable_version": 2026101200
+            },
+            "present mode": {
+                "stable_version": 2026101200
+            },
+            "present mode::fifo": {
+                "stable_version": 2026101200
+            },
+            "present mode::fifo relaxed": {
+                "stable_version": 2026101200
+            },
+            "present mode::immediate": {
+                "stable_version": 2026101200
+            },
+            "present mode::mailbox": {
+                "stable_version": 2026101200
+            },
+            "present mode::undefined": {
+                "stable_version": 2026101200
+            },
+            "primitive topology": {
+                "stable_version": 2026101200
+            },
+            "primitive topology::line list": {
+                "stable_version": 2026101200
+            },
+            "primitive topology::line strip": {
+                "stable_version": 2026101200
+            },
+            "primitive topology::point list": {
+                "stable_version": 2026101200
+            },
+            "primitive topology::triangle list": {
+                "stable_version": 2026101200
+            },
+            "primitive topology::triangle strip": {
+                "stable_version": 2026101200
+            },
+            "primitive topology::undefined": {
+                "stable_version": 2026101200
+            },
+            "query type": {
+                "stable_version": 2026101200
+            },
+            "query type::occlusion": {
+                "stable_version": 2026101200
+            },
+            "query type::timestamp": {
+                "stable_version": 2026101200
+            },
+            "queue work done status": {
+                "stable_version": 2026101200
+            },
+            "queue work done status::callback cancelled": {
+                "stable_version": 2026101200
+            },
+            "queue work done status::error": {
+                "stable_version": 2026101200
+            },
+            "queue work done status::success": {
+                "stable_version": 2026101200
+            },
+            "request adapter status": {
+                "stable_version": 2026101200
+            },
+            "request adapter status::callback cancelled": {
+                "stable_version": 2026101200
+            },
+            "request adapter status::error": {
+                "stable_version": 2026101200
+            },
+            "request adapter status::success": {
+                "stable_version": 2026101200
+            },
+            "request adapter status::unavailable": {
+                "stable_version": 2026101200
+            },
+            "request device status": {
+                "stable_version": 2026101200
+            },
+            "request device status::callback cancelled": {
+                "stable_version": 2026101200
+            },
+            "request device status::error": {
+                "stable_version": 2026101200
+            },
+            "request device status::success": {
+                "stable_version": 2026101200
+            },
+            "s type": {
+                "stable_version": 2026101200
+            },
+            "s type::compatibility mode limits": {
+                "stable_version": 2026101200
+            },
+            "s type::external texture binding entry": {
+                "stable_version": 2026101200
+            },
+            "s type::external texture binding layout": {
+                "stable_version": 2026101200
+            },
+            "s type::render pass max draw count": {
+                "stable_version": 2026101200
+            },
+            "s type::request adapter WebXR options": {
+                "stable_version": 2026101200
+            },
+            "s type::shader source SPIRV": {
+                "stable_version": 2026101200
+            },
+            "s type::shader source WGSL": {
+                "stable_version": 2026101200
+            },
+            "s type::surface source android native window": {
+                "stable_version": 2026101200
+            },
+            "s type::surface source metal layer": {
+                "stable_version": 2026101200
+            },
+            "s type::surface source wayland surface": {
+                "stable_version": 2026101200
+            },
+            "s type::surface source windows HWND": {
+                "stable_version": 2026101200
+            },
+            "s type::surface source XCB window": {
+                "stable_version": 2026101200
+            },
+            "s type::surface source xlib window": {
+                "stable_version": 2026101200
+            },
+            "s type::texture binding view dimension": {
+                "stable_version": 2026101200
+            },
+            "s type::texture component swizzle descriptor": {
+                "stable_version": 2026101200
+            },
+            "sampler binding type": {
+                "stable_version": 2026101200
+            },
+            "sampler binding type::binding not used": {
+                "stable_version": 2026101200
+            },
+            "sampler binding type::comparison": {
+                "stable_version": 2026101200
+            },
+            "sampler binding type::filtering": {
+                "stable_version": 2026101200
+            },
+            "sampler binding type::non filtering": {
+                "stable_version": 2026101200
+            },
+            "sampler binding type::undefined": {
+                "stable_version": 2026101200
+            },
+            "shader stage": {
+                "stable_version": 2026101200
+            },
+            "shader stage::compute": {
+                "stable_version": 2026101200
+            },
+            "shader stage::fragment": {
+                "stable_version": 2026101200
+            },
+            "shader stage::none": {
+                "stable_version": 2026101200
+            },
+            "shader stage::vertex": {
+                "stable_version": 2026101200
+            },
+            "status": {
+                "stable_version": 2026101200
+            },
+            "status::error": {
+                "stable_version": 2026101200
+            },
+            "status::success": {
+                "stable_version": 2026101200
+            },
+            "stencil operation": {
+                "stable_version": 2026101200
+            },
+            "stencil operation::decrement clamp": {
+                "stable_version": 2026101200
+            },
+            "stencil operation::decrement wrap": {
+                "stable_version": 2026101200
+            },
+            "stencil operation::increment clamp": {
+                "stable_version": 2026101200
+            },
+            "stencil operation::increment wrap": {
+                "stable_version": 2026101200
+            },
+            "stencil operation::invert": {
+                "stable_version": 2026101200
+            },
+            "stencil operation::keep": {
+                "stable_version": 2026101200
+            },
+            "stencil operation::replace": {
+                "stable_version": 2026101200
+            },
+            "stencil operation::undefined": {
+                "stable_version": 2026101200
+            },
+            "stencil operation::zero": {
+                "stable_version": 2026101200
+            },
+            "storage texture access": {
+                "stable_version": 2026101200
+            },
+            "storage texture access::binding not used": {
+                "stable_version": 2026101200
+            },
+            "storage texture access::read only": {
+                "stable_version": 2026101200
+            },
+            "storage texture access::read write": {
+                "stable_version": 2026101200
+            },
+            "storage texture access::undefined": {
+                "stable_version": 2026101200
+            },
+            "storage texture access::write only": {
+                "stable_version": 2026101200
+            },
+            "store op": {
+                "stable_version": 2026101200
+            },
+            "store op::discard": {
+                "stable_version": 2026101200
+            },
+            "store op::store": {
+                "stable_version": 2026101200
+            },
+            "store op::undefined": {
+                "stable_version": 2026101200
+            },
+            "surface get current texture status": {
+                "stable_version": 2026101200
+            },
+            "surface get current texture status::error": {
+                "stable_version": 2026101200
+            },
+            "surface get current texture status::lost": {
+                "stable_version": 2026101200
+            },
+            "surface get current texture status::outdated": {
+                "stable_version": 2026101200
+            },
+            "surface get current texture status::success optimal": {
+                "stable_version": 2026101200
+            },
+            "surface get current texture status::success suboptimal": {
+                "stable_version": 2026101200
+            },
+            "surface get current texture status::timeout": {
+                "stable_version": 2026101200
+            },
+            "texture aspect": {
+                "stable_version": 2026101200
+            },
+            "texture aspect::all": {
+                "stable_version": 2026101200
+            },
+            "texture aspect::depth only": {
+                "stable_version": 2026101200
+            },
+            "texture aspect::stencil only": {
+                "stable_version": 2026101200
+            },
+            "texture aspect::undefined": {
+                "stable_version": 2026101200
+            },
+            "texture dimension": {
+                "stable_version": 2026101200
+            },
+            "texture dimension::1D": {
+                "stable_version": 2026101200
+            },
+            "texture dimension::2D": {
+                "stable_version": 2026101200
+            },
+            "texture dimension::3D": {
+                "stable_version": 2026101200
+            },
+            "texture dimension::undefined": {
+                "stable_version": 2026101200
+            },
+            "texture format": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 10x10 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 10x10 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 10x5 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 10x5 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 10x6 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 10x6 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 10x8 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 10x8 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 12x10 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 12x10 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 12x12 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 12x12 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 4x4 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 4x4 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 5x4 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 5x4 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 5x5 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 5x5 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 6x5 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 6x5 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 6x6 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 6x6 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 8x5 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 8x5 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 8x6 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 8x6 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 8x8 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ASTC 8x8 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::BC1 RGBA unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::BC1 RGBA unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::BC2 RGBA unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::BC2 RGBA unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::BC3 RGBA unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::BC3 RGBA unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::BC4 R snorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::BC4 R unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::BC5 RG snorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::BC5 RG unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::BC6H RGB float": {
+                "stable_version": 2026101200
+            },
+            "texture format::BC6H RGB ufloat": {
+                "stable_version": 2026101200
+            },
+            "texture format::BC7 RGBA unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::BC7 RGBA unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::BGRA8 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::BGRA8 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::depth16 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::depth24 plus": {
+                "stable_version": 2026101200
+            },
+            "texture format::depth24 plus stencil8": {
+                "stable_version": 2026101200
+            },
+            "texture format::depth32 float": {
+                "stable_version": 2026101200
+            },
+            "texture format::depth32 float stencil8": {
+                "stable_version": 2026101200
+            },
+            "texture format::EAC R11 snorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::EAC R11 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::EAC RG11 snorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::EAC RG11 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ETC2 RGB8 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ETC2 RGB8 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::ETC2 RGB8A1 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ETC2 RGB8A1 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::ETC2 RGBA8 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::ETC2 RGBA8 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::R16 float": {
+                "stable_version": 2026101200
+            },
+            "texture format::R16 sint": {
+                "stable_version": 2026101200
+            },
+            "texture format::R16 snorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::R16 uint": {
+                "stable_version": 2026101200
+            },
+            "texture format::R16 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::R32 float": {
+                "stable_version": 2026101200
+            },
+            "texture format::R32 sint": {
+                "stable_version": 2026101200
+            },
+            "texture format::R32 uint": {
+                "stable_version": 2026101200
+            },
+            "texture format::R8 sint": {
+                "stable_version": 2026101200
+            },
+            "texture format::R8 snorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::R8 uint": {
+                "stable_version": 2026101200
+            },
+            "texture format::R8 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::RG11 B10 ufloat": {
+                "stable_version": 2026101200
+            },
+            "texture format::RG16 float": {
+                "stable_version": 2026101200
+            },
+            "texture format::RG16 sint": {
+                "stable_version": 2026101200
+            },
+            "texture format::RG16 snorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::RG16 uint": {
+                "stable_version": 2026101200
+            },
+            "texture format::RG16 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::RG32 float": {
+                "stable_version": 2026101200
+            },
+            "texture format::RG32 sint": {
+                "stable_version": 2026101200
+            },
+            "texture format::RG32 uint": {
+                "stable_version": 2026101200
+            },
+            "texture format::RG8 sint": {
+                "stable_version": 2026101200
+            },
+            "texture format::RG8 snorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::RG8 uint": {
+                "stable_version": 2026101200
+            },
+            "texture format::RG8 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::RGB10 A2 uint": {
+                "stable_version": 2026101200
+            },
+            "texture format::RGB10 A2 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::RGB9 E5 ufloat": {
+                "stable_version": 2026101200
+            },
+            "texture format::RGBA16 float": {
+                "stable_version": 2026101200
+            },
+            "texture format::RGBA16 sint": {
+                "stable_version": 2026101200
+            },
+            "texture format::RGBA16 snorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::RGBA16 uint": {
+                "stable_version": 2026101200
+            },
+            "texture format::RGBA16 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::RGBA32 float": {
+                "stable_version": 2026101200
+            },
+            "texture format::RGBA32 sint": {
+                "stable_version": 2026101200
+            },
+            "texture format::RGBA32 uint": {
+                "stable_version": 2026101200
+            },
+            "texture format::RGBA8 sint": {
+                "stable_version": 2026101200
+            },
+            "texture format::RGBA8 snorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::RGBA8 uint": {
+                "stable_version": 2026101200
+            },
+            "texture format::RGBA8 unorm": {
+                "stable_version": 2026101200
+            },
+            "texture format::RGBA8 unorm srgb": {
+                "stable_version": 2026101200
+            },
+            "texture format::stencil8": {
+                "stable_version": 2026101200
+            },
+            "texture format::undefined": {
+                "stable_version": 2026101200
+            },
+            "texture sample type": {
+                "stable_version": 2026101200
+            },
+            "texture sample type::binding not used": {
+                "stable_version": 2026101200
+            },
+            "texture sample type::depth": {
+                "stable_version": 2026101200
+            },
+            "texture sample type::float": {
+                "stable_version": 2026101200
+            },
+            "texture sample type::sint": {
+                "stable_version": 2026101200
+            },
+            "texture sample type::uint": {
+                "stable_version": 2026101200
+            },
+            "texture sample type::undefined": {
+                "stable_version": 2026101200
+            },
+            "texture sample type::unfilterable float": {
+                "stable_version": 2026101200
+            },
+            "texture usage": {
+                "stable_version": 2026101200
+            },
+            "texture usage::copy dst": {
+                "stable_version": 2026101200
+            },
+            "texture usage::copy src": {
+                "stable_version": 2026101200
+            },
+            "texture usage::none": {
+                "stable_version": 2026101200
+            },
+            "texture usage::render attachment": {
+                "stable_version": 2026101200
+            },
+            "texture usage::storage binding": {
+                "stable_version": 2026101200
+            },
+            "texture usage::texture binding": {
+                "stable_version": 2026101200
+            },
+            "texture usage::transient attachment": {
+                "stable_version": 2026101200
+            },
+            "texture view dimension": {
+                "stable_version": 2026101200
+            },
+            "texture view dimension::1D": {
+                "stable_version": 2026101200
+            },
+            "texture view dimension::2D": {
+                "stable_version": 2026101200
+            },
+            "texture view dimension::2D array": {
+                "stable_version": 2026101200
+            },
+            "texture view dimension::3D": {
+                "stable_version": 2026101200
+            },
+            "texture view dimension::cube": {
+                "stable_version": 2026101200
+            },
+            "texture view dimension::cube array": {
+                "stable_version": 2026101200
+            },
+            "texture view dimension::undefined": {
+                "stable_version": 2026101200
+            },
+            "tone mapping mode": {
+                "stable_version": 2026101200
+            },
+            "tone mapping mode::extended": {
+                "stable_version": 2026101200
+            },
+            "tone mapping mode::standard": {
+                "stable_version": 2026101200
+            },
+            "vertex format": {
+                "stable_version": 2026101200
+            },
+            "vertex format::float16": {
+                "stable_version": 2026101200
+            },
+            "vertex format::float16x2": {
+                "stable_version": 2026101200
+            },
+            "vertex format::float16x4": {
+                "stable_version": 2026101200
+            },
+            "vertex format::float32": {
+                "stable_version": 2026101200
+            },
+            "vertex format::float32x2": {
+                "stable_version": 2026101200
+            },
+            "vertex format::float32x3": {
+                "stable_version": 2026101200
+            },
+            "vertex format::float32x4": {
+                "stable_version": 2026101200
+            },
+            "vertex format::sint16": {
+                "stable_version": 2026101200
+            },
+            "vertex format::sint16x2": {
+                "stable_version": 2026101200
+            },
+            "vertex format::sint16x4": {
+                "stable_version": 2026101200
+            },
+            "vertex format::sint32": {
+                "stable_version": 2026101200
+            },
+            "vertex format::sint32x2": {
+                "stable_version": 2026101200
+            },
+            "vertex format::sint32x3": {
+                "stable_version": 2026101200
+            },
+            "vertex format::sint32x4": {
+                "stable_version": 2026101200
+            },
+            "vertex format::sint8": {
+                "stable_version": 2026101200
+            },
+            "vertex format::sint8x2": {
+                "stable_version": 2026101200
+            },
+            "vertex format::sint8x4": {
+                "stable_version": 2026101200
+            },
+            "vertex format::snorm 10_10_10_2": {
+                "stable_version": 2026101200
+            },
+            "vertex format::snorm16": {
+                "stable_version": 2026101200
+            },
+            "vertex format::snorm16x2": {
+                "stable_version": 2026101200
+            },
+            "vertex format::snorm16x4": {
+                "stable_version": 2026101200
+            },
+            "vertex format::snorm8": {
+                "stable_version": 2026101200
+            },
+            "vertex format::snorm8x2": {
+                "stable_version": 2026101200
+            },
+            "vertex format::snorm8x4": {
+                "stable_version": 2026101200
+            },
+            "vertex format::uint16": {
+                "stable_version": 2026101200
+            },
+            "vertex format::uint16x2": {
+                "stable_version": 2026101200
+            },
+            "vertex format::uint16x4": {
+                "stable_version": 2026101200
+            },
+            "vertex format::uint32": {
+                "stable_version": 2026101200
+            },
+            "vertex format::uint32x2": {
+                "stable_version": 2026101200
+            },
+            "vertex format::uint32x3": {
+                "stable_version": 2026101200
+            },
+            "vertex format::uint32x4": {
+                "stable_version": 2026101200
+            },
+            "vertex format::uint8": {
+                "stable_version": 2026101200
+            },
+            "vertex format::uint8x2": {
+                "stable_version": 2026101200
+            },
+            "vertex format::uint8x4": {
+                "stable_version": 2026101200
+            },
+            "vertex format::unorm 10_10_10_2": {
+                "stable_version": 2026101200
+            },
+            "vertex format::unorm16": {
+                "stable_version": 2026101200
+            },
+            "vertex format::unorm16x2": {
+                "stable_version": 2026101200
+            },
+            "vertex format::unorm16x4": {
+                "stable_version": 2026101200
+            },
+            "vertex format::unorm8": {
+                "stable_version": 2026101200
+            },
+            "vertex format::unorm8x2": {
+                "stable_version": 2026101200
+            },
+            "vertex format::unorm8x4": {
+                "stable_version": 2026101200
+            },
+            "vertex format::unorm8x4 BGRA": {
+                "stable_version": 2026101200
+            },
+            "vertex step mode": {
+                "stable_version": 2026101200
+            },
+            "vertex step mode::instance": {
+                "stable_version": 2026101200
+            },
+            "vertex step mode::undefined": {
+                "stable_version": 2026101200
+            },
+            "vertex step mode::vertex": {
+                "stable_version": 2026101200
+            },
+            "wait status": {
+                "stable_version": 2026101200
+            },
+            "wait status::error": {
+                "stable_version": 2026101200
+            },
+            "wait status::success": {
+                "stable_version": 2026101200
+            },
+            "wait status::timed out": {
+                "stable_version": 2026101200
+            },
+            "WGSL language feature name": {
+                "stable_version": 2026101200
+            },
+            "WGSL language feature name::buffer view": {
+                "stable_version": 2026101200
+            },
+            "WGSL language feature name::fragment depth": {
+                "stable_version": 2026101200
+            },
+            "WGSL language feature name::immediate address space": {
+                "stable_version": 2026101200
+            },
+            "WGSL language feature name::linear indexing": {
+                "stable_version": 2026101200
+            },
+            "WGSL language feature name::packed 4x8 integer dot product": {
+                "stable_version": 2026101200
+            },
+            "WGSL language feature name::pointer composite access": {
+                "stable_version": 2026101200
+            },
+            "WGSL language feature name::readonly and readwrite storage textures": {
+                "stable_version": 2026101200
+            },
+            "WGSL language feature name::subgroup id": {
+                "stable_version": 2026101200
+            },
+            "WGSL language feature name::subgroup uniformity": {
+                "stable_version": 2026101200
+            },
+            "WGSL language feature name::swizzle assignment": {
+                "stable_version": 2026101200
+            },
+            "WGSL language feature name::texture and sampler let": {
+                "stable_version": 2026101200
+            },
+            "WGSL language feature name::texture formats tier1": {
+                "stable_version": 2026101200
+            },
+            "WGSL language feature name::uniform buffer standard layout": {
+                "stable_version": 2026101200
+            },
+            "WGSL language feature name::unrestricted pointer parameters": {
+                "stable_version": 2026101200
             }
         }
     }

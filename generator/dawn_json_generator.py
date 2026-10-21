@@ -27,7 +27,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import json, os, sys
-from collections import namedtuple, defaultdict
+from collections import defaultdict
 from copy import deepcopy
 
 from generator_lib import Generator, run_generator, FileRender, GeneratorOutput
@@ -142,7 +142,16 @@ class Type:
         return {}
 
 
-EnumValue = namedtuple('EnumValue', ['name', 'value', 'valid', 'json_data'])
+class EnumValue:
+
+    def __init__(self, name, value, valid, json_data):
+        self.name = name
+        self.value = value
+        self.valid = valid
+        self.json_data = json_data
+
+    def get_child_map(self):
+        return {}
 
 
 class EnumType(Type):
@@ -211,8 +220,19 @@ class EnumType(Type):
             all_values.add(value.value)
         self.is_wire_transparent = True
 
+    def get_child_map(self):
+        return {value.name.get(): value for value in self.values}
 
-BitmaskValue = namedtuple('BitmaskValue', ['name', 'value', 'json_data'])
+
+class BitmaskValue:
+
+    def __init__(self, name, value, json_data):
+        self.name = name
+        self.value = value
+        self.json_data = json_data
+
+    def get_child_map(self):
+        return {}
 
 
 class BitmaskType(Type):
@@ -227,6 +247,9 @@ class BitmaskType(Type):
         for value in self.values:
             self.full_mask = self.full_mask | value.value
         self.is_wire_transparent = True
+
+    def get_child_map(self):
+        return {value.name.get(): value for value in self.values}
 
 
 class CallbackFunctionType(Type):
