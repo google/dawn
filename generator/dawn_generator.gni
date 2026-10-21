@@ -85,6 +85,7 @@ template("dawn_json_generator") {
     # templates) must be listed individually in the target's inputs in BUILD.gn.
     inputs = [
       "${dawn_root}/src/dawn/dawn.json",
+      "${dawn_root}/generator/dawn_json_parsing.py",
       "${dawn_root}/generator/webgpu_docs_utility.py",
     ]
     if (defined(invoker.inputs)) {
