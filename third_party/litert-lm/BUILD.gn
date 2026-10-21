@@ -78,6 +78,8 @@ action("litert_lm_advanced_main") {
   ]
   data = [
     "data/model.litertlm",
+    "models/gemma4_2b/apple.jpg",
+    "models/gemma4_2b/model/gemma4_2b.litertlm",
     "//scripts/run_litert_lm_benchmark.py",
     "//scripts/merge_scripts/merge_litert_lm_benchmark_results.py",
     "//scripts/merge_scripts/perf_results_common.py",

@@ -45,6 +45,7 @@
 /third_party/libc++abi/src
 /third_party/libprotobuf-mutator/src
 /third_party/litert-lm/data
+/third_party/litert-lm/models
 /third_party/litert-lm/src
 /third_party/llvm-build
 /third_party/llvm-dev

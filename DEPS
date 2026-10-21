@@ -835,6 +835,17 @@ deps = {
     'dep_type': 'cipd',
     'condition': 'checkout_litert_lm',
   },
+  'third_party/litert-lm/models/gemma4_2b': {
+    'packages': [
+      {
+        # TODO(crbug.com/527944617): Replace experimental CIPD dependency.
+        'package': 'experimental/ohjerry_at_google.com/gemma4_2b',
+        'version': '8BbbFJuxlNAt7We_SL3apsoXv9KF3tOoQXGp0DNFQE8C',
+      }
+    ],
+    'dep_type': 'cipd',
+    'condition': 'checkout_litert_lm',
+  },
 
   # V8 and its dependencies for standalone builds.
   'third_party/v8/src': {
