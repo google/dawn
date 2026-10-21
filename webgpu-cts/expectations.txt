@@ -1002,9 +1002,12 @@ crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:api,operation,texture_view,te
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="rgba16sint";aspect="all";samples=1 [ Failure ]
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="bc7-rgba-unorm";dim="cube";filt="nearest";modeU="r";modeV="c";modeW="r";offset=false [ Failure ]
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_3d_coords:* [ Failure ]
-crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_3d_coords:format="bc2-rgba-unorm-srgb";dim="3d";filt="linear";modeU="r";modeV="c";modeW="c";offset=false [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_3d_coords:* [ Failure ]
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:arrayed_2d_coords:format="depth24plus-stencil8";filt="nearest";modeU="r";modeV="m";offset=true [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:* [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords,lodClamp:* [ Failure ]
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:* [ Failure ]
+crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:* [ Failure ]
 
 crbug.com/563458562 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleBaseClampToEdge:*textureType="texture_external"* [ Failure ]
 
