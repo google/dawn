@@ -25,30 +25,22 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <memory>
-#include <utility>
+#include <array>
+#include <optional>
 
 #include "dawn/platform/DawnPlatform.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "src/dawn/common/Compiler.h"
 #include "src/dawn/native/DeviceGuard.h"
 
 namespace dawn::native {
-
-class DeviceMutexTest : public ::testing::Test {
-  protected:
-    // TODO(533405609) Thread safety analysis flags this whole test as
-    // problematic. The issue tracks revisiting the need for a recursive mutex in
-    // the first place.
-    void Lock(DeviceMutex& mutex) DAWN_NO_THREAD_SAFETY_ANALYSIS { mutex.Lock(); }
-    void Unlock(DeviceMutex& mutex) DAWN_NO_THREAD_SAFETY_ANALYSIS { mutex.Unlock(); }
-};
-
 namespace {
 
 using ::testing::_;
 using ::testing::NiceMock;
+using ::testing::StrEq;
+
+using AutoLock = DeviceMutex::AutoLockBase<DeviceMutex*>;
 
 class MockPlatform : public dawn::platform::Platform {
   public:
@@ -68,7 +60,7 @@ class MockPlatform : public dawn::platform::Platform {
 
 // Test that DeviceMutex records average and max lock acquisition time after 100 non-recursive
 // locks.
-TEST_F(DeviceMutexTest, UMARecording) {
+TEST(DeviceMutexTest, UMARecording) {
     NiceMock<MockPlatform> mockPlatform;
     // Increment time by 5 microseconds (0.000005 seconds) per call to MonotonicallyIncreasingTime.
     // Lock() calls it twice (before and after lock), so elapsed time per lock will be 5us.
@@ -79,23 +71,22 @@ TEST_F(DeviceMutexTest, UMARecording) {
     // We expect both the Average and Max histograms to be called exactly once after 100 lock
     // acquisitions.
     EXPECT_CALL(mockPlatform,
-                HistogramCustomCountsHPC(::testing::StrEq("DeviceLockAcquireTimeAvgUs"), 5, 1,
-                                         1'000'000, 50))
+                HistogramCustomCountsHPC(StrEq("DeviceLockAcquireTimeAvgUs"), 5, 1, 1'000'000, 50))
         .Times(1);
 
     EXPECT_CALL(mockPlatform,
-                HistogramCustomCountsHPC(::testing::StrEq("DeviceLockAcquireTimeMaxUs"), 5, 1,
-                                         1'000'000, 50))
+                HistogramCustomCountsHPC(StrEq("DeviceLockAcquireTimeMaxUs"), 5, 1, 1'000'000, 50))
         .Times(1);
 
+    std::optional<AutoLock> guard;
     for (int i = 0; i < 100; ++i) {
-        Lock(mutex);
-        Unlock(mutex);
+        guard.emplace(&mutex);
+        guard = std::nullopt;
     }
 }
 
 // Test that recursive locks are not measured or counted.
-TEST_F(DeviceMutexTest, RecursiveLocksIgnored) {
+TEST(DeviceMutexTest, RecursiveLocksIgnored) {
     NiceMock<MockPlatform> mockPlatform;
     mockPlatform.mIncrement = 0.000005;
 
@@ -103,19 +94,19 @@ TEST_F(DeviceMutexTest, RecursiveLocksIgnored) {
 
     // Even if we perform 100 total locks, since they are recursive, they shouldn't trigger UMA
     // emission.
-    EXPECT_CALL(mockPlatform, HistogramCustomCountsHPC(
-                                  ::testing::StrEq("DeviceLockAcquireTimeAvgUs"), _, _, _, _))
+    EXPECT_CALL(mockPlatform,
+                HistogramCustomCountsHPC(StrEq("DeviceLockAcquireTimeAvgUs"), _, _, _, _))
         .Times(0);
-    EXPECT_CALL(mockPlatform, HistogramCustomCountsHPC(
-                                  ::testing::StrEq("DeviceLockAcquireTimeMaxUs"), _, _, _, _))
+    EXPECT_CALL(mockPlatform,
+                HistogramCustomCountsHPC(StrEq("DeviceLockAcquireTimeMaxUs"), _, _, _, _))
         .Times(0);
 
-    Lock(mutex);  // Outermost lock - increment starts.
-    for (int i = 0; i < 99; ++i) {
-        Lock(mutex);  // Recursive locks.
+    std::array<std::optional<AutoLock>, 100> guards;
+    for (auto& guard : guards) {
+        guard.emplace(&mutex);
     }
-    for (int i = 0; i < 100; ++i) {
-        Unlock(mutex);
+    for (auto& guard : guards) {
+        guard = std::nullopt;
     }
 }
 
