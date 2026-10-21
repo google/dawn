@@ -144,6 +144,7 @@ DAWN_INSTANTIATE_TEST(DrawIndirectTest,
 
 // These tests exercise general DrawIndirect behavior, but were added specifically to cover
 // D3D12's batching of consecutive indirect draws into a single ExecuteIndirect call.
+// They verify rendering correctness regardless of whether the draws are batched.
 class DrawIndirectBatchingTest : public DrawIndirectTest {
   protected:
     void TestTwoDraws(const wgpu::Buffer& firstBuffer,
@@ -166,8 +167,7 @@ class DrawIndirectBatchingTest : public DrawIndirectTest {
     }
 };
 
-// Consecutive DrawIndirect calls using adjacent records may be submitted as one D3D12
-// ExecuteIndirect call. Test that both draws execute.
+// Test drawing from adjacent indirect records.
 TEST_P(DrawIndirectBatchingTest, ConsecutiveDraws) {
     wgpu::Buffer indirectBuffer = utils::CreateBufferFromData<uint32_t>(
         device, wgpu::BufferUsage::Indirect, {3, 1, 0, 0, 3, 1, 3, 0});
@@ -175,7 +175,7 @@ TEST_P(DrawIndirectBatchingTest, ConsecutiveDraws) {
     TestTwoDraws(indirectBuffer, 0, indirectBuffer, uint64_t{4} * sizeof(uint32_t));
 }
 
-// Non-adjacent indirect records must remain separate draws with their original arguments.
+// Test drawing from non-adjacent indirect records in the same buffer.
 TEST_P(DrawIndirectBatchingTest, NonConsecutiveOffsets) {
     wgpu::Buffer indirectBuffer = utils::CreateBufferFromData<uint32_t>(
         device, wgpu::BufferUsage::Indirect, {3, 1, 0, 0, 0, 0, 0, 0, 3, 1, 3, 0});
@@ -183,7 +183,7 @@ TEST_P(DrawIndirectBatchingTest, NonConsecutiveOffsets) {
     TestTwoDraws(indirectBuffer, 0, indirectBuffer, uint64_t{8} * sizeof(uint32_t));
 }
 
-// Indirect draws backed by different buffers must retain the arguments from each buffer.
+// Test drawing from indirect records in different buffers.
 TEST_P(DrawIndirectBatchingTest, DifferentBuffers) {
     // TODO(42242119): fail on Qualcomm Adreno X1.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm() &&

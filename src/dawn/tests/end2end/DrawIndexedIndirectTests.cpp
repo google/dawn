@@ -707,7 +707,144 @@ TEST_P(DrawIndexedIndirectTest, ValidateReusedBundleWithChangingParams) {
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 3, 1);
 }
 
+// These tests exercise general DrawIndexedIndirect behavior, but were added specifically to cover
+// D3D12's batching of consecutive indirect draws into a single ExecuteIndirect call.
+// They verify rendering correctness regardless of whether the draws are batched.
+class DrawIndexedIndirectBatchingTest : public DrawIndexedIndirectTest {
+  protected:
+    void TestTwoDraws(const wgpu::Buffer& firstBuffer,
+                      uint64_t firstOffset,
+                      const wgpu::Buffer& secondBuffer,
+                      uint64_t secondOffset) {
+        wgpu::Buffer indexBuffer = CreateIndexBuffer({0, 1, 2, 0, 3, 1});
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.SetPipeline(pipeline);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+        pass.DrawIndexedIndirect(firstBuffer, firstOffset);
+        pass.DrawIndexedIndirect(secondBuffer, secondOffset);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 0, 255), renderPass.color, 1, 3);
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 0, 255), renderPass.color, 3, 1);
+    }
+};
+
+// Test drawing from adjacent indirect records.
+TEST_P(DrawIndexedIndirectBatchingTest, ConsecutiveDraws) {
+    wgpu::Buffer indirectBuffer = CreateIndirectBuffer({3, 1, 0, 0, 0, 3, 1, 3, 0, 0});
+
+    TestTwoDraws(indirectBuffer, 0, indirectBuffer, uint64_t{5} * sizeof(uint32_t));
+}
+
+// A pipeline change must flush pending indirect draws before applying the new pipeline.
+TEST_P(DrawIndexedIndirectBatchingTest, PipelineChangePreservesDrawState) {
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+        @vertex
+        fn main(@location(0) position : vec4f) -> @builtin(position) vec4f {
+            return position;
+        })");
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(1.0, 0.0, 0.0, 1.0);
+        })");
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleStrip;
+    descriptor.primitive.stripIndexFormat = wgpu::IndexFormat::Uint32;
+    descriptor.vertex.bufferCount = 1;
+    descriptor.cBuffers[0].arrayStride = uint64_t{4} * sizeof(float);
+    descriptor.cBuffers[0].attributeCount = 1;
+    descriptor.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
+    descriptor.cTargets[0].format = renderPass.colorFormat;
+    wgpu::RenderPipeline redPipeline = device.CreateRenderPipeline(&descriptor);
+
+    wgpu::Buffer indexBuffer = CreateIndexBuffer({0, 1, 2, 0, 3, 1});
+    wgpu::Buffer indirectBuffer = CreateIndirectBuffer({3, 1, 0, 0, 0, 3, 1, 3, 0, 0});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.SetVertexBuffer(0, vertexBuffer);
+    pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+    pass.DrawIndexedIndirect(indirectBuffer, 0);
+    pass.SetPipeline(redPipeline);
+    pass.DrawIndexedIndirect(indirectBuffer, uint64_t{5} * sizeof(uint32_t));
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 0, 255), renderPass.color, 1, 3);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(255, 0, 0, 255), renderPass.color, 3, 1);
+}
+
+// Test a DrawIndirect followed by a DrawIndexedIndirect whose record starts one indexed record size
+// (20 bytes) into the same buffer.
+TEST_P(DrawIndexedIndirectBatchingTest, DrawIndirectThenDrawIndexedIndirect) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
+    wgpu::Buffer indexBuffer = CreateIndexBuffer({0, 1, 2});
+    wgpu::Buffer indirectBuffer = CreateIndirectBuffer({3, 1, 4, 0,       // Non-indexed: top right
+                                                        0,                // Padding
+                                                        3, 1, 0, 0, 0});  // Indexed: bottom left
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.SetVertexBuffer(0, vertexBuffer);
+    pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+    pass.DrawIndirect(indirectBuffer, 0);
+    pass.DrawIndexedIndirect(indirectBuffer, uint64_t{5} * sizeof(uint32_t));
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 0, 255), renderPass.color, 1, 3);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 0, 255), renderPass.color, 3, 1);
+}
+
+// Test a DrawIndexedIndirect followed by a DrawIndirect from the next record in the same buffer.
+TEST_P(DrawIndexedIndirectBatchingTest, DrawIndexedIndirectThenDrawIndirect) {
+    wgpu::Buffer indexBuffer = CreateIndexBuffer({0, 1, 2});
+    wgpu::Buffer indirectBuffer = CreateIndirectBuffer({3, 1, 0, 0, 0,  // Indexed: bottom left
+                                                        3, 1, 4, 0});   // Non-indexed: top right
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.SetVertexBuffer(0, vertexBuffer);
+    pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+    pass.DrawIndexedIndirect(indirectBuffer, 0);
+    pass.DrawIndirect(indirectBuffer, uint64_t{5} * sizeof(uint32_t));
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 0, 255), renderPass.color, 1, 3);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 0, 255), renderPass.color, 3, 1);
+}
+
 DAWN_INSTANTIATE_TEST(DrawIndexedIndirectTest,
+                      D3D11Backend(),
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend(),
+                      WebGPUBackend());
+
+DAWN_INSTANTIATE_TEST(DrawIndexedIndirectBatchingTest,
                       D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
