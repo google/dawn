@@ -115,6 +115,7 @@ Checks:
   - -modernize-avoid-variadic-functions
   - -modernize-pass-by-value
   - -modernize-type-traits
+  - -modernize-use-consteval  # Currently triggers on DAWN_ASSERT, etc. Should fix eventually
   - -modernize-use-constraints
   - -modernize-use-equals-default
   - -modernize-use-equals-delete
