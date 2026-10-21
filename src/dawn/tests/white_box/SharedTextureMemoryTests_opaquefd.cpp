@@ -385,29 +385,18 @@ TEST_P(SharedTextureMemoryOpaqueFDValidationTest, ImportErrors) {
             deviceVk, 4, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_DST_BIT,
             VkImageCreateFlagBits(0), dedicated,
             [&](const wgpu::SharedTextureMemoryDescriptor* desc) {
-                // Measure the injection points in a successful import.
-                ClearErrorInjector();
-                EnableErrorInjector();
-                device.ImportSharedTextureMemory(desc);
-                DisableErrorInjector();
-                const uint64_t failureCount = AcquireErrorInjectorCallCount();
-                EXPECT_GT(failureCount, 0u);
-                WaitForAllOperations();
-
-                for (uint64_t failureIndex = 0; failureIndex < failureCount; ++failureIndex) {
-                    SCOPED_TRACE(failureIndex);
-                    // ImportSharedTextureMemory turns unexpected backend errors into device loss.
-                    // Use a fresh device so every iteration reaches the intended failure point.
-                    wgpu::Device importDevice = CreateDevice();
-                    EXPECT_DEVICE_LOSS_ON(importDevice, {
-                        ClearErrorInjector();
-                        EnableErrorInjector();
-                        InjectErrorAt(failureIndex);
-                        importDevice.ImportSharedTextureMemory(desc);
-                        DisableErrorInjector();
-                    });
-                    EXPECT_EQ(AcquireErrorInjectorCallCount(), failureIndex + 1);
-                }
+                ExhaustiveErrorInjection([&](ErrorInjectionPhase phase) {
+                    if (phase == ErrorInjectionPhase::InjectError) {
+                        // ImportSharedTextureMemory turns unexpected backend errors into device
+                        // loss. Use a fresh device so every iteration reaches the intended failure
+                        // point.
+                        wgpu::Device importDevice = CreateDevice();
+                        EXPECT_DEVICE_LOSS_ON(importDevice,
+                                              importDevice.ImportSharedTextureMemory(desc));
+                    } else {
+                        device.ImportSharedTextureMemory(desc);
+                    }
+                });
                 return true;
             });
     }

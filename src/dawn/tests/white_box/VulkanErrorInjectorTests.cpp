@@ -138,32 +138,14 @@ TEST_P(VulkanErrorInjectorTests, InjectErrorOnCreateBuffer) {
 TEST_P(VulkanErrorInjectorTests, InjectErrorOnCreateDevice) {
     wgpu::DeviceDescriptor deviceDesc = {};
 
-    // Create a device successfully with the error injector enabled to count how many
-    // injectable Vulkan calls CreateDevice() makes in total.
-    ClearErrorInjector();
-    EnableErrorInjector();
-    {
+    ExhaustiveErrorInjection([&](ErrorInjectionPhase phase) {
         wgpu::Device testDevice = adapter.CreateDevice(&deviceDesc);
-        EXPECT_NE(testDevice, nullptr);
-    }
-    DisableErrorInjector();
-
-    const uint32_t callCount = AcquireErrorInjectorCallCount();
-    EXPECT_GT(callCount, 0u);
-
-    // Fail each Vulkan call index one by one and verify device creation fails cleanly
-    // without crashing.
-    for (uint32_t errorIndex = 0; errorIndex < callCount; ++errorIndex) {
-        ClearErrorInjector();
-        EnableErrorInjector();
-        InjectErrorAt(errorIndex);
-
-        wgpu::Device testDevice = adapter.CreateDevice(&deviceDesc);
-        EXPECT_EQ(testDevice, nullptr);
-
-        DisableErrorInjector();
-    }
-    ClearErrorInjector();
+        if (phase == ErrorInjectionPhase::InjectError) {
+            EXPECT_EQ(testDevice, nullptr);
+        } else {
+            EXPECT_NE(testDevice, nullptr);
+        }
+    });
 }
 
 DAWN_INSTANTIATE_TEST(VulkanErrorInjectorTests, VulkanBackend());

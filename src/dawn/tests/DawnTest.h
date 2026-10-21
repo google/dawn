@@ -33,6 +33,7 @@
 #include <webgpu/webgpu_cpp.h>
 
 #include <atomic>
+#include <functional>
 #include <memory>
 #include <queue>
 #include <set>
@@ -811,6 +812,22 @@ class DawnTestBase {
         const wgpu::DeviceDescriptor& descriptor);
 
     void* GetUniqueUserdata();
+
+#if defined(DAWN_ENABLE_ERROR_INJECTION)
+    enum class ErrorInjectionPhase {
+        CountCalls,   // Dry run with no error injected to count total injectable calls
+        InjectError,  // Run with an error injected at a specific call index
+    };
+
+    // Runs `fn(ErrorInjectionPhase::CountCalls)` with the error injector enabled to count the
+    // number of injectable calls, then runs `fn(ErrorInjectionPhase::InjectError)` once for each
+    // call index with an error injected at that index.
+    // Note: `DawnTestBase::CreateDevice()` pauses error injection while creating a helper test
+    // device, so `fn` may call `CreateDevice()` in only one of the phases (e.g. `InjectError` to
+    // recreate a lost device) without affecting the injectable call count or consuming injected
+    // errors.
+    void ExhaustiveErrorInjection(std::function<void(ErrorInjectionPhase)> fn);
+#endif  // defined(DAWN_ENABLE_ERROR_INJECTION)
 
   private:
     AdapterTestParam mParam;
