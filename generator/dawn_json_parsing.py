@@ -25,6 +25,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import json
+
 ############################################################
 # OBJECT MODEL
 ############################################################
@@ -753,7 +755,15 @@ def _apply_addins(types, addins):
             setattr(target, prop, val)
 
 
-def parse_json(json, enabled_tags, disabled_tags=None, metadata=None):
+def parse_addin(json_filepath):
+    with open(json_filepath) as f:
+        content = f.read().strip()
+        if not content:
+            return {}
+        return json.loads(content).get('metadata', {}).get('addins', {})
+
+
+def parse_json(json, enabled_tags, disabled_tags=None, addins=None):
     is_enabled = lambda json_data: _item_is_enabled(
         enabled_tags, json_data) and not _item_is_disabled(
             disabled_tags, json_data)
@@ -823,8 +833,8 @@ def parse_json(json, enabled_tags, disabled_tags=None, metadata=None):
     for struct in by_category['structure']:
         struct.update_metadata()
 
-    addins = metadata.get('addins', {}) if metadata else {}
-    _apply_addins(types, addins)
+    for addin in (addins or []):
+        _apply_addins(types, addin)
 
     return {
         'metadata': Metadata(json['_metadata']),

@@ -586,6 +586,8 @@ def CheckDawnHeaderVersion(input_api, output_api):
                         sys.executable,
                         "generator/dawn_version_generator.py",
                         "check",
+                        "--dawn-json",
+                        "src/dawn/dawn.json",
                         "--old-version-json",
                         old_file.name,
                         "--new-version-json",

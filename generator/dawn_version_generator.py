@@ -28,6 +28,7 @@
 
 import argparse, json, os, subprocess, sys, shutil
 
+from dawn_json_parsing import parse_addin, parse_json
 from generator_lib import Generator, run_generator, FileRender, GeneratorOutput
 
 
@@ -122,16 +123,11 @@ def get_version_byte_array(version_str):
     return ", ".join(byte_values)
 
 
-def _get_stable_versions(json_filepath):
-    versions = []
-    with open(json_filepath) as f:
-        content = f.read().strip()
-        if content:
-            addins = json.loads(content).get("metadata", {}).get("addins", {})
-            versions = [
-                v["stable_version"] for v in addins.values()
-                if "stable_version" in v
-            ]
+def _get_stable_versions(version_addins):
+    versions = [
+        v["stable_version"] for v in version_addins.values()
+        if "stable_version" in v
+    ]
     return len(versions), max(versions)
 
 
@@ -144,7 +140,7 @@ def get_major_version():
 
 
 def get_minor_version(json_filepath):
-    return _get_stable_versions(json_filepath)[1]
+    return _get_stable_versions(parse_addin(json_filepath))[1]
 
 
 def compute_params(args):
@@ -215,6 +211,12 @@ class DawnVersionGenerator(Generator):
 def run_check(args):
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "--dawn-json",
+        required=True,
+        type=str,
+        help="The DAWN JSON definition to use.",
+    )
+    parser.add_argument(
         "--old-version-json",
         required=True,
         type=str,
@@ -228,11 +230,20 @@ def run_check(args):
     )
     options = parser.parse_args(args)
 
+    with open(options.dawn_json) as f:
+        dawn_json = json.loads(f.read())
+    new_addins = parse_addin(options.new_version_json)
+    old_addins = parse_addin(options.old_version_json)
+
+    # Verify that the new addins file doesn't contain any mismatched entries
+    # with respect to dawn.json.
+    parse_json(dawn_json, enabled_tags=["dawn", "native"], addins=[new_addins])
+
     # TODO(crbug.com/575526443): Currently, we are just using heuristic checks
     # on the number of entries and the max version number. We can probably do
     # a dictionary diff on the addins once we have the infrastructure in place.
-    old_count, old_max = _get_stable_versions(options.old_version_json)
-    new_count, new_max = _get_stable_versions(options.new_version_json)
+    old_count, old_max = _get_stable_versions(old_addins)
+    new_count, new_max = _get_stable_versions(new_addins)
 
     if new_count < old_count:
         print(f"The number of 'stable_version' entries in dawn_version.json "

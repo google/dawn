@@ -31,7 +31,6 @@ MARKUPSAFE_DIR = os.path.join('third_party', 'markupsafe')
 DAWN_GENERATOR = os.path.join('generator', 'dawn_json_generator.py')
 DAWN_GENERATOR_TEMPLATE_DIR = os.path.join('generator', 'templates')
 DAWN_JSON = os.path.join('src', 'dawn', 'dawn.json')
-DAWN_VERSION_JSON = os.path.join('src', 'dawn', 'dawn_version.json')
 DAWN_WEBGPU_HEADER_TARGET = 'webgpu_headers'
 
 # Upstream webgpu-header constants.
@@ -93,9 +92,8 @@ def _gen_dawn_header(dir):
     subprocess.check_call([
         sys.executable, DAWN_GENERATOR, '--template-dir',
         DAWN_GENERATOR_TEMPLATE_DIR, '--output-dir', dir, '--dawn-json',
-        DAWN_JSON, '--version-json', DAWN_VERSION_JSON, '--targets',
-        DAWN_WEBGPU_HEADER_TARGET, '--jinja2-path', JINJA2_DIR,
-        '--markupsafe-path', MARKUPSAFE_DIR
+        DAWN_JSON, '--targets', DAWN_WEBGPU_HEADER_TARGET, '--jinja2-path',
+        JINJA2_DIR, '--markupsafe-path', MARKUPSAFE_DIR
     ])
     _remove_comments(os.path.join(dir, DAWN_GENERATED_HEADER),
                      os.path.join(dir, DAWN_GENERATED_HEADER))

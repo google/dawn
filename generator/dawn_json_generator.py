@@ -35,15 +35,15 @@ import dawn_json_parsing
 from dawn_json_parsing import (AnnotatedTypedMember, FunctionDeclaration,
                                Method, Name, Record, RecordMember,
                                StructureType, Type, concat_names,
-                               linked_record_members)
+                               linked_record_members, parse_addin)
 from webgpu_docs_utility import build_doc_map, load_json_data
 
 
-def parse_json(json, enabled_tags, disabled_tags=None, metadata=None):
+def parse_json(json, enabled_tags, disabled_tags=None, addins=None):
     api_params = dawn_json_parsing.parse_json(json,
                                               enabled_tags,
                                               disabled_tags=disabled_tags,
-                                              metadata=metadata)
+                                              addins=addins)
     api_params.update({
         'c_methods':
         lambda typ: c_methods(api_params, typ),
@@ -253,12 +253,13 @@ def analyze_converter_usage(params_kotlin):
 
 def compute_kotlin_params(loaded_json,
                           kotlin_json,
+                          kotlin_addins,
                           webgpu_kt_docs_data=None,
                           doc_warn_log_file_path=None):
 
     params_kotlin = parse_json(loaded_json,
                                enabled_tags=['art', 'art_experimental'],
-                               metadata=kotlin_json['metadata'])
+                               addins=kotlin_addins)
     params_kotlin['kotlin_package'] = kotlin_json['kotlin_package']
     params_kotlin['jni_primitives'] = kotlin_json['jni_primitives']
     params_kotlin['jni_signatures'] = kotlin_json['jni_signatures']
@@ -892,10 +893,6 @@ class MultiGeneratorFromDawnJSON(Generator):
                             required=True,
                             type=str,
                             help='The DAWN JSON definition to use.')
-        parser.add_argument('--version-json',
-                            default=None,
-                            type=str,
-                            help='The DAWN VERSION JSON definition to use.')
         parser.add_argument('--wire-json',
                             default=None,
                             type=str,
@@ -934,25 +931,23 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         targets = args.targets.split(',')
 
-        version_json = None
-        if args.version_json:
-            with open(args.version_json) as f:
-                version_json = json.loads(f.read())
-
         wire_json = None
+        wire_addins = []
         if args.wire_json:
             with open(args.wire_json) as f:
                 wire_json = json.loads(f.read())
+            wire_addins = [parse_addin(args.wire_json)]
 
-        native_json = None
+        native_addins = []
         if args.native_json:
-            with open(args.native_json) as f:
-                native_json = json.loads(f.read())
+            native_addins = [parse_addin(args.native_json)]
 
         kotlin_json = None
+        kotlin_addins = []
         if args.kotlin_json:
             with open(args.kotlin_json) as f:
                 kotlin_json = json.loads(f.read())
+            kotlin_addins = [parse_addin(args.kotlin_json)]
 
         webgpu_kt_docs_data = None
         if args.webgpu_kt_docs:
@@ -1067,8 +1062,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
             params_upstream = parse_json(loaded_json,
                                          enabled_tags=['native'],
-                                         disabled_tags=['dawn'],
-                                         metadata=version_json['metadata'])
+                                         disabled_tags=['dawn'])
             renders.append(
                 FileRender('api.h', 'webgpu-headers/' + api + '.h',
                            [RENDER_PARAMS_BASE, params_upstream]))
@@ -1184,7 +1178,7 @@ class MultiGeneratorFromDawnJSON(Generator):
             params_dawn_native = parse_json(
                 loaded_json,
                 enabled_tags=['dawn', 'native', 'deprecated'],
-                metadata=native_json['metadata'])
+                addins=native_addins)
             frontend_params = [
                 RENDER_PARAMS_BASE,
                 params_dawn_native,
@@ -1294,7 +1288,7 @@ class MultiGeneratorFromDawnJSON(Generator):
             params_dawn_wire = parse_json(loaded_json,
                                           enabled_tags=['dawn', 'deprecated'],
                                           disabled_tags=['native'],
-                                          metadata=wire_json['metadata'])
+                                          addins=wire_addins)
             additional_params = compute_wire_params(params_dawn_wire,
                                                     wire_json)
 
@@ -1397,6 +1391,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if 'kotlin' in targets:
             params_kotlin = compute_kotlin_params(loaded_json, kotlin_json,
+                                                  kotlin_addins,
                                                   webgpu_kt_docs_data,
                                                   doc_warn_log_file_path)
             kt_file_path = params_kotlin['kotlin_package'].replace('.', '/')
@@ -1477,6 +1472,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if "jni" in targets:
             params_kotlin = compute_kotlin_params(loaded_json, kotlin_json,
+                                                  kotlin_addins,
                                                   webgpu_kt_docs_data,
                                                   doc_warn_log_file_path)
 
@@ -1505,8 +1501,6 @@ class MultiGeneratorFromDawnJSON(Generator):
 
     def get_dependencies(self, args):
         deps = [os.path.abspath(args.dawn_json)]
-        if args.version_json != None:
-            deps += [os.path.abspath(args.version_json)]
         if args.wire_json != None:
             deps += [os.path.abspath(args.wire_json)]
         if args.native_json != None:
