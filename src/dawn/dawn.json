@@ -243,29 +243,6 @@
             {"name": "disabled toggles", "type": "char", "annotation": "const*const*", "length": "disabled toggle count"}
         ]
     },
-    "dawn load cache data function": {
-        "tags": ["dawn", "native"],
-        "category": "function pointer",
-        "returns": "size_t",
-        "args": [
-            {"name": "key", "type": "void const *"},
-            {"name": "key size", "type": "size_t"},
-            {"name": "value", "type": "void *"},
-            {"name": "value size", "type": "size_t"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "dawn store cache data function": {
-        "tags": ["dawn", "native"],
-        "category": "function pointer",
-        "args": [
-            {"name": "key", "type": "void const *"},
-            {"name": "key size", "type": "size_t"},
-            {"name": "value", "type": "void const *"},
-            {"name": "value size", "type": "size_t"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
     "dawn load cache data callback": {
         "tags": ["dawn", "native"],
         "category": "callback function",
