@@ -202,8 +202,6 @@ class DawnVersionGenerator(Generator):
         renders = [
             FileRender("dawn/dawn_version.h", "include/dawn/dawn_version.h",
                        [params]),
-            FileRender("dawn/dawn_version.h",
-                       "src/dawn/common/Version_autogen.h", [params]),
         ]
         return GeneratorOutput(renders=renders, imported_templates=[])
 

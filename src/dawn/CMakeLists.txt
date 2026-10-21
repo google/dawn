@@ -32,7 +32,7 @@
 DawnGenerator(
     SCRIPT "${Dawn_SOURCE_DIR}/generator/dawn_version_generator.py"
     PRINT_NAME "Dawn version based utilities"
-    OUTPUT_HEADERS DAWN_VERSION_AUTOGEN_HEADERS
+    OUTPUT_HEADERS DAWN_VERSION_GEN_HEADERS
     EXTRA_PARAMETERS "gen"
          "--dawn-dir"
          "${Dawn_SOURCE_DIR}"
@@ -46,7 +46,7 @@ dawn_add_library(
     ENABLE_EMSCRIPTEN
     UTILITY_TARGET dawn_internal_config
     HEADERS
-        ${DAWN_VERSION_AUTOGEN_HEADERS}
+        ${DAWN_VERSION_GEN_HEADERS}
     DEPENDS
         dawn_public_config
 )
@@ -67,6 +67,7 @@ dawn_add_library(
     UTILITY_TARGET dawn_internal_config
     HEADERS
         "${DAWN_INCLUDE_DIR}/webgpu/webgpu.h"
+        ${DAWN_VERSION_GEN_HEADERS}
         ${DAWN_HEADERS_GEN_HEADERS}
     DEPENDS
         dawn_public_config

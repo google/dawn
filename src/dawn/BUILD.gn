@@ -63,10 +63,7 @@ dawn_generator("dawn_version_gen") {
     inputs += [ "*.git/*" ]
   }
 
-  outputs = [
-    "include/dawn/dawn_version.h",
-    "src/dawn/common/Version_autogen.h",
-  ]
+  outputs = [ "include/dawn/dawn_version.h" ]
 }
 
 ###############################################################################
