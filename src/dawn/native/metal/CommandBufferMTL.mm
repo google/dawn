@@ -634,10 +634,6 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                     RecordWriteBuffer(commandContext, mCommands.NextCommand<WriteBufferCmd>()));
                 break;
             }
-            case Command::SetResourceTable: {
-                // TODO(https://issues.chromium.org/473444514): Add support for resource tables.
-                return DAWN_UNIMPLEMENTED_ERROR("SetResourceTable unimplemented.");
-            }
             default: {
                 DAWN_UNREACHABLE();
             }
@@ -833,6 +829,13 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                                withBarrier:YES];
 
                 UpdateQueryAvailability(cmd);
+                break;
+            }
+
+            case Command::SetResourceTable: {
+                [[maybe_unused]] SetResourceTableCmd* cmd =
+                    mCommands.NextCommand<SetResourceTableCmd>();
+                // TODO(473444514): Implement
                 break;
             }
 
@@ -1197,6 +1200,13 @@ MaybeError CommandBuffer::RecordRenderPass(
 
                 vertexBuffers.OnSetVertexBuffer(cmd->slot, ToBackend(cmd->buffer.Get()),
                                                 cmd->offset);
+                break;
+            }
+
+            case Command::SetResourceTable: {
+                [[maybe_unused]] SetResourceTableCmd* cmd =
+                    mCommands.NextCommand<SetResourceTableCmd>();
+                // TODO(473444514): Implement
                 break;
             }
 

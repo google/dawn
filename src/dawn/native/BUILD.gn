@@ -733,6 +733,8 @@ source_set("sources") {
       "metal/QueueMTL.mm",
       "metal/RenderPipelineMTL.h",
       "metal/RenderPipelineMTL.mm",
+      "metal/ResourceTableMTL.h",
+      "metal/ResourceTableMTL.mm",
       "metal/SamplerMTL.h",
       "metal/SamplerMTL.mm",
       "metal/ShaderModuleMTL.h",

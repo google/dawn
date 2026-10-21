@@ -96,7 +96,10 @@ MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {
 
     NSRef<NSString> label = MakeDebugName(GetDevice(), "Dawn_Sampler", GetLabel());
     mtlDesc.label = label.Get();
-    if (GetDevice()->IsToggleEnabled(Toggle::MetalUseArgumentBuffers)) {
+
+    // TODO(crbug.com/477317117, crbug.com/473444514): Handle the per-process limit on samplers
+    if (GetDevice()->IsToggleEnabled(Toggle::MetalUseArgumentBuffers) ||
+        GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable)) {
         mtlDesc.supportArgumentBuffers = true;
     }
 

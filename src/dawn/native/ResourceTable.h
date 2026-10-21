@@ -36,6 +36,7 @@
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/WeakRefSupport.h"
 #include "src/dawn/common/ityp_vector.h"
+#include "src/dawn/native/Buffer.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/Forward.h"
 #include "src/dawn/native/IntegerTypes.h"

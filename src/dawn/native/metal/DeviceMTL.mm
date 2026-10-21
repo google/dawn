@@ -46,6 +46,7 @@
 #include "src/dawn/native/metal/QuerySetMTL.h"
 #include "src/dawn/native/metal/QueueMTL.h"
 #include "src/dawn/native/metal/RenderPipelineMTL.h"
+#include "src/dawn/native/metal/ResourceTableMTL.h"
 #include "src/dawn/native/metal/SamplerMTL.h"
 #include "src/dawn/native/metal/ShaderModuleMTL.h"
 #include "src/dawn/native/metal/SharedFenceMTL.h"
@@ -224,8 +225,7 @@ Ref<RenderPipelineBase> Device::CreateUninitializedRenderPipelineImpl(
 }
 ResultOrError<Ref<ResourceTableBase>> Device::CreateResourceTableImpl(
     const ResourceTableDescriptor* descriptor) {
-    // TODO(https://issues.chromium.org/473444514): Implement resource tables in Metal.
-    return DAWN_UNIMPLEMENTED_ERROR("ResourceTable is not implemented on Metal");
+    return ResourceTable::Create(this, descriptor);
 }
 ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
     return Sampler::Create(this, descriptor);

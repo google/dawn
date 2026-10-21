@@ -47,8 +47,17 @@ class Device;
 inline constexpr size_t kMetalBufferTableSize = 31;
 // Immediate blocks contain pipeline immediates followed by tightly packed storage buffer sizes.
 inline constexpr size_t kImmediateBlockBufferSlot = kMetalBufferTableSize - 1;
+
+// Note, the kResourceTable*Slot's can conflict with kGenericMetalBufferSlots but we choose to allow
+// the conflict while experimenting with resource tables. The conflict will be resolved when
+// argument buffers are enabled.
+inline constexpr size_t kResourceTableBindingSlot = kImmediateBlockBufferSlot - 1;
+inline constexpr size_t kResourceTableStorageSlot = kResourceTableBindingSlot - 1;
+
 // The number of Metal buffers Dawn can use in a generic way (i.e. that aren't reserved)
-inline constexpr size_t kGenericMetalBufferSlots = kMetalBufferTableSize - 1;
+//
+// Note, this needs to match the value in PhysicalDeviceMTL for maxBuffersPerStage.
+inline constexpr size_t kGenericMetalBufferSlots = kImmediateBlockBufferSlot;
 
 // Get the [[buffer()]] number for an argument buffer and its dynamic offset buffer,
 // from the SetBindGroup() slot number.
@@ -56,7 +65,7 @@ inline constexpr size_t kGenericMetalBufferSlots = kMetalBufferTableSize - 1;
 // which is in the immediates buffer. Then this will just return a single uint32_t.
 inline std::pair<uint32_t, uint32_t> BindGroupSlotToArgumentBufferID(BindGroupIndex slot) {
     // The last buffer slot to be used by argument buffers
-    constexpr uint32_t kArgumentBufferSlotMax = kImmediateBlockBufferSlot - 1;
+    constexpr uint32_t kArgumentBufferSlotMax = kResourceTableBindingSlot - 1;
 
     // Maps slots as follows (AB = Argument Buffer, DOB = Dynamic Offset Buffer):
     // AB3 DOB3 AB2 DOB2 AB1 DOB1 AB0 DOB0
