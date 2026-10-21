@@ -2035,7 +2035,8 @@ TEST_P(ExternalTextureTests, LayoutWithUnusedExternalTexture) {
 // BindGroupLayout
 TEST_P(ExternalTextureTests, UseExternalTextureWithDynamicOffset) {
     // TODO(42242119): fail on Qualcomm Adreno X1.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm() &&
+                          GetDriverVersion() < gpu_info::DriverVersion({31, 0, 170, 0}));
 
     // Make the two external textures.
     wgpu::ExternalTexture et = utils::MakePassthroughExternalTexture(

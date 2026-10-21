@@ -1457,6 +1457,10 @@ native::Adapter DawnTestBase::GetAdapter() const {
     return mBackendAdapter;
 }
 
+const gpu_info::DriverVersion& DawnTestBase::GetDriverVersion() const {
+    return mBackendAdapter.GetDriverVersion();
+}
+
 utils::WireHelper* DawnTestBase::GetWireHelper() const {
     return mWireHelper.get();
 }

@@ -47,6 +47,7 @@
 #include "dawn/utils/ComboLimits.h"
 #include "dawn/webgpu_cpp_print.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+#include "src/dawn/common/GPUInfo.h"
 #include "src/dawn/common/Mutex.h"
 #include "src/dawn/common/Preprocessor.h"
 #include "src/dawn/tests/AdapterTestConfig.h"
@@ -405,6 +406,7 @@ class DawnTestBase {
 
     const wgpu::Instance& GetInstance() const;
     native::Adapter GetAdapter() const;
+    const gpu_info::DriverVersion& GetDriverVersion() const;
 
     virtual std::unique_ptr<platform::Platform> CreateTestPlatform();
 

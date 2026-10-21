@@ -118,6 +118,10 @@ WGPUDevice Adapter::CreateDevice(const WGPUDeviceDescriptor* deviceDescriptor) {
     return ToAPI(mImpl->APICreateDevice(FromAPI(deviceDescriptor)));
 }
 
+const gpu_info::DriverVersion& Adapter::GetDriverVersion() const {
+    return mImpl->GetPhysicalDevice()->GetDriverVersion();
+}
+
 void Adapter::ResetInternalDeviceForTesting() {
     std::ignore = mImpl->GetInstance()->ConsumedError(
         mImpl->GetPhysicalDevice()->ResetInternalDeviceForTesting());

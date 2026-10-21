@@ -186,7 +186,8 @@ TEST_P(DrawIndirectBatchingTest, NonConsecutiveOffsets) {
 // Indirect draws backed by different buffers must retain the arguments from each buffer.
 TEST_P(DrawIndirectBatchingTest, DifferentBuffers) {
     // TODO(42242119): fail on Qualcomm Adreno X1.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm() &&
+                          GetDriverVersion() < gpu_info::DriverVersion({31, 0, 170, 0}));
 
     wgpu::Buffer first =
         utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, {3, 1, 0, 0});

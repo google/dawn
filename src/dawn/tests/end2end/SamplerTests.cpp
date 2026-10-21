@@ -326,7 +326,8 @@ TEST_P(StaticSamplerTest, AddressMode) {
     DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     // TODO(crbug.com/459848481): Fails on Win/Snapdragon X Elite w/ D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D12());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsQualcomm() &&
+                          GetDriverVersion() < gpu_info::DriverVersion({31, 0, 170, 0}));
 
     for (auto u : addressModes) {
         for (auto v : addressModes) {
@@ -352,7 +353,8 @@ TEST_P(StaticSamplerTest, PassThroughUserFunctionParameters) {
     DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     // TODO(crbug.com/459848481): Fails on Win/Snapdragon X Elite w/ D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D12());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsQualcomm() &&
+                          GetDriverVersion() < gpu_info::DriverVersion({31, 0, 170, 0}));
 
     for (auto u : addressModes) {
         for (auto v : addressModes) {
