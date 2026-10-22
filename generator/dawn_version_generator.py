@@ -128,7 +128,7 @@ def _get_stable_versions(version_addins):
         v["stable_version"] for v in version_addins.values()
         if "stable_version" in v
     ]
-    return len(versions), max(versions)
+    return max(versions)
 
 
 # Hard-coded to 1 for now since we don't anticipate needing to ever increment
@@ -140,7 +140,7 @@ def get_major_version():
 
 
 def get_minor_version(json_filepath):
-    return _get_stable_versions(parse_addin(json_filepath))[1]
+    return _get_stable_versions(parse_addin(json_filepath))
 
 
 def compute_params(args):
@@ -237,29 +237,31 @@ def run_check(args):
     # with respect to dawn.json.
     parse_json(dawn_json, enabled_tags=["dawn", "native"], addins=[new_addins])
 
-    # TODO(crbug.com/575526443): Currently, we are just using heuristic checks
-    # on the number of entries and the max version number. We can probably do
-    # a dictionary diff on the addins once we have the infrastructure in place.
-    old_count, old_max = _get_stable_versions(old_addins)
-    new_count, new_max = _get_stable_versions(new_addins)
+    old_max = _get_stable_versions(old_addins)
 
-    if new_count < old_count:
-        print(f"The number of 'stable_version' entries in dawn_version.json "
-              f"decreased from {old_count} to {new_count}. Stable API entries "
-              f"cannot be removed.")
-        return 1
+    # Verify that all old entries are unchanged and any new entries have a
+    # stable_version greater than the old max.
+    for key, value in new_addins.items():
+        if key in old_addins:
+            old_value = old_addins.pop(key)
+            if value != old_value:
+                print(f"Stable API entry '{key}' in dawn_version.json was "
+                      f"modified from {old_value} to {value}. Existing stable "
+                      f"API entries cannot be changed.")
+                return 1
+        else:
+            new_version = value.get("stable_version")
+            if new_version is None or new_version <= old_max:
+                print(
+                    f"New stable API entry '{key}' in dawn_version.json has "
+                    f"'stable_version' {new_version}, which is not greater "
+                    f"than the previous maximum 'stable_version' ({old_max}).")
+                return 1
 
-    if new_count == old_count and new_max != old_max:
-        print(
-            f"The number of 'stable_version' entries in dawn_version.json did "
-            f"not change ({new_count}), but the maximum 'stable_version' "
-            f"changed from {old_max} to {new_max}.")
-        return 1
-
-    if new_count > old_count and new_max <= old_max:
-        print(f"The number of 'stable_version' entries in dawn_version.json "
-              f"increased from {old_count} to {new_count}, but the maximum "
-              f"'stable_version' ({new_max}) did not increase from {old_max}.")
+    if old_addins:
+        removed_keys = ", ".join(f"'{k}'" for k in old_addins)
+        print(f"Stable API entries ({removed_keys}) were removed from "
+              f"dawn_version.json. Stable API entries cannot be removed.")
         return 1
 
     return 0
