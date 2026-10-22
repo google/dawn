@@ -34,7 +34,9 @@
 namespace dawn {
 namespace {
 
+using ::testing::AllOf;
 using ::testing::HasSubstr;
+using ::testing::Not;
 using ::testing::StartsWith;
 
 class CommandBufferValidationTest : public ValidationTest {};
@@ -365,8 +367,7 @@ TEST_F(CommandBufferValidationTest, InjectedValidateErrorVariousStringTypes) {
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.InjectValidationError(DAWN_UNSAFE_TODO(std::string_view("my error bad", 8)));
-        ASSERT_DEVICE_ERROR(encoder.Finish(),
-                            testing::AllOf(HasSubstr("my error"), Not(HasSubstr("bad"))));
+        ASSERT_DEVICE_ERROR(encoder.Finish(), AllOf(HasSubstr("my error"), Not(HasSubstr("bad"))));
     }
 
     // Empty, nullptr string
@@ -419,14 +420,14 @@ TEST_F(CommandBufferValidationTest, InjectedValidateErrorVariousStringTypes) {
 TEST_F(CommandBufferValidationTest, EncodeAfterDeviceDestroyed) {
     PlaceholderRenderPass placeholderRenderPass(device);
 
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        ExpectDeviceDestruction();
-        device.Destroy();
-        // The encoder should not accessing any device info if device is destroyed when try
-        // encoding.
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&placeholderRenderPass);
-        pass.End();
-        encoder.Finish();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    ExpectDeviceDestruction();
+    device.Destroy();
+    // The encoder should not accessing any device info if device is destroyed when try
+    // encoding.
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&placeholderRenderPass);
+    pass.End();
+    encoder.Finish();
 }
 
 // Test having the device destroyed after encoding but before Finish().

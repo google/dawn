@@ -50,6 +50,11 @@
 namespace dawn {
 namespace {
 
+using ::testing::Combine;
+using ::testing::HasSubstr;
+using ::testing::Values;
+using ::testing::ValuesIn;
+
 class ShaderModuleValidationTest : public ValidationTest {};
 
 #if TINT_BUILD_SPV_READER && !DAWN_PLATFORM_IS(EMSCRIPTEN)
@@ -315,7 +320,7 @@ TEST_F(ShaderModuleValidationTest, ShaderModuleCompilationOptionsNoFeature) {
     desc.nextInChain = &wgslDesc;
     wgslDesc.nextInChain = &compilationOptions;
     ASSERT_DEVICE_ERROR(device.CreateShaderModule(&desc),
-                        testing::HasSubstr("FeatureName::ShaderModuleCompilationOptions"));
+                        HasSubstr("FeatureName::ShaderModuleCompilationOptions"));
 }
 
 // Tests that shader module compilation messages can be queried.
@@ -511,11 +516,10 @@ TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
                 device.CreateRenderPipeline(&pDesc);
             } else {
                 ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc),
-                                    testing::HasSubstr("The fragment input at location"));
+                                    HasSubstr("The fragment input at location"));
             }
         } else {
-            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc),
-                                testing::HasSubstr(errorMatcher));
+            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc), HasSubstr(errorMatcher));
         }
     };
 
@@ -849,11 +853,10 @@ TEST_F(ShaderModuleMaxInterStageShaderVariablesValidationTest, Test) {
                     device.CreateRenderPipeline(&pDesc);
                 } else {
                     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc),
-                                        testing::HasSubstr("The fragment input at location"));
+                                        HasSubstr("The fragment input at location"));
                 }
             } else {
-                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc),
-                                    testing::HasSubstr(errorMatcher));
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc), HasSubstr(errorMatcher));
             }
         };
 
@@ -1153,8 +1156,7 @@ TEST_P(ShaderModuleExtensionValidationTestUnsafeOnlyRequiredFeatures,
 }
 INSTANTIATE_TEST_SUITE_P(,
                          ShaderModuleExtensionValidationTestUnsafeOnlyRequiredFeatures,
-                         ::testing::Combine(::testing::ValuesIn(kExtensions),
-                                            ::testing::Values(true, false)));
+                         Combine(ValuesIn(kExtensions), Values(true, false)));
 
 class SubgroupSizeControlValidationTest : public ValidationTest {
   protected:

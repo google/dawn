@@ -38,6 +38,10 @@
 namespace dawn {
 namespace {
 
+using ::testing::TestParamInfo;
+using ::testing::Values;
+using ::testing::WithParamInterface;
+
 class ImmediateDataTest : public ValidationTest {
   protected:
     wgpu::BindGroupLayout CreateBindGroupLayout() {
@@ -565,8 +569,7 @@ struct ImmediateDataRange {
     uint32_t size;
 };
 
-class ImmediateDataRequiredTest : public ImmediateDataTest,
-                                  public testing::WithParamInterface<EncoderType> {
+class ImmediateDataRequiredTest : public ImmediateDataTest, public WithParamInterface<EncoderType> {
   protected:
     void TestImmediateDataValidation(std::string entryPoint,
                                      std::vector<ImmediateDataRange> ranges,
@@ -745,21 +748,22 @@ TEST_P(ImmediateDataRequiredTest, PadTailPartialA) {
     RunTests("mainTail", {{0, 8}}, false);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    ,
-    ImmediateDataRequiredTest,
-    ::testing::Values(EncoderType::Compute, EncoderType::RenderPass, EncoderType::RenderBundle),
-    [](const testing::TestParamInfo<ImmediateDataRequiredTest::ParamType>& info) {
-        switch (info.param) {
-            case EncoderType::Compute:
-                return "Compute";
-            case EncoderType::RenderPass:
-                return "RenderPass";
-            case EncoderType::RenderBundle:
-                return "RenderBundle";
-        }
-        return "Unknown";
-    });
+INSTANTIATE_TEST_SUITE_P(,
+                         ImmediateDataRequiredTest,
+                         Values(EncoderType::Compute,
+                                EncoderType::RenderPass,
+                                EncoderType::RenderBundle),
+                         [](const TestParamInfo<ImmediateDataRequiredTest::ParamType>& info) {
+                             switch (info.param) {
+                                 case EncoderType::Compute:
+                                     return "Compute";
+                                 case EncoderType::RenderPass:
+                                     return "RenderPass";
+                                 case EncoderType::RenderBundle:
+                                     return "RenderBundle";
+                             }
+                             return "Unknown";
+                         });
 
 }  // anonymous namespace
 }  // namespace dawn

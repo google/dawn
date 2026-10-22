@@ -30,6 +30,7 @@
 #include "src/dawn/tests/unittests/validation/ValidationTest.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
 
 class SamplerValidationTest : public ValidationTest {};
@@ -149,3 +150,4 @@ TEST_F(SamplerValidationTest, ValidFilterAnisotropicWithUndefined) {
 }
 
 }  // anonymous namespace
+}  // namespace dawn

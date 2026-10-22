@@ -31,6 +31,7 @@
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
 namespace {
 
 class WriteBufferTest : public ValidationTest {
@@ -115,4 +116,5 @@ TEST_F(WriteBufferTest, ValidBufferState) {
     device.GetQueue().Submit(1, &commands);
 }
 
-}  // namespace
+}  // anonymous namespace
+}  // namespace dawn

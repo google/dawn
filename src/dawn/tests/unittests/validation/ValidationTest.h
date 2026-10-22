@@ -127,6 +127,8 @@
     } while (0)
 #define EXPECT_DEPRECATION_WARNING(statement) EXPECT_DEPRECATION_WARNINGS(statement, 1)
 
+namespace dawn {
+
 // Gmock matcher helpers that may be used throughout other tests.
 
 // BindGroupLayouts can either be cache equivalent meaning that they may have different
@@ -141,9 +143,9 @@ MATCHER_P(BindGroupLayoutEq, other, "") {
     return dawn::native::FromAPI(arg.Get())->IsLayoutEqual(dawn::native::FromAPI(other.Get()));
 }
 
-namespace dawn::utils {
+namespace utils {
 class WireHelper;
-}  // namespace dawn::utils
+}  // namespace utils
 
 void InitDawnValidationTestEnvironment(int argc, char** argv);
 
@@ -245,5 +247,7 @@ class ValidationTest : public testing::Test {
 
 template <typename T, typename Base = ValidationTest>
 class ValidationTestWithParam : public Base, public testing::WithParamInterface<T> {};
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_TESTS_UNITTESTS_VALIDATION_VALIDATIONTEST_H_

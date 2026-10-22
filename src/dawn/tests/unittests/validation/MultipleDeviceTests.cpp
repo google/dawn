@@ -32,10 +32,10 @@
 namespace dawn {
 namespace {
 
-using testing::_;
-using testing::IsNull;
-using testing::MockCppCallback;
-using testing::NotNull;
+using ::testing::_;
+using ::testing::IsNull;
+using ::testing::MockCppCallback;
+using ::testing::NotNull;
 
 class MultipleDeviceTest : public ValidationTest {};
 

@@ -34,8 +34,8 @@
 namespace dawn {
 namespace {
 
-using testing::_;
-using testing::MockCppCallback;
+using ::testing::_;
+using ::testing::MockCppCallback;
 
 class QueueOnSubmittedWorkDoneValidationTests : public ValidationTest {
   protected:

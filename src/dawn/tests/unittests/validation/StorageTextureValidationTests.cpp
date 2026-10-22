@@ -37,6 +37,9 @@
 namespace dawn {
 namespace {
 
+using ::testing::ValuesIn;
+using ::testing::WithParamInterface;
+
 class StorageTextureValidationTests : public ValidationTest {
   protected:
     void SetUp() override {
@@ -283,7 +286,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInShaders) {
 class BGRA8UnormStorageTextureValidationTests
     : public StorageTextureValidationTests,
       // Bool param indicates whether requires the BGRA8UnormStorage feature or not.
-      public ::testing::WithParamInterface<bool> {
+      public WithParamInterface<bool> {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         if (GetParam()) {
@@ -371,7 +374,7 @@ INSTANTIATE_TEST_SUITE_P(
     ,
     BGRA8UnormStorageTextureValidationTests,
     // Bool param indicates whether requires the BGRA8UnormStorage feature or not.
-    ::testing::ValuesIn({false, true}));
+    ValuesIn({false, true}));
 
 // Verify that declaring a storage texture dimension that isn't supported by
 // WebGPU causes a compile failure. WebGPU doesn't support using cube map

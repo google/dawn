@@ -43,6 +43,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::HasSubstr;
+
 class BindGroupValidationTest : public ValidationTest {
   public:
     wgpu::Texture CreateTexture(wgpu::TextureUsage usage,
@@ -1428,7 +1430,7 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutEntryTooManySet) {
     descriptor.entryCount = 1;
     descriptor.entries = &entry;
     ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor),
-                        testing::HasSubstr("had more than one of"));
+                        HasSubstr("had more than one of"));
 }
 
 // Test that it is invalid to create a BGL with none one of buffer,
@@ -1439,8 +1441,7 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutEntryNoneSet) {
     wgpu::BindGroupLayoutDescriptor descriptor;
     descriptor.entryCount = 1;
     descriptor.entries = &entry;
-    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor),
-                        testing::HasSubstr("had none of"));
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor), HasSubstr("had none of"));
 }
 
 // This test verifies that visibility of bindings in BindGroupLayout can be none
@@ -4146,8 +4147,7 @@ TEST_F(FilterabilityValidationTest, FilterableBGL_DepthShader_Fail) {
                     {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float},
                 });
 
-    ASSERT_DEVICE_ERROR(CreateComputePipeline(shaderSource, {bgl}),
-                        testing::HasSubstr("isn't compatible"));
+    ASSERT_DEVICE_ERROR(CreateComputePipeline(shaderSource, {bgl}), HasSubstr("isn't compatible"));
 }
 
 TEST_F(FilterabilityValidationTest, FilterableBGL_i32Shader_Fail) {
@@ -4163,8 +4163,7 @@ TEST_F(FilterabilityValidationTest, FilterableBGL_i32Shader_Fail) {
                     {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float},
                 });
 
-    ASSERT_DEVICE_ERROR(CreateComputePipeline(shaderSource, {bgl}),
-                        testing::HasSubstr("isn't compatible"));
+    ASSERT_DEVICE_ERROR(CreateComputePipeline(shaderSource, {bgl}), HasSubstr("isn't compatible"));
 }
 
 TEST_F(FilterabilityValidationTest, FilteringBGL_FilteringShader_Pass) {

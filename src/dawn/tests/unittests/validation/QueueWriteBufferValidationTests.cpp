@@ -28,6 +28,9 @@
 #include "src/dawn/tests/unittests/validation/ValidationTest.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 
+namespace dawn {
+namespace {
+
 class QueueWriteBufferValidationTest : public ValidationTest {
   private:
     void SetUp() override {
@@ -138,3 +141,6 @@ TEST_F(QueueWriteBufferValidationTest, MappedBuffer) {
         ASSERT_DEVICE_ERROR(queue.WriteBuffer(buf, 0, &value, sizeof(value)));
     }
 }
+
+}  // anonymous namespace
+}  // namespace dawn

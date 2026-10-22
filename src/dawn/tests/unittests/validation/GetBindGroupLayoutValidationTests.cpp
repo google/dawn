@@ -33,7 +33,7 @@
 namespace dawn {
 namespace {
 
-using testing::Not;
+using ::testing::Not;
 
 class GetBindGroupLayoutTests : public ValidationTest {
   protected:

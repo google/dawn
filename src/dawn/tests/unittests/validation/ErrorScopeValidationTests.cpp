@@ -37,11 +37,11 @@
 namespace dawn {
 namespace {
 
-using testing::_;
-using testing::EmptySizedString;
-using testing::HasSubstr;
-using testing::MockCppCallback;
-using testing::SizedStringMatches;
+using ::testing::_;
+using ::testing::EmptySizedString;
+using ::testing::HasSubstr;
+using ::testing::MockCppCallback;
+using ::testing::SizedStringMatches;
 using utils::BinarySemaphore;
 
 class ErrorScopeValidationTest : public ValidationTest {

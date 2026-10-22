@@ -42,6 +42,12 @@
 namespace dawn {
 namespace {
 
+using ::testing::_;
+using ::testing::HasSubstr;
+using ::testing::TestParamInfo;
+using ::testing::Values;
+using ::testing::WithParamInterface;
+
 class CompatValidationTest : public ValidationTest {
   protected:
     bool UseCompatibilityMode() const override { return true; }
@@ -101,7 +107,7 @@ TEST_F(CompatValidationTest, CanNotSpecifyAlternateCompatibleViewFormatRGBA8Unor
     descriptor.viewFormats = &viewFormat;
     wgpu::Texture texture;
     ASSERT_DEVICE_ERROR(texture = device.CreateTexture(&descriptor),
-                        testing::HasSubstr("must match format"));
+                        HasSubstr("must match format"));
     texture.Destroy();
 }
 
@@ -117,7 +123,7 @@ TEST_F(CompatValidationTest, CanNotSpecifyAlternateCompatibleViewFormatRGBA8Unor
     descriptor.viewFormats = &viewFormat;
     wgpu::Texture texture;
     ASSERT_DEVICE_ERROR(texture = device.CreateTexture(&descriptor),
-                        testing::HasSubstr("must match format"));
+                        HasSubstr("must match format"));
     texture.Destroy();
 }
 
@@ -305,8 +311,7 @@ TEST_F(CompatValidationTest, CanNotCreatePipelineWithTextureLoadOfDepthTexture) 
         } else {
             ASSERT_DEVICE_ERROR(
                 device.CreateComputePipeline(&pDesc),
-                testing::HasSubstr(
-                    "textureLoad can not be used with depth textures in compatibility mode"));
+                HasSubstr("textureLoad can not be used with depth textures in compatibility mode"));
         }
     }
 }
@@ -336,7 +341,7 @@ TEST_F(CompatValidationTest, LargeGroupIds) {
         wgpu::ComputePipelineDescriptor pDesc;
         pDesc.compute.module = module;
         ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&pDesc),
-                            testing::HasSubstr("exceeds maxBindGroups"));
+                            HasSubstr("exceeds maxBindGroups"));
     }
     {
         utils::ComboRenderPipelineDescriptor pDesc;
@@ -346,7 +351,7 @@ TEST_F(CompatValidationTest, LargeGroupIds) {
         pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
 
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc),
-                            testing::HasSubstr("exceeds maxBindGroups"));
+                            HasSubstr("exceeds maxBindGroups"));
     }
 }
 
@@ -442,8 +447,8 @@ TEST_F(CompatValidationTest, CanNotCreatePipelineWithDepthTextureUsedWithNonComp
         } else {
             ASSERT_DEVICE_ERROR(
                 device.CreateRenderPipeline(&pDesc),
-                testing::HasSubstr("texture_depth_xx can not be used with non-comparison samplers "
-                                   "in compatibility mode"));
+                HasSubstr("texture_depth_xx can not be used with non-comparison samplers "
+                          "in compatibility mode"));
         }
     }
 }
@@ -587,8 +592,7 @@ fn usage1() -> vec4f {
         if (test.expectSuccess) {
             device.CreateRenderPipeline(&descriptor);
         } else {
-            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
-                                testing::HasSubstr("compat"));
+            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor), HasSubstr("compat"));
         }
     }
 }
@@ -636,8 +640,7 @@ TEST_F(CompatValidationTest, CanNotUseSampleMask) {
         descriptor.multisample.count = 4;
         descriptor.multisample.alphaToCoverageEnabled = false;
 
-        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
-                            testing::HasSubstr("sample_mask"));
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor), HasSubstr("sample_mask"));
     }
 }
 
@@ -684,8 +687,7 @@ TEST_F(CompatValidationTest, CanNotUseFragmentShaderWithSampleIndex) {
         descriptor.multisample.count = 4;
         descriptor.multisample.alphaToCoverageEnabled = false;
 
-        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
-                            testing::HasSubstr("sample_index"));
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor), HasSubstr("sample_index"));
     }
 }
 
@@ -742,7 +744,7 @@ TEST_F(CompatValidationTest, CanNotUseShaderWithUnsupportedInterpolateTypeOrSamp
                 device.CreateRenderPipeline(&descriptor);
             } else {
                 ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
-                                    testing::HasSubstr("in compatibility mode"));
+                                    HasSubstr("in compatibility mode"));
             }
         }
     }
@@ -801,7 +803,7 @@ TEST_F(CompatValidationTest, CanNotUseStorageBufferInVertexStageWithDefaultLimit
                 wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&descriptor);
             } else {
                 ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor),
-                                    testing::HasSubstr("maxStorageBuffers"));
+                                    HasSubstr("maxStorageBuffers"));
             }
         }
     }
@@ -839,7 +841,7 @@ TEST_F(CompatValidationTest, CanNotUseStorageTexturesInVertexStageWithDefaultLim
                 wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&descriptor);
             } else {
                 ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor),
-                                    testing::HasSubstr("maxStorageTextures"));
+                                    HasSubstr("maxStorageTextures"));
             }
         }
     }
@@ -954,12 +956,11 @@ enum FlexibleTextureViewsFeature {
     Disabled,
 };
 
-class CompatTextureViewValidationTests
-    : public CompatValidationTest,
-      public ::testing::WithParamInterface<FlexibleTextureViewsFeature> {
+class CompatTextureViewValidationTests : public CompatValidationTest,
+                                         public WithParamInterface<FlexibleTextureViewsFeature> {
   public:
     static std::string PrintToStringParamName(
-        const testing::TestParamInfo<FlexibleTextureViewsFeature>& info) {
+        const TestParamInfo<FlexibleTextureViewsFeature>& info) {
         std::ostringstream ss;
         ss << "WithFlexibleTextureViews";
         if (info.param == FlexibleTextureViewsFeature::Enabled) {
@@ -1025,7 +1026,7 @@ TEST_P(CompatTextureViewValidationTests, CanNotDrawDifferentMipsSameTextureSameB
             pass.End();
 
             ASSERT_TEXTURE_VIEW_ERROR_IF_NO_FLEXIBLE_FEATURE(encoder.Finish(),
-                                                             testing::HasSubstr("different views"));
+                                                             HasSubstr("different views"));
         });
 }
 
@@ -1063,7 +1064,7 @@ TEST_P(CompatTextureViewValidationTests, CanNotDrawDifferentMipsSameTextureDiffe
             pass.End();
 
             ASSERT_TEXTURE_VIEW_ERROR_IF_NO_FLEXIBLE_FEATURE(encoder.Finish(),
-                                                             testing::HasSubstr("different views"));
+                                                             HasSubstr("different views"));
         });
 }
 
@@ -1274,7 +1275,7 @@ TEST_P(CompatTextureViewValidationTests, CanNotComputeWithDifferentMipsSameTextu
             pass.End();
 
             ASSERT_TEXTURE_VIEW_ERROR_IF_NO_FLEXIBLE_FEATURE(encoder.Finish(),
-                                                             testing::HasSubstr("different views"));
+                                                             HasSubstr("different views"));
         });
 }
 
@@ -1312,7 +1313,7 @@ TEST_P(CompatTextureViewValidationTests,
             pass.End();
 
             ASSERT_TEXTURE_VIEW_ERROR_IF_NO_FLEXIBLE_FEATURE(encoder.Finish(),
-                                                             testing::HasSubstr("different views"));
+                                                             HasSubstr("different views"));
         });
 }
 
@@ -1484,7 +1485,7 @@ TEST_P(CompatTextureViewValidationTests,
             pass.End();
 
             ASSERT_TEXTURE_VIEW_ERROR_IF_NO_FLEXIBLE_FEATURE(encoder.Finish(),
-                                                             testing::HasSubstr("different views"));
+                                                             HasSubstr("different views"));
         });
 }
 
@@ -1522,7 +1523,7 @@ TEST_P(CompatTextureViewValidationTests,
             pass.End();
 
             ASSERT_TEXTURE_VIEW_ERROR_IF_NO_FLEXIBLE_FEATURE(encoder.Finish(),
-                                                             testing::HasSubstr("different views"));
+                                                             HasSubstr("different views"));
         });
 }
 
@@ -1624,7 +1625,7 @@ TEST_F(CompatValidationTest, CanNotCreateBGRA8UnormSRGBTexture) {
     descriptor.usage = wgpu::TextureUsage::TextureBinding;
 
     ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor),
-                        testing::HasSubstr("not supported in compatibility mode"));
+                        HasSubstr("not supported in compatibility mode"));
 }
 
 TEST_F(CompatValidationTest, CanNotCreateBGRA8UnormTextureWithBGRA8UnormSrgbView) {
@@ -1639,7 +1640,7 @@ TEST_F(CompatValidationTest, CanNotCreateBGRA8UnormTextureWithBGRA8UnormSrgbView
     descriptor.viewFormats = &viewFormat;
 
     ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor),
-                        testing::HasSubstr("not supported in compatibility mode"));
+                        HasSubstr("not supported in compatibility mode"));
 }
 
 TEST_F(CompatValidationTest, CanNotCopyMultisampleTextureToTexture) {
@@ -1664,8 +1665,7 @@ TEST_F(CompatValidationTest, CanNotCopyMultisampleTextureToTexture) {
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyTextureToTexture(&source, &destination, &srcDescriptor.size);
-    ASSERT_DEVICE_ERROR(encoder.Finish(),
-                        testing::HasSubstr("cannot be copied in compatibility mode"));
+    ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr("cannot be copied in compatibility mode"));
 }
 
 // Regression test for crbug.com/339704108
@@ -1706,7 +1706,7 @@ TEST_P(CompatTextureViewValidationTests, InvalidTextureBindingViewDimensionDescr
     textureBindingViewDimensionDesc.textureBindingViewDimension =
         static_cast<wgpu::TextureViewDimension>(99);
 
-    ASSERT_TEXTURE_VIEW_ERROR_IF_NO_FLEXIBLE_FEATURE(device.CreateTexture(&descriptor), testing::_);
+    ASSERT_TEXTURE_VIEW_ERROR_IF_NO_FLEXIBLE_FEATURE(device.CreateTexture(&descriptor), _);
 }
 
 class CompatTextureViewDimensionValidationTests : public CompatTextureViewValidationTests {
@@ -1734,7 +1734,7 @@ class CompatTextureViewDimensionValidationTests : public CompatTextureViewValida
         } else {
             ASSERT_DEVICE_ERROR(
                 utils::MakeBindGroup(device, layout, {{0, texture.CreateView(&viewDesc)}}),
-                testing::HasSubstr("must match textureBindingViewDimension"));
+                HasSubstr("must match textureBindingViewDimension"));
         }
 
         texture.Destroy();
@@ -1764,7 +1764,7 @@ class CompatTextureViewDimensionValidationTests : public CompatTextureViewValida
         } else {
             ASSERT_DEVICE_ERROR(
                 utils::MakeBindGroup(device, layout, {{0, texture.CreateView(&viewDesc)}}),
-                testing::HasSubstr("must match textureBindingViewDimension"));
+                HasSubstr("must match textureBindingViewDimension"));
         }
 
         texture.Destroy();
@@ -1785,7 +1785,7 @@ class CompatTextureViewDimensionValidationTests : public CompatTextureViewValida
                 CreateTextureWithViewDimension(depth, dimension, textureBindingViewDimension,
                                                wgpu::TextureFormat::RGBA8Unorm,
                                                wgpu::TextureUsage::TextureBinding),
-                testing::HasSubstr(expectedSubstr));
+                HasSubstr(expectedSubstr));
         }
     }
 
@@ -1968,7 +1968,7 @@ TEST_P(CompatTextureViewValidationTests, CanNotDrawDifferentAspectSameTextureSam
             pass.End();
 
             ASSERT_TEXTURE_VIEW_ERROR_IF_NO_FLEXIBLE_FEATURE(encoder.Finish(),
-                                                             testing::HasSubstr("different views"));
+                                                             HasSubstr("different views"));
         });
 }
 
@@ -2031,7 +2031,7 @@ TEST_F(CompatCompressedCopyT2BAndCopyT2TValidationTests, CanNotCopyCompressedTex
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyTextureToBuffer(&source, &destination, &descriptor.size);
-        ASSERT_DEVICE_ERROR(encoder.Finish(), testing::HasSubstr("cannot be used"));
+        ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr("cannot be used"));
     }
 }
 
@@ -2056,7 +2056,7 @@ TEST_F(CompatCompressedCopyT2BAndCopyT2TValidationTests, CanNotCopyCompressedTex
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyTextureToTexture(&source, &destination, &descriptor.size);
-        ASSERT_DEVICE_ERROR(encoder.Finish(), testing::HasSubstr("cannot be used"));
+        ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr("cannot be used"));
     }
 }
 
@@ -2125,8 +2125,7 @@ class CompatMaxVertexAttributesTest : public CompatValidationTest {
         if (expectSuccess) {
             device.CreateRenderPipeline(&descriptor);
         } else {
-            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
-                                testing::HasSubstr("compat"));
+            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor), HasSubstr("compat"));
         }
     }
 };
@@ -2221,28 +2220,28 @@ TEST_P(CompatTextureViewSwizzleValidationTests,
                 drawFn(pass);
                 pass.End();
 
-                ASSERT_TEXTURE_VIEW_ERROR_IF_NO_FLEXIBLE_FEATURE(
-                    encoder.Finish(), testing::HasSubstr("different views"));
+                ASSERT_TEXTURE_VIEW_ERROR_IF_NO_FLEXIBLE_FEATURE(encoder.Finish(),
+                                                                 HasSubstr("different views"));
             });
     }
 }
 
 INSTANTIATE_TEST_SUITE_P(,
                          CompatTextureViewValidationTests,
-                         ::testing::Values(FlexibleTextureViewsFeature::Disabled,
-                                           FlexibleTextureViewsFeature::Enabled),
+                         Values(FlexibleTextureViewsFeature::Disabled,
+                                FlexibleTextureViewsFeature::Enabled),
                          CompatTextureViewValidationTests::PrintToStringParamName);
 
 INSTANTIATE_TEST_SUITE_P(,
                          CompatTextureViewDimensionValidationTests,
-                         ::testing::Values(FlexibleTextureViewsFeature::Disabled,
-                                           FlexibleTextureViewsFeature::Enabled),
+                         Values(FlexibleTextureViewsFeature::Disabled,
+                                FlexibleTextureViewsFeature::Enabled),
                          CompatTextureViewValidationTests::PrintToStringParamName);
 
 INSTANTIATE_TEST_SUITE_P(,
                          CompatTextureViewSwizzleValidationTests,
-                         ::testing::Values(FlexibleTextureViewsFeature::Disabled,
-                                           FlexibleTextureViewsFeature::Enabled),
+                         Values(FlexibleTextureViewsFeature::Disabled,
+                                FlexibleTextureViewsFeature::Enabled),
                          CompatTextureViewValidationTests::PrintToStringParamName);
 
 class CompatLayoutLimitsTests : public CompatValidationTest {
@@ -2275,7 +2274,7 @@ class CompatLayoutLimitsTests : public CompatValidationTest {
         descriptor.entryCount = entries.size();
         descriptor.entries = entries.data();
         ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor),
-                            testing::HasSubstr(expectedErrorSubstring));
+                            HasSubstr(expectedErrorSubstring));
     }
 
     void DoPipelineLayoutTest(uint32_t limitInStage,
@@ -2307,7 +2306,7 @@ class CompatLayoutLimitsTests : public CompatValidationTest {
         pipelineLayoutDescriptor.bindGroupLayouts = bgls.data();
 
         ASSERT_DEVICE_ERROR(device.CreatePipelineLayout(&pipelineLayoutDescriptor),
-                            testing::HasSubstr(expectedErrorSubstring));
+                            HasSubstr(expectedErrorSubstring));
     }
 };
 
