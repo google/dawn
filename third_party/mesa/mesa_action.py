@@ -25,15 +25,16 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-"""Helper wrapper for Mesa GN codegen actions.
+"""Helper wrapper for Mesa GN and CMake codegen actions.
 
-This script serves three roles for the native GN Mesa build (//third_party/mesa:mesa):
+This script serves three roles for the native GN and CMake Mesa builds:
 1. Bridging to vpython3 (--vpython-spec): Dawn's root .gn configures
    `script_executable` to use the bare hermetic CPython interpreter
    (//third_party/cpython3/host/bin/python3), which does not automatically load
-   Dawn's root `vpython.toml`. Mesa's Python codegen scripts require third-party
-   packages like `mako` and `pyyaml` defined in `vpython.toml`, so this wrapper
-   re-invokes them under `vpython3 -vpython-spec`.
+   Dawn's root `vpython.toml`. Similarly, CMake invokes `${Python3_EXECUTABLE}`
+   directly. Mesa's Python codegen scripts require third-party packages like
+   `mako` and `pyyaml` defined in `vpython.toml`, so this wrapper re-invokes
+   them under `vpython3 -vpython-spec`.
 2. Running compiled build-time tools: GN `action()` targets can only execute a
    Python script directly, so this wrapper is also used to invoke compiled host
    binaries such as `glslang_validator`.
@@ -69,14 +70,16 @@ def main():
         cmd = ["vpython3", "-vpython-spec", args.vpython_spec] + cmd
 
     if args.capture_stdout:
+        res = subprocess.run(cmd, stdout=subprocess.PIPE)
+        if res.returncode != 0:
+            return res.returncode
         os.makedirs(
             os.path.dirname(os.path.abspath(args.capture_stdout)),
             exist_ok=True,
         )
-        res = subprocess.run(cmd, stdout=subprocess.PIPE)
         with open(args.capture_stdout, "wb") as f:
             f.write(res.stdout)
-        return res.returncode
+        return 0
 
     return subprocess.call(cmd)
 

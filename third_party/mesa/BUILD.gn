@@ -1121,6 +1121,7 @@ shared_library("vulkan_lvp") {
   ldflags = [
     "-fuse-ld=lld",
     "-Wl,-Bsymbolic",
+    "-Wl,-z,nodelete",
     "-Wl,--gc-sections",
     "-Wl,--exclude-libs,ALL",
     "-Wl,-rpath,\$ORIGIN",

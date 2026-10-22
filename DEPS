@@ -326,10 +326,6 @@ deps = {
     'url': '{chromium_git}/external/gitlab.freedesktop.org/mesa/mesa/@2e683eb7385c54f872acc47b371210d2282bc103',
     'condition': 'checkout_mesa and host_os == "linux"',
   },
-  'third_party/meson/src': {
-    'url': '{chromium_git}/external/github.com/mesonbuild/meson@d389906a136c2aac9820ded0f38d1e25ef25fb9a',
-    'condition': 'checkout_mesa and host_os == "linux"',
-  },
   'third_party/llvm-dev': {
     'packages': [{
       'package': 'infra/3pp/tools/llvm-dev/linux-amd64',
