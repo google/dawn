@@ -38,6 +38,7 @@
 #include "src/dawn/native/ShaderModule.h"
 #include "src/dawn/native/dawn_platform.h"
 #include "src/dawn/native/metal/BufferMTL.h"
+#include "src/dawn/native/metal/ResourceTableMTL.h"
 #include "src/utils/assert.h"
 #include "src/utils/numeric.h"
 
@@ -948,9 +949,15 @@ MaybeError EncodeMetalRenderPass(Device* device,
     // No (more) workarounds needed! We can finally encode the actual render pass.
     commandContext->EndBlit();
     auto renderCommandEncoder = commandContext->BeginRender(mtlRenderPass);
-    if (resourceUsage != nullptr && device->IsToggleEnabled(Toggle::MetalUseArgumentBuffers)) {
-        MakeResourcesResident(renderCommandEncoder, *resourceUsage);
+    if (resourceUsage != nullptr) {
+        if (device->IsToggleEnabled(Toggle::MetalUseArgumentBuffers)) {
+            MakeResourcesResident(renderCommandEncoder, *resourceUsage);
+        }
+        if (resourceUsage->resourceTable != nullptr) {
+            ToBackend(resourceUsage->resourceTable)->UseResources(renderCommandEncoder);
+        }
     }
+
     DAWN_TRY(encodeInside(renderCommandEncoder, renderPassCmd));
     commandContext->EndRender();
     return {};
@@ -961,6 +968,9 @@ void MetalComputePassMakeResourcesResident(DeviceBase* device,
                                            const SyncScopeResourceUsage& resourceUsage) {
     if (device->IsToggleEnabled(Toggle::MetalUseArgumentBuffers)) {
         MakeResourcesResident(encoder, resourceUsage);
+    }
+    if (resourceUsage.resourceTable != nullptr) {
+        ToBackend(resourceUsage.resourceTable)->UseResources(encoder);
     }
 }
 

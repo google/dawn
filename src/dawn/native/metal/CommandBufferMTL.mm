@@ -50,6 +50,7 @@
 #include "src/dawn/native/metal/PipelineLayoutMTL.h"
 #include "src/dawn/native/metal/QuerySetMTL.h"
 #include "src/dawn/native/metal/RenderPipelineMTL.h"
+#include "src/dawn/native/metal/ResourceTableMTL.h"
 #include "src/dawn/native/metal/SamplerMTL.h"
 #include "src/dawn/native/metal/StorageBufferLengthTrackerMTL.h"
 #include "src/dawn/native/metal/TextureMTL.h"
@@ -675,10 +676,12 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                                 GetDevice()->IsToggleEnabled(Toggle::MetalUseArgumentBuffers));
 
     id<MTLComputeCommandEncoder> encoder;
+
     // When counter sampling is supported at stage boundary, begin a configurable compute pass
     // encoder which is supported since macOS 11.0+ and iOS 14.0+ and set timestamp writes to
     // compute pass descriptor, otherwise begin a default compute pass encoder, and simulate
-    // timestamp writes using sampleCountersInBuffer API at the beginning and end of compute pass.
+    // timestamp writes using sampleCountersInBuffer API at the beginning and end of compute
+    // pass.
     if (ToBackend(GetDevice())->UseCounterSamplingAtStageBoundary()) {
         NSRef<MTLComputePassDescriptor> descriptor = CreateMTLComputePassDescriptor(computePassCmd);
         encoder = commandContext->BeginCompute(descriptor.Get());
@@ -833,10 +836,8 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
             }
 
             case Command::SetResourceTable: {
-                [[maybe_unused]] SetResourceTableCmd* cmd =
-                    mCommands.NextCommand<SetResourceTableCmd>();
-                // TODO(473444514): Implement
-                break;
+                return DAWN_UNRECOVERABLE_ERROR(
+                    "ResourceTable currently not supported in Compute passes on Metal.");
             }
 
             default: {
@@ -867,6 +868,13 @@ MaybeError CommandBuffer::RecordBeginRenderPass(CommandRecordingContext* command
         }
     }
     DAWN_TRY(LazyClearSyncScope(resourceUsage, commandContext));
+
+    // Apply the resource table usages
+    if (auto table = resourceUsage.resourceTable) {
+        auto writables = GatherWritableTextures(resourceUsage);
+        DAWN_TRY(ToBackend(table)->ApplyPendingUpdates(commandContext, writables));
+    }
+
     commandContext->EndBlit();
 
     // Before beginning, we encode a compute pass that converts multi draws into an ICB
@@ -1204,9 +1212,8 @@ MaybeError CommandBuffer::RecordRenderPass(
             }
 
             case Command::SetResourceTable: {
-                [[maybe_unused]] SetResourceTableCmd* cmd =
-                    mCommands.NextCommand<SetResourceTableCmd>();
-                // TODO(473444514): Implement
+                SetResourceTableCmd* cmd = iter->NextCommand<SetResourceTableCmd>();
+                bindGroups.SetResourceTable(ToBackend(cmd->table.Get()));
                 break;
             }
 

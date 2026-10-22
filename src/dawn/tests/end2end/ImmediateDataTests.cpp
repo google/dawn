@@ -1177,6 +1177,9 @@ class ImmediateDataWithResourceTableTests : public DawnTest {
 // The VVL will complain if the resource table is not correctly rebound (with
 // --enable-backend-validation).
 TEST_P(ImmediateDataWithResourceTableTests, ResourceTableReboundOnDifferentImmediateSize) {
+    // TODO(473444514): Re-enable when compute shaders support ResourceTable on metal
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
+
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage}});
 

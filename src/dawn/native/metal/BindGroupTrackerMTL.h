@@ -34,6 +34,7 @@
 #include "src/dawn/native/BindGroupTracker.h"
 #include "src/dawn/native/metal/BindGroupMTL.h"
 #include "src/dawn/native/metal/BufferMTL.h"
+#include "src/dawn/native/metal/ResourceTableMTL.h"
 #include "src/dawn/native/metal/SamplerMTL.h"
 #include "src/dawn/native/metal/StorageBufferLengthTrackerMTL.h"
 #include "src/dawn/native/metal/TextureMTL.h"
@@ -55,6 +56,11 @@ class BindGroupTracker : public BindGroupTrackerBase<true> {
     void Apply(Encoder encoder) {
         BeforeApply();
 
+        if (mResourceTable != mLastAppliedResourceTable) {
+            ApplyResourceTable(encoder);
+            mLastAppliedResourceTable = mResourceTable;
+        }
+
         for (BindGroupIndex index : mDirtyBindGroupsObjectChangedOrIsDynamic) {
             ApplyBindGroup(encoder, index, ToBackend(mBindGroups[index]), GetDynamicOffsets(index),
                            ToBackend(mPipeline->GetLayout()));
@@ -62,6 +68,8 @@ class BindGroupTracker : public BindGroupTrackerBase<true> {
 
         AfterApply();
     }
+
+    void SetResourceTable(ResourceTable* resourceTable) { mResourceTable = resourceTable; }
 
   private:
     // Handles a call to SetBindGroup, directing the commands to the correct encoder.
@@ -273,6 +281,37 @@ class BindGroupTracker : public BindGroupTrackerBase<true> {
         ApplyBindGroupImpl(nullptr, encoder, std::forward<Args&&>(args)...);
     }
 
+    void ApplyResourceTableImpl(id<MTLRenderCommandEncoder> render,
+                                id<MTLComputeCommandEncoder> compute) {
+        Buffer* metadataBuffer = ToBackend(mResourceTable->GetMetadataBuffer());
+        auto scopedUseMetadataBuffer = metadataBuffer->UseInternal();
+        metadataBuffer->TrackUsage();
+
+        id<MTLBuffer> mtlMetadataBuffer = metadataBuffer->GetMTLBuffer();
+        id<MTLBuffer> mtlArgBuffer = mResourceTable->GetArgBuffer();
+
+        if (render != nullptr) {
+            [render setVertexBuffer:mtlArgBuffer offset:0 atIndex:kResourceTableBindingSlot];
+            [render setFragmentBuffer:mtlArgBuffer offset:0 atIndex:kResourceTableBindingSlot];
+
+            [render setVertexBuffer:mtlMetadataBuffer offset:0 atIndex:kResourceTableStorageSlot];
+            [render setFragmentBuffer:mtlMetadataBuffer offset:0 atIndex:kResourceTableStorageSlot];
+        } else if (compute != nullptr) {
+            [compute setBuffer:mtlArgBuffer offset:0 atIndex:kResourceTableBindingSlot];
+            [compute setBuffer:mtlMetadataBuffer offset:0 atIndex:kResourceTableStorageSlot];
+        } else {
+            DAWN_UNREACHABLE();
+        }
+    }
+
+    void ApplyResourceTable(id<MTLRenderCommandEncoder> encoder) {
+        ApplyResourceTableImpl(encoder, nullptr);
+    }
+
+    void ApplyResourceTable(id<MTLComputeCommandEncoder> encoder) {
+        ApplyResourceTableImpl(nullptr, encoder);
+    }
+
     raw_ptr<StorageBufferLengthTracker> mLengthTracker;
 
     // Keep track of current texture and sampler bindings to minimize state changes even when bind
@@ -282,6 +321,9 @@ class BindGroupTracker : public BindGroupTrackerBase<true> {
     PerStage<absl::flat_hash_map<uint32_t, id<MTLSamplerState>>> mBoundSamplers;
 
     bool mUseArgumentBuffers = false;
+
+    raw_ptr<ResourceTable> mResourceTable = nullptr;
+    raw_ptr<ResourceTable> mLastAppliedResourceTable = nullptr;
 };
 
 }  // namespace dawn::native::metal

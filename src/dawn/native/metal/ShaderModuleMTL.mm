@@ -200,7 +200,7 @@ ResultOrUnknownError<CacheResult<MslCompilation>> TranslateToMSL(
     const ImmediateMask& pipelineImmediateMask) {
     bool useArgumentBuffers = device->IsToggleEnabled(Toggle::MetalUseArgumentBuffers);
 
-    auto ToMSLBindPoint = [&](BindGroupIndex group, BindingIndex index) {
+    auto ToMSLBindPoint = [&](BindGroupIndex group, BindingIndex index) -> tint::BindingPoint {
         if (useArgumentBuffers) {
             return tint::BindingPoint{
                 .group = uint32_t{group},
@@ -214,7 +214,6 @@ ResultOrUnknownError<CacheResult<MslCompilation>> TranslateToMSL(
     };
 
     tint::Bindings bindings = GenerateBindingRemapping(layout, stage, ToMSLBindPoint);
-
     tint::msl::writer::ArrayLengthOptions arrayLengthFromConstants =
         GenerateArrayLengthOptions(layout, stage);
 

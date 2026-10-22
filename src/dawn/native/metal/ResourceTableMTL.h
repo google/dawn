@@ -30,20 +30,31 @@
 
 #import <Metal/Metal.h>
 
+#include <vector>
+
 #include "src/dawn/common/NSRef.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/ResourceTable.h"
+#include "src/dawn/native/metal/TextureMTL.h"
 
 namespace dawn::native::metal {
 
 class Device;
+class CommandRecordingContext;
 
 class ResourceTable final : public ResourceTableBase {
   public:
     static ResultOrError<Ref<ResourceTable>> Create(Device* device,
                                                     const ResourceTableDescriptor* descriptor);
 
+    // Apply updates to resources or to the metadata buffers that are pending.
+    MaybeError ApplyPendingUpdates(CommandRecordingContext* recordingContext,
+                                   const absl::flat_hash_set<TextureBase*>& writableTextures);
+
     id<MTLBuffer> GetArgBuffer() const;
+
+    void UseResources(id<MTLRenderCommandEncoder> encoder);
+    void UseResources(id<MTLComputeCommandEncoder> encoder);
 
   protected:
     void DestroyImpl(DestroyReason reason) override;
@@ -55,7 +66,14 @@ class ResourceTable final : public ResourceTableBase {
     using ResourceTableBase::ResourceTableBase;
     MaybeError Initialize();
 
+    MaybeError TransitionResources(CommandRecordingContext* recordingContext,
+                                   const absl::flat_hash_set<raw_ptr<TextureBase>>& textures);
+    MaybeError UpdateMetadataBuffer(CommandRecordingContext* recordingContext,
+                                    const std::vector<MetadataUpdate>& updates);
+    MaybeError UpdateResourceBindings(const std::vector<ResourceDiff>& diffs);
+
     NSPRef<id<MTLBuffer>> mArgBuffer;
+    ityp::vector<ResourceTableSlot, Ref<TextureView>> mTextureViews;
 };
 
 }  // namespace dawn::native::metal

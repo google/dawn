@@ -915,7 +915,10 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     limits->v1.maxColorAttachmentBytesPerSample = mtlLimits.maxTotalRenderTargetSize;
 
     uint32_t maxBuffersPerStage = mtlLimits.maxBufferArgumentEntriesPerFunc;
-    maxBuffersPerStage -= 1;  // One slot is reserved to store buffer lengths.
+    // Note, this doesn't take resource table into account. There are guards in the resource table
+    // to check for the use of these slots when resource table is enabled.
+    // TODO(473444514): Update text when resource tables is complete
+    maxBuffersPerStage -= 1;  // One slot for immediates
 
     uint32_t baseMaxBuffersPerStage = limits->v1.maxStorageBuffersPerShaderStage +
                                       limits->v1.maxUniformBuffersPerShaderStage +
