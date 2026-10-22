@@ -617,6 +617,13 @@ def as_wasmType(x):
 
     if isinstance(x, AnnotatedTypedMember):
         if x.annotation == 'value':
+            # The Wasm C ABI passes non-singleton structs like WGPUStringView
+            # indirectly (it contains both a data pointer and a length):
+            # https://github.com/WebAssembly/tool-conventions/blob/main/BasicCABI.md#function-arguments-and-return-values
+            # Mark them as pointers so Emscripten converts BigInt addresses for
+            # MEMORY64. This does not apply to structure return values.
+            if x.type.name.get() == 'string view':
+                return 'p'
             x = x.type
         elif '*' in x.annotation:
             return 'p'
