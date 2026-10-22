@@ -29,6 +29,9 @@
 
 #include "src/dawn/common/Strings.h"
 
+namespace dawn {
+namespace {
+
 #define STATIC_EXPECT_STREQ(x, y) static_assert(std::string_view(x) == std::string_view(y))
 
 // DAWN_MULTILINE tests
@@ -53,3 +56,6 @@ STATIC_EXPECT_STREQ("@fragment fn fs_empty_main ( ) { 2 / 3 }",
     // comment
     // comment
 ));
+
+}  // anonymous namespace
+}  // namespace dawn

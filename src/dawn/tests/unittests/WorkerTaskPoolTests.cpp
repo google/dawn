@@ -34,12 +34,14 @@
 namespace dawn {
 namespace {
 
-using testing::NotNull;
+using ::testing::MockCallback;
+using ::testing::NotNull;
+using ::testing::Test;
 
-using MockTaskCallback = testing::MockCallback<platform::PostWorkerTaskCallback>;
-using MockJobCallback = testing::MockCallback<platform::PostWorkerJobCallback>;
+using MockTaskCallback = MockCallback<platform::PostWorkerTaskCallback>;
+using MockJobCallback = MockCallback<platform::PostWorkerJobCallback>;
 
-class WorkerTaskPoolTests : public testing::Test {
+class WorkerTaskPoolTests : public Test {
   protected:
     WorkerTaskPoolTests() : pool(platform.CreateWorkerTaskPool()) {}
 

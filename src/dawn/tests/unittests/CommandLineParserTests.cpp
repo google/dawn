@@ -268,7 +268,9 @@ enum class Cell {
 };
 TEST(CommandLineParserTest, EnumParsing) {
     std::vector<std::pair<std::string_view, Cell>> conversions = {{
-        {"pop", Cell::Pop}, {"six", Cell::Six}, {"uh-uh", Cell::Uhuh},
+        {"pop", Cell::Pop},
+        {"six", Cell::Six},
+        {"uh-uh", Cell::Uhuh},
         // others left as an exercise to the reader.
     }};
 

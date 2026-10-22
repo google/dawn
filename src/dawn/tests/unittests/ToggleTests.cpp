@@ -43,10 +43,11 @@
 namespace dawn {
 namespace {
 
-using testing::Contains;
-using testing::StrEq;
+using ::testing::Contains;
+using ::testing::StrEq;
+using ::testing::Test;
 
-class ToggleTest : public testing::Test {
+class ToggleTest : public Test {
   public:
     // Helper function for getting the null adapter with given toggles.
     native::Adapter CreateNullAdapter(native::Instance* instance,

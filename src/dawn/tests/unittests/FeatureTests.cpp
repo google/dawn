@@ -39,10 +39,12 @@
 namespace dawn {
 namespace {
 
-class FeatureTests : public testing::Test {
+using ::testing::Test;
+
+class FeatureTests : public Test {
   public:
     FeatureTests()
-        : testing::Test(),
+        : Test(),
           mInstanceBase([]() -> Ref<dawn::native::InstanceBase> {
               static constexpr auto kMultipleDevicesPerAdapter =
                   wgpu::InstanceFeatureName::MultipleDevicesPerAdapter;

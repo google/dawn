@@ -40,7 +40,9 @@
 namespace dawn {
 namespace {
 
-class EnumeratorTest : public testing::Test {
+using ::testing::Test;
+
+class EnumeratorTest : public Test {
   protected:
     template <typename Index, typename Thing, typename Value>
     void Check(Thing thingToEnumerate, const Value* values) {

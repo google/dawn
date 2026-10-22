@@ -34,7 +34,9 @@
 namespace dawn {
 namespace {
 
-class ITypArrayTest : public testing::Test {
+using ::testing::Test;
+
+class ITypArrayTest : public Test {
   protected:
     using Key = TypedInteger<struct KeyT, uint32_t>;
     using Val = TypedInteger<struct ValT, uint32_t>;

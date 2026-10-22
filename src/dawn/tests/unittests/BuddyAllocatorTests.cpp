@@ -31,6 +31,7 @@
 #include "src/dawn/native/BuddyAllocator.h"
 
 namespace dawn::native {
+namespace {
 
 // Verify the buddy allocator with a basic test.
 TEST(BuddyAllocatorTests, SingleBlock) {
@@ -340,4 +341,5 @@ TEST(BuddyAllocatorTests, VariousSizeSameAlignment) {
     ASSERT_EQ(allocator.ComputeTotalNumOfFreeBlocksForTesting(), 0u);
 }
 
+}  // anonymous namespace
 }  // namespace dawn::native

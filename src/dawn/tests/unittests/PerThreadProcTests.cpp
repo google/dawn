@@ -39,7 +39,9 @@
 namespace dawn {
 namespace {
 
-class PerThreadProcTests : public testing::Test {
+using ::testing::Test;
+
+class PerThreadProcTests : public Test {
   public:
     PerThreadProcTests()
         : mNativeInstance(native::APICreateInstance(nullptr)),

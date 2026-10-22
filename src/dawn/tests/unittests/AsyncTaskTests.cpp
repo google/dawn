@@ -75,11 +75,9 @@ void DoTask(ConcurrentTaskResultQueue* resultQueue, uint32_t id) {
     resultQueue->AddResult(std::move(result));
 }
 
-class AsyncTaskTest : public testing::Test {};
-
 // TODO(crbug.com/454672586): Causing flaky fatal errors on multiple platforms.
 // Emulate the basic usage of worker thread pool in Create*PipelineAsync().
-TEST_F(AsyncTaskTest, DISABLED_Basic) {
+TEST(AsyncTaskTest, DISABLED_Basic) {
     platform::Platform platform;
     std::unique_ptr<platform::WorkerTaskPool> pool = platform.CreateWorkerTaskPool();
 
@@ -104,7 +102,7 @@ TEST_F(AsyncTaskTest, DISABLED_Basic) {
 }
 
 // Test that the task status is updated based on the task's running state
-TEST_F(AsyncTaskTest, Status) {
+TEST(AsyncTaskTest, Status) {
     platform::Platform platform;
     std::unique_ptr<platform::WorkerTaskPool> pool = platform.CreateWorkerTaskPool();
 
@@ -127,7 +125,7 @@ TEST_F(AsyncTaskTest, Status) {
 }
 
 // Test coverage of the completion callbacks for tasks
-TEST_F(AsyncTaskTest, Callbacks) {
+TEST(AsyncTaskTest, Callbacks) {
     platform::Platform platform;
     std::unique_ptr<platform::WorkerTaskPool> pool = platform.CreateWorkerTaskPool();
 

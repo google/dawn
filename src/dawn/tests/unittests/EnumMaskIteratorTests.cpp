@@ -32,12 +32,15 @@
 #include "src/utils/compiler.h"
 
 namespace dawn::native {
+namespace {
 
 enum class TestAspect : uint8_t {
     Color = 1,
     Depth = 2,
     Stencil = 4,
 };
+
+}  // anonymous namespace
 
 template <>
 struct EnumBitmaskSize<TestAspect> {
@@ -52,6 +55,7 @@ struct wgpu::IsWGPUBitmask<dawn::native::TestAspect> {
 };
 
 namespace dawn::native {
+namespace {
 
 static_assert(EnumBitmaskSize<TestAspect>::value == 3);
 
@@ -87,4 +91,5 @@ TEST(EnumMaskIteratorTests, Partial) {
     }
 }
 
+}  // anonymous namespace
 }  // namespace dawn::native

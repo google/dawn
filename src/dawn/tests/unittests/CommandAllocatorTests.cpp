@@ -51,8 +51,6 @@ class CommandAllocatorAndPool : public CommandAllocator {
     MemoryBlockAllocator mBlockAllocator;
 };
 
-}  // anonymous namespace
-
 // Definition of the command types used in the tests
 enum class CommandType : uint32_t {
     Draw,
@@ -540,4 +538,5 @@ TEST(CommandAllocator, AcquireCommandBlocks) {
     iterator.MakeEmptyAsDataWasDestroyed();
 }
 
+}  // anonymous namespace
 }  // namespace dawn::native

@@ -39,6 +39,10 @@
 namespace dawn {
 namespace {
 
+using ::testing::PrintToStringParamName;
+using ::testing::TestWithParam;
+using ::testing::Values;
+
 // dawn_wire and dawn_native contain duplicated code for the handling of GetProcAddress
 // so we run the tests against both implementations. This enum is used as a test parameters to
 // know which implementation to test.
@@ -64,10 +68,10 @@ std::ostream& operator<<(std::ostream& stream, DawnFlavor flavor) {
     return stream;
 }
 
-class GetProcAddressTests : public testing::TestWithParam<DawnFlavor> {
+class GetProcAddressTests : public TestWithParam<DawnFlavor> {
   public:
     GetProcAddressTests()
-        : testing::TestWithParam<DawnFlavor>(),
+        : TestWithParam<DawnFlavor>(),
           mNativeInstance(native::APICreateInstance(nullptr)),
           mAdapterBase(mNativeInstance.Get(),
                        native::null::PhysicalDevice::Create(mNativeInstance.Get()),
@@ -170,8 +174,8 @@ TEST_P(GetProcAddressTests, FreeStandingFunctions) {
 
 INSTANTIATE_TEST_SUITE_P(,
                          GetProcAddressTests,
-                         testing::Values(DawnFlavor::Native, DawnFlavor::Wire),
-                         testing::PrintToStringParamName());
+                         Values(DawnFlavor::Native, DawnFlavor::Wire),
+                         PrintToStringParamName());
 
 }  // anonymous namespace
 }  // namespace dawn

@@ -34,6 +34,7 @@
 
 // Make our own Base - Backend object pair, reusing the MyObjectBase name
 namespace dawn::native {
+namespace {
 
 class MyObjectBase : public RefCounted {};
 
@@ -43,10 +44,14 @@ struct MyBackendTraits {
     using MyObjectType = MyObject;
 };
 
+}  // anonymous namespace
+
 template <typename BackendTraits>
 struct ToBackendTraits<MyObjectBase, BackendTraits> {
     using BackendType = typename BackendTraits::MyObjectType;
 };
+
+namespace {
 
 // Instantiate ToBackend for our "backend"
 template <typename T>
@@ -101,4 +106,6 @@ TEST(ToBackend, Ref) {
         myObject->Release();
     }
 }
+
+}  // anonymous namespace
 }  // namespace dawn::native

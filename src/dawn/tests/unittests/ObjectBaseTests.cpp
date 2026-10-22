@@ -30,6 +30,9 @@
 
 #include <utility>
 
+namespace dawn {
+namespace {
+
 class Object : public wgpu::ObjectBase<Object, int*> {
   public:
     using ObjectBase::ObjectBase;
@@ -224,3 +227,6 @@ TEST(ObjectBase, AssignNullptr) {
     obj = nullptr;
     ASSERT_EQ(refcount, 1);
 }
+
+}  // anonymous namespace
+}  // namespace dawn

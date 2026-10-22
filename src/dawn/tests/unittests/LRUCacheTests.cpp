@@ -34,6 +34,8 @@
 namespace dawn::native {
 namespace {
 
+using ::testing::_;
+
 class CacheKey {
   public:
     explicit CacheKey(uint32_t value, bool isError = false) : mValue(value), mIsError(isError) {}
@@ -97,13 +99,13 @@ TEST(LRUCache, ZeroSizedCache) {
     uint32_t cacheId;
     {
         // The constructed values should be evicted immediately.
-        EXPECT_CALL(cache, EvictedFromCache(testing::_));
+        EXPECT_CALL(cache, EvictedFromCache(_));
         CacheValue value = cache.GetOrCreateNoError(key);
         cacheId = value.mId;
     }
 
     {
-        EXPECT_CALL(cache, EvictedFromCache(testing::_));
+        EXPECT_CALL(cache, EvictedFromCache(_));
         CacheValue value = cache.GetOrCreateNoError(key);
 
         // A new cached value should be created.
@@ -146,14 +148,14 @@ TEST(LRUCache, CacheEviction) {
     // Calling GetOrCreate with an existing key won't cause a cache eviction
     {
         CacheKey key(1u);
-        EXPECT_CALL(cache, EvictedFromCache(testing::_)).Times(0);
+        EXPECT_CALL(cache, EvictedFromCache(_)).Times(0);
         cache.GetOrCreateNoError(key);
     }
 
     // Calling GetOrCreate with a new key should evict an older value.
     {
         CacheKey key(TestCache::kDefaultCapacity);
-        EXPECT_CALL(cache, EvictedFromCache(testing::_));
+        EXPECT_CALL(cache, EvictedFromCache(_));
         cache.GetOrCreateNoError(key);
     }
 
@@ -161,7 +163,7 @@ TEST(LRUCache, CacheEviction) {
     // as evidenced by us receiving a new value when querying it again.
     {
         CacheKey key(0u);
-        EXPECT_CALL(cache, EvictedFromCache(testing::_));
+        EXPECT_CALL(cache, EvictedFromCache(_));
         auto value = cache.GetOrCreateNoError(key);
         EXPECT_NE(value.mId, keyIds[0]);
     }
@@ -170,7 +172,7 @@ TEST(LRUCache, CacheEviction) {
     // call, because it was queried more recently than the other keys.
     {
         CacheKey key(1u);
-        EXPECT_CALL(cache, EvictedFromCache(testing::_)).Times(0);
+        EXPECT_CALL(cache, EvictedFromCache(_)).Times(0);
         auto value = cache.GetOrCreateNoError(key);
         EXPECT_EQ(value.mId, keyIds[1]);
     }
@@ -190,7 +192,7 @@ TEST(LRUCache, CacheClear) {
 
     // Calling Clear should evict all values from the cache.
     {
-        EXPECT_CALL(cache, EvictedFromCache(testing::_)).Times(TestCache::kDefaultCapacity);
+        EXPECT_CALL(cache, EvictedFromCache(_)).Times(TestCache::kDefaultCapacity);
         cache.Clear();
     }
 
@@ -198,7 +200,7 @@ TEST(LRUCache, CacheClear) {
     // value and cause no evictions
     {
         CacheKey key(0u);
-        EXPECT_CALL(cache, EvictedFromCache(testing::_)).Times(0);
+        EXPECT_CALL(cache, EvictedFromCache(_)).Times(0);
         auto value = cache.GetOrCreateNoError(key);
         EXPECT_NE(value.mId, keyIds[0]);
     }
