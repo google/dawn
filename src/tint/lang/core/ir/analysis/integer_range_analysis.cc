@@ -88,10 +88,8 @@ struct CompareOpAndConstRHS {
     const Binary* binary = nullptr;
 };
 
-IntegerRangeInfo ToIntegerRangeInfo(const Constant* constant,
-                                    int64_t min_value,
-                                    int64_t max_value) {
-    if (constant->Type()->IsSignedIntegerScalar()) {
+IntegerRangeInfo ToIntegerRangeInfo(bool is_signed, int64_t min_value, int64_t max_value) {
+    if (is_signed) {
         return IntegerRangeInfo(min_value, max_value);
     } else {
         return IntegerRangeInfo(static_cast<uint64_t>(min_value), static_cast<uint64_t>(max_value));
@@ -186,7 +184,8 @@ struct IntegerRangeAnalysisImpl {
         }
         return integer_constant_range_info_map_.GetOrAdd(constant, [&]() {
             int64_t const_value = GetValueFromConstant(constant);
-            return ToIntegerRangeInfo(constant, const_value, const_value);
+            bool is_signed = constant->Type()->IsSignedIntegerScalar();
+            return ToIntegerRangeInfo(is_signed, const_value, const_value);
         });
     }
 
@@ -323,7 +322,7 @@ struct IntegerRangeAnalysisImpl {
 
     /// Analyze a loop to compute the range of the loop control variable if possible.
     void AnalyzeLoop(const Loop* loop) {
-        const Var* index = GetLoopControlVariableFromConstantInitializer(loop);
+        const Var* index = GetLoopControlVariableFromInitializer(loop);
         if (!index) {
             return;
         }
@@ -338,45 +337,71 @@ struct IntegerRangeAnalysisImpl {
         }
 
         TINT_ASSERT(index->Initializer());
-        TINT_ASSERT(index->Initializer()->As<Constant>());
 
-        // for (var i = const_init; ...)
-        const Constant* constant_initializer = index->Initializer()->As<Constant>();
-        int64_t const_init = GetValueFromConstant(constant_initializer);
+        // for (var i = init_value; ...), where `init_value` has a valid range [init_min, init_max].
+        IntegerRangeInfo init_range = GetInfo(index->Initializer());
+        TINT_ASSERT(init_range.IsValid());
+
+        bool is_signed =
+            std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(init_range.range);
+        int64_t init_min = 0;
+        int64_t init_max = 0;
+        if (is_signed) {
+            const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(init_range.range);
+            init_min = range.min_bound;
+            init_max = range.max_bound;
+        } else {
+            const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(init_range.range);
+            TINT_ASSERT(range.max_bound <= static_cast<uint64_t>(u32::kHighestValue));
+            init_min = static_cast<int64_t>(range.min_bound);
+            init_max = static_cast<int64_t>(range.max_bound);
+        }
 
         // for (...; i++) or for(...; i--)
         bool index_is_increasing = update->Op() == BinaryOp::kAdd;
 
         switch (compare_info.op) {
             case BinaryOp::kLessThanEqual: {
-                // for (var index = const_init; index <= const_rhs; index++)
-                // Only `const_init <= const_rhs` is valid. The range of `index` is:
-                // [const_init, const_rhs]
+                // for (var index = init_value; index <= const_rhs; index++), where `init_value` has
+                // a range `[init_min, init_max]`, then range of `index` will be:
+                // - When `const_rhs < init_min`, the loop body can never be executed.
+                // - When `init_min <= const_rhs <= init_max`, the range of `index` is
+                //   `[init_min, const_rhs]` when `init_min <= init_value <= const_rhs`, and becomes
+                //   invalid when `init_value > const_rhs` as the loop won't be executed, so the
+                //   range of `index` is `[init_min, const_rhs]`.
+                // - When `const_rhs > init_max`, the range of `index` is `[init_min, const_rhs]` as
+                //   the loop can always be executed for all the values of `init_value`.
                 // Note that in `GetBinaryToCompareLoopControlVariableInLoopBody()` we disallow
                 // `const_rhs` to be the maximum value of `i32` or `u32`, so:
-                // - `index + 1` won't be overflow as `const_init` cannot be greater than
-                //   `const_rhs`.
-                // - `index <= const_rhs` can correctly exit when `const_init + 1` is the maximum
+                // - `index + 1` won't be overflow as `init_min` cannot be greater than `const_rhs`.
+                // - `index <= const_rhs` can correctly exit when `init_min + 1` is the maximum
                 //   value of `i32` or `u32`.
-                if (index_is_increasing && const_init <= compare_info.const_rhs) {
-                    IntegerRangeInfo range_info = ToIntegerRangeInfo(
-                        constant_initializer, const_init, compare_info.const_rhs);
+                if (index_is_increasing && init_min <= compare_info.const_rhs) {
+                    IntegerRangeInfo range_info =
+                        ToIntegerRangeInfo(is_signed, init_min, compare_info.const_rhs);
                     integer_var_range_info_map_.Add(index, range_info);
                 }
                 break;
             }
             case BinaryOp::kGreaterThanEqual: {
-                // for (var index = const_init; index >= const_rhs; index--)
-                // Only `const_init >= const_rhs` is valid. The range of `index` is:
-                // [const_rhs, const_init]
+                // for (var index = init_value; index >= const_rhs; index--), where `init_value` has
+                // a range `[init_min, init_max]`, then the range of `index` will be:
+                // - When `const_rhs < init_min`, the range of `index` is `[const_rhs, init_max]` as
+                //   the loop can always be executed for all the values of `init_value`.
+                // - When `init_min <= const_rhs <= init_max`, the range of `index` is
+                //   `[const_rhs, init_max]` when `const_rhs <= init_value <= init_max`, and becomes
+                //   invalid when `init_value < const_rhs` as the loop won't be executed, so the
+                //   range
+                //    of `index` is `[const_rhs, init_max]`.
+                // - When `const_rhs > init_max`, the loop body will never be executed.
                 // Note that in `GetBinaryToCompareLoopControlVariableInLoopBody()` we disallow
                 // `const_rhs` to be the minimum value of `i32` or `u32`, so:
-                // - `index - 1` won't be underflow as `const_init` cannot be less than `const_rhs`.
-                // - `index >= const_rhs` can correctly exit when `const_init - 1` is the minimum
+                // - `index - 1` won't be underflow as `init_max` cannot be less than `const_rhs`.
+                // - `index >= const_rhs` can correctly exit when `init_max - 1` is the minimum
                 //   value of `i32` or `u32`.
-                if (!index_is_increasing && const_init >= compare_info.const_rhs) {
-                    IntegerRangeInfo range_info = ToIntegerRangeInfo(
-                        constant_initializer, compare_info.const_rhs, const_init);
+                if (!index_is_increasing && init_max >= compare_info.const_rhs) {
+                    IntegerRangeInfo range_info =
+                        ToIntegerRangeInfo(is_signed, compare_info.const_rhs, init_max);
                     integer_var_range_info_map_.Add(index, range_info);
                 }
                 break;
@@ -386,7 +411,7 @@ struct IntegerRangeAnalysisImpl {
         }
     }
 
-    const Var* GetLoopControlVariableFromConstantInitializer(const Loop* loop) {
+    const Var* GetLoopControlVariableFromInitializer(const Loop* loop) {
         TINT_ASSERT(loop);
 
         auto* init_block = loop->Initializer();
@@ -394,22 +419,23 @@ struct IntegerRangeAnalysisImpl {
             return nullptr;
         }
 
-        // Currently we only support the loop initializer of a simple for-loop, which only has two
-        // instructions
-        // - The first instruction is to initialize the loop control variable
-        //   with a constant integer (signed or unsigned) value.
-        // - The second instruction is `next_iteration`
-        // e.g. for (var i = 0; ...)
-        if (init_block->Length() != 2u) {
-            return nullptr;
-        }
-
-        auto* var = init_block->Front()->As<Var>();
-        if (!var) {
+        // Currently we only support the loop initializer of a simple for-loop, which only has:
+        // - Zero or more instructions to compute the value that initializes the loop control
+        //   variable and has a valid integer range.
+        // - An instruction to initialize the loop control variable with the value got above which
+        //   is immediately followed by `next_iteration`.
+        // e.g. for (var i = 0; ...) or for (var i = local_invocation_id.x; ...)
+        if (init_block->Length() < 2u) {
             return nullptr;
         }
 
         if (!init_block->Back()->As<NextIteration>()) {
+            return nullptr;
+        }
+
+        // The loop control variable must be declared immediately before `next_iteration`.
+        auto* var = init_block->Back()->prev->As<Var>();
+        if (!var) {
             return nullptr;
         }
 
@@ -423,7 +449,7 @@ struct IntegerRangeAnalysisImpl {
             return nullptr;
         }
 
-        if (!initializer->As<Constant>()) {
+        if (!GetInfo(initializer).IsValid()) {
             return nullptr;
         }
 
@@ -1417,7 +1443,18 @@ IntegerRangeInfo IntegerRangeAnalysis::GetInfo(const FunctionParam* param, uint3
 
 const Var* IntegerRangeAnalysis::GetLoopControlVariableFromConstantInitializerForTest(
     const Loop* loop) {
-    return impl_->GetLoopControlVariableFromConstantInitializer(loop);
+    const Var* var = GetLoopControlVariableFromInitializerForTest(loop);
+    if (!var) {
+        return nullptr;
+    }
+    if (!var->Initializer()->As<Constant>()) {
+        return nullptr;
+    }
+    return var;
+}
+
+const Var* IntegerRangeAnalysis::GetLoopControlVariableFromInitializerForTest(const Loop* loop) {
+    return impl_->GetLoopControlVariableFromInitializer(loop);
 }
 
 const Binary* IntegerRangeAnalysis::GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(

@@ -500,7 +500,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_NotInitialize
     EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
 }
 
-TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_NotInitializedWithConstValue) {
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_InitializerHasNoValidRange) {
     Var* idx = nullptr;
     Loop* loop = nullptr;
     auto* end = b.FunctionParam("end", ty.u32());
@@ -537,6 +537,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_NotInitialize
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+    EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromInitializerForTest(loop));
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_InitializerTooComplex) {
@@ -583,6 +584,93 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failure_InitializerTo
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Failed_InitializedWithLoadedVariable) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* start = b.Var("start", 3_u);
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            idx = b.Var("idx", b.Load(start));
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    %start:ptr<function, u32, read_write> = var 3u
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
+        %3:u32 = load %start
+        %idx:ptr<function, u32, read_write> = var %3
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        exit_loop  # loop_1
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+    EXPECT_EQ(nullptr, analysis.GetLoopControlVariableFromInitializerForTest(loop));
+}
+
+// for (var index = local_invocation_id.x; index < 20u; index++) // Range of `index` is [0u, 19u]
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Success_UseLocalInvocationId_X) {
+    Var* idx = nullptr;
+    Loop* loop = nullptr;
+    Binary* binary = nullptr;
+    auto* func = b.ComputeFunction("func", 8_u, 1_u, 1_u);
+    auto* local_invocation_id = b.FunctionParam("local_invocation_id", mod.Types().vec3<u32>());
+    local_invocation_id->SetBuiltin(tint::core::BuiltinValue::kLocalInvocationId);
+    func->SetParams({local_invocation_id});
+
+    b.Append(func->Block(), [&] {
+        loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = local_invocation_id.x
+            auto* init = b.Access(ty.u32(), local_invocation_id, 0_u);
+            idx = b.Var("idx", init);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 20
+            binary = b.LessThan(b.Load(idx), 20_u)->AsInstruction<Binary>();
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+    EXPECT_EQ(idx, analysis.GetLoopControlVariableFromInitializerForTest(loop));
+
+    const IntegerRangeInfo& info = analysis.GetInfo(idx);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
+    EXPECT_EQ(0u, range.min_bound);
+    EXPECT_EQ(19u, range.max_bound);
 }
 
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Success_AddOne_sint) {
@@ -17925,6 +18013,758 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Success_RHS_Is_Highest_U32) {
     const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
     EXPECT_EQ(0u, range.min_bound);
     EXPECT_EQ(u32::kHighestValue - 1u, range.max_bound);
+}
+
+// for (var i = 2u; i <= 4u; i++) {    // Range of `i` is [2u, 4u]
+//   for (var j = i; j < 10u; j++) {   // Range of `j` is [2u, 9u]
+//   }
+// }
+TEST_F(IR_IntegerRangeAnalysisTest, NestedLoops_Success_InitRangeBelowBound_u32) {
+    Var* i = nullptr;
+    Var* j = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* outer_loop = b.Loop();
+        b.Append(outer_loop->Initializer(), [&] {
+            // i = 2u
+            i = b.Var("i", 2_u);
+            b.NextIteration(outer_loop);
+        });
+        b.Append(outer_loop->Body(), [&] {
+            // i <= 4u
+            auto* outer_if = b.If(b.LessThanEqual(b.Load(i), 4_u));
+            b.Append(outer_if->True(), [&] { b.ExitIf(outer_if); });
+            b.Append(outer_if->False(), [&] { b.ExitLoop(outer_loop); });
+
+            auto* inner_loop = b.Loop();
+            b.Append(inner_loop->Initializer(), [&] {
+                // j = i
+                j = b.Var("j", b.Load(i));
+                b.NextIteration(inner_loop);
+            });
+            b.Append(inner_loop->Body(), [&] {
+                // j < 10u
+                auto* inner_if = b.If(b.LessThan(b.Load(j), 10_u));
+                b.Append(inner_if->True(), [&] { b.ExitIf(inner_if); });
+                b.Append(inner_if->False(), [&] { b.ExitLoop(inner_loop); });
+                b.Continue(inner_loop);
+            });
+            b.Append(inner_loop->Continuing(), [&] {
+                // j++
+                b.Store(j, b.Add(b.Load(j), 1_u));
+                b.NextIteration(inner_loop);
+            });
+            b.Continue(outer_loop);
+        });
+        b.Append(outer_loop->Continuing(), [&] {
+            // i++
+            b.Store(i, b.Add(b.Load(i), 1_u));
+            b.NextIteration(outer_loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %i:ptr<function, u32, read_write> = var 2u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:u32 = load %i
+        %4:bool = lte %3, 4u
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+          $B7: {  # initializer
+            %5:u32 = load %i
+            %j:ptr<function, u32, read_write> = var %5
+            next_iteration  # -> $B8
+          }
+          $B8: {  # body
+            %7:u32 = load %j
+            %8:bool = lt %7, 10u
+            if %8 [t: $B10, f: $B11] {  # if_2
+              $B10: {  # true
+                exit_if  # if_2
+              }
+              $B11: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            continue  # -> $B9
+          }
+          $B9: {  # continuing
+            %9:u32 = load %j
+            %10:u32 = add %9, 1u
+            store %j, %10
+            next_iteration  # -> $B8
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %11:u32 = load %i
+        %12:u32 = add %11, 1u
+        store %i, %12
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    const IntegerRangeInfo& i_info = analysis.GetInfo(i);
+    ASSERT_TRUE(i_info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(i_info.range));
+    const auto& i_range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(i_info.range);
+    EXPECT_EQ(2u, i_range.min_bound);
+    EXPECT_EQ(4u, i_range.max_bound);
+
+    const IntegerRangeInfo& j_info = analysis.GetInfo(j);
+    ASSERT_TRUE(j_info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(j_info.range));
+    const auto& j_range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(j_info.range);
+    EXPECT_EQ(2u, j_range.min_bound);
+    EXPECT_EQ(9u, j_range.max_bound);
+}
+
+// for (var i = 2i; i <= 4i; i++) {    // Range of `i` is [2i, 4i]
+//   for (var j = i; j < 10i; j++) {   // Range of `j` is [2i, 9i]
+//   }
+// }
+TEST_F(IR_IntegerRangeAnalysisTest, NestedLoops_Success_InitRangeBelowBound_i32) {
+    Var* i = nullptr;
+    Var* j = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* outer_loop = b.Loop();
+        b.Append(outer_loop->Initializer(), [&] {
+            // i = 2i
+            i = b.Var("i", 2_i);
+            b.NextIteration(outer_loop);
+        });
+        b.Append(outer_loop->Body(), [&] {
+            // i <= 4i
+            auto* outer_if = b.If(b.LessThanEqual(b.Load(i), 4_i));
+            b.Append(outer_if->True(), [&] { b.ExitIf(outer_if); });
+            b.Append(outer_if->False(), [&] { b.ExitLoop(outer_loop); });
+
+            auto* inner_loop = b.Loop();
+            b.Append(inner_loop->Initializer(), [&] {
+                // j = i
+                j = b.Var("j", b.Load(i));
+                b.NextIteration(inner_loop);
+            });
+            b.Append(inner_loop->Body(), [&] {
+                // j < 10i
+                auto* inner_if = b.If(b.LessThan(b.Load(j), 10_i));
+                b.Append(inner_if->True(), [&] { b.ExitIf(inner_if); });
+                b.Append(inner_if->False(), [&] { b.ExitLoop(inner_loop); });
+                b.Continue(inner_loop);
+            });
+            b.Append(inner_loop->Continuing(), [&] {
+                // j++
+                b.Store(j, b.Add(b.Load(j), 1_i));
+                b.NextIteration(inner_loop);
+            });
+            b.Continue(outer_loop);
+        });
+        b.Append(outer_loop->Continuing(), [&] {
+            // i++
+            b.Store(i, b.Add(b.Load(i), 1_i));
+            b.NextIteration(outer_loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %i:ptr<function, i32, read_write> = var 2i
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:i32 = load %i
+        %4:bool = lte %3, 4i
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+          $B7: {  # initializer
+            %5:i32 = load %i
+            %j:ptr<function, i32, read_write> = var %5
+            next_iteration  # -> $B8
+          }
+          $B8: {  # body
+            %7:i32 = load %j
+            %8:bool = lt %7, 10i
+            if %8 [t: $B10, f: $B11] {  # if_2
+              $B10: {  # true
+                exit_if  # if_2
+              }
+              $B11: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            continue  # -> $B9
+          }
+          $B9: {  # continuing
+            %9:i32 = load %j
+            %10:i32 = add %9, 1i
+            store %j, %10
+            next_iteration  # -> $B8
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %11:i32 = load %i
+        %12:i32 = add %11, 1i
+        store %i, %12
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    const IntegerRangeInfo& i_info = analysis.GetInfo(i);
+    ASSERT_TRUE(i_info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(i_info.range));
+    const auto& i_range = std::get<IntegerRangeInfo::SignedIntegerRange>(i_info.range);
+    EXPECT_EQ(2, i_range.min_bound);
+    EXPECT_EQ(4, i_range.max_bound);
+
+    const IntegerRangeInfo& j_info = analysis.GetInfo(j);
+    ASSERT_TRUE(j_info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(j_info.range));
+    const auto& j_range = std::get<IntegerRangeInfo::SignedIntegerRange>(j_info.range);
+    EXPECT_EQ(2, j_range.min_bound);
+    EXPECT_EQ(9, j_range.max_bound);
+}
+
+// for (var i = 5u; i <= 15u; i++) {   // Range of `i` is [5u, 15u]
+//   for (var j = i; j < 10u; j++) {   // Range of `j` is [5u, 9u]
+//   }
+// }
+TEST_F(IR_IntegerRangeAnalysisTest, NestedLoops_Success_InitRangeAcrossBound_u32) {
+    Var* i = nullptr;
+    Var* j = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* outer_loop = b.Loop();
+        b.Append(outer_loop->Initializer(), [&] {
+            // i = 5u
+            i = b.Var("i", 5_u);
+            b.NextIteration(outer_loop);
+        });
+        b.Append(outer_loop->Body(), [&] {
+            // i <= 15u
+            auto* outer_if = b.If(b.LessThanEqual(b.Load(i), 15_u));
+            b.Append(outer_if->True(), [&] { b.ExitIf(outer_if); });
+            b.Append(outer_if->False(), [&] { b.ExitLoop(outer_loop); });
+
+            auto* inner_loop = b.Loop();
+            b.Append(inner_loop->Initializer(), [&] {
+                // j = i
+                j = b.Var("j", b.Load(i));
+                b.NextIteration(inner_loop);
+            });
+            b.Append(inner_loop->Body(), [&] {
+                // j < 10u
+                auto* inner_if = b.If(b.LessThan(b.Load(j), 10_u));
+                b.Append(inner_if->True(), [&] { b.ExitIf(inner_if); });
+                b.Append(inner_if->False(), [&] { b.ExitLoop(inner_loop); });
+                b.Continue(inner_loop);
+            });
+            b.Append(inner_loop->Continuing(), [&] {
+                // j++
+                b.Store(j, b.Add(b.Load(j), 1_u));
+                b.NextIteration(inner_loop);
+            });
+            b.Continue(outer_loop);
+        });
+        b.Append(outer_loop->Continuing(), [&] {
+            // i++
+            b.Store(i, b.Add(b.Load(i), 1_u));
+            b.NextIteration(outer_loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %i:ptr<function, u32, read_write> = var 5u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:u32 = load %i
+        %4:bool = lte %3, 15u
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+          $B7: {  # initializer
+            %5:u32 = load %i
+            %j:ptr<function, u32, read_write> = var %5
+            next_iteration  # -> $B8
+          }
+          $B8: {  # body
+            %7:u32 = load %j
+            %8:bool = lt %7, 10u
+            if %8 [t: $B10, f: $B11] {  # if_2
+              $B10: {  # true
+                exit_if  # if_2
+              }
+              $B11: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            continue  # -> $B9
+          }
+          $B9: {  # continuing
+            %9:u32 = load %j
+            %10:u32 = add %9, 1u
+            store %j, %10
+            next_iteration  # -> $B8
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %11:u32 = load %i
+        %12:u32 = add %11, 1u
+        store %i, %12
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    const IntegerRangeInfo& i_info = analysis.GetInfo(i);
+    ASSERT_TRUE(i_info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(i_info.range));
+    const auto& i_range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(i_info.range);
+    EXPECT_EQ(5u, i_range.min_bound);
+    EXPECT_EQ(15u, i_range.max_bound);
+
+    const IntegerRangeInfo& j_info = analysis.GetInfo(j);
+    ASSERT_TRUE(j_info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(j_info.range));
+    const auto& j_range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(j_info.range);
+    EXPECT_EQ(5u, j_range.min_bound);
+    EXPECT_EQ(9u, j_range.max_bound);
+}
+
+// for (var i = 15u; i <= 20u; i++) {  // Range of `i` is [15u, 20u]
+//   for (var j = i; j < 10u; j++) {   // `j` has no valid range
+//   }
+// }
+TEST_F(IR_IntegerRangeAnalysisTest, NestedLoops_Failure_InitRangeAboveBound_u32) {
+    Var* i = nullptr;
+    Var* j = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* outer_loop = b.Loop();
+        b.Append(outer_loop->Initializer(), [&] {
+            // i = 15u
+            i = b.Var("i", 15_u);
+            b.NextIteration(outer_loop);
+        });
+        b.Append(outer_loop->Body(), [&] {
+            // i <= 20u
+            auto* outer_if = b.If(b.LessThanEqual(b.Load(i), 20_u));
+            b.Append(outer_if->True(), [&] { b.ExitIf(outer_if); });
+            b.Append(outer_if->False(), [&] { b.ExitLoop(outer_loop); });
+
+            auto* inner_loop = b.Loop();
+            b.Append(inner_loop->Initializer(), [&] {
+                // j = i
+                j = b.Var("j", b.Load(i));
+                b.NextIteration(inner_loop);
+            });
+            b.Append(inner_loop->Body(), [&] {
+                // j < 10u
+                auto* inner_if = b.If(b.LessThan(b.Load(j), 10_u));
+                b.Append(inner_if->True(), [&] { b.ExitIf(inner_if); });
+                b.Append(inner_if->False(), [&] { b.ExitLoop(inner_loop); });
+                b.Continue(inner_loop);
+            });
+            b.Append(inner_loop->Continuing(), [&] {
+                // j++
+                b.Store(j, b.Add(b.Load(j), 1_u));
+                b.NextIteration(inner_loop);
+            });
+            b.Continue(outer_loop);
+        });
+        b.Append(outer_loop->Continuing(), [&] {
+            // i++
+            b.Store(i, b.Add(b.Load(i), 1_u));
+            b.NextIteration(outer_loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %i:ptr<function, u32, read_write> = var 15u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:u32 = load %i
+        %4:bool = lte %3, 20u
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+          $B7: {  # initializer
+            %5:u32 = load %i
+            %j:ptr<function, u32, read_write> = var %5
+            next_iteration  # -> $B8
+          }
+          $B8: {  # body
+            %7:u32 = load %j
+            %8:bool = lt %7, 10u
+            if %8 [t: $B10, f: $B11] {  # if_2
+              $B10: {  # true
+                exit_if  # if_2
+              }
+              $B11: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            continue  # -> $B9
+          }
+          $B9: {  # continuing
+            %9:u32 = load %j
+            %10:u32 = add %9, 1u
+            store %j, %10
+            next_iteration  # -> $B8
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %11:u32 = load %i
+        %12:u32 = add %11, 1u
+        store %i, %12
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    const IntegerRangeInfo& i_info = analysis.GetInfo(i);
+    ASSERT_TRUE(i_info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(i_info.range));
+    const auto& i_range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(i_info.range);
+    EXPECT_EQ(15u, i_range.min_bound);
+    EXPECT_EQ(20u, i_range.max_bound);
+
+    EXPECT_FALSE(analysis.GetInfo(j).IsValid());
+}
+
+// for (var i = 0u; i <= 3u; i++) {    // Range of `i` is [0u, 3u]
+//   for (var j = i; j > 0u; j--) {    // Range of `j` is [1u, 3u]
+//   }
+// }
+TEST_F(IR_IntegerRangeAnalysisTest, NestedLoops_Success_IndexIsDecreasing_u32) {
+    Var* i = nullptr;
+    Var* j = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* outer_loop = b.Loop();
+        b.Append(outer_loop->Initializer(), [&] {
+            // i = 0u
+            i = b.Var("i", 0_u);
+            b.NextIteration(outer_loop);
+        });
+        b.Append(outer_loop->Body(), [&] {
+            // i <= 3u
+            auto* outer_if = b.If(b.LessThanEqual(b.Load(i), 3_u));
+            b.Append(outer_if->True(), [&] { b.ExitIf(outer_if); });
+            b.Append(outer_if->False(), [&] { b.ExitLoop(outer_loop); });
+
+            auto* inner_loop = b.Loop();
+            b.Append(inner_loop->Initializer(), [&] {
+                // j = i
+                j = b.Var("j", b.Load(i));
+                b.NextIteration(inner_loop);
+            });
+            b.Append(inner_loop->Body(), [&] {
+                // j > 0u
+                auto* inner_if = b.If(b.GreaterThan(b.Load(j), 0_u));
+                b.Append(inner_if->True(), [&] { b.ExitIf(inner_if); });
+                b.Append(inner_if->False(), [&] { b.ExitLoop(inner_loop); });
+                b.Continue(inner_loop);
+            });
+            b.Append(inner_loop->Continuing(), [&] {
+                // j--
+                b.Store(j, b.Subtract(b.Load(j), 1_u));
+                b.NextIteration(inner_loop);
+            });
+            b.Continue(outer_loop);
+        });
+        b.Append(outer_loop->Continuing(), [&] {
+            // i++
+            b.Store(i, b.Add(b.Load(i), 1_u));
+            b.NextIteration(outer_loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %i:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:u32 = load %i
+        %4:bool = lte %3, 3u
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+          $B7: {  # initializer
+            %5:u32 = load %i
+            %j:ptr<function, u32, read_write> = var %5
+            next_iteration  # -> $B8
+          }
+          $B8: {  # body
+            %7:u32 = load %j
+            %8:bool = gt %7, 0u
+            if %8 [t: $B10, f: $B11] {  # if_2
+              $B10: {  # true
+                exit_if  # if_2
+              }
+              $B11: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            continue  # -> $B9
+          }
+          $B9: {  # continuing
+            %9:u32 = load %j
+            %10:u32 = sub %9, 1u
+            store %j, %10
+            next_iteration  # -> $B8
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %11:u32 = load %i
+        %12:u32 = add %11, 1u
+        store %i, %12
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    const IntegerRangeInfo& i_info = analysis.GetInfo(i);
+    ASSERT_TRUE(i_info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(i_info.range));
+    const auto& i_range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(i_info.range);
+    EXPECT_EQ(0u, i_range.min_bound);
+    EXPECT_EQ(3u, i_range.max_bound);
+
+    const IntegerRangeInfo& j_info = analysis.GetInfo(j);
+    ASSERT_TRUE(j_info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(j_info.range));
+    const auto& j_range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(j_info.range);
+    EXPECT_EQ(1u, j_range.min_bound);
+    EXPECT_EQ(3u, j_range.max_bound);
+}
+
+// for (var i = 0u; i <= 3u; i++) {    // Range of `i` is [0u, 3u]
+//   for (var j = i; j >= 0u; j--) {   // `j` has no valid range
+//   }
+// }
+TEST_F(IR_IntegerRangeAnalysisTest, NestedLoops_Failure_IndexIsDecreasingToZero_u32) {
+    Var* i = nullptr;
+    Var* j = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* outer_loop = b.Loop();
+        b.Append(outer_loop->Initializer(), [&] {
+            // i = 0u
+            i = b.Var("i", 0_u);
+            b.NextIteration(outer_loop);
+        });
+        b.Append(outer_loop->Body(), [&] {
+            // i <= 3u
+            auto* outer_if = b.If(b.LessThanEqual(b.Load(i), 3_u));
+            b.Append(outer_if->True(), [&] { b.ExitIf(outer_if); });
+            b.Append(outer_if->False(), [&] { b.ExitLoop(outer_loop); });
+
+            auto* inner_loop = b.Loop();
+            b.Append(inner_loop->Initializer(), [&] {
+                // j = i
+                j = b.Var("j", b.Load(i));
+                b.NextIteration(inner_loop);
+            });
+            b.Append(inner_loop->Body(), [&] {
+                // j >= 0u
+                auto* inner_if = b.If(b.GreaterThanEqual(b.Load(j), 0_u));
+                b.Append(inner_if->True(), [&] { b.ExitIf(inner_if); });
+                b.Append(inner_if->False(), [&] { b.ExitLoop(inner_loop); });
+                b.Continue(inner_loop);
+            });
+            b.Append(inner_loop->Continuing(), [&] {
+                // j--
+                b.Store(j, b.Subtract(b.Load(j), 1_u));
+                b.NextIteration(inner_loop);
+            });
+            b.Continue(outer_loop);
+        });
+        b.Append(outer_loop->Continuing(), [&] {
+            // i++
+            b.Store(i, b.Add(b.Load(i), 1_u));
+            b.NextIteration(outer_loop);
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %i:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %3:u32 = load %i
+        %4:bool = lte %3, 3u
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+          $B7: {  # initializer
+            %5:u32 = load %i
+            %j:ptr<function, u32, read_write> = var %5
+            next_iteration  # -> $B8
+          }
+          $B8: {  # body
+            %7:u32 = load %j
+            %8:bool = gte %7, 0u
+            if %8 [t: $B10, f: $B11] {  # if_2
+              $B10: {  # true
+                exit_if  # if_2
+              }
+              $B11: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            continue  # -> $B9
+          }
+          $B9: {  # continuing
+            %9:u32 = load %j
+            %10:u32 = sub %9, 1u
+            store %j, %10
+            next_iteration  # -> $B8
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %11:u32 = load %i
+        %12:u32 = add %11, 1u
+        store %i, %12
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    const IntegerRangeInfo& i_info = analysis.GetInfo(i);
+    ASSERT_TRUE(i_info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(i_info.range));
+    const auto& i_range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(i_info.range);
+    EXPECT_EQ(0u, i_range.min_bound);
+    EXPECT_EQ(3u, i_range.max_bound);
+
+    EXPECT_FALSE(analysis.GetInfo(j).IsValid());
 }
 
 }  // namespace

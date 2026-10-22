@@ -136,10 +136,20 @@ class IntegerRangeAnalysis {
     /// Note: This function is only for tests.
     /// Returns the pointer of the loop control variable in the given loop when its initializer
     /// meets the below requirements.
-    /// - There are only two instructions in the loop initializer block.
-    /// - The first instruction is to initialize the loop control variable
-    ///   with a constant integer (signed or unsigned) value.
-    /// - The second instruction is `next_iteration`.
+    /// - The loop initializer block ends with at least two instructions.
+    /// - The second to last instruction initializes the loop control variable with an integer value
+    ///   that has a valid range.
+    /// - The last instruction is `next_iteration`.
+    /// - The instructions in front of them are not inspected as they are only used to compute the
+    ///   initializer of the loop control variable.
+    /// @param loop the Loop variable to investigate
+    /// @returns the pointer of the loop control variable when its loop initializer meets the
+    /// requirements, return nullptr otherwise.
+    const Var* GetLoopControlVariableFromInitializerForTest(const Loop* loop);
+
+    /// Note: This function is only for tests.
+    /// Same as `GetLoopControlVariableFromInitializerForTest()`, but also requires the loop control
+    /// variable to be initialized with a constant integer value.
     /// @param loop the Loop variable to investigate
     /// @returns the pointer of the loop control variable when its loop initializer meets the
     /// requirements, return nullptr otherwise.
