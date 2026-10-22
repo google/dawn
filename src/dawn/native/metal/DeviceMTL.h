@@ -85,6 +85,12 @@ class Device final : public DeviceBase {
 
     bool BackendWillValidateMultiDraw() const override;
 
+    std::optional<DeviceGuard> UseGuardForCreateBindGroup() override;
+    std::optional<DeviceGuard> UseGuardForCreateBindGroupLayout() override;
+    std::optional<DeviceGuard> UseGuardForCreateBuffer() override;
+    std::optional<DeviceGuard> UseGuardForCreateSampler() override;
+    std::optional<DeviceGuard> UseGuardForCreateTexture() override;
+
     // Get a MTLBuffer that can be used as a mock in a no-op blit encoder based on filling this
     // single-byte buffer
     id<MTLBuffer> GetMockBlitMtlBuffer();

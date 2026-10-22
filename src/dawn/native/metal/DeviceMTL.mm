@@ -412,6 +412,53 @@ bool Device::BackendWillValidateMultiDraw() const {
     return true;
 }
 
+std::optional<DeviceGuard> Device::UseGuardForCreateBindGroup() {
+    // TODO(crbug.com/363031535): When argument buffers are enabled, BindGroup::InitializeImpl()
+    // encodes into a shared MTLArgumentEncoder stored on the BindGroupLayout without
+    // synchronization. We can remove this guard if we synchronize the shared encoder's state in the
+    // future.
+    if (IsToggleEnabled(Toggle::MetalUseArgumentBuffers)) {
+        return GetGuard();
+    }
+    return std::nullopt;
+}
+
+std::optional<DeviceGuard> Device::UseGuardForCreateBindGroupLayout() {
+    return std::nullopt;
+}
+
+std::optional<DeviceGuard> Device::UseGuardForCreateBuffer() {
+    // Buffer::Initialize() clears padding bytes (when LazyClearResourceOnFirstUse is enabled) or
+    // initializes the buffer to non-zero (when NonzeroClearResourcesOnCreationForTesting is
+    // enabled) using the queue's shared CommandRecordingContext, which is not thread-safe. If we
+    // defer padding byte clearing to first use on the GPU in the future, we may be able to remove
+    // the LazyClearResourceOnFirstUse check here.
+    if (IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) ||
+        IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
+        return GetGuard();
+    }
+    return std::nullopt;
+}
+
+std::optional<DeviceGuard> Device::UseGuardForCreateSampler() {
+    return std::nullopt;
+}
+
+std::optional<DeviceGuard> Device::UseGuardForCreateTexture() {
+    // Texture::Create() clears textures at creation time when ShouldKeepInitialized() is true
+    // (for multi-subresource depth/stencil textures when LazyClearResourceOnFirstUse and
+    // MetalKeepMultisubresourceDepthStencilTexturesInitialized are enabled) or when
+    // NonzeroClearResourcesOnCreationForTesting is enabled. Clearing uses the queue's shared
+    // CommandRecordingContext and DynamicUploader, which are not thread-safe without the device
+    // lock.
+    if (IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting) ||
+        (IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) &&
+         IsToggleEnabled(Toggle::MetalKeepMultisubresourceDepthStencilTexturesInitialized))) {
+        return GetGuard();
+    }
+    return std::nullopt;
+}
+
 id<MTLBuffer> Device::GetMockBlitMtlBuffer() {
     if (mMockBlitMtlBuffer == nullptr) {
         mMockBlitMtlBuffer.Acquire(
