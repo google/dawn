@@ -88,7 +88,7 @@ template("_mesa_action") {
 }
 
 # ---------------------------------------------------------------------------
-# Codegen Actions (45 targets total)
+# Codegen Actions (49 targets total)
 # ---------------------------------------------------------------------------
 
 _mesa_action("mesa_git_sha1") {
@@ -554,102 +554,113 @@ _glslang_dep = [ "//third_party/glslang/src:glslang_validator" ]
 _glslang_bin = "${root_out_dir}/glslang_validator"
 _glslang_cmd = "./" + rebase_path(_glslang_bin, root_build_dir)
 
-action_foreach("mesa_radix_sort_spv") {
-  script = "mesa_action.py"
-  deps = _glslang_dep
-  sources = [
-    "src/src/vulkan/runtime/radix_sort/shaders/fill.comp",
-    "src/src/vulkan/runtime/radix_sort/shaders/histogram.comp",
-    "src/src/vulkan/runtime/radix_sort/shaders/init.comp",
-    "src/src/vulkan/runtime/radix_sort/shaders/prefix.comp",
-    "src/src/vulkan/runtime/radix_sort/shaders/scatter_0_even.comp",
-    "src/src/vulkan/runtime/radix_sort/shaders/scatter_0_odd.comp",
-    "src/src/vulkan/runtime/radix_sort/shaders/scatter_1_even.comp",
-    "src/src/vulkan/runtime/radix_sort/shaders/scatter_1_odd.comp",
-  ]
-  inputs = [
-    _glslang_bin,
-    "src/src/vulkan/runtime/radix_sort/shaders/bufref.h",
-    "src/src/vulkan/runtime/radix_sort/shaders/config.h",
-    "src/src/vulkan/runtime/radix_sort/shaders/prefix.h",
-    "src/src/vulkan/runtime/radix_sort/shaders/prefix_limits.h",
-    "src/src/vulkan/runtime/radix_sort/shaders/push.h",
-    "src/src/vulkan/runtime/radix_sort/shaders/scatter.glsl",
-  ]
-  outputs = [ "${_mesa_gen_dir}/src/vulkan/runtime/radix_sort/shaders/{{source_file_part}}.spv.h" ]
-  args = [
-    "--",
-    _glslang_cmd,
-    "-V",
-    "--target-env",
-    "spirv1.5",
-    "-x",
-    "-o",
-    rebase_path(
-        "${_mesa_gen_dir}/src/vulkan/runtime/radix_sort/shaders/{{source_file_part}}.spv.h",
-        root_build_dir),
-    "{{source}}",
-    "-DRS_KEYVAL_DWORDS=2",
-    "--quiet",
-  ]
-}
+_bvh_spv_inputs = [
+  _glslang_bin,
+  "src/src/compiler/spirv/spirv_internal_exts.h",
+  "src/src/vulkan/runtime/bvh/leaf.h",
+  "src/src/vulkan/runtime/bvh/pair_triangles.h",
+  "src/src/vulkan/runtime/bvh/vk_bvh_defines.h",
+  "src/src/vulkan/runtime/bvh/vk_bvh_helpers.h",
+  "src/src/vulkan/runtime/bvh/vk_debug.h",
+]
+
+_bvh_spv_preamble_args = [
+  "--quiet",
+  "-P#extension GL_GOOGLE_include_directive : require",
+  "-P#extension GL_EXT_control_flow_attributes : require",
+  "-P#extension GL_EXT_shader_explicit_arithmetic_types_int8 : require",
+  "-P#extension GL_EXT_shader_explicit_arithmetic_types_int16 : require",
+  "-P#extension GL_EXT_shader_explicit_arithmetic_types_int32 : require",
+  "-P#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require",
+  "-P#extension GL_EXT_shader_explicit_arithmetic_types_float16 : require",
+  "-P#extension GL_EXT_scalar_block_layout : require",
+  "-P#extension GL_EXT_buffer_reference : require",
+  "-P#extension GL_EXT_buffer_reference2 : require",
+  "-P#extension GL_KHR_memory_scope_semantics : require",
+  "-P#extension GL_KHR_shader_subgroup_arithmetic : require",
+  "-P#extension GL_KHR_shader_subgroup_basic : require",
+  "-P#extension GL_KHR_shader_subgroup_shuffle : require",
+  "-P#extension GL_KHR_shader_subgroup_ballot : require",
+  "-P#extension GL_KHR_shader_subgroup_clustered : require",
+  "-P#extension GL_KHR_shader_subgroup_vote : require",
+  "-P#extension GL_EXT_shader_atomic_int64 : require",
+  "-P#extension GL_EXT_spirv_intrinsics : require",
+  "-P#extension GL_EXT_shared_memory_block : require",
+]
 
 action_foreach("mesa_bvh_spv") {
   script = "mesa_action.py"
   deps = _glslang_dep
   sources = [
     "src/src/vulkan/runtime/bvh/hploc_internal.comp",
+    "src/src/vulkan/runtime/bvh/id_prefix_sum.comp",
     "src/src/vulkan/runtime/bvh/lbvh_generate_ir.comp",
     "src/src/vulkan/runtime/bvh/lbvh_main.comp",
     "src/src/vulkan/runtime/bvh/leaf.comp",
-    "src/src/vulkan/runtime/bvh/morton.comp",
+    "src/src/vulkan/runtime/bvh/pair_triangles.comp",
     "src/src/vulkan/runtime/bvh/ploc_internal.comp",
   ]
-  inputs = [
-    _glslang_bin,
-    "src/src/compiler/spirv/spirv_internal_exts.h",
-    "src/src/vulkan/runtime/bvh/leaf.h",
-    "src/src/vulkan/runtime/bvh/vk_build_helpers.h",
-    "src/src/vulkan/runtime/bvh/vk_build_interface.h",
-    "src/src/vulkan/runtime/bvh/vk_bvh.h",
-    "src/src/vulkan/runtime/bvh/vk_debug.h",
-  ]
+  inputs = _bvh_spv_inputs
   outputs =
       [ "${_mesa_gen_dir}/src/vulkan/runtime/bvh/{{source_name_part}}.spv.h" ]
   args = [
-    "--",
-    _glslang_cmd,
-    "-V",
-    "-I" + rebase_path("src/src/vulkan/runtime/bvh", root_build_dir),
-    "-I" + rebase_path("src/src/compiler/spirv", root_build_dir),
-    "--target-env",
-    "spirv1.5",
-    "-x",
-    "-o",
-    rebase_path(
-        "${_mesa_gen_dir}/src/vulkan/runtime/bvh/{{source_name_part}}.spv.h",
-        root_build_dir),
-    "{{source}}",
-    "--quiet",
-    "-P#extension GL_GOOGLE_include_directive : require",
-    "-P#extension GL_EXT_shader_explicit_arithmetic_types_int8 : require",
-    "-P#extension GL_EXT_shader_explicit_arithmetic_types_int16 : require",
-    "-P#extension GL_EXT_shader_explicit_arithmetic_types_int32 : require",
-    "-P#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require",
-    "-P#extension GL_EXT_shader_explicit_arithmetic_types_float16 : require",
-    "-P#extension GL_EXT_scalar_block_layout : require",
-    "-P#extension GL_EXT_buffer_reference : require",
-    "-P#extension GL_EXT_buffer_reference2 : require",
-    "-P#extension GL_KHR_memory_scope_semantics : require",
-    "-P#extension GL_KHR_shader_subgroup_arithmetic : require",
-    "-P#extension GL_KHR_shader_subgroup_basic : require",
-    "-P#extension GL_KHR_shader_subgroup_shuffle : require",
-    "-P#extension GL_KHR_shader_subgroup_ballot : require",
-    "-P#extension GL_KHR_shader_subgroup_clustered : require",
-    "-P#extension GL_KHR_shader_subgroup_vote : require",
-    "-P#extension GL_EXT_shader_atomic_int64 : require",
-    "-P#extension GL_EXT_spirv_intrinsics : require",
-  ]
+           "--",
+           _glslang_cmd,
+           "-V",
+           "-I" + rebase_path("src/src/vulkan/runtime/bvh", root_build_dir),
+           "-I" + rebase_path("src/src/compiler/spirv", root_build_dir),
+           "--target-env",
+           "spirv1.5",
+           "-x",
+           "-o",
+           rebase_path(
+               "${_mesa_gen_dir}/src/vulkan/runtime/bvh/{{source_name_part}}.spv.h",
+               root_build_dir),
+           "{{source}}",
+         ] + _bvh_spv_preamble_args
+}
+
+action("mesa_bvh_morton_sort_32_spv") {
+  script = "mesa_action.py"
+  deps = _glslang_dep
+  inputs = _bvh_spv_inputs + [ "src/src/vulkan/runtime/bvh/morton_sort.comp" ]
+  outputs = [ "${_mesa_gen_dir}/src/vulkan/runtime/bvh/morton_sort_32.spv.h" ]
+  args = [
+           "--",
+           _glslang_cmd,
+           "-V",
+           "-I" + rebase_path("src/src/vulkan/runtime/bvh", root_build_dir),
+           "-I" + rebase_path("src/src/compiler/spirv", root_build_dir),
+           "--target-env",
+           "spirv1.5",
+           "-x",
+           "-o",
+           rebase_path(outputs[0], root_build_dir),
+           rebase_path("src/src/vulkan/runtime/bvh/morton_sort.comp",
+                       root_build_dir),
+         ] + _bvh_spv_preamble_args
+}
+
+action("mesa_bvh_morton_sort_64_spv") {
+  script = "mesa_action.py"
+  deps = _glslang_dep
+  inputs = _bvh_spv_inputs + [ "src/src/vulkan/runtime/bvh/morton_sort.comp" ]
+  outputs = [ "${_mesa_gen_dir}/src/vulkan/runtime/bvh/morton_sort_64.spv.h" ]
+  args = [
+           "--",
+           _glslang_cmd,
+           "-V",
+           "-I" + rebase_path("src/src/vulkan/runtime/bvh", root_build_dir),
+           "-I" + rebase_path("src/src/compiler/spirv", root_build_dir),
+           "--target-env",
+           "spirv1.5",
+           "-x",
+           "-o",
+           rebase_path(outputs[0], root_build_dir),
+           rebase_path("src/src/vulkan/runtime/bvh/morton_sort.comp",
+                       root_build_dir),
+           "-DMORTON_SORT_KEY64=1",
+         ] + _bvh_spv_preamble_args
 }
 
 action("mesa_astc_spv") {
@@ -757,6 +768,55 @@ _mesa_action("mesa_u_unfilled_gen_c") {
   args = [ rebase_path(outputs[0], root_build_dir) ]
 }
 
+_mesa_action("mesa_draw_nir_lower_opcodes_c") {
+  python_script = "src/src/gallium/auxiliary/draw/draw_nir_lower_opcodes.py"
+  inputs = _nir_py_inputs + [ "src/src/compiler/nir/nir_algebraic.py" ]
+  outputs =
+      [ "${_mesa_gen_dir}/src/gallium/auxiliary/draw_nir_lower_opcodes.c" ]
+  capture_stdout = true
+  args = [
+    "-p",
+    rebase_path("src/src/compiler/nir", root_build_dir),
+  ]
+}
+
+_mesa_action("mesa_lp_bld_nir_no_integer_algebraic_c") {
+  python_script =
+      "src/src/gallium/auxiliary/gallivm/lp_bld_nir_no_integer_algebraic.py"
+  inputs = _nir_py_inputs + [ "src/src/compiler/nir/nir_algebraic.py" ]
+  outputs = [
+    "${_mesa_gen_dir}/src/gallium/auxiliary/lp_bld_nir_no_integer_algebraic.c",
+  ]
+  capture_stdout = true
+  args = [
+    "-p",
+    rebase_path("src/src/compiler/nir", root_build_dir),
+  ]
+}
+
+_mesa_action("mesa_lvp_drirc") {
+  python_script = "src/src/gallium/frontends/lavapipe/lvp_drirc_gen.py"
+  inputs = [
+    "src/src/gallium/frontends/lavapipe/00-lavapipe-defaults.conf",
+    "src/src/util/drirc_gen.py",
+  ]
+  outputs = [
+    "${_mesa_gen_dir}/src/gallium/frontends/lavapipe/lvp_drirc.c",
+    "${_mesa_gen_dir}/src/gallium/frontends/lavapipe/lvp_drirc.h",
+  ]
+  args = [
+    "--import-path",
+    rebase_path("src/src/util", root_build_dir),
+    "--drirc-src",
+    rebase_path(outputs[0], root_build_dir),
+    "--drirc-hdr",
+    rebase_path(outputs[1], root_build_dir),
+    "--validate",
+    rebase_path("src/src/gallium/frontends/lavapipe/00-lavapipe-defaults.conf",
+                root_build_dir),
+  ]
+}
+
 _mesa_action("mesa_lvp_entrypoints") {
   python_script = "src/src/vulkan/util/vk_entrypoints_gen.py"
   inputs = _vk_py_inputs
@@ -806,11 +866,16 @@ group("mesa_all_codegen") {
     ":mesa_astc_spv",
     ":mesa_builtin_types_c",
     ":mesa_builtin_types_h",
+    ":mesa_bvh_morton_sort_32_spv",
+    ":mesa_bvh_morton_sort_64_spv",
     ":mesa_bvh_spv",
+    ":mesa_draw_nir_lower_opcodes_c",
     ":mesa_driconf_static_h",
     ":mesa_format_srgb_c",
     ":mesa_git_sha1",
     ":mesa_ir_expression_operation_h",
+    ":mesa_lp_bld_nir_no_integer_algebraic_c",
+    ":mesa_lvp_drirc",
     ":mesa_lvp_entrypoints",
     ":mesa_nir_builder_opcodes_h",
     ":mesa_nir_constant_expressions_c",
@@ -820,7 +885,6 @@ group("mesa_all_codegen") {
     ":mesa_nir_opcodes_c",
     ":mesa_nir_opcodes_h",
     ":mesa_nir_opt_algebraic_c",
-    ":mesa_radix_sort_spv",
     ":mesa_shader_stats_h",
     ":mesa_spirv_info",
     ":mesa_tr_util",
@@ -873,7 +937,6 @@ config("mesa_common_config") {
     "${_mesa_gen_dir}/src/util/format",
     "${_mesa_gen_dir}/src/vulkan/runtime",
     "${_mesa_gen_dir}/src/vulkan/runtime/bvh",
-    "${_mesa_gen_dir}/src/vulkan/runtime/radix_sort/shaders",
     "${_mesa_gen_dir}/src/vulkan/util",
     "${_mesa_gen_dir}/src/vulkan/wsi",
     "src/include",
@@ -1037,7 +1100,10 @@ _mesa_source_set("mesa_vulkan_runtime") {
         "${_mesa_gen_dir}/src/vulkan/runtime/vk_synchronization_helpers.c",
         "${_mesa_gen_dir}/src/vulkan/wsi/wsi_common_entrypoints.c",
       ]
-  defines = [ "VK_LITE_RUNTIME_INSTANCE=0" ]
+  defines = [
+    "MESA_VK_LOG=0",
+    "VK_LITE_RUNTIME_INSTANCE=0",
+  ]
   deps = [
     ":mesa_nir",
     ":mesa_util",
@@ -1048,6 +1114,8 @@ _mesa_source_set("mesa_vulkan_runtime") {
 
 _mesa_source_set("mesa_gallium_aux") {
   sources = mesa_gallium_aux_static_sources + [
+              "${_mesa_gen_dir}/src/gallium/auxiliary/draw_nir_lower_opcodes.c",
+              "${_mesa_gen_dir}/src/gallium/auxiliary/lp_bld_nir_no_integer_algebraic.c",
               "${_mesa_gen_dir}/src/gallium/auxiliary/tr_util.c",
               "${_mesa_gen_dir}/src/gallium/auxiliary/u_indices_gen.c",
               "${_mesa_gen_dir}/src/gallium/auxiliary/u_tracepoints.c",
@@ -1071,6 +1139,7 @@ _mesa_source_set("mesa_llvmpipe") {
 _mesa_source_set("mesa_lavapipe") {
   sources =
       mesa_lavapipe_static_sources + [
+        "${_mesa_gen_dir}/src/gallium/frontends/lavapipe/lvp_drirc.c",
         "${_mesa_gen_dir}/src/gallium/frontends/lavapipe/lvp_entrypoints.c",
         "mesa_llvm_sysroot_compat.cc",
       ]
