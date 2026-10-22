@@ -36,6 +36,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::HasSubstr;
+
 // The compute shader workgroup size is settled at compute pipeline creation time.
 // The validation code in dawn is in each backend (not including Null backend) thus this test needs
 // to be as part of a dawn_end2end_tests instead of the dawn_unittests
@@ -490,8 +492,7 @@ fn main() {
     std::ostringstream expectedError;
     expectedError << "the SplitWorkgroupAtomics transform increased workgroup storage usage from "
                   << limit << " bytes to " << limit + limit / 2 << " bytes";
-    ASSERT_DEVICE_ERROR_MSG(device.CreateComputePipeline(&desc),
-                            testing::HasSubstr(expectedError.str()));
+    ASSERT_DEVICE_ERROR_MSG(device.CreateComputePipeline(&desc), HasSubstr(expectedError.str()));
 }
 
 // TODO(crbug.com/462151326): Fix pipeline creation error of the inner layer to surface up properly

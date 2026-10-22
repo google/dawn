@@ -40,10 +40,10 @@
 namespace dawn {
 namespace {
 
-using testing::_;
-using testing::EmptySizedString;
-using testing::HasSubstr;
-using testing::MockCppCallback;
+using ::testing::EmptySizedString;
+using ::testing::HasSubstr;
+using ::testing::Mock;
+using ::testing::MockCppCallback;
 
 using MockMapAsyncCallback = MockCppCallback<wgpu::BufferMapCallback<void>*>;
 using MockQueueWorkDoneCallback = MockCppCallback<wgpu::QueueWorkDoneCallback<void>*>;
@@ -487,7 +487,7 @@ TEST_P(DeviceLostTest, LoseDeviceForTestingOnce) {
 
     device.ForceLoss(wgpu::DeviceLostReason::Unknown, "Device lost for testing");
     FlushWire();
-    testing::Mock::VerifyAndClearExpectations(&mDeviceLostCallback);
+    Mock::VerifyAndClearExpectations(&mDeviceLostCallback);
 }
 
 TEST_P(DeviceLostTest, DeviceLostDoesntCallUncapturedError) {
@@ -607,7 +607,7 @@ TEST_P(DeviceLostTest, ExpectDeviceLoss) {
 TEST_P(DeviceLostTest, ExpectDeviceLossMsg) {
     EXPECT_DEVICE_LOSS_MSG(
         device.ForceLoss(wgpu::DeviceLostReason::Unknown, "Device lost for testing"),
-        testing::HasSubstr("Device lost for testing"));
+        HasSubstr("Device lost for testing"));
 }
 
 DAWN_INSTANTIATE_TEST(DeviceLostTest,

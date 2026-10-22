@@ -39,6 +39,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::ValuesIn;
+
 // Helper for replacing all occurrences of substr in str with replacement
 std::string ReplaceAll(std::string str, const std::string& substr, const std::string& replacement) {
     size_t pos = 0;
@@ -1042,7 +1044,7 @@ auto GenerateParams() {
 
 INSTANTIATE_TEST_SUITE_P(,
                          ComputeLayoutMemoryBufferTests,
-                         ::testing::ValuesIn(GenerateParams()),
+                         ValuesIn(GenerateParams()),
                          DawnTestBase::PrintToStringParamName("ComputeLayoutMemoryBufferTests"));
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ComputeLayoutMemoryBufferTests);
 

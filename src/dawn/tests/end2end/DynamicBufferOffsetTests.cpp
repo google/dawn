@@ -567,13 +567,11 @@ TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffsetsMultipleTimesComputePipelin
     EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), mStorageBuffers[1], 0, expectedData.size());
 }
 
-namespace {
 using ReadBufferUsage = wgpu::BufferUsage;
 using OOBRead = bool;
 using OOBWrite = bool;
 
 DAWN_TEST_PARAM_STRUCT(ClampedOOBDynamicBufferOffsetParams, ReadBufferUsage, OOBRead, OOBWrite);
-}  // anonymous namespace
 
 class ClampedOOBDynamicBufferOffsetTests
     : public DawnTestWithParams<ClampedOOBDynamicBufferOffsetParams> {};

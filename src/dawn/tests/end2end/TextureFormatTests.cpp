@@ -42,6 +42,10 @@
 namespace dawn {
 namespace {
 
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
+
 enum class TextureComponentType {
     Float,
     Sint,
@@ -55,7 +59,7 @@ class ExpectFloatWithTolerance : public detail::Expectation {
     ExpectFloatWithTolerance(std::vector<float> expected, float tolerance)
         : mExpected(std::move(expected)), mTolerance(tolerance) {}
 
-    testing::AssertionResult Check(const void* data, size_t size) override {
+    AssertionResult Check(const void* data, size_t size) override {
         DAWN_ASSERT(size == sizeof(float) * mExpected.size());
 
         const float* actual = static_cast<const float*>(data);
@@ -65,14 +69,13 @@ class ExpectFloatWithTolerance : public detail::Expectation {
             float actualValue = DAWN_UNSAFE_TODO(actual[i]);
 
             if (!FloatsMatch(expectedValue, actualValue)) {
-                testing::AssertionResult result = testing::AssertionFailure()
-                                                  << "Expected data[" << i << "] to be close to "
-                                                  << expectedValue << ", actual " << actualValue
-                                                  << "\n";
+                AssertionResult result = AssertionFailure()
+                                         << "Expected data[" << i << "] to be close to "
+                                         << expectedValue << ", actual " << actualValue << "\n";
                 return result;
             }
         }
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 
   private:
@@ -102,7 +105,7 @@ class ExpectFloat16 : public detail::Expectation {
   public:
     explicit ExpectFloat16(std::vector<uint16_t> expected) : mExpected(std::move(expected)) {}
 
-    testing::AssertionResult Check(const void* data, size_t size) override {
+    AssertionResult Check(const void* data, size_t size) override {
         DAWN_ASSERT(size == sizeof(uint16_t) * mExpected.size());
 
         const uint16_t* actual = static_cast<const uint16_t*>(data);
@@ -112,14 +115,13 @@ class ExpectFloat16 : public detail::Expectation {
             uint16_t actualValue = DAWN_UNSAFE_TODO(actual[i]);
 
             if (!Floats16Match(expectedValue, actualValue)) {
-                testing::AssertionResult result = testing::AssertionFailure()
-                                                  << "Expected data[" << i << "] to be "
-                                                  << expectedValue << ", actual " << actualValue
-                                                  << "\n";
+                AssertionResult result = AssertionFailure()
+                                         << "Expected data[" << i << "] to be " << expectedValue
+                                         << ", actual " << actualValue << "\n";
                 return result;
             }
         }
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 
   private:
@@ -139,7 +141,7 @@ class ExpectRG11B10Ufloat : public detail::Expectation {
   public:
     explicit ExpectRG11B10Ufloat(std::vector<uint32_t> expected) : mExpected(std::move(expected)) {}
 
-    testing::AssertionResult Check(const void* data, size_t size) override {
+    AssertionResult Check(const void* data, size_t size) override {
         DAWN_ASSERT(size == sizeof(uint32_t) * mExpected.size());
 
         const uint32_t* actual = static_cast<const uint32_t*>(data);
@@ -149,14 +151,13 @@ class ExpectRG11B10Ufloat : public detail::Expectation {
             uint32_t actualValue = DAWN_UNSAFE_TODO(actual[i]);
 
             if (!RG11B10UfloatMatch(expectedValue, actualValue)) {
-                testing::AssertionResult result = testing::AssertionFailure()
-                                                  << "Expected data[" << i << "] to be "
-                                                  << expectedValue << ", actual " << actualValue
-                                                  << "\n";
+                AssertionResult result = AssertionFailure()
+                                         << "Expected data[" << i << "] to be " << expectedValue
+                                         << ", actual " << actualValue << "\n";
                 return result;
             }
         }
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 
   private:

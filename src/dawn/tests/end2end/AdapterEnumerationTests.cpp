@@ -64,7 +64,9 @@
 namespace dawn {
 namespace {
 
-class AdapterEnumerationTests : public ::testing::Test {
+using ::testing::Test;
+
+class AdapterEnumerationTests : public Test {
     void SetUp() override { dawnProcSetProcs(&dawn::native::GetProcs()); }
 };
 

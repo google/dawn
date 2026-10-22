@@ -62,10 +62,6 @@ bool IsIndirectDraw(DrawMode mode) {
     return mode == DrawMode::NonIndexedIndirect || mode == DrawMode::IndexedIndirect;
 }
 
-}  // anonymous namespace
-
-namespace {
-
 struct FirstIndexOffset {
     DrawMode mode = DrawMode::NonIndexed;
     uint32_t firstVertex = 0;

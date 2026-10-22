@@ -40,6 +40,10 @@
 namespace dawn {
 namespace {
 
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
+
 using Format = wgpu::TextureFormat;
 using Aspect = wgpu::TextureAspect;
 using Usage = wgpu::TextureUsage;
@@ -64,23 +68,22 @@ class ExpectNonZero : public detail::CustomTextureExpectation {
   public:
     uint32_t DataSize() override { return sizeof(T); }
 
-    testing::AssertionResult Check(const void* data, size_t size) override {
+    AssertionResult Check(const void* data, size_t size) override {
         DAWN_ASSERT(size % DataSize() == 0 && size > 0);
         const T* actual = static_cast<const T*>(data);
         T value = *actual;
         if (value == T(0)) {
-            return testing::AssertionFailure()
-                   << "Expected data to be non-zero, was " << value << "\n";
+            return AssertionFailure() << "Expected data to be non-zero, was " << value << "\n";
         }
         for (size_t i = 0; i < size / DataSize(); ++i) {
             if (DAWN_UNSAFE_TODO(actual[i]) != value) {
-                return testing::AssertionFailure()
+                return AssertionFailure()
                        << "Expected data[" << i << "] to match non-zero value " << value
                        << ", actual " << DAWN_UNSAFE_TODO(actual[i]) << "\n";
             }
         }
 
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 };
 

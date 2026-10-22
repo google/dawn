@@ -304,7 +304,6 @@ DAWN_INSTANTIATE_TEST(QueueWriteBufferTests,
 // For MinimumDataSpec bytesPerRow and rowsPerImage, compute a default from the copy extent.
 constexpr uint32_t kStrideComputeDefault = 0xFFFF'FFFEul;
 
-namespace {
 using TextureFormat = wgpu::TextureFormat;
 DAWN_TEST_PARAM_STRUCT(WriteTextureFormatParams, TextureFormat);
 
@@ -345,7 +344,6 @@ void FillData(Span<uint8_t> data) {
         data[i] = static_cast<uint8_t>(i % 253);
     }
 }
-}  // namespace
 
 class QueueWriteTextureTests : public DawnTestWithParams<WriteTextureFormatParams> {
   protected:

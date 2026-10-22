@@ -56,13 +56,15 @@
 namespace dawn {
 namespace {
 
+using ::testing::Test;
+
 struct GLFWindowDestroyer {
     void operator()(GLFWwindow* ptr) { glfwDestroyWindow(ptr); }
 };
 
 // Test for wgpu::Surface creation that only need an instance (no devices) and don't need all the
 // complexity of DawnTest.
-class WindowSurfaceInstanceTests : public testing::Test {
+class WindowSurfaceInstanceTests : public Test {
   public:
     void SetUp() override {
         glfwSetErrorCallback([](int code, const char* message) {

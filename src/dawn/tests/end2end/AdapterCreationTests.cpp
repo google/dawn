@@ -44,16 +44,18 @@
 namespace dawn {
 namespace {
 
-using testing::_;
-using testing::EmptySizedString;
-using testing::IsNull;
-using testing::MockCppCallback;
-using testing::StrictMock;
-using testing::WithArg;
+using ::testing::_;
+using ::testing::EmptySizedString;
+using ::testing::IsNull;
+using ::testing::MockCppCallback;
+using ::testing::StrictMock;
+using ::testing::TestWithParam;
+using ::testing::ValuesIn;
+using ::testing::WithArg;
 
 using MockRequestAdapterCallback = MockCppCallback<wgpu::RequestAdapterCallback<void>*>;
 
-class AdapterCreationTest : public ::testing::TestWithParam<wgpu::CallbackMode> {
+class AdapterCreationTest : public TestWithParam<wgpu::CallbackMode> {
   protected:
     void SetUp() override {
         // TODO(345685638): these tests are timed out on TSAN bots.
@@ -115,7 +117,7 @@ class AdapterCreationTest : public ::testing::TestWithParam<wgpu::CallbackMode> 
 
 INSTANTIATE_TEST_SUITE_P(,
                          AdapterCreationTest,
-                         ::testing::ValuesIn(std::initializer_list<wgpu::CallbackMode>{
+                         ValuesIn(std::initializer_list<wgpu::CallbackMode>{
                              wgpu::CallbackMode::WaitAnyOnly,
                              wgpu::CallbackMode::AllowProcessEvents,
                              wgpu::CallbackMode::AllowSpontaneous}));

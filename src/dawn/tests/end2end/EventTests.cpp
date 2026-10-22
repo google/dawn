@@ -44,6 +44,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::_;
+
 wgpu::Device CreateExtraDevice(utils::WireHelper* wireHelper, wgpu::Instance instance) {
     // IMPORTANT: DawnTest overrides RequestAdapter and RequestDevice and mixes
     // up the two instances. We use these to bypass the override.
@@ -174,7 +176,7 @@ class EventCompletionTests : public DawnTestWithParams<EventCompletionTestParams
 
     void LoseTestDevice() {
         EXPECT_CALL(mDeviceLostCallback,
-                    Call(CHandleIs(testDevice.Get()), wgpu::DeviceLostReason::Unknown, testing::_))
+                    Call(CHandleIs(testDevice.Get()), wgpu::DeviceLostReason::Unknown, _))
             .Times(1);
         testDevice.ForceLoss(wgpu::DeviceLostReason::Unknown, "Device lost for testing");
         testInstance.ProcessEvents();

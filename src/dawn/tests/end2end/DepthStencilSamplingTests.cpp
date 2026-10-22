@@ -39,6 +39,10 @@
 namespace dawn {
 namespace {
 
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
+
 using TextureFormat = wgpu::TextureFormat;
 DAWN_TEST_PARAM_STRUCT(DepthStencilSamplingTestParams, TextureFormat);
 
@@ -466,7 +470,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
 
         ~ExtraStencilComponentsExpectation() override = default;
 
-        testing::AssertionResult Check(const void* rawData, size_t size) override {
+        AssertionResult Check(const void* rawData, size_t size) override {
             DAWN_ASSERT(size == sizeof(StencilData));
             const uint32_t* data = static_cast<const uint32_t*>(rawData);
 
@@ -475,10 +479,10 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
 
             if (DAWN_UNSAFE_TODO(memcmp(data, ssss.data(), size)) == 0 ||
                 DAWN_UNSAFE_TODO(memcmp(data, s001.data(), size)) == 0) {
-                return testing::AssertionSuccess();
+                return AssertionSuccess();
             }
 
-            return testing::AssertionFailure()
+            return AssertionFailure()
                    << "Expected stencil data to be " << "(" << ssss[0] << ", " << ssss[1] << ", "
                    << ssss[2] << ", " << ssss[3] << ") or " << "(" << s001[0] << ", " << s001[1]
                    << ", " << s001[2] << ", " << s001[3] << "). Got " << "(" << data[0] << ", "

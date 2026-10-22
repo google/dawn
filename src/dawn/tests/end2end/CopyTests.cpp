@@ -52,6 +52,11 @@
 namespace dawn {
 namespace {
 
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
+using ::testing::Message;
+
 // For MinimumBufferSpec bytesPerRow and rowsPerImage, compute a default from the copy extent.
 constexpr uint32_t kStrideComputeDefault = 0xFFFF'FFFEul;
 
@@ -111,7 +116,7 @@ class ColorExpectation : public detail::CustomTextureExpectation {
 
     uint32_t DataSize() override { return ColorType::kDataSize; }
 
-    testing::AssertionResult Check(const void* data, size_t size) override {
+    AssertionResult Check(const void* data, size_t size) override {
         size_t expectedSize = sizeof(ColorType) * mExpected.size();
         DAWN_ASSERT(size == expectedSize);
         // SAFETY: `data` contains at least `mExpected.size()` ColorType elements as verified by the
@@ -121,12 +126,12 @@ class ColorExpectation : public detail::CustomTextureExpectation {
 
         for (size_t i = 0; i < mExpected.size(); ++i) {
             if (!AreEqual(mExpected[i], actual[i])) {
-                return testing::AssertionFailure()
+                return AssertionFailure()
                        << "Expected data[" << i << "] to be " << ToString(mExpected[i])
                        << ", actual " << ToString(actual[i]) << "\n";
             }
         }
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 
   private:
@@ -475,7 +480,6 @@ class CopyTests {
     }
 };
 
-namespace {
 using TextureFormat = wgpu::TextureFormat;
 DAWN_TEST_PARAM_STRUCT(CopyTextureFormatParams, TextureFormat);
 
@@ -549,8 +553,6 @@ class CopyTests_WithFormatParam : public CopyTests,
                                             GetTextureBytesPerRowAlignment());
     }
 };
-
-}  // namespace
 
 class CopyTests_T2B : public CopyTests_WithFormatParam {
   protected:
@@ -1867,7 +1869,7 @@ TEST_P(CopyTests_T2B, ReallyLargeBytesPerRow) {
     //   behavior (262144->0, 262400->256, 524288/1048576->0 without the workaround)
     // - 14-bit row-width texels boundary with 1 byte/texel format(such as R8Unorm)
     for (uint32_t bytesPerRow : {(1u << 18), (1u << 18) + 256u, (1u << 19), (1u << 20)}) {
-        SCOPED_TRACE(testing::Message() << "bytesPerRow=" << bytesPerRow);
+        SCOPED_TRACE(Message() << "bytesPerRow=" << bytesPerRow);
         BufferSpec bufferSpec = MinimumBufferSpec({2, 2, 2}, /*overrideBytesPerRow=*/bytesPerRow);
         DoTest(textureSpec, bufferSpec, {2, 2, 2});
     }
@@ -2461,7 +2463,7 @@ class ExpectRG11B10Ufloat : public detail::Expectation {
   public:
     explicit ExpectRG11B10Ufloat(std::vector<uint32_t> expected) : mExpected(std::move(expected)) {}
 
-    testing::AssertionResult Check(const void* data, size_t size) override {
+    AssertionResult Check(const void* data, size_t size) override {
         size_t expectedSize = sizeof(uint32_t) * mExpected.size();
         DAWN_ASSERT(size == expectedSize);
 
@@ -2475,14 +2477,13 @@ class ExpectRG11B10Ufloat : public detail::Expectation {
             uint32_t actualValue = actual[i];
 
             if (!RG11B10UfloatMatch(expectedValue, actualValue)) {
-                testing::AssertionResult result = testing::AssertionFailure()
-                                                  << "Expected data[" << i << "] to be "
-                                                  << expectedValue << ", actual " << actualValue
-                                                  << "\n";
+                AssertionResult result = AssertionFailure()
+                                         << "Expected data[" << i << "] to be " << expectedValue
+                                         << ", actual " << actualValue << "\n";
                 return result;
             }
         }
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 
   private:
@@ -3143,7 +3144,7 @@ TEST_P(CopyTests_B2T, ReallyLargeBytesPerRow) {
     //   behavior (262144->0, 262400->256, 524288/1048576->0 without the workaround)
     // - 14-bit row-width texels boundary with 1 byte/texel format (such as R8Unorm)
     for (uint32_t bytesPerRow : {(1u << 18), (1u << 18) + 256u, (1u << 19), (1u << 20)}) {
-        SCOPED_TRACE(testing::Message() << "bytesPerRow=" << bytesPerRow);
+        SCOPED_TRACE(Message() << "bytesPerRow=" << bytesPerRow);
         BufferSpec bufferSpec = MinimumBufferSpec({2, 2, 2}, /*overrideBytesPerRow=*/bytesPerRow);
         DoTest(textureSpec, bufferSpec, {2, 2, 2});
     }
@@ -4245,7 +4246,6 @@ DAWN_INSTANTIATE_TEST(ClearBufferTests,
 
 // Regression tests to reproduce a flaky failure when running whole WebGPU CTS on Intel GPUs.
 // See crbug.com/dawn/1487 for more details.
-namespace {
 using TextureFormat = wgpu::TextureFormat;
 
 enum class InitializationMethod {
@@ -4279,8 +4279,6 @@ DAWN_TEST_PARAM_STRUCT(CopyToDepthStencilTextureAfterDestroyingBigBufferTestsPar
                        TextureFormat,
                        InitializationMethod,
                        AddRenderAttachmentUsage);
-
-}  // anonymous namespace
 
 class CopyToDepthStencilTextureAfterDestroyingBigBufferTests
     : public DawnTestWithParams<CopyToDepthStencilTextureAfterDestroyingBigBufferTestsParams> {};

@@ -41,6 +41,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::HasSubstr;
+
 // Expect lazy clear count for test in device to increment by N after `statement`.
 // Note: WebGPU backend doesn't maintain the lazy clear count for testing but rely on the inner
 // layer implementation for the initialization.
@@ -1562,7 +1564,7 @@ TEST_P(BufferZeroInitMaxBufferSizeTest, CopyTextureToBufferLargerThanMaxBufferSi
 
     // Submit fails when lazy-clearing `poison` tries to allocate a staging buffer larger than
     // maxBufferSize.
-    EXPECT_DEVICE_LOSS_MSG(queue.Submit(1, &cb), testing::HasSubstr("max buffer size limit"));
+    EXPECT_DEVICE_LOSS_MSG(queue.Submit(1, &cb), HasSubstr("max buffer size limit"));
 }
 
 DAWN_INSTANTIATE_TEST(BufferZeroInitMaxBufferSizeTest,

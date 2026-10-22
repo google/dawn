@@ -37,7 +37,9 @@
 namespace dawn {
 namespace {
 
-class DeviceInitializationTest : public testing::Test {
+using ::testing::Test;
+
+class DeviceInitializationTest : public Test {
   protected:
     void SetUp() override { dawnProcSetProcs(&native::GetProcs()); }
 

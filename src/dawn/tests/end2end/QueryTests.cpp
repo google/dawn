@@ -35,6 +35,10 @@
 namespace dawn {
 namespace {
 
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
+
 // Clear the content of the result buffer into 0xFFFFFFFF.
 constexpr static uint64_t kSentinelValue = ~uint64_t{0};
 constexpr static uint64_t kZero = 0u;
@@ -71,27 +75,26 @@ class OcclusionExpectation : public detail::Expectation {
 
     explicit OcclusionExpectation(Result expected) { mExpected = expected; }
 
-    testing::AssertionResult Check(const void* data, size_t size) override {
+    AssertionResult Check(const void* data, size_t size) override {
         DAWN_ASSERT(size % sizeof(uint64_t) == 0);
         const uint64_t* actual = static_cast<const uint64_t*>(data);
         for (size_t i = 0; i < size / sizeof(uint64_t); i++) {
             if (DAWN_UNSAFE_TODO(actual[i]) == kSentinelValue) {
-                return testing::AssertionFailure()
+                return AssertionFailure()
                        << "Data[" << i << "] was not written (it kept the sentinel value of "
                        << kSentinelValue << ").\n";
             }
             if (mExpected == Result::Zero && DAWN_UNSAFE_TODO(actual[i]) != 0) {
-                return testing::AssertionFailure()
+                return AssertionFailure()
                        << "Expected data[" << i
                        << "] to be zero, actual: " << DAWN_UNSAFE_TODO(actual[i]) << ".\n";
             }
             if (mExpected == Result::NonZero && DAWN_UNSAFE_TODO(actual[i]) == 0) {
-                return testing::AssertionFailure()
-                       << "Expected data[" << i << "] to be non-zero.\n";
+                return AssertionFailure() << "Expected data[" << i << "] to be non-zero.\n";
             }
         }
 
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 
   private:
@@ -734,17 +737,16 @@ class TimestampExpectation : public detail::Expectation {
     ~TimestampExpectation() override = default;
 
     // Expect the timestamp results are greater than 0.
-    testing::AssertionResult Check(const void* data, size_t size) override {
+    AssertionResult Check(const void* data, size_t size) override {
         DAWN_ASSERT(size % sizeof(uint64_t) == 0);
         const uint64_t* timestamps = static_cast<const uint64_t*>(data);
         for (size_t i = 0; i < size / sizeof(uint64_t); i++) {
             if (DAWN_UNSAFE_TODO(timestamps[i]) == 0) {
-                return testing::AssertionFailure()
-                       << "Expected data[" << i << "] to be greater than 0.\n";
+                return AssertionFailure() << "Expected data[" << i << "] to be greater than 0.\n";
             }
         }
 
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 };
 
@@ -752,7 +754,6 @@ class TimestampQueryTestsBase : public QueryTests {
   protected:
     void SetUp() override {
         QueryTests::SetUp();
-
 
         // TODO(crbug.com/451389800): [Capture] implement query set.
         DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());

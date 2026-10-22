@@ -50,9 +50,12 @@
 namespace dawn {
 namespace {
 
-using testing::_;
-using testing::MockCppCallback;
-using testing::StrictMock;
+using ::testing::_;
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
+using ::testing::MockCppCallback;
+using ::testing::StrictMock;
 
 using MockMapAsyncCallback = MockCppCallback<wgpu::BufferMapCallback<void>*>;
 using FutureCallbackMode = wgpu::CallbackMode;
@@ -1948,15 +1951,15 @@ TEST_P(BufferMapExtendedUsagesTests, MapWriteQueryBufferThenDrawThenMapWrite) {
 
     class NonZeroExpectation : public detail::Expectation {
       public:
-        testing::AssertionResult Check(const void* data, size_t size) override {
+        AssertionResult Check(const void* data, size_t size) override {
             DAWN_ASSERT(size % sizeof(uint64_t) == 0);
             const uint64_t* actual = static_cast<const uint64_t*>(data);
 
             if (actual[0] == 0) {
-                return testing::AssertionFailure() << "Expected data[0] to be non-zero.\n";
+                return AssertionFailure() << "Expected data[0] to be non-zero.\n";
             }
 
-            return testing::AssertionSuccess();
+            return AssertionSuccess();
         }
     };
 

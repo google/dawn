@@ -51,6 +51,11 @@
 namespace dawn {
 namespace {
 
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
+using ::testing::ElementsAreArray;
+
 class CaptureAndReplayTests : public DawnTest {
   public:
     void SetUp() override {
@@ -518,7 +523,7 @@ TEST_P(CaptureAndReplayTests, CaptureWithMapRead) {
     auto actual = static_cast<const uint8_t*>(dstBuffer.GetConstMappedRange(0, sizeof(myData)));
     std::span<const uint8_t> actual_span =
         DAWN_UNSAFE_TODO(std::span<const uint8_t>(actual, std::size(myData)));
-    ASSERT_THAT(actual_span, ::testing::ElementsAreArray(myData));
+    ASSERT_THAT(actual_span, ElementsAreArray(myData));
 }
 
 TEST_P(CaptureAndReplayTests, CaptureCopyBufferToBuffer) {
@@ -1665,29 +1670,28 @@ class OcclusionExpectation : public detail::Expectation {
 
     explicit OcclusionExpectation(const std::vector<Result> expected) { mExpected = expected; }
 
-    testing::AssertionResult Check(const void* data, size_t size) override {
+    AssertionResult Check(const void* data, size_t size) override {
         DAWN_ASSERT(size % sizeof(uint64_t) == 0);
         DAWN_ASSERT(size / sizeof(uint64_t) == mExpected.size());
         const uint64_t* actual = static_cast<const uint64_t*>(data);
         for (size_t i = 0; i < size / sizeof(uint64_t); i++) {
             if (DAWN_UNSAFE_TODO(actual[i]) == kSentinelValue) {
-                return testing::AssertionFailure()
+                return AssertionFailure()
                        << "Data[" << i << "] was not written (it kept the sentinel value of "
                        << kSentinelValue << ").\n";
             }
             Result expected = mExpected[i];
             if (expected == Result::Zero && DAWN_UNSAFE_TODO(actual[i]) != 0) {
-                return testing::AssertionFailure()
+                return AssertionFailure()
                        << "Expected data[" << i
                        << "] to be zero, actual: " << DAWN_UNSAFE_TODO(actual[i]) << ".\n";
             }
             if (expected == Result::NonZero && DAWN_UNSAFE_TODO(actual[i]) == 0) {
-                return testing::AssertionFailure()
-                       << "Expected data[" << i << "] to be non-zero.\n";
+                return AssertionFailure() << "Expected data[" << i << "] to be non-zero.\n";
             }
         }
 
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 
   private:

@@ -39,6 +39,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::HasSubstr;
+
 #define EXPECT_LAZY_CLEAR(N, statement)                                                  \
     do {                                                                                 \
         if (UsesWire()) {                                                                \
@@ -3033,7 +3035,7 @@ TEST_P(CompressedTextureZeroInitTest, CopyTextureToTextureLargerThanMaxBufferSiz
 
     // Submitting the copy fails and loses the device because the temporary staging buffer used for
     // the copy exceeds the maxBufferSize limit.
-    EXPECT_DEVICE_LOSS_MSG(queue.Submit(1, &commands), testing::HasSubstr("max buffer size limit"));
+    EXPECT_DEVICE_LOSS_MSG(queue.Submit(1, &commands), HasSubstr("max buffer size limit"));
 }
 
 DAWN_INSTANTIATE_TEST(CompressedTextureZeroInitTest,

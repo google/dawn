@@ -46,6 +46,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::HasSubstr;
+
 constexpr bool Is8Bit(wgpu::SubgroupMatrixComponentType c) {
     return c == wgpu::SubgroupMatrixComponentType::U8 || c == wgpu::SubgroupMatrixComponentType::I8;
 }
@@ -459,7 +461,7 @@ fn main() {
                 device.CreateComputePipeline(&csDesc);
             } else {
                 ASSERT_DEVICE_ERROR_MSG(device.CreateComputePipeline(&csDesc),
-                                        testing::HasSubstr("not supported by the device"));
+                                        HasSubstr("not supported by the device"));
             }
         }
     };
@@ -509,8 +511,7 @@ fn main() {
         std::stringstream err;
         err << "The x-dimension of workgroup_size (" << (info.subgroupMaxSize / 2)
             << ") must be a multiple of the device maxSubgroupSize";
-        ASSERT_DEVICE_ERROR_MSG(device.CreateComputePipeline(&csDesc),
-                                testing::HasSubstr(err.str()));
+        ASSERT_DEVICE_ERROR_MSG(device.CreateComputePipeline(&csDesc), HasSubstr(err.str()));
     }
 }
 

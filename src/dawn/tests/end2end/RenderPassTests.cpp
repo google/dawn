@@ -35,6 +35,10 @@
 namespace dawn {
 namespace {
 
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
+
 constexpr uint32_t kRTSize = 16;
 constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
 
@@ -46,15 +50,15 @@ class ExpectEqualToOneOf : public detail::CustomTextureExpectation {
 
     uint32_t DataSize() override { return sizeof(utils::RGBA8); }
 
-    testing::AssertionResult Check(const void* data, size_t size) override {
+    AssertionResult Check(const void* data, size_t size) override {
         DAWN_ASSERT(size == DataSize());
         utils::RGBA8 actual = *static_cast<const utils::RGBA8*>(data);
         for (const utils::RGBA8& candidate : mCandidates) {
             if (actual == candidate) {
-                return testing::AssertionSuccess();
+                return AssertionSuccess();
             }
         }
-        testing::AssertionResult result = testing::AssertionFailure();
+        AssertionResult result = AssertionFailure();
         result << "Expected " << actual << " to equal one of:";
         for (const utils::RGBA8& candidate : mCandidates) {
             result << " " << candidate;

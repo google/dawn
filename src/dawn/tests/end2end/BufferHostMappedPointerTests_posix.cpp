@@ -38,6 +38,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::MockCallback;
+
 class MMapBackend : public BufferHostMappedPointerTestBackend {
   public:
     static BufferHostMappedPointerTestBackend* GetInstance() {
@@ -96,7 +98,7 @@ class MMapBackend : public BufferHostMappedPointerTestBackend {
     }
 
   private:
-    MutexProtected<testing::MockCallback<WGPUCallback>> mDisposeCallback;
+    MutexProtected<MockCallback<WGPUCallback>> mDisposeCallback;
 };
 
 DAWN_INSTANTIATE_PREFIXED_TEST_P(Posix,

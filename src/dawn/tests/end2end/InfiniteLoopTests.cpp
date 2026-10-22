@@ -37,6 +37,10 @@
 namespace dawn {
 namespace {
 
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
+
 enum class LoopKind {
     kLoop,            // loop { if breakCond {break;}}
     kLoopContinuing,  // loop { continuing { break if breakCond; } }}
@@ -239,7 +243,7 @@ class ExpectOneNonZero : public detail::Expectation {
   public:
     explicit ExpectOneNonZero(T value) : mValue(value) { DAWN_ASSERT(mValue != T(0)); }
 
-    testing::AssertionResult Check(const void* data, size_t size) override {
+    AssertionResult Check(const void* data, size_t size) override {
         DAWN_ASSERT(size % sizeof(T) == 0 && size > 0);
         const T* actual = static_cast<const T*>(data);
 
@@ -247,21 +251,20 @@ class ExpectOneNonZero : public detail::Expectation {
         for (size_t i = 0; i < size / sizeof(T); i++) {
             if (DAWN_UNSAFE_TODO(actual[i]) == mValue) {
                 if (whereFound.has_value()) {
-                    return testing::AssertionFailure()
-                           << "Found value " << mValue << " at data[" << whereFound.value()
-                           << "] and data[" << i << "]\n";
+                    return AssertionFailure() << "Found value " << mValue << " at data["
+                                              << whereFound.value() << "] and data[" << i << "]\n";
                 }
                 whereFound = i;
             } else if (DAWN_UNSAFE_TODO(actual[i]) != 0) {
-                return testing::AssertionFailure()
+                return AssertionFailure()
                        << "Found unexpected value data[" << i
                        << "] = " << DAWN_UNSAFE_TODO(actual[i]) << " instead of " << mValue << "\n";
             }
         }
         if (!whereFound.has_value()) {
-            return testing::AssertionFailure() << "Sentinel value " << mValue << " was not found\n";
+            return AssertionFailure() << "Sentinel value " << mValue << " was not found\n";
         }
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 
   private:

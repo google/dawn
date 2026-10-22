@@ -43,6 +43,10 @@
 namespace dawn {
 namespace {
 
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
+
 enum class ShaderAtomicOp : uint8_t {
     AtomicAdd,
     AtomicCASFakeAdd,
@@ -532,16 +536,15 @@ class ExpectLessThan : public detail::Expectation {
   public:
     explicit ExpectLessThan(unsigned int high) : mHigh(high) {}
 
-    testing::AssertionResult Check(const void* data, size_t size) override {
+    AssertionResult Check(const void* data, size_t size) override {
         DAWN_ASSERT(size == sizeof(uint32_t));
         // SAFETY: Test-only code.
         uint32_t val = DAWN_UNSAFE_BUFFERS(*static_cast<const uint32_t*>(data));
         if (val >= mHigh) {
-            return testing::AssertionFailure()
-                   << "Found unexpected value " << val << " (expected between 0 and " << (mHigh - 1)
-                   << ")\n";
+            return AssertionFailure() << "Found unexpected value " << val
+                                      << " (expected between 0 and " << (mHigh - 1) << ")\n";
         }
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 };
 
