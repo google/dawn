@@ -1179,6 +1179,8 @@ shared_library("vulkan_lvp") {
 
   deps = [ ":mesa_lavapipe" ]
 
+  inputs = [ "${mesa_zstd_dir}/lib/libzstd.so.1.5.7" ]
+
   libs = [ "${mesa_zstd_dir}/lib/libzstd.so" ] + mesa_llvm_libs + [
            "dl",
            "m",
