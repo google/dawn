@@ -38,8 +38,14 @@ namespace dawn::native::vulkan {
 FencedDeleter::FencedDeleter(Device* device) : mDevice(device) {}
 
 FencedDeleter::~FencedDeleter() {
-    // Flush any pending deletions.
-    UpdateCompletedSerialTo(kMaxExecutionSerial);
+    // There should be nothing left to delete by this point.
+#if defined(DAWN_ENABLE_ASSERTS)
+    mPendingDeletions.Use([&](auto pending) {
+#define X(Type, ...) DAWN_ASSERT(pending->m##Type.Empty());
+        FENCED_DELETER_TYPES(X)
+#undef X
+    });
+#endif  // defined(DAWN_ENABLE_ASSERTS)
 }
 
 #define X(Type, DeleteFn, deleteWith)                                            \
@@ -87,11 +93,15 @@ void FencedDeleter::UpdateCompletedSerialTo(ExecutionSerial completedSerial) {
     pending->m##Type.ClearUpTo(completedSerial);
         FENCED_DELETER_TYPES(X)
 #undef X
+
+        if (completedSerial == kMaxExecutionSerial) {
+            pending->mAssumeCompleted = true;
+        }
     });
 }
 
 void FencedDeleter::AssumeCommandsComplete() {
-    mPendingDeletions->mAssumeCompleted = true;
+    UpdateCompletedSerialTo(kMaxExecutionSerial);
 }
 
 }  // namespace dawn::native::vulkan
