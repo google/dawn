@@ -48,6 +48,7 @@
 namespace dawn {
 namespace {
 using Microsoft::WRL::ComPtr;
+using ::testing::HasSubstr;
 
 enum class Mode {
     DXGISharedHandle,
@@ -413,7 +414,7 @@ TEST_P(SharedTextureMemoryNoFeatureTests, SharedFenceImportWithoutFeature) {
     fenceDesc.nextInChain = &sharedHandleDesc;
 
     ASSERT_DEVICE_ERROR_MSG(wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc),
-                            testing::HasSubstr("is not enabled"));
+                            HasSubstr("is not enabled"));
 }
 
 // Test that a shared handle can be imported, and then exported.
@@ -502,7 +503,7 @@ TEST_P(SharedTextureMemoryTests, SharedFenceImportDXGISharedHandleMissing) {
     fenceDesc.nextInChain = &sharedHandleDesc;
 
     ASSERT_DEVICE_ERROR_MSG(wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc),
-                            testing::HasSubstr("missing"));
+                            HasSubstr("missing"));
 }
 
 // Test exporting info from a shared fence with no chained struct.

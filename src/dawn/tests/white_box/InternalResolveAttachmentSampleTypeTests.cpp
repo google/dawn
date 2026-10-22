@@ -38,6 +38,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::HasSubstr;
+
 class InternalResolveAttachmentSampleTypeTests : public DawnTest {
   protected:
     void SetUp() override {
@@ -146,7 +148,7 @@ TEST_P(InternalResolveAttachmentSampleTypeTests, TextureLoadI32Incompatible) {
     pipelineDescriptor.layout = CreatePipelineLayout(/*withSampler=*/false);
 
     ASSERT_DEVICE_ERROR_MSG(device.CreateRenderPipeline(&pipelineDescriptor),
-                            testing::HasSubstr("isn't compatible"));
+                            HasSubstr("isn't compatible"));
 }
 
 // Test that using a bind group layout with kInternalResolveAttachmentSampleType is incompatible
@@ -166,7 +168,7 @@ TEST_P(InternalResolveAttachmentSampleTypeTests, TextureLoadU32Incompatible) {
     pipelineDescriptor.layout = CreatePipelineLayout(/*withSampler=*/false);
 
     ASSERT_DEVICE_ERROR_MSG(device.CreateRenderPipeline(&pipelineDescriptor),
-                            testing::HasSubstr("isn't compatible"));
+                            HasSubstr("isn't compatible"));
 }
 
 DAWN_INSTANTIATE_TEST(InternalResolveAttachmentSampleTypeTests, NullBackend());

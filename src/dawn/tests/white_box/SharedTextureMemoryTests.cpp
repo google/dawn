@@ -43,8 +43,6 @@
 #include "src/dawn/utils/TextureUtils.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 
-using testing::SizedStringMatches;
-
 namespace dawn {
 
 namespace {
@@ -148,7 +146,7 @@ std::vector<wgpu::FeatureName> SharedTextureMemoryTests::GetRequiredFeatures() {
     }
 
     return features;
-}  // namespace dawn
+}
 
 void SharedTextureMemoryTests::SetUp() {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
@@ -885,8 +883,9 @@ void SharedTextureMemoryTests::TestTableHasResource(wgpu::ResourceTable table,
 
 namespace {
 
-using testing::HasSubstr;
-using testing::MockCppCallback;
+using ::testing::HasSubstr;
+using ::testing::MockCppCallback;
+using ::testing::SizedStringMatches;
 
 template <typename T>
 T& AsNonConst(const T& rhs) {

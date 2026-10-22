@@ -42,6 +42,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::HasSubstr;
+
 wgpu::SharedTextureMemory CreateSharedTextureMemoryHelper(const wgpu::Device& device,
                                                           bool allowStorageBinding = true) {
     auto surface = CreateIOSurface(16, 16, kCVPixelFormatType_32RGBA, 4);
@@ -258,7 +260,7 @@ TEST_P(SharedTextureMemoryNoFeatureTests, SharedFenceImportWithoutFeature) {
     fenceDesc.nextInChain = &sharedEventDesc;
 
     ASSERT_DEVICE_ERROR_MSG(wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc),
-                            testing::HasSubstr("MTLSharedEvent is not enabled"));
+                            HasSubstr("MTLSharedEvent is not enabled"));
 }
 
 // Test that it is an error to import a shared fence with a null MTLSharedEvent
@@ -270,7 +272,7 @@ TEST_P(SharedTextureMemoryTests, SharedFenceImportMTLSharedEventMissing) {
     fenceDesc.nextInChain = &sharedEventDesc;
 
     ASSERT_DEVICE_ERROR_MSG(wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc),
-                            testing::HasSubstr("missing"));
+                            HasSubstr("missing"));
 }
 
 // Test exporting info from a shared fence with no chained struct.

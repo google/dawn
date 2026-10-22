@@ -36,7 +36,7 @@
 namespace dawn::native::opengl {
 namespace {
 
-using testing::_;
+using ::testing::_;
 
 class GLDeferredWorkTests : public DawnTest {
   protected:

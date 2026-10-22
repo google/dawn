@@ -36,6 +36,10 @@
 namespace dawn {
 namespace {
 
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
+
 void EncodeConvertTimestampsToNanoseconds(wgpu::CommandEncoder encoder,
                                           uint32_t queryCount,
                                           wgpu::Buffer timestamps,
@@ -56,7 +60,7 @@ class InternalShaderExpectation : public ::dawn::detail::Expectation {
     }
 
     // Expect the actual results are approximately equal to the expected values.
-    testing::AssertionResult Check(const void* data, size_t size) override {
+    AssertionResult Check(const void* data, size_t size) override {
         DAWN_ASSERT(size == sizeof(uint64_t) * mExpected.size());
         // The computations in the shader use a multiplier that's a 16bit integer plus a shift
         // that maximize the multiplier. This means that for the range of periods we care about
@@ -72,9 +76,8 @@ class InternalShaderExpectation : public ::dawn::detail::Expectation {
         for (size_t i = 0; i < mExpected.size(); ++i) {
             if (mExpected[i] == 0) {
                 if (DAWN_UNSAFE_TODO(actual[i]) != 0) {
-                    return testing::AssertionFailure()
-                           << "Expected data[" << i << "] to be 0, actual "
-                           << DAWN_UNSAFE_TODO(actual[i]) << "\n";
+                    return AssertionFailure() << "Expected data[" << i << "] to be 0, actual "
+                                              << DAWN_UNSAFE_TODO(actual[i]) << "\n";
                 }
                 continue;
             }
@@ -93,7 +96,7 @@ class InternalShaderExpectation : public ::dawn::detail::Expectation {
 
             if (DAWN_UNSAFE_TODO(actual[i]) < lowerLimit ||
                 DAWN_UNSAFE_TODO(actual[i]) > upperLimit) {
-                return testing::AssertionFailure()
+                return AssertionFailure()
                        << "Expected data[" << i << "] to be " << expected << ", actual "
                        << DAWN_UNSAFE_TODO(actual[i]) << ". Error rate is larger than "
                        << kErrorToleranceRatio << ". Upper limit is " << upperLimit
@@ -101,14 +104,14 @@ class InternalShaderExpectation : public ::dawn::detail::Expectation {
             }
 
             if ((DAWN_UNSAFE_TODO(actual[i]) & ~quantizationMask64) != 0) {
-                return testing::AssertionFailure()
+                return AssertionFailure()
                        << "Actual data 0x" << std::hex << DAWN_UNSAFE_TODO(actual[i])
                        << " does not match quantization mask 0x" << std::hex << mQuantizationMask
                        << "\n";
             }
         }
 
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 
   private:

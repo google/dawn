@@ -44,6 +44,11 @@
 
 namespace dawn {
 namespace {
+
+using ::testing::HasSubstr;
+using ::testing::MockCppCallback;
+using ::testing::StrictMock;
+
 constexpr uint32_t kBufferSize = 4;
 
 struct FenceInfo {
@@ -358,8 +363,7 @@ TEST_P(SharedBufferMemoryExistingD3D12ResourceTests,
 
     ASSERT_DEVICE_ERROR_MSG(
         memory.CreateBuffer(&bufferDesc),
-        testing::HasSubstr(
-            "mappedAtCreation=true requires the SharedBufferMemory to have MapWrite usage"));
+        HasSubstr("mappedAtCreation=true requires the SharedBufferMemory to have MapWrite usage"));
 }
 
 // Tests that creating SharedBufferMemory emits a specific error message if Uniform usage specified.
@@ -375,7 +379,7 @@ TEST_P(SharedBufferMemoryExistingD3D12ResourceTests, UniformUsageValidation) {
     bufferDesc.size = properties.size;
     bufferDesc.usage = properties.usage | wgpu::BufferUsage::Uniform;
 
-    ASSERT_DEVICE_ERROR_MSG(memory.CreateBuffer(&bufferDesc), testing::HasSubstr("Uniform"));
+    ASSERT_DEVICE_ERROR_MSG(memory.CreateBuffer(&bufferDesc), HasSubstr("Uniform"));
 }
 
 // Verify that DuplicateHandle with the correct access rights including READ_CONTROL succeeds in
@@ -730,8 +734,8 @@ class D3D12HostPointerBackend : public SharedBufferMemoryTestBackend {
 
 class SharedBufferMemoryD3D12HostPointerTests : public SharedBufferMemoryTests {
   protected:
-    using MockDisposeCallback = testing::MockCppCallback<wgpu::DisposeCallback<void>*>;
-    testing::StrictMock<MockDisposeCallback> mMockDispose;
+    using MockDisposeCallback = MockCppCallback<wgpu::DisposeCallback<void>*>;
+    StrictMock<MockDisposeCallback> mMockDispose;
 };
 
 // Ensure that importing a nullptr host pointer results in error, and that disposeCallback is

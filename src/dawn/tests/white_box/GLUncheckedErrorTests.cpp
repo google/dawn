@@ -33,7 +33,7 @@
 namespace dawn::native::opengl {
 namespace {
 
-using testing::_;
+using ::testing::_;
 
 // An invalid capability, used to generate a GL_INVALID_ENUM error with glEnable.
 constexpr GLenum kInvalidCapability = 0;

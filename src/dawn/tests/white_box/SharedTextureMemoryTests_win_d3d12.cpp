@@ -45,6 +45,7 @@ namespace dawn {
 namespace {
 
 using Microsoft::WRL::ComPtr;
+using ::testing::HasSubstr;
 
 enum class Mode {
     // TODO(crbug.com/454827192): Add tests for shared handle to D3D12Resources.
@@ -289,7 +290,7 @@ TEST_P(SharedTextureMemoryNoFeatureTests, SharedFenceImportWithoutFeatureD3D12) 
     fenceDesc.nextInChain = &sharedHandleDesc;
 
     ASSERT_DEVICE_ERROR_MSG(wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc),
-                            testing::HasSubstr("is not enabled"));
+                            HasSubstr("is not enabled"));
 }
 
 // Test that a shared handle can be imported, and then exported, using a D3D12 fence.

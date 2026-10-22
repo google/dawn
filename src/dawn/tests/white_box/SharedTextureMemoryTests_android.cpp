@@ -45,6 +45,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::HasSubstr;
+
 template <typename BackendBase>
 class SharedTextureMemoryTestAndroidBackend : public BackendBase {
   public:
@@ -494,7 +496,7 @@ TEST_P(SharedTextureMemoryTests, ProtectedUnsupported) {
     desc.nextInChain = &stmAHardwareBufferDesc;
 
     ASSERT_DEVICE_ERROR_MSG(device.ImportSharedTextureMemory(&desc),
-                            testing::HasSubstr("Unsupported AHardwareBuffer usage"));
+                            HasSubstr("Unsupported AHardwareBuffer usage"));
 }
 
 #if defined(DAWN_ENABLE_ERROR_INJECTION)
