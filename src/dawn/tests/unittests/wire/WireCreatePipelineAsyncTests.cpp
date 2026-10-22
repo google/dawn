@@ -41,14 +41,14 @@
 namespace dawn::wire {
 namespace {
 
-using testing::_;
-using testing::EmptySizedString;
-using testing::IsNull;
-using testing::NonEmptySizedString;
-using testing::NotNull;
-using testing::Return;
-using testing::SizedString;
-using testing::WithArg;
+using ::testing::_;
+using ::testing::EmptySizedString;
+using ::testing::IsNull;
+using ::testing::NonEmptySizedString;
+using ::testing::NotNull;
+using ::testing::Return;
+using ::testing::SizedString;
+using ::testing::WithArg;
 
 using WireCreateComputePipelineAsyncTestBase =
     WireFutureTest<wgpu::CreateComputePipelineAsyncCallback<void>*>;

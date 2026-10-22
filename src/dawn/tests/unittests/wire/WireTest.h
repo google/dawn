@@ -37,7 +37,11 @@
 #include "src/utils/log.h"
 #include "webgpu/webgpu_cpp.h"
 
-namespace dawn {
+namespace dawn::utils {
+class TerribleCommandBuffer;
+}  // namespace dawn::utils
+
+namespace dawn::wire {
 
 // Definition of a "Lambda predicate matcher" for GMock to allow checking deep structures
 // are passed correctly by the wire.
@@ -126,7 +130,6 @@ MATCHER_P(CHandleIs, cType, "") {
         }                                                       \
     } while (0)
 
-namespace wire {
 class CommandSerializer;
 class WireClient;
 class WireServer;
@@ -136,11 +139,6 @@ class MemoryTransferService;
 namespace server {
 class MemoryTransferService;
 }  // namespace server
-}  // namespace wire
-
-namespace utils {
-class TerribleCommandBuffer;
-}  // namespace utils
 
 class WireTest : virtual public testing::Test {
   protected:
@@ -177,11 +175,11 @@ class WireTest : virtual public testing::Test {
     wgpu::Queue queue;
     WGPUQueue apiQueue = nullptr;
 
-    wire::WireServer* GetWireServer();
-    wire::WireClient* GetWireClient();
+    WireServer* GetWireServer();
+    WireClient* GetWireClient();
 
-    wire::CommandSerializer* GetC2SSerializer();
-    wire::CommandSerializer* GetS2CSerializer();
+    CommandSerializer* GetC2SSerializer();
+    CommandSerializer* GetS2CSerializer();
 
     utils::TerribleCommandBuffer* GetC2SCommandBuffer();
 
@@ -191,19 +189,19 @@ class WireTest : virtual public testing::Test {
     void DeleteClient();
 
   private:
-    virtual wire::client::MemoryTransferService* GetClientMemoryTransferService();
-    virtual wire::server::MemoryTransferService* GetServerMemoryTransferService();
+    virtual client::MemoryTransferService* GetClientMemoryTransferService();
+    virtual server::MemoryTransferService* GetServerMemoryTransferService();
 
     // Devices created on the server MUST call Device.Destroy at least once. This map is used to
     // ensure that this invariant holds true for any devices returned.
     absl::flat_hash_map<WGPUDevice, bool> mDeviceDestroyed;
 
-    std::unique_ptr<wire::WireServer> mWireServer;
-    std::unique_ptr<wire::WireClient> mWireClient;
+    std::unique_ptr<WireServer> mWireServer;
+    std::unique_ptr<WireClient> mWireClient;
     std::unique_ptr<utils::TerribleCommandBuffer> mS2cBuf;
     std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
 };
 
-}  // namespace dawn
+}  // namespace dawn::wire
 
 #endif  // SRC_DAWN_TESTS_UNITTESTS_WIRE_WIRETEST_H_

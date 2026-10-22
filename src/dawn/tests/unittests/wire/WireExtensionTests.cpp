@@ -31,8 +31,8 @@
 namespace dawn::wire {
 namespace {
 
-using testing::_;
-using testing::Unused;
+using ::testing::_;
+using ::testing::Unused;
 
 class WireExtensionTests : public WireTest {
   public:

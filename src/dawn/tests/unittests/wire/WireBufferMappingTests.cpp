@@ -57,10 +57,10 @@ static std::ostream& operator<<(std::ostream& os, const MapMode& param) {
 namespace dawn::wire {
 namespace {
 
-using testing::_;
-using testing::Return;
-using testing::SizedString;
-using testing::WithArg;
+using ::testing::_;
+using ::testing::Return;
+using ::testing::SizedString;
+using ::testing::WithArg;
 
 // For the buffer tests, we make passing a map mode optional to reuse the same test fixture for
 // tests that test multiple modes and tests that are mode specific. By making it an optional, it

@@ -34,8 +34,8 @@
 namespace dawn::wire {
 namespace {
 
-using testing::Mock;
-using testing::Return;
+using ::testing::Mock;
+using ::testing::Return;
 
 class WireInjectTextureTests : public WireTest {
   public:

@@ -35,10 +35,10 @@
 namespace dawn::wire {
 namespace {
 
-using testing::_;
-using testing::Exactly;
-using testing::Return;
-using testing::SizedString;
+using ::testing::_;
+using ::testing::Exactly;
+using ::testing::Return;
+using ::testing::SizedString;
 
 class WireDisconnectTests : public WireTest {};
 

@@ -63,14 +63,18 @@ static std::ostream& operator<<(std::ostream& os, const MapMode& param) {
 namespace dawn::wire {
 namespace {
 
-using testing::_;
-using testing::MockCppCallback;
-using testing::Ne;
-using testing::NotNull;
-using testing::Return;
-using testing::SizedString;
-using testing::StrictMock;
-using testing::WithArg;
+using ::testing::_;
+using ::testing::Matcher;
+using ::testing::MockCppCallback;
+using ::testing::Ne;
+using ::testing::NotNull;
+using ::testing::Return;
+using ::testing::SizedString;
+using ::testing::StrictMock;
+using ::testing::Truly;
+using ::testing::ValuesIn;
+using ::testing::WithArg;
+using ::testing::WithParamInterface;
 
 using MapMode = wgpu::MapMode;
 using MappedAtCreation = bool;
@@ -93,8 +97,7 @@ using MockServerMemoryHandle = server::MockMemoryTransferService::MockMemoryHand
 // mapping operation from map to unmap, and add all MemoryTransferService expectations. Tests
 // which check for errors perform the same mapping operations but insert mocked failures for
 // various mapping or MemoryTransferService operations.
-class WireMemoryTransferServiceTestBase : public WireTest,
-                                          public testing::WithParamInterface<MapModeParam> {
+class WireMemoryTransferServiceTestBase : public WireTest, public WithParamInterface<MapModeParam> {
   protected:
     client::MemoryTransferService* GetClientMemoryTransferService() override { return &mClientMTS; }
     server::MemoryTransferService* GetServerMemoryTransferService() override { return &mServerMTS; }
@@ -224,12 +227,11 @@ class WireMemoryTransferServiceTestBase : public WireTest,
     void ExpectClientDeserializeData(bool success, MockClientMemoryHandle* clientHandle) {
         DAWN_ASSERT(clientHandle != nullptr);
 
-        EXPECT_CALL(*clientHandle,
-                    DeserializeDataUpdate(testing::Matcher<std::span<const std::byte>>(
-                                              testing::Truly([](std::span<const std::byte> arg) {
-                                                  return arg.size() == kBufferSize;
-                                              })),
-                                          static_cast<size_t>(0u), kBufferSize))
+        EXPECT_CALL(*clientHandle, DeserializeDataUpdate(Matcher<std::span<const std::byte>>(Truly(
+                                                             [](std::span<const std::byte> arg) {
+                                                                 return arg.size() == kBufferSize;
+                                                             })),
+                                                         static_cast<size_t>(0u), kBufferSize))
             .WillOnce(WithArg<0>([&, success](std::span<const std::byte> deserializeSpan) {
                 if (success) {
                     // TODO(https://crbug.com/524406299) use copy_from.
@@ -246,13 +248,12 @@ class WireMemoryTransferServiceTestBase : public WireTest,
         EXPECT_CALL(
             *serverHandle,
             DeserializeDataUpdate(
-                testing::Matcher<std::span<const std::byte>>(testing::Truly(
+                Matcher<std::span<const std::byte>>(Truly(
                     [](std::span<const std::byte> arg) { return arg.size() == kBufferSize; })),
                 static_cast<size_t>(0u), kBufferSize,
-                testing::Matcher<std::span<std::byte>>(
-                    testing::Truly([target](std::span<std::byte> arg) {
-                        return arg.data() == target.data() && arg.size() == target.size();
-                    }))))
+                Matcher<std::span<std::byte>>(Truly([target](std::span<std::byte> arg) {
+                    return arg.data() == target.data() && arg.size() == target.size();
+                }))))
             .WillOnce(WithArg<0>([&, success](std::span<const std::byte> deserializePointer) {
                 if (success) {
                     // TODO(https://crbug.com/524406299) use copy_from.
@@ -415,10 +416,10 @@ class WireMemoryTransferServiceBufferHandleTests : public WireMemoryTransferServ
 INSTANTIATE_TEST_SUITE_P(
     ,
     WireMemoryTransferServiceBufferHandleTests,
-    testing::ValuesIn(ParamGenerator<WireMemoryTransferServiceBufferHandleTests::ParamType,
-                                     MapMode,
-                                     MappedAtCreation>({wgpu::MapMode::Read, wgpu::MapMode::Write},
-                                                       {true, false})),
+    ValuesIn(ParamGenerator<WireMemoryTransferServiceBufferHandleTests::ParamType,
+                            MapMode,
+                            MappedAtCreation>({wgpu::MapMode::Read, wgpu::MapMode::Write},
+                                              {true, false})),
     &TestParamToString<WireMemoryTransferServiceBufferHandleTests::ParamType>);
 
 // Test handle(s) destroy behavior.
@@ -508,10 +509,10 @@ class WireMemoryTransferServiceBufferMapAsyncTests : public WireMemoryTransferSe
 INSTANTIATE_TEST_SUITE_P(
     ,
     WireMemoryTransferServiceBufferMapAsyncTests,
-    testing::ValuesIn(ParamGenerator<WireMemoryTransferServiceBufferMapAsyncTests::ParamType,
-                                     MapMode,
-                                     MappedAtCreation>({wgpu::MapMode::Read, wgpu::MapMode::Write},
-                                                       {true, false})),
+    ValuesIn(ParamGenerator<WireMemoryTransferServiceBufferMapAsyncTests::ParamType,
+                            MapMode,
+                            MappedAtCreation>({wgpu::MapMode::Read, wgpu::MapMode::Write},
+                                              {true, false})),
     &TestParamToString<WireMemoryTransferServiceBufferMapAsyncTests::ParamType>);
 
 // Test successful mapping.
@@ -714,12 +715,11 @@ class WireMemoryTransferServiceBufferMappedAtCreationTests
 INSTANTIATE_TEST_SUITE_P(
     ,
     WireMemoryTransferServiceBufferMappedAtCreationTests,
-    testing::ValuesIn(
-        ParamGenerator<WireMemoryTransferServiceBufferMappedAtCreationTests::ParamType,
-                       MapMode,
-                       MappedAtCreation>({wgpu::MapMode::Read, wgpu::MapMode::Write,
-                                          wgpu::MapMode::None},
-                                         {true})),
+    ValuesIn(ParamGenerator<WireMemoryTransferServiceBufferMappedAtCreationTests::ParamType,
+                            MapMode,
+                            MappedAtCreation>({wgpu::MapMode::Read, wgpu::MapMode::Write,
+                                               wgpu::MapMode::None},
+                                              {true})),
     &TestParamToString<WireMemoryTransferServiceBufferMappedAtCreationTests::ParamType>);
 
 // Test DeserializeDataUpdate (actual data) failure w.r.t for the initial Unmap.

@@ -38,16 +38,17 @@
 namespace dawn::wire {
 namespace {
 
-using testing::_;
-using testing::EmptySizedString;
-using testing::SizedString;
-using testing::WithArg;
+using ::testing::_;
+using ::testing::EmptySizedString;
+using ::testing::MockCppCallback;
+using ::testing::SizedString;
+using ::testing::WithArg;
 
 class WireErrorCallbackTests : public WireTest {};
 
 // Test the return wire for device user warning callbacks
 TEST_F(WireErrorCallbackTests, DeviceLoggingCallback) {
-    testing::MockCppCallback<wgpu::LoggingCallback<void>*> mockCallback;
+    MockCppCallback<wgpu::LoggingCallback<void>*> mockCallback;
     device.SetLoggingCallback(mockCallback.TemplatedCallback(),
                               mockCallback.TemplatedCallbackUserdata());
 

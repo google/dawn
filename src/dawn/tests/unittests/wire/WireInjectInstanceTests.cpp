@@ -36,10 +36,10 @@
 namespace dawn::wire {
 namespace {
 
-using testing::_;
-using testing::Mock;
-using testing::MockCallback;
-using testing::WithArg;
+using ::testing::_;
+using ::testing::Mock;
+using ::testing::MockCallback;
+using ::testing::WithArg;
 
 class WireInjectInstanceTests : public WireTest {
   public:

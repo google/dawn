@@ -45,16 +45,16 @@
 namespace dawn::wire {
 namespace {
 
-using testing::_;
-using testing::EmptySizedString;
-using testing::IsNull;
-using testing::MockCppCallback;
-using testing::NonEmptySizedString;
-using testing::NotNull;
-using testing::Return;
-using testing::SaveArg;
-using testing::WithArg;
-using testing::WithArgs;
+using ::testing::_;
+using ::testing::EmptySizedString;
+using ::testing::IsNull;
+using ::testing::MockCppCallback;
+using ::testing::NonEmptySizedString;
+using ::testing::NotNull;
+using ::testing::Return;
+using ::testing::SaveArg;
+using ::testing::WithArg;
+using ::testing::WithArgs;
 
 // Fixture that helps execute specific commands through the wire that may not be possible to trigger
 // through usage of the dawn::wire::client. It is even more change detecting than regular dawn::wire

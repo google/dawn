@@ -42,14 +42,14 @@
 namespace dawn::wire {
 namespace {
 
-using testing::_;
-using testing::EmptySizedString;
-using testing::IsNull;
-using testing::NonEmptySizedString;
-using testing::NotNull;
-using testing::SizedString;
-using testing::WithArg;
-using testing::WithArgs;
+using ::testing::_;
+using ::testing::EmptySizedString;
+using ::testing::IsNull;
+using ::testing::NonEmptySizedString;
+using ::testing::NotNull;
+using ::testing::SizedString;
+using ::testing::WithArg;
+using ::testing::WithArgs;
 
 using WireAdapterTestBase = WireFutureTest<wgpu::RequestDeviceCallback<void>*>;
 class WireAdapterTests : public WireAdapterTestBase {

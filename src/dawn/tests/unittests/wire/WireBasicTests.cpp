@@ -30,7 +30,7 @@
 namespace dawn::wire {
 namespace {
 
-using testing::Return;
+using ::testing::Return;
 
 class WireBasicTests : public WireTest {
   public:
