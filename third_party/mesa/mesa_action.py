@@ -27,7 +27,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """Helper wrapper for Mesa GN codegen actions.
 
-This script serves three roles for the native GN Mesa build (mesa_gn):
+This script serves three roles for the native GN Mesa build (//third_party/mesa:mesa):
 1. Bridging to vpython3 (--vpython-spec): Dawn's root .gn configures
    `script_executable` to use the bare hermetic CPython interpreter
    (//third_party/cpython3/host/bin/python3), which does not automatically load

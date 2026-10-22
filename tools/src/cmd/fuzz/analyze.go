@@ -813,13 +813,6 @@ func generateLcovReport(t *taskConfig, fuzzer string, binDir string, output stri
 		}
 	}
 
-	dawnRoot := fileutils.DawnRoot(t.osWrapper)
-	if buildDir, err := filepath.Abs(t.build); err == nil {
-		// Path equivalence for Mesa source resolution
-		cmdArgs = append(cmdArgs, "--path-equivalence=/third_party/mesa,"+filepath.Join(dawnRoot, "third_party", "mesa"))
-		cmdArgs = append(cmdArgs, "--path-equivalence="+filepath.Join(buildDir, "src")+","+filepath.Join(buildDir, "gen", "third_party", "mesa", "mesa_build_setup", "src"))
-	}
-
 	// Exclude /usr/.*
 	cmdArgs = append(cmdArgs, "-i", "\\/usr\\/.*")
 

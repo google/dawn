@@ -25,1131 +25,903 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import("//build/config/clang/clang.gni")
+import("//build/config/coverage/coverage.gni")
 import("../../scripts/dawn_overrides_with_defaults.gni")
 import("mesa_overrides_with_defaults.gni")
+import("mesa_sources.gni")
 
-import("${mesa_meson_dir}/meson_overrides_with_defaults.gni")
+assert(is_linux, "Mesa Lavapipe build is currently only supported on Linux")
 
 _mesa_so = "${root_out_dir}/libvulkan_lvp.so"
 _mesa_icd_json = "${root_out_dir}/lvp_icd.json"
+_mesa_gen_dir = "${target_gen_dir}"
+_vpython_spec = "${dawn_root}/vpython.toml"
 
-if (is_linux) {
-  copy("copy_zstd") {
-    sources = [
-      "${meson_zstd_dir}/lib/libzstd.so.1",
-      "${meson_zstd_dir}/lib/libzstd.so.1.5.7",
+copy("copy_zstd") {
+  sources = [
+    "${mesa_zstd_dir}/lib/libzstd.so.1",
+    "${mesa_zstd_dir}/lib/libzstd.so.1.5.7",
+  ]
+  outputs = [ "${root_out_dir}/{{source_file_part}}" ]
+}
+
+# Helper template to run a Mesa Python codegen script under vpython3.
+template("_mesa_action") {
+  action(target_name) {
+    script = "mesa_action.py"
+    inputs = [
+      _vpython_spec,
+      invoker.python_script,
     ]
-    outputs = [ "${root_out_dir}/{{source_file_part}}" ]
+    if (defined(invoker.inputs)) {
+      inputs += invoker.inputs
+    }
+    outputs = invoker.outputs
+    if (defined(invoker.deps)) {
+      deps = invoker.deps
+    }
+    if (defined(invoker.data)) {
+      data = invoker.data
+    }
+
+    args = [
+      "--vpython-spec",
+      rebase_path(_vpython_spec, root_build_dir),
+    ]
+    if (defined(invoker.capture_stdout) && invoker.capture_stdout) {
+      assert(outputs == [ outputs[0] ],
+             "capture_stdout requires a single output file in ${target_name}")
+      args += [
+        "--capture-stdout",
+        rebase_path(outputs[0], root_build_dir),
+      ]
+    }
+    args += [
+      "--",
+      rebase_path(invoker.python_script, root_build_dir),
+    ]
+    if (defined(invoker.args)) {
+      args += invoker.args
+    }
   }
 }
 
-if (!mesa_use_gn_build) {
-  import("${mesa_meson_dir}/meson_target.gni")
+# ---------------------------------------------------------------------------
+# Codegen Actions (45 targets total)
+# ---------------------------------------------------------------------------
 
-  meson_target("mesa_build") {
-    source_dir = "src"
-    options = mesa_options
-    inputs = [ "${mesa_src_dir}/mesa_options.txt" ]
-    outputs = [ "${target_gen_dir}/install" ]
-  }
-
-  action("copy_mesa_vulkan_icd") {
-    script = "copy_mesa_driver.py"
-    deps = [ ":mesa_build" ]
-    args = [
-      rebase_path("${target_gen_dir}/install", root_build_dir),
-      rebase_path(root_out_dir, root_build_dir),
-    ]
-    outputs = [
-      _mesa_icd_json,
-      _mesa_so,
-    ]
-    data = [
-      _mesa_icd_json,
-      _mesa_so,
-    ]
-  }
-
-  group("mesa_meson") {
-    public_deps = [ ":copy_mesa_vulkan_icd" ]
-    if (is_linux) {
-      public_deps += [ ":copy_zstd" ]
-      data = [
-        "${root_out_dir}/libzstd.so.1",
-        "${root_out_dir}/libzstd.so.1.5.7",
-      ]
-    }
-  }
-
-  group("mesa") {
-    public_deps = [ ":mesa_meson" ]
-    data_deps = [ ":mesa_meson" ]
-  }
-} else {
-  import("//build/config/clang/clang.gni")
-  import("//build/config/coverage/coverage.gni")
-  import("mesa_sources.gni")
-
-  assert(is_linux, "mesa_gn is currently only supported on Linux")
-
-  _mesa_gen_dir = "${target_gen_dir}/mesa_gn"
-  _vpython_spec = "${dawn_root}/vpython.toml"
-
-  # Helper template to run a Mesa Python codegen script under vpython3.
-  template("_mesa_action") {
-    action(target_name) {
-      script = "mesa_action.py"
-      inputs = [
-        _vpython_spec,
-        invoker.python_script,
-      ]
-      if (defined(invoker.inputs)) {
-        inputs += invoker.inputs
-      }
-      outputs = invoker.outputs
-      if (defined(invoker.deps)) {
-        deps = invoker.deps
-      }
-      if (defined(invoker.data)) {
-        data = invoker.data
-      }
-
-      args = [
-        "--vpython-spec",
-        rebase_path(_vpython_spec, root_build_dir),
-      ]
-      if (defined(invoker.capture_stdout) && invoker.capture_stdout) {
-        assert(outputs == [ outputs[0] ],
-               "capture_stdout requires a single output file in ${target_name}")
-        args += [
-          "--capture-stdout",
-          rebase_path(outputs[0], root_build_dir),
-        ]
-      }
-      args += [
-        "--",
-        rebase_path(invoker.python_script, root_build_dir),
-      ]
-      if (defined(invoker.args)) {
-        args += invoker.args
-      }
-    }
-  }
-
-  # ---------------------------------------------------------------------------
-  # Codegen Actions (45 targets total)
-  # ---------------------------------------------------------------------------
-
-  _mesa_action("mesa_gn_git_sha1") {
-    python_script = "src/bin/git_sha1_gen.py"
-    outputs = [ "${_mesa_gen_dir}/src/git_sha1.h" ]
-    args = [
-      "--output",
-      rebase_path(outputs[0], root_build_dir),
-    ]
-  }
-
-  _mesa_action("mesa_gn_driconf_static_h") {
-    python_script = "src/src/util/driconf_static.py"
-    inputs = [ "src/src/util/00-mesa-defaults.conf" ]
-    outputs = [ "${_mesa_gen_dir}/src/util/driconf_static.h" ]
-    args = [
-      rebase_path("src/src/util/00-mesa-defaults.conf", root_build_dir),
-      rebase_path(outputs[0], root_build_dir),
-    ]
-  }
-
-  _mesa_action("mesa_gn_format_srgb_c") {
-    python_script = "src/src/util/format_srgb.py"
-    outputs = [ "${_mesa_gen_dir}/src/util/format_srgb.c" ]
-    capture_stdout = true
-  }
-
-  _mesa_action("mesa_gn_shader_stats_h") {
-    python_script = "src/src/util/process_shader_stats.py"
-    inputs = [
-      "src/src/util/shader_stats.rnc",
-      "src/src/util/shader_stats.xml",
-    ]
-    outputs = [ "${_mesa_gen_dir}/src/util/shader_stats.h" ]
-    capture_stdout = true
-    args = [
-      rebase_path("src/src/util/shader_stats.rnc", root_build_dir),
-      rebase_path("src/src/util/shader_stats.xml", root_build_dir),
-    ]
-  }
-
-  _u_format_inputs = [
-    "src/src/util/format/u_format.yaml",
-    "src/src/util/format/u_format_pack.py",
-    "src/src/util/format/u_format_parse.py",
+_mesa_action("mesa_git_sha1") {
+  python_script = "src/bin/git_sha1_gen.py"
+  outputs = [ "${_mesa_gen_dir}/src/git_sha1.h" ]
+  args = [
+    "--output",
+    rebase_path(outputs[0], root_build_dir),
   ]
+}
 
-  _mesa_action("mesa_gn_u_format_gen_h") {
-    python_script = "src/src/util/format/u_format_table.py"
-    inputs = _u_format_inputs
-    outputs = [ "${_mesa_gen_dir}/src/util/format/u_format_gen.h" ]
-    capture_stdout = true
-    args = [
-      rebase_path("src/src/util/format/u_format.yaml", root_build_dir),
-      "--enums",
-    ]
-  }
-
-  _mesa_action("mesa_gn_u_format_pack_h") {
-    python_script = "src/src/util/format/u_format_table.py"
-    inputs = _u_format_inputs
-    outputs = [ "${_mesa_gen_dir}/src/util/format/u_format_pack.h" ]
-    capture_stdout = true
-    args = [
-      rebase_path("src/src/util/format/u_format.yaml", root_build_dir),
-      "--header",
-    ]
-  }
-
-  _mesa_action("mesa_gn_u_format_table_c") {
-    python_script = "src/src/util/format/u_format_table.py"
-    inputs = _u_format_inputs
-    outputs = [ "${_mesa_gen_dir}/src/util/format/u_format_table.c" ]
-    capture_stdout = true
-    args = [ rebase_path("src/src/util/format/u_format.yaml", root_build_dir) ]
-  }
-
-  _mesa_action("mesa_gn_builtin_types_h") {
-    python_script = "src/src/compiler/builtin_types_h.py"
-    inputs = [ "src/src/compiler/builtin_types.py" ]
-    outputs = [ "${_mesa_gen_dir}/src/compiler/builtin_types.h" ]
-    args = [ rebase_path(outputs[0], root_build_dir) ]
-  }
-
-  _mesa_action("mesa_gn_builtin_types_c") {
-    python_script = "src/src/compiler/builtin_types_c.py"
-    inputs = [ "src/src/compiler/builtin_types.py" ]
-    outputs = [ "${_mesa_gen_dir}/src/compiler/builtin_types.c" ]
-    args = [ rebase_path(outputs[0], root_build_dir) ]
-  }
-
-  _mesa_action("mesa_gn_ir_expression_operation_h") {
-    python_script = "src/src/compiler/glsl/ir_expression_operation.py"
-    outputs = [ "${_mesa_gen_dir}/src/compiler/ir_expression_operation.h" ]
-    capture_stdout = true
-    args = [ "enum" ]
-  }
-
-  _nir_py_inputs = [
-    "src/src/compiler/nir/nir_intrinsics.py",
-    "src/src/compiler/nir/nir_opcodes.py",
+_mesa_action("mesa_driconf_static_h") {
+  python_script = "src/src/util/driconf_static.py"
+  inputs = [ "src/src/util/00-mesa-defaults.conf" ]
+  outputs = [ "${_mesa_gen_dir}/src/util/driconf_static.h" ]
+  args = [
+    rebase_path("src/src/util/00-mesa-defaults.conf", root_build_dir),
+    rebase_path(outputs[0], root_build_dir),
   ]
+}
 
-  _mesa_action("mesa_gn_nir_builder_opcodes_h") {
-    python_script = "src/src/compiler/nir/nir_builder_opcodes_h.py"
-    inputs = _nir_py_inputs
-    outputs = [ "${_mesa_gen_dir}/src/compiler/nir/nir_builder_opcodes.h" ]
-    capture_stdout = true
-  }
+_mesa_action("mesa_format_srgb_c") {
+  python_script = "src/src/util/format_srgb.py"
+  outputs = [ "${_mesa_gen_dir}/src/util/format_srgb.c" ]
+  capture_stdout = true
+}
 
-  _mesa_action("mesa_gn_nir_constant_expressions_c") {
-    python_script = "src/src/compiler/nir/nir_constant_expressions.py"
-    inputs = _nir_py_inputs
-    outputs = [ "${_mesa_gen_dir}/src/compiler/nir/nir_constant_expressions.c" ]
-    capture_stdout = true
-  }
-
-  _mesa_action("mesa_gn_nir_opcodes_h") {
-    python_script = "src/src/compiler/nir/nir_opcodes_h.py"
-    inputs = _nir_py_inputs
-    outputs = [ "${_mesa_gen_dir}/src/compiler/nir/nir_opcodes.h" ]
-    capture_stdout = true
-  }
-
-  _mesa_action("mesa_gn_nir_opcodes_c") {
-    python_script = "src/src/compiler/nir/nir_opcodes_c.py"
-    inputs = _nir_py_inputs
-    outputs = [ "${_mesa_gen_dir}/src/compiler/nir/nir_opcodes.c" ]
-    capture_stdout = true
-  }
-
-  _mesa_action("mesa_gn_nir_opt_algebraic_c") {
-    python_script = "src/src/compiler/nir/nir_opt_algebraic.py"
-    inputs = _nir_py_inputs + [ "src/src/compiler/nir/nir_algebraic.py" ]
-    outputs = [ "${_mesa_gen_dir}/src/compiler/nir/nir_opt_algebraic.c" ]
-    args = [
-      "--out",
-      rebase_path(outputs[0], root_build_dir),
-    ]
-  }
-
-  _mesa_action("mesa_gn_nir_intrinsics_h") {
-    python_script = "src/src/compiler/nir/nir_intrinsics_h.py"
-    inputs = [ "src/src/compiler/nir/nir_intrinsics.py" ]
-    outputs = [ "${_mesa_gen_dir}/src/compiler/nir/nir_intrinsics.h" ]
-    args = [
-      "--out",
-      rebase_path(outputs[0], root_build_dir),
-    ]
-  }
-
-  _mesa_action("mesa_gn_nir_intrinsics_indices_h") {
-    python_script = "src/src/compiler/nir/nir_intrinsics_indices_h.py"
-    inputs = [ "src/src/compiler/nir/nir_intrinsics.py" ]
-    outputs = [ "${_mesa_gen_dir}/src/compiler/nir/nir_intrinsics_indices.h" ]
-    args = [
-      "--out",
-      rebase_path(outputs[0], root_build_dir),
-    ]
-  }
-
-  _mesa_action("mesa_gn_nir_intrinsics_c") {
-    python_script = "src/src/compiler/nir/nir_intrinsics_c.py"
-    inputs = [ "src/src/compiler/nir/nir_intrinsics.py" ]
-    outputs = [ "${_mesa_gen_dir}/src/compiler/nir/nir_intrinsics.c" ]
-    args = [
-      "--out",
-      rebase_path(outputs[0], root_build_dir),
-    ]
-  }
-
-  _mesa_action("mesa_gn_vtn_gather_types_c") {
-    python_script = "src/src/compiler/spirv/vtn_gather_types_c.py"
-    inputs = [ "src/src/compiler/spirv/spirv.core.grammar.json" ]
-    outputs = [ "${_mesa_gen_dir}/src/compiler/spirv/vtn_gather_types.c" ]
-    args = [
-      rebase_path("src/src/compiler/spirv/spirv.core.grammar.json",
-                  root_build_dir),
-      rebase_path(outputs[0], root_build_dir),
-    ]
-  }
-
-  _mesa_action("mesa_gn_spirv_info") {
-    python_script = "src/src/compiler/spirv/spirv_info_gen.py"
-    inputs = [ "src/src/compiler/spirv/spirv.core.grammar.json" ]
-    outputs = [
-      "${_mesa_gen_dir}/src/compiler/spirv/spirv_info.h",
-      "${_mesa_gen_dir}/src/compiler/spirv/spirv_info.c",
-    ]
-    args = [
-      "--json",
-      rebase_path("src/src/compiler/spirv/spirv.core.grammar.json",
-                  root_build_dir),
-      "--out-h",
-      rebase_path(outputs[0], root_build_dir),
-      "--out-c",
-      rebase_path(outputs[1], root_build_dir),
-    ]
-  }
-
-  _mesa_action("mesa_gn_vtn_generator_ids_h") {
-    python_script = "src/src/compiler/spirv/vtn_generator_ids_h.py"
-    inputs = [ "src/src/compiler/spirv/spir-v.xml" ]
-    outputs = [ "${_mesa_gen_dir}/src/compiler/spirv/vtn_generator_ids.h" ]
-    args = [
-      rebase_path("src/src/compiler/spirv/spir-v.xml", root_build_dir),
-      rebase_path(outputs[0], root_build_dir),
-    ]
-  }
-
-  _vk_xml = "src/src/vulkan/registry/vk.xml"
-  _vk_py_inputs = [
-    _vk_xml,
-    "src/src/vulkan/util/vk_entrypoints.py",
-    "src/src/vulkan/util/vk_extensions.py",
+_mesa_action("mesa_shader_stats_h") {
+  python_script = "src/src/util/process_shader_stats.py"
+  inputs = [
+    "src/src/util/shader_stats.rnc",
+    "src/src/util/shader_stats.xml",
   ]
+  outputs = [ "${_mesa_gen_dir}/src/util/shader_stats.h" ]
+  capture_stdout = true
+  args = [
+    rebase_path("src/src/util/shader_stats.rnc", root_build_dir),
+    rebase_path("src/src/util/shader_stats.xml", root_build_dir),
+  ]
+}
 
-  _mesa_action("mesa_gn_vk_dispatch_table") {
-    python_script = "src/src/vulkan/util/vk_dispatch_table_gen.py"
-    inputs = _vk_py_inputs
-    outputs = [
-      "${_mesa_gen_dir}/src/vulkan/util/vk_dispatch_table.c",
-      "${_mesa_gen_dir}/src/vulkan/util/vk_dispatch_table.h",
-    ]
-    args = [
-      "--xml",
-      rebase_path(_vk_xml, root_build_dir),
-      "--out-c",
-      rebase_path(outputs[0], root_build_dir),
-      "--out-h",
-      rebase_path(outputs[1], root_build_dir),
-      "--beta",
-      "false",
-    ]
-  }
+_u_format_inputs = [
+  "src/src/util/format/u_format.yaml",
+  "src/src/util/format/u_format_pack.py",
+  "src/src/util/format/u_format_parse.py",
+]
 
-  _mesa_action("mesa_gn_vk_enum_to_str") {
-    python_script = "src/src/vulkan/util/gen_enum_to_str.py"
-    inputs = _vk_py_inputs
-    outputs = [
-      "${_mesa_gen_dir}/src/vulkan/util/vk_enum_to_str.c",
-      "${_mesa_gen_dir}/src/vulkan/util/vk_enum_to_str.h",
-      "${_mesa_gen_dir}/src/vulkan/util/vk_enum_defines.h",
-    ]
-    args = [
-      "--xml",
-      rebase_path(_vk_xml, root_build_dir),
-      "--out-c",
-      rebase_path(outputs[0], root_build_dir),
-      "--out-h",
-      rebase_path(outputs[1], root_build_dir),
-      "--out-d",
-      rebase_path(outputs[2], root_build_dir),
-      "--beta",
-      "false",
-    ]
-  }
+_mesa_action("mesa_u_format_gen_h") {
+  python_script = "src/src/util/format/u_format_table.py"
+  inputs = _u_format_inputs
+  outputs = [ "${_mesa_gen_dir}/src/util/format/u_format_gen.h" ]
+  capture_stdout = true
+  args = [
+    rebase_path("src/src/util/format/u_format.yaml", root_build_dir),
+    "--enums",
+  ]
+}
 
-  _mesa_action("mesa_gn_vk_struct_type_cast") {
-    python_script = "src/src/vulkan/util/vk_struct_type_cast_gen.py"
-    inputs = _vk_py_inputs
-    outputs = [ "${_mesa_gen_dir}/src/vulkan/util/vk_struct_type_cast.h" ]
-    args = [
-      "--xml",
-      rebase_path(_vk_xml, root_build_dir),
-      "--out",
-      rebase_path(outputs[0], root_build_dir),
-      "--beta",
-      "false",
-    ]
-  }
+_mesa_action("mesa_u_format_pack_h") {
+  python_script = "src/src/util/format/u_format_table.py"
+  inputs = _u_format_inputs
+  outputs = [ "${_mesa_gen_dir}/src/util/format/u_format_pack.h" ]
+  capture_stdout = true
+  args = [
+    rebase_path("src/src/util/format/u_format.yaml", root_build_dir),
+    "--header",
+  ]
+}
 
-  _mesa_action("mesa_gn_vk_extensions") {
-    python_script = "src/src/vulkan/util/vk_extensions_gen.py"
-    inputs = _vk_py_inputs
-    outputs = [
-      "${_mesa_gen_dir}/src/vulkan/util/vk_extensions.c",
-      "${_mesa_gen_dir}/src/vulkan/util/vk_extensions.h",
-    ]
-    args = [
-      "--xml",
-      rebase_path(_vk_xml, root_build_dir),
-      "--out-c",
-      rebase_path(outputs[0], root_build_dir),
-      "--out-h",
-      rebase_path(outputs[1], root_build_dir),
-    ]
-  }
+_mesa_action("mesa_u_format_table_c") {
+  python_script = "src/src/util/format/u_format_table.py"
+  inputs = _u_format_inputs
+  outputs = [ "${_mesa_gen_dir}/src/util/format/u_format_table.c" ]
+  capture_stdout = true
+  args = [ rebase_path("src/src/util/format/u_format.yaml", root_build_dir) ]
+}
 
-  _mesa_action("mesa_gn_vk_common_entrypoints") {
-    python_script = "src/src/vulkan/util/vk_entrypoints_gen.py"
-    inputs = _vk_py_inputs
-    outputs = [
-      "${_mesa_gen_dir}/src/vulkan/runtime/vk_common_entrypoints.h",
-      "${_mesa_gen_dir}/src/vulkan/runtime/vk_common_entrypoints.c",
-    ]
-    args = [
-      "--xml",
-      rebase_path(_vk_xml, root_build_dir),
-      "--proto",
-      "--weak",
-      "--out-h",
-      rebase_path(outputs[0], root_build_dir),
-      "--out-c",
-      rebase_path(outputs[1], root_build_dir),
-      "--prefix",
-      "vk_common",
-      "--beta",
-      "false",
-    ]
-  }
+_mesa_action("mesa_builtin_types_h") {
+  python_script = "src/src/compiler/builtin_types_h.py"
+  inputs = [ "src/src/compiler/builtin_types.py" ]
+  outputs = [ "${_mesa_gen_dir}/src/compiler/builtin_types.h" ]
+  args = [ rebase_path(outputs[0], root_build_dir) ]
+}
 
-  _mesa_action("mesa_gn_vk_cmd_queue") {
-    python_script = "src/src/vulkan/util/vk_cmd_queue_gen.py"
-    inputs = _vk_py_inputs
-    outputs = [
-      "${_mesa_gen_dir}/src/vulkan/runtime/vk_cmd_queue.c",
-      "${_mesa_gen_dir}/src/vulkan/runtime/vk_cmd_queue.h",
-    ]
-    args = [
-      "--xml",
-      rebase_path(_vk_xml, root_build_dir),
-      "--out-c",
-      rebase_path(outputs[0], root_build_dir),
-      "--out-h",
-      rebase_path(outputs[1], root_build_dir),
-      "--beta",
-      "false",
-    ]
-  }
+_mesa_action("mesa_builtin_types_c") {
+  python_script = "src/src/compiler/builtin_types_c.py"
+  inputs = [ "src/src/compiler/builtin_types.py" ]
+  outputs = [ "${_mesa_gen_dir}/src/compiler/builtin_types.c" ]
+  args = [ rebase_path(outputs[0], root_build_dir) ]
+}
 
-  _mesa_action("mesa_gn_vk_cmd_enqueue_entrypoints") {
-    python_script = "src/src/vulkan/util/vk_entrypoints_gen.py"
-    inputs = _vk_py_inputs
-    outputs = [
-      "${_mesa_gen_dir}/src/vulkan/runtime/vk_cmd_enqueue_entrypoints.h",
-      "${_mesa_gen_dir}/src/vulkan/runtime/vk_cmd_enqueue_entrypoints.c",
-    ]
-    args = [
-      "--xml",
-      rebase_path(_vk_xml, root_build_dir),
-      "--proto",
-      "--weak",
-      "--out-h",
-      rebase_path(outputs[0], root_build_dir),
-      "--out-c",
-      rebase_path(outputs[1], root_build_dir),
-      "--prefix",
-      "vk_cmd_enqueue",
-      "--prefix",
-      "vk_cmd_enqueue_unless_primary",
-      "--beta",
-      "false",
-    ]
-  }
+_mesa_action("mesa_ir_expression_operation_h") {
+  python_script = "src/src/compiler/glsl/ir_expression_operation.py"
+  outputs = [ "${_mesa_gen_dir}/src/compiler/ir_expression_operation.h" ]
+  capture_stdout = true
+  args = [ "enum" ]
+}
 
-  _mesa_action("mesa_gn_vk_dispatch_trampolines") {
-    python_script = "src/src/vulkan/util/vk_dispatch_trampolines_gen.py"
-    inputs = _vk_py_inputs
-    outputs = [
-      "${_mesa_gen_dir}/src/vulkan/runtime/vk_dispatch_trampolines.c",
-      "${_mesa_gen_dir}/src/vulkan/runtime/vk_dispatch_trampolines.h",
-    ]
-    args = [
-      "--xml",
-      rebase_path(_vk_xml, root_build_dir),
-      "--out-c",
-      rebase_path(outputs[0], root_build_dir),
-      "--out-h",
-      rebase_path(outputs[1], root_build_dir),
-      "--beta",
-      "false",
-    ]
-  }
+_nir_py_inputs = [
+  "src/src/compiler/nir/nir_intrinsics.py",
+  "src/src/compiler/nir/nir_opcodes.py",
+]
 
-  _mesa_action("mesa_gn_vk_physical_device_features") {
-    python_script = "src/src/vulkan/util/vk_physical_device_features_gen.py"
-    inputs = _vk_py_inputs
-    outputs = [
-      "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_features.c",
-      "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_features.h",
-    ]
-    args = [
-      "--xml",
-      rebase_path(_vk_xml, root_build_dir),
-      "--out-c",
-      rebase_path(outputs[0], root_build_dir),
-      "--out-h",
-      rebase_path(outputs[1], root_build_dir),
-      "--beta",
-      "false",
-    ]
-  }
+_mesa_action("mesa_nir_builder_opcodes_h") {
+  python_script = "src/src/compiler/nir/nir_builder_opcodes_h.py"
+  inputs = _nir_py_inputs
+  outputs = [ "${_mesa_gen_dir}/src/compiler/nir/nir_builder_opcodes.h" ]
+  capture_stdout = true
+}
 
-  _mesa_action("mesa_gn_vk_physical_device_properties") {
-    python_script = "src/src/vulkan/util/vk_physical_device_properties_gen.py"
-    inputs = _vk_py_inputs
-    outputs = [
-      "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_properties.c",
-      "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_properties.h",
-    ]
-    args = [
-      "--xml",
-      rebase_path(_vk_xml, root_build_dir),
-      "--out-c",
-      rebase_path(outputs[0], root_build_dir),
-      "--out-h",
-      rebase_path(outputs[1], root_build_dir),
-      "--beta",
-      "false",
-    ]
-  }
+_mesa_action("mesa_nir_constant_expressions_c") {
+  python_script = "src/src/compiler/nir/nir_constant_expressions.py"
+  inputs = _nir_py_inputs
+  outputs = [ "${_mesa_gen_dir}/src/compiler/nir/nir_constant_expressions.c" ]
+  capture_stdout = true
+}
 
-  _mesa_action("mesa_gn_vk_physical_device_spirv_caps") {
-    python_script = "src/src/vulkan/util/vk_physical_device_spirv_caps_gen.py"
-    inputs = _vk_py_inputs +
-             [ "src/src/vulkan/util/vk_physical_device_features_gen.py" ]
-    outputs = [
-      "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_spirv_caps.c",
-    ]
-    args = [
-      "--xml",
-      rebase_path(_vk_xml, root_build_dir),
-      "--out-c",
-      rebase_path(outputs[0], root_build_dir),
-      "--beta",
-      "false",
-    ]
-  }
+_mesa_action("mesa_nir_opcodes_h") {
+  python_script = "src/src/compiler/nir/nir_opcodes_h.py"
+  inputs = _nir_py_inputs
+  outputs = [ "${_mesa_gen_dir}/src/compiler/nir/nir_opcodes.h" ]
+  capture_stdout = true
+}
 
-  _mesa_action("mesa_gn_vk_synchronization_helpers") {
-    python_script = "src/src/vulkan/util/vk_synchronization_helpers_gen.py"
-    inputs = _vk_py_inputs
-    outputs =
-        [ "${_mesa_gen_dir}/src/vulkan/runtime/vk_synchronization_helpers.c" ]
-    args = [
-      "--xml",
-      rebase_path(_vk_xml, root_build_dir),
-      "--out-c",
-      rebase_path(outputs[0], root_build_dir),
-      "--beta",
-      "false",
-    ]
-  }
+_mesa_action("mesa_nir_opcodes_c") {
+  python_script = "src/src/compiler/nir/nir_opcodes_c.py"
+  inputs = _nir_py_inputs
+  outputs = [ "${_mesa_gen_dir}/src/compiler/nir/nir_opcodes.c" ]
+  capture_stdout = true
+}
 
-  _mesa_action("mesa_gn_vk_format_info") {
-    python_script = "src/src/vulkan/runtime/vk_format_info_gen.py"
-    inputs = _vk_py_inputs
-    outputs = [
-      "${_mesa_gen_dir}/src/vulkan/runtime/vk_format_info.c",
-      "${_mesa_gen_dir}/src/vulkan/runtime/vk_format_info.h",
-    ]
-    args = [
-      "--xml",
-      rebase_path(_vk_xml, root_build_dir),
-      "--out-c",
-      rebase_path(outputs[0], root_build_dir),
-      "--out-h",
-      rebase_path(outputs[1], root_build_dir),
-    ]
-  }
+_mesa_action("mesa_nir_opt_algebraic_c") {
+  python_script = "src/src/compiler/nir/nir_opt_algebraic.py"
+  inputs = _nir_py_inputs + [ "src/src/compiler/nir/nir_algebraic.py" ]
+  outputs = [ "${_mesa_gen_dir}/src/compiler/nir/nir_opt_algebraic.c" ]
+  args = [
+    "--out",
+    rebase_path(outputs[0], root_build_dir),
+  ]
+}
 
-  _glslang_dep = [ "//third_party/glslang/src:glslang_validator" ]
-  _glslang_bin = "${root_out_dir}/glslang_validator"
-  _glslang_cmd = "./" + rebase_path(_glslang_bin, root_build_dir)
+_mesa_action("mesa_nir_intrinsics_h") {
+  python_script = "src/src/compiler/nir/nir_intrinsics_h.py"
+  inputs = [ "src/src/compiler/nir/nir_intrinsics.py" ]
+  outputs = [ "${_mesa_gen_dir}/src/compiler/nir/nir_intrinsics.h" ]
+  args = [
+    "--out",
+    rebase_path(outputs[0], root_build_dir),
+  ]
+}
 
-  action_foreach("mesa_gn_radix_sort_spv") {
-    script = "mesa_action.py"
-    deps = _glslang_dep
-    sources = [
-      "src/src/vulkan/runtime/radix_sort/shaders/fill.comp",
-      "src/src/vulkan/runtime/radix_sort/shaders/histogram.comp",
-      "src/src/vulkan/runtime/radix_sort/shaders/init.comp",
-      "src/src/vulkan/runtime/radix_sort/shaders/prefix.comp",
-      "src/src/vulkan/runtime/radix_sort/shaders/scatter_0_even.comp",
-      "src/src/vulkan/runtime/radix_sort/shaders/scatter_0_odd.comp",
-      "src/src/vulkan/runtime/radix_sort/shaders/scatter_1_even.comp",
-      "src/src/vulkan/runtime/radix_sort/shaders/scatter_1_odd.comp",
-    ]
-    inputs = [
-      _glslang_bin,
-      "src/src/vulkan/runtime/radix_sort/shaders/bufref.h",
-      "src/src/vulkan/runtime/radix_sort/shaders/config.h",
-      "src/src/vulkan/runtime/radix_sort/shaders/prefix.h",
-      "src/src/vulkan/runtime/radix_sort/shaders/prefix_limits.h",
-      "src/src/vulkan/runtime/radix_sort/shaders/push.h",
-      "src/src/vulkan/runtime/radix_sort/shaders/scatter.glsl",
-    ]
-    outputs = [ "${_mesa_gen_dir}/src/vulkan/runtime/radix_sort/shaders/{{source_file_part}}.spv.h" ]
-    args = [
-      "--",
-      _glslang_cmd,
-      "-V",
-      "--target-env",
-      "spirv1.5",
-      "-x",
-      "-o",
-      rebase_path(
-          "${_mesa_gen_dir}/src/vulkan/runtime/radix_sort/shaders/{{source_file_part}}.spv.h",
-          root_build_dir),
-      "{{source}}",
-      "-DRS_KEYVAL_DWORDS=2",
-      "--quiet",
-    ]
-  }
+_mesa_action("mesa_nir_intrinsics_indices_h") {
+  python_script = "src/src/compiler/nir/nir_intrinsics_indices_h.py"
+  inputs = [ "src/src/compiler/nir/nir_intrinsics.py" ]
+  outputs = [ "${_mesa_gen_dir}/src/compiler/nir/nir_intrinsics_indices.h" ]
+  args = [
+    "--out",
+    rebase_path(outputs[0], root_build_dir),
+  ]
+}
 
-  action_foreach("mesa_gn_bvh_spv") {
-    script = "mesa_action.py"
-    deps = _glslang_dep
-    sources = [
-      "src/src/vulkan/runtime/bvh/hploc_internal.comp",
-      "src/src/vulkan/runtime/bvh/lbvh_generate_ir.comp",
-      "src/src/vulkan/runtime/bvh/lbvh_main.comp",
-      "src/src/vulkan/runtime/bvh/leaf.comp",
-      "src/src/vulkan/runtime/bvh/morton.comp",
-      "src/src/vulkan/runtime/bvh/ploc_internal.comp",
-    ]
-    inputs = [
-      _glslang_bin,
-      "src/src/compiler/spirv/spirv_internal_exts.h",
-      "src/src/vulkan/runtime/bvh/leaf.h",
-      "src/src/vulkan/runtime/bvh/vk_build_helpers.h",
-      "src/src/vulkan/runtime/bvh/vk_build_interface.h",
-      "src/src/vulkan/runtime/bvh/vk_bvh.h",
-      "src/src/vulkan/runtime/bvh/vk_debug.h",
-    ]
-    outputs =
-        [ "${_mesa_gen_dir}/src/vulkan/runtime/bvh/{{source_name_part}}.spv.h" ]
-    args = [
-      "--",
-      _glslang_cmd,
-      "-V",
-      "-I" + rebase_path("src/src/vulkan/runtime/bvh", root_build_dir),
-      "-I" + rebase_path("src/src/compiler/spirv", root_build_dir),
-      "--target-env",
-      "spirv1.5",
-      "-x",
-      "-o",
-      rebase_path(
-          "${_mesa_gen_dir}/src/vulkan/runtime/bvh/{{source_name_part}}.spv.h",
-          root_build_dir),
-      "{{source}}",
-      "--quiet",
-      "-P#extension GL_GOOGLE_include_directive : require",
-      "-P#extension GL_EXT_shader_explicit_arithmetic_types_int8 : require",
-      "-P#extension GL_EXT_shader_explicit_arithmetic_types_int16 : require",
-      "-P#extension GL_EXT_shader_explicit_arithmetic_types_int32 : require",
-      "-P#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require",
-      "-P#extension GL_EXT_shader_explicit_arithmetic_types_float16 : require",
-      "-P#extension GL_EXT_scalar_block_layout : require",
-      "-P#extension GL_EXT_buffer_reference : require",
-      "-P#extension GL_EXT_buffer_reference2 : require",
-      "-P#extension GL_KHR_memory_scope_semantics : require",
-      "-P#extension GL_KHR_shader_subgroup_arithmetic : require",
-      "-P#extension GL_KHR_shader_subgroup_basic : require",
-      "-P#extension GL_KHR_shader_subgroup_shuffle : require",
-      "-P#extension GL_KHR_shader_subgroup_ballot : require",
-      "-P#extension GL_KHR_shader_subgroup_clustered : require",
-      "-P#extension GL_KHR_shader_subgroup_vote : require",
-      "-P#extension GL_EXT_shader_atomic_int64 : require",
-      "-P#extension GL_EXT_spirv_intrinsics : require",
-    ]
-  }
+_mesa_action("mesa_nir_intrinsics_c") {
+  python_script = "src/src/compiler/nir/nir_intrinsics_c.py"
+  inputs = [ "src/src/compiler/nir/nir_intrinsics.py" ]
+  outputs = [ "${_mesa_gen_dir}/src/compiler/nir/nir_intrinsics.c" ]
+  args = [
+    "--out",
+    rebase_path(outputs[0], root_build_dir),
+  ]
+}
 
-  action("mesa_gn_astc_spv") {
-    script = "mesa_action.py"
-    deps = _glslang_dep
-    inputs = [
-      _glslang_bin,
-      "src/src/compiler/glsl/astc_decoder.glsl",
-    ]
-    outputs = [ "${_mesa_gen_dir}/src/vulkan/runtime/astc_spv.h" ]
-    args = [
-      "--",
-      _glslang_cmd,
-      "-V",
-      "--target-env",
-      "spirv1.2",
-      "-S",
-      "comp",
-      "-x",
-      "-o",
-      rebase_path(outputs[0], root_build_dir),
-      rebase_path("src/src/compiler/glsl/astc_decoder.glsl", root_build_dir),
-      "--quiet",
-    ]
-  }
+_mesa_action("mesa_vtn_gather_types_c") {
+  python_script = "src/src/compiler/spirv/vtn_gather_types_c.py"
+  inputs = [ "src/src/compiler/spirv/spirv.core.grammar.json" ]
+  outputs = [ "${_mesa_gen_dir}/src/compiler/spirv/vtn_gather_types.c" ]
+  args = [
+    rebase_path("src/src/compiler/spirv/spirv.core.grammar.json",
+                root_build_dir),
+    rebase_path(outputs[0], root_build_dir),
+  ]
+}
 
-  _mesa_action("mesa_gn_wsi_entrypoints") {
-    python_script = "src/src/vulkan/util/vk_entrypoints_gen.py"
-    inputs = _vk_py_inputs
-    outputs = [
-      "${_mesa_gen_dir}/src/vulkan/wsi/wsi_common_entrypoints.h",
-      "${_mesa_gen_dir}/src/vulkan/wsi/wsi_common_entrypoints.c",
-    ]
-    args = [
-      "--xml",
-      rebase_path(_vk_xml, root_build_dir),
-      "--proto",
-      "--weak",
-      "--out-h",
-      rebase_path(outputs[0], root_build_dir),
-      "--out-c",
-      rebase_path(outputs[1], root_build_dir),
-      "--prefix",
-      "wsi",
-      "--beta",
-      "false",
-    ]
-  }
+_mesa_action("mesa_spirv_info") {
+  python_script = "src/src/compiler/spirv/spirv_info_gen.py"
+  inputs = [ "src/src/compiler/spirv/spirv.core.grammar.json" ]
+  outputs = [
+    "${_mesa_gen_dir}/src/compiler/spirv/spirv_info.h",
+    "${_mesa_gen_dir}/src/compiler/spirv/spirv_info.c",
+  ]
+  args = [
+    "--json",
+    rebase_path("src/src/compiler/spirv/spirv.core.grammar.json",
+                root_build_dir),
+    "--out-h",
+    rebase_path(outputs[0], root_build_dir),
+    "--out-c",
+    rebase_path(outputs[1], root_build_dir),
+  ]
+}
 
-  _mesa_action("mesa_gn_tr_util") {
-    python_script = "src/src/gallium/auxiliary/driver_trace/enums2names.py"
-    inputs = [
-      "src/src/gallium/include/pipe/p_defines.h",
-      "src/src/gallium/include/pipe/p_video_enums.h",
-      "src/src/util/blend.h",
-    ]
-    outputs = [
-      "${_mesa_gen_dir}/src/gallium/auxiliary/tr_util.c",
-      "${_mesa_gen_dir}/src/gallium/auxiliary/tr_util.h",
-    ]
-    args = [
-      rebase_path("src/src/gallium/include/pipe/p_defines.h", root_build_dir),
-      rebase_path("src/src/gallium/include/pipe/p_video_enums.h",
-                  root_build_dir),
-      rebase_path("src/src/util/blend.h", root_build_dir),
-      "-C",
-      rebase_path(outputs[0], root_build_dir),
-      "-H",
-      rebase_path(outputs[1], root_build_dir),
-    ]
-  }
+_mesa_action("mesa_vtn_generator_ids_h") {
+  python_script = "src/src/compiler/spirv/vtn_generator_ids_h.py"
+  inputs = [ "src/src/compiler/spirv/spir-v.xml" ]
+  outputs = [ "${_mesa_gen_dir}/src/compiler/spirv/vtn_generator_ids.h" ]
+  args = [
+    rebase_path("src/src/compiler/spirv/spir-v.xml", root_build_dir),
+    rebase_path(outputs[0], root_build_dir),
+  ]
+}
 
-  _mesa_action("mesa_gn_u_tracepoints_c") {
-    python_script = "src/src/gallium/auxiliary/util/u_tracepoints.py"
-    inputs = [ "src/src/util/perf/u_trace.py" ]
-    outputs = [ "${_mesa_gen_dir}/src/gallium/auxiliary/u_tracepoints.c" ]
-    args = [
-      "-p",
-      rebase_path("src/src/util/perf", root_build_dir),
-      "-C",
-      rebase_path(outputs[0], root_build_dir),
-    ]
-  }
+_vk_xml = "src/src/vulkan/registry/vk.xml"
+_vk_py_inputs = [
+  _vk_xml,
+  "src/src/vulkan/util/vk_entrypoints.py",
+  "src/src/vulkan/util/vk_extensions.py",
+]
 
-  _mesa_action("mesa_gn_u_tracepoints_h") {
-    python_script = "src/src/gallium/auxiliary/util/u_tracepoints.py"
-    inputs = [ "src/src/util/perf/u_trace.py" ]
-    outputs = [ "${_mesa_gen_dir}/src/gallium/auxiliary/u_tracepoints.h" ]
-    args = [
-      "-p",
-      rebase_path("src/src/util/perf", root_build_dir),
-      "-H",
-      rebase_path(outputs[0], root_build_dir),
-    ]
-  }
+_mesa_action("mesa_vk_dispatch_table") {
+  python_script = "src/src/vulkan/util/vk_dispatch_table_gen.py"
+  inputs = _vk_py_inputs
+  outputs = [
+    "${_mesa_gen_dir}/src/vulkan/util/vk_dispatch_table.c",
+    "${_mesa_gen_dir}/src/vulkan/util/vk_dispatch_table.h",
+  ]
+  args = [
+    "--xml",
+    rebase_path(_vk_xml, root_build_dir),
+    "--out-c",
+    rebase_path(outputs[0], root_build_dir),
+    "--out-h",
+    rebase_path(outputs[1], root_build_dir),
+    "--beta",
+    "false",
+  ]
+}
 
-  _mesa_action("mesa_gn_u_indices_gen_c") {
-    python_script = "src/src/gallium/auxiliary/indices/u_indices_gen.py"
-    outputs = [ "${_mesa_gen_dir}/src/gallium/auxiliary/u_indices_gen.c" ]
-    args = [ rebase_path(outputs[0], root_build_dir) ]
-  }
+_mesa_action("mesa_vk_enum_to_str") {
+  python_script = "src/src/vulkan/util/gen_enum_to_str.py"
+  inputs = _vk_py_inputs
+  outputs = [
+    "${_mesa_gen_dir}/src/vulkan/util/vk_enum_to_str.c",
+    "${_mesa_gen_dir}/src/vulkan/util/vk_enum_to_str.h",
+    "${_mesa_gen_dir}/src/vulkan/util/vk_enum_defines.h",
+  ]
+  args = [
+    "--xml",
+    rebase_path(_vk_xml, root_build_dir),
+    "--out-c",
+    rebase_path(outputs[0], root_build_dir),
+    "--out-h",
+    rebase_path(outputs[1], root_build_dir),
+    "--out-d",
+    rebase_path(outputs[2], root_build_dir),
+    "--beta",
+    "false",
+  ]
+}
 
-  _mesa_action("mesa_gn_u_unfilled_gen_c") {
-    python_script = "src/src/gallium/auxiliary/indices/u_unfilled_gen.py"
-    outputs = [ "${_mesa_gen_dir}/src/gallium/auxiliary/u_unfilled_gen.c" ]
-    args = [ rebase_path(outputs[0], root_build_dir) ]
-  }
+_mesa_action("mesa_vk_struct_type_cast") {
+  python_script = "src/src/vulkan/util/vk_struct_type_cast_gen.py"
+  inputs = _vk_py_inputs
+  outputs = [ "${_mesa_gen_dir}/src/vulkan/util/vk_struct_type_cast.h" ]
+  args = [
+    "--xml",
+    rebase_path(_vk_xml, root_build_dir),
+    "--out",
+    rebase_path(outputs[0], root_build_dir),
+    "--beta",
+    "false",
+  ]
+}
 
-  _mesa_action("mesa_gn_lvp_entrypoints") {
-    python_script = "src/src/vulkan/util/vk_entrypoints_gen.py"
-    inputs = _vk_py_inputs
-    outputs = [
-      "${_mesa_gen_dir}/src/gallium/frontends/lavapipe/lvp_entrypoints.h",
-      "${_mesa_gen_dir}/src/gallium/frontends/lavapipe/lvp_entrypoints.c",
-    ]
-    args = [
-      "--xml",
-      rebase_path(_vk_xml, root_build_dir),
-      "--proto",
-      "--weak",
-      "--out-h",
-      rebase_path(outputs[0], root_build_dir),
-      "--out-c",
-      rebase_path(outputs[1], root_build_dir),
-      "--prefix",
-      "lvp",
-      "--beta",
-      "false",
-    ]
-  }
+_mesa_action("mesa_vk_extensions") {
+  python_script = "src/src/vulkan/util/vk_extensions_gen.py"
+  inputs = _vk_py_inputs
+  outputs = [
+    "${_mesa_gen_dir}/src/vulkan/util/vk_extensions.c",
+    "${_mesa_gen_dir}/src/vulkan/util/vk_extensions.h",
+  ]
+  args = [
+    "--xml",
+    rebase_path(_vk_xml, root_build_dir),
+    "--out-c",
+    rebase_path(outputs[0], root_build_dir),
+    "--out-h",
+    rebase_path(outputs[1], root_build_dir),
+  ]
+}
 
-  _mesa_action("mesa_gn_icd_json") {
-    python_script = "src/src/vulkan/util/vk_icd_gen.py"
-    inputs = [ _vk_xml ]
-    outputs = [ _mesa_icd_json ]
-    data = [ _mesa_icd_json ]
-    args = [
-      "--api-version",
-      "1.4",
-      "--xml",
-      rebase_path(_vk_xml, root_build_dir),
-      "--sizeof-pointer",
-      "8",
-      "--icd-lib-path",
-      ".",
-      "--icd-filename",
-      "./libvulkan_lvp.so",
-      "--out",
-      rebase_path(_mesa_icd_json, root_build_dir),
-    ]
-  }
+_mesa_action("mesa_vk_common_entrypoints") {
+  python_script = "src/src/vulkan/util/vk_entrypoints_gen.py"
+  inputs = _vk_py_inputs
+  outputs = [
+    "${_mesa_gen_dir}/src/vulkan/runtime/vk_common_entrypoints.h",
+    "${_mesa_gen_dir}/src/vulkan/runtime/vk_common_entrypoints.c",
+  ]
+  args = [
+    "--xml",
+    rebase_path(_vk_xml, root_build_dir),
+    "--proto",
+    "--weak",
+    "--out-h",
+    rebase_path(outputs[0], root_build_dir),
+    "--out-c",
+    rebase_path(outputs[1], root_build_dir),
+    "--prefix",
+    "vk_common",
+    "--beta",
+    "false",
+  ]
+}
 
-  group("mesa_gn_all_codegen") {
-    public_deps = [
-      ":mesa_gn_astc_spv",
-      ":mesa_gn_builtin_types_c",
-      ":mesa_gn_builtin_types_h",
-      ":mesa_gn_bvh_spv",
-      ":mesa_gn_driconf_static_h",
-      ":mesa_gn_format_srgb_c",
-      ":mesa_gn_git_sha1",
-      ":mesa_gn_ir_expression_operation_h",
-      ":mesa_gn_lvp_entrypoints",
-      ":mesa_gn_nir_builder_opcodes_h",
-      ":mesa_gn_nir_constant_expressions_c",
-      ":mesa_gn_nir_intrinsics_c",
-      ":mesa_gn_nir_intrinsics_h",
-      ":mesa_gn_nir_intrinsics_indices_h",
-      ":mesa_gn_nir_opcodes_c",
-      ":mesa_gn_nir_opcodes_h",
-      ":mesa_gn_nir_opt_algebraic_c",
-      ":mesa_gn_radix_sort_spv",
-      ":mesa_gn_shader_stats_h",
-      ":mesa_gn_spirv_info",
-      ":mesa_gn_tr_util",
-      ":mesa_gn_u_format_gen_h",
-      ":mesa_gn_u_format_pack_h",
-      ":mesa_gn_u_format_table_c",
-      ":mesa_gn_u_indices_gen_c",
-      ":mesa_gn_u_tracepoints_c",
-      ":mesa_gn_u_tracepoints_h",
-      ":mesa_gn_u_unfilled_gen_c",
-      ":mesa_gn_vk_cmd_enqueue_entrypoints",
-      ":mesa_gn_vk_cmd_queue",
-      ":mesa_gn_vk_common_entrypoints",
-      ":mesa_gn_vk_dispatch_table",
-      ":mesa_gn_vk_dispatch_trampolines",
-      ":mesa_gn_vk_enum_to_str",
-      ":mesa_gn_vk_extensions",
-      ":mesa_gn_vk_format_info",
-      ":mesa_gn_vk_physical_device_features",
-      ":mesa_gn_vk_physical_device_properties",
-      ":mesa_gn_vk_physical_device_spirv_caps",
-      ":mesa_gn_vk_struct_type_cast",
-      ":mesa_gn_vk_synchronization_helpers",
-      ":mesa_gn_vtn_gather_types_c",
-      ":mesa_gn_vtn_generator_ids_h",
-      ":mesa_gn_wsi_entrypoints",
-    ]
-  }
+_mesa_action("mesa_vk_cmd_queue") {
+  python_script = "src/src/vulkan/util/vk_cmd_queue_gen.py"
+  inputs = _vk_py_inputs
+  outputs = [
+    "${_mesa_gen_dir}/src/vulkan/runtime/vk_cmd_queue.c",
+    "${_mesa_gen_dir}/src/vulkan/runtime/vk_cmd_queue.h",
+  ]
+  args = [
+    "--xml",
+    rebase_path(_vk_xml, root_build_dir),
+    "--out-c",
+    rebase_path(outputs[0], root_build_dir),
+    "--out-h",
+    rebase_path(outputs[1], root_build_dir),
+    "--beta",
+    "false",
+  ]
+}
 
-  # ---------------------------------------------------------------------------
-  # Compilation Config & Source Sets
-  # ---------------------------------------------------------------------------
+_mesa_action("mesa_vk_cmd_enqueue_entrypoints") {
+  python_script = "src/src/vulkan/util/vk_entrypoints_gen.py"
+  inputs = _vk_py_inputs
+  outputs = [
+    "${_mesa_gen_dir}/src/vulkan/runtime/vk_cmd_enqueue_entrypoints.h",
+    "${_mesa_gen_dir}/src/vulkan/runtime/vk_cmd_enqueue_entrypoints.c",
+  ]
+  args = [
+    "--xml",
+    rebase_path(_vk_xml, root_build_dir),
+    "--proto",
+    "--weak",
+    "--out-h",
+    rebase_path(outputs[0], root_build_dir),
+    "--out-c",
+    rebase_path(outputs[1], root_build_dir),
+    "--prefix",
+    "vk_cmd_enqueue",
+    "--prefix",
+    "vk_cmd_enqueue_unless_primary",
+    "--beta",
+    "false",
+  ]
+}
 
-  config("mesa_gn_common_config") {
-    defines = mesa_common_defines
-    cflags = mesa_common_cflags +
-             [ "-isystem" +
-               rebase_path("${mesa_llvm_dev_dir}/include", root_build_dir) ]
-    cflags_c = mesa_common_cflags_c
-    cflags_cc = mesa_common_cflags_cc
+_mesa_action("mesa_vk_dispatch_trampolines") {
+  python_script = "src/src/vulkan/util/vk_dispatch_trampolines_gen.py"
+  inputs = _vk_py_inputs
+  outputs = [
+    "${_mesa_gen_dir}/src/vulkan/runtime/vk_dispatch_trampolines.c",
+    "${_mesa_gen_dir}/src/vulkan/runtime/vk_dispatch_trampolines.h",
+  ]
+  args = [
+    "--xml",
+    rebase_path(_vk_xml, root_build_dir),
+    "--out-c",
+    rebase_path(outputs[0], root_build_dir),
+    "--out-h",
+    rebase_path(outputs[1], root_build_dir),
+    "--beta",
+    "false",
+  ]
+}
 
-    include_dirs = [
-      "${_mesa_gen_dir}/src",
-      "${_mesa_gen_dir}/src/compiler",
-      "${_mesa_gen_dir}/src/compiler/nir",
-      "${_mesa_gen_dir}/src/compiler/spirv",
-      "${_mesa_gen_dir}/src/gallium/auxiliary",
-      "${_mesa_gen_dir}/src/gallium/frontends/lavapipe",
-      "${_mesa_gen_dir}/src/util",
-      "${_mesa_gen_dir}/src/util/format",
-      "${_mesa_gen_dir}/src/vulkan/runtime",
-      "${_mesa_gen_dir}/src/vulkan/runtime/bvh",
-      "${_mesa_gen_dir}/src/vulkan/runtime/radix_sort/shaders",
-      "${_mesa_gen_dir}/src/vulkan/util",
-      "${_mesa_gen_dir}/src/vulkan/wsi",
-      "src/include",
-      "src/src",
-      "src/src/c11/impl",
-      "src/src/compiler",
-      "src/src/compiler/nir",
-      "src/src/compiler/spirv",
-      "src/src/gallium/auxiliary",
-      "src/src/gallium/auxiliary/pipe-loader",
-      "src/src/gallium/auxiliary/util",
-      "src/src/gallium/drivers",
-      "src/src/gallium/drivers/llvmpipe",
-      "src/src/gallium/frontends/lavapipe",
-      "src/src/gallium/include",
-      "src/src/gallium/targets/lavapipe",
-      "src/src/gallium/winsys",
-      "src/src/gallium/winsys/sw/null",
-      "src/src/gallium/winsys/sw/wrapper",
-      "src/src/util",
-      "src/src/util/blake3",
-      "src/src/util/format",
-      "src/src/vulkan/runtime",
-      "src/src/vulkan/runtime/bvh",
-      "src/src/vulkan/util",
-      "src/src/vulkan/wsi",
-      "${meson_zstd_dir}/include",
-    ]
-  }
+_mesa_action("mesa_vk_physical_device_features") {
+  python_script = "src/src/vulkan/util/vk_physical_device_features_gen.py"
+  inputs = _vk_py_inputs
+  outputs = [
+    "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_features.c",
+    "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_features.h",
+  ]
+  args = [
+    "--xml",
+    rebase_path(_vk_xml, root_build_dir),
+    "--out-c",
+    rebase_path(outputs[0], root_build_dir),
+    "--out-h",
+    rebase_path(outputs[1], root_build_dir),
+    "--beta",
+    "false",
+  ]
+}
 
-  template("_mesa_source_set") {
-    source_set(target_name) {
-      check_includes = false
-      use_libcxx_modules = false
+_mesa_action("mesa_vk_physical_device_properties") {
+  python_script = "src/src/vulkan/util/vk_physical_device_properties_gen.py"
+  inputs = _vk_py_inputs
+  outputs = [
+    "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_properties.c",
+    "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_properties.h",
+  ]
+  args = [
+    "--xml",
+    rebase_path(_vk_xml, root_build_dir),
+    "--out-c",
+    rebase_path(outputs[0], root_build_dir),
+    "--out-h",
+    rebase_path(outputs[1], root_build_dir),
+    "--beta",
+    "false",
+  ]
+}
 
-      forward_variables_from(invoker,
-                             [
-                               "sources",
-                               "defines",
-                               "cflags",
-                               "cflags_c",
-                               "cflags_cc",
-                               "deps",
-                             ])
+_mesa_action("mesa_vk_physical_device_spirv_caps") {
+  python_script = "src/src/vulkan/util/vk_physical_device_spirv_caps_gen.py"
+  inputs = _vk_py_inputs +
+           [ "src/src/vulkan/util/vk_physical_device_features_gen.py" ]
+  outputs =
+      [ "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_spirv_caps.c" ]
+  args = [
+    "--xml",
+    rebase_path(_vk_xml, root_build_dir),
+    "--out-c",
+    rebase_path(outputs[0], root_build_dir),
+    "--beta",
+    "false",
+  ]
+}
 
-      configs -= [
-        "//build/config/clang:find_bad_constructs",
-        "//build/config/clang:unsafe_buffers",
-        "//build/config/compiler:chromium_code",
-        "//build/config/compiler:runtime_library",
-        "//build/config/sanitizers:default_sanitizer_flags",
-      ]
-      configs += [
-        "//build/config/compiler:no_chromium_code",
-        "//build/config/posix:runtime_library",
-        ":mesa_gn_common_config",
-      ]
+_mesa_action("mesa_vk_synchronization_helpers") {
+  python_script = "src/src/vulkan/util/vk_synchronization_helpers_gen.py"
+  inputs = _vk_py_inputs
+  outputs =
+      [ "${_mesa_gen_dir}/src/vulkan/runtime/vk_synchronization_helpers.c" ]
+  args = [
+    "--xml",
+    rebase_path(_vk_xml, root_build_dir),
+    "--out-c",
+    rebase_path(outputs[0], root_build_dir),
+    "--beta",
+    "false",
+  ]
+}
 
-      public_deps = [ ":mesa_gn_all_codegen" ]
-      if (defined(invoker.public_deps)) {
-        public_deps += invoker.public_deps
-      }
-    }
-  }
+_mesa_action("mesa_vk_format_info") {
+  python_script = "src/src/vulkan/runtime/vk_format_info_gen.py"
+  inputs = _vk_py_inputs
+  outputs = [
+    "${_mesa_gen_dir}/src/vulkan/runtime/vk_format_info.c",
+    "${_mesa_gen_dir}/src/vulkan/runtime/vk_format_info.h",
+  ]
+  args = [
+    "--xml",
+    rebase_path(_vk_xml, root_build_dir),
+    "--out-c",
+    rebase_path(outputs[0], root_build_dir),
+    "--out-h",
+    rebase_path(outputs[1], root_build_dir),
+  ]
+}
 
-  _mesa_source_set("mesa_util_c11") {
-    sources = mesa_util_c11_sources
-  }
+_glslang_dep = [ "//third_party/glslang/src:glslang_validator" ]
+_glslang_bin = "${root_out_dir}/glslang_validator"
+_glslang_cmd = "./" + rebase_path(_glslang_bin, root_build_dir)
 
-  _mesa_source_set("mesa_blake3") {
-    sources = mesa_blake3_sources
-  }
+action_foreach("mesa_radix_sort_spv") {
+  script = "mesa_action.py"
+  deps = _glslang_dep
+  sources = [
+    "src/src/vulkan/runtime/radix_sort/shaders/fill.comp",
+    "src/src/vulkan/runtime/radix_sort/shaders/histogram.comp",
+    "src/src/vulkan/runtime/radix_sort/shaders/init.comp",
+    "src/src/vulkan/runtime/radix_sort/shaders/prefix.comp",
+    "src/src/vulkan/runtime/radix_sort/shaders/scatter_0_even.comp",
+    "src/src/vulkan/runtime/radix_sort/shaders/scatter_0_odd.comp",
+    "src/src/vulkan/runtime/radix_sort/shaders/scatter_1_even.comp",
+    "src/src/vulkan/runtime/radix_sort/shaders/scatter_1_odd.comp",
+  ]
+  inputs = [
+    _glslang_bin,
+    "src/src/vulkan/runtime/radix_sort/shaders/bufref.h",
+    "src/src/vulkan/runtime/radix_sort/shaders/config.h",
+    "src/src/vulkan/runtime/radix_sort/shaders/prefix.h",
+    "src/src/vulkan/runtime/radix_sort/shaders/prefix_limits.h",
+    "src/src/vulkan/runtime/radix_sort/shaders/push.h",
+    "src/src/vulkan/runtime/radix_sort/shaders/scatter.glsl",
+  ]
+  outputs = [ "${_mesa_gen_dir}/src/vulkan/runtime/radix_sort/shaders/{{source_file_part}}.spv.h" ]
+  args = [
+    "--",
+    _glslang_cmd,
+    "-V",
+    "--target-env",
+    "spirv1.5",
+    "-x",
+    "-o",
+    rebase_path(
+        "${_mesa_gen_dir}/src/vulkan/runtime/radix_sort/shaders/{{source_file_part}}.spv.h",
+        root_build_dir),
+    "{{source}}",
+    "-DRS_KEYVAL_DWORDS=2",
+    "--quiet",
+  ]
+}
 
-  _mesa_source_set("mesa_util_clflush") {
-    sources = mesa_util_clflush_sources
-  }
+action_foreach("mesa_bvh_spv") {
+  script = "mesa_action.py"
+  deps = _glslang_dep
+  sources = [
+    "src/src/vulkan/runtime/bvh/hploc_internal.comp",
+    "src/src/vulkan/runtime/bvh/lbvh_generate_ir.comp",
+    "src/src/vulkan/runtime/bvh/lbvh_main.comp",
+    "src/src/vulkan/runtime/bvh/leaf.comp",
+    "src/src/vulkan/runtime/bvh/morton.comp",
+    "src/src/vulkan/runtime/bvh/ploc_internal.comp",
+  ]
+  inputs = [
+    _glslang_bin,
+    "src/src/compiler/spirv/spirv_internal_exts.h",
+    "src/src/vulkan/runtime/bvh/leaf.h",
+    "src/src/vulkan/runtime/bvh/vk_build_helpers.h",
+    "src/src/vulkan/runtime/bvh/vk_build_interface.h",
+    "src/src/vulkan/runtime/bvh/vk_bvh.h",
+    "src/src/vulkan/runtime/bvh/vk_debug.h",
+  ]
+  outputs =
+      [ "${_mesa_gen_dir}/src/vulkan/runtime/bvh/{{source_name_part}}.spv.h" ]
+  args = [
+    "--",
+    _glslang_cmd,
+    "-V",
+    "-I" + rebase_path("src/src/vulkan/runtime/bvh", root_build_dir),
+    "-I" + rebase_path("src/src/compiler/spirv", root_build_dir),
+    "--target-env",
+    "spirv1.5",
+    "-x",
+    "-o",
+    rebase_path(
+        "${_mesa_gen_dir}/src/vulkan/runtime/bvh/{{source_name_part}}.spv.h",
+        root_build_dir),
+    "{{source}}",
+    "--quiet",
+    "-P#extension GL_GOOGLE_include_directive : require",
+    "-P#extension GL_EXT_shader_explicit_arithmetic_types_int8 : require",
+    "-P#extension GL_EXT_shader_explicit_arithmetic_types_int16 : require",
+    "-P#extension GL_EXT_shader_explicit_arithmetic_types_int32 : require",
+    "-P#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require",
+    "-P#extension GL_EXT_shader_explicit_arithmetic_types_float16 : require",
+    "-P#extension GL_EXT_scalar_block_layout : require",
+    "-P#extension GL_EXT_buffer_reference : require",
+    "-P#extension GL_EXT_buffer_reference2 : require",
+    "-P#extension GL_KHR_memory_scope_semantics : require",
+    "-P#extension GL_KHR_shader_subgroup_arithmetic : require",
+    "-P#extension GL_KHR_shader_subgroup_basic : require",
+    "-P#extension GL_KHR_shader_subgroup_shuffle : require",
+    "-P#extension GL_KHR_shader_subgroup_ballot : require",
+    "-P#extension GL_KHR_shader_subgroup_clustered : require",
+    "-P#extension GL_KHR_shader_subgroup_vote : require",
+    "-P#extension GL_EXT_shader_atomic_int64 : require",
+    "-P#extension GL_EXT_spirv_intrinsics : require",
+  ]
+}
 
-  _mesa_source_set("mesa_util_clflushopt") {
-    sources = mesa_util_clflushopt_sources
-    cflags = [ "-mclflushopt" ]
-  }
+action("mesa_astc_spv") {
+  script = "mesa_action.py"
+  deps = _glslang_dep
+  inputs = [
+    _glslang_bin,
+    "src/src/compiler/glsl/astc_decoder.glsl",
+  ]
+  outputs = [ "${_mesa_gen_dir}/src/vulkan/runtime/astc_spv.h" ]
+  args = [
+    "--",
+    _glslang_cmd,
+    "-V",
+    "--target-env",
+    "spirv1.2",
+    "-S",
+    "comp",
+    "-x",
+    "-o",
+    rebase_path(outputs[0], root_build_dir),
+    rebase_path("src/src/compiler/glsl/astc_decoder.glsl", root_build_dir),
+    "--quiet",
+  ]
+}
 
-  _mesa_source_set("mesa_util_simd") {
-    sources = mesa_util_simd_sources
-    cflags = [ "-msse4.1" ]
-  }
+_mesa_action("mesa_wsi_entrypoints") {
+  python_script = "src/src/vulkan/util/vk_entrypoints_gen.py"
+  inputs = _vk_py_inputs
+  outputs = [
+    "${_mesa_gen_dir}/src/vulkan/wsi/wsi_common_entrypoints.h",
+    "${_mesa_gen_dir}/src/vulkan/wsi/wsi_common_entrypoints.c",
+  ]
+  args = [
+    "--xml",
+    rebase_path(_vk_xml, root_build_dir),
+    "--proto",
+    "--weak",
+    "--out-h",
+    rebase_path(outputs[0], root_build_dir),
+    "--out-c",
+    rebase_path(outputs[1], root_build_dir),
+    "--prefix",
+    "wsi",
+    "--beta",
+    "false",
+  ]
+}
 
-  _mesa_source_set("mesa_xmlconfig") {
-    sources = mesa_xmlconfig_sources
-    defines = [ "WITH_XMLCONFIG=0" ]
-  }
+_mesa_action("mesa_tr_util") {
+  python_script = "src/src/gallium/auxiliary/driver_trace/enums2names.py"
+  inputs = [
+    "src/src/gallium/include/pipe/p_defines.h",
+    "src/src/gallium/include/pipe/p_video_enums.h",
+    "src/src/util/blend.h",
+  ]
+  outputs = [
+    "${_mesa_gen_dir}/src/gallium/auxiliary/tr_util.c",
+    "${_mesa_gen_dir}/src/gallium/auxiliary/tr_util.h",
+  ]
+  args = [
+    rebase_path("src/src/gallium/include/pipe/p_defines.h", root_build_dir),
+    rebase_path("src/src/gallium/include/pipe/p_video_enums.h", root_build_dir),
+    rebase_path("src/src/util/blend.h", root_build_dir),
+    "-C",
+    rebase_path(outputs[0], root_build_dir),
+    "-H",
+    rebase_path(outputs[1], root_build_dir),
+  ]
+}
 
-  _mesa_source_set("mesa_util") {
-    sources = mesa_util_static_sources + [
-                "${_mesa_gen_dir}/src/util/format/u_format_table.c",
-                "${_mesa_gen_dir}/src/util/format_srgb.c",
-              ]
-    deps = [
-      ":mesa_blake3",
-      ":mesa_util_c11",
-      ":mesa_util_clflush",
-      ":mesa_util_clflushopt",
-      ":mesa_util_simd",
-      ":mesa_xmlconfig",
-    ]
-  }
+_mesa_action("mesa_u_tracepoints_c") {
+  python_script = "src/src/gallium/auxiliary/util/u_tracepoints.py"
+  inputs = [ "src/src/util/perf/u_trace.py" ]
+  outputs = [ "${_mesa_gen_dir}/src/gallium/auxiliary/u_tracepoints.c" ]
+  args = [
+    "-p",
+    rebase_path("src/src/util/perf", root_build_dir),
+    "-C",
+    rebase_path(outputs[0], root_build_dir),
+  ]
+}
 
-  _mesa_source_set("mesa_compiler") {
-    sources = mesa_compiler_static_sources +
-              [ "${_mesa_gen_dir}/src/compiler/builtin_types.c" ]
-    deps = [ ":mesa_util" ]
-  }
+_mesa_action("mesa_u_tracepoints_h") {
+  python_script = "src/src/gallium/auxiliary/util/u_tracepoints.py"
+  inputs = [ "src/src/util/perf/u_trace.py" ]
+  outputs = [ "${_mesa_gen_dir}/src/gallium/auxiliary/u_tracepoints.h" ]
+  args = [
+    "-p",
+    rebase_path("src/src/util/perf", root_build_dir),
+    "-H",
+    rebase_path(outputs[0], root_build_dir),
+  ]
+}
 
-  _mesa_source_set("mesa_nir") {
-    sources = mesa_nir_static_sources + [
-                "${_mesa_gen_dir}/src/compiler/nir/nir_constant_expressions.c",
-                "${_mesa_gen_dir}/src/compiler/nir/nir_intrinsics.c",
-                "${_mesa_gen_dir}/src/compiler/nir/nir_opcodes.c",
-                "${_mesa_gen_dir}/src/compiler/nir/nir_opt_algebraic.c",
-              ]
-    deps = [
-      ":mesa_compiler",
-      ":mesa_util",
-    ]
-  }
+_mesa_action("mesa_u_indices_gen_c") {
+  python_script = "src/src/gallium/auxiliary/indices/u_indices_gen.py"
+  outputs = [ "${_mesa_gen_dir}/src/gallium/auxiliary/u_indices_gen.c" ]
+  args = [ rebase_path(outputs[0], root_build_dir) ]
+}
 
-  _mesa_source_set("mesa_vtn") {
-    sources = mesa_vtn_static_sources + [
-                "${_mesa_gen_dir}/src/compiler/spirv/spirv_info.c",
-                "${_mesa_gen_dir}/src/compiler/spirv/vtn_gather_types.c",
-              ]
-    deps = [
-      ":mesa_nir",
-      ":mesa_util",
-    ]
-  }
+_mesa_action("mesa_u_unfilled_gen_c") {
+  python_script = "src/src/gallium/auxiliary/indices/u_unfilled_gen.py"
+  outputs = [ "${_mesa_gen_dir}/src/gallium/auxiliary/u_unfilled_gen.c" ]
+  args = [ rebase_path(outputs[0], root_build_dir) ]
+}
 
-  _mesa_source_set("mesa_vulkan_util") {
-    sources = mesa_vulkan_util_static_sources + [
-                "${_mesa_gen_dir}/src/vulkan/util/vk_dispatch_table.c",
-                "${_mesa_gen_dir}/src/vulkan/util/vk_enum_to_str.c",
-                "${_mesa_gen_dir}/src/vulkan/util/vk_extensions.c",
-              ]
-    deps = [
-      ":mesa_compiler",
-      ":mesa_util",
-    ]
-  }
+_mesa_action("mesa_lvp_entrypoints") {
+  python_script = "src/src/vulkan/util/vk_entrypoints_gen.py"
+  inputs = _vk_py_inputs
+  outputs = [
+    "${_mesa_gen_dir}/src/gallium/frontends/lavapipe/lvp_entrypoints.h",
+    "${_mesa_gen_dir}/src/gallium/frontends/lavapipe/lvp_entrypoints.c",
+  ]
+  args = [
+    "--xml",
+    rebase_path(_vk_xml, root_build_dir),
+    "--proto",
+    "--weak",
+    "--out-h",
+    rebase_path(outputs[0], root_build_dir),
+    "--out-c",
+    rebase_path(outputs[1], root_build_dir),
+    "--prefix",
+    "lvp",
+    "--beta",
+    "false",
+  ]
+}
 
-  _mesa_source_set("mesa_vulkan_runtime") {
-    sources =
-        mesa_vulkan_runtime_static_sources + [
-          "${_mesa_gen_dir}/src/vulkan/runtime/vk_cmd_enqueue_entrypoints.c",
-          "${_mesa_gen_dir}/src/vulkan/runtime/vk_cmd_queue.c",
-          "${_mesa_gen_dir}/src/vulkan/runtime/vk_common_entrypoints.c",
-          "${_mesa_gen_dir}/src/vulkan/runtime/vk_dispatch_trampolines.c",
-          "${_mesa_gen_dir}/src/vulkan/runtime/vk_format_info.c",
-          "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_features.c",
-          "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_properties.c",
-          "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_spirv_caps.c",
-          "${_mesa_gen_dir}/src/vulkan/runtime/vk_synchronization_helpers.c",
-          "${_mesa_gen_dir}/src/vulkan/wsi/wsi_common_entrypoints.c",
-        ]
-    defines = [ "VK_LITE_RUNTIME_INSTANCE=0" ]
-    deps = [
-      ":mesa_nir",
-      ":mesa_util",
-      ":mesa_vtn",
-      ":mesa_vulkan_util",
-    ]
-  }
+_mesa_action("mesa_icd_json") {
+  python_script = "src/src/vulkan/util/vk_icd_gen.py"
+  inputs = [ _vk_xml ]
+  outputs = [ _mesa_icd_json ]
+  data = [ _mesa_icd_json ]
+  args = [
+    "--api-version",
+    "1.4",
+    "--xml",
+    rebase_path(_vk_xml, root_build_dir),
+    "--sizeof-pointer",
+    "8",
+    "--icd-lib-path",
+    ".",
+    "--icd-filename",
+    "./libvulkan_lvp.so",
+    "--out",
+    rebase_path(_mesa_icd_json, root_build_dir),
+  ]
+}
 
-  _mesa_source_set("mesa_gallium_aux") {
-    sources = mesa_gallium_aux_static_sources + [
-                "${_mesa_gen_dir}/src/gallium/auxiliary/tr_util.c",
-                "${_mesa_gen_dir}/src/gallium/auxiliary/u_indices_gen.c",
-                "${_mesa_gen_dir}/src/gallium/auxiliary/u_tracepoints.c",
-                "${_mesa_gen_dir}/src/gallium/auxiliary/u_unfilled_gen.c",
-              ]
-    deps = [
-      ":mesa_nir",
-      ":mesa_util",
-    ]
-  }
+group("mesa_all_codegen") {
+  public_deps = [
+    ":mesa_astc_spv",
+    ":mesa_builtin_types_c",
+    ":mesa_builtin_types_h",
+    ":mesa_bvh_spv",
+    ":mesa_driconf_static_h",
+    ":mesa_format_srgb_c",
+    ":mesa_git_sha1",
+    ":mesa_ir_expression_operation_h",
+    ":mesa_lvp_entrypoints",
+    ":mesa_nir_builder_opcodes_h",
+    ":mesa_nir_constant_expressions_c",
+    ":mesa_nir_intrinsics_c",
+    ":mesa_nir_intrinsics_h",
+    ":mesa_nir_intrinsics_indices_h",
+    ":mesa_nir_opcodes_c",
+    ":mesa_nir_opcodes_h",
+    ":mesa_nir_opt_algebraic_c",
+    ":mesa_radix_sort_spv",
+    ":mesa_shader_stats_h",
+    ":mesa_spirv_info",
+    ":mesa_tr_util",
+    ":mesa_u_format_gen_h",
+    ":mesa_u_format_pack_h",
+    ":mesa_u_format_table_c",
+    ":mesa_u_indices_gen_c",
+    ":mesa_u_tracepoints_c",
+    ":mesa_u_tracepoints_h",
+    ":mesa_u_unfilled_gen_c",
+    ":mesa_vk_cmd_enqueue_entrypoints",
+    ":mesa_vk_cmd_queue",
+    ":mesa_vk_common_entrypoints",
+    ":mesa_vk_dispatch_table",
+    ":mesa_vk_dispatch_trampolines",
+    ":mesa_vk_enum_to_str",
+    ":mesa_vk_extensions",
+    ":mesa_vk_format_info",
+    ":mesa_vk_physical_device_features",
+    ":mesa_vk_physical_device_properties",
+    ":mesa_vk_physical_device_spirv_caps",
+    ":mesa_vk_struct_type_cast",
+    ":mesa_vk_synchronization_helpers",
+    ":mesa_vtn_gather_types_c",
+    ":mesa_vtn_generator_ids_h",
+    ":mesa_wsi_entrypoints",
+  ]
+}
 
-  _mesa_source_set("mesa_llvmpipe") {
-    sources = mesa_llvmpipe_sources
-    deps = [
-      ":mesa_gallium_aux",
-      ":mesa_nir",
-      ":mesa_util",
-    ]
-  }
+# ---------------------------------------------------------------------------
+# Compilation Config & Source Sets
+# ---------------------------------------------------------------------------
 
-  _mesa_source_set("mesa_lavapipe") {
-    sources =
-        mesa_lavapipe_static_sources + [
-          "${_mesa_gen_dir}/src/gallium/frontends/lavapipe/lvp_entrypoints.c",
-          "mesa_llvm_sysroot_compat.cc",
-        ]
-    defines = [
-      "GALLIUM_LLVMPIPE",
+config("mesa_common_config") {
+  defines = mesa_common_defines
+  cflags = mesa_common_cflags +
+           [ "-isystem" +
+             rebase_path("${mesa_llvm_dev_dir}/include", root_build_dir) ]
+  cflags_c = mesa_common_cflags_c
+  cflags_cc = mesa_common_cflags_cc
 
-      # lvp_formats.c references DRM_FORMAT_MOD_LINEAR under #if DETECT_OS_LINUX
-      # even when HAVE_LIBDRM is not defined (which skips including
-      # drm-uapi/drm_fourcc.h in lvp_private.h).
-      "DRM_FORMAT_MOD_LINEAR=0",
-    ]
-    deps = [
-      ":mesa_gallium_aux",
-      ":mesa_llvmpipe",
-      ":mesa_nir",
-      ":mesa_util",
-      ":mesa_vtn",
-      ":mesa_vulkan_runtime",
-      ":mesa_vulkan_util",
-    ]
-  }
+  include_dirs = [
+    "${_mesa_gen_dir}/src",
+    "${_mesa_gen_dir}/src/compiler",
+    "${_mesa_gen_dir}/src/compiler/nir",
+    "${_mesa_gen_dir}/src/compiler/spirv",
+    "${_mesa_gen_dir}/src/gallium/auxiliary",
+    "${_mesa_gen_dir}/src/gallium/frontends/lavapipe",
+    "${_mesa_gen_dir}/src/util",
+    "${_mesa_gen_dir}/src/util/format",
+    "${_mesa_gen_dir}/src/vulkan/runtime",
+    "${_mesa_gen_dir}/src/vulkan/runtime/bvh",
+    "${_mesa_gen_dir}/src/vulkan/runtime/radix_sort/shaders",
+    "${_mesa_gen_dir}/src/vulkan/util",
+    "${_mesa_gen_dir}/src/vulkan/wsi",
+    "src/include",
+    "src/src",
+    "src/src/c11/impl",
+    "src/src/compiler",
+    "src/src/compiler/nir",
+    "src/src/compiler/spirv",
+    "src/src/gallium/auxiliary",
+    "src/src/gallium/auxiliary/pipe-loader",
+    "src/src/gallium/auxiliary/util",
+    "src/src/gallium/drivers",
+    "src/src/gallium/drivers/llvmpipe",
+    "src/src/gallium/frontends/lavapipe",
+    "src/src/gallium/include",
+    "src/src/gallium/targets/lavapipe",
+    "src/src/gallium/winsys",
+    "src/src/gallium/winsys/sw/null",
+    "src/src/gallium/winsys/sw/wrapper",
+    "src/src/util",
+    "src/src/util/blake3",
+    "src/src/util/format",
+    "src/src/vulkan/runtime",
+    "src/src/vulkan/runtime/bvh",
+    "src/src/vulkan/util",
+    "src/src/vulkan/wsi",
+    "${mesa_zstd_dir}/include",
+  ]
+}
 
-  shared_library("vulkan_lvp") {
-    output_name = "vulkan_lvp"
-    no_default_deps = true
+template("_mesa_source_set") {
+  source_set(target_name) {
+    check_includes = false
     use_libcxx_modules = false
 
+    forward_variables_from(invoker,
+                           [
+                             "sources",
+                             "defines",
+                             "cflags",
+                             "cflags_c",
+                             "cflags_cc",
+                             "deps",
+                           ])
+
     configs -= [
+      "//build/config/clang:find_bad_constructs",
+      "//build/config/clang:unsafe_buffers",
       "//build/config/compiler:chromium_code",
       "//build/config/compiler:runtime_library",
       "//build/config/sanitizers:default_sanitizer_flags",
@@ -1157,53 +929,220 @@ if (!mesa_use_gn_build) {
     configs += [
       "//build/config/compiler:no_chromium_code",
       "//build/config/posix:runtime_library",
+      ":mesa_common_config",
     ]
 
-    deps = [ ":mesa_lavapipe" ]
-
-    libs = [ "${meson_zstd_dir}/lib/libzstd.so" ] + mesa_llvm_libs + [
-             "dl",
-             "m",
-             "pthread",
-             "rt",
-             "z",
-           ]
-
-    ldflags = [
-      "-fuse-ld=lld",
-      "-Wl,-Bsymbolic",
-      "-Wl,--gc-sections",
-      "-Wl,--exclude-libs,ALL",
-      "-Wl,-rpath,\$ORIGIN",
-    ]
-    if (use_clang_coverage) {
-      ldflags += [
-        "-fprofile-instr-generate",
-        "-fcoverage-mapping",
-      ]
+    public_deps = [ ":mesa_all_codegen" ]
+    if (defined(invoker.public_deps)) {
+      public_deps += invoker.public_deps
     }
   }
+}
 
-  group("mesa_gn") {
-    public_deps = [
-      ":mesa_gn_icd_json",
-      ":vulkan_lvp",
-    ]
-    data = [
-      _mesa_icd_json,
-      _mesa_so,
-    ]
-    if (is_linux) {
-      public_deps += [ ":copy_zstd" ]
-      data += [
-        "${root_out_dir}/libzstd.so.1",
-        "${root_out_dir}/libzstd.so.1.5.7",
+_mesa_source_set("mesa_util_c11") {
+  sources = mesa_util_c11_sources
+}
+
+_mesa_source_set("mesa_blake3") {
+  sources = mesa_blake3_sources
+}
+
+_mesa_source_set("mesa_util_clflush") {
+  sources = mesa_util_clflush_sources
+}
+
+_mesa_source_set("mesa_util_clflushopt") {
+  sources = mesa_util_clflushopt_sources
+  cflags = [ "-mclflushopt" ]
+}
+
+_mesa_source_set("mesa_util_simd") {
+  sources = mesa_util_simd_sources
+  cflags = [ "-msse4.1" ]
+}
+
+_mesa_source_set("mesa_xmlconfig") {
+  sources = mesa_xmlconfig_sources
+  defines = [ "WITH_XMLCONFIG=0" ]
+}
+
+_mesa_source_set("mesa_util") {
+  sources = mesa_util_static_sources + [
+              "${_mesa_gen_dir}/src/util/format/u_format_table.c",
+              "${_mesa_gen_dir}/src/util/format_srgb.c",
+            ]
+  deps = [
+    ":mesa_blake3",
+    ":mesa_util_c11",
+    ":mesa_util_clflush",
+    ":mesa_util_clflushopt",
+    ":mesa_util_simd",
+    ":mesa_xmlconfig",
+  ]
+}
+
+_mesa_source_set("mesa_compiler") {
+  sources = mesa_compiler_static_sources +
+            [ "${_mesa_gen_dir}/src/compiler/builtin_types.c" ]
+  deps = [ ":mesa_util" ]
+}
+
+_mesa_source_set("mesa_nir") {
+  sources = mesa_nir_static_sources + [
+              "${_mesa_gen_dir}/src/compiler/nir/nir_constant_expressions.c",
+              "${_mesa_gen_dir}/src/compiler/nir/nir_intrinsics.c",
+              "${_mesa_gen_dir}/src/compiler/nir/nir_opcodes.c",
+              "${_mesa_gen_dir}/src/compiler/nir/nir_opt_algebraic.c",
+            ]
+  deps = [
+    ":mesa_compiler",
+    ":mesa_util",
+  ]
+}
+
+_mesa_source_set("mesa_vtn") {
+  sources = mesa_vtn_static_sources + [
+              "${_mesa_gen_dir}/src/compiler/spirv/spirv_info.c",
+              "${_mesa_gen_dir}/src/compiler/spirv/vtn_gather_types.c",
+            ]
+  deps = [
+    ":mesa_nir",
+    ":mesa_util",
+  ]
+}
+
+_mesa_source_set("mesa_vulkan_util") {
+  sources = mesa_vulkan_util_static_sources + [
+              "${_mesa_gen_dir}/src/vulkan/util/vk_dispatch_table.c",
+              "${_mesa_gen_dir}/src/vulkan/util/vk_enum_to_str.c",
+              "${_mesa_gen_dir}/src/vulkan/util/vk_extensions.c",
+            ]
+  deps = [
+    ":mesa_compiler",
+    ":mesa_util",
+  ]
+}
+
+_mesa_source_set("mesa_vulkan_runtime") {
+  sources =
+      mesa_vulkan_runtime_static_sources + [
+        "${_mesa_gen_dir}/src/vulkan/runtime/vk_cmd_enqueue_entrypoints.c",
+        "${_mesa_gen_dir}/src/vulkan/runtime/vk_cmd_queue.c",
+        "${_mesa_gen_dir}/src/vulkan/runtime/vk_common_entrypoints.c",
+        "${_mesa_gen_dir}/src/vulkan/runtime/vk_dispatch_trampolines.c",
+        "${_mesa_gen_dir}/src/vulkan/runtime/vk_format_info.c",
+        "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_features.c",
+        "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_properties.c",
+        "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_spirv_caps.c",
+        "${_mesa_gen_dir}/src/vulkan/runtime/vk_synchronization_helpers.c",
+        "${_mesa_gen_dir}/src/vulkan/wsi/wsi_common_entrypoints.c",
       ]
-    }
-  }
+  defines = [ "VK_LITE_RUNTIME_INSTANCE=0" ]
+  deps = [
+    ":mesa_nir",
+    ":mesa_util",
+    ":mesa_vtn",
+    ":mesa_vulkan_util",
+  ]
+}
 
-  group("mesa") {
-    public_deps = [ ":mesa_gn" ]
-    data_deps = [ ":mesa_gn" ]
+_mesa_source_set("mesa_gallium_aux") {
+  sources = mesa_gallium_aux_static_sources + [
+              "${_mesa_gen_dir}/src/gallium/auxiliary/tr_util.c",
+              "${_mesa_gen_dir}/src/gallium/auxiliary/u_indices_gen.c",
+              "${_mesa_gen_dir}/src/gallium/auxiliary/u_tracepoints.c",
+              "${_mesa_gen_dir}/src/gallium/auxiliary/u_unfilled_gen.c",
+            ]
+  deps = [
+    ":mesa_nir",
+    ":mesa_util",
+  ]
+}
+
+_mesa_source_set("mesa_llvmpipe") {
+  sources = mesa_llvmpipe_sources
+  deps = [
+    ":mesa_gallium_aux",
+    ":mesa_nir",
+    ":mesa_util",
+  ]
+}
+
+_mesa_source_set("mesa_lavapipe") {
+  sources =
+      mesa_lavapipe_static_sources + [
+        "${_mesa_gen_dir}/src/gallium/frontends/lavapipe/lvp_entrypoints.c",
+        "mesa_llvm_sysroot_compat.cc",
+      ]
+  defines = [
+    "GALLIUM_LLVMPIPE",
+
+    # lvp_formats.c references DRM_FORMAT_MOD_LINEAR under #if DETECT_OS_LINUX
+    # even when HAVE_LIBDRM is not defined (which skips including
+    # drm-uapi/drm_fourcc.h in lvp_private.h).
+    "DRM_FORMAT_MOD_LINEAR=0",
+  ]
+  deps = [
+    ":mesa_gallium_aux",
+    ":mesa_llvmpipe",
+    ":mesa_nir",
+    ":mesa_util",
+    ":mesa_vtn",
+    ":mesa_vulkan_runtime",
+    ":mesa_vulkan_util",
+  ]
+}
+
+shared_library("vulkan_lvp") {
+  output_name = "vulkan_lvp"
+  no_default_deps = true
+  use_libcxx_modules = false
+
+  configs -= [
+    "//build/config/compiler:chromium_code",
+    "//build/config/compiler:runtime_library",
+    "//build/config/sanitizers:default_sanitizer_flags",
+  ]
+  configs += [
+    "//build/config/compiler:no_chromium_code",
+    "//build/config/posix:runtime_library",
+  ]
+
+  deps = [ ":mesa_lavapipe" ]
+
+  libs = [ "${mesa_zstd_dir}/lib/libzstd.so" ] + mesa_llvm_libs + [
+           "dl",
+           "m",
+           "pthread",
+           "rt",
+           "z",
+         ]
+
+  ldflags = [
+    "-fuse-ld=lld",
+    "-Wl,-Bsymbolic",
+    "-Wl,--gc-sections",
+    "-Wl,--exclude-libs,ALL",
+    "-Wl,-rpath,\$ORIGIN",
+  ]
+  if (use_clang_coverage) {
+    ldflags += [
+      "-fprofile-instr-generate",
+      "-fcoverage-mapping",
+    ]
   }
+}
+
+group("mesa") {
+  public_deps = [
+    ":copy_zstd",
+    ":mesa_icd_json",
+    ":vulkan_lvp",
+  ]
+  data = [
+    "${root_out_dir}/libzstd.so.1",
+    "${root_out_dir}/libzstd.so.1.5.7",
+    _mesa_icd_json,
+    _mesa_so,
+  ]
 }

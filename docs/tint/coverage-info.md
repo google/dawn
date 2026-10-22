@@ -88,8 +88,7 @@ Open `coverage_report/linux/index.html` in your browser.
 ### 3. Advanced: Fuzzers with Dynamic Objects (Mesa/Vulkan)
 
 If you are running a fuzzer that dynamically loads a Vulkan driver
-(like Mesa's `lvp`), you need to explicitly include the driver object
-and map its source paths:
+(like Mesa's `lvp`), you need to explicitly include the driver object:
 
 ```bash
 vpython3 tools/code_coverage/coverage.py tint_ir_fuzzer \
@@ -98,20 +97,12 @@ vpython3 tools/code_coverage/coverage.py tint_ir_fuzzer \
     -o coverage_report \
     --format html \
     -a out/gn-coverage/libvulkan_lvp.so \
-    --path-equivalence=/third_party/mesa,$(pwd)/third_party/mesa \
-    --path-equivalence=$(pwd)/out/gn-coverage/src,$(pwd)/out/gn-coverage/gen/third_party/mesa/mesa_build_setup/src \
     -i '\/usr\/.*' \
     -c 'out/gn-coverage/tint_ir_fuzzer -max_total_time=30'
 ```
 
 *   `-a`: Adds the dynamically loaded driver as object source to the
     coverage calculation.
-*   `--path-equivalence`: Maps paths recorded in the binary (which may
-    be absolute or relative to build artifacts) to your local
-    checkout.
-*   Multiple `--path-equivalence` flags can be provided to handle
-    different source roots (e.g., standard sources vs. generated
-    files).
 *   `-i '\/usr\/.*` is used to not include system files that are
     outside the source tree.
 
