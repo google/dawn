@@ -3326,6 +3326,12 @@ TEST_P(SharedTextureMemoryTests, WriteTextureThenReadSample) {
 
 // Test that calling memory.EndAccess() implicitly hides the texture, and BeginAccess() unhides it.
 TEST_P(SharedTextureMemoryTests, HasResourceOneTextureEndAccess) {
+    // TODO(473444514): Re-enable when compute shaders support ResourceTable on metal
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
+
+    // WebGPUOnWebGPU doesn't support ResourceTable
+    DAWN_TEST_UNSUPPORTED_IF(IsWebGPUOnWebGPU());
+
     DAWN_TEST_UNSUPPORTED_IF(
         !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable}));
     // Swiftshader doesn't support variable count descriptor sets used in draw operations.
@@ -3361,6 +3367,12 @@ TEST_P(SharedTextureMemoryTests, HasResourceOneTextureEndAccess) {
 // Test that updating a table with a texture whose access has ended works, but doesn't show that
 // entry as available until BeginAccess is called.
 TEST_P(SharedTextureMemoryTests, HasResourceUpdateWithTextureAlreadyEndedAccess) {
+    // TODO(473444514): Re-enable when compute shaders support ResourceTable on metal
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
+
+    // WebGPUOnWebGPU doesn't support ResourceTable
+    DAWN_TEST_UNSUPPORTED_IF(IsWebGPUOnWebGPU());
+
     DAWN_TEST_UNSUPPORTED_IF(
         !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable}));
     // Swiftshader doesn't support variable count descriptor sets used in draw operations.
@@ -3394,6 +3406,12 @@ TEST_P(SharedTextureMemoryTests, HasResourceUpdateWithTextureAlreadyEndedAccess)
 // Test that a texture used in multiple resource tables has its availability correctly updated on
 // EndAccess and BeginAccess.
 TEST_P(SharedTextureMemoryTests, HasResourceSameTextureMultipleTablesEndAccess) {
+    // TODO(473444514): Re-enable when compute shaders support ResourceTable on metal
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
+
+    // WebGPUOnWebGPU doesn't support ResourceTable
+    DAWN_TEST_UNSUPPORTED_IF(IsWebGPUOnWebGPU());
+
     DAWN_TEST_UNSUPPORTED_IF(
         !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable}));
     // Swiftshader doesn't support variable count descriptor sets used in draw operations.
@@ -3435,6 +3453,9 @@ TEST_P(SharedTextureMemoryTests, HasResourceSameTextureMultipleTablesEndAccess) 
 // where one device interacts via a bindful render attachment and the other via a bindless resource
 // table.
 TEST_P(SharedTextureMemoryTests, InterDeviceRenderAttachmentAndBindlessTexture) {
+    // WebGPUOnWebGPU doesn't support ResourceTable
+    DAWN_TEST_UNSUPPORTED_IF(IsWebGPUOnWebGPU());
+
     DAWN_TEST_UNSUPPORTED_IF(
         !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable}));
     // Swiftshader doesn't support variable count descriptor sets used in draw operations.

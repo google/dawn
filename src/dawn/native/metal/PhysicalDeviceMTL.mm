@@ -815,6 +815,13 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if ([*mDevice readWriteTextureSupport] == MTLReadWriteTextureTier2) {
         EnableFeature(Feature::TextureFormatsTier2);
     }
+
+    // TODO(crbug.com/363031535): Remove this check once Dawn starts assuming support for tier 2.
+    if ([*mDevice argumentBuffersSupport] == MTLArgumentBuffersTier2 &&
+        // TODO(crbug.com/473444514): ResourceTable causes timeouts on Intel mac.
+        !gpu_info::IsIntel(GetVendorId())) {
+        EnableFeature(Feature::ChromiumExperimentalSamplingResourceTable);
+    }
 }
 
 void PhysicalDevice::InitializeVendorArchitectureImpl() {
