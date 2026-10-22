@@ -50,9 +50,11 @@ std::ostream& operator<<(std::ostream& o, const SubgroupMatrixConfig& config) {
 namespace dawn::native::d3d12 {
 namespace {
 
+using ::testing::Test;
+
 using enum wgpu::SubgroupMatrixComponentType;
 
-class SubgroupMatrixConfigTests : public testing::Test {
+class SubgroupMatrixConfigTests : public Test {
   protected:
     struct Shape {
         uint32_t M;
