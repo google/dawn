@@ -1642,7 +1642,11 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
 bool DumpIR([[maybe_unused]] const tint::Program& program,
             [[maybe_unused]] const Options& options) {
 #if TINT_BUILD_WGSL_READER
-    auto result = tint::wgsl::reader::ProgramToLoweredIR(program);
+    tint::wgsl::reader::IROptions ir_options{
+        .dump_ir_when_validating = options.dump_ir,
+        .enable_validation_asserts = options.enable_ir_validation_asserts,
+    };
+    auto result = tint::wgsl::reader::ProgramToLoweredIR(program, std::move(ir_options));
     if (result != tint::Success) {
         std::cerr << "Failed to build IR from program: " << result.Failure() << "\n";
         return false;
