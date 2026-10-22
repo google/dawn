@@ -100,7 +100,13 @@ Source Validator::SourceOf(const Instruction* inst) {
 
 Source Validator::SourceOf(const Instruction* inst, size_t idx) {
     if (IsWGSLValidation()) {
-        return ir_.SourceOf(inst->Operands()[idx]);
+        // TODO(crbug.com/576354155): Make this better by tracking operand sources for constants.
+        // If the operand is constant it has no source, so fallback to the instruction's source.
+        auto src = ir_.SourceOf(inst->Operands()[idx]);
+        if (src.file) {
+            return src;
+        }
+        return ir_.SourceOf(inst);
     }
     return Disassemble().OperandSource(
         Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});

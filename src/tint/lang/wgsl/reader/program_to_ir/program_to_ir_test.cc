@@ -1657,5 +1657,28 @@ TEST_F(IR_FromProgramTest, Array_ExcessiveNumberOfElementsExplicitConstructor) {
                     ":3:42 error: let: result type size (160000) exceeds maximum allowed (65536)"));
 }
 
+TEST_F(IR_FromProgramTest, OperandTooLarge) {
+    auto* wgsl = R"(
+struct S {
+  a : array<vec4f, 4097>,
+}
+
+fn f(s : S) {}
+
+@compute @workgroup_size(1)
+fn main() {
+  f(S());
+}
+)";
+
+    auto m = Build(wgsl);
+    ASSERT_NE(m, Success);
+    EXPECT_EQ(m.Failure().reason,
+              R"(test.wgsl:10:3 error: call: operand size (65552) exceeds maximum allowed (65536)
+  f(S());
+  ^
+)");
+}
+
 }  // namespace
 }  // namespace tint::wgsl::reader

@@ -79,7 +79,10 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
         wgsl::reader::Options options{
             .allowed_features = wgsl::AllowedFeatures::Everything(),
         };
-        TINT_CHECK_RESULT_UNWRAP(result, wgsl::reader::WgslToIR(&file, options));
+        wgsl::reader::IROptions ir_options{
+            .enable_validation_asserts = true,
+        };
+        TINT_CHECK_RESULT_UNWRAP(result, wgsl::reader::WgslToIR(&file, options, ir_options));
         TINT_CHECK_RESULT(core::ir::Validate(result));
 
         return result;
