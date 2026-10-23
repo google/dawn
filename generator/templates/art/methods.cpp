@@ -77,21 +77,28 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     {% set ArgsStruct = FunctionSuffix + "ArgsStruct" %}
 
     {% set unwrap_objs = (object is not none) %}
-    //* Define the helper structs to perform most of the conversion.
-    struct {{KotlinRecord}} {
-        {% for arg in kotlin_record_members(method.arguments) %}
-            {{ 'jlong' if (unwrap_objs and arg.type.category == 'object' and not arg.length) else arg_to_jni_type(arg) }} {{ as_varName(arg.name) }};
-        {% endfor %}
-    };
-    struct {{ArgsStruct}} {
-        {% for arg in method.arguments %}
-            {{ as_annotated_cType(arg) }};
-        {% endfor %}
-    };
-
-    {{ define_kotlin_to_struct_conversion("ConvertInternal", KotlinRecord, ArgsStruct, method.arguments, unwrap_objects=unwrap_objs)}}
-
     {% set _kotlin_return = kotlin_return(method) %}
+    {% set _kotlin_args = kotlin_record_members(method.arguments) | list %}
+    //* Define the helper structs to perform most of the conversion.
+    {% if _kotlin_args %}
+        struct {{KotlinRecord}} {
+            {% for arg in _kotlin_args %}
+                {{ 'jlong' if (unwrap_objs and arg.type.category == 'object' and not arg.length) else arg_to_jni_type(arg) }} {{ as_varName(arg.name) }};
+            {% endfor %}
+        };
+    {% endif %}
+    {% if method.arguments %}
+        struct {{ArgsStruct}} {
+            {% for arg in method.arguments %}
+                {{ as_annotated_cType(arg) }};
+            {% endfor %}
+        };
+    {% endif %}
+    {% if _kotlin_args %}
+
+        {{ define_kotlin_to_struct_conversion("ConvertInternal", KotlinRecord, ArgsStruct, method.arguments, unwrap_objects=unwrap_objs)}}
+    {% endif %}
+
     //*  A JNI-external method is built with the JNI signature expected to match the host Kotlin.
     //*  Object methods bind to the top-level static native on {{ kotlin_name(object) }}Kt, receiving the handle as a jlong.
     DEFAULT extern "C"
@@ -105,7 +112,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     {%- endif -%}
 
     //* Make the signature for each argument in turn.
-    {%- for arg in kotlin_record_members(method.arguments) %},
+    {%- for arg in _kotlin_args %},
         {{ 'jlong' if (unwrap_objs and arg.type.category == 'object' and not arg.length) else arg_to_jni_type(arg) }} _{{ as_varName(arg.name) }}
     {%- endfor %}) {
 
@@ -113,15 +120,21 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     {% if _kotlin_return and (_kotlin_return.type.category == 'object' or (_kotlin_return.length == 'size_t' and (_kotlin_return.type.category == 'structure' or _kotlin_return.type.name.get() == 'char'))) %}
         JNIClasses* classes = JNIClasses::getInstance(env);
     {% endif %}
-    JNIContext c(env);
+    {% if _kotlin_args or (_kotlin_return and _kotlin_return.length == 'size_t') %}
+        JNIContext c(env);
+    {% endif %}
 
-    //* Perform the conversion of arguments.
-    {{KotlinRecord}} kotlinRecord;
-    {% for arg in kotlin_record_members(method.arguments) %}
-        kotlinRecord.{{ as_varName(arg.name) }} = _{{ as_varName(arg.name) }};
-    {% endfor %}
-    {{ArgsStruct}} args;
-    ConvertInternal(&c, kotlinRecord, &args);
+    {% if _kotlin_args %}
+        //* Perform the conversion of arguments.
+        {{KotlinRecord}} kotlinRecord;
+        {% for arg in _kotlin_args %}
+            kotlinRecord.{{ as_varName(arg.name) }} = _{{ as_varName(arg.name) }};
+        {% endfor %}
+        {{ArgsStruct}} args;
+        ConvertInternal(&c, kotlinRecord, &args);
+    {% elif method.arguments %}
+        {{ArgsStruct}} args = {};
+    {% endif %}
 
     {% if object %}
         auto handle = reinterpret_cast<{{ as_cType(object.name) }}>(_handle);
@@ -157,7 +170,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
             {{ as_cType(_kotlin_return.type.name) }} out = {};
             args.{{ as_varName(_kotlin_return.name) }} = &out;
         {% endif %}
-        {{ 'auto result =' if method.returns }}
+        {{ 'auto result =' if (_kotlin_return and _kotlin_return.annotation != '*') or (method.returns and method.returns.type.name.canonical_case() == 'status') }}
         {% if object %}
             wgpu{{ object.name.CamelCase() }}{{ method.name.CamelCase() }}(handle
         {% else %}
@@ -183,7 +196,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
             }
         {% endif %}
     {% endif %}
-    {% if object and object.name.get() == 'device' %}
+    {% if object and object.name.get() == 'device' and _kotlin_args %}
         // Note: We intentionally only register recurring callbacks for WGPUDevice, as it is
         // the only object in Dawn with a terminal lifecycle event (device lost callback)
         // that guarantees safe cleanup. Instance does not have recurring callbacks in dawn.json.
@@ -200,7 +213,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
                 }
             {% endif %}
         {% endif %}
-        {% if object and method.name.get() == 'create device' %}
+        {% if object and method.name.get() == 'create device' and _kotlin_args %}
             if (result != nullptr) {
                 // Transfer callbacks to the newly created device.
                 RegisterDeviceCallbacks(result, c.recurringCallbacks);
