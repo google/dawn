@@ -51,6 +51,10 @@
 #include "src/utils/assert.h"
 #include "src/utils/crash_handler.h"
 
+void InitDawnValidationTestEnvironment(int argc, char** argv) {
+    dawn::InitDawnValidationTestEnvironment(argc, argv);
+}
+
 namespace dawn {
 namespace {
 

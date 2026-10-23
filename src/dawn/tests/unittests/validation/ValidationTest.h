@@ -127,6 +127,10 @@
     } while (0)
 #define EXPECT_DEPRECATION_WARNING(statement) EXPECT_DEPRECATION_WARNINGS(statement, 1)
 
+// Proxy to the same function in the dawn:: namespace as Chromium as an unnamespaced forward
+// declaration in its main file for dawn_unittests.
+void InitDawnValidationTestEnvironment(int argc, char** argv);
+
 namespace dawn {
 
 // Gmock matcher helpers that may be used throughout other tests.
