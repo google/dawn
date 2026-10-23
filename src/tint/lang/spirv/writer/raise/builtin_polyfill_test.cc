@@ -1571,8 +1571,8 @@ $B1: {  # root
 
 %foo = @fragment func(%tint_subgroup_invocation_id_1:u32 [@subgroup_invocation_id]):i32 [@location(0)] {  # %tint_subgroup_invocation_id_1: 'tint_subgroup_invocation_id'
   $B2: {
-    %5:u32 = subgroupAdd 1u
-    %6:u32 = sub %5, 1u
+    %5:vec4<u32> = subgroupBallot true
+    %6:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %5
     store %tint_subgroup_last_id, %6
     store %tint_subgroup_invocation_id, %tint_subgroup_invocation_id_1
     %val:i32 = let 1i
@@ -1659,8 +1659,8 @@ $B1: {  # root
 
 %foo = @fragment func(%tint_subgroup_invocation_id_1:u32 [@subgroup_invocation_id]):i32 [@location(0)] {  # %tint_subgroup_invocation_id_1: 'tint_subgroup_invocation_id'
   $B2: {
-    %5:u32 = subgroupAdd 1u
-    %6:u32 = sub %5, 1u
+    %5:vec4<u32> = subgroupBallot true
+    %6:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %5
     store %tint_subgroup_last_id, %6
     store %tint_subgroup_invocation_id, %tint_subgroup_invocation_id_1
     %val:i32 = let 1i
@@ -1747,8 +1747,8 @@ $B1: {  # root
 
 %foo = @fragment func(%tint_subgroup_invocation_id_1:u32 [@subgroup_invocation_id]):i32 [@location(0)] {  # %tint_subgroup_invocation_id_1: 'tint_subgroup_invocation_id'
   $B2: {
-    %5:u32 = subgroupAdd 1u
-    %6:u32 = sub %5, 1u
+    %5:vec4<u32> = subgroupBallot true
+    %6:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %5
     store %tint_subgroup_last_id, %6
     store %tint_subgroup_invocation_id, %tint_subgroup_invocation_id_1
     %val:i32 = let 1i
@@ -4342,8 +4342,8 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = subgroupAdd 1u
-    %4:u32 = sub %3, 1u
+    %3:vec4<u32> = subgroupBallot true
+    %4:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %3
     store %tint_subgroup_last_id, %4
     %id:i32 = let 1i
     %val:i32 = let 1i
@@ -4392,8 +4392,8 @@ $B1: {  # root
 
 %foo = @fragment func(%my_subgroup_size:u32 [@subgroup_size]):void {
   $B2: {
-    %4:u32 = subgroupAdd 1u
-    %5:u32 = sub %4, 1u
+    %4:vec4<u32> = subgroupBallot true
+    %5:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %4
     store %tint_subgroup_last_id, %5
     %6:u32 = load %tint_subgroup_last_id
     %7:u32 = min 1u, %6
@@ -4456,8 +4456,8 @@ $B1: {  # root
 
 %foo = @fragment func(%inputs:S):void {
   $B2: {
-    %4:u32 = subgroupAdd 1u
-    %5:u32 = sub %4, 1u
+    %4:vec4<u32> = subgroupBallot true
+    %5:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %4
     store %tint_subgroup_last_id, %5
     %6:u32 = load %tint_subgroup_last_id
     %7:u32 = min 1u, %6
@@ -4533,8 +4533,8 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = subgroupAdd 1u
-    %4:u32 = sub %3, 1u
+    %3:vec4<u32> = subgroupBallot true
+    %4:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %3
     store %tint_subgroup_last_id, %4
     %5:i32 = subgroupBroadcast 1i, 1u
     %6:u32 = load %tint_subgroup_last_id
@@ -5724,8 +5724,8 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = subgroupAdd 1u
-    %4:u32 = sub %3, 1u
+    %3:vec4<u32> = subgroupBallot true
+    %4:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %3
     store %tint_subgroup_last_id, %4
     %arg1:i32 = let 1i
     %arg2:i32 = let 1i
@@ -5773,8 +5773,8 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = subgroupAdd 1u
-    %4:u32 = sub %3, 1u
+    %3:vec4<u32> = subgroupBallot true
+    %4:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %3
     store %tint_subgroup_last_id, %4
     %arg1:u32 = let 1u
     %arg2:u32 = let 1u
@@ -5821,8 +5821,8 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = subgroupAdd 1u
-    %4:u32 = sub %3, 1u
+    %3:vec4<u32> = subgroupBallot true
+    %4:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %3
     store %tint_subgroup_last_id, %4
     %arg1:f32 = let 1.0f
     %arg2:u32 = let 1u
@@ -5869,8 +5869,8 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = subgroupAdd 1u
-    %4:u32 = sub %3, 1u
+    %3:vec4<u32> = subgroupBallot true
+    %4:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %3
     store %tint_subgroup_last_id, %4
     %arg1:vec2<f32> = let vec2<f32>(1.0f)
     %arg2:u32 = let 1u
@@ -5942,8 +5942,8 @@ $B1: {  # root
 }
 %ep = @compute @workgroup_size(1u, 1u, 1u) func(%tint_subgroup_invocation_id_1:u32 [@subgroup_invocation_id]):void {  # %tint_subgroup_invocation_id_1: 'tint_subgroup_invocation_id'
   $B3: {
-    %14:u32 = subgroupAdd 1u
-    %15:u32 = sub %14, 1u
+    %14:vec4<u32> = subgroupBallot true
+    %15:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %14
     store %tint_subgroup_last_id, %15
     store %tint_subgroup_invocation_id, %tint_subgroup_invocation_id_1
     %16:i32 = call %helper, 1i, 1u

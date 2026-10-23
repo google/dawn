@@ -1930,6 +1930,9 @@ fn u_dot(u32, u32, literal) -> u32
 ////////////////////////////////////////////////////////////////////////////////
 // Subgroups
 ////////////////////////////////////////////////////////////////////////////////
+@must_use @stage("fragment", "compute")
+fn group_non_uniform_ballot_find_msb(scope: u32, value: vec4<u32>) -> u32
+
 @must_use @stage("fragment", "compute") implicit(T: scalar)
 fn group_non_uniform_broadcast(scope: u32, e: T, @const id: u32) -> T
 @must_use @stage("fragment", "compute") implicit(N: num, T: scalar)

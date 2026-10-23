@@ -1829,6 +1829,10 @@ class Printer {
             case BuiltinFn::kGroupNonUniformSMax:
                 op = spv::Op::OpGroupNonUniformSMax;
                 break;
+            case BuiltinFn::kGroupNonUniformBallotFindMsb:
+                module_.PushCapability(SpvCapabilityGroupNonUniformBallot);
+                op = spv::Op::OpGroupNonUniformBallotFindMSB;
+                break;
             case BuiltinFn::kUConvert:
                 op = spv::Op::OpUConvert;
                 break;

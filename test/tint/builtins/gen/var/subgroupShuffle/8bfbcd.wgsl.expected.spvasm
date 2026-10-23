@@ -4,11 +4,11 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 37
+; Bound: 39
 ; Schema: 0
                OpCapability Shader
                OpCapability GroupNonUniformShuffle
-               OpCapability GroupNonUniformArithmetic
+               OpCapability GroupNonUniformBallot
          %21 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fragment_main "fragment_main"
@@ -40,7 +40,9 @@
      %uint_3 = OpConstant %uint 3
        %void = OpTypeVoid
          %28 = OpTypeFunction %void
-     %uint_1 = OpConstant %uint 1
+     %v4uint = OpTypeVector %uint 4
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
      %uint_0 = OpConstant %uint 0
 %subgroupShuffle_8bfbcd = OpFunction %int None %10
@@ -62,12 +64,12 @@
                OpFunctionEnd
 %fragment_main = OpFunction %void None %28
          %29 = OpLabel
-         %30 = OpGroupNonUniformIAdd %uint %uint_3 Reduce %uint_1
-         %32 = OpISub %uint %30 %uint_1
-               OpStore %tint_subgroup_last_id %32 None
-         %33 = OpFunctionCall %int %subgroupShuffle_8bfbcd
-         %34 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %34 %33 None
+         %30 = OpGroupNonUniformBallot %v4uint %uint_3 %true
+         %34 = OpGroupNonUniformBallotFindMSB %uint %uint_3 %30
+               OpStore %tint_subgroup_last_id %34 None
+         %35 = OpFunctionCall %int %subgroupShuffle_8bfbcd
+         %36 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %36 %35 None
                OpReturn
                OpFunctionEnd
 ;
@@ -76,11 +78,11 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 37
+; Bound: 39
 ; Schema: 0
                OpCapability Shader
                OpCapability GroupNonUniformShuffle
-               OpCapability GroupNonUniformArithmetic
+               OpCapability GroupNonUniformBallot
          %21 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %compute_main "compute_main"
@@ -112,7 +114,9 @@
      %uint_3 = OpConstant %uint 3
        %void = OpTypeVoid
          %28 = OpTypeFunction %void
-     %uint_1 = OpConstant %uint 1
+     %v4uint = OpTypeVector %uint 4
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
      %uint_0 = OpConstant %uint 0
 %subgroupShuffle_8bfbcd = OpFunction %int None %10
@@ -134,11 +138,11 @@
                OpFunctionEnd
 %compute_main = OpFunction %void None %28
          %29 = OpLabel
-         %30 = OpGroupNonUniformIAdd %uint %uint_3 Reduce %uint_1
-         %32 = OpISub %uint %30 %uint_1
-               OpStore %tint_subgroup_last_id %32 None
-         %33 = OpFunctionCall %int %subgroupShuffle_8bfbcd
-         %34 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %34 %33 None
+         %30 = OpGroupNonUniformBallot %v4uint %uint_3 %true
+         %34 = OpGroupNonUniformBallotFindMSB %uint %uint_3 %30
+               OpStore %tint_subgroup_last_id %34 None
+         %35 = OpFunctionCall %int %subgroupShuffle_8bfbcd
+         %36 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %36 %35 None
                OpReturn
                OpFunctionEnd

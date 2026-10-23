@@ -437,8 +437,14 @@ struct State {
     /// Set the subgroup_last_id_ variable from an entry point.
     void SetSubgroupLastIdForEntryPoint(core::ir::Function* ep) {
         b.InsertBefore(ep->Block()->Front(), [&] {
-            auto* count = b.Call(ty.u32(), core::BuiltinFn::kSubgroupAdd, 1_u);
-            b.Store(subgroup_last_id_, b.Subtract(count, 1_u));
+            // The IDs of the active invocations are not necessarily contiguous from zero (e.g.
+            // fragment shader helper invocations may be inactive for non-quad group operations),
+            // so use the highest active invocation ID rather than the number of active invocations.
+            auto* ballot = b.Call(ty.vec4u(), core::BuiltinFn::kSubgroupBallot, true);
+            auto* last_id = b.Call<spirv::ir::BuiltinCall>(
+                ty.u32(), spirv::BuiltinFn::kGroupNonUniformBallotFindMsb, u32(SpvScopeSubgroup),
+                ballot);
+            b.Store(subgroup_last_id_, last_id);
         });
     }
 
