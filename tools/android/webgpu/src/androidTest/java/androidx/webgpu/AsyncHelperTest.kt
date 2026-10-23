@@ -15,11 +15,19 @@
  */
 package androidx.webgpu
 
+import android.os.Process
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import androidx.webgpu.GPU.createGPUInstance
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
+import java.io.File
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executor
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
@@ -29,11 +37,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.concurrent.atomic.AtomicBoolean
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -180,5 +190,202 @@ class AsyncHelperTest {
       false,
       baseCancellationTest(true)
     )
+  }
+
+  private fun distinctShaderSource(seed: Int): String = """
+        @vertex fn vertexMain(@builtin(vertex_index) i : u32) ->
+        @builtin(position) vec4f {
+            return vec4f(${seed}.0, 0.0, 0.0, 1.0);
+        }
+        @fragment fn fragmentMain() -> @location(0) vec4f {
+            return vec4f(0.0, ${seed}.0, 0.0, 1.0);
+        } """
+
+  @Test
+  fun asyncCallbackAttachesThreadWithKernelName() {
+    for (iteration in 1..2) {
+      val latch = CountDownLatch(1)
+      val callbackThreadName = AtomicReference<String>()
+      val callbackKernelComm = AtomicReference<String>()
+      val callbackError = AtomicReference<Throwable>()
+
+      runBlocking {
+        webGpu.execute {
+          val shaderModule = device.createShaderModule(
+            GPUShaderModuleDescriptor(shaderSourceWGSL = GPUShaderSourceWGSL(distinctShaderSource(iteration)))
+          )
+          device.createRenderPipelineAsync(
+            descriptor = GPURenderPipelineDescriptor(
+              vertex = GPUVertexState(module = shaderModule),
+              fragment = GPUFragmentState(
+                module = shaderModule,
+                targets = arrayOf(GPUColorTargetState(format = TextureFormat.RGBA8Unorm))
+              )
+            ),
+            callbackExecutor = Executor(Runnable::run),
+            callback = object : GPURequestCallback<GPURenderPipeline> {
+              override fun onResult(result: GPURenderPipeline) {
+                try {
+                  callbackThreadName.set(Thread.currentThread().name)
+                  callbackKernelComm.set(
+                    File("/proc/self/task/${Process.myTid()}/comm").readText().trim()
+                  )
+                } finally {
+                  result.close()
+                  shaderModule.close()
+                  latch.countDown()
+                }
+              }
+
+              override fun onError(exception: Exception) {
+                callbackError.set(exception)
+                shaderModule.close()
+                latch.countDown()
+              }
+            }
+          )
+        }
+      }
+
+      assertTrue("Timed out waiting for async pipeline callback", latch.await(10, TimeUnit.SECONDS))
+      assertNull("Unexpected callback error", callbackError.get())
+      assertEquals("DawnWorker", callbackThreadName.get())
+      assertEquals("DawnWorker", callbackKernelComm.get())
+    }
+  }
+
+  @Test
+  fun asyncCallbackForwardsUncaughtExceptionToHandler() {
+    val expectedMessage = "Uncaught async callback failure"
+    val handlerLatch = CountDownLatch(1)
+    val caughtThreadName = AtomicReference<String>()
+    val caughtThrowable = AtomicReference<Throwable>()
+    val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
+
+    Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+      if (throwable.message == expectedMessage) {
+        caughtThreadName.set(thread.name)
+        caughtThrowable.set(throwable)
+        handlerLatch.countDown()
+      } else {
+        previousHandler?.uncaughtException(thread, throwable)
+      }
+    }
+
+    try {
+      runBlocking {
+        webGpu.execute {
+          val shaderModule = device.createShaderModule(
+            GPUShaderModuleDescriptor(shaderSourceWGSL = GPUShaderSourceWGSL(distinctShaderSource(101)))
+          )
+          device.createRenderPipelineAsync(
+            descriptor = GPURenderPipelineDescriptor(
+              vertex = GPUVertexState(module = shaderModule),
+              fragment = GPUFragmentState(
+                module = shaderModule,
+                targets = arrayOf(GPUColorTargetState(format = TextureFormat.RGBA8Unorm))
+              )
+            ),
+            callbackExecutor = Executor(Runnable::run),
+            callback = object : GPURequestCallback<GPURenderPipeline> {
+              override fun onResult(result: GPURenderPipeline) {
+                result.close()
+                shaderModule.close()
+                throw IllegalStateException(expectedMessage)
+              }
+
+              override fun onError(exception: Exception) {
+                shaderModule.close()
+              }
+            }
+          )
+        }
+      }
+
+      assertTrue(
+        "Timed out waiting for UncaughtExceptionHandler",
+        handlerLatch.await(10, TimeUnit.SECONDS)
+      )
+      assertEquals("DawnWorker", caughtThreadName.get())
+      assertTrue(caughtThrowable.get() is IllegalStateException)
+      assertEquals(expectedMessage, caughtThrowable.get()?.message)
+
+      // Verify a subsequent async callback still succeeds on DawnWorker without pending-JNI state.
+      val followUpLatch = CountDownLatch(1)
+      val followUpThreadName = AtomicReference<String>()
+      runBlocking {
+        webGpu.execute {
+          val shaderModule = device.createShaderModule(
+            GPUShaderModuleDescriptor(shaderSourceWGSL = GPUShaderSourceWGSL(distinctShaderSource(102)))
+          )
+          device.createRenderPipelineAsync(
+            descriptor = GPURenderPipelineDescriptor(
+              vertex = GPUVertexState(module = shaderModule),
+              fragment = GPUFragmentState(
+                module = shaderModule,
+                targets = arrayOf(GPUColorTargetState(format = TextureFormat.RGBA8Unorm))
+              )
+            ),
+            callbackExecutor = Executor(Runnable::run),
+            callback = object : GPURequestCallback<GPURenderPipeline> {
+              override fun onResult(result: GPURenderPipeline) {
+                followUpThreadName.set(Thread.currentThread().name)
+                result.close()
+                shaderModule.close()
+                followUpLatch.countDown()
+              }
+
+              override fun onError(exception: Exception) {
+                shaderModule.close()
+                followUpLatch.countDown()
+              }
+            }
+          )
+        }
+      }
+      assertTrue("Follow-up async callback timed out", followUpLatch.await(10, TimeUnit.SECONDS))
+      assertEquals("DawnWorker", followUpThreadName.get())
+    } finally {
+      Thread.setDefaultUncaughtExceptionHandler(previousHandler)
+    }
+  }
+
+  @Test
+  fun syncCallbackPropagatesUncaughtExceptionToCaller() {
+    val expectedMessage = "Synchronous callback failure"
+    val handlerInvoked = AtomicBoolean(false)
+    val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
+
+    Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+      if (throwable.message == expectedMessage) {
+        handlerInvoked.set(true)
+      } else {
+        previousHandler?.uncaughtException(thread, throwable)
+      }
+    }
+
+    try {
+      createGPUInstance().use { instance ->
+        val thrown = assertThrows(IllegalStateException::class.java) {
+          instance.requestAdapter(
+            callbackExecutor = Executor(Runnable::run),
+            callback = object : GPURequestCallback<GPUAdapter> {
+              override fun onResult(result: GPUAdapter) {
+                result.close()
+                throw IllegalStateException(expectedMessage)
+              }
+
+              override fun onError(exception: Exception) {
+                throw IllegalStateException(expectedMessage, exception)
+              }
+            }
+          )
+        }
+        assertEquals(expectedMessage, thrown.message)
+      }
+      assertEquals(false, handlerInvoked.get())
+    } finally {
+      Thread.setDefaultUncaughtExceptionHandler(previousHandler)
+    }
   }
 }

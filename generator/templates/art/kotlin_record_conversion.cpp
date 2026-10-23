@@ -91,6 +91,8 @@
                                 {% set userdata = 'userdata1' %}
                             //* User data is used to carry the JNI context (env) for use by the
                             //* callback.
+                            ScopedJVMAttachment jvmAttachment(
+                                static_cast<UserData*>({{ userdata }})->jvm);
                             {% if member.type.name.get() in ['uncaptured error callback', 'dawn load cache data callback', 'dawn store cache data callback'] %}
                             std::shared_ptr<UserData> userData1 = static_cast<UserData *>({{ userdata }})->shared_from_this();
                             {% else %}
@@ -111,16 +113,8 @@
                                 FreeDeviceCallbacks(*device);
                             }
                             {% endif %}
-                            JavaVM* jvm = userData1->jvm;
-                            JNIEnv *env = NULL;
-                            //* Deal with difference in signatures between Oracle's jni.h and Android's.
-                            #ifdef _JAVASOFT_JNI_H_  //* Oracle's jni.h violates the JNI spec.
-                                jvm->AttachCurrentThread(reinterpret_cast<void**>(&env), NULL);
-                            #else
-                                jvm->AttachCurrentThread(&env, NULL);
-                            #endif
-
-                            if (env->ExceptionCheck()) {
+                            JNIEnv* env = jvmAttachment.GetEnv();
+                            if (!env || env->ExceptionCheck()) {
                                 return;
                             }
                             JNIClasses* classes = JNIClasses::getInstance(env);
@@ -208,6 +202,13 @@
                             );
 
                             env->CallVoidMethod(userData1->executor, executeMethodID, runnable);
+                            //* An exception thrown by a direct executor on a newly attached native
+                            //* worker thread has no outer Java frame; forward it to the thread's
+                            //* uncaught-exception handler before detaching. On an already-attached
+                            //* caller thread, leave it pending so it propagates to the Kotlin caller.
+                            if (jvmAttachment.NeedsDetach() && env->ExceptionCheck()) {
+                                classes->DispatchPendingException(env);
+                            }
                         };
                         {% if member.type.name.get() in ['uncaptured error callback', 'dawn load cache data callback', 'dawn store cache data callback'] %}
                         auto newUserDataShared = std::make_shared<UserData>();

@@ -49,6 +49,14 @@ JNIClasses::JNIClasses(JNIEnv* env) {
     gpuHardwareBufferTexture = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("androidx/webgpu/GPUHardwareBufferTexture")));
     javaIllegalStateException = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("java/lang/IllegalStateException")));
     javaUnsupportedOperationException = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("java/lang/UnsupportedOperationException")));
+    jclass threadClz = env->FindClass("java/lang/Thread");
+    javaThread = reinterpret_cast<jclass>(env->NewGlobalRef(threadClz));
+    env->DeleteLocalRef(threadClz);
+    threadCurrentThread = env->GetStaticMethodID(javaThread, "currentThread", "()Ljava/lang/Thread;");
+    threadGetUncaughtExceptionHandler = env->GetMethodID(javaThread, "getUncaughtExceptionHandler", "()Ljava/lang/Thread$UncaughtExceptionHandler;");
+    jclass uncaughtExceptionHandlerClz = env->FindClass("java/lang/Thread$UncaughtExceptionHandler");
+    uncaughtExceptionHandlerUncaughtException = env->GetMethodID(uncaughtExceptionHandlerClz, "uncaughtException", "(Ljava/lang/Thread;Ljava/lang/Throwable;)V");
+    env->DeleteLocalRef(uncaughtExceptionHandlerClz);
     parcelFileDescriptor = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("android/os/ParcelFileDescriptor")));
     pfdGetFd = env->GetMethodID(parcelFileDescriptor, "getFd", "()I");
     pfdAdoptFd = env->GetStaticMethodID(parcelFileDescriptor, "adoptFd", "(I)Landroid/os/ParcelFileDescriptor;");
@@ -69,6 +77,49 @@ JNIClasses::JNIClasses(JNIEnv* env) {
     colorSpaceYCbCrMatrix = env->GetFieldID(colorSpaceClz, "yCbCrMatrix", "I");
     env->DeleteLocalRef(colorSpaceClz);
 
+}
+
+void JNIClasses::DispatchPendingException(JNIEnv* env) const {
+    jthrowable pending = env->ExceptionOccurred();
+    if (!pending) {
+        return;
+    }
+    env->ExceptionClear();
+
+    bool dispatched = false;
+    jobject thread = env->CallStaticObjectMethod(javaThread, threadCurrentThread);
+    if (env->ExceptionCheck()) {
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+    } else if (thread != nullptr) {
+        jobject handler = env->CallObjectMethod(thread, threadGetUncaughtExceptionHandler);
+        if (env->ExceptionCheck()) {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+        } else if (handler != nullptr) {
+            env->CallVoidMethod(
+                handler, uncaughtExceptionHandlerUncaughtException, thread, pending);
+            if (env->ExceptionCheck()) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+            } else {
+                dispatched = true;
+            }
+        }
+        if (handler != nullptr) {
+            env->DeleteLocalRef(handler);
+        }
+    }
+
+    if (!dispatched) {
+        env->Throw(pending);
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+    }
+    if (thread != nullptr) {
+        env->DeleteLocalRef(thread);
+    }
+    env->DeleteLocalRef(pending);
 }
 
 }  // namespace dawn::kotlin_api

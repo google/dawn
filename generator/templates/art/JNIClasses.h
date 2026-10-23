@@ -33,9 +33,27 @@
 
 namespace dawn::kotlin_api {
 
+class ScopedJVMAttachment {
+  public:
+    explicit ScopedJVMAttachment(JavaVM* jvm);
+    ~ScopedJVMAttachment();
+
+    ScopedJVMAttachment(const ScopedJVMAttachment&) = delete;
+    ScopedJVMAttachment& operator=(const ScopedJVMAttachment&) = delete;
+
+    JNIEnv* GetEnv() const { return mEnv; }
+    bool NeedsDetach() const { return mNeedsDetach; }
+
+  private:
+    JavaVM* mJvm = nullptr;
+    JNIEnv* mEnv = nullptr;
+    bool mNeedsDetach = false;
+};
+
 class JNIClasses {
     public:
          static JNIClasses* getInstance(JNIEnv* env);
+         void DispatchPendingException(JNIEnv* env) const;
         {% for entity in has_kotlin_classes %}
             jclass {{ entity.name.camelCase() }};
             {%if entity.category == 'callback function' %}
@@ -51,6 +69,10 @@ class JNIClasses {
         jclass gpuHardwareBufferTexture;
         jclass javaIllegalStateException;
         jclass javaUnsupportedOperationException;
+        jclass javaThread;
+        jmethodID threadCurrentThread;
+        jmethodID threadGetUncaughtExceptionHandler;
+        jmethodID uncaughtExceptionHandlerUncaughtException;
         jclass parcelFileDescriptor;
         jmethodID pfdGetFd;
         jmethodID pfdAdoptFd;
