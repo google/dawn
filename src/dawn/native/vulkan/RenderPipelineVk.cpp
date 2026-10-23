@@ -904,19 +904,15 @@ ResultOrUnknownError<RenderPipeline::SpecializationResult> RenderPipeline::Initi
         // Without any specific toggle only vertex inputs can be made robust enough for WebGPU.
         robustnessCreateInfo.vertexInputs =
             VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_ROBUST_BUFFER_ACCESS;
-        robustnessCreateInfo.uniformBuffers = VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_DISABLED;
-        robustnessCreateInfo.storageBuffers = VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_DISABLED;
-        robustnessCreateInfo.images = VK_PIPELINE_ROBUSTNESS_IMAGE_BEHAVIOR_DISABLED;
 
-        if (device->IsToggleEnabled(Toggle::VulkanUseBufferRobustAccess2)) {
-            // Uniform buffers are checked with WebGPU validation and don't need robustness.
-            robustnessCreateInfo.storageBuffers =
-                VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_ROBUST_BUFFER_ACCESS_2;
-        }
-        if (device->IsToggleEnabled(Toggle::VulkanUseImageRobustAccess2)) {
-            robustnessCreateInfo.images =
-                VK_PIPELINE_ROBUSTNESS_IMAGE_BEHAVIOR_ROBUST_IMAGE_ACCESS_2;
-        }
+        // Device default for uniform and storage buffers is based on
+        // Toggle::VulkanUseBufferRobustAccess2.
+        robustnessCreateInfo.uniformBuffers =
+            VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_DEVICE_DEFAULT_EXT;
+        robustnessCreateInfo.storageBuffers =
+            VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_DEVICE_DEFAULT_EXT;
+        // Device default for images is based on Toggle::VulkanUseImageRobustAccess2.
+        robustnessCreateInfo.images = VK_PIPELINE_ROBUSTNESS_IMAGE_BEHAVIOR_DEVICE_DEFAULT_EXT;
     }
 
     // Record cache key information now since createInfo is not stored. Only store for the noop
