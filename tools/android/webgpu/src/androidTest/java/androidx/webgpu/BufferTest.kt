@@ -62,7 +62,10 @@ class BufferTest {
 
   @After
   fun teardown() {
-    runCatching { device.destroy() }
+    // Destroy on the WebGPU dispatcher: processEventsLoop() ticks the device on that thread and a
+    // Dawn device must not be used from two threads at once (unless ImplicitDeviceSynchronization is
+    // enabled); destroying it from the test thread raced with the loop.
+    runCatching { runBlocking { webGpu.execute { device.destroy() } } }
     webGpu.close()
     testScope.cancel()
     (dispatcher as? ExecutorCoroutineDispatcher)?.close()
