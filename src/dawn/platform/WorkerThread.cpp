@@ -32,6 +32,11 @@
 #include <utility>
 
 #include "src/utils/assert.h"
+#include "src/utils/platform.h"
+
+#if DAWN_PLATFORM_IS(LINUX)
+#include <pthread.h>
+#endif
 
 namespace dawn::platform {
 
@@ -103,6 +108,11 @@ void AsyncJobHandleImpl::Join() {
 }
 
 void AsyncJobHandleImpl::JobThreadLoop(PostWorkerJobCallback cb, void* userdata) {
+#if DAWN_PLATFORM_IS(LINUX)
+    // Give the worker thread a dedicated name instead of inheriting the spawning thread's name.
+    // Linux and Android only: the pthread_setname_np() signature differs on other POSIX platforms.
+    pthread_setname_np(pthread_self(), "DawnWorker");
+#endif
     JobStatus status = JobStatus::Continue;
     while (!mCancelled && status == JobStatus::Continue) {
         status = cb(userdata);
