@@ -413,13 +413,6 @@ bool Device::BackendWillValidateMultiDraw() const {
 }
 
 std::optional<DeviceGuard> Device::UseGuardForCreateBindGroup() {
-    // TODO(crbug.com/363031535): When argument buffers are enabled, BindGroup::InitializeImpl()
-    // encodes into a shared MTLArgumentEncoder stored on the BindGroupLayout without
-    // synchronization. We can remove this guard if we synchronize the shared encoder's state in the
-    // future.
-    if (IsToggleEnabled(Toggle::MetalUseArgumentBuffers)) {
-        return GetGuard();
-    }
     return std::nullopt;
 }
 

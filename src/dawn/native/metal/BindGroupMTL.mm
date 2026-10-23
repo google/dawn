@@ -59,64 +59,65 @@ MaybeError BindGroup::InitializeImpl() {
         return {};
     }
 
-    // TODO(crbug.com/477311786): The argument buffers should probably work in some kind of pool
-    // instead of being allocated here
-
     auto layout = ToBackend(GetLayout());
+    layout->GetArgumentEncoder().Use([this, device, layout](auto encoder) {
+        NSUInteger argumentBufferLength = [**encoder encodedLength];
+        // Avoid zero-sized buffers by rounding up the size.
+        if (argumentBufferLength == 0) {
+            argumentBufferLength = 8;
+        }
 
-    auto encoder = layout->GetArgumentEncoder();
-    NSUInteger argumentBufferLength = [*encoder encodedLength];
-    // Avoid zero-sized buffers by rounding up the size.
-    if (argumentBufferLength == 0) {
-        argumentBufferLength = 8;
-    }
+        // TODO(crbug.com/477311786): The argument buffers should probably work in some kind of pool
+        // instead of being allocated here
+        mArgumentBuffer =
+            AcquireNSPRef([device->GetMTLDevice() newBufferWithLength:argumentBufferLength
+                                                              options:0]);
+        [**encoder setArgumentBuffer:*mArgumentBuffer offset:0];
 
-    mArgumentBuffer = AcquireNSPRef([device->GetMTLDevice() newBufferWithLength:argumentBufferLength
-                                                                        options:0]);
-    [*encoder setArgumentBuffer:*mArgumentBuffer offset:0];
+        for (BindingIndex bindingIndex : Range(layout->GetBindingCount())) {
+            const BindingInfo& bindingInfo = layout->GetBindingInfo(bindingIndex);
+            uint32_t dstBinding = ToMTLArgumentBufferIndex(bindingIndex - bindingInfo.indexInArray);
 
-    for (BindingIndex bindingIndex : Range(layout->GetBindingCount())) {
-        const BindingInfo& bindingInfo = layout->GetBindingInfo(bindingIndex);
-        uint32_t dstBinding = ToMTLArgumentBufferIndex(bindingIndex - bindingInfo.indexInArray);
+            auto HandleTextureBinding = [&]() {
+                auto textureView = ToBackend(GetBindingAsTextureView(bindingIndex));
+                id<MTLTexture> texture =
+                    textureView->GetTexture()->IsDestroyed() ? nil : textureView->GetMTLTexture();
+                [**encoder setTexture:texture atIndex:dstBinding];
+            };
 
-        auto HandleTextureBinding = [&]() {
-            auto textureView = ToBackend(GetBindingAsTextureView(bindingIndex));
-            id<MTLTexture> texture =
-                textureView->GetTexture()->IsDestroyed() ? nil : textureView->GetMTLTexture();
-            [*encoder setTexture:texture atIndex:dstBinding];
-        };
-
-        // Note, if a resource is destroyed, we will write nil to that slot.
-        // Validation should ensure we never actually try to use it.
-        MatchVariant(
-            bindingInfo.bindingLayout,
-            [&](const BufferBindingInfo& layout) {
-                const BufferBinding& binding = GetBindingAsBufferBinding(bindingIndex);
-                const id<MTLBuffer> buffer =
-                    binding.buffer->IsDestroyed() ? nil : ToBackend(binding.buffer)->GetMTLBuffer();
-                [*encoder setBuffer:buffer offset:binding.offset atIndex:dstBinding];
-            },
-            [&](const SamplerBindingInfo&) {
-                auto sampler = ToBackend(GetBindingAsSampler(bindingIndex));
-                id<MTLSamplerState> samplerState = sampler->GetMTLSamplerState();
-                [*encoder setSamplerState:samplerState atIndex:dstBinding];
-            },
-            [&](const StaticSamplerBindingInfo&) {
-                // Static samplers are handled in the frontend.
-                // TODO(crbug.com/dawn/2482): Implement static samplers in the
-                // Metal backend.
-                DAWN_UNREACHABLE();
-            },
-            [&](const TextureBindingInfo&) { HandleTextureBinding(); },
-            [&](const StorageTextureBindingInfo&) { HandleTextureBinding(); },
-            [&](const TexelBufferBindingInfo&) {
-                // Metal does not support texel buffers.
-                // TODO(crbug/382544164): Prototype texel buffer feature
-                DAWN_UNREACHABLE();
-            },
-            [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); },
-            [](const ExternalTextureBindingInfo&) { DAWN_UNREACHABLE(); });
-    }
+            // Note, if a resource is destroyed, we will write nil to that slot.
+            // Validation should ensure we never actually try to use it.
+            MatchVariant(
+                bindingInfo.bindingLayout,
+                [&](const BufferBindingInfo& layout) {
+                    const BufferBinding& binding = GetBindingAsBufferBinding(bindingIndex);
+                    const id<MTLBuffer> buffer = binding.buffer->IsDestroyed()
+                                                     ? nil
+                                                     : ToBackend(binding.buffer)->GetMTLBuffer();
+                    [**encoder setBuffer:buffer offset:binding.offset atIndex:dstBinding];
+                },
+                [&](const SamplerBindingInfo&) {
+                    auto sampler = ToBackend(GetBindingAsSampler(bindingIndex));
+                    id<MTLSamplerState> samplerState = sampler->GetMTLSamplerState();
+                    [**encoder setSamplerState:samplerState atIndex:dstBinding];
+                },
+                [&](const StaticSamplerBindingInfo&) {
+                    // Static samplers are handled in the frontend.
+                    // TODO(crbug.com/dawn/2482): Implement static samplers in the
+                    // Metal backend.
+                    DAWN_UNREACHABLE();
+                },
+                [&](const TextureBindingInfo&) { HandleTextureBinding(); },
+                [&](const StorageTextureBindingInfo&) { HandleTextureBinding(); },
+                [&](const TexelBufferBindingInfo&) {
+                    // Metal does not support texel buffers.
+                    // TODO(crbug/382544164): Prototype texel buffer feature
+                    DAWN_UNREACHABLE();
+                },
+                [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); },
+                [](const ExternalTextureBindingInfo&) { DAWN_UNREACHABLE(); });
+        }
+    });
 
     return {};
 }

@@ -97,7 +97,7 @@ BindGroupLayout::BindGroupLayout(DeviceBase* device,
 
         if (!descriptors.empty()) {
             NSArray* ary = [NSArray arrayWithObjects:descriptors.data() count:descriptors.size()];
-            mArgumentEncoder = AcquireNSPRef(
+            mArgumentEncoder->Acquire(
                 [ToBackend(device)->GetMTLDevice() newArgumentEncoderWithArguments:ary]);
         }
     }
@@ -119,7 +119,7 @@ void BindGroupLayout::ReduceMemoryUsage() {
     mBindGroupAllocator->DeleteEmptySlabs();
 }
 
-NSPRef<id<MTLArgumentEncoder>> BindGroupLayout::GetArgumentEncoder() const {
+MutexProtected<NSPRef<id<MTLArgumentEncoder>>>& BindGroupLayout::GetArgumentEncoder() {
     return mArgumentEncoder;
 }
 
