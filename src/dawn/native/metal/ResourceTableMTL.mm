@@ -50,23 +50,27 @@ ResourceTable::~ResourceTable() = default;
 MaybeError ResourceTable::Initialize() {
     DAWN_TRY(ResourceTableBase::InitializeBase());
 
-    Device* device = ToBackend(GetDevice());
-    NSUInteger argBufferLength = size_t(GetSizeWithDefaultResources()) * sizeof(MTLResourceID);
+    if (@available(macOS 13.0, iOS 16.0, *)) {
+        Device* device = ToBackend(GetDevice());
+        NSUInteger argBufferLength = size_t(GetSizeWithDefaultResources()) * sizeof(MTLResourceID);
 
-    // TODO(crbug.com/473444514): This should use `ModePrivate` over `ModeShared` as private would
-    // be faster.
-    // TODO(crbug.com/473444514): Investigate turning this into a WebGPU Buffer, then below we can
-    // use the `GetMappedSpan` and remove the unsafe buffer.
-    mArgBuffer =
-        AcquireNSPRef([device->GetMTLDevice() newBufferWithLength:argBufferLength
-                                                          options:MTLResourceStorageModeShared]);
-    if (mArgBuffer == nil) {
-        return DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate resource table argument buffer.");
+        // TODO(crbug.com/473444514): This should use `ModePrivate` over `ModeShared` as private
+        // would be faster.
+        // TODO(crbug.com/473444514): Investigate turning this into a WebGPU Buffer, then below we
+        // can use the `GetMappedSpan` and remove the unsafe buffer.
+        mArgBuffer = AcquireNSPRef([device->GetMTLDevice()
+            newBufferWithLength:argBufferLength
+                        options:MTLResourceStorageModeShared]);
+        if (mArgBuffer == nil) {
+            return DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate resource table argument buffer.");
+        }
+
+        mTextureViews.resize(GetSizeWithDefaultResources());
+
+        SetLabelImpl();
+    } else {
+        DAWN_UNRECOVERABLE_ERROR("ResourceTable requires macOS 13 or iOS 16");
     }
-
-    mTextureViews.resize(GetSizeWithDefaultResources());
-
-    SetLabelImpl();
 
     return {};
 }
@@ -74,137 +78,163 @@ MaybeError ResourceTable::Initialize() {
 MaybeError ResourceTable::ApplyPendingUpdates(
     CommandRecordingContext* recordingContext,
     const absl::flat_hash_set<TextureBase*>& writableTextures) {
-    DAWN_TRY(ApplyDirtySlotUpdatesWith(
-        writableTextures,
-        [&](const std::vector<MetadataUpdate>& metadataUpdates,
-            const std::vector<ResourceDiff>& resourceDiffs,
-            const absl::flat_hash_set<raw_ptr<TextureBase>>& texturesToTransition) -> MaybeError {
-            // Transition and initialize all required textures
-            if (!texturesToTransition.empty()) {
-                DAWN_TRY(TransitionResources(recordingContext, texturesToTransition));
-            }
-            if (!metadataUpdates.empty()) {
-                DAWN_TRY(UpdateMetadataBuffer(recordingContext, metadataUpdates));
-            }
-            if (!resourceDiffs.empty()) {
-                DAWN_TRY(UpdateResourceBindings(resourceDiffs));
-            }
-            return {};
-        }));
+    if (@available(macOS 13.0, iOS 16.0, *)) {
+        DAWN_TRY(ApplyDirtySlotUpdatesWith(
+            writableTextures,
+            [&](const std::vector<MetadataUpdate>& metadataUpdates,
+                const std::vector<ResourceDiff>& resourceDiffs,
+                const absl::flat_hash_set<raw_ptr<TextureBase>>& texturesToTransition)
+                -> MaybeError {
+                // Transition and initialize all required textures
+                if (!texturesToTransition.empty()) {
+                    DAWN_TRY(TransitionResources(recordingContext, texturesToTransition));
+                }
+                if (!metadataUpdates.empty()) {
+                    DAWN_TRY(UpdateMetadataBuffer(recordingContext, metadataUpdates));
+                }
+                if (!resourceDiffs.empty()) {
+                    DAWN_TRY(UpdateResourceBindings(resourceDiffs));
+                }
+                return {};
+            }));
+    } else {
+        DAWN_UNRECOVERABLE_ERROR("ResourceTable requires macOS 13 or iOS 16");
+    }
     return {};
 }
 
 MaybeError ResourceTable::TransitionResources(
     CommandRecordingContext* recordingContext,
     const absl::flat_hash_set<raw_ptr<TextureBase>>& textures) {
-    for (const auto& texture : textures) {
-        Texture* textureBackend = ToBackend(texture);
-        textureBackend->SynchronizeTextureBeforeUse(recordingContext);
-        DAWN_TRY(textureBackend->EnsureSubresourceContentInitialized(
-            recordingContext, texture->GetAllSubresources()));
+    if (@available(macOS 13.0, iOS 16.0, *)) {
+        for (const auto& texture : textures) {
+            Texture* textureBackend = ToBackend(texture);
+            textureBackend->SynchronizeTextureBeforeUse(recordingContext);
+            DAWN_TRY(textureBackend->EnsureSubresourceContentInitialized(
+                recordingContext, texture->GetAllSubresources()));
+        }
+    } else {
+        DAWN_UNRECOVERABLE_ERROR("ResourceTable requires macOS 13 or iOS 16");
     }
     return {};
 }
 
 MaybeError ResourceTable::UpdateMetadataBuffer(CommandRecordingContext* recordingContext,
                                                const std::vector<MetadataUpdate>& updates) {
-    DAWN_ASSERT(!updates.empty());
+    if (@available(macOS 13.0, iOS 16.0, *)) {
+        DAWN_ASSERT(!updates.empty());
 
-    Buffer* metadataBuffer = ToBackend(GetMetadataBuffer());
+        Buffer* metadataBuffer = ToBackend(GetMetadataBuffer());
 
-    return GetDevice()->GetDynamicUploader()->WithUploadReservation(
-        sizeof(uint32_t) * updates.size(), kCopyBufferToBufferOffsetAlignment,
-        [&](UploadReservation reservation) -> MaybeError {
-            Span<uint32_t> stagedData = ReinterpretSpan<uint32_t>(reservation.mappedData);
-            id<MTLBuffer> uploadBuffer = ToBackend(reservation.buffer)->GetMTLBuffer();
-            id<MTLBuffer> dstBuffer = metadataBuffer->GetMTLBuffer();
-            id<MTLBlitCommandEncoder> blit = recordingContext->EnsureBlit();
+        return GetDevice()->GetDynamicUploader()->WithUploadReservation(
+            sizeof(uint32_t) * updates.size(), kCopyBufferToBufferOffsetAlignment,
+            [&](UploadReservation reservation) -> MaybeError {
+                Span<uint32_t> stagedData = ReinterpretSpan<uint32_t>(reservation.mappedData);
+                id<MTLBuffer> uploadBuffer = ToBackend(reservation.buffer)->GetMTLBuffer();
+                id<MTLBuffer> dstBuffer = metadataBuffer->GetMTLBuffer();
+                id<MTLBlitCommandEncoder> blit = recordingContext->EnsureBlit();
 
-            for (auto [i, update] : Enumerate(updates)) {
-                DAWN_ASSERT((update.data & 0xFFFF0000) == 0);  // Only low 16 bits used for type id
+                for (auto [i, update] : Enumerate(updates)) {
+                    DAWN_ASSERT((update.data & 0xFFFF0000) ==
+                                0);  // Only low 16 bits used for type id
 
-                stagedData[i] = update.data;
+                    stagedData[i] = update.data;
 
-                [blit copyFromBuffer:uploadBuffer
-                         sourceOffset:reservation.offsetInBuffer + i * sizeof(uint32_t)
-                             toBuffer:dstBuffer
-                    destinationOffset:update.offset
-                                 size:sizeof(uint32_t)];
-            }
-            return {};
-        });
+                    [blit copyFromBuffer:uploadBuffer
+                             sourceOffset:reservation.offsetInBuffer + i * sizeof(uint32_t)
+                                 toBuffer:dstBuffer
+                        destinationOffset:update.offset
+                                     size:sizeof(uint32_t)];
+                }
+                return {};
+            });
+    }
+    DAWN_UNRECOVERABLE_ERROR("ResourceTable requires macOS 13 or iOS 16");
+    return {};
 }
 
 MaybeError ResourceTable::UpdateResourceBindings(const std::vector<ResourceDiff>& diffs) {
-    // SAFETY: The mArgBuffer was created sized to the correct number of slots.
-    Span<MTLResourceID> contents = DAWN_UNSAFE_BUFFERS(  //
-        {static_cast<MTLResourceID*>([*mArgBuffer contents]),
-         size_t(GetSizeWithDefaultResources())});
+    if (@available(macOS 13.0, iOS 16.0, *)) {
+        // SAFETY: The mArgBuffer was created sized to the correct number of slots.
+        Span<MTLResourceID> contents = DAWN_UNSAFE_BUFFERS(  //
+            {static_cast<MTLResourceID*>([*mArgBuffer contents]),
+             size_t(GetSizeWithDefaultResources())});
 
-    for (const ResourceDiff& diff : diffs) {
-        auto slot = uint32_t(diff.slot);
+        for (const ResourceDiff& diff : diffs) {
+            auto slot = uint32_t(diff.slot);
 
-        MatchVariant(
-            diff.added,
-            [&](std::monostate) {
-                contents[slot] = MTLResourceID{0};
-                mTextureViews[diff.slot] = nullptr;
-            },
-            [&](Ref<TextureViewBase> textureView) {
-                // Skip updating the descriptor if the texture is already destroyed; the slot is
-                // marked as empty in the metadata buffer and the partially-bound descriptor array
-                // does not require a valid descriptor for unused slots.
-                if (textureView->GetTexture()->IsDestroyed()) {
-                    return;
-                }
+            MatchVariant(
+                diff.added,
+                [&](std::monostate) {
+                    contents[slot] = MTLResourceID{0};
+                    mTextureViews[diff.slot] = nullptr;
+                },
+                [&](Ref<TextureViewBase> textureView) {
+                    // Skip updating the descriptor if the texture is already destroyed; the
+                    // slot is marked as empty in the metadata buffer and the partially-bound
+                    // descriptor array does not require a valid descriptor for unused slots.
+                    if (textureView->GetTexture()->IsDestroyed()) {
+                        return;
+                    }
 
-                Ref<TextureView> handle = ToBackend(textureView);
-                DAWN_CHECK(handle != nullptr);
+                    Ref<TextureView> handle = ToBackend(textureView);
+                    DAWN_CHECK(handle != nullptr);
 
-                id<MTLTexture> texture = handle->GetMTLTexture();
-                contents[slot] = [texture gpuResourceID];
+                    id<MTLTexture> texture = handle->GetMTLTexture();
+                    contents[slot] = [texture gpuResourceID];
 
-                mTextureViews[diff.slot] = std::move(handle);
-            },
-            [&](Ref<SamplerBase> sampler) {
-                mTextureViews[diff.slot] = nullptr;
+                    mTextureViews[diff.slot] = std::move(handle);
+                },
+                [&](Ref<SamplerBase> sampler) {
+                    mTextureViews[diff.slot] = nullptr;
 
-                Ref<Sampler> handle = ToBackend(sampler);
-                DAWN_CHECK(handle != nullptr);
+                    Ref<Sampler> handle = ToBackend(sampler);
+                    DAWN_CHECK(handle != nullptr);
 
-                id<MTLSamplerState> samplerState = handle->GetMTLSamplerState();
-                contents[slot] = [samplerState gpuResourceID];
-            });
+                    id<MTLSamplerState> samplerState = handle->GetMTLSamplerState();
+                    contents[slot] = [samplerState gpuResourceID];
+                });
+        }
+    } else {
+        DAWN_UNRECOVERABLE_ERROR("ResourceTable requires macOS 13 or iOS 16");
     }
 
     return {};
 }
 
 void ResourceTable::UseResources(id<MTLComputeCommandEncoder> encoder) {
-    Buffer* metadataBuffer = ToBackend(GetMetadataBuffer());
-    auto scopedUse = metadataBuffer->UseInternal();
-    metadataBuffer->TrackUsage();
+    if (@available(macOS 13.0, iOS 16.0, *)) {
+        Buffer* metadataBuffer = ToBackend(GetMetadataBuffer());
+        auto scopedUse = metadataBuffer->UseInternal();
+        metadataBuffer->TrackUsage();
 
-    for (const Ref<TextureView>& view : mTextureViews) {
-        if (view != nullptr && !view->GetTexture()->IsDestroyed() &&
-            view->GetTexture()->HasAccess()) {
-            [encoder useResource:view->GetMTLTexture() usage:MTLResourceUsageRead];
+        for (const Ref<TextureView>& view : mTextureViews) {
+            if (view != nullptr && !view->GetTexture()->IsDestroyed() &&
+                view->GetTexture()->HasAccess()) {
+                [encoder useResource:view->GetMTLTexture() usage:MTLResourceUsageRead];
+            }
         }
+    } else {
+        DAWN_UNRECOVERABLE_ERROR("ResourceTable requires macOS 13 or iOS 16");
     }
 }
 
 void ResourceTable::UseResources(id<MTLRenderCommandEncoder> encoder) {
-    Buffer* metadataBuffer = ToBackend(GetMetadataBuffer());
-    auto scopedUse = metadataBuffer->UseInternal();
-    metadataBuffer->TrackUsage();
+    if (@available(macOS 13.0, iOS 16.0, *)) {
+        Buffer* metadataBuffer = ToBackend(GetMetadataBuffer());
+        auto scopedUse = metadataBuffer->UseInternal();
+        metadataBuffer->TrackUsage();
 
-    for (const Ref<TextureView>& view : mTextureViews) {
-        if (view != nullptr && !view->GetTexture()->IsDestroyed() &&
-            view->GetTexture()->HasAccess()) {
-            [encoder useResource:view->GetMTLTexture()
-                           usage:MTLResourceUsageRead
-                          stages:MTLRenderStageVertex | MTLRenderStageFragment];
+        for (const Ref<TextureView>& view : mTextureViews) {
+            if (view != nullptr && !view->GetTexture()->IsDestroyed() &&
+                view->GetTexture()->HasAccess()) {
+                [encoder useResource:view->GetMTLTexture()
+                               usage:MTLResourceUsageRead
+                              stages:MTLRenderStageVertex | MTLRenderStageFragment];
+            }
         }
+    } else {
+        DAWN_UNRECOVERABLE_ERROR("ResourceTable requires macOS 13 or iOS 16");
     }
 }
 
