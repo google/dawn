@@ -191,8 +191,8 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
         // headers local.
         tint::ResourceType typeId = tint::ResourceType(0);
         ExecutionSerial availableAfter = kBeginningOfGPUTime;
-        bool dirty = false;
-        bool resourceDirty = false;  // resourceDirty implies dirty.
+        bool metadataDirty = false;
+        bool resourceDirty = false;  // resourceDirty implies metadataDirty.
         bool visible = false;        // Applies to textures
     };
     ityp::vector<ResourceTableSlot, SlotState> mSlots;

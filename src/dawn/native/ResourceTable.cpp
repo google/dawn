@@ -629,8 +629,8 @@ ResourceTableBase::Updates ResourceTableBase::AcquireDirtySlotUpdates(
 
     for (ResourceTableSlot dirtySlot : mDirtySlots) {
         SlotState& state = mSlots[dirtySlot];
-        DAWN_CHECK(state.dirty);
-        state.dirty = false;
+        DAWN_CHECK(state.metadataDirty);
+        state.metadataDirty = false;
 
         // Set the value in the table to the type id. If the resource requires pinning, we only set
         // the type id if it's pinned, else we clear it.
@@ -675,9 +675,9 @@ ResourceTableBase::Updates ResourceTableBase::AcquireDirtySlotUpdates(
 }
 
 void ResourceTableBase::MarkStateDirty(ResourceTableSlot slot) {
-    if (!mSlots[slot].dirty) {
+    if (!mSlots[slot].metadataDirty) {
         mDirtySlots.push_back(slot);
-        mSlots[slot].dirty = true;
+        mSlots[slot].metadataDirty = true;
     }
 }
 
