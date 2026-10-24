@@ -1233,9 +1233,10 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_SecondInstruct
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
 }
 
-TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_AddTwo) {
+TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Success_AddTwo) {
     Var* idx = nullptr;
     Loop* loop = nullptr;
+    Binary* binary = nullptr;
     auto* func = b.Function("func", ty.void_());
     b.Append(func->Block(), [&] {
         loop = b.Loop();
@@ -1246,7 +1247,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_AddTwo) {
         b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
         b.Append(loop->Continuing(), [&] {
             // idx += 2u;
-            b.Store(idx, b.Add(b.Load(idx), 2_u));
+            binary = b.Add(b.Load(idx), 2_u)->AsInstruction<Binary>();
+            b.Store(idx, binary);
             b.NextIteration(loop);
         });
         b.Return(func);
@@ -1279,7 +1281,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopContinuing_Failure_AddTwo) {
 
     IntegerRangeAnalysis analysis(&mod);
     EXPECT_EQ(idx, analysis.GetLoopControlVariableFromConstantInitializerForTest(loop));
-    EXPECT_EQ(nullptr,
+    EXPECT_EQ(binary,
               analysis.GetBinaryToUpdateLoopControlVariableInContinuingBlockForTest(loop, idx));
 }
 
@@ -18765,6 +18767,408 @@ TEST_F(IR_IntegerRangeAnalysisTest, NestedLoops_Failure_IndexIsDecreasingToZero_
     EXPECT_EQ(3u, i_range.max_bound);
 
     EXPECT_FALSE(analysis.GetInfo(j).IsValid());
+}
+
+class IR_IntegerRangeAnalysisLoopStepTest : public IR_IntegerRangeAnalysisTest {
+  protected:
+    /// Builds `for (var idx = init; idx <= rhs; idx += step)` (`idx < rhs` when `!inclusive`,
+    /// `idx = step + idx` when `step_is_lhs`) and returns `idx`.
+    template <typename T>
+    Var* BuildIncreasingLoop(T init,
+                             T rhs,
+                             T step,
+                             bool inclusive = true,
+                             bool step_is_lhs = false) {
+        Var* idx = nullptr;
+        auto* func = b.Function("func", ty.void_());
+        b.Append(func->Block(), [&] {
+            auto* loop = b.Loop();
+            b.Append(loop->Initializer(), [&] {
+                idx = b.Var("idx", b.Constant(init));
+                b.NextIteration(loop);
+            });
+            b.Append(loop->Body(), [&] {
+                auto* cmp = inclusive ? b.LessThanEqual(b.Load(idx), b.Constant(rhs))
+                                      : b.LessThan(b.Load(idx), b.Constant(rhs));
+                auto* ifelse = b.If(cmp);
+                b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+                b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+                b.Continue(loop);
+            });
+            b.Append(loop->Continuing(), [&] {
+                auto* load = b.Load(idx);
+                auto* sum =
+                    step_is_lhs ? b.Add(b.Constant(step), load) : b.Add(load, b.Constant(step));
+                b.Store(idx, sum);
+                b.NextIteration(loop);
+            });
+            b.Return(func);
+        });
+        EXPECT_EQ(Validate(mod), Success);
+        return idx;
+    }
+
+    /// Builds `for (var i = outer_init; i <= outer_rhs; i += outer_step) {
+    ///   for (var j = i; j < inner_rhs; j += inner_step) {}
+    /// }` and returns `i` and `j`.
+    template <typename T>
+    std::pair<Var*, Var*> BuildNestedLoops(T outer_init,
+                                           T outer_rhs,
+                                           T outer_step,
+                                           T inner_rhs,
+                                           T inner_step) {
+        Var* i = nullptr;
+        Var* j = nullptr;
+        auto* func = b.Function("func", ty.void_());
+        b.Append(func->Block(), [&] {
+            auto* outer = b.Loop();
+            b.Append(outer->Initializer(), [&] {
+                i = b.Var("i", b.Constant(outer_init));
+                b.NextIteration(outer);
+            });
+            b.Append(outer->Body(), [&] {
+                auto* outer_if = b.If(b.LessThanEqual(b.Load(i), b.Constant(outer_rhs)));
+                b.Append(outer_if->True(), [&] { b.ExitIf(outer_if); });
+                b.Append(outer_if->False(), [&] { b.ExitLoop(outer); });
+
+                auto* inner = b.Loop();
+                b.Append(inner->Initializer(), [&] {
+                    j = b.Var("j", b.Load(i));
+                    b.NextIteration(inner);
+                });
+                b.Append(inner->Body(), [&] {
+                    auto* inner_if = b.If(b.LessThan(b.Load(j), b.Constant(inner_rhs)));
+                    b.Append(inner_if->True(), [&] { b.ExitIf(inner_if); });
+                    b.Append(inner_if->False(), [&] { b.ExitLoop(inner); });
+                    b.Continue(inner);
+                });
+                b.Append(inner->Continuing(), [&] {
+                    b.Store(j, b.Add(b.Load(j), b.Constant(inner_step)));
+                    b.NextIteration(inner);
+                });
+                b.Continue(outer);
+            });
+            b.Append(outer->Continuing(), [&] {
+                b.Store(i, b.Add(b.Load(i), b.Constant(outer_step)));
+                b.NextIteration(outer);
+            });
+            b.Return(func);
+        });
+        EXPECT_EQ(Validate(mod), Success);
+        return {i, j};
+    }
+
+    void ExpectSigned(Var* idx, int64_t min, int64_t max) {
+        IntegerRangeAnalysis analysis(&mod);
+        const IntegerRangeInfo& info = analysis.GetInfo(idx);
+        ASSERT_TRUE(info.IsValid());
+        ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(info.range));
+        const auto& range = std::get<IntegerRangeInfo::SignedIntegerRange>(info.range);
+        EXPECT_EQ(min, range.min_bound);
+        EXPECT_EQ(max, range.max_bound);
+    }
+
+    void ExpectUnsigned(Var* idx, uint64_t min, uint64_t max) {
+        IntegerRangeAnalysis analysis(&mod);
+        const IntegerRangeInfo& info = analysis.GetInfo(idx);
+        ASSERT_TRUE(info.IsValid());
+        ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
+        const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
+        EXPECT_EQ(min, range.min_bound);
+        EXPECT_EQ(max, range.max_bound);
+    }
+
+    void ExpectNoRange(Var* idx) {
+        IntegerRangeAnalysis analysis(&mod);
+        EXPECT_FALSE(analysis.GetInfo(idx).IsValid());
+    }
+};
+
+// for (var idx = 2u; idx <= 6u; idx += 2u)
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_ReachRHS_u32) {
+    Var* idx = BuildIncreasingLoop(2_u, 6_u, 2_u);
+    ExpectUnsigned(idx, 2u, 6u);
+}
+
+// for (var idx = 2; idx <= 10; idx += 3)
+// `idx` takes 2, 5, 8.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_NotReachRHS_i32) {
+    Var* idx = BuildIncreasingLoop(2_i, 10_i, 3_i);
+    ExpectSigned(idx, 2, 8);
+}
+
+// for (var idx = 0; idx < 10; idx += 3)
+// `idx` takes 0, 3, 6, 9.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_LessThan_ReachRHS_i32) {
+    Var* idx = BuildIncreasingLoop(0_i, 10_i, 3_i, /* inclusive */ false);
+    ExpectSigned(idx, 0, 9);
+}
+
+// for (var idx = 0u; idx < 10u; idx += 4u)
+// `idx` takes 0u, 4u, 8u.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_LessThan_NotReachRHS_u32) {
+    Var* idx = BuildIncreasingLoop(0_u, 10_u, 4_u, /* inclusive */ false);
+    ExpectUnsigned(idx, 0u, 8u);
+}
+
+// for (var idx = 1; idx <= 7; idx = 2 + idx)
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_StepIsLHS_i32) {
+    Var* idx = BuildIncreasingLoop(1_i, 7_i, 2_i, /* inclusive */ true, /* step_is_lhs */ true);
+    ExpectSigned(idx, 1, 7);
+}
+
+// for (var idx = 1u; idx < 8u; idx = 3u + idx)
+// `idx` takes 1u, 4u, 7u.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_StepIsLHS_LessThan_u32) {
+    Var* idx = BuildIncreasingLoop(1_u, 8_u, 3_u, /* inclusive */ false, /* step_is_lhs */ true);
+    ExpectUnsigned(idx, 1u, 7u);
+}
+
+// for (var idx = 0; idx <= 5; idx += 1)
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_StepIsOne_i32) {
+    Var* idx = BuildIncreasingLoop(0_i, 5_i, 1_i);
+    ExpectSigned(idx, 0, 5);
+}
+
+// for (var idx = 3u; idx <= 5u; idx += 10u)
+// `idx` only takes 3u.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_StepGreaterThanRange_u32) {
+    Var* idx = BuildIncreasingLoop(3_u, 5_u, 10_u);
+    ExpectUnsigned(idx, 3u, 3u);
+}
+
+// for (var idx = 5; idx <= 5; idx += 3)
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_InitEqualsRHS_i32) {
+    Var* idx = BuildIncreasingLoop(5_i, 5_i, 3_i);
+    ExpectSigned(idx, 5, 5);
+}
+
+// for (var idx = 6; idx <= 5; idx += 3)
+// The loop body is never executed.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_Failure_InitGreaterThanRHS_i32) {
+    Var* idx = BuildIncreasingLoop(6_i, 5_i, 3_i);
+    ExpectNoRange(idx);
+}
+
+// for (var idx = -10; idx <= -1; idx += 4)
+// `idx` takes -10, -6, -2.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_Negative_i32) {
+    Var* idx = BuildIncreasingLoop(-10_i, -1_i, 4_i);
+    ExpectSigned(idx, -10, -2);
+}
+
+// for (var idx = kMax - 9; idx <= kMax - 3; idx += 3), where `kMax` is the maximum i32.
+// `idx` takes `kMax - 9`, `kMax - 6`, `kMax - 3`, and `(kMax - 3) + 3` doesn't overflow.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_MaxPlusStepIsHighestValue_i32) {
+    constexpr int32_t kMax = i32::kHighestValue;
+    Var* idx = BuildIncreasingLoop(i32(kMax - 9), i32(kMax - 3), 3_i);
+    ExpectSigned(idx, kMax - 9, kMax - 3);
+}
+
+// for (var idx = kMax - 8; idx <= kMax - 2; idx += 3), where `kMax` is the maximum i32.
+// `idx` takes `kMax - 8`, `kMax - 5`, `kMax - 2`, and `(kMax - 2) + 3` overflows.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_Failure_Overflow_i32) {
+    constexpr int32_t kMax = i32::kHighestValue;
+    Var* idx = BuildIncreasingLoop(i32(kMax - 8), i32(kMax - 2), 3_i);
+    ExpectNoRange(idx);
+}
+
+// for (var idx = kMax - 4; idx < kMax; idx += 2), where `kMax` is the maximum i32.
+// `idx` takes `kMax - 4`, `kMax - 2`, and `(kMax - 2) + 2` doesn't overflow.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_LessThan_NotReachRHS_NoOverflow_i32) {
+    constexpr int32_t kMax = i32::kHighestValue;
+    Var* idx = BuildIncreasingLoop(i32(kMax - 4), i32(kMax), 2_i, /* inclusive */ false);
+    ExpectSigned(idx, kMax - 4, kMax - 2);
+}
+
+// for (var idx = kMax - 5; idx < kMax; idx += 2), where `kMax` is the maximum i32.
+// `idx` takes `kMax - 5`, `kMax - 3`, `kMax - 1`, and `(kMax - 1) + 2` overflows.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_Failure_LessThan_Overflow_i32) {
+    constexpr int32_t kMax = i32::kHighestValue;
+    Var* idx = BuildIncreasingLoop(i32(kMax - 5), i32(kMax), 2_i, /* inclusive */ false);
+    ExpectNoRange(idx);
+}
+
+// for (var idx = 0; idx <= 10; idx += 2147483647)
+// `idx` only takes 0, and `0 + 2147483647` is exactly the maximum i32.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_StepIsHighestValue_i32) {
+    Var* idx = BuildIncreasingLoop(0_i, 10_i, 2147483647_i);
+    ExpectSigned(idx, 0, 0);
+}
+
+// for (var idx = 1; idx <= 10; idx += 2147483647)
+// `1 + 2147483647` overflows i32 (but would not overflow u32).
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_Failure_StepIsHighestValue_i32) {
+    Var* idx = BuildIncreasingLoop(1_i, 10_i, 2147483647_i);
+    ExpectNoRange(idx);
+}
+
+// for (var idx = kMax - 7u; idx <= kMax - 2u; idx += 2u), where `kMax` is the maximum u32.
+// `idx` takes `kMax - 7u`, `kMax - 5u`, `kMax - 3u`, and `(kMax - 3u) + 2u` doesn't overflow.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_NotReachRHS_NoOverflow_u32) {
+    constexpr uint32_t kMax = u32::kHighestValue;
+    Var* idx = BuildIncreasingLoop(u32(kMax - 7u), u32(kMax - 2u), 2_u);
+    ExpectUnsigned(idx, kMax - 7u, kMax - 3u);
+}
+
+// for (var idx = kMax - 7u; idx <= kMax - 1u; idx += 2u), where `kMax` is the maximum u32.
+// `idx` takes `kMax - 7u`, `kMax - 5u`, `kMax - 3u`, `kMax - 1u`, and `(kMax - 1u) + 2u`
+// overflows.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_Failure_Overflow_u32) {
+    constexpr uint32_t kMax = u32::kHighestValue;
+    Var* idx = BuildIncreasingLoop(u32(kMax - 7u), u32(kMax - 1u), 2_u);
+    ExpectNoRange(idx);
+}
+
+// for (var idx = kMax - 6u; idx < kMax; idx += 3u), where `kMax` is the maximum u32.
+// `idx` takes `kMax - 6u`, `kMax - 3u`, and `(kMax - 3u) + 3u` doesn't overflow.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_LessThan_NotReachRHS_NoOverflow_u32) {
+    constexpr uint32_t kMax = u32::kHighestValue;
+    Var* idx = BuildIncreasingLoop(u32(kMax - 6u), u32(kMax), 3_u, /* inclusive */ false);
+    ExpectUnsigned(idx, kMax - 6u, kMax - 3u);
+}
+
+// for (var idx = kMax - 4u; idx < kMax; idx += 3u), where `kMax` is the maximum u32.
+// `idx` takes `kMax - 4u`, `kMax - 1u`, and `(kMax - 1u) + 3u` overflows.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_Failure_LessThan_Overflow_u32) {
+    constexpr uint32_t kMax = u32::kHighestValue;
+    Var* idx = BuildIncreasingLoop(u32(kMax - 4u), u32(kMax), 3_u, /* inclusive */ false);
+    ExpectNoRange(idx);
+}
+
+// for (var idx = 0u; idx <= 10u; idx += 4294967295u)
+// `idx` only takes 0u, and `0u + 4294967295u` is exactly the maximum u32.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_StepIsHighestValue_u32) {
+    Var* idx = BuildIncreasingLoop(0_u, 10_u, 4294967295_u);
+    ExpectUnsigned(idx, 0u, 0u);
+}
+
+// for (var idx = 1u; idx <= 10u; idx += 4294967295u)
+// `1u + 4294967295u` overflows.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, ConstantInit_Failure_StepIsHighestValue_u32) {
+    Var* idx = BuildIncreasingLoop(1_u, 10_u, 4294967295_u);
+    ExpectNoRange(idx);
+}
+
+// for (var i = 1; i <= 7; i += 1) {         // Range of `i` is [1, 7]
+//   for (var j = i; j < 17; j += 6) {}      // Range of `j` is [1, 16]
+// }
+// `(16 - 1) % 6 = 3` and `1 + 3 = 4` is in [1, 7], so `j` reaches 16 when `i == 4`.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, NestedLoops_InnerReachRHS_i32) {
+    auto [i, j] = BuildNestedLoops(1_i, 7_i, 1_i, 17_i, 6_i);
+    ExpectSigned(i, 1, 7);
+    ExpectSigned(j, 1, 16);
+}
+
+// for (var i = 1; i <= 2; i += 1) {         // Range of `i` is [1, 2]
+//   for (var j = i; j < 17; j += 6) {}      // Range of `j` is [1, 14]
+// }
+// `(16 - 1) % 6 = 3` and `1 + 3 = 4` is not in [1, 2], so the maximum value of `j` is reached
+// when `i == 2` (`2 + 6 * 2 = 14`).
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, NestedLoops_InnerNotReachRHS_i32) {
+    auto [i, j] = BuildNestedLoops(1_i, 2_i, 1_i, 17_i, 6_i);
+    ExpectSigned(i, 1, 2);
+    ExpectSigned(j, 1, 14);
+}
+
+// for (var i = 1u; i <= 3u; i += 1u) {      // Range of `i` is [1u, 3u]
+//   for (var j = i; j < 17u; j += 6u) {}    // Range of `j` is [1u, 15u]
+// }
+// `(16 - 1) % 6 = 3` and `1 + 3 = 4` is not in [1, 3], so the maximum value of `j` is reached
+// when `i == 3` (`3 + 6 * 2 = 15`).
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, NestedLoops_InnerNotReachRHS_Boundary_u32) {
+    auto [i, j] = BuildNestedLoops(1_u, 3_u, 1_u, 17_u, 6_u);
+    ExpectUnsigned(i, 1u, 3u);
+    ExpectUnsigned(j, 1u, 15u);
+}
+
+// for (var i = 1u; i <= 4u; i += 1u) {      // Range of `i` is [1u, 4u]
+//   for (var j = i; j < 17u; j += 6u) {}    // Range of `j` is [1u, 16u]
+// }
+// `(16 - 1) % 6 = 3` and `1 + 3 = 4` is exactly the maximum value of `i`.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, NestedLoops_InnerReachRHS_Boundary_u32) {
+    auto [i, j] = BuildNestedLoops(1_u, 4_u, 1_u, 17_u, 6_u);
+    ExpectUnsigned(i, 1u, 4u);
+    ExpectUnsigned(j, 1u, 16u);
+}
+
+// for (var i = 0; i <= 20; i += 5) {        // Range of `i` is [0, 20]
+//   for (var j = i; j < 10; j += 4) {}      // Range of `j` is [0, 9]
+// }
+// The maximum value of `i` is greater than the RHS of the inner loop.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, NestedLoops_InitMaxGreaterThanRHS_i32) {
+    auto [i, j] = BuildNestedLoops(0_i, 20_i, 5_i, 10_i, 4_i);
+    ExpectSigned(i, 0, 20);
+    ExpectSigned(j, 0, 9);
+}
+
+// for (var i = 0u; i <= 10u; i += 3u) {     // Range of `i` is [0u, 9u]
+//   for (var j = i; j < 8u; j += 5u) {}     // Range of `j` is [0u, 7u]
+// }
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, NestedLoops_BothStepsGreaterThanOne_u32) {
+    auto [i, j] = BuildNestedLoops(0_u, 10_u, 3_u, 8_u, 5_u);
+    ExpectUnsigned(i, 0u, 9u);
+    ExpectUnsigned(j, 0u, 7u);
+}
+
+// for (var i = 10; i <= 20; i += 1) {       // Range of `i` is [10, 20]
+//   for (var j = i; j < 5; j += 2) {}       // The inner loop body is never executed.
+// }
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, NestedLoops_Failure_InitMinGreaterThanRHS_i32) {
+    auto [i, j] = BuildNestedLoops(10_i, 20_i, 1_i, 5_i, 2_i);
+    ExpectSigned(i, 10, 20);
+    ExpectNoRange(j);
+}
+
+// for (var i = kMax - 10; i <= kMax - 8; i += 1) {  // Range of `i` is [kMax - 10, kMax - 8]
+//   for (var j = i; j < kMax; j += 4) {}
+// }
+// where `kMax` is the maximum i32.
+// `j` can be `kMax - 1` (when `i == kMax - 9`), and `(kMax - 1) + 4` overflows.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, NestedLoops_Failure_Overflow_i32) {
+    constexpr int32_t kMax = i32::kHighestValue;
+    auto [i, j] = BuildNestedLoops(i32(kMax - 10), i32(kMax - 8), 1_i, i32(kMax), 4_i);
+    ExpectSigned(i, kMax - 10, kMax - 8);
+    ExpectNoRange(j);
+}
+
+// for (var i = kMax - 11; i <= kMax - 9; i += 1) {  // Range of `i` is [kMax - 11, kMax - 9]
+//   for (var j = i; j < kMax - 2; j += 4) {}
+// }
+// where `kMax` is the maximum i32.
+// `((kMax - 3) - (kMax - 11)) % 4 = 0`, so `j` can be `kMax - 3` (when `i == kMax - 11`), and
+// `(kMax - 3) + 4` overflows.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, NestedLoops_Failure_Overflow_ReachRHS_i32) {
+    constexpr int32_t kMax = i32::kHighestValue;
+    auto [i, j] = BuildNestedLoops(i32(kMax - 11), i32(kMax - 9), 1_i, i32(kMax - 2), 4_i);
+    ExpectSigned(i, kMax - 11, kMax - 9);
+    ExpectNoRange(j);
+}
+
+// for (var i = kMax - 10; i <= kMax - 8; i += 1) {  // Range of `i` is [kMax - 10, kMax - 8]
+//   for (var j = i; j < kMax - 2; j += 4) {}        // Range of `j` is [kMax - 10, kMax - 4]
+// }
+// where `kMax` is the maximum i32.
+// `((kMax - 3) - (kMax - 10)) % 4 = 3` and `(kMax - 10) + 3 = kMax - 7` is not in the range of
+// `i`, so the maximum value of `j` is reached when `i == kMax - 8` (`kMax - 8 + 4 = kMax - 4`),
+// and `(kMax - 4) + 4` doesn't overflow.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, NestedLoops_NotReachRHS_NoOverflow_i32) {
+    constexpr int32_t kMax = i32::kHighestValue;
+    auto [i, j] = BuildNestedLoops(i32(kMax - 10), i32(kMax - 8), 1_i, i32(kMax - 2), 4_i);
+    ExpectSigned(i, kMax - 10, kMax - 8);
+    ExpectSigned(j, kMax - 10, kMax - 4);
+}
+
+// for (var i = kMax - 10u; i <= kMax - 8u; i += 1u) {  // Range of `i` is [kMax - 10u, kMax - 8u]
+//   for (var j = i; j < kMax; j += 3u) {}
+// }
+// where `kMax` is the maximum u32.
+// `j` can be `kMax - 1u` (when `i == kMax - 10u`), and `(kMax - 1u) + 3u` overflows.
+TEST_F(IR_IntegerRangeAnalysisLoopStepTest, NestedLoops_Failure_Overflow_u32) {
+    constexpr uint32_t kMax = u32::kHighestValue;
+    auto [i, j] = BuildNestedLoops(u32(kMax - 10u), u32(kMax - 8u), 1_u, u32(kMax), 3_u);
+    ExpectUnsigned(i, kMax - 10u, kMax - 8u);
+    ExpectNoRange(j);
 }
 
 }  // namespace

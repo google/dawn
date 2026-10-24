@@ -160,7 +160,8 @@ class IntegerRangeAnalysis {
     /// continuing block of the given loop if the loop meets the below requirements.
     /// - There are only 4 instructions in the loop initializer block.
     /// - The first instruction is to load the loop control variable into a temporary variable.
-    /// - The second instruction is to add one or minus one to the temporary variable.
+    /// - The second instruction is to add a constant positive integer to the temporary variable,
+    ///   or to minus one from the temporary variable.
     /// - The third instruction is to store the value of the temporary variable into the loop
     ///   control variable.
     /// - The fourth instruction is `next_iteration`.
