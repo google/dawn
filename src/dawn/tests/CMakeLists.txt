@@ -205,6 +205,7 @@ set(end2end_sources
     "end2end/SupportedFeatureArch.cpp"
     "end2end/TexelBufferTests.cpp"
     "end2end/Texture3DTests.cpp"
+    "end2end/TextureAllocationTests.cpp"
     "end2end/TextureComponentSwizzleTests.cpp"
     "end2end/TextureCorruptionTests.cpp"
     "end2end/TextureFormatTests.cpp"

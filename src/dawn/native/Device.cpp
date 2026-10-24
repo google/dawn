@@ -2396,6 +2396,9 @@ ResultOrUnknownError<Ref<TextureBase>> DeviceBase::CreateTexture(
     } else {
         descriptor = Unpack(&rawDescriptor);
     }
+    if (IsToggleEnabled(Toggle::LimitMaxTextureBytesTo1MB)) {
+        DAWN_TRY(ValidateTextureAllocationSizeForTesting(this, *descriptor));
+    }
     return CreateTextureImpl(descriptor);
 }
 

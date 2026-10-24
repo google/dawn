@@ -281,35 +281,5 @@ DAWN_INSTANTIATE_TEST(Texture3DTests,
                       VulkanBackend(),
                       WebGPUBackend());
 
-class Texture3DPotFootprintTests : public DawnTest {};
-
-// Regression test for crbug.com/497202432: verify that a 3D texture whose power-of-two rounded
-// byte footprint reaches 4 GiB (513x513x513 rgba8unorm -> 1024x1024x1024 * 4 = 4 GiB) produces an
-// OutOfMemory error when limit_3d_texture_pot_footprint_to_4gb is enabled.
-TEST_P(Texture3DPotFootprintTests, PotFootprintAt4GBProducesOutOfMemory) {
-    wgpu::TextureDescriptor descriptor;
-    descriptor.dimension = wgpu::TextureDimension::e3D;
-    descriptor.size = {513, 513, 513};
-    descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
-    descriptor.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
-
-    device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
-    wgpu::Texture texture = device.CreateTexture(&descriptor);
-
-    wgpu::ErrorType oomResult = wgpu::ErrorType::NoError;
-    device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents,
-                         [&oomResult](wgpu::PopErrorScopeStatus, wgpu::ErrorType errorType,
-                                      wgpu::StringView) { oomResult = errorType; });
-    FlushWire();
-    instance.ProcessEvents();
-
-    EXPECT_EQ(oomResult, wgpu::ErrorType::OutOfMemory);
-}
-
-DAWN_INSTANTIATE_TEST(Texture3DPotFootprintTests,
-                      OpenGLBackend({"limit_3d_texture_pot_footprint_to_4gb"}),
-                      OpenGLESBackend({"limit_3d_texture_pot_footprint_to_4gb"}),
-                      VulkanBackend({"limit_3d_texture_pot_footprint_to_4gb"}));
-
 }  // anonymous namespace
 }  // namespace dawn

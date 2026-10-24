@@ -53,6 +53,48 @@ namespace dawn::native {
 
 namespace {
 
+constexpr uint64_t kMaxTextureBytesForTesting = 1ull << 20;  // 1 MiB
+
+Extent3D GetAspectSize(const Format& format, const Extent3D& size, Aspect aspect) {
+    switch (aspect) {
+        case Aspect::Color:
+        case Aspect::Depth:
+        case Aspect::Stencil:
+        case Aspect::CombinedDepthStencil:
+            return size;
+        case Aspect::Plane0:
+        case Aspect::Plane2:
+            DAWN_ASSERT(format.IsMultiPlanar());
+            return size;
+        case Aspect::Plane1: {
+            DAWN_ASSERT(format.IsMultiPlanar());
+            auto planeSize = size;
+            // Divide by 2, rounding odd dimensions up without overflowing.
+            switch (format.subSampling) {
+                case TextureSubsampling::e420:
+                    planeSize.height = planeSize.height / 2 + planeSize.height % 2;
+                    [[fallthrough]];
+                case TextureSubsampling::e422:
+                    planeSize.width = planeSize.width / 2 + planeSize.width % 2;
+                    break;
+                case TextureSubsampling::e444:
+                    break;
+                case TextureSubsampling::Undefined:
+                    DAWN_UNREACHABLE();
+            }
+            return planeSize;
+        }
+        case Aspect::None:
+            break;
+    }
+
+    if (aspect == (Aspect::Depth | Aspect::Stencil)) {
+        return size;
+    }
+
+    DAWN_UNREACHABLE();
+}
+
 MaybeValError ValidateTextureViewFormatCompatibility(const DeviceBase* device,
                                                      const Format& format,
                                                      wgpu::TextureFormat viewFormatEnum) {
@@ -1088,14 +1130,63 @@ bool IsValidSampleCount(uint32_t sampleCount) {
     }
 }
 
+MaybeError ValidateTextureAllocationSizeForTesting(const DeviceBase* device,
+                                                   const TextureDescriptor* descriptor) {
+    const Format& format = device->GetValidInternalFormat(descriptor->format);
+
+    // Estimate the largest individual allocation using only the base mip and largest plane.
+    // Include the maximum texel padding for depth/stencil, but not backend-specific row or
+    // allocation alignment.
+    uint64_t bytes = 0;
+    if (format.HasDepthOrStencil()) {
+        // Treat interleaved depth/stencil as one allocation, using the upper bound of the
+        // spec's texel block memory cost rather than summing the aspect copy footprints.
+        // https://gpuweb.github.io/gpuweb/#depth-formats
+        uint32_t blockBytes;
+        switch (format.format) {
+            case wgpu::TextureFormat::Depth16Unorm:
+                blockBytes = 2;
+                break;
+            case wgpu::TextureFormat::Stencil8:
+            case wgpu::TextureFormat::Depth24Plus:
+            case wgpu::TextureFormat::Depth32Float:
+                blockBytes = 4;
+                break;
+            case wgpu::TextureFormat::Depth24PlusStencil8:
+            case wgpu::TextureFormat::Depth32FloatStencil8:
+                blockBytes = 8;
+                break;
+            default:
+                DAWN_UNREACHABLE();
+        }
+        bytes = uint64_t{descriptor->size.width} * descriptor->size.height * blockBytes;
+    } else {
+        // For color and multi-planar formats, each aspect corresponds to a plane.
+        for (Aspect aspect : IterateEnumMask(format.aspects)) {
+            const Extent3D size = GetAspectSize(format, descriptor->size, aspect);
+            const TexelBlockInfo& block = format.GetAspectInfo(aspect).block;
+            const uint64_t widthInBlocks = (uint64_t{size.width} + block.width - 1) / block.width;
+            const uint64_t heightInBlocks =
+                (uint64_t{size.height} + block.height - 1) / block.height;
+            bytes = std::max(bytes, widthInBlocks * heightInBlocks * block.byteSize);
+        }
+    }
+    bytes *= uint64_t{descriptor->size.depthOrArrayLayers} * descriptor->sampleCount;
+    if (bytes > kMaxTextureBytesForTesting) {
+        return DAWN_OUT_OF_MEMORY_ERROR("Texture allocation exceeds the 1 MiB limit for testing.");
+    }
+    return {};
+}
+
 // Used by the Vulkan and GL backends to check for a certain class of driver bug. Must be called
 // from the backend because OOM errors can't be raised via MaybeValError.
-MaybeError VerifyBaseLevelFootprint(const TextureBase* texture) {
-    if (texture->GetDimension() == wgpu::TextureDimension::e3D &&
-        texture->GetDevice()->IsToggleEnabled(Toggle::Limit3DTexturePotFootprintTo4GB)) {
-        const Extent3D& size = texture->GetBaseSize();
-        const TexelBlockInfo& blockInfo =
-            texture->GetFormat().GetAspectInfo(wgpu::TextureAspect::All).block;
+MaybeError VerifyBaseLevelFootprint(const DeviceBase* device, const TextureDescriptor* descriptor) {
+    if (descriptor->dimension == wgpu::TextureDimension::e3D &&
+        device->IsToggleEnabled(Toggle::Limit3DTexturePotFootprintTo4GB)) {
+        const Extent3D& size = descriptor->size;
+        const TexelBlockInfo& blockInfo = device->GetValidInternalFormat(descriptor->format)
+                                              .GetAspectInfo(wgpu::TextureAspect::All)
+                                              .block;
         uint64_t baseWidth = RoundUp(size.width, blockInfo.width);
         uint64_t baseHeight = RoundUp(size.height, blockInfo.height);
         uint64_t baseDepth = size.depthOrArrayLayers;
@@ -1104,9 +1195,12 @@ MaybeError VerifyBaseLevelFootprint(const TextureBase* texture) {
         uint64_t potDepth = NextPowerOfTwo(baseDepth);
         uint64_t potByteSize = (potWidth / blockInfo.width) * (potHeight / blockInfo.height) *
                                potDepth * blockInfo.byteSize;
-        if (potByteSize > std::numeric_limits<uint32_t>::max()) {
-            return DAWN_OUT_OF_MEMORY_ERROR(
-                "3D texture level power-of-two footprint exceeds 32-bit driver limit.");
+        uint64_t limit = device->IsToggleEnabled(Toggle::LimitMaxTextureBytesTo1MB)
+                             ? kMaxTextureBytesForTesting
+                             : std::numeric_limits<uint32_t>::max();
+        if (potByteSize > limit) {
+            return DAWN_OUT_OF_MEMORY_ERROR(absl::StrFormat(
+                "3D texture level power-of-two footprint exceeds limit (%u bytes).", limit));
         }
     }
 
@@ -1296,44 +1390,7 @@ const Extent3D& TextureBase::GetBaseSize() const {
 
 Extent3D TextureBase::GetSize(Aspect aspect) const {
     DAWN_CHECK(!IsError());
-    switch (aspect) {
-        case Aspect::Color:
-        case Aspect::Depth:
-        case Aspect::Stencil:
-        case Aspect::CombinedDepthStencil:
-            return mBaseSize;
-        case Aspect::Plane0:
-        case Aspect::Plane2:
-            DAWN_ASSERT(GetFormat().IsMultiPlanar());
-            return mBaseSize;
-        case Aspect::Plane1: {
-            DAWN_ASSERT(GetFormat().IsMultiPlanar());
-            auto planeSize = mBaseSize;
-            switch (GetFormat().subSampling) {
-                case TextureSubsampling::e420:
-                    // Divide by 2, rounding odd dimensions up.
-                    planeSize.width = (planeSize.width + 1) >> 1;
-                    planeSize.height = (planeSize.height + 1) >> 1;
-                    break;
-                case TextureSubsampling::e422:
-                    planeSize.width = (planeSize.width + 1) >> 1;
-                    break;
-                case TextureSubsampling::e444:
-                    break;
-                case TextureSubsampling::Undefined:
-                    DAWN_UNREACHABLE();
-            }
-            return planeSize;
-        }
-        case Aspect::None:
-            break;
-    }
-
-    if (aspect == (Aspect::Depth | Aspect::Stencil)) {
-        return mBaseSize;
-    }
-
-    DAWN_UNREACHABLE();
+    return GetAspectSize(GetFormat(), mBaseSize, aspect);
 }
 Extent3D TextureBase::GetSize(wgpu::TextureAspect textureAspect) const {
     const auto aspect = SelectFormatAspects(GetFormat(), textureAspect);

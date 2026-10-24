@@ -1442,6 +1442,7 @@ ResultOrError<Ref<InternalTexture>> InternalTexture::Create(
     Device* device,
     const UnpackedPtr<TextureDescriptor>& descriptor,
     VkImageUsageFlags extraUsages) {
+    DAWN_TRY(VerifyBaseLevelFootprint(device, *descriptor));
     Ref<InternalTexture> texture = AcquireRef(new InternalTexture(device, descriptor));
     DAWN_TRY(texture->Initialize(extraUsages));
     return std::move(texture);
@@ -1455,10 +1456,6 @@ MaybeError InternalTexture::Initialize(VkImageUsageFlags extraUsages) {
     // Have fun! :)
     DAWN_ASSERT(
         !(GetFormat().HasDepthOrStencil() && (GetUsage() & wgpu::TextureUsage::StorageBinding)));
-
-    // Ensure that the base level of the texture conforms to device-specific limits.
-    // May generate an OOM.
-    DAWN_TRY(VerifyBaseLevelFootprint(this));
 
     // Create the Vulkan image "container". We don't need to check that the format supports the
     // combination of sample, usage etc. because validation should have been done in the Dawn

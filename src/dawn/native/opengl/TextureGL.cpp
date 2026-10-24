@@ -259,6 +259,9 @@ MaybeError FramebufferTextureHelper(const OpenGLFunctions& gl,
 // static
 ResultOrError<Ref<Texture>> Texture::Create(Device* device,
                                             const UnpackedPtr<TextureDescriptor>& descriptor) {
+    // Report synthetic OOM from CreateTexture even when GL commands are deferred.
+    DAWN_TRY(VerifyBaseLevelFootprint(device, *descriptor));
+
     // Wrap the handle in a Texture class early so that it is deleted if initialization fails
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, 0, OwnsHandle::Yes));
 
@@ -295,10 +298,6 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device,
         bool clear = device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting);
         DAWN_TRY(device->EnqueueGL([texture, clear](const OpenGLFunctions& gl) -> MaybeError {
             DAWN_GL_TRY(gl, GenTextures(1, &texture->mTextureHandle));
-
-            // Ensure that the base level of the texture conforms to device-specific limits.
-            // May generate an OOM.
-            DAWN_TRY(VerifyBaseLevelFootprint(texture.Get()));
 
             GLenum target = texture->GetGLTarget();
             uint32_t levels = texture->GetNumMipLevels();

@@ -972,9 +972,19 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "https://g-issues.chromium.org/issues/559589664", ToggleStage::Instance}},
     {Toggle::Limit3DTexturePotFootprintTo4GB,
      {"limit_3d_texture_pot_footprint_to_4gb",
-      "Synthesize an OutOfMemory error on 3D texture creation if the power-of-two rounded byte "
-      "footprint of the texture is 4 GiB or larger. Works around a PowerVR driver bug.",
+      "Synthesize OutOfMemory if a 3D texture's base-level power-of-two footprint is 4 GiB or "
+      "larger, or exceeds 1 MiB with limit_max_texture_bytes_to_1mb enabled. "
+      "Works around a PowerVR driver bug.",
       "https://crbug.com/497202432", ToggleStage::Device}},
+    {Toggle::LimitMaxTextureBytesTo1MB,
+     {"limit_max_texture_bytes_to_1mb",
+      "For testing, synthesize an OutOfMemory error when a texture's base mip level's largest "
+      "plane exceeds 1 MiB, counting all array layers and samples. Depth/stencil is treated "
+      "as one allocation using the maximum texel block memory cost from the WebGPU spec. "
+      "Also lowers the "
+      "limit_3d_texture_pot_footprint_to_4gb threshold to 1 MiB when that toggle is enabled. "
+      "Does not limit cumulative allocations or imported textures.",
+      "https://crbug.com/573237633", ToggleStage::Device}},
 
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
