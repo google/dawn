@@ -1605,56 +1605,44 @@ fn bar() {
 }
 
 TEST_F(IR_FromProgramTest, Array_ExcessiveNumberOfElementsZeroConstructor) {
-    // array<i32, 40000u>();
-    auto* tc = Call<array<i32, 40000>>();
-    WrapInFunction(tc);
+    auto* wgsl = R"(
+@compute @workgroup_size(1)
+fn main() {
+  var a: array<i32, 40000>;
+}
+)";
 
-    auto m = Build();
+    auto m = Build(wgsl);
     ASSERT_NE(m, Success);
     EXPECT_EQ(m.Failure().reason,
-              R"(:3:42 error: let: result type size (160000) exceeds maximum allowed (65536)
-    %tint_symbol:array<i32, 40000> = let array<i32, 40000>(0i)
-                                         ^^^^^^^^^^^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:3:42 error: let: operand size (160000) exceeds maximum allowed (65536)
-    %tint_symbol:array<i32, 40000> = let array<i32, 40000>(0i)
-                                         ^^^^^^^^^^^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %tint_symbol:array<i32, 40000> = let array<i32, 40000>(0i)
-    ret
-  }
-}
+              R"(test.wgsl:4:3 error: result type size (160000) exceeds maximum allowed (65536)
+  var a: array<i32, 40000>;
+  ^^^^^^^^^^^^^^^^^^^^^^^^
 )");
 }
 
 TEST_F(IR_FromProgramTest, Array_ExcessiveNumberOfElementsExplicitConstructor) {
-    // array<i32, 40000u>(0i, 2i, 3i, ..., 39999i);
-    SetSource(Source::Location({12, 34}));
-    Vector<const ast::IntLiteralExpression*, 40000> elements;
+    std::string expr = "array<i32, 40000>(";
     for (uint32_t i = 0; i < 40000; i++) {
-        elements.Push(Expr(i32(i)));
+        expr += std::to_string(i) + ", ";
     }
-    auto* tc = Call<array<i32, 40000>>(std::move(elements));
-    WrapInFunction(tc);
+    expr += ")";
 
-    auto m = Build();
+    auto wgsl = R"(
+@compute @workgroup_size(1)
+fn main() {
+  let a = )" + expr +
+                R"(;
+}
+)";
+
+    auto m = Build(wgsl);
     ASSERT_NE(m, Success);
     // Not performing full string matching, since the failure reason includes the full 40,000
     // element constructor
     EXPECT_THAT(m.Failure().reason,
                 testing::HasSubstr(
-                    ":3:42 error: let: result type size (160000) exceeds maximum allowed (65536)"));
+                    ":4:7 error: result type size (160000) exceeds maximum allowed (65536)"));
 }
 
 TEST_F(IR_FromProgramTest, OperandTooLarge) {

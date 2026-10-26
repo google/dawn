@@ -184,12 +184,15 @@ diag::Diagnostic& Validator::AddError(Source src) {
 }
 
 diag::Diagnostic& Validator::AddResultError(const Instruction* inst, size_t idx) {
-    TINT_IR_ASSERT(ir_, IsIRValidation());
+    if (IsWGSLValidation()) {
+        return AddError(ir_.SourceOf(inst));
+    }
+
     auto src =
         Disassemble().ResultSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
-    if (IsIRValidation() && !block_stack_.IsEmpty()) {
+    if (!block_stack_.IsEmpty()) {
         AddNote(block_stack_.Back()) << "in block";
 
         // Adding the note may trigger a resize and invalidate the error diagnostic reference, so we
@@ -375,9 +378,9 @@ bool Validator::CheckResult(const Instruction* inst, size_t idx) {
 
     if (check_size) {
         if (ty->Size() > tint::internal_limits::kMaxTemporaryStorageSize) {
-            AddError(inst, idx) << "result type size (" << ty->Size()
-                                << ") exceeds maximum allowed ("
-                                << tint::internal_limits::kMaxTemporaryStorageSize << ")";
+            AddResultError(inst, idx)
+                << "result type size (" << ty->Size() << ") exceeds maximum allowed ("
+                << tint::internal_limits::kMaxTemporaryStorageSize << ")";
             return false;
         }
     }
