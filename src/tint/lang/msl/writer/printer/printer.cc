@@ -1198,27 +1198,6 @@ class Printer : public tint::TextGenerator {
             out << ")";
             return;
         }
-        if (c->Func() == BuiltinFn::kCopyCooperativeTensor) {
-            if (copy_cooperative_tensor_.empty()) {
-                TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
-
-                copy_cooperative_tensor_ = UniqueIdentifier("tint_copy_cooperative_tensor");
-                Line();
-                Line() << "template<typename T>";
-                Line() << "void " << copy_cooperative_tensor_
-                       << "(thread T* dst, const thread T* src) {";
-                Line() << "  for (uint i = 0; i < dst->get_capacity(); i++) {";
-                Line() << "    dst->set(i, src->get(i));";
-                Line() << "  }";
-                Line() << "}";
-            }
-            out << copy_cooperative_tensor_ << "(";
-            EmitAndTakeAddressIfNeeded(out, c->Args()[0]);
-            out << ", ";
-            EmitAndTakeAddressIfNeeded(out, c->Args()[1]);
-            out << ")";
-            return;
-        }
         if (c->Func() == msl::BuiltinFn::kMakeTensorInline) {
             auto args = c->Args();
             auto* p = args[0];
@@ -2122,7 +2101,7 @@ class Printer : public tint::TextGenerator {
                             << result_type.str();
                 auto name = UniqueIdentifier(name_stream.str());
                 Line() << "using " << name << " =";
-                Line() << "  decltype(declval<" << operation << "<" << tensor->M() << ", "
+                Line() << "  decltype(declval<thread " << operation << "<" << tensor->M() << ", "
                        << tensor->N() << ", " << tensor->K() << ">>()";
                 Line() << "             .get_" << tensor_kind << "_cooperative_tensor<" << left_type
                        << ", " << right_type << ", " << result_type.str() << ">());";

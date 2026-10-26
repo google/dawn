@@ -250,7 +250,7 @@ struct State {
                     src = b.Load(src)->Result();
                 }
 
-                b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kCopyCooperativeTensor, dst, src);
+                b.Store(dst, b.Load(src));
             },
             [&](const core::type::Array* arr) {
                 // Copy each array element.
@@ -634,7 +634,7 @@ struct State {
             auto* result_var = MakeLocalTensorVar(sm_ty, c);
 
             // Copy the contents of the accumulator into the result variable.
-            b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kCopyCooperativeTensor, result_var, acc);
+            b.Store(result_var, b.Load(acc));
 
             // Load the cooperative tensor values from their local variables.
             auto* load_lhs = b.Load(lhs);

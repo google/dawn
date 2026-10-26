@@ -554,6 +554,7 @@ When specified, automatically enables MSL validation)",
         EnumName(tint::msl::validate::MslVersion::kMsl_2_4, "2.4"),
         EnumName(tint::msl::validate::MslVersion::kMsl_3_2, "3.2"),
         EnumName(tint::msl::validate::MslVersion::kMsl_4_0, "4.0"),
+        EnumName(tint::msl::validate::MslVersion::kMsl_4_1, "4.1"),
     };
     auto& msl_version = options.Add<EnumOption<tint::msl::validate::MslVersion>>(
         "msl-version", R"(Specify the MSL version.

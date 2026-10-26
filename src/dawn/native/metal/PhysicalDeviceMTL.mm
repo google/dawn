@@ -385,8 +385,8 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
 
 void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platform,
                                                 TogglesState* adapterToggles) const {
-#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 260000
-    if (@available(macos 26.0, ios 26.0, *)) {
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000
+    if (@available(macos 27.0, ios 27.0, *)) {
         if (![*mDevice supportsFamily:MTLGPUFamilyMetal4]) {
             adapterToggles->ForceSet(Toggle::MetalEnableTensors, false);
         }
@@ -1089,8 +1089,8 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
     }
     if (auto* subgroupMatrixConfigs = info.Get<AdapterPropertiesSubgroupMatrixConfigs>()) {
         if (toggles.IsEnabled(Toggle::MetalEnableTensors)) {
-#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 260000
-            if (@available(macos 26.0, ios 26.0, *)) {
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000
+            if (@available(macos 27.0, ios 27.0, *)) {
                 DAWN_ASSERT([*mDevice supportsFamily:MTLGPUFamilyMetal4]);
             } else
 #endif

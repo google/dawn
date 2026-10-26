@@ -57,6 +57,9 @@ Result<SuccessType> Validate(const std::string& xcrun_path,
         case MslVersion::kMsl_4_0:
             version_str = "-std=macos-metal4.0";
             break;
+        case MslVersion::kMsl_4_1:
+            version_str = "-std=macos-metal4.1";
+            break;
     }
 
 #ifdef _WIN32

@@ -40,7 +40,7 @@ class MslWriterTensorTest : public MslWriterTest {
     Result<SuccessType> Generate() {
         Options options;
         options.extensions.enable_tensors = true;
-        return MslWriterTest::Generate(options, validate::MslVersion::kMsl_4_0);
+        return MslWriterTest::Generate(options, validate::MslVersion::kMsl_4_1);
     }
 };
 
@@ -69,13 +69,13 @@ using tint_matmul2d_operation =
   mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
 
 using tint_left_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
 
 template<typename T, typename V>
@@ -122,13 +122,13 @@ using tint_matmul2d_operation =
   mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
 
 using tint_left_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
 
 template<typename T, typename V>
@@ -175,13 +175,13 @@ using tint_matmul2d_operation =
   mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
 
 using tint_left_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
 
 template<typename T, typename V>
@@ -231,13 +231,13 @@ using tint_matmul2d_operation =
   mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
 
 using tint_left_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
 
 template<typename T, typename V>
@@ -248,33 +248,33 @@ void tint_fill_cooperative_tensor(thread T* dst, V value) {
 }
 
 using tint_left_input_32_32_16_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 16>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 16>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_32_32_16_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 16>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 16>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_32_32_16_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 16>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 16>>()
              .get_destination_cooperative_tensor<tint_left_input_32_32_16_half_half, tint_right_input_32_32_16_half_half, half>());
 
 using tint_left_input_32_16_16_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 16, 16>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 16, 16>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_32_16_16_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 16, 16>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 16, 16>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_32_16_16_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 16, 16>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 16, 16>>()
              .get_destination_cooperative_tensor<tint_left_input_32_16_16_half_half, tint_right_input_32_16_16_half_half, half>());
 
 using tint_left_input_32_16_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 16, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 16, 32>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_32_16_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 16, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 16, 32>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_32_16_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 16, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 16, 32>>()
              .get_destination_cooperative_tensor<tint_left_input_32_16_32_half_half, tint_right_input_32_16_32_half_half, half>());
 
 [[max_total_threads_per_threadgroup(1)]]
@@ -329,13 +329,13 @@ using tint_matmul2d_operation =
   mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
 
 using tint_left_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
 
 template<typename T, typename V>
@@ -410,13 +410,13 @@ using tint_matmul2d_operation =
   mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
 
 using tint_left_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
 
 template<typename T, typename V>
@@ -495,13 +495,13 @@ using tint_matmul2d_operation =
   mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
 
 using tint_left_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
 
 [[max_total_threads_per_threadgroup(1)]]
@@ -572,13 +572,13 @@ using tint_matmul2d_operation =
   mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
 
 using tint_left_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
 
 struct tint_symbol_1 {
@@ -641,13 +641,13 @@ using tint_matmul2d_operation =
   mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
 
 using tint_left_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
 
 template<typename T, typename V>
@@ -697,26 +697,19 @@ using tint_matmul2d_operation =
   mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
 
 using tint_left_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
 
 template<typename T, typename V>
 void tint_fill_cooperative_tensor(thread T* dst, V value) {
   for (uint i = 0; i < dst->get_capacity(); i++) {
     dst->set(i, value);
-  }
-}
-
-template<typename T>
-void tint_copy_cooperative_tensor(thread T* dst, const thread T* src) {
-  for (uint i = 0; i < dst->get_capacity(); i++) {
-    dst->set(i, src->get(i));
   }
 }
 
@@ -729,7 +722,7 @@ kernel void entry() {
   tint_destination_32_32_32_half_half v_2;
   (tint_fill_cooperative_tensor((&v_2), 0.0h));
   tint_destination_32_32_32_half_half x;
-  (tint_copy_cooperative_tensor((&x), (&v_2)));
+  x = v_2;
   (tint_matmul2d_operation<32, 32, 32, mpp::tensor_ops::matmul2d_descriptor::mode::multiply_accumulate>().run(v, v_1, x));
 }
 )");
@@ -759,13 +752,13 @@ using tint_matmul2d_operation =
   mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
 
 using tint_left_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
 
 template<typename T, typename V>
@@ -775,19 +768,12 @@ void tint_fill_cooperative_tensor(thread T* dst, V value) {
   }
 }
 
-template<typename T>
-void tint_copy_cooperative_tensor(thread T* dst, const thread T* src) {
-  for (uint i = 0; i < dst->get_capacity(); i++) {
-    dst->set(i, src->get(i));
-  }
-}
-
 [[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   tint_destination_32_32_32_half_half acc;
   (tint_fill_cooperative_tensor((&acc), 0.0h));
   tint_destination_32_32_32_half_half x;
-  (tint_copy_cooperative_tensor((&x), (&acc)));
+  x = acc;
 }
 )");
 }
@@ -817,13 +803,13 @@ using tint_matmul2d_operation =
   mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
 
 using tint_left_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
 
 template<typename T, typename V>
@@ -833,20 +819,13 @@ void tint_fill_cooperative_tensor(thread T* dst, V value) {
   }
 }
 
-template<typename T>
-void tint_copy_cooperative_tensor(thread T* dst, const thread T* src) {
-  for (uint i = 0; i < dst->get_capacity(); i++) {
-    dst->set(i, src->get(i));
-  }
-}
-
 [[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   tint_destination_32_32_32_half_half acc;
   (tint_fill_cooperative_tensor((&acc), 0.0h));
   tint_destination_32_32_32_half_half v;
   (tint_fill_cooperative_tensor((&v), 1.0h));
-  (tint_copy_cooperative_tensor((&acc), (&v)));
+  acc = v;
 }
 )");
 }
@@ -885,26 +864,19 @@ using tint_matmul2d_operation =
   mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
 
 using tint_left_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
 
 template<typename T, typename V>
 void tint_fill_cooperative_tensor(thread T* dst, V value) {
   for (uint i = 0; i < dst->get_capacity(); i++) {
     dst->set(i, value);
-  }
-}
-
-template<typename T>
-void tint_copy_cooperative_tensor(thread T* dst, const thread T* src) {
-  for (uint i = 0; i < dst->get_capacity(); i++) {
-    dst->set(i, src->get(i));
   }
 }
 
@@ -918,13 +890,13 @@ kernel void entry() {
   tint_destination_32_32_32_half_half v_2;
   tint_destination_32_32_32_half_half v_3;
   array<thread tint_destination_32_32_32_half_half*, 2> const copy = array<thread tint_destination_32_32_32_half_half*, 2>{(&v_2), (&v_3)};
-  (tint_copy_cooperative_tensor(copy[0u], acc[0u]));
-  (tint_copy_cooperative_tensor(copy[1u], acc[1u]));
-  (tint_copy_cooperative_tensor(acc[0u], copy[0u]));
-  (tint_copy_cooperative_tensor(acc[1u], copy[1u]));
+  (*copy[0u]) = (*acc[0u]);
+  (*copy[1u]) = (*acc[1u]);
+  (*acc[0u]) = (*copy[0u]);
+  (*acc[1u]) = (*copy[1u]);
   tint_destination_32_32_32_half_half el;
-  (tint_copy_cooperative_tensor((&el), acc[1u]));
-  (tint_copy_cooperative_tensor(acc[0u], (&el)));
+  el = (*acc[1u]);
+  (*acc[0u]) = el;
 }
 )");
 }
@@ -968,26 +940,19 @@ using tint_matmul2d_operation =
   mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
 
 using tint_left_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_32_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<32, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<32, 32, 32>>()
              .get_destination_cooperative_tensor<tint_left_input_32_32_32_half_half, tint_right_input_32_32_32_half_half, half>());
 
 template<typename T, typename V>
 void tint_fill_cooperative_tensor(thread T* dst, V value) {
   for (uint i = 0; i < dst->get_capacity(); i++) {
     dst->set(i, value);
-  }
-}
-
-template<typename T>
-void tint_copy_cooperative_tensor(thread T* dst, const thread T* src) {
-  for (uint i = 0; i < dst->get_capacity(); i++) {
-    dst->set(i, src->get(i));
   }
 }
 
@@ -1017,28 +982,28 @@ kernel void entry() {
   tint_destination_32_32_32_half_half v_14;
   tint_destination_32_32_32_half_half v_15;
   array<array<thread tint_destination_32_32_32_half_half*, 2>, 3> const copy = array<array<thread tint_destination_32_32_32_half_half*, 2>, 3>{v_10, v_13, array<thread tint_destination_32_32_32_half_half*, 2>{(&v_14), (&v_15)}};
-  (tint_copy_cooperative_tensor(copy[0u][0u], acc[0u][0u]));
-  (tint_copy_cooperative_tensor(copy[0u][1u], acc[0u][1u]));
-  (tint_copy_cooperative_tensor(copy[1u][0u], acc[1u][0u]));
-  (tint_copy_cooperative_tensor(copy[1u][1u], acc[1u][1u]));
-  (tint_copy_cooperative_tensor(copy[2u][0u], acc[2u][0u]));
-  (tint_copy_cooperative_tensor(copy[2u][1u], acc[2u][1u]));
-  (tint_copy_cooperative_tensor(acc[0u][0u], copy[0u][0u]));
-  (tint_copy_cooperative_tensor(acc[0u][1u], copy[0u][1u]));
-  (tint_copy_cooperative_tensor(acc[1u][0u], copy[1u][0u]));
-  (tint_copy_cooperative_tensor(acc[1u][1u], copy[1u][1u]));
-  (tint_copy_cooperative_tensor(acc[2u][0u], copy[2u][0u]));
-  (tint_copy_cooperative_tensor(acc[2u][1u], copy[2u][1u]));
+  (*copy[0u][0u]) = (*acc[0u][0u]);
+  (*copy[0u][1u]) = (*acc[0u][1u]);
+  (*copy[1u][0u]) = (*acc[1u][0u]);
+  (*copy[1u][1u]) = (*acc[1u][1u]);
+  (*copy[2u][0u]) = (*acc[2u][0u]);
+  (*copy[2u][1u]) = (*acc[2u][1u]);
+  (*acc[0u][0u]) = (*copy[0u][0u]);
+  (*acc[0u][1u]) = (*copy[0u][1u]);
+  (*acc[1u][0u]) = (*copy[1u][0u]);
+  (*acc[1u][1u]) = (*copy[1u][1u]);
+  (*acc[2u][0u]) = (*copy[2u][0u]);
+  (*acc[2u][1u]) = (*copy[2u][1u]);
   tint_destination_32_32_32_half_half v_16;
   tint_destination_32_32_32_half_half v_17;
   array<thread tint_destination_32_32_32_half_half*, 2> const inner = array<thread tint_destination_32_32_32_half_half*, 2>{(&v_16), (&v_17)};
-  (tint_copy_cooperative_tensor(inner[0u], acc[2u][0u]));
-  (tint_copy_cooperative_tensor(inner[1u], acc[2u][1u]));
-  (tint_copy_cooperative_tensor(acc[1u][0u], inner[0u]));
-  (tint_copy_cooperative_tensor(acc[1u][1u], inner[1u]));
+  (*inner[0u]) = (*acc[2u][0u]);
+  (*inner[1u]) = (*acc[2u][1u]);
+  (*acc[1u][0u]) = (*inner[0u]);
+  (*acc[1u][1u]) = (*inner[1u]);
   tint_destination_32_32_32_half_half el;
-  (tint_copy_cooperative_tensor((&el), acc[2u][1u]));
-  (tint_copy_cooperative_tensor(acc[1u][0u], (&el)));
+  el = (*acc[2u][1u]);
+  (*acc[1u][0u]) = el;
 }
 )");
 }
@@ -1072,26 +1037,19 @@ using tint_matmul2d_operation =
   mpp::tensor_ops::matmul2d<tint_matmul2d_descriptor<M, N, K, O>, execution_simdgroup>;
 
 using tint_left_input_16_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<16, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<16, 32, 32>>()
              .get_left_input_cooperative_tensor<half, half, half>());
 using tint_right_input_16_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<16, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<16, 32, 32>>()
              .get_right_input_cooperative_tensor<half, half, half>());
 using tint_destination_16_32_32_half_half =
-  decltype(declval<tint_matmul2d_operation<16, 32, 32>>()
+  decltype(declval<thread tint_matmul2d_operation<16, 32, 32>>()
              .get_destination_cooperative_tensor<tint_left_input_16_32_32_half_half, tint_right_input_16_32_32_half_half, half>());
 
 template<typename T, typename V>
 void tint_fill_cooperative_tensor(thread T* dst, V value) {
   for (uint i = 0; i < dst->get_capacity(); i++) {
     dst->set(i, value);
-  }
-}
-
-template<typename T>
-void tint_copy_cooperative_tensor(thread T* dst, const thread T* src) {
-  for (uint i = 0; i < dst->get_capacity(); i++) {
-    dst->set(i, src->get(i));
   }
 }
 
@@ -1106,8 +1064,8 @@ kernel void entry() {
   thread tint_destination_16_32_32_half_half* const el = acc[1u];
   thread tint_destination_16_32_32_half_half* const el2 = el;
   tint_destination_16_32_32_half_half v_2;
-  (tint_copy_cooperative_tensor((&v_2), el2));
-  (tint_copy_cooperative_tensor(acc[0u], (&v_2)));
+  v_2 = (*el2);
+  (*acc[0u]) = v_2;
 }
 )");
 }

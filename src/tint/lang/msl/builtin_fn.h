@@ -94,7 +94,6 @@ enum class BuiltinFn : uint8_t {
     kSimdgroupStore,
     kSimdgroupMultiply,
     kSimdgroupMultiplyAccumulate,
-    kCopyCooperativeTensor,
     kFillCooperativeTensor,
     kMakeTensorInline,
     kLoad,
