@@ -301,8 +301,18 @@ ResultOrUnknownError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpi
         GetDevice()->IsToggleEnabled(Toggle::UseVulkanMemoryModel);
     // Currently we can disable index clamping on all runtime-sized arrays in Tint robustness
     // transform as unsized arrays can only be declared on storage address space.
-    req.tintOptions.extensions.disable_runtime_sized_array_index_clamping =
+    req.tintOptions.extensions.disable_storage_runtime_sized_array_index_clamping =
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseBufferRobustAccess2);
+    // We can only disable index clamping on runtime-sized uniform arrays in Tint if the
+    // allocated buffer size is large enough for the Vulkan property. These arrays can appear with
+    // the buffer_view feature.
+    // Note: 16 bytes matches the round up allocation size of uniform buffers in BufferVk.cpp and
+    // should be kept in sync.
+    req.tintOptions.extensions.disable_uniform_runtime_sized_array_index_clamping =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanUseBufferRobustAccess2) &&
+        ToBackend(GetDevice())
+                ->GetDeviceInfo()
+                .robustness2Properties.robustUniformBufferAccessSizeAlignment <= 16;
     req.tintOptions.extensions.disable_image_robustness =
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseImageRobustAccess2);
     req.tintOptions.extensions.disable_storage_subgroup_matrix_clamping =

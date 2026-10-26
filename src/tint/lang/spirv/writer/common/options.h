@@ -199,9 +199,13 @@ struct Options {
         /// Set to `true` to skip robustness transform on textures.
         bool disable_image_robustness = false;
 
-        /// Set to `true` to disable index clamping on the runtime-sized arrays in robustness
-        /// transform.
-        bool disable_runtime_sized_array_index_clamping = false;
+        /// Set to `true` to disable index clamping on the runtime-sized storage arrays in
+        /// robustness transform.
+        bool disable_storage_runtime_sized_array_index_clamping = false;
+
+        /// Set to `true` to disable index clamping on the runtime-sized uniform arrays in
+        /// robustness transform.
+        bool disable_uniform_runtime_sized_array_index_clamping = false;
 
         /// Set to `true` to disable bounds checks on subgroup matrix load/store in the storage
         /// address space. Set by
@@ -225,7 +229,8 @@ struct Options {
                      use_zero_initialize_workgroup_memory,
                      use_vulkan_memory_model,
                      disable_image_robustness,
-                     disable_runtime_sized_array_index_clamping,
+                     disable_storage_runtime_sized_array_index_clamping,
+                     disable_uniform_runtime_sized_array_index_clamping,
                      disable_storage_subgroup_matrix_clamping,
                      dot_4x8_packed,
                      use_maximal_reconvergence,

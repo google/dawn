@@ -318,8 +318,10 @@ struct State {
                     // workgroup.
                     auto* object = access->Object();
                     auto* base_ptr = object->Type()->As<core::type::Pointer>();
-                    if (config.disable_runtime_sized_array_index_clamping &&
-                        base_ptr->AddressSpace() != AddressSpace::kWorkgroup) {
+                    if ((config.disable_storage_runtime_sized_array_index_clamping &&
+                         base_ptr->AddressSpace() == AddressSpace::kStorage) ||
+                        (config.disable_uniform_runtime_sized_array_index_clamping &&
+                         base_ptr->AddressSpace() == AddressSpace::kUniform)) {
                         return nullptr;
                     }
 

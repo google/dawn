@@ -92,8 +92,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         if (options.extensions.disable_image_robustness) {
             config.clamp_texture = false;
         }
-        config.disable_runtime_sized_array_index_clamping =
-            options.extensions.disable_runtime_sized_array_index_clamping;
+        config.disable_storage_runtime_sized_array_index_clamping =
+            options.extensions.disable_storage_runtime_sized_array_index_clamping;
+        config.disable_uniform_runtime_sized_array_index_clamping =
+            options.extensions.disable_uniform_runtime_sized_array_index_clamping;
         config.use_integer_range_analysis = !options.disable_integer_range_analysis;
         config.clamp_storage_subgroup_matrix =
             !options.extensions.disable_storage_subgroup_matrix_clamping;

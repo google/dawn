@@ -74,7 +74,7 @@ struct FuzzedOptions {
     bool use_zero_initialize_workgroup_memory;
     bool use_vulkan_memory_model;
     bool disable_image_robustness;
-    bool disable_runtime_sized_array_index_clamping;
+    bool disable_storage_runtime_sized_array_index_clamping;
     bool dot_4x8_packed;
     std::optional<Options::RangeOffsets> depth_range_offsets;
     SpvVersion spirv_version;
@@ -90,6 +90,7 @@ struct FuzzedOptions {
     bool replace_workgroup_atomic_store_with_exchange;
     bool replace_unsigned_compare_zero;
     bool polyfill_bool_vec_dynamic_store;
+    bool disable_uniform_runtime_sized_array_index_clamping;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(FuzzedOptions,
@@ -114,7 +115,7 @@ struct FuzzedOptions {
                  use_zero_initialize_workgroup_memory,
                  use_vulkan_memory_model,
                  disable_image_robustness,
-                 disable_runtime_sized_array_index_clamping,
+                 disable_storage_runtime_sized_array_index_clamping,
                  dot_4x8_packed,
                  depth_range_offsets,
                  spirv_version,
@@ -129,7 +130,8 @@ struct FuzzedOptions {
                  collapse_subgroup_min_max,
                  replace_workgroup_atomic_store_with_exchange,
                  replace_unsigned_compare_zero,
-                 polyfill_bool_vec_dynamic_store);
+                 polyfill_bool_vec_dynamic_store,
+                 disable_uniform_runtime_sized_array_index_clamping);
     TINT_REFLECT_HASH_CODE(FuzzedOptions);
 };
 
@@ -339,8 +341,10 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
         fuzzed_options.use_zero_initialize_workgroup_memory;
     options.extensions.use_vulkan_memory_model = fuzzed_options.use_vulkan_memory_model;
     options.extensions.disable_image_robustness = fuzzed_options.disable_image_robustness;
-    options.extensions.disable_runtime_sized_array_index_clamping =
-        fuzzed_options.disable_runtime_sized_array_index_clamping;
+    options.extensions.disable_storage_runtime_sized_array_index_clamping =
+        fuzzed_options.disable_storage_runtime_sized_array_index_clamping;
+    options.extensions.disable_uniform_runtime_sized_array_index_clamping =
+        fuzzed_options.disable_uniform_runtime_sized_array_index_clamping;
     options.extensions.dot_4x8_packed = fuzzed_options.dot_4x8_packed;
     options.depth_range_offsets = fuzzed_options.depth_range_offsets;
     options.spirv_version = fuzzed_options.spirv_version;

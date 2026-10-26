@@ -265,6 +265,8 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
 
     // Round uniform buffer sizes up to a multiple of 16 bytes since Tint will polyfill them as
     // array<vec4u, ...>.
+    // Note: If this value changes, update the setting of
+    // disable_uniform_runtime_sized_array_index_clamping in ShaderModuleVk.cpp to match.
     if (GetUsage() & wgpu::BufferUsage::Uniform) {
         mAllocatedSize = Align(size, 16u);
     }

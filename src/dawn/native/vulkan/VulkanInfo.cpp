@@ -334,6 +334,8 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
     if (info.extensions[DeviceExt::Robustness2]) {
         featuresChain.Add(&info.robustness2Features,
                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT);
+        propertiesChain.Add(&info.robustness2Properties,
+                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_PROPERTIES_EXT);
     }
 
     // Check subgroup features and properties
