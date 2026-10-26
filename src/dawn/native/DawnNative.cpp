@@ -58,6 +58,12 @@ std::vector<const char*> GetTogglesUsed(const wgpu::Adapter& adapter) {
     return FromAPI(adapter.Get())->GetTogglesUsed();
 }
 
+std::vector<const char*> GetDeviceTogglesUsed(const wgpu::Adapter& adapter,
+                                              const wgpu::DeviceDescriptor* descriptor) {
+    return FromAPI(adapter.Get())
+        ->GetDeviceTogglesUsed(FromAPI(reinterpret_cast<const WGPUDeviceDescriptor*>(descriptor)));
+}
+
 std::vector<const char*> GetTogglesUsed(WGPUDevice device) {
     return FromAPI(device)->GetTogglesUsed();
 }

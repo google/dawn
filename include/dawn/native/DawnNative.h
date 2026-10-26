@@ -219,6 +219,11 @@ DAWN_NATIVE_EXPORT const DawnProcTable& GetProcs();
 // Query the names of all the toggles that are enabled in adapter
 DAWN_NATIVE_EXPORT std::vector<const char*> GetTogglesUsed(const wgpu::Adapter& adapter);
 
+// Query the names of all the toggles that would be enabled on a device created from adapter
+DAWN_NATIVE_EXPORT std::vector<const char*> GetDeviceTogglesUsed(
+    const wgpu::Adapter& adapter,
+    const wgpu::DeviceDescriptor* descriptor = nullptr);
+
 // Query the names of all the toggles that are enabled in device
 DAWN_NATIVE_EXPORT std::vector<const char*> GetTogglesUsed(WGPUDevice device);
 

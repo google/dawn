@@ -422,6 +422,56 @@ TEST_F(DeviceToggleTest, DeviceSetToggles) {
     }
 }
 
+// Test that GetDeviceTogglesUsed computes effective device toggles without creating a device.
+TEST_F(DeviceToggleTest, GetDeviceTogglesUsed) {
+    std::unique_ptr<native::Instance> instance = std::make_unique<native::Instance>(&instanceDesc);
+
+    native::Adapter nullAdapter = CreateNullAdapter(instance.get(), nullptr);
+    wgpu::Adapter wgpuAdapter(nullAdapter.Get());
+    Ref<native::AdapterBase> adapter = native::FromAPI(nullAdapter.Get());
+
+    const char* dumpShaderToggle = "dump_shaders";
+
+    // 1. With nullptr descriptor, device toggles match default created device toggles.
+    {
+        std::vector<const char*> queriedToggles =
+            native::GetDeviceTogglesUsed(wgpuAdapter, nullptr);
+        native::DeviceDescriptor desc{};
+        Ref<native::DeviceBase> device = AcquireRef(adapter->APICreateDevice(&desc));
+        std::vector<const char*> actualDeviceToggles = device->GetTogglesUsed();
+
+        EXPECT_EQ(queriedToggles.size(), actualDeviceToggles.size());
+        for (const char* toggle : actualDeviceToggles) {
+            EXPECT_THAT(queriedToggles, Contains(StrEq(toggle)));
+        }
+        EXPECT_THAT(queriedToggles, Not(Contains(StrEq(dumpShaderToggle))));
+    }
+
+    // 2. With an enabled toggle in DawnTogglesDescriptor, queried toggles reflect it.
+    {
+        wgpu::DawnTogglesDescriptor togglesDesc = {};
+        togglesDesc.enabledToggleCount = 1;
+        togglesDesc.enabledToggles = &dumpShaderToggle;
+
+        wgpu::DeviceDescriptor deviceDesc = {};
+        deviceDesc.nextInChain = &togglesDesc;
+
+        std::vector<const char*> queriedToggles =
+            native::GetDeviceTogglesUsed(wgpuAdapter, &deviceDesc);
+        EXPECT_THAT(queriedToggles, Contains(StrEq(dumpShaderToggle)));
+
+        native::DeviceDescriptor desc{};
+        desc.nextInChain = &togglesDesc;
+        Ref<native::DeviceBase> device = AcquireRef(adapter->APICreateDevice(&desc));
+        std::vector<const char*> actualDeviceToggles = device->GetTogglesUsed();
+
+        EXPECT_EQ(queriedToggles.size(), actualDeviceToggles.size());
+        for (const char* toggle : actualDeviceToggles) {
+            EXPECT_THAT(queriedToggles, Contains(StrEq(toggle)));
+        }
+    }
+}
+
 // Test that device can override non-forced instance toggles by requirement as expected.
 TEST_F(DeviceToggleTest, DeviceOverridingInstanceToggle) {
     // Create an instance with default toggles, where AllowUnsafeAPIs is disabled.

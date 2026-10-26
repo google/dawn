@@ -238,18 +238,8 @@ DeviceBase* AdapterBase::APICreateDevice(const DeviceDescriptor* descriptor) {
     return ReturnToAPI(std::move(device));
 }
 
-ResultOrUnknownError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
-    const DeviceDescriptor* rawDescriptor,
-    Ref<DeviceBase::DeviceLostEvent> lostEvent) {
-    DAWN_CHECK(rawDescriptor != nullptr);
-
-    // Create device toggles state from required toggles descriptor and inherited adapter toggles
-    // state.
-    UnpackedPtr<DeviceDescriptor> descriptor;
-    DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
-    auto* deviceTogglesDesc = descriptor.Get<DawnTogglesDescriptor>();
-
-    // Create device toggles state.
+TogglesState AdapterBase::CreateDeviceToggles(
+    const DawnTogglesDescriptor* deviceTogglesDesc) const {
     TogglesState deviceToggles =
         TogglesState::CreateFromTogglesDescriptor(deviceTogglesDesc, ToggleStage::Device);
     deviceToggles.InheritFrom(mTogglesState);
@@ -270,6 +260,22 @@ ResultOrUnknownError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
 
     // Backend-specific forced and default device toggles
     mPhysicalDevice->SetupBackendDeviceToggles(mInstance->GetPlatform(), &deviceToggles);
+    return deviceToggles;
+}
+
+ResultOrUnknownError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
+    const DeviceDescriptor* rawDescriptor,
+    Ref<DeviceBase::DeviceLostEvent> lostEvent) {
+    DAWN_CHECK(rawDescriptor != nullptr);
+
+    // Create device toggles state from required toggles descriptor and inherited adapter toggles
+    // state.
+    UnpackedPtr<DeviceDescriptor> descriptor;
+    DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
+    auto* deviceTogglesDesc = descriptor.Get<DawnTogglesDescriptor>();
+
+    // Create device toggles state.
+    TogglesState deviceToggles = CreateDeviceToggles(deviceTogglesDesc);
 
     std::unordered_set<wgpu::FeatureName> requiredFeatureSet{descriptor->requiredFeatures.begin(),
                                                              descriptor->requiredFeatures.end()};
@@ -441,6 +447,15 @@ const TogglesState& AdapterBase::GetTogglesState() const {
 
 std::vector<const char*> AdapterBase::GetTogglesUsed() const {
     return mTogglesState.GetEnabledToggleNames();
+}
+
+std::vector<const char*> AdapterBase::GetDeviceTogglesUsed(
+    const DeviceDescriptor* rawDescriptor) const {
+    const DawnTogglesDescriptor* deviceTogglesDesc = nullptr;
+    if (rawDescriptor != nullptr) {
+        deviceTogglesDesc = Unpack(rawDescriptor).Get<DawnTogglesDescriptor>();
+    }
+    return CreateDeviceToggles(deviceTogglesDesc).GetEnabledToggleNames();
 }
 
 wgpu::FeatureLevel AdapterBase::GetFeatureLevel() const {
