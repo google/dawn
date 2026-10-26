@@ -16,7 +16,6 @@
     "tint_build_wgsl_reader": true,
     "tint_build_wgsl_writer": true,
     "use_custom_libcxx": false,
-    "use_reclient": false,
     "use_remoteexec": true,
     "use_siso": true
   }
