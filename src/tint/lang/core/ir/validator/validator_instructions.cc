@@ -604,6 +604,9 @@ void Validator::CheckCoreBuiltinCall(const CoreBuiltinCall* call,
                 AddError(call) << call->FriendlyName()
                                << " result store type must be host-shareable";
             }
+            if (call->Result()->Type()->UnwrapPtr()->Is<core::type::Buffer>()) {
+                AddError(call) << call->FriendlyName() << " result store type must not be a buffer";
+            }
         }
 
         if (call->Func() == core::BuiltinFn::kBufferArrayView) {

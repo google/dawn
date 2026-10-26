@@ -772,4 +772,42 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_BufferArrayView_StructNotHostShareable) {
         << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, CallBuiltinFn_BufferView_BufferResult) {
+    mod.properties.Add(core::ir::Property::kAllowBufferTypes);
+    auto* bar = b.Function("bar", ty.void_());
+    auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
+    bar->SetParams({p});
+
+    b.Append(bar->Block(), [&] {
+        b.CallExplicit(ty.ptr(storage, ty.buffer(128)), BuiltinFn::kBufferView,
+                       Vector<TemplateParameter, 1>{ty.buffer(128)}, p, 0_i);
+        b.Return(bar);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(bufferView result store type must not be a buffer)"))
+        << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, CallBuiltinFn_BufferArrayView_BufferResult) {
+    mod.properties.Add(core::ir::Property::kAllowBufferTypes);
+    auto* bar = b.Function("bar", ty.void_());
+    auto* p = b.FunctionParam("p", ty.ptr(storage, ty.unsized_buffer()));
+    bar->SetParams({p});
+
+    b.Append(bar->Block(), [&] {
+        b.CallExplicit(ty.ptr(storage, ty.unsized_buffer()), BuiltinFn::kBufferArrayView,
+                       Vector<TemplateParameter, 1>{ty.unsized_buffer()}, p, 0_i, 128_i);
+        b.Return(bar);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(bufferArrayView result store type must not be a buffer)"))
+        << res.Failure();
+}
+
 }  // namespace tint::core::ir
