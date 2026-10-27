@@ -1054,5 +1054,112 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_HoistConstantArrayInitializersTest, ManyStructMembers) {
+    auto* str_ty = ty.Struct(mod.symbols.New("S"), {
+                                                       {mod.symbols.New("a"), ty.array<f32, 2>()},
+                                                       {mod.symbols.New("b"), ty.array<f32, 2>()},
+                                                       {mod.symbols.New("c"), ty.array<f32, 2>()},
+                                                       {mod.symbols.New("d"), ty.array<f32, 2>()},
+                                                       {mod.symbols.New("e"), ty.array<f32, 2>()},
+                                                       {mod.symbols.New("f"), ty.array<f32, 2>()},
+                                                       {mod.symbols.New("g"), ty.array<f32, 2>()},
+                                                       {mod.symbols.New("h"), ty.array<f32, 2>()},
+                                                       {mod.symbols.New("i"), ty.array<f32, 2>()},
+                                                       {mod.symbols.New("j"), ty.array<f32, 2>()},
+                                                   });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* arr = b.Composite(ty.array<f32, 2>(), 1_f, 2_f);
+        b.Var<function>("s", b.Composite(str_ty, arr, arr, arr, arr, arr, arr, arr, arr, arr, arr));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+S = struct @align(4) {
+  a:array<f32, 2> @offset(0)
+  b:array<f32, 2> @offset(8)
+  c:array<f32, 2> @offset(16)
+  d:array<f32, 2> @offset(24)
+  e:array<f32, 2> @offset(32)
+  f:array<f32, 2> @offset(40)
+  g:array<f32, 2> @offset(48)
+  h:array<f32, 2> @offset(56)
+  i:array<f32, 2> @offset(64)
+  j:array<f32, 2> @offset(72)
+}
+
+%foo = @fragment func():void {
+  $B1: {
+    %s:ptr<function, S, read_write> = var S(array<f32, 2>(1.0f, 2.0f))
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(4) {
+  a:array<f32, 2> @offset(0)
+  b:array<f32, 2> @offset(8)
+  c:array<f32, 2> @offset(16)
+  d:array<f32, 2> @offset(24)
+  e:array<f32, 2> @offset(32)
+  f:array<f32, 2> @offset(40)
+  g:array<f32, 2> @offset(48)
+  h:array<f32, 2> @offset(56)
+  i:array<f32, 2> @offset(64)
+  j:array<f32, 2> @offset(72)
+}
+
+%foo = @fragment func():void {
+  $B1: {
+    %2:array<f32, 2> = let array<f32, 2>(1.0f, 2.0f)
+    %3:array<f32, 2> = let array<f32, 2>(1.0f, 2.0f)
+    %4:array<f32, 2> = let array<f32, 2>(1.0f, 2.0f)
+    %5:array<f32, 2> = let array<f32, 2>(1.0f, 2.0f)
+    %6:array<f32, 2> = let array<f32, 2>(1.0f, 2.0f)
+    %7:array<f32, 2> = let array<f32, 2>(1.0f, 2.0f)
+    %8:array<f32, 2> = let array<f32, 2>(1.0f, 2.0f)
+    %9:array<f32, 2> = let array<f32, 2>(1.0f, 2.0f)
+    %10:array<f32, 2> = let array<f32, 2>(1.0f, 2.0f)
+    %11:array<f32, 2> = let array<f32, 2>(1.0f, 2.0f)
+    %12:S = call %tint_construct_S, %2, %3, %4, %5, %6, %7, %8, %9, %10, %11
+    %s:ptr<function, S, read_write> = var %12
+    ret
+  }
+}
+%tint_construct_S = func(%a:array<f32, 2>, %b:array<f32, 2>, %c:array<f32, 2>, %d:array<f32, 2>, %e:array<f32, 2>, %f:array<f32, 2>, %g:array<f32, 2>, %h:array<f32, 2>, %i:array<f32, 2>, %j:array<f32, 2>):S {
+  $B2: {
+    %25:ptr<function, S, read_write> = var undef
+    %26:ptr<function, array<f32, 2>, read_write> = access %25, 0u
+    store %26, %a
+    %27:ptr<function, array<f32, 2>, read_write> = access %25, 1u
+    store %27, %b
+    %28:ptr<function, array<f32, 2>, read_write> = access %25, 2u
+    store %28, %c
+    %29:ptr<function, array<f32, 2>, read_write> = access %25, 3u
+    store %29, %d
+    %30:ptr<function, array<f32, 2>, read_write> = access %25, 4u
+    store %30, %e
+    %31:ptr<function, array<f32, 2>, read_write> = access %25, 5u
+    store %31, %f
+    %32:ptr<function, array<f32, 2>, read_write> = access %25, 6u
+    store %32, %g
+    %33:ptr<function, array<f32, 2>, read_write> = access %25, 7u
+    store %33, %h
+    %34:ptr<function, array<f32, 2>, read_write> = access %25, 8u
+    store %34, %i
+    %35:ptr<function, array<f32, 2>, read_write> = access %25, 9u
+    store %35, %j
+    %36:S = load %25
+    ret %36
+  }
+}
+)";
+    Run(HoistConstantArrayInitializers);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer::raise

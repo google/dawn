@@ -114,13 +114,12 @@ struct State {
                 for (auto* mem : str->Members()) {
                     params.Push(b.FunctionParam(mem->Name().NameView(), mem->Type()));
                 }
-                fn->SetParams(std::move(params));
-
                 for (auto* mem : str->Members()) {
                     auto idx = mem->Index();
                     auto* access = b.Access(ty.ptr<function>(mem->Type()), var, u32(idx));
                     b.Store(access, params[idx]);
                 }
+                fn->SetParams(std::move(params));
 
                 b.Return(fn, b.Load(var));
             });
