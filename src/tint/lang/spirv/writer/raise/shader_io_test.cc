@@ -1782,6 +1782,66 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_ShaderIOTest, ForcePixelCenters_LocationClash_Fragment) {
+    auto* position = b.FunctionParam("position", ty.vec4f());
+    position->SetBuiltin(core::BuiltinValue::kPosition);
+    auto* color = b.FunctionParam("color", ty.f32());
+    color->SetLocation(1);
+
+    auto* ep = b.Function("foo", ty.void_());
+    ep->SetParams({position, color});
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+
+    b.Append(ep->Block(), [&] {
+        b.Let("p", position);
+        b.Return(ep);
+    });
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.polyfill_pixel_center = 1;
+
+    auto result = RunWithFailure(ShaderIO, config);
+    EXPECT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason,
+              "location for center_pos interpolant clashes with user-declared location");
+}
+
+TEST_F(SpirvWriter_ShaderIOTest, ForcePixelCenters_LocationClash_Vertex) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("Outputs"), {
+                                                  {
+                                                      mod.symbols.New("position"),
+                                                      ty.vec4f(),
+                                                      core::IOAttributes{
+                                                          .builtin = core::BuiltinValue::kPosition,
+                                                      },
+                                                  },
+                                                  {
+                                                      mod.symbols.New("color"),
+                                                      ty.f32(),
+                                                      core::IOAttributes{
+                                                          .location = 1u,
+                                                      },
+                                                  },
+                                              });
+
+    auto* ep = b.Function("foo", str_ty);
+    ep->SetStage(core::ir::Function::PipelineStage::kVertex);
+
+    b.Append(ep->Block(),
+             [&] { b.Return(ep, b.Construct(str_ty, b.Construct(ty.vec4f(), 0_f), 0.5_f)); });
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.polyfill_pixel_center = 1;
+
+    auto result = RunWithFailure(ShaderIO, config);
+    EXPECT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason,
+              "location for center_pos interpolant clashes with user-declared location");
+}
+
 TEST_F(SpirvWriter_ShaderIOTest, WorkgroupIndex_ReuseExistingBuiltins) {
     auto* workgroup_id = b.FunctionParam("wgid", ty.vec3u());
     workgroup_id->SetBuiltin(core::BuiltinValue::kWorkgroupId);

@@ -100,7 +100,16 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     /// Add a new interpolant that will be used to emulate the position builtin as if it always is
     /// pixel centered.
     /// @param addrspace the address to use for the global variables
-    uint32_t AddCenterPosInterpolant(core::AddressSpace addrspace) {
+    Result<uint32_t> AddCenterPosInterpolant(
+        core::AddressSpace addrspace,
+        VectorRef<core::type::Manager::StructMemberDesc> entries) {
+        for (auto io : entries) {
+            if (io.attributes.location == config.polyfill_pixel_center.value()) {
+                return Failure{
+                    "location for center_pos interpolant clashes with user-declared location"};
+            }
+        }
+
         // For our 'position' -> 'FragCoord' polyfill we must use 'perspective' because
         // 'interpolateAtOffset' may not be supported for 'linear'.
         auto io_attrib = core::IOAttributes{
@@ -120,21 +129,25 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     /// @param addrspace the address to use for the global variables
     /// @param access the access mode to use for the global variables
     /// @param name_suffix the suffix to add to struct and variable names
-    void MakeVars(Vector<core::ir::Var*, 4>& vars,
-                  Vector<core::type::Manager::StructMemberDesc, 4>& entries,
-                  core::AddressSpace addrspace,
-                  core::Access access,
-                  const char* name_suffix) {
+    Result<SuccessType> MakeVars(Vector<core::ir::Var*, 4>& vars,
+                                 Vector<core::type::Manager::StructMemberDesc, 4>& entries,
+                                 core::AddressSpace addrspace,
+                                 core::Access access,
+                                 const char* name_suffix) {
         if (func->IsVertex() && addrspace == core::AddressSpace::kOut &&
             config.polyfill_pixel_center.has_value()) {
-            center_pos_vert_idx = AddCenterPosInterpolant(addrspace);
-
+            auto result = AddCenterPosInterpolant(addrspace, entries);
+            TINT_CHECK_RESULT(result);
+            center_pos_vert_idx = result.Get();
         } else if (func->IsFragment() && addrspace == core::AddressSpace::kIn &&
                    config.polyfill_pixel_center.has_value()) {
-            center_pos_frag_idx = AddCenterPosInterpolant(addrspace);
+            auto result = AddCenterPosInterpolant(addrspace, entries);
+            TINT_CHECK_RESULT(result);
+            center_pos_frag_idx = result.Get();
         }
 
-        for (auto io : entries) {
+        for (size_t i = 0; i < entries.Length(); ++i) {
+            auto io = entries[i];
             StringStream name;
             name << ir.NameOf(func).Name();
 
@@ -232,6 +245,8 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             input_indices.Push(static_cast<uint32_t>(vars.Length()));
             vars.Push(var);
         }
+
+        return Success;
     }
 
     /// @copydoc ShaderIO::BackendState::FinalizeInputs
@@ -261,13 +276,15 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                                 "global_invocation_id");
         }
 
-        MakeVars(input_vars, inputs, core::AddressSpace::kIn, core::Access::kRead, "_Input");
+        TINT_CHECK_RESULT(
+            MakeVars(input_vars, inputs, core::AddressSpace::kIn, core::Access::kRead, "_Input"));
         return Vector<core::ir::FunctionParam*, 4>{};
     }
 
     /// @copydoc ShaderIO::BackendState::FinalizeOutputs
     Result<const core::type::Type*> FinalizeOutputs() override {
-        MakeVars(output_vars, outputs, core::AddressSpace::kOut, core::Access::kWrite, "_Output");
+        TINT_CHECK_RESULT(MakeVars(output_vars, outputs, core::AddressSpace::kOut,
+                                   core::Access::kWrite, "_Output"));
         return ty.void_();
     }
 
