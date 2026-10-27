@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <optional>
 
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/ir/access.h"
@@ -875,16 +876,34 @@ struct IntegerRangeAnalysisImpl {
     }
 
   private:
+    /// @returns the value of `@subgroup_size` of @p func if it is declared with a constant value,
+    /// or std::nullopt otherwise.
+    std::optional<uint32_t> GetConstantSubgroupSize(const Function* func) {
+        std::optional<Value*> subgroup_size = func->SubgroupSize();
+        if (!subgroup_size.has_value()) {
+            return std::nullopt;
+        }
+        const auto* subgroup_size_const = (*subgroup_size)->As<Constant>();
+        if (!subgroup_size_const) {
+            return std::nullopt;
+        }
+        uint32_t size = subgroup_size_const->Value()->ValueAs<uint32_t>();
+        if (size == 0u) {
+            return std::nullopt;
+        }
+        return size;
+    }
+
     void AnalyzeFunctionParameters(const Function* func) {
         for (const auto* param : func->Params()) {
             if (!param->Type()->IsIntegerScalarOrVector()) {
-                return;
+                continue;
             }
 
-            // Currently we only support the query of ranges of `local_invocation_id` or
-            // `local_invocation_index`.
+            // Currently we only support the query of ranges of `local_invocation_id`,
+            // `local_invocation_index`, `subgroup_invocation_id` and `subgroup_size`.
             if (!param->Builtin()) {
-                return;
+                continue;
             }
 
             switch (*param->Builtin()) {
@@ -915,6 +934,31 @@ struct IntegerRangeAnalysisImpl {
                 }
 
                 break;
+                case BuiltinValue::kSubgroupInvocationId: {
+                    // The range of `subgroup_invocation_id` is [0, subgroup_size - 1] when
+                    // the attribute `@subgroup_size` is declared with a constant value.
+                    std::optional<uint32_t> subgroup_size = GetConstantSubgroupSize(func);
+                    if (!subgroup_size.has_value()) {
+                        break;
+                    }
+                    constexpr uint64_t kMinBound = 0;
+                    integer_function_param_range_info_map_.Add(
+                        param, Vector<IntegerRangeInfo, 3>(
+                                   {IntegerRangeInfo(kMinBound, *subgroup_size - 1u)}));
+                    break;
+                }
+                case BuiltinValue::kSubgroupSize: {
+                    // The value of the built-in variable `subgroup_size` is exactly the value of
+                    // the attribute `@subgroup_size` when it is declared with a constant value.
+                    std::optional<uint32_t> subgroup_size = GetConstantSubgroupSize(func);
+                    if (!subgroup_size.has_value()) {
+                        break;
+                    }
+                    uint64_t size = *subgroup_size;
+                    integer_function_param_range_info_map_.Add(
+                        param, Vector<IntegerRangeInfo, 3>({IntegerRangeInfo(size, size)}));
+                    break;
+                }
                 default:
                     break;
             }

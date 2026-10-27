@@ -329,6 +329,257 @@ TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationID_u32_1_1_Z) {
     }
 }
 
+TEST_F(IR_IntegerRangeAnalysisTest, SubgroupInvocationId_ConstantSubgroupSize_u32) {
+    auto* func = b.ComputeFunction("my_func", 64_u, 1_u, 1_u);
+    func->SetSubgroupSize(b.Constant(32_u));
+    auto* subgroupInvocationId = b.FunctionParam("subgroupInvocationId", mod.Types().u32());
+    subgroupInvocationId->SetBuiltin(tint::core::BuiltinValue::kSubgroupInvocationId);
+    func->SetParams({subgroupInvocationId});
+
+    b.Append(func->Block(), [&] {
+        auto* dst = b.Var(ty.ptr<function, array<u32, 32u>>());
+        auto* access_dst = b.Access(ty.ptr<function, u32>(), dst, subgroupInvocationId);
+        b.Store(access_dst, subgroupInvocationId);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%my_func = @compute @workgroup_size(64u, 1u, 1u) @subgroup_size(32u) func(%subgroupInvocationId:u32 [@subgroup_invocation_id]):void {
+  $B1: {
+    %3:ptr<function, array<u32, 32>, read_write> = var
+    %4:ptr<function, u32, read_write> = access %3, %subgroupInvocationId
+    store %4, %subgroupInvocationId
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+    const IntegerRangeInfo& info = analysis.GetInfo(subgroupInvocationId);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
+
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
+    EXPECT_EQ(0u, range.min_bound);
+    EXPECT_EQ(31u, range.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, SubgroupInvocationId_ConstantSubgroupSize_i32) {
+    auto* func = b.ComputeFunction("my_func", 64_u, 1_u, 1_u);
+    func->SetSubgroupSize(b.Constant(16_i));
+    auto* subgroupInvocationId = b.FunctionParam("subgroupInvocationId", mod.Types().u32());
+    subgroupInvocationId->SetBuiltin(tint::core::BuiltinValue::kSubgroupInvocationId);
+    func->SetParams({subgroupInvocationId});
+
+    b.Append(func->Block(), [&] {
+        auto* dst = b.Var(ty.ptr<function, array<u32, 16u>>());
+        auto* access_dst = b.Access(ty.ptr<function, u32>(), dst, subgroupInvocationId);
+        b.Store(access_dst, subgroupInvocationId);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%my_func = @compute @workgroup_size(64u, 1u, 1u) @subgroup_size(16i) func(%subgroupInvocationId:u32 [@subgroup_invocation_id]):void {
+  $B1: {
+    %3:ptr<function, array<u32, 16>, read_write> = var
+    %4:ptr<function, u32, read_write> = access %3, %subgroupInvocationId
+    store %4, %subgroupInvocationId
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+    const IntegerRangeInfo& info = analysis.GetInfo(subgroupInvocationId);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
+
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
+    EXPECT_EQ(0u, range.min_bound);
+    EXPECT_EQ(15u, range.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, SubgroupInvocationId_NoSubgroupSize) {
+    auto* func = b.ComputeFunction("my_func", 64_u, 1_u, 1_u);
+    auto* subgroupInvocationId = b.FunctionParam("subgroupInvocationId", mod.Types().u32());
+    subgroupInvocationId->SetBuiltin(tint::core::BuiltinValue::kSubgroupInvocationId);
+    func->SetParams({subgroupInvocationId});
+
+    b.Append(func->Block(), [&] {
+        auto* dst = b.Var(ty.ptr<function, array<u32, 32u>>());
+        auto* access_dst = b.Access(ty.ptr<function, u32>(), dst, subgroupInvocationId);
+        b.Store(access_dst, subgroupInvocationId);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%my_func = @compute @workgroup_size(64u, 1u, 1u) func(%subgroupInvocationId:u32 [@subgroup_invocation_id]):void {
+  $B1: {
+    %3:ptr<function, array<u32, 32>, read_write> = var
+    %4:ptr<function, u32, read_write> = access %3, %subgroupInvocationId
+    store %4, %subgroupInvocationId
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+    const IntegerRangeInfo& info = analysis.GetInfo(subgroupInvocationId);
+    EXPECT_FALSE(info.IsValid());
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, SubgroupSize_ConstantSubgroupSize) {
+    auto* func = b.ComputeFunction("my_func", 64_u, 1_u, 1_u);
+    func->SetSubgroupSize(b.Constant(32_u));
+    auto* subgroupSize = b.FunctionParam("subgroupSize", mod.Types().u32());
+    subgroupSize->SetBuiltin(tint::core::BuiltinValue::kSubgroupSize);
+    func->SetParams({subgroupSize});
+
+    b.Append(func->Block(), [&] {
+        auto* dst = b.Var(ty.ptr<function, u32>());
+        b.Store(dst, subgroupSize);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%my_func = @compute @workgroup_size(64u, 1u, 1u) @subgroup_size(32u) func(%subgroupSize:u32 [@subgroup_size]):void {
+  $B1: {
+    %3:ptr<function, u32, read_write> = var
+    store %3, %subgroupSize
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+    const IntegerRangeInfo& info = analysis.GetInfo(subgroupSize);
+    ASSERT_TRUE(info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(info.range));
+
+    const auto& range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(info.range);
+    EXPECT_EQ(32u, range.min_bound);
+    EXPECT_EQ(32u, range.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, SubgroupInvocationId_ConstantSubgroupSize_MultipleParams) {
+    auto* func = b.ComputeFunction("my_func", 64_u, 1_u, 1_u);
+    func->SetSubgroupSize(b.Constant(32_u));
+    auto* localInvocationIndex = b.FunctionParam("localInvocationIndex", mod.Types().u32());
+    localInvocationIndex->SetBuiltin(tint::core::BuiltinValue::kLocalInvocationIndex);
+    auto* subgroupInvocationId = b.FunctionParam("subgroupInvocationId", mod.Types().u32());
+    subgroupInvocationId->SetBuiltin(tint::core::BuiltinValue::kSubgroupInvocationId);
+    func->SetParams({localInvocationIndex, subgroupInvocationId});
+
+    Binary* add = nullptr;
+    b.Append(func->Block(), [&] {
+        auto* dst = b.Var(ty.ptr<function, array<u32, 95u>>());
+        add = b.Add(subgroupInvocationId, localInvocationIndex)->AsInstruction<Binary>();
+        auto* access_dst = b.Access(ty.ptr<function, u32>(), dst, add);
+        b.Store(access_dst, subgroupInvocationId);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%my_func = @compute @workgroup_size(64u, 1u, 1u) @subgroup_size(32u) func(%localInvocationIndex:u32 [@local_invocation_index], %subgroupInvocationId:u32 [@subgroup_invocation_id]):void {
+  $B1: {
+    %4:ptr<function, array<u32, 95>, read_write> = var
+    %5:u32 = add %subgroupInvocationId, %localInvocationIndex
+    %6:ptr<function, u32, read_write> = access %4, %5
+    store %6, %subgroupInvocationId
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    const IntegerRangeInfo& index_info = analysis.GetInfo(localInvocationIndex);
+    ASSERT_TRUE(index_info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(index_info.range));
+    const auto& index_range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(index_info.range);
+    EXPECT_EQ(0u, index_range.min_bound);
+    EXPECT_EQ(63u, index_range.max_bound);
+
+    const IntegerRangeInfo& id_info = analysis.GetInfo(subgroupInvocationId);
+    ASSERT_TRUE(id_info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(id_info.range));
+    const auto& id_range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(id_info.range);
+    EXPECT_EQ(0u, id_range.min_bound);
+    EXPECT_EQ(31u, id_range.max_bound);
+
+    const IntegerRangeInfo& add_info = analysis.GetInfo(add);
+    ASSERT_TRUE(add_info.IsValid());
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(add_info.range));
+    const auto& add_range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(add_info.range);
+    EXPECT_EQ(0u, add_range.min_bound);
+    EXPECT_EQ(94u, add_range.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, SubgroupBuiltins_OverrideSubgroupSize) {
+    mod.properties.Add(Property::kAllowOverrides);
+    auto* subgroup_size_override = b.Override(ty.u32());
+    subgroup_size_override->SetOverrideId(OverrideId{1});
+    mod.root_block->Append(subgroup_size_override);
+
+    auto* func = b.ComputeFunction("my_func", 64_u, 1_u, 1_u);
+    func->SetSubgroupSize(subgroup_size_override->Result());
+    auto* subgroupInvocationId = b.FunctionParam("subgroupInvocationId", ty.u32());
+    subgroupInvocationId->SetBuiltin(BuiltinValue::kSubgroupInvocationId);
+    auto* subgroupSize = b.FunctionParam("subgroupSize", ty.u32());
+    subgroupSize->SetBuiltin(BuiltinValue::kSubgroupSize);
+    func->SetParams({subgroupInvocationId, subgroupSize});
+    b.Append(func->Block(), [&] { b.Return(func); });
+
+    ASSERT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+    EXPECT_FALSE(analysis.GetInfo(subgroupInvocationId).IsValid());
+    EXPECT_FALSE(analysis.GetInfo(subgroupSize).IsValid());
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, SubgroupBuiltins_AfterStructParam) {
+    auto* inputs =
+        ty.Struct(mod.symbols.New("Inputs"), {{mod.symbols.New("localInvocationIndex"),
+                                               ty.u32(),
+                                               {.builtin = BuiltinValue::kLocalInvocationIndex}}});
+    auto* func = b.ComputeFunction("my_func", 64_u, 1_u, 1_u);
+    func->SetSubgroupSize(b.Constant(32_u));
+    auto* inputs_param = b.FunctionParam("inputs", inputs);
+    auto* subgroupInvocationId = b.FunctionParam("subgroupInvocationId", ty.u32());
+    subgroupInvocationId->SetBuiltin(BuiltinValue::kSubgroupInvocationId);
+    auto* subgroupSize = b.FunctionParam("subgroupSize", ty.u32());
+    subgroupSize->SetBuiltin(BuiltinValue::kSubgroupSize);
+    func->SetParams({inputs_param, subgroupInvocationId, subgroupSize});
+    b.Append(func->Block(), [&] { b.Return(func); });
+
+    ASSERT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+    EXPECT_FALSE(analysis.GetInfo(inputs_param).IsValid());
+
+    const auto id_info = analysis.GetInfo(subgroupInvocationId);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(id_info.range));
+    const auto& id_range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(id_info.range);
+    EXPECT_EQ(0u, id_range.min_bound);
+    EXPECT_EQ(31u, id_range.max_bound);
+
+    const auto size_info = analysis.GetInfo(subgroupSize);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(size_info.range));
+    const auto& size_range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(size_info.range);
+    EXPECT_EQ(32u, size_range.min_bound);
+    EXPECT_EQ(32u, size_range.max_bound);
+}
+
 TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopInitializer_Success_sint) {
     Var* idx = nullptr;
     Loop* loop = nullptr;
