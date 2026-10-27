@@ -77,7 +77,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': '27c47ddd2ba59835f6306e577274ceeb37aba1ca',
+  'chromium_revision': '3318e836e90b01f367be032759ad1368d7001bd3',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
