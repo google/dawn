@@ -44,7 +44,7 @@ namespace dawn::native::vulkan {
 //
 // Types are listed in order of deletion.
 //  - Buffers and images must be deleted before memories because it is invalid to free memory
-// that still have resources bound to it.
+//    that still have resources bound to it.
 //  - Vulkan swapchains must be destroyed before their corresponding VkSurface
 #define FENCED_DELETER_TYPES(X)                                        \
     X(VkBufferView, DestroyBufferView, device)                         \

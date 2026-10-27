@@ -718,6 +718,8 @@ source_set("sources") {
       "metal/ComputePipelineMTL.mm",
       "metal/DeviceMTL.h",
       "metal/DeviceMTL.mm",
+      "metal/FencedReferencer.h",
+      "metal/FencedReferencer.mm",
       "metal/Forward.h",
       "metal/ImmediatesLayoutMTL.h",
       "metal/ImmediatesTrackerMTL.h",

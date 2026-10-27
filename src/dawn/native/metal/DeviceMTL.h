@@ -45,6 +45,7 @@
 
 namespace dawn::native::metal {
 
+class FencedReferencer;
 struct KalmanInfo;
 class CounterSampleBufferAllocator;
 
@@ -62,6 +63,7 @@ class Device final : public DeviceBase {
     MaybeError TickImpl() override;
 
     id<MTLDevice> GetMTLDevice() const;
+    FencedReferencer& GetFencedReferencer() const;
 
     MaybeError CopyFromStagingToBuffer(BufferBase* source,
                                        uint64_t sourceOffset,
@@ -170,6 +172,8 @@ class Device final : public DeviceBase {
     NSPRef<id<MTLBuffer>> mMockBlitMtlBuffer;
 
     std::unique_ptr<CounterSampleBufferAllocator> mCounterSampleBufferAllocator;
+
+    Ref<FencedReferencer> mFencedReferencer;
 };
 
 }  // namespace dawn::native::metal

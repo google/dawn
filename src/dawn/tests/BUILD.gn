@@ -925,6 +925,7 @@ source_set("white_box_tests_sources") {
       "white_box/GPUTimestampCalibrationTests_Metal.mm",
       "white_box/MetalAutoreleasePoolTests.mm",
       "white_box/MetalBackendTests.cpp",
+      "white_box/MetalFencedReferencerTests.mm",
     ]
 
     # If a "build with ARC" config is present, remove it.

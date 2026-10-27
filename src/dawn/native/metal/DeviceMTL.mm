@@ -41,6 +41,7 @@
 #include "src/dawn/native/metal/BufferMTL.h"
 #include "src/dawn/native/metal/CommandBufferMTL.h"
 #include "src/dawn/native/metal/ComputePipelineMTL.h"
+#include "src/dawn/native/metal/FencedReferencer.h"
 #include "src/dawn/native/metal/PhysicalDeviceMTL.h"
 #include "src/dawn/native/metal/PipelineLayoutMTL.h"
 #include "src/dawn/native/metal/QuerySetMTL.h"
@@ -163,8 +164,10 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     // itself is not captured.
     StartTrace();
 
+    mFencedReferencer = AcquireRef(new FencedReferencer(this));
     Ref<Queue> queue;
     DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue));
+    queue->RegisterSerialProcessor(QueuePriority::BestEffort, mFencedReferencer);
 
     if (mIsTimestampQueryEnabled && !IsToggleEnabled(Toggle::DisableTimestampQueryConversion)) {
         // Make a best guess of timestamp period based on device vendor info, and converge it to
@@ -321,6 +324,10 @@ id<MTLDevice> Device::GetMTLDevice() const {
     return mMtlDevice.Get();
 }
 
+FencedReferencer& Device::GetFencedReferencer() const {
+    return *mFencedReferencer.Get();
+}
+
 MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
                                            uint64_t sourceOffset,
                                            BufferBase* destination,
@@ -380,6 +387,7 @@ void Device::DestroyImpl(DestroyReason reason) {
     //   is implicitly destroyed. This case is thread-safe because there are no
     //   other threads using the device since there are no other live refs.
     mCounterSampleBufferAllocator = nullptr;
+    mFencedReferencer = nullptr;
     mMtlDevice = nullptr;
     mMockBlitMtlBuffer = nullptr;
 }

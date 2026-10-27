@@ -397,6 +397,7 @@ if (DAWN_ENABLE_METAL)
       "white_box/GPUTimestampCalibrationTests_Metal.mm"
       "white_box/MetalAutoreleasePoolTests.mm"
       "white_box/MetalBackendTests.cpp"
+      "white_box/MetalFencedReferencerTests.mm"
     )
 endif()
 
