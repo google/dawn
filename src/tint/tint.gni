@@ -220,8 +220,8 @@ template("tint_fuzzer_test") {
     # TODO(crbug.com/505034799): Determine best migration path for this.
     is_fuzztest_compatible = false
 
-    if (target_name == "wgsl") {
-      dict = "dictionary.txt"
+    if (target_name == "wgsl" || target_name == "wgsl_mesa") {
+      dict = "${tint_src_dir}/cmd/fuzz/wgsl/dictionary.txt"
       libfuzzer_options = [
         # TODO(crbug.com/tint/2223): Remove this to fuzz unicode?
         "only_ascii=1",
