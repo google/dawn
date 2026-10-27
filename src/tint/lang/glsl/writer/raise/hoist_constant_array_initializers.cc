@@ -32,6 +32,8 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/traverse.h"
+#include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/struct.h"
@@ -78,6 +80,9 @@ struct State {
         // Process variable initializers first to handle instructions in the root block and implicit
         // zero initializers.
         ProcessVariableInitializers();
+
+        // Rewrite unreachable instructions inside functions returning nested types.
+        ProcessUnreachables();
 
         // Find all constants that match the pattern and replace their usages.
         Vector<core::ir::Constant*, 16> worklist;
@@ -225,6 +230,28 @@ struct State {
                     b.Store(var, replacement);
                     var->SetInitializer(b.Undef(ptr->StoreType()));
                 });
+            }
+        }
+    }
+
+    void ProcessUnreachables() {
+        Vector<core::ir::Function*, 16> functions = ir.functions;
+        for (auto* func : functions) {
+            if (!HasArrayInsideStruct(func->ReturnType())) {
+                continue;
+            }
+
+            Vector<core::ir::Unreachable*, 8> unreachables;
+            core::ir::Traverse(func->Block(),
+                               [&](core::ir::Unreachable* u) {  //
+                                   unreachables.Push(u);
+                               });
+            for (auto* u : unreachables) {
+                b.InsertBefore(u, [&] {
+                    auto* val = Convert(ir.constant_values.Zero(func->ReturnType()));
+                    b.Return(func, val);
+                });
+                u->Destroy();
             }
         }
     }

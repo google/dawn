@@ -1161,5 +1161,227 @@ S = struct @align(4) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_HoistConstantArrayInitializersTest,
+       UnreachableInFunctionReturningStructWithArray) {
+    auto* str_ty = ty.Struct(mod.symbols.New("S"), {
+                                                       {mod.symbols.New("a"), ty.array<f32, 2>()},
+                                                   });
+
+    auto* helper = b.Function("helper", str_ty);
+    b.Append(helper->Block(), [&] { b.Unreachable(); });
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(ep->Block(), [&] {
+        b.Call(helper);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+S = struct @align(4) {
+  a:array<f32, 2> @offset(0)
+}
+
+%helper = func():S {
+  $B1: {
+    unreachable
+  }
+}
+%foo = @fragment func():void {
+  $B2: {
+    %3:S = call %helper
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(4) {
+  a:array<f32, 2> @offset(0)
+}
+
+%helper = func():S {
+  $B1: {
+    %2:array<f32, 2> = let array<f32, 2>(0.0f)
+    %3:S = call %tint_construct_S, %2
+    ret %3
+  }
+}
+%foo = @fragment func():void {
+  $B2: {
+    %6:S = call %helper
+    ret
+  }
+}
+%tint_construct_S = func(%a:array<f32, 2>):S {
+  $B3: {
+    %8:ptr<function, S, read_write> = var undef
+    %9:ptr<function, array<f32, 2>, read_write> = access %8, 0u
+    store %9, %a
+    %10:S = load %8
+    ret %10
+  }
+}
+)";
+    Run(HoistConstantArrayInitializers);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_HoistConstantArrayInitializersTest,
+       UnreachableInFunctionReturningStructWithArray_MultipleUnreachables) {
+    auto* str_ty = ty.Struct(mod.symbols.New("S"), {
+                                                       {mod.symbols.New("a"), ty.array<f32, 2>()},
+                                                   });
+
+    auto* helper = b.Function("helper", str_ty);
+    auto* cond = b.FunctionParam("cond", ty.bool_());
+    helper->SetParams({cond});
+    b.Append(helper->Block(), [&] {
+        auto* if_ = b.If(cond);
+        b.Append(if_->True(), [&] {
+            auto* arr = b.Composite(ty.array<f32, 2>(), 1_f, 2_f);
+            b.Return(helper, b.Composite(str_ty, arr));
+        });
+        b.Append(if_->False(), [&] { b.Unreachable(); });
+        b.Unreachable();
+    });
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(ep->Block(), [&] {
+        b.Call(helper, true);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+S = struct @align(4) {
+  a:array<f32, 2> @offset(0)
+}
+
+%helper = func(%cond:bool):S {
+  $B1: {
+    if %cond [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
+        ret S(array<f32, 2>(1.0f, 2.0f))
+      }
+      $B3: {  # false
+        unreachable
+      }
+    }
+    unreachable
+  }
+}
+%foo = @fragment func():void {
+  $B4: {
+    %4:S = call %helper, true
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(4) {
+  a:array<f32, 2> @offset(0)
+}
+
+%helper = func(%cond:bool):S {
+  $B1: {
+    if %cond [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
+        %3:array<f32, 2> = let array<f32, 2>(1.0f, 2.0f)
+        %4:S = call %tint_construct_S, %3
+        ret %4
+      }
+      $B3: {  # false
+        %6:array<f32, 2> = let array<f32, 2>(0.0f)
+        %7:S = call %tint_construct_S, %6
+        ret %7
+      }
+    }
+    %8:array<f32, 2> = let array<f32, 2>(0.0f)
+    %9:S = call %tint_construct_S, %8
+    ret %9
+  }
+}
+%foo = @fragment func():void {
+  $B4: {
+    %11:S = call %helper, true
+    ret
+  }
+}
+%tint_construct_S = func(%a:array<f32, 2>):S {
+  $B5: {
+    %13:ptr<function, S, read_write> = var undef
+    %14:ptr<function, array<f32, 2>, read_write> = access %13, 0u
+    store %14, %a
+    %15:S = load %13
+    ret %15
+  }
+}
+)";
+    Run(HoistConstantArrayInitializers);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_HoistConstantArrayInitializersTest, NoModify_UnreachableInVoidFunction) {
+    auto* helper = b.Function("helper", ty.void_());
+    b.Append(helper->Block(), [&] { b.Unreachable(); });
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(ep->Block(), [&] {
+        b.Call(helper);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%helper = func():void {
+  $B1: {
+    unreachable
+  }
+}
+%foo = @fragment func():void {
+  $B2: {
+    %3:void = call %helper
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+    Run(HoistConstantArrayInitializers);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_HoistConstantArrayInitializersTest, NoModify_UnreachableInScalarFunction) {
+    auto* helper = b.Function("helper", ty.i32());
+    b.Append(helper->Block(), [&] { b.Unreachable(); });
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(ep->Block(), [&] {
+        b.Call(helper);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%helper = func():i32 {
+  $B1: {
+    unreachable
+  }
+}
+%foo = @fragment func():void {
+  $B2: {
+    %3:i32 = call %helper
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+    Run(HoistConstantArrayInitializers);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer::raise

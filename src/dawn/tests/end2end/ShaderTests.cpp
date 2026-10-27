@@ -3811,6 +3811,14 @@ var<private> p = Outer(
         array<f32, 4>(8.5, 9.5, 10.5, 11.5),
         array<f32, 4>(12.5, 13.5, 14.5, 15.5)));
 
+fn foo() -> Outer {
+  if (true) {
+    return p;
+  } else {
+    return p0;
+  }
+}
+
 @group(0) @binding(0) var<storage, read_write> o : array<f32, 16>;
 @compute @workgroup_size(1)
 fn main(@builtin(global_invocation_id) gid : vec3u) {
@@ -3837,6 +3845,7 @@ fn main(@builtin(global_invocation_id) gid : vec3u) {
   o[1] = f.a[i].v[j].x + f.a[i].m[j].y + f.b[i][j];
   o[2] = p0.a[i].v[j].x + p0.a[i].m[j].y + p0.b[i][j];
   o[3] = p.a[i].v[j].x + p.a[i].m[j].y + p.b[i][j];
+  o[4] = foo().a[i].v[j].x + foo().a[i].m[j].y + foo().b[i][j];
 }
 )");
 
