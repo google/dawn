@@ -120,7 +120,9 @@ Result<SuccessType> ValidateUsingMetal(const std::string& src_original, MslVersi
                                                     error:&error];
     if (!library) {
         NSString* output = [error localizedDescription];
-        return Failure{[output UTF8String]};
+        // `UTF8String` is declared nullable, so guard against null before converting to a string.
+        const char* message = [output UTF8String];
+        return Failure{message != nullptr ? message : "unknown MSL compilation error"};
     }
 
     return Success;
