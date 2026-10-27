@@ -53,10 +53,6 @@ vars = {
   # RBE project to download rewrapper config files for. Only needed if
   # different from the project used in 'rbe_instance'
   'rewrapper_cfg_project': '',
-  # reclient CIPD package
-  'reclient_package': 'infra/rbe/client/',
-  # reclient CIPD package version
-  'reclient_version': 're_client_version:0.185.0.db415f21-gomaip',
   # siso CIPD package version.
   'siso_version': 'git_revision:c574896b272b40aac6e44c228ee0b471ea7e3d7d',
 
@@ -676,18 +672,6 @@ deps = {
       }
     ],
     'condition': 'dawn_standalone and non_git_source',
-    'dep_type': 'cipd',
-  },
-
-  # RBE dependencies
-  'buildtools/reclient': {
-    'packages': [
-      {
-        'package': Var('reclient_package') + '${{platform}}',
-        'version': Var('reclient_version'),
-      }
-    ],
-    'condition': 'dawn_standalone and (host_cpu != "arm64" or host_os == "mac") and non_git_source',
     'dep_type': 'cipd',
   },
 
