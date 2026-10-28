@@ -1052,6 +1052,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // TODO(crbug.com/dawn/857): tighten this workaround when this issue is fixed in both
     // Vulkan SPEC and drivers.
     deviceToggles->Default(Toggle::UseTemporaryBufferInCompressedTextureToTextureCopy, true);
+    deviceToggles->Default(Toggle::VulkanUseDescriptorUpdateTemplate, true);
 
     if (MayBeQualcommProprietary()) {
         // dawn:1564, dawn:1897: Recording a compute pass after a render pass in the same command

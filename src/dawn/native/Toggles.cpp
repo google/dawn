@@ -985,6 +985,10 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "limit_3d_texture_pot_footprint_to_4gb threshold to 1 MiB when that toggle is enabled. "
       "Does not limit cumulative allocations or imported textures.",
       "https://crbug.com/573237633", ToggleStage::Device}},
+    {Toggle::VulkanUseDescriptorUpdateTemplate,
+     {"vulkan_use_descriptor_update_template",
+      "Use VkDescriptorUpdateTemplate to update descriptor sets in BindGroup.",
+      "https://crbug.com/438554018", ToggleStage::Device}},
 
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};

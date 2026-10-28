@@ -67,14 +67,124 @@ BindGroup::BindGroup(Device* device,
 BindGroup::~BindGroup() = default;
 
 MaybeError BindGroup::InitializeImpl() {
-    WriteDescriptorSet(GetHandle(), ToBackend(GetLayout())->GetTextureToStaticSamplerMap());
+    WriteDescriptorSet(GetHandle(), ToBackend(GetLayout())->GetDescriptorUpdateTemplate());
 
     SetLabelImpl();
     return {};
 }
 
 void BindGroup::WriteDescriptorSet(VkDescriptorSet dsSet,
-                                   const TextureToStaticSamplerMap& textureToStaticSampler) const {
+                                   VkDescriptorUpdateTemplate updateTemplate) const {
+    if (GetDevice()->IsToggleEnabled(Toggle::VulkanUseDescriptorUpdateTemplate)) {
+        WriteDescriptorSetWithTemplate(dsSet, updateTemplate);
+    } else {
+        WriteDescriptorSetWithoutTemplate(dsSet,
+                                          ToBackend(GetLayout())->GetTextureToStaticSamplerMap());
+    }
+}
+
+void BindGroup::WriteDescriptorSetWithTemplate(VkDescriptorSet dsSet,
+                                               VkDescriptorUpdateTemplate updateTemplate) const {
+    if (updateTemplate == VK_NULL_HANDLE) {
+        return;
+    }
+
+    const auto* layout = ToBackend(GetLayout());
+    ityp::stack_vec<BindingIndex, DescriptorUpdateData, kMaxOptimalBindingsPerGroup> writes(
+        layout->GetBindingCount());
+
+    for (BindingIndex i : layout->GetBufferIndices()) {
+        BufferBinding binding = GetBindingAsBufferBinding(i);
+
+        VkBuffer handle = ToBackend(binding.buffer)->GetHandleOrPlaceholder();
+        DAWN_ASSERT(handle != VK_NULL_HANDLE);
+
+        // Round uniform buffer binding sizes up to a multiple of 16 bytes since Tint will polyfill
+        // them as array<vec4u, ...>.
+        auto bufferInfo = std::get<BufferBindingInfo>(layout->GetBindingInfo(i).bindingLayout);
+        if (bufferInfo.type == wgpu::BufferBindingType::Uniform) {
+            binding.size = Align(binding.size, 16u);
+        }
+
+        writes[i].buffer.buffer = handle;
+        // If the buffer is destroyed, `handle` is the device's small placeholder VkBuffer.
+        // Use offset 0 and VK_WHOLE_SIZE so the descriptor range remains within the bounds of
+        // the placeholder buffer regardless of the original buffer's offset and size.
+        if (binding.buffer->IsDestroyed()) [[unlikely]] {
+            writes[i].buffer.offset = 0;
+            writes[i].buffer.range = VK_WHOLE_SIZE;
+        } else {
+            writes[i].buffer.offset = binding.offset;
+            writes[i].buffer.range = binding.size;
+        }
+    }
+
+    for (BindingIndex i : layout->GetNonStaticSamplerIndices()) {
+        Sampler* sampler = ToBackend(GetBindingAsSampler(i));
+
+        writes[i].image.sampler = sampler->GetHandle();
+        writes[i].image.imageView = VkImageView(VK_NULL_HANDLE);
+        writes[i].image.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    }
+
+    for (BindingIndex i : layout->GetSampledTextureIndices()) {
+        TextureView* view = ToBackend(GetBindingAsTextureView(i));
+
+        VkImageView handle = view->GetHandleOrPlaceholder();
+        DAWN_ASSERT(handle != VK_NULL_HANDLE);
+
+        // VkDescriptorImageInfo::sampler is a raw ::VkSampler (uint64_t on 32-bit platforms),
+        // whereas vulkan_platform.h redefines VK_NULL_HANDLE as nullptr (std::nullptr_t).
+        // Wrap VK_NULL_HANDLE in Dawn's vulkan::VkSampler so it converts to the raw null handle
+        // on both 32-bit and 64-bit builds.
+        writes[i].image.sampler = VkSampler(VK_NULL_HANDLE);
+        writes[i].image.imageView = handle;
+        writes[i].image.imageLayout = view->VulkanImageLayout(wgpu::TextureUsage::TextureBinding);
+    }
+
+    for (BindingIndex i : layout->GetStorageTextureIndices()) {
+        TextureView* view = ToBackend(GetBindingAsTextureView(i));
+
+        VkImageView handle = VK_NULL_HANDLE;
+        if (view->GetFormat().format == wgpu::TextureFormat::BGRA8Unorm) {
+            handle = view->GetHandleForBGRA8UnormStorageOrPlaceholder();
+        } else {
+            handle = view->GetHandleOrPlaceholder();
+        }
+        DAWN_ASSERT(handle != VK_NULL_HANDLE);
+
+        writes[i].image.sampler = VkSampler(VK_NULL_HANDLE);
+        writes[i].image.imageView = handle;
+        writes[i].image.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+    }
+
+    for (BindingIndex i : layout->GetTexelBufferIndices()) {
+        TexelBufferView* view = ToBackend(GetBindingAsTexelBufferView(i));
+        VkBufferView handle = view->GetHandleOrPlaceholder();
+        DAWN_ASSERT(handle != VK_NULL_HANDLE);
+
+        writes[i].texelBufferView = handle;
+    }
+
+    for (BindingIndex i : layout->GetInputAttachmentIndices()) {
+        TextureView* view = ToBackend(GetBindingAsTextureView(i));
+
+        VkImageView handle = view->GetHandleOrPlaceholder();
+        DAWN_ASSERT(handle != VK_NULL_HANDLE);
+
+        writes[i].image.sampler = VkSampler(VK_NULL_HANDLE);
+        writes[i].image.imageView = handle;
+        writes[i].image.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    }
+
+    Device* device = ToBackend(GetDevice());
+    device->fn.UpdateDescriptorSetWithTemplate(device->GetVkDevice(), dsSet, updateTemplate,
+                                               writes.data());
+}
+
+void BindGroup::WriteDescriptorSetWithoutTemplate(
+    VkDescriptorSet dsSet,
+    const TextureToStaticSamplerMap& textureToStaticSampler) const {
     const auto* layout = ToBackend(GetLayout());
 
     // Now do a write of a single descriptor set with all possible chained data allocated on the

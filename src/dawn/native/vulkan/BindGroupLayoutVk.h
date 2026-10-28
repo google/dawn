@@ -59,6 +59,7 @@ class BindGroupLayout : public BindGroupLayoutInternalBase {
         const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor);
 
     VkDescriptorSetLayout GetHandle() const;
+    VkDescriptorUpdateTemplate GetDescriptorUpdateTemplate() const;
 
     // BindGroupLayouts can be specialized when doing pipeline JITing to return
     // VkDescriptorSetLayouts that have some parts changed.
@@ -77,6 +78,7 @@ class BindGroupLayout : public BindGroupLayoutInternalBase {
     };
     struct SpecializationResult {
         VkDescriptorSetLayout layout = VK_NULL_HANDLE;
+        VkDescriptorUpdateTemplate descriptorUpdateTemplate = VK_NULL_HANDLE;
         Ref<DescriptorSetAllocator> allocator;
     };
     ResultOrError<SpecializationResult> GetOrCreateSpecialization(
@@ -115,6 +117,7 @@ class BindGroupLayout : public BindGroupLayoutInternalBase {
     void SetLabelImpl() override;
 
     VkDescriptorSetLayout mHandle = VK_NULL_HANDLE;
+    VkDescriptorUpdateTemplate mDescriptorUpdateTemplate = VK_NULL_HANDLE;
     raw_ptr<DescriptorSetAllocator> mDescriptorSetAllocator = nullptr;
 
     // Caches VkDescriptorSetLayouts for specializations so that the lifetime guarantees are the

@@ -2234,6 +2234,7 @@ DAWN_INSTANTIATE_TEST(BindGroupTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend(),
+                      VulkanBackend({}, {"vulkan_use_descriptor_update_template"}),
                       WebGPUBackend());
 
 }  // namespace
