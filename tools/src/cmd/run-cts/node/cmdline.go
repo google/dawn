@@ -28,15 +28,12 @@
 package node
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"sync"
-	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/run-cts/common"
 	"dawn.googlesource.com/dawn/tools/src/oswrapper"
@@ -85,74 +82,101 @@ func (c *cmd) runTestCaseWithCmdline(ctx context.Context, testCase common.TestCa
 	ctx, cancel := context.WithTimeout(ctx, common.TestCaseTimeout)
 	defer cancel()
 
-	prog, args := c.cmdlineTarget(testCase)
-	cmd := exec.CommandContext(ctx, prog, args...)
+	executable, args := c.cmdlineTarget(testCase)
+	cmd := exec.CommandContext(ctx, executable, args...)
 	cmd.Dir = c.flags.CTS
-
-	var buf bytes.Buffer
-	cmd.Stdout = &buf
-	cmd.Stderr = &buf
-
 	if c.flags.Verbose {
 		PrintCommand(cmd, c.flags.skipVSCodeInfo)
 	}
 
-	start := time.Now()
-	err := cmd.Run()
-
-	msg := buf.String()
-	res := common.Result{
-		TestCase: testCase,
-		Status:   common.Pass,
-		Message:  msg,
-		Error:    err,
-		Duration: time.Since(start),
+	proc, err := startWithPipe(cmd)
+	if err != nil {
+		return common.Result{
+			TestCase: testCase,
+			Status:   common.Fail,
+			Error:    err,
+		}
 	}
 
-	if err == nil && c.coverage != nil {
-		const header = "Code-coverage: [["
-		const footer = "]]"
-		if headerStart := strings.Index(msg, header); headerStart >= 0 {
-			if footerStart := strings.Index(msg[headerStart:], footer); footerStart >= 0 {
-				footerStart += headerStart
-				path := msg[headerStart+len(header) : footerStart]
-				res.Message = msg[:headerStart] + msg[footerStart+len(footer):] // Strip out the coverage from the message
-				coverage, covErr := c.coverage.Env.Import(path, fsReaderWriter)
-				fsReaderWriter.Remove(path)
-				if covErr == nil {
-					res.Coverage = coverage
-				} else {
-					err = fmt.Errorf("could not import coverage data from '%v': %v", path, covErr)
-				}
+	lines := make(chan string, 64)
+	go readLines(proc.out, lines)
+
+	// The runner prints whatever the test case writes, then one result line,
+	// `[<status>] <case> (<ms>ms). Log:`, then the test case's log lines, each
+	// indented. With --coverage, a `Code-coverage: [[<path>]]` line comes last.
+	var output []string       // lines printed before the result line
+	var result *common.Result // set by the result line
+	for line := range lines {
+		// The coverage data is attached to the result, not added to its message.
+		if c.coverage != nil {
+			if path, ok := parseCoverageLine(line); ok {
+				c.importCoverage(path, result, fsReaderWriter)
+				continue
 			}
 		}
-		if err == nil && res.Coverage == nil {
-			err = fmt.Errorf("failed to parse code coverage from output")
+
+		// The indented lines after the result line are its log lines. Other lines
+		// after it, such as warnings Dawn prints when the process exits, are
+		// dropped. They are unrelated to the test case. If they were, they would
+		// have been printed before the result line.
+		if result != nil {
+			if isLogLine(line) {
+				result.Message += line + "\n"
+			}
+			continue
+		}
+
+		// Every line before the result line is output of the test case.
+		word, _, duration, ok := parseResultLine(line)
+		if !ok {
+			output = append(output, line)
+			continue
+		}
+
+		// The result's message starts with the output read so far, and the log
+		// lines that follow are appended to it.
+		status, known := toStatus(word)
+		result = &common.Result{TestCase: testCase, Status: status, Duration: duration, Message: joinLines(output)}
+		if !known {
+			result.Error = fmt.Errorf("unknown status '%v'", word)
 		}
 	}
-
-	switch {
-	case errors.Is(err, context.DeadlineExceeded):
-		res.Status = common.Timeout
-	case strings.Contains(msg, "[fail]"):
-		res.Status = common.Fail
-	case strings.Contains(msg, "[warn]"):
-		res.Status = common.Warn
-	case err != nil:
-		res.Status = common.Fail
-	case strings.Contains(msg, "[skip]"):
-		res.Status = common.Skip
-	case strings.Contains(msg, "[pass]"):
-		break
-	default:
-		res.Status = common.Fail
-		msg += "\ncould not parse test output"
+	exit := proc.wait()
+	if result != nil {
+		return *result
 	}
-
-	if res.Error != nil {
-		res.Message = fmt.Sprint(res.Message, res.Error)
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		return common.Result{
+			TestCase: testCase,
+			Status:   common.Timeout,
+			Message:  joinLines(output),
+		}
 	}
-	return res
+	msg := joinLines(output) +
+		"the runner process ended before reporting a result for this test case: " + exit.description + "\n"
+	if exit.success {
+		msg += "an early exit with status 0 usually means that a test awaited a promise that never settles\n"
+	}
+	return common.Result{
+		TestCase: testCase,
+		Status:   common.Fail,
+		Message:  msg,
+	}
+}
+
+// importCoverage imports coverage data from path into res.
+func (c *cmd) importCoverage(path string, res *common.Result, fsReaderWriter oswrapper.FilesystemReaderWriter) {
+	if res == nil {
+		return
+	}
+	coverage, err := c.coverage.Env.Import(path, fsReaderWriter)
+	fsReaderWriter.Remove(path)
+	if err != nil {
+		res.Error = fmt.Errorf("could not import coverage data from '%v': %v", path, err)
+		res.Status = common.Fail
+		return
+	}
+	res.Coverage = coverage
 }
 
 // cmdlineTarget returns the executable and arguments to run testCase in a
