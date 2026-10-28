@@ -140,7 +140,8 @@ enum class Features {
     kWebGPUEnableRangeAnalysisForRobustness,
     kWebGPUUseSpirv14,
     kWebGPUUseHLSL2021,
-    kWebGPUUseSpirvReconvergenceMode,
+    kWebGPUUseSpirvMaximalReconvergence,
+    kWebGPUUseSpirvSubgroupUniformControlFlow,
 };
 
 class DAWN_PLATFORM_EXPORT Platform {

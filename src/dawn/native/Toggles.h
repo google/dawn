@@ -198,7 +198,6 @@ enum class Toggle {
     D3D12UseHLSL2021,
     MetalFixU32DivMod,
     VulkanSleepAfterLostDeviceWait,
-    UseSpirvReconvergenceMode,
     VulkanReplaceWorkgroupAtomicStoreWithExchange,
     VulkanDisallowNPOTDepthStencilMipmaps,
     VulkanReplaceUnsignedCompareZero,
@@ -206,6 +205,8 @@ enum class Toggle {
     MetalEnableTensors,
     AllowAlphaToCoverageNotBlendable,
     GLHoistConstantArrayInitializers,
+    UseSpirvMaximalReconvergence,
+    UseSpirvSubgroupUniformControlFlow,
 
     // Once all backends have been updated to be thread safe for waiting, we can remove this toggle.
     WaitIsThreadSafe,

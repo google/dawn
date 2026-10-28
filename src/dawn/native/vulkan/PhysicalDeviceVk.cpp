@@ -1382,25 +1382,31 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->ForceSet(Toggle::UseSpirv14, false);
     }
 
+    // If maximal reconvergence is supported, don't enable subgroup uniform control flow.
     // TODO(b/379673383): Disabled on Pixel10 devices.
     if (GetDeviceInfo().HasExt(DeviceExt::MaximalReconvergence) &&
         GetDeviceInfo().shaderMaximalReconvergenceFeatures.shaderMaximalReconvergence == VK_TRUE &&
         !IsAndroidImgTec()) {
         deviceToggles->Default(
-            Toggle::UseSpirvReconvergenceMode,
-            platform->IsFeatureEnabled(platform::Features::kWebGPUUseSpirvReconvergenceMode));
-    } else if (GetDeviceInfo().HasExt(DeviceExt::SubgroupUniformControlFlow) &&
-               GetDeviceInfo()
-                       .shaderSubgroupUniformControlFlowFeatures.shaderSubgroupUniformControlFlow ==
-                   VK_TRUE &&
-               (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_COMPUTE_BIT) &&
-               (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_FRAGMENT_BIT) &&
-               !IsAndroidImgTec()) {
-        deviceToggles->Default(
-            Toggle::UseSpirvReconvergenceMode,
-            platform->IsFeatureEnabled(platform::Features::kWebGPUUseSpirvReconvergenceMode));
+            Toggle::UseSpirvMaximalReconvergence,
+            platform->IsFeatureEnabled(platform::Features::kWebGPUUseSpirvMaximalReconvergence));
+        deviceToggles->ForceSet(Toggle::UseSpirvSubgroupUniformControlFlow, false);
     } else {
-        deviceToggles->ForceSet(Toggle::UseSpirvReconvergenceMode, false);
+        deviceToggles->ForceSet(Toggle::UseSpirvMaximalReconvergence, false);
+        if (GetDeviceInfo().HasExt(DeviceExt::SubgroupUniformControlFlow) &&
+            GetDeviceInfo()
+                    .shaderSubgroupUniformControlFlowFeatures.shaderSubgroupUniformControlFlow ==
+                VK_TRUE &&
+            (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_COMPUTE_BIT) &&
+            (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_FRAGMENT_BIT) &&
+            !IsAndroidImgTec()) {
+            deviceToggles->Default(
+                Toggle::UseSpirvSubgroupUniformControlFlow,
+                platform->IsFeatureEnabled(
+                    platform::Features::kWebGPUUseSpirvSubgroupUniformControlFlow));
+        } else {
+            deviceToggles->ForceSet(Toggle::UseSpirvSubgroupUniformControlFlow, false);
+        }
     }
 
     // Vulkan waiting is already thread safe.

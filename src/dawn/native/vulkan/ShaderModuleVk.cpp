@@ -328,21 +328,10 @@ ResultOrUnknownError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpi
     req.tintOptions.extensions.use_zero_initialize_workgroup_memory =
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension);
 
-    // Maximal reconvergence takes precedence over subgroup uniform control flow in the SPIR-V
-    // backend so just try to turn both on.
-    if (GetDevice()->IsToggleEnabled(Toggle::UseSpirvReconvergenceMode)) {
-        req.tintOptions.extensions.use_maximal_reconvergence =
-            ToBackend(GetDevice())->GetDeviceInfo().HasExt(DeviceExt::MaximalReconvergence) &&
-            ToBackend(GetDevice())
-                    ->GetDeviceInfo()
-                    .shaderMaximalReconvergenceFeatures.shaderMaximalReconvergence == VK_TRUE;
-        req.tintOptions.extensions.use_subgroup_uniform_control_flow =
-            ToBackend(GetDevice())->GetDeviceInfo().HasExt(DeviceExt::SubgroupUniformControlFlow) &&
-            ToBackend(GetDevice())
-                    ->GetDeviceInfo()
-                    .shaderSubgroupUniformControlFlowFeatures.shaderSubgroupUniformControlFlow ==
-                VK_TRUE;
-    }
+    req.tintOptions.extensions.use_maximal_reconvergence =
+        GetDevice()->IsToggleEnabled(Toggle::UseSpirvMaximalReconvergence);
+    req.tintOptions.extensions.use_subgroup_uniform_control_flow =
+        GetDevice()->IsToggleEnabled(Toggle::UseSpirvSubgroupUniformControlFlow);
 
     req.tintOptions.workarounds.texture_sample_compare_depth_cube_array =
         GetDevice()->IsToggleEnabled(Toggle::VulkanSampleCompareDepthCubeArrayWorkaround);
