@@ -246,6 +246,17 @@ TEST(CommandLineParserTest, StringListParsing) {
         EXPECT_EQ(opt.GetValue()[2], "flour");
     }
 
+    // Test disabling comma splitting preserves commas inside each argument.
+    {
+        CLP opts;
+        auto& opt = opts.AddStringList("foo").ShortName('f').SplitOnComma(false);
+        ExpectSuccess(opts.Parse(Split("-f a,b -foo c,d,e")));
+
+        EXPECT_EQ(opt.GetValue().size(), 2u);
+        EXPECT_EQ(opt.GetValue()[0], "a,b");
+        EXPECT_EQ(opt.GetValue()[1], "c,d,e");
+    }
+
     // Test the default value
     {
         CLP opts;

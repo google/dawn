@@ -31,6 +31,7 @@
 #include <cctype>
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -724,6 +725,11 @@ Napi::Value Exit(const Napi::CallbackInfo& info) {
     return info.Env().Undefined();
 }
 
+// https://nodejs.org/api/process.html#processabort
+[[noreturn]] void Abort(const Napi::CallbackInfo&) {
+    std::abort();
+}
+
 Napi::Value HrtimeBigint(const Napi::CallbackInfo& info) {
     auto now = std::chrono::steady_clock::now().time_since_epoch();
     int64_t nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(now).count();
@@ -754,6 +760,7 @@ void RegisterProcess(Napi::Env env, const PolyfillOptions& options, PolyfillCont
     Napi::Object process = Napi::Object::New(env);
     process.Set("cwd", Napi::Function::New(env, Cwd, "cwd"));
     process.Set("exit", Napi::Function::New(env, Exit, "exit", ctx));
+    process.Set("abort", Napi::Function::New(env, Abort, "abort"));
 
     Napi::Object hrtime = Napi::Object::New(env);
     hrtime.Set("bigint", Napi::Function::New(env, HrtimeBigint, "bigint"));

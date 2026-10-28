@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <optional>
@@ -34,13 +35,12 @@
 #include <utility>
 #include <vector>
 
+#include "libplatform/libplatform.h"
 #include "src/dawn/node/Module.h"
 #include "src/dawn/node/napi_v8/napi_v8.h"
 #include "src/dawn/node/standalone/EventLoop.h"
 #include "src/dawn/node/standalone/Polyfills.h"
 #include "src/dawn/utils/CommandLineParser.h"
-
-#include "libplatform/libplatform.h"
 
 #if defined(DAWN_ENABLE_PARTITION_ALLOC)
 #include "partition_alloc/buildflags.h"  // nogncheck
@@ -59,6 +59,19 @@ namespace {
 // the CommonJS `require()` polyfill resolves it as a relative file path rather than rejecting it
 // as a bare package name.
 constexpr const char* kCmdlineScript = "./out-node/common/runtime/cmdline.js";
+
+// Appends each non-empty line of `in` to `queries`, without a trailing '\r'.
+void AppendQueryLines(std::istream& in, std::vector<std::string>* queries) {
+    std::string line;
+    while (std::getline(in, line)) {
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
+        if (!line.empty()) {
+            queries->push_back(std::move(line));
+        }
+    }
+}
 
 class StandaloneRunner {
   public:
@@ -91,8 +104,23 @@ class StandaloneRunner {
             return 0;
         }
 
-        if (!query_opt_.IsSet()) {
-            std::cerr << "Error: --query (-q) must be specified.\n\n";
+        queries_.assign(query_opt_.GetValue().begin(), query_opt_.GetValue().end());
+        if (query_file_opt_.IsSet()) {
+            const std::string& path = query_file_opt_.GetValue();
+            if (path == "-") {
+                AppendQueryLines(std::cin, &queries_);
+            } else {
+                std::ifstream file(path);
+                if (!file) {
+                    std::cerr << "Error: failed to open --query-file '" << path << "'.\n";
+                    return 1;
+                }
+                AppendQueryLines(file, &queries_);
+            }
+        }
+
+        if (queries_.empty()) {
+            std::cerr << "Error: --query (-q) or --query-file must be specified.\n\n";
             std::cerr << "Usage: " << argv[0] << " [options] --query <query>\n\nOptions:\n";
             parser_.PrintHelp(std::cerr);
             return 1;
@@ -172,7 +200,9 @@ class StandaloneRunner {
             js_args.push_back(flag);
         }
 
-        js_args.push_back(query_opt_.GetValue());
+        for (const std::string& query : queries_) {
+            js_args.push_back(query);
+        }
         return js_args;
     }
 
@@ -308,10 +338,14 @@ class StandaloneRunner {
             .AddString("cts-dir",
                        "Directory containing the WebGPU CTS (default: third_party/webgpu-cts)")
             .Parameter("dir");
-    dawn::utils::CommandLineParser::StringOption& query_opt_ =
-        parser_.AddString("query", "CTS test query to run (e.g. 'webgpu:*')")
+    dawn::utils::CommandLineParser::StringListOption& query_opt_ =
+        parser_.AddStringList("query", "CTS test query to run (e.g. 'webgpu:*'); may be repeated")
             .ShortName('q')
-            .Parameter("query");
+            .Parameter("query")
+            .SplitOnComma(false);
+    dawn::utils::CommandLineParser::StringOption& query_file_opt_ =
+        parser_.AddString("query-file", "File of queries or test cases, one per line; '-' is stdin")
+            .Parameter("path");
     dawn::utils::CommandLineParser::BoolOption& verbose_opt_ =
         parser_.AddBool("verbose", "Print result/log of every test as it runs").ShortName('v');
     dawn::utils::CommandLineParser::BoolOption& quiet_opt_ =
@@ -334,6 +368,8 @@ class StandaloneRunner {
         parser_.AddStringList("dawn-flag", "Flag to set on dawn.node as <flag>=<value>")
             .Parameter("flag=value");
 
+    // The `--query` values followed by the lines of `--query-file`.
+    std::vector<std::string> queries_;
     std::unique_ptr<v8::Platform> platform_;
     std::unique_ptr<v8::ArrayBuffer::Allocator> allocator_;
     v8::Isolate* isolate_ = nullptr;

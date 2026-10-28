@@ -28,8 +28,6 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
 
-#include <gtest/gtest.h>
-
 #include <algorithm>
 #include <atomic>
 #include <chrono>
@@ -49,6 +47,7 @@
 #include "src/dawn/node/standalone/EventLoop.h"
 #include "src/dawn/node/standalone/Polyfills.h"
 #include "src/dawn/node/test/V8TestEnvironment.h"
+#include "src/utils/gtest.h"
 
 namespace {
 
@@ -779,6 +778,14 @@ TEST_F(PolyfillsTest, ProcessExitWithACodeThatIsNotANumberExitsWithZero) {
     RunScriptAllowingExit("process.exit('not a number')");
     EXPECT_TRUE(loop().stopped());
     EXPECT_EQ(loop().exit_code(), 0);
+}
+
+using PolyfillsDeathTest = PolyfillsTest;
+
+TEST_F(PolyfillsDeathTest, ProcessAbortKillsTheProcess) {
+    dawn::node::standalone::RegisterPolyfills(env_, loop());
+
+    DAWN_EXPECT_DEATH_IF_SUPPORTED(RunScript("process.abort()"), "");
 }
 
 TEST_F(PolyfillsTest, ProcessStreamWritesAreVerbatim) {
