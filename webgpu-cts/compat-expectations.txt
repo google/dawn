@@ -403,6 +403,10 @@ crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,i
 # sample_texture_combos test is failing on all Compat platforms
 crbug.com/402772749 [ angle-opengl arch-x86_64 desktop display-server-x memory_ge_16gb nvidia-0x2184 release ubuntu ] webgpu:api,operation,sampling,sampler_texture:sample_texture_combos: [ Failure ]
 
+# Linux/GTX 1660 failures when going to 595.104.02
+crbug.com/563458562 [ linux nvidia-0x2184 ] webgpu:api,validation,state,device_lost,destroy:importExternalTexture:* [ Failure ]
+crbug.com/578632701 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleBaseClampToEdge:*textureType="texture_external"* [ Failure ]
+
 ### This section represents tests which may require CTS changes.
 
 ### This section represents things that will require Compat validation
