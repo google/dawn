@@ -29,8 +29,10 @@ package node
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 // exitStatus describes how a process ended.
@@ -39,19 +41,41 @@ type exitStatus struct {
 	description string // e.g. "exit status 1" or "signal: aborted (core dumped)"
 }
 
+// localTarget runs the runner on this machine.
+type localTarget struct {
+	runner         string // path to the executable
+	dir            string // working directory, or "" for the current directory
+	verbose        bool   // print each command before running it
+	skipVSCodeInfo bool   // skip VS Code launch.json output when dir is set
+}
+
+func (t localTarget) start(args []string, stdin string) (*localProcess, error) {
+	cmd := exec.Command(t.runner, args...)
+	cmd.Dir = t.dir
+	if t.verbose {
+		if t.dir != "" {
+			PrintCommand(cmd, t.skipVSCodeInfo)
+		} else {
+			fmt.Println("Running", strings.Join(cmd.Args, " "))
+		}
+	}
+	return startWithPipe(cmd, stdin)
+}
+
 // localProcess is a process started by exec.
 type localProcess struct {
 	cmd *exec.Cmd
 	out *os.File
 }
 
-// startWithPipe starts cmd with stdout and stderr both writing to one pipe, so
-// that the reader sees them in the order they were written.
-func startWithPipe(cmd *exec.Cmd) (*localProcess, error) {
+// startWithPipe starts cmd reading stdin, with stdout and stderr both writing
+// to one pipe, so that the reader sees them in the order they were written.
+func startWithPipe(cmd *exec.Cmd, stdin string) (*localProcess, error) {
 	r, w, err := os.Pipe()
 	if err != nil {
 		return nil, err
 	}
+	cmd.Stdin = strings.NewReader(stdin)
 	cmd.Stdout = w
 	cmd.Stderr = w
 	err = cmd.Start()
@@ -69,6 +93,10 @@ func (p *localProcess) wait() exitStatus {
 	err := p.cmd.Wait()
 	p.out.Close()
 	return exitStatus{success: err == nil, description: exitDescription(err)}
+}
+
+func (p *localProcess) kill() {
+	p.cmd.Process.Kill()
 }
 
 // exitDescription describes the error returned by exec.Cmd.Wait, e.g.

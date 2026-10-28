@@ -31,10 +31,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"syscall"
+	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/run-cts/common"
 	"dawn.googlesource.com/dawn/tools/src/cov"
@@ -66,6 +70,9 @@ type flags struct {
 	skipVSCodeInfo       bool
 	enforceDefaultLimits bool
 	blockAllFeatures     bool
+	batchSize            int
+	caseTimeout          time.Duration
+	startupAllowance     time.Duration
 	dawn                 node.Flags
 }
 
@@ -119,6 +126,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.StringVar(&c.flags.bin, "bin", fileutils.BuildPath(cfg.OsWrapper), binDesc)
 	if c.standalone {
 		flag.StringVar(&c.flags.runner, "runner", "", "path to "+runnerName+", overriding -bin")
+		flag.IntVar(&c.flags.batchSize, "batch-size", defaultBatchSize, "maximum number of test cases per runner process")
 	} else {
 		flag.BoolVar(&c.flags.isolated, "isolate", false, "run each test in an isolated process")
 	}
@@ -141,6 +149,8 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.BoolVar(&c.flags.skipVSCodeInfo, "skip-vs-code-info", false, "skips emitting VS Code information")
 	flag.BoolVar(&c.flags.enforceDefaultLimits, "enforce-default-limits", false, "enforce the default limits (note: powerPreference tests may fail)")
 	flag.BoolVar(&c.flags.blockAllFeatures, "block-all-features", false, "block all features (except 'core-features-and-limits')")
+	flag.DurationVar(&c.flags.caseTimeout, "case-timeout", common.TestCaseTimeout, "kill a runner process if it produces no result line within this time")
+	flag.DurationVar(&c.flags.startupAllowance, "startup-allowance", defaultStartupAllowance, "extra time allowed for the first result line of each runner process")
 
 	if c.standalone {
 		return nil, nil
@@ -159,6 +169,9 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	if err := c.maybeInitCoverage(cfg.OsWrapper); err != nil {
 		return err
 	}
+
+	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
 	if c.flags.build {
 		if err := c.state.CTS.Node.BuildIfRequired(c.flags.Verbose, cfg.OsWrapper); err != nil {
@@ -211,6 +224,22 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	return nil
 }
 
+// target returns where to run the command-line runner, and the CTS directory there.
+func (c *cmd) target() (localTarget, string) {
+	runner := c.flags.Node
+	if c.standalone {
+		runner = c.flags.runner
+	}
+	return localTarget{
+		runner:  runner,
+		dir:     c.flags.CTS,
+		verbose: c.flags.Verbose,
+		// The VS Code launch.json output does not work for the standalone runner,
+		// which reads its test cases from stdin.
+		skipVSCodeInfo: c.flags.skipVSCodeInfo || c.standalone,
+	}, c.flags.CTS
+}
+
 func (c *cmd) processFlags(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 	if c.standalone {
 		if c.flags.runner == "" {
@@ -228,6 +257,9 @@ func (c *cmd) processFlags(fsReaderWriter oswrapper.FilesystemReaderWriter) erro
 			return fmt.Errorf("unable to get absolute path for '%v'", c.flags.runner)
 		}
 		c.flags.runner = absRunner
+		if c.flags.batchSize < 1 {
+			return fmt.Errorf("-batch-size must be at least 1")
+		}
 	} else {
 		if c.flags.bin == "" {
 			return fmt.Errorf("-bin is not set. It defaults to <dawn>/out/active (%v) which does not exist",
@@ -264,6 +296,12 @@ func (c *cmd) processFlags(fsReaderWriter oswrapper.FilesystemReaderWriter) erro
 	}
 	if c.flags.NumRunners < 1 {
 		c.flags.NumRunners = 1
+	}
+	if c.flags.caseTimeout <= 0 {
+		return fmt.Errorf("-case-timeout must be positive")
+	}
+	if c.flags.startupAllowance < 0 {
+		return fmt.Errorf("-startup-allowance must not be negative")
 	}
 
 	c.flags.dawn.SetOptions(node.Options{
