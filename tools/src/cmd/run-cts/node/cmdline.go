@@ -79,53 +79,14 @@ func (c *cmd) runTestCasesWithCmdline(
 	wg.Wait()
 }
 
-// TODO(crbug.com/416755658): Add unittest coverage when exec is handled via
-// dependency injection.
-// runTestCaseWithCmdline() runs a single CTS test case with the command line tool,
-// returning the test result.
+// runTestCaseWithCmdline runs a single CTS test case in a command-line runner
+// process and returns the result.
 func (c *cmd) runTestCaseWithCmdline(ctx context.Context, testCase common.TestCase, fsReaderWriter oswrapper.FilesystemReaderWriter) common.Result {
 	ctx, cancel := context.WithTimeout(ctx, common.TestCaseTimeout)
 	defer cancel()
 
-	args := []string{
-		"-e", "require('./out-node/common/runtime/cmdline.js');",
-		"--",
-		// src/common/runtime/helper/sys.ts expects 'node file.js <args>'
-		// and slices away the first two arguments. When running with '-e', args
-		// start at 1, so just inject a placeholder argument.
-		"placeholder-arg",
-		// Actual arguments begin here
-		"--gpu-provider", filepath.Join(c.flags.bin, "cts.cjs"),
-		"--verbose", // always required to emit test pass results
-		"--quiet",
-	}
-	if c.flags.Verbose {
-		args = append(args, "--gpu-provider-flag", "verbose=1")
-	}
-	if c.coverage != nil {
-		args = append(args, "--coverage")
-	}
-	if c.flags.Colors {
-		args = append(args, "--colors")
-	}
-	if c.flags.unrollConstEvalLoops {
-		args = append(args, "--unroll-const-eval-loops")
-	}
-	if c.flags.compatibilityMode {
-		args = append(args, "--compat")
-	}
-	if c.flags.enforceDefaultLimits {
-		args = append(args, "--enforce-default-limits")
-	}
-	if c.flags.blockAllFeatures {
-		args = append(args, "--block-all-features")
-	}
-	for _, f := range c.flags.dawn {
-		args = append(args, "--gpu-provider-flag", f)
-	}
-	args = append(args, string(testCase))
-
-	cmd := exec.CommandContext(ctx, c.flags.Node, args...)
+	prog, args := c.cmdlineTarget(testCase)
+	cmd := exec.CommandContext(ctx, prog, args...)
 	cmd.Dir = c.flags.CTS
 
 	var buf bytes.Buffer
@@ -173,10 +134,12 @@ func (c *cmd) runTestCaseWithCmdline(ctx context.Context, testCase common.TestCa
 	switch {
 	case errors.Is(err, context.DeadlineExceeded):
 		res.Status = common.Timeout
-	case err != nil, strings.Contains(msg, "[fail]"):
+	case strings.Contains(msg, "[fail]"):
 		res.Status = common.Fail
 	case strings.Contains(msg, "[warn]"):
 		res.Status = common.Warn
+	case err != nil:
+		res.Status = common.Fail
 	case strings.Contains(msg, "[skip]"):
 		res.Status = common.Skip
 	case strings.Contains(msg, "[pass]"):
@@ -190,4 +153,64 @@ func (c *cmd) runTestCaseWithCmdline(ctx context.Context, testCase common.TestCa
 		res.Message = fmt.Sprint(res.Message, res.Error)
 	}
 	return res
+}
+
+// cmdlineTarget returns the executable and arguments to run testCase in a
+// command-line runner process.
+func (c *cmd) cmdlineTarget(testCase common.TestCase) (string, []string) {
+	args := append(c.runnerArgs(c.flags.CTS), "--verbose", "--quiet")
+	if c.standalone {
+		return c.flags.runner, append(args, "-q", string(testCase))
+	}
+	return c.flags.Node, append(args, string(testCase))
+}
+
+// runnerArgs returns the command-line runner arguments shared by every process.
+func (c *cmd) runnerArgs(ctsDir string) []string {
+	var args []string
+	var dawnFlag string
+	if c.standalone {
+		args = []string{"--cts-dir", ctsDir}
+		dawnFlag = "--dawn-flag"
+	} else {
+		args = []string{
+			"-e", "require('./out-node/common/runtime/cmdline.js');",
+			"--",
+			// src/common/runtime/helper/sys.ts expects 'node file.js <args>'
+			// and slices away the first two arguments. When running with '-e', args
+			// start at 1, so just inject a placeholder argument.
+			"placeholder-arg",
+			"--gpu-provider", filepath.Join(c.flags.bin, "cts.cjs"),
+		}
+		dawnFlag = "--gpu-provider-flag"
+	}
+	if c.flags.Verbose {
+		args = append(args, dawnFlag, "verbose=1")
+	}
+	if c.coverage != nil {
+		args = append(args, "--coverage")
+	}
+	// --colors is a cmdline.js option; the standalone runner rejects it.
+	if c.flags.Colors && !c.standalone {
+		args = append(args, "--colors")
+	}
+	if c.flags.unrollConstEvalLoops {
+		args = append(args, "--unroll-const-eval-loops")
+	}
+	if c.flags.compatibilityMode {
+		args = append(args, "--compat")
+	}
+	if c.flags.enforceDefaultLimits {
+		args = append(args, "--enforce-default-limits")
+	}
+	if c.flags.blockAllFeatures {
+		args = append(args, "--block-all-features")
+	}
+	if c.flags.debugCTS {
+		args = append(args, "--debug")
+	}
+	for _, f := range c.flags.dawn {
+		args = append(args, dawnFlag, f)
+	}
+	return args
 }

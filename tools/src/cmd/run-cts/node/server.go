@@ -177,7 +177,7 @@ func (c *cmd) runServer(
 		}
 
 		// Load the cases
-		postResp, postErr := http.Post(fmt.Sprintf("http://localhost:%v/load?%v", port, c.query), "", &bytes.Buffer{})
+		postResp, postErr := http.Post(fmt.Sprintf("http://localhost:%v/load?%v", port, c.queries[0]), "", &bytes.Buffer{})
 		if postErr != nil || postResp.StatusCode != http.StatusOK {
 			msg := &strings.Builder{}
 			fmt.Println(msg, "failed to load test cases: ", postErr)
