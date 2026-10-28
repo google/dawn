@@ -139,7 +139,7 @@ func (c *cmd) runnerArgs(ctsDir string) []string {
 // test cases, the test case it was running is reported as a crash or a timeout
 // and a new process runs the test cases after it.
 type cmdlineRunner struct {
-	target           localTarget
+	target           target
 	args             []string          // runner arguments shared by every process
 	queryStdin       bool              // pass queries on stdin via --query-file - instead of argv
 	cases            []common.TestCase // test cases to run, in the order the runner runs them
@@ -266,12 +266,12 @@ func (r *cmdlineRunner) processInput(batch caseRange, next int) ([]string, strin
 // watch reads the output of proc and sends the result of each test case in
 // [next, end) that proc finishes to results. If no result line arrives within
 // the case timeout, plus the start-up allowance for the first one, it kills proc.
-func (r *cmdlineRunner) watch(ctx context.Context, proc *localProcess, next, end int, results chan<- common.Result) processOutcome {
+func (r *cmdlineRunner) watch(ctx context.Context, proc process, next, end int, results chan<- common.Result) processOutcome {
 	stop := context.AfterFunc(ctx, proc.kill)
 	defer stop()
 
 	lines := make(chan string, 64)
-	go readLines(proc.out, lines)
+	go readLines(proc.output(), lines)
 
 	outcome := processOutcome{next: next}
 	wait := r.caseTimeout + r.startupAllowance

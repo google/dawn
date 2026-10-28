@@ -51,7 +51,7 @@ func newTestRunner(t *testing.T, cases ...string) (*cmdlineRunner, string) {
 		testCases[i] = common.TestCase(testCase)
 	}
 	return &cmdlineRunner{
-		target:           localTarget{runner: exe},
+		target:           &localTarget{runner: exe},
 		args:             []string{"--cts-dir", ctsDir},
 		queryStdin:       true,
 		cases:            testCases,
@@ -160,7 +160,7 @@ func TestHangAtExit(t *testing.T) {
 
 func TestRunMissingRunner(t *testing.T) {
 	runner, _ := newTestRunner(t, "suite:a:", "suite:b:")
-	runner.target = localTarget{runner: filepath.Join(t.TempDir(), "missing")}
+	runner.target = &localTarget{runner: filepath.Join(t.TempDir(), "missing")}
 	results := runCmdline(t, runner)
 	for _, res := range results {
 		require.Equal(t, common.Fail, res.Status)

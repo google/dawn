@@ -30,10 +30,27 @@ package node
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
 )
+
+// target starts command-line runner processes.
+type target interface {
+	// start runs the runner with args, feeding it stdin.
+	start(args []string, stdin string) (process, error)
+}
+
+// process is a running command-line runner process.
+type process interface {
+	// output returns the process's stdout and stderr, interleaved.
+	output() io.Reader
+	// wait waits for the process to exit.
+	wait() exitStatus
+	// kill stops the process.
+	kill()
+}
 
 // exitStatus describes how a process ended.
 type exitStatus struct {
@@ -49,7 +66,7 @@ type localTarget struct {
 	skipVSCodeInfo bool   // skip VS Code launch.json output when dir is set
 }
 
-func (t localTarget) start(args []string, stdin string) (*localProcess, error) {
+func (t *localTarget) start(args []string, stdin string) (process, error) {
 	cmd := exec.Command(t.runner, args...)
 	cmd.Dir = t.dir
 	if t.verbose {
@@ -89,9 +106,19 @@ func startWithPipe(cmd *exec.Cmd, stdin string) (*localProcess, error) {
 	return &localProcess{cmd: cmd, out: r}, nil
 }
 
-func (p *localProcess) wait() exitStatus {
+func (p *localProcess) output() io.Reader {
+	return p.out
+}
+
+// waitErr waits for the process to exit and returns the error from exec.Cmd.Wait.
+func (p *localProcess) waitErr() error {
 	err := p.cmd.Wait()
 	p.out.Close()
+	return err
+}
+
+func (p *localProcess) wait() exitStatus {
+	err := p.waitErr()
 	return exitStatus{success: err == nil, description: exitDescription(err)}
 }
 

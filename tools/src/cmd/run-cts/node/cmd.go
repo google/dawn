@@ -71,6 +71,11 @@ type flags struct {
 	enforceDefaultLimits bool
 	blockAllFeatures     bool
 	batchSize            int
+	adb                  bool
+	adbSerial            string
+	deviceDir            string
+	stage                string
+	stageOnly            bool
 	caseTimeout          time.Duration
 	startupAllowance     time.Duration
 	recover              bool
@@ -94,6 +99,7 @@ type cmd struct {
 	flags      flags
 	coverage   *common.Coverage
 	queries    []string
+	adbPath    string
 }
 
 func (c *cmd) Name() string {
@@ -128,6 +134,11 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	if c.standalone {
 		flag.StringVar(&c.flags.runner, "runner", "", "path to "+runnerName+", overriding -bin")
 		flag.IntVar(&c.flags.batchSize, "batch-size", defaultBatchSize, "maximum number of test cases per runner process")
+		flag.BoolVar(&c.flags.adb, "adb", false, "run the runner on an Android device with adb. -j defaults to 1")
+		flag.StringVar(&c.flags.adbSerial, "adb-serial", "", "serial of the Android device to use")
+		flag.StringVar(&c.flags.deviceDir, "device-dir", "/data/local/tmp/cts", "directory on the Android device that holds the runner and the CTS")
+		flag.StringVar(&c.flags.stage, "stage", stageAuto, "with -adb, when to copy the runner and the CTS onto the device first: auto (when they differ from the copies there), always or never")
+		flag.BoolVar(&c.flags.stageOnly, "stage-only", false, "with -adb, stage onto the device and exit")
 	} else {
 		flag.BoolVar(&c.flags.isolated, "isolate", false, "run each test in an isolated process")
 	}
@@ -181,6 +192,16 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		}
 	}
 
+	target, _ := c.target()
+	if adb, ok := target.(*adbTarget); ok && c.flags.stage != stageNever {
+		if err := adb.stage(c.flags.runner, c.flags.CTS, c.flags.stage == stageAlways); err != nil {
+			return fmt.Errorf("failed to stage onto the device: %w", err)
+		}
+		if c.flags.stageOnly {
+			return c.state.Close(nil)
+		}
+	}
+
 	testCases, err := c.queryTestCases()
 	if err != nil {
 		return err
@@ -227,12 +248,21 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 }
 
 // target returns where to run the command-line runner, and the CTS directory there.
-func (c *cmd) target() (localTarget, string) {
+func (c *cmd) target() (target, string) {
+	if c.flags.adb {
+		t := &adbTarget{
+			adb:       c.adbPath,
+			serial:    c.flags.adbSerial,
+			deviceDir: c.flags.deviceDir,
+			verbose:   c.flags.Verbose,
+		}
+		return t, t.devicePath(deviceCTS)
+	}
 	runner := c.flags.Node
 	if c.standalone {
 		runner = c.flags.runner
 	}
-	return localTarget{
+	return &localTarget{
 		runner:  runner,
 		dir:     c.flags.CTS,
 		verbose: c.flags.Verbose,
@@ -249,7 +279,11 @@ func (c *cmd) processFlags(fsReaderWriter oswrapper.FilesystemReaderWriter) erro
 				return fmt.Errorf("-bin is not set. It defaults to <dawn>/out/active (%v) which does not exist",
 					filepath.Join(fileutils.DawnRoot(fsReaderWriter), "out/active"))
 			}
-			c.flags.runner = filepath.Join(c.flags.bin, runnerName+fileutils.ExeExt)
+			exeExt := fileutils.ExeExt
+			if c.flags.adb {
+				exeExt = ""
+			}
+			c.flags.runner = filepath.Join(c.flags.bin, runnerName+exeExt)
 		}
 		if !fileutils.IsFile(c.flags.runner, fsReaderWriter) {
 			return fmt.Errorf("'%v' does not exist", c.flags.runner)
@@ -296,6 +330,26 @@ func (c *cmd) processFlags(fsReaderWriter oswrapper.FilesystemReaderWriter) erro
 	if !c.standalone && !c.flags.isolated && len(c.queries) > 1 {
 		return fmt.Errorf("only a single query can be provided")
 	}
+	if c.flags.adb {
+		var err error
+		if c.adbPath, err = exec.LookPath("adb"); err != nil {
+			return fmt.Errorf("-adb needs adb on PATH: %w", err)
+		}
+		if !isFlagSet("j") {
+			c.flags.NumRunners = 1
+		}
+		switch c.flags.stage {
+		case stageAuto, stageAlways:
+		case stageNever:
+			if c.flags.stageOnly {
+				return fmt.Errorf("-stage-only cannot be used with -stage=never")
+			}
+		default:
+			return fmt.Errorf("-stage must be auto, always or never, not '%v'", c.flags.stage)
+		}
+	} else if c.flags.stageOnly {
+		return fmt.Errorf("-stage-only needs -adb")
+	}
 	if c.flags.NumRunners < 1 {
 		c.flags.NumRunners = 1
 	}
@@ -330,6 +384,17 @@ func (c *cmd) processFlags(fsReaderWriter oswrapper.FilesystemReaderWriter) erro
 	c.state = *state
 
 	return nil
+}
+
+// isFlagSet returns true if the named flag was given on the command line.
+func isFlagSet(name string) bool {
+	set := false
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == name {
+			set = true
+		}
+	})
+	return set
 }
 
 // queryTestCases returns the test cases that match c.queries, in order.
