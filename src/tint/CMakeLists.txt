@@ -123,6 +123,7 @@ function(tint_default_compile_options TARGET)
     -Wno-lifetime-safety-intra-tu-suggestions
     -Wno-lifetime-safety-cross-tu-suggestions
     -Wno-lifetime-safety-invalidation
+    -Wno-experimental-lifetime-safety-field-origin-escape
   )
 
   if(COMPILER_IS_GNU)
