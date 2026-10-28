@@ -34,9 +34,16 @@ const (
 	Pass    Status = "pass"
 	Warn    Status = "warn"
 	Fail    Status = "fail"
+	Crash   Status = "crash" // the runner process ended before the test case reported a result
 	Skip    Status = "skip"
 	Timeout Status = "timeout"
 )
 
 // All the status types
-var AllStatuses = []Status{Pass, Warn, Fail, Skip, Timeout}
+var AllStatuses = []Status{Pass, Warn, Fail, Crash, Skip, Timeout}
+
+// isFailure returns true for the statuses that make the run fail and that
+// --failures-only keeps.
+func (s Status) isFailure() bool {
+	return s == Fail || s == Crash
+}

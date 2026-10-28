@@ -140,7 +140,7 @@ func (s *State) Close(results Results) error {
 	if s.resultsPath != "" {
 		expectations := Expectations{}
 		for testCase, result := range results {
-			if !s.failuresOnly || result.Status == Fail {
+			if !s.failuresOnly || result.Status.isFailure() {
 				expectations[testCase] = result.Status
 			}
 		}

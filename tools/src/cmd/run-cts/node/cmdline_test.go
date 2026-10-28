@@ -59,6 +59,7 @@ func newTestRunner(t *testing.T, cases ...string) (*cmdlineRunner, string) {
 		batchSize:        defaultBatchSize,
 		caseTimeout:      time.Minute,
 		startupAllowance: time.Minute,
+		recover:          true,
 	}, ctsDir
 }
 
@@ -82,15 +83,24 @@ func runCmdline(t *testing.T, runner *cmdlineRunner) map[common.TestCase]common.
 	return results
 }
 
-// The test case in flight when the runner exits early is a failure with the
-// output since the last result, and the rest of the batch is reported as not
-// run.
-func TestRunEarlyExitInBatch(t *testing.T) {
+// statuses returns the status of each result.
+func statuses(results map[common.TestCase]common.Result) map[common.TestCase]common.Status {
+	out := map[common.TestCase]common.Status{}
+	for testCase, res := range results {
+		out[testCase] = res.Status
+	}
+	return out
+}
+
+// Without recovery, the test case in flight when the runner crashes is a
+// crash with the crash output, and the rest are reported as not run.
+func TestRunCrashWithoutRecovery(t *testing.T) {
 	runner, _ := newTestRunner(t, "suite:a:", "suite:crash:", "suite:c:", "suite:d:")
+	runner.recover = false
 	results := runCmdline(t, runner)
 	require.Equal(t, common.Pass, results["suite:a:"].Status)
 	crashed := results["suite:crash:"]
-	require.Equal(t, common.Fail, crashed.Status)
+	require.Equal(t, common.Crash, crashed.Status)
 	require.Contains(t, crashed.Message, "[ERROR] crashing in suite:crash:\n")
 	require.Contains(t, crashed.Message, "the runner process ended before reporting a result")
 	for _, testCase := range []common.TestCase{"suite:c:", "suite:d:"} {
@@ -99,21 +109,33 @@ func TestRunEarlyExitInBatch(t *testing.T) {
 	}
 }
 
+// After a crash, a new process runs the rest of the batch.
+func TestRecoverBatch(t *testing.T) {
+	runner, _ := newTestRunner(t, "suite:a:", "suite:crash:", "suite:c:", "suite:d:")
+	results := runCmdline(t, runner)
+	require.Equal(t, map[common.TestCase]common.Status{
+		"suite:a:":     common.Pass,
+		"suite:crash:": common.Crash,
+		"suite:c:":     common.Pass,
+		"suite:d:":     common.Pass,
+	}, statuses(results))
+}
+
 // A runner that exits with status 0 before running every test case is not a
-// pass.
+// pass, and the run continues.
 func TestRunStall(t *testing.T) {
 	runner, _ := newTestRunner(t, "suite:a:", "suite:stall:", "suite:c:")
 	results := runCmdline(t, runner)
 	require.Equal(t, common.Pass, results["suite:a:"].Status)
 	stall := results["suite:stall:"]
-	require.Equal(t, common.Fail, stall.Status)
+	require.Equal(t, common.Crash, stall.Status)
 	require.Contains(t, stall.Message, "exit status 0")
 	require.Contains(t, stall.Message, "a promise that never settles")
-	require.Equal(t, common.Fail, results["suite:c:"].Status)
+	require.Equal(t, common.Pass, results["suite:c:"].Status)
 }
 
 // A test case that reports no result within the case timeout is killed and
-// reported as a timeout.
+// reported as a timeout, and the run continues.
 func TestTimeout(t *testing.T) {
 	runner, _ := newTestRunner(t, "suite:a:", "suite:hang:", "suite:c:")
 	runner.caseTimeout = 500 * time.Millisecond
@@ -123,7 +145,7 @@ func TestTimeout(t *testing.T) {
 	require.Equal(t, common.Pass, results["suite:a:"].Status)
 	require.Equal(t, common.Timeout, results["suite:hang:"].Status)
 	require.Contains(t, results["suite:hang:"].Message, "no result after")
-	require.Equal(t, common.Fail, results["suite:c:"].Status)
+	require.Equal(t, common.Pass, results["suite:c:"].Status)
 }
 
 // A process that does not exit after its last test case is killed without

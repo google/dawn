@@ -70,6 +70,7 @@ func (c *cmd) newCmdlineRunner(testCases []common.TestCase, fsReaderWriter oswra
 		batchSize:        batchSize,
 		caseTimeout:      c.flags.caseTimeout,
 		startupAllowance: c.flags.startupAllowance,
+		recover:          c.flags.recover,
 		coverage:         c.coverage,
 		fsReaderWriter:   fsReaderWriter,
 	}
@@ -133,7 +134,10 @@ func (c *cmd) runnerArgs(ctsDir string) []string {
 }
 
 // cmdlineRunner runs test cases in command-line runner processes and turns
-// their output into results. Every test case gets exactly one result.
+// their output into results. Every test case gets exactly one result. When a
+// runner process ends, or stops reporting results, before it has run all its
+// test cases, the test case it was running is reported as a crash or a timeout
+// and a new process runs the test cases after it.
 type cmdlineRunner struct {
 	target           localTarget
 	args             []string          // runner arguments shared by every process
@@ -143,6 +147,7 @@ type cmdlineRunner struct {
 	batchSize        int               // test cases per batch
 	caseTimeout      time.Duration     // longest wait for the next result line
 	startupAllowance time.Duration     // extra wait for the first result line of a process
+	recover          bool              // start a new process after a crash or a timeout
 	coverage         *common.Coverage
 	fsReaderWriter   oswrapper.FilesystemReaderWriter
 
@@ -205,23 +210,32 @@ func makeBatches(numCases, batchSize, numWorkers int) []caseRange {
 	return batches
 }
 
-// runBatch runs the test cases of batch in a runner process.
+// runBatch runs the test cases of batch. When a runner process ends, or stops
+// reporting results, before it has run them all, the test case it was running
+// is reported as a crash or a timeout and a new process runs the rest.
 func (r *cmdlineRunner) runBatch(ctx context.Context, batch caseRange) {
-	outcome := r.runProcess(ctx, batch, batch.start, r.results)
-	next := outcome.next
-	if next == batch.end {
-		return
+	next := batch.start
+	for next < batch.end {
+		outcome := r.runProcess(ctx, batch, next, r.results)
+		next = outcome.next
+		if next == batch.end {
+			return
+		}
+		switch {
+		case ctx.Err() != nil:
+			r.reportNotRun(r.results, next, batch.end, "not run: the run was interrupted\n")
+			return
+		case outcome.startErr != nil:
+			r.reportNotRun(r.results, next, batch.end, fmt.Sprintf("not run: could not start the runner: %v\n", outcome.startErr))
+			return
+		}
+		r.reportUnfinished(next, outcome)
+		next++
+		if !r.recover {
+			r.reportNotRun(r.results, next, batch.end, fmt.Sprintf("not run: the runner process ended while running %v\n", r.cases[next-1]))
+			return
+		}
 	}
-	switch {
-	case ctx.Err() != nil:
-		r.reportNotRun(r.results, next, batch.end, "not run: the run was interrupted\n")
-		return
-	case outcome.startErr != nil:
-		r.reportNotRun(r.results, next, batch.end, fmt.Sprintf("not run: could not start the runner: %v\n", outcome.startErr))
-		return
-	}
-	r.reportUnfinished(next, outcome)
-	r.reportNotRun(r.results, next+1, batch.end, fmt.Sprintf("not run: the runner process ended while running %v\n", r.cases[next]))
 }
 
 // runProcess starts a runner process for the test cases of batch from index next
@@ -371,7 +385,7 @@ func (r *cmdlineRunner) reportUnfinished(i int, outcome processOutcome) {
 		res.Status = common.Timeout
 		res.Message = outcome.output + fmt.Sprintf("no result after %v, so the runner process was killed\n", outcome.waited)
 	} else {
-		res.Status = common.Fail
+		res.Status = common.Crash
 		res.Message = outcome.output + "the runner process ended before reporting a result for this test case: " + outcome.exit.description + "\n"
 		if outcome.exit.success {
 			res.Message += "an early exit with status 0 usually means that a test awaited a promise that never settles\n"

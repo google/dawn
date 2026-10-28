@@ -73,6 +73,7 @@ type flags struct {
 	batchSize            int
 	caseTimeout          time.Duration
 	startupAllowance     time.Duration
+	recover              bool
 	dawn                 node.Flags
 }
 
@@ -151,6 +152,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.BoolVar(&c.flags.blockAllFeatures, "block-all-features", false, "block all features (except 'core-features-and-limits')")
 	flag.DurationVar(&c.flags.caseTimeout, "case-timeout", common.TestCaseTimeout, "kill a runner process if it produces no result line within this time")
 	flag.DurationVar(&c.flags.startupAllowance, "startup-allowance", defaultStartupAllowance, "extra time allowed for the first result line of each runner process")
+	flag.BoolVar(&c.flags.recover, "recover", true, "start a new runner process on the remaining test cases after a crash or timeout")
 
 	if c.standalone {
 		return nil, nil
