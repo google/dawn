@@ -42,6 +42,7 @@
 #include "src/tint/lang/core/ir/break_if.h"
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/lang/core/ir/constant.h"
+#include "src/tint/lang/core/ir/constexpr_if.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/convert.h"
@@ -201,9 +202,12 @@ class State {
                 inst,                                                               //
                 [&](const core::ir::Var* var) { Var(var); },                        //
                 [&](const core::ir::Override* override_) { Override(override_); },  //
+                [&](const core::ir::Access* access) { Access(access); },            //
                 [&](const core::ir::Binary* binary) { Binary(binary); },            //
+                [&](const core::ir::Call* call) { Call(call); },                    //
+                [&](const core::ir::ConstExprIf* if_) { If(if_); },                 //
+                [&](const core::ir::Swizzle* swizzle) { Swizzle(swizzle); },        //
                 [&](const core::ir::Unary* unary) { Unary(unary); },                //
-                [&](const wgsl::ir::BuiltinCall* c) { Call(c); },                   //
                 TINT_ICE_ON_NO_MATCH);
         }
     }
@@ -707,7 +711,7 @@ class State {
             call,  //
             [&](const core::ir::UserCall* c) {
                 auto* expr = b.Call(NameFor(c->Target()), std::move(args));
-                if (call->Results().IsEmpty() || !call->Result()->IsUsed()) {
+                if (current_function_ && (call->Results().IsEmpty() || !call->Result()->IsUsed())) {
                     Append(b.CallStmt(expr));
                     return;
                 }
@@ -765,7 +769,7 @@ class State {
                     expr = b.Call(c->Func(), std::move(args));
                 }
 
-                if (call->Results().IsEmpty() || !call->Result()->IsUsed()) {
+                if (current_function_ && (call->Results().IsEmpty() || !call->Result()->IsUsed())) {
                     Append(b.CallStmt(expr));
                     return;
                 }

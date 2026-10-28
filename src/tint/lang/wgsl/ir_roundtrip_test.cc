@@ -2160,6 +2160,20 @@ TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Handle_SamplerCmp) {
 )");
 }
 
+TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_OverrideExpressions) {
+    RUN_TEST(R"(
+@id(0) override o : i32 = 1i;
+
+@id(1) override b : bool = ((o == 1i) && (f32(o) > 0.0f));
+
+var<private> v1 : vec2<f32> = vec3<f32>(f32(o), 1.0f, 2.0f).xy;
+
+var<private> v2 : f32 = vec2<f32>(f32(o), 1.0f).x;
+
+var<workgroup> w : array<i32, max(o, 2i)>;
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Function-scope var
 ////////////////////////////////////////////////////////////////////////////////
