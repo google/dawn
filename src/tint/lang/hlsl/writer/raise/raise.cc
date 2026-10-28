@@ -65,6 +65,7 @@
 #include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/lang/hlsl/writer/raise/array_offset_from_immediate.h"
 #include "src/tint/lang/hlsl/writer/raise/binary_polyfill.h"
+#include "src/tint/lang/hlsl/writer/raise/bitcast_polyfill.h"
 #include "src/tint/lang/hlsl/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/hlsl/writer/raise/decompose_snorm10_10_10_2.h"
 #include "src/tint/lang/hlsl/writer/raise/decompose_storage_access.h"
@@ -354,11 +355,6 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
     TINT_CHECK_RESULT(raise::BinaryPolyfill(module));
 
-    // Avoid potential UB (aka signed overflow) by performing unsigned integer arithmetic.
-    core::ir::transform::SignedIntegerPolyfillConfig signed_integer_cfg{
-        .signed_negation = true, .signed_arithmetic = true, .signed_shiftleft = true};
-    TINT_CHECK_RESULT(core::ir::transform::SignedIntegerPolyfill(module, signed_integer_cfg));
-
     // BuiltinPolyfill must come after BinaryPolyfill and DecomposeStorageAccess as they add
     // builtins
     {
@@ -368,6 +364,18 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         config.use_hlsl_2021_select = (options.compiler == Options::Compiler::kDXC_2021);
         TINT_CHECK_RESULT(raise::BuiltinPolyfill(module, config));
     }
+
+    // Avoid potential UB (aka signed overflow) by performing unsigned integer arithmetic.
+    // SignedIntegerPolyfill must come after BuiltinPolyfill as it can introduce additional signed
+    // integer arithmetic.
+    core::ir::transform::SignedIntegerPolyfillConfig signed_integer_cfg{
+        .signed_negation = true, .signed_arithmetic = true, .signed_shiftleft = true};
+    TINT_CHECK_RESULT(core::ir::transform::SignedIntegerPolyfill(module, signed_integer_cfg));
+
+    // BitcastPolyfill must come after any transform that introduces bitcasts (including
+    // SignedIntegerPolyfill).
+    TINT_CHECK_RESULT(raise::BitcastPolyfill(module));
+
     TINT_CHECK_RESULT(core::ir::transform::VectorizeScalarMatrixConstructors(module));
     TINT_CHECK_RESULT(core::ir::transform::RemoveContinueInSwitch(module));
 

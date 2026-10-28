@@ -6,7 +6,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 float4 unpack4x8snorm_523fb3() {
   uint arg_0 = 1u;
   int v = int(arg_0);
-  float4 res = clamp((float4((int4((v << 24u), (v << 16u), (v << 8u), v) >> (24u).xxxx)) / 127.0f), (-1.0f).xxxx, (1.0f).xxxx);
+  float4 res = clamp((float4((int4(asint((asuint(v) << 24u)), asint((asuint(v) << 16u)), asint((asuint(v) << 8u)), v) >> (24u).xxxx)) / 127.0f), (-1.0f).xxxx, (1.0f).xxxx);
   return res;
 }
 
@@ -22,7 +22,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 float4 unpack4x8snorm_523fb3() {
   uint arg_0 = 1u;
   int v = int(arg_0);
-  float4 res = clamp((float4((int4((v << 24u), (v << 16u), (v << 8u), v) >> (24u).xxxx)) / 127.0f), (-1.0f).xxxx, (1.0f).xxxx);
+  float4 res = clamp((float4((int4(asint((asuint(v) << 24u)), asint((asuint(v) << 16u)), asint((asuint(v) << 8u)), v) >> (24u).xxxx)) / 127.0f), (-1.0f).xxxx, (1.0f).xxxx);
   return res;
 }
 
@@ -48,7 +48,7 @@ struct vertex_main_outputs {
 float4 unpack4x8snorm_523fb3() {
   uint arg_0 = 1u;
   int v = int(arg_0);
-  float4 res = clamp((float4((int4((v << 24u), (v << 16u), (v << 8u), v) >> (24u).xxxx)) / 127.0f), (-1.0f).xxxx, (1.0f).xxxx);
+  float4 res = clamp((float4((int4(asint((asuint(v) << 24u)), asint((asuint(v) << 16u)), asint((asuint(v) << 8u)), v) >> (24u).xxxx)) / 127.0f), (-1.0f).xxxx, (1.0f).xxxx);
   return res;
 }
 

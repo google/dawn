@@ -6,7 +6,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 int3 subgroupInclusiveMul_769def() {
   int3 arg_0 = (int(1)).xxx;
   int3 v = arg_0;
-  int3 res = (WavePrefixProduct(v) * v);
+  int3 res = asint((asuint(WavePrefixProduct(v)) * asuint(v)));
   return res;
 }
 
@@ -22,7 +22,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 int3 subgroupInclusiveMul_769def() {
   int3 arg_0 = (int(1)).xxx;
   int3 v = arg_0;
-  int3 res = (WavePrefixProduct(v) * v);
+  int3 res = asint((asuint(WavePrefixProduct(v)) * asuint(v)));
   return res;
 }
 

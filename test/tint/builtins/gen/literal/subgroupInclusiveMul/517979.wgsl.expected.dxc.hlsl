@@ -4,7 +4,7 @@
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int4 subgroupInclusiveMul_517979() {
-  int4 res = (WavePrefixProduct((int(1)).xxxx) * (int(1)).xxxx);
+  int4 res = asint((asuint(WavePrefixProduct((int(1)).xxxx)) * (1u).xxxx));
   return res;
 }
 
@@ -18,7 +18,7 @@ void fragment_main() {
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int4 subgroupInclusiveMul_517979() {
-  int4 res = (WavePrefixProduct((int(1)).xxxx) * (int(1)).xxxx);
+  int4 res = asint((asuint(WavePrefixProduct((int(1)).xxxx)) * (1u).xxxx));
   return res;
 }
 

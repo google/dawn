@@ -672,6 +672,46 @@ void main(main_inputs inputs) {
 )");
 }
 
+// Check that the negation introduced by the atomicSub polyfill is performed with unsigned
+// arithmetic, to avoid the potential UB of signed integer overflow.
+TEST_F(HlslWriterTest, BuiltinWorkgroupAtomicSub_NonConstantI32) {
+    auto* v = b.ir.root_block->Append(b.Var<workgroup, atomic<i32>>("v"));
+    auto* p = b.ir.root_block->Append(b.Var<private_>("p", 123_i));
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call<i32>(core::BuiltinFn::kAtomicSub, v, b.Load(p)));
+        b.Return(func);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(struct main_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
+
+
+groupshared int v;
+static int p = int(123);
+void main_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
+    int v_1 = int(0);
+    InterlockedExchange(v, int(0), v_1);
+  }
+  GroupMemoryBarrierWithGroupSync();
+  int v_2 = int(0);
+  InterlockedAdd(v, asint((0u - asuint(p))), v_2);
+  int x = v_2;
+}
+
+[numthreads(1, 1, 1)]
+void main(main_inputs inputs) {
+  main_inner(inputs.tint_local_index);
+}
+
+)");
+}
+
 TEST_F(HlslWriterTest, BuiltinWorkgroupAtomicCompareExchangeWeak) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("padding"), ty.vec4f()},
@@ -2129,7 +2169,7 @@ TEST_F(HlslWriterTest, BuiltinPack2x16Snorm) {
 void main() {
   float2 u = (2.0f).xx;
   int2 v = (int2(round((clamp(u, (-1.0f).xx, (1.0f).xx) * 32767.0f))) & (int(65535)).xx);
-  uint a = asuint((v.x | (v.y << 16u)));
+  uint a = asuint((v.x | asint((asuint(v.y) << 16u))));
 }
 
 )");
@@ -2149,7 +2189,7 @@ TEST_F(HlslWriterTest, BuiltinUnpack2x16Snorm) {
 void main() {
   uint u = 2u;
   int v = int(u);
-  float2 a = clamp((float2((int2((v << 16u), v) >> (16u).xx)) / 32767.0f), (-1.0f).xx, (1.0f).xx);
+  float2 a = clamp((float2((int2(asint((asuint(v) << 16u)), v) >> (16u).xx)) / 32767.0f), (-1.0f).xx, (1.0f).xx);
 }
 
 )");
@@ -2209,7 +2249,7 @@ TEST_F(HlslWriterTest, BuiltinPack4x8Snorm) {
 void main() {
   float4 u = (2.0f).xxxx;
   int4 v = (int4(round((clamp(u, (-1.0f).xxxx, (1.0f).xxxx) * 127.0f))) & (int(255)).xxxx);
-  uint a = asuint((v.x | ((v.y << 8u) | ((v.z << 16u) | (v.w << 24u)))));
+  uint a = asuint((v.x | (asint((asuint(v.y) << 8u)) | (asint((asuint(v.z) << 16u)) | asint((asuint(v.w) << 24u))))));
 }
 
 )");
@@ -2229,7 +2269,7 @@ TEST_F(HlslWriterTest, BuiltinUnpack4x8Snorm) {
 void main() {
   uint u = 2u;
   int v = int(u);
-  float4 a = clamp((float4((int4((v << 24u), (v << 16u), (v << 8u), v) >> (24u).xxxx)) / 127.0f), (-1.0f).xxxx, (1.0f).xxxx);
+  float4 a = clamp((float4((int4(asint((asuint(v) << 24u)), asint((asuint(v) << 16u)), asint((asuint(v) << 8u)), v) >> (24u).xxxx)) / 127.0f), (-1.0f).xxxx, (1.0f).xxxx);
 }
 
 )");

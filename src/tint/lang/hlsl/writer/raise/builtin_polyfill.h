@@ -52,6 +52,7 @@ struct BuiltinPolyfillConfig {
 
 /// BuiltinPolyfill is a transform that replaces calls to builtins with polyfills and calls to
 /// HLSL polyfilled or backend intrinsic functions.
+/// Note: calls to the `bitcast` builtin are handled by BitcastPolyfill instead.
 /// @param module the module to transform
 /// @param config the configuration for the transform
 /// @returns success or failure

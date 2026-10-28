@@ -6,7 +6,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 float2 unpack2x16snorm_b4aea6() {
   uint arg_0 = 1u;
   int v = int(arg_0);
-  float2 res = clamp((float2((int2((v << 16u), v) >> (16u).xx)) / 32767.0f), (-1.0f).xx, (1.0f).xx);
+  float2 res = clamp((float2((int2(asint((asuint(v) << 16u)), v) >> (16u).xx)) / 32767.0f), (-1.0f).xx, (1.0f).xx);
   return res;
 }
 
@@ -22,7 +22,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 float2 unpack2x16snorm_b4aea6() {
   uint arg_0 = 1u;
   int v = int(arg_0);
-  float2 res = clamp((float2((int2((v << 16u), v) >> (16u).xx)) / 32767.0f), (-1.0f).xx, (1.0f).xx);
+  float2 res = clamp((float2((int2(asint((asuint(v) << 16u)), v) >> (16u).xx)) / 32767.0f), (-1.0f).xx, (1.0f).xx);
   return res;
 }
 
@@ -48,7 +48,7 @@ struct vertex_main_outputs {
 float2 unpack2x16snorm_b4aea6() {
   uint arg_0 = 1u;
   int v = int(arg_0);
-  float2 res = clamp((float2((int2((v << 16u), v) >> (16u).xx)) / 32767.0f), (-1.0f).xx, (1.0f).xx);
+  float2 res = clamp((float2((int2(asint((asuint(v) << 16u)), v) >> (16u).xx)) / 32767.0f), (-1.0f).xx, (1.0f).xx);
   return res;
 }
 

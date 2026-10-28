@@ -12,7 +12,7 @@ Matrix_right_i32_8x8 tint_subgroup_matrix_scalar_op(Matrix_right_i32_8x8 m, int 
       if ((v >= result.Length())) {
         break;
       }
-      result.Set(v, (result.Get(v) * s));
+      result.Set(v, asint((asuint(result.Get(v)) * asuint(s))));
       {
         idx = (idx + 1u);
       }

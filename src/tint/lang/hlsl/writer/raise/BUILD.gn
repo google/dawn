@@ -49,6 +49,8 @@ if (tint_build_hlsl_writer) {
       "array_offset_from_immediate.h",
       "binary_polyfill.cc",
       "binary_polyfill.h",
+      "bitcast_polyfill.cc",
+      "bitcast_polyfill.h",
       "builtin_polyfill.cc",
       "builtin_polyfill.h",
       "decompose_snorm10_10_10_2.cc",
@@ -113,6 +115,7 @@ if (tint_build_unittests) {
       sources = [
         "array_offset_from_immediate_test.cc",
         "binary_polyfill_test.cc",
+        "bitcast_polyfill_test.cc",
         "builtin_polyfill_test.cc",
         "decompose_snorm10_10_10_2_test.cc",
         "decompose_storage_access_test.cc",
