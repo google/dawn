@@ -99,6 +99,7 @@ Checks:
   - -bugprone-lambda-function-name
   - -bugprone-random-generator-seed
   - -bugprone-unchecked-optional-access
+  - -cppcoreguidelines-avoid-const-or-ref-data-members
   - -cppcoreguidelines-macro-usage
   - -cppcoreguidelines-pro-type-reinterpret-cast
   - -fuchsia-statically-constructed-objects
@@ -132,7 +133,6 @@ Checks:
   #- -bugprone-forward-declaration-namespace
   #- -bugprone-nondeterministic-pointer-iteration-order
   #- -bugprone-unused-local-non-trivial-variable
-  #- -cppcoreguidelines-avoid-const-or-ref-data-members
   #- -cppcoreguidelines-avoid-non-const-global-variables
   #- -cppcoreguidelines-no-malloc
   #- -cppcoreguidelines-prefer-member-initializer
