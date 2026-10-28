@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -116,46 +117,33 @@ MaybeError ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial waitSerial, Na
         }
     }
 
-    // We currently have two differing implementations for this function depending on whether the
-    // backend supports thread safe waits. Note that while currently only the Metal backend
-    // explicitly enables thread safe wait, the main blocking backend is D3D11 which is using the
-    // value of |mCompletedSerial| within it's implementation of |CheckAndUpdateCompletedSerials|.
-    if (GetDevice()->IsToggleEnabled(Toggle::WaitIsThreadSafe)) {
-        if (timeout > Nanoseconds(0u)) {
-            // We should never need to wait for queue serials after the device has been
-            // Disconnected.
-            DAWN_ASSERT(GetDevice()->GetState() != DeviceBase::State::Disconnected);
-
-            // Wait on the serial if it hasn't passed yet.
-            ExecutionSerial completedSerial = kWaitSerialTimeout;
-            DAWN_TRY_ASSIGN(completedSerial, WaitForQueueSerialImpl(waitSerial, timeout));
-            UpdateCompletedSerialTo(QueuePriority::UserVisible, completedSerial);
-            return {};
-        }
-        return UpdateCompletedSerial(QueuePriority::UserVisible);
-    } else {
-        // Otherwise, we need to acquire the device lock first.
-        auto deviceGuard = GetDevice()->GetGuard();
-        if (timeout > Nanoseconds(0u)) {
-            // We should never need to wait for queue serials after the device has been
-            // Disconnected.
-            DAWN_ASSERT(GetDevice()->GetState() != DeviceBase::State::Disconnected);
-
-            // Wait on the serial if it hasn't passed yet.
-            ExecutionSerial completedSerial = kWaitSerialTimeout;
-            DAWN_TRY_ASSIGN(completedSerial, WaitForQueueSerialImpl(waitSerial, timeout));
-
-            // It's critical to update the completed serial right away. If fences are processed
-            // by another thread before CheckAndUpdateCompletedSerials() runs on the current
-            // thread, the fence list will be empty, preventing the current thread from
-            // determining the true latest serial. Preemptively updating mCompletedSerial
-            // ensures CheckAndUpdateCompletedSerials() returns an accurate value, preventing
-            // stale data.
-            mCompletedSerial.Use(
-                [&](auto old) { *old = std::max(*old, static_cast<uint64_t>(completedSerial)); });
-        }
-        return UpdateCompletedSerial(QueuePriority::UserVisible);
+    // If the backend does not support thread-safe waits, we need to acquire the device lock first.
+    // Note that the main blocking backend is D3D11 which is using the value of |mCompletedSerial|
+    // within its implementation of |CheckAndUpdateCompletedSerials|.
+    std::optional<DeviceGuard> deviceGuard;
+    if (!GetDevice()->IsToggleEnabled(Toggle::WaitIsThreadSafe)) {
+        deviceGuard.emplace(GetDevice()->GetGuard());
     }
+
+    if (timeout > Nanoseconds(0u)) {
+        // We should never need to wait for queue serials after the device has been
+        // Disconnected.
+        DAWN_ASSERT(GetDevice()->GetState() != DeviceBase::State::Disconnected);
+
+        // Wait on the serial if it hasn't passed yet.
+        ExecutionSerial completedSerial = kWaitSerialTimeout;
+        DAWN_TRY_ASSIGN(completedSerial, WaitForQueueSerialImpl(waitSerial, timeout));
+
+        // It's critical to update the completed serial right away. If fences are processed
+        // by another thread before CheckAndUpdateCompletedSerials() runs on the current
+        // thread, the fence list will be empty, preventing the current thread from
+        // determining the true latest serial. Preemptively updating mCompletedSerial
+        // ensures CheckAndUpdateCompletedSerials() returns an accurate value, preventing
+        // stale data.
+        mCompletedSerial.Use(
+            [&](auto old) { *old = std::max(*old, static_cast<uint64_t>(completedSerial)); });
+    }
+    return UpdateCompletedSerial(QueuePriority::UserVisible);
 }
 
 void ExecutionQueueBase::WaitForIdleForDestruction() {
@@ -212,9 +200,11 @@ void ExecutionQueueBase::WaitForIdleForDestruction() {
 }
 
 MaybeError ExecutionQueueBase::CheckPassedSerials() {
+    ExecutionSerial oldCompletedSerial = GetCompletedCommandSerial();
     ExecutionSerial completedSerial;
     DAWN_TRY_ASSIGN(completedSerial, CheckAndUpdateCompletedSerials());
 
+    DAWN_ASSERT(completedSerial >= oldCompletedSerial);
     DAWN_CHECK(completedSerial <=
                ExecutionSerial(mLastSubmittedSerial.load(std::memory_order_acquire)));
 
@@ -225,9 +215,11 @@ MaybeError ExecutionQueueBase::CheckPassedSerials() {
 }
 
 MaybeError ExecutionQueueBase::UpdateCompletedSerial(QueuePriority priority) {
+    ExecutionSerial oldCompletedSerial = GetCompletedCommandSerial();
     ExecutionSerial completedSerial;
     DAWN_TRY_ASSIGN(completedSerial, CheckAndUpdateCompletedSerials());
 
+    DAWN_ASSERT(completedSerial >= oldCompletedSerial);
     DAWN_CHECK(completedSerial <=
                ExecutionSerial(mLastSubmittedSerial.load(std::memory_order_acquire)));
     UpdateCompletedSerialTo(priority, completedSerial);

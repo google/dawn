@@ -27,6 +27,7 @@
 
 #include "src/dawn/native/webgpu/QueueWGPU.h"
 
+#include <algorithm>
 #include <limits>
 #include <vector>
 
@@ -173,7 +174,7 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
             DAWN_TRY(CheckWGPUSuccess(status, "instanceWaitAny"));
 
             // Update fenceSerial since future is ready.
-            fenceSerial = tentativeSerial;
+            fenceSerial = std::max(fenceSerial, tentativeSerial);
 
             futuresInFlight->pop_front();
         }

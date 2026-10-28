@@ -185,10 +185,6 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
         DAWN_UNREACHABLE();
     }
 
-    if (completedSerial <= GetCompletedCommandSerial()) {
-        return ExecutionSerial(0u);
-    }
-
     DAWN_TRY(RecycleSystemEventReceivers(completedSerial));
 
     return completedSerial;

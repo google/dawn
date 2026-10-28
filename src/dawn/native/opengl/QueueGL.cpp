@@ -27,6 +27,7 @@
 
 #include "src/dawn/native/opengl/QueueGL.h"
 
+#include <algorithm>
 #include <vector>
 
 #include "dawn/platform/DawnPlatform.h"
@@ -328,7 +329,7 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
     // Queue::SubmitImpl(), it's safe to use ExecuteGL().
     return device->ExecuteGL(SubmitMode::Passive, [&](const OpenGLFunctions& gl) -> auto {
         return mFencesInFlight.Use([&](auto fencesInFlight) -> ResultOrError<ExecutionSerial> {
-            ExecutionSerial fenceSerial{0u};
+            ExecutionSerial fenceSerial = GetCompletedCommandSerial();
             while (!fencesInFlight->empty()) {
                 auto [sync, tentativeSerial] = fencesInFlight->front();
 
@@ -341,7 +342,7 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
                     return fenceSerial;
                 }
                 // Update fenceSerial since fence is ready.
-                fenceSerial = tentativeSerial;
+                fenceSerial = std::max(fenceSerial, tentativeSerial);
 
                 fencesInFlight->pop_front();
             }

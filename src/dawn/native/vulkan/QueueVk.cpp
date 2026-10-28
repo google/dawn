@@ -27,6 +27,7 @@
 
 #include "src/dawn/native/vulkan/QueueVk.h"
 
+#include <algorithm>
 #include <limits>
 #include <optional>
 #include <utility>
@@ -130,12 +131,9 @@ VkQueue Queue::GetVkQueue() const {
 }
 
 ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
-    // TODO(crbug.com/40643114): Revisit whether this lock is needed for this backend.
-    auto deviceGuard = GetDevice()->GetGuard();
-
     Device* device = ToBackend(GetDevice());
     return mFencesInFlight.Use([&](auto fencesInFlight) -> ResultOrError<ExecutionSerial> {
-        ExecutionSerial fenceSerial(0u);
+        ExecutionSerial fenceSerial = GetCompletedCommandSerial();
         while (!fencesInFlight->empty()) {
             VkFence fence = fencesInFlight->front().first;
             ExecutionSerial tentativeSerial = fencesInFlight->front().second;
@@ -151,7 +149,7 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
             }
 
             // Update fenceSerial since fence is ready.
-            fenceSerial = tentativeSerial;
+            fenceSerial = std::max(fenceSerial, tentativeSerial);
 
             mUnusedFences->push_back(fence);
             fencesInFlight->pop_front();

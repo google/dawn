@@ -163,7 +163,7 @@ class ExecutionQueueBase : public ApiObjectBase {
 
   private:
     // Each backend should implement to check their passed fences if there are any and return a
-    // completed serial. Return 0 should indicate no fences to check.
+    // completed serial.
     virtual ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() = 0;
 
     // Backend specific wait function, returns kWaitSerialTimeout if we did not successfully wait
