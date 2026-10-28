@@ -125,6 +125,8 @@ crbug.com/42241379 [ win intel angle-d3d11 asan ] webgpu:shader,validation,expre
 crbug.com/402178306 [ webgpu-dxc-disabled win ] webgpu:shader,execution,limits:struct_members: [ Slow ]
 
 # Timeouts when running with code coverage
+crbug.com/469120957 [ clang-coverage win ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="function";workgroupSize=[1,1,1];batch__=9 [ Slow ]
+crbug.com/469120957 [ clang-coverage win ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="private";workgroupSize=[1,1,1];batch__=9 [ Slow ]
 crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=false;sampleCount=4;rasterizationMask=1 [ Slow ]
 crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=1;rasterizationMask=1 [ Slow ]
 crbug.com/481017411 [ clang-coverage linux nvidia ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rgba16sint" [ Slow ]
