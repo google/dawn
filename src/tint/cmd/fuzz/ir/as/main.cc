@@ -100,15 +100,16 @@ bool ParseArgs(tint::VectorRef<std::string_view> arguments, Options* opts) {
     auto show_usage = [&] {
         std::cout
             << R"(Usage: ir_fuzz_as [options] '<input-file> <output-file>' or '<input-dir> <output-dir>'
+       ir_fuzz_as [--dump-ir|--dump-proto] [options] '<input-file>' or '<input-dir>'
 The first form takes in a single WGSL shader via <input-file> and produces the corresponding IR test
 binary in <output-file>.
 
-In the second form, the input and output arguments are directories. The files it contained in
-<input-dir> will be scanned and any .wgsl files will have acorresponding .tirb file generated in
+In the second form, the input and output arguments are directories. The files contained in
+<input-dir> will be scanned and any .wgsl files will have a corresponding .tirb file generated in
 <output-dir>.
 
-If you are wanting to generate human readable IR from a WGSL file, either --emit-ir should be added
-to options, or the tint CLI used
+When --dump-ir (--emit-ir) or --dump-proto (--emit-proto) is provided, the output argument may be
+omitted to only emit to stdout without writing out a file.
 
 Options:
 )";
@@ -126,11 +127,31 @@ Options:
         return false;
     }
 
+    const bool has_dump_flag = *dump_ir.value || *dump_proto.value;
     auto args = result.Get();
-    if (args.Length() != 2) {
-        std::cerr << "Expected exactly 2 args, found: "
-                  << tint::Join(Transform(args, tint::cmd::Quote), ", ") << "\n";
-        return false;
+    if (!has_dump_flag) {
+        if (args.Length() != 2) {
+            std::cerr << "Expected exactly 2 args, found: "
+                      << tint::Join(Transform(args, tint::cmd::Quote), ", ") << "\n";
+            return false;
+        }
+    } else {
+        if (args.Length() != 1 && args.Length() != 2) {
+            std::cerr << "Expected 1 or 2 args, found: "
+                      << tint::Join(Transform(args, tint::cmd::Quote), ", ") << "\n";
+            return false;
+        }
+    }
+
+    if (args.Length() == 1) {
+        if (is_directory(std::filesystem::path{args[0]})) {
+            opts->input_dirname = args[0];
+            opts->batch_mode = true;
+        } else {
+            opts->input_filename = args[0];
+            opts->batch_mode = false;
+        }
+        return true;
     }
 
     bool is_arg0_dir = is_directory(std::filesystem::path{args[0]});
@@ -258,13 +279,15 @@ bool ProcessFile(const Options& options) {
 
     auto info = tint::cmd::LoadProgramInfo(opts);
     if (!info.program.IsValid()) {
-        // If the program just fails to load, ignore it as it's probably just a test file added in
-        // anticipation of a new feature.
-        return true;
+        // In batch mode, if the program fails to load, ignore it as it's probably a test file
+        // added in anticipation of a new feature.
+        return options.batch_mode;
     }
 
     if (options.dump_ir) {
-        DumpIR(info.program, options);
+        if (!DumpIR(info.program, options)) {
+            return false;
+        }
     }
 
     auto data = tint::DecodeBase64FromComments(info.source_file->content.data);
@@ -317,9 +340,11 @@ int main(int argc, const char** argv) {
 
             options.input_filename = input_entry.path().string();
 
-            auto output_entry = std::filesystem::path{options.output_dirname} /
-                                input_entry.path().filename().replace_extension(".tirb");
-            options.output_filename = output_entry.string();
+            if (!options.output_dirname.empty()) {
+                auto output_entry = std::filesystem::path{options.output_dirname} /
+                                    input_entry.path().filename().replace_extension(".tirb");
+                options.output_filename = output_entry.string();
+            }
 
             ProcessFile(options);  // Ignoring the return value, so that one bad file doesn't cause
                                    // the processing batch to stop.
