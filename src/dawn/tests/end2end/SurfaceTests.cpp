@@ -870,8 +870,14 @@ TEST_P(SurfaceTests, ConfigureWithViewFormats) {
         case wgpu::TextureFormat::BGRA8Unorm:
             viewFormat = wgpu::TextureFormat::BGRA8UnormSrgb;
             break;
+        case wgpu::TextureFormat::BGRA8UnormSrgb:
+            viewFormat = wgpu::TextureFormat::BGRA8Unorm;
+            break;
         case wgpu::TextureFormat::RGBA8Unorm:
             viewFormat = wgpu::TextureFormat::RGBA8UnormSrgb;
+            break;
+        case wgpu::TextureFormat::RGBA8UnormSrgb:
+            viewFormat = wgpu::TextureFormat::RGBA8Unorm;
             break;
         default:
             // Add a case above if a platform starts preferring another format.
@@ -903,11 +909,26 @@ TEST_P(SurfaceTests, ConfigureWithViewFormats) {
     queue.Submit(1, &commands);
 
     if (surfaceTexture.texture.GetUsage() & wgpu::TextureUsage::CopySrc) {
-        // The sRGB view encodes the linear 0.5 clear value to ~0.735 on store, so the raw
-        // non-sRGB pixels read back as ~187.5 instead of 128 if the reinterpretation took
-        // effect. A gray value keeps the check independent of the BGRA/RGBA channel order.
-        EXPECT_PIXEL_RGBA8_BETWEEN(utils::RGBA8(187, 187, 187, 255),
-                                   utils::RGBA8(188, 188, 188, 255), surfaceTexture.texture, 0, 0);
+        // The readback sees the raw bytes, so the expected value depends on the view format:
+        // an sRGB view encodes the 0.5 clear to ~187.5, a linear view stores 127.5 (127 or 128
+        // depending on GPU rounding). A gray value keeps the check independent of the BGRA/RGBA
+        // channel order.
+        switch (viewFormat) {
+            case wgpu::TextureFormat::BGRA8UnormSrgb:
+            case wgpu::TextureFormat::RGBA8UnormSrgb:
+                EXPECT_PIXEL_RGBA8_BETWEEN(utils::RGBA8(187, 187, 187, 255),
+                                           utils::RGBA8(188, 188, 188, 255), surfaceTexture.texture,
+                                           0, 0);
+                break;
+            case wgpu::TextureFormat::BGRA8Unorm:
+            case wgpu::TextureFormat::RGBA8Unorm:
+                EXPECT_PIXEL_RGBA8_BETWEEN(utils::RGBA8(127, 127, 127, 255),
+                                           utils::RGBA8(128, 128, 128, 255), surfaceTexture.texture,
+                                           0, 0);
+                break;
+            default:
+                DAWN_UNREACHABLE();
+        }
     }
 
     surface.Present();
