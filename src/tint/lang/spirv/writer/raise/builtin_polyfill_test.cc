@@ -5956,6 +5956,54 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle_ExplicitSubgroupSize_Clamped) {
+    auto* ep = b.Function("ep", ty.void_());
+    ep->SetStage(core::ir::Function::PipelineStage::kCompute);
+    ep->SetWorkgroupSize(b.Constant(16_u), b.Constant(1_u), b.Constant(1_u));
+    ep->SetSubgroupSize(b.Constant(16_u));
+    b.Append(ep->Block(), [&] {
+        auto* arg1 = b.Let("arg1", 1_i);
+        auto* arg2 = b.Let("arg2", 1_u);
+        b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kSubgroupShuffle, arg1, arg2));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%ep = @compute @workgroup_size(16u, 1u, 1u) @subgroup_size(16u) func():void {
+  $B1: {
+    %arg1:i32 = let 1i
+    %arg2:u32 = let 1u
+    %4:i32 = subgroupShuffle %arg1, %arg2
+    %a:i32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var
+}
+
+%ep = @compute @workgroup_size(16u, 1u, 1u) @subgroup_size(16u) func():void {
+  $B2: {
+    store %tint_subgroup_last_id, 15u
+    %arg1:i32 = let 1i
+    %arg2:u32 = let 1u
+    %5:u32 = load %tint_subgroup_last_id
+    %6:u32 = min %arg2, %5
+    %7:i32 = subgroupShuffle %arg1, %6
+    %a:i32 = let %7
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, PolyfillConfig{});
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd) {
     auto* mat = ty.subgroup_matrix_result(ty.f32(), 8, 8);
 

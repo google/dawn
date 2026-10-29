@@ -437,6 +437,14 @@ struct State {
     /// Set the subgroup_last_id_ variable from an entry point.
     void SetSubgroupLastIdForEntryPoint(core::ir::Function* ep) {
         b.InsertBefore(ep->Block()->Front(), [&] {
+            // When the attribute `@subgroup_size(N)` is declared where `N` is a valid value,
+            // the `subgroup-size-control` extension must be enabled and `subgroup_last_id_` will
+            // always be `N-1`.
+            if (auto subgroup_size = ep->SubgroupSizeAsConst()) {
+                b.Store(subgroup_last_id_, u32(*subgroup_size - 1));
+                return;
+            }
+
             // The IDs of the active invocations are not necessarily contiguous from zero (e.g.
             // fragment shader helper invocations may be inactive for non-quad group operations),
             // so use the highest active invocation ID rather than the number of active invocations.
