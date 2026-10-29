@@ -584,5 +584,136 @@ DAWN_INSTANTIATE_TEST(RenderBundleIndirectValidationTest,
                       VulkanBackend(),
                       WebGPUBackend());
 
+class RenderBundleIndirectDuplicationTest : public RenderBundleIndirectValidationTest {};
+
+// Tests that indirect draws in a render bundle still have their parameters duplicated/processed
+// (including when validation is disabled) on backends where
+// MayRequireDuplicationOfIndirectParameters() is true (e.g. D3D12 when the vertex shader uses
+// @builtin(vertex_index), or OpenGL when applying index buffer offsets).
+TEST_P(RenderBundleIndirectDuplicationTest, DrawIndirectInBundle) {
+    // Render Pass
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    // Index Buffer
+    wgpu::Buffer smallIdx = CreateIndexBuffer({0, 1, 2});
+
+    // Indirect buffers with firstVertex = 2 / baseVertex = 2 so vertex_index values are 2, 3, 4
+    // (sum = 9 per draw).
+    wgpu::Buffer directIndirect = CreateIndirectBuffer({3, 1, 2, 0});
+    wgpu::Buffer indexedIndirect = CreateIndirectBuffer({3, 1, 0, 2, 0});
+
+    // Buffers to use for simple fragment counter
+    uint32_t data[] = {0};
+    wgpu::Buffer counterBuffer = utils::CreateBufferFromData(
+        device, data, sizeof(uint32_t),
+        wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc);
+    wgpu::Buffer counterRead = utils::CreateBufferFromData(
+        device, data, sizeof(uint32_t), wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc);
+
+    // Pipeline reading @builtin(vertex_index) so ShouldDuplicateParametersForDrawIndirect()
+    // returns true on D3D12 even when validation is disabled.
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        struct Ctr { n: atomic<u32>, };
+        @group(0) @binding(0) var<storage, read_write> ctr: Ctr;
+
+        struct VOut {
+            @builtin(position) pos: vec4f,
+            @location(0) @interpolate(flat, either) vidx: u32,
+        };
+
+        @vertex fn vs(@builtin(vertex_index) vi: u32) -> VOut {
+            var out: VOut;
+            out.pos = vec4f(0.0, 0.0, 0.0, 1.0);
+            out.vidx = vi;
+            return out;
+        }
+        @fragment fn fs(in: VOut) -> @location(0) vec4f {
+            atomicAdd(&ctr.n, in.vidx);
+            return vec4f(1.0, 0.0, 0.0, 1.0);
+        })");
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = module;
+    descriptor.cFragment.module = module;
+    descriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    descriptor.cTargets[0].format = renderPass.colorFormat;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+    // Bind group
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {{0, counterBuffer, 0, sizeof(float)}});
+
+    // Render bundles
+    utils::ComboRenderBundleEncoderDescriptor desc = {};
+    desc.colorFormatCount = 1;
+    desc.cColorFormats[0] = renderPass.colorFormat;
+
+    wgpu::RenderBundle directRenderBundle;
+    {
+        wgpu::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
+        renderBundleEncoder.SetPipeline(pipeline);
+        renderBundleEncoder.SetBindGroup(0, bindGroup);
+        renderBundleEncoder.DrawIndirect(directIndirect, 0);
+        directRenderBundle = renderBundleEncoder.Finish();
+    }
+
+    wgpu::RenderBundle indexedRenderBundle;
+    {
+        wgpu::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
+        renderBundleEncoder.SetPipeline(pipeline);
+        renderBundleEncoder.SetBindGroup(0, bindGroup);
+        renderBundleEncoder.SetIndexBuffer(smallIdx, wgpu::IndexFormat::Uint32);
+        renderBundleEncoder.DrawIndexedIndirect(indexedIndirect, 0);
+        indexedRenderBundle = renderBundleEncoder.Finish();
+    }
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        // Test bundles with DrawIndirect calls
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.ExecuteBundles(1, &directRenderBundle);
+        pass.ExecuteBundles(1, &directRenderBundle);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+    }
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        // Test bundles with DrawIndexedIndirect calls
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.ExecuteBundles(1, &indexedRenderBundle);
+        pass.ExecuteBundles(1, &indexedRenderBundle);
+        pass.End();
+
+        // Copy the fragment counter results of both passes to the readback buffer.
+        encoder.CopyBufferToBuffer(counterBuffer, 0, counterRead, 0, 4);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+    }
+
+    // Each bundle execution draws vertices 2, 3, 4 (sum = 9), executed 4 times total = 36.
+    EXPECT_BUFFER_U32_EQ(36, counterRead, 0);
+}
+
+DAWN_INSTANTIATE_TEST(RenderBundleIndirectDuplicationTest,
+                      D3D11Backend(),
+                      D3D11Backend({"skip_validation"}),
+                      D3D12Backend(),
+                      D3D12Backend({"skip_validation"}),
+                      MetalBackend(),
+                      MetalBackend({"skip_validation"}),
+                      OpenGLBackend(),
+                      OpenGLBackend({"skip_validation"}),
+                      OpenGLESBackend(),
+                      OpenGLESBackend({"skip_validation"}),
+                      VulkanBackend(),
+                      VulkanBackend({"skip_validation"}),
+                      WebGPUBackend(),
+                      WebGPUBackend({"skip_validation"}));
+
 }  // anonymous namespace
 }  // namespace dawn
