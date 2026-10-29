@@ -417,7 +417,12 @@ struct State {
                 if_->SetResult(resource_kind);
 
                 b.Append(if_->True(), [&] {  //
-                    b.ExitIf(if_, GetTypeId(info.slot_idx));
+                    core::ir::Value* type_id = GetTypeId(info.slot_idx);
+                    if (config->get_sampler_index_from_metadata && IsSampler(info.binding_type)) {
+                        // Type id is in lower 16 bits
+                        type_id = b.And(type_id, u32(0xFFFF));
+                    }
+                    b.ExitIf(if_, type_id);
                 });
                 b.Append(if_->False(), [&] {
                     ResourceType res_type = core::type::DefaultResourceTypeFor(info.binding_type);

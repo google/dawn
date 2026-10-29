@@ -1609,7 +1609,8 @@ $B1: {  # root
       $B5: {  # true
         %17:ptr<storage, u32, read> = access %tint_resource_table_metadata, 1u, 1u
         %18:u32 = load %17
-        exit_if %18  # if_2
+        %19:u32 = and %18, 65535u
+        exit_if %19  # if_2
       }
       $B6: {  # false
         exit_if 41u  # if_2
@@ -1620,18 +1621,18 @@ $B1: {  # root
         exit_if 1u  # if_3
       }
       $B8: {  # false
-        %20:ptr<storage, u32, read> = access %tint_resource_table_metadata, 0u
-        %21:u32 = load %20
-        %22:u32 = add 0u, %21
-        exit_if %22  # if_3
+        %21:ptr<storage, u32, read> = access %tint_resource_table_metadata, 0u
+        %22:u32 = load %21
+        %23:u32 = add 0u, %22
+        exit_if %23  # if_3
       }
     }
-    %23:ptr<storage, u32, read> = access %tint_resource_table_metadata, 1u, %item_idx
-    %24:u32 = load %23
-    %25:u32 = shr %24, 16u
-    %26:ptr<handle, sampler, read> = access %2, %25
-    %27:sampler = load %26
-    %28:vec4<f32> = textureSample %5, %27, vec2<f32>(0.0f)
+    %24:ptr<storage, u32, read> = access %tint_resource_table_metadata, 1u, %item_idx
+    %25:u32 = load %24
+    %26:u32 = shr %25, 16u
+    %27:ptr<handle, sampler, read> = access %2, %26
+    %28:sampler = load %27
+    %29:vec4<f32> = textureSample %5, %28, vec2<f32>(0.0f)
     ret
   }
 }

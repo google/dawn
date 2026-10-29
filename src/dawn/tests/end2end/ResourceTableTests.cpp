@@ -2969,6 +2969,94 @@ TEST_P(ResourceTableTests, DestroyDeviceThenResourceTable) {
     table.Destroy();
 }
 
+// Test dynamic filterability validation when sampling an unfilterable f32 texture (both bindless
+// and bindful) with bindless filtering vs. non-filtering samplers.
+TEST_P(ResourceTableTests, UnfilterableTextureWithBindlessSampler) {
+    // TODO(473444514): Re-enable when compute shaders support ResourceTable on metal
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
+    // TODO(https://issues.chromium.org/issues/490066027): Fails on Mali G78
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
+    DAWN_ASSERT(!device.HasFeature(wgpu::FeatureName::Float32Filterable));
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_resource_table;
+
+        @group(0) @binding(0) var<storage, read_write> results : array<vec4f, 4>;
+        @group(0) @binding(1) var bindfulUnfilterableTex : texture_2d<f32>;
+
+        @compute @workgroup_size(1) fn main() {
+            let bindlessUnfilterableTex = getResource<texture_2d<f32>>(0);
+            let filteringSampler = getResource<sampler>(1);
+            let nonFilteringSampler = getResource<sampler>(2);
+
+            // 1. Bindless unfilterable texture + bindless filtering sampler -> must return 0
+            results[0] = textureSampleLevel(bindlessUnfilterableTex, filteringSampler, vec2f(0.5, 0.5), 0.0);
+
+            // 2. Bindless unfilterable texture + bindless non-filtering sampler -> must sample texel
+            results[1] = textureSampleLevel(bindlessUnfilterableTex, nonFilteringSampler, vec2f(0.5, 0.5), 0.0);
+
+            // 3. Bindful unfilterable texture + bindless filtering sampler -> must return 0
+            results[2] = textureSampleLevel(bindfulUnfilterableTex, filteringSampler, vec2f(0.5, 0.5), 0.0);
+
+            // 4. Bindful unfilterable texture + bindless non-filtering sampler -> must sample texel
+            results[3] = textureSampleLevel(bindfulUnfilterableTex, nonFilteringSampler, vec2f(0.5, 0.5), 0.0);
+        }
+    )");
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    // Create a 1x1 unfilterable RGBA32Float texture initialized to (1, 2, 3, 4).
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::RGBA32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    const float kTexelData[4] = {1.0f, 2.0f, 3.0f, 4.0f};
+    wgpu::TexelCopyTextureInfo dstInfo = utils::CreateTexelCopyTextureInfo(tex, 0, {0, 0, 0});
+    wgpu::TexelCopyBufferLayout dataLayout = {.bytesPerRow = sizeof(kTexelData)};
+    wgpu::Extent3D copySize = {1, 1, 1};
+    queue.WriteTexture(&dstInfo, kTexelData, sizeof(kTexelData), &dataLayout, &copySize);
+
+    wgpu::SamplerDescriptor filteringDesc{
+        .magFilter = wgpu::FilterMode::Linear,
+        .minFilter = wgpu::FilterMode::Linear,
+    };
+    wgpu::Sampler filteringSampler = device.CreateSampler(&filteringDesc);
+    wgpu::Sampler nonFilteringSampler = device.CreateSampler();
+
+    wgpu::ResourceTable table = MakeResourceTable(3, {
+                                                         {0, {.textureView = tex.CreateView()}},
+                                                         {1, {.sampler = filteringSampler}},
+                                                         {2, {.sampler = nonFilteringSampler}},
+                                                     });
+
+    wgpu::BufferDescriptor bDesc{
+        .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
+        .size = sizeof(float) * 4 * 4,
+    };
+    wgpu::Buffer resultBuffer = device.CreateBuffer(&bDesc);
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                              {{0, resultBuffer}, {1, tex.CreateView()}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bg);
+    pass.SetResourceTable(table);
+    pass.DispatchWorkgroups(1);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    const float kExpectedZero[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(kExpectedZero, resultBuffer, 0ULL * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(kTexelData, resultBuffer, 1ULL * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(kExpectedZero, resultBuffer, 2ULL * 4 * sizeof(float), 4);
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(kTexelData, resultBuffer, 3ULL * 4 * sizeof(float), 4);
+}
+
 DAWN_INSTANTIATE_TEST(ResourceTableTests, D3D12Backend(), MetalBackend(), VulkanBackend());
 
 // Test that a resource used in a bindful way outside of a usage scope will get correctly barriered
