@@ -135,6 +135,22 @@ config("dawn_warnings") {
           "-Wdeprecated-builtins",
           "-Wc++98-compat-extra-semi",
         ]
+
+        cflags += [
+          # The lifetime-safety-* warnings are part of an experimental analysis.
+          # Many individual diagnostics (like
+          # -Wlifetime-safety-lifetimebound-violation) are not yet mapped to
+          # toggleable warning flags, so we suppress the entire group and
+          # disable the analysis pass.
+          "-Wno-lifetime-safety-all",
+        ]
+
+        # Experimental lifetime-safety diagnostic that is not part of the
+        # lifetime-safety-all group. Not known by the (older) emsdk clang used
+        # for WASM builds.
+        if (!is_wasm) {
+          cflags += [ "-Wno-experimental-lifetime-safety-field-origin-escape" ]
+        }
       } else {
         cflags = [
           "-Wall",
@@ -207,20 +223,8 @@ config("dawn_warnings") {
       "-Wno-undefined-func-template",
       "-Wno-unused-parameter",
 
-      # The lifetime-safety-* warnings are part of an experimental analysis.
-      # Many individual diagnostics (like
-      # -Wlifetime-safety-lifetimebound-violation) are not yet mapped to
-      # toggleable warning flags, so we suppress the entire group and disable
-      # the analysis pass.
-      "-Wno-lifetime-safety-all",
+      # See also lifetime-safety warnings above.
     ]
-
-    # Experimental lifetime-safety diagnostic that is not part of the
-    # lifetime-safety-all group. Not known by the (older) emsdk clang used for
-    # WASM builds.
-    if (!is_wasm) {
-      cflags += [ "-Wno-experimental-lifetime-safety-field-origin-escape" ]
-    }
 
     # P3. Checks that could be nice but probably don't help with hardening.
     cflags += [
