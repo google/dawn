@@ -95,7 +95,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-10-08 08:26:25AM
+# Last rolled: 2026-10-29 06:50:51AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -3256,12 +3256,35 @@ crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,t
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:storage:format="rgba8snorm";aspect="all" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:storage:format="rgba8uint";aspect="all" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:storage:format="rgba8unorm";aspect="all" [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:composite_and_element:address_space="function";composite="array";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:composite_and_element:address_space="function";composite="struct";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:composite_and_element:address_space="private";composite="array";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:composite_and_element:address_space="private";composite="struct";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:composite_copy:address_space="function";composite="array";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:composite_copy:address_space="function";composite="struct";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:composite_copy:address_space="private";composite="array";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:composite_copy:address_space="private";composite="struct";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:loop_carried_dependence:address_space="function";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:loop_carried_dependence:address_space="private";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:one_pointer_one_module_scope:address_space="private";target="array_element";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:one_pointer_one_module_scope:address_space="private";target="scalar";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:one_pointer_one_module_scope:address_space="private";target="struct_member";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:two_pointers:address_space="function";target="array_element";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:two_pointers:address_space="function";target="scalar";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:two_pointers:address_space="function";target="struct_member";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:two_pointers:address_space="private";target="array_element";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:two_pointers:address_space="private";target="scalar";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:two_pointers:address_space="private";target="struct_member";aliased=false [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,statement,assignment,vector:vector_dynamic_index:elementType="i32";width=3;indexType="u32" [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,value_init:scalars:addressSpace="private";type="u32" [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,value_init:struct:addressSpace="private" [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="fragment_depth" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="fragment_depth" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="fragment_depth" [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="fragment_depth" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="fragment_depth" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="fragment_depth" [ Failure ]
