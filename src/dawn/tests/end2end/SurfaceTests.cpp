@@ -936,9 +936,10 @@ DAWN_INSTANTIATE_TEST(SurfaceTests,
 // Rendering into the surface's current texture with an implicit sample count
 // (MSAARenderToSingleSampled). On Vulkan, every single-sampled attachment of such a pass must have
 // been created with VK_IMAGE_CREATE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_BIT_EXT
-// (VUID-VkFramebufferCreateInfo-samples-06881, VUID-VkRenderingInfo-imageView-06859). Swapchain
-// images never are, so these tests fail under backend validation on any driver that advertises the
-// extension, and the Adreno driver crashes in vkCreateFramebuffer without validation.
+// (VUID-VkFramebufferCreateInfo-samples-06881, VUID-VkRenderingInfo-imageView-06859), which
+// swapchain images cannot be, so the surface texture must be a regular texture that is blitted to
+// the swapchain on Present. Without this the validation layers report the error on every driver
+// that advertises the extension, and the Adreno driver crashes in vkCreateFramebuffer.
 // See https://issues.chromium.org/issues/571594984.
 class SurfaceMSRTSSTests : public SurfaceTests {
   protected:
@@ -968,7 +969,13 @@ class SurfaceMSRTSSTests : public SurfaceTests {
 
     void ClearSurfaceTextureWithImplicitSampleCount() {
         wgpu::Surface surface = CreateTestSurface();
+        wgpu::SurfaceCapabilities caps;
+        surface.GetCapabilities(adapter, &caps);
         wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+        // When supported, also request CopySrc so the result of the pass can be read back.
+        if (caps.usages & wgpu::TextureUsage::CopySrc) {
+            config.usage |= wgpu::TextureUsage::CopySrc;
+        }
         surface.Configure(&config);
 
         wgpu::SurfaceTexture surfaceTexture;
@@ -991,8 +998,12 @@ class SurfaceMSRTSSTests : public SurfaceTests {
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
-        // With backend validation enabled, the Vulkan backend turns the layer error into a device
-        // loss on the next tick, which the harness reports as a test failure.
+        if (surfaceTexture.texture.GetUsage() & wgpu::TextureUsage::CopySrc) {
+            EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, surfaceTexture.texture, 0, 0);
+        }
+
+        // With backend validation enabled, an invalid pass turns into a device loss on the next
+        // tick, which the harness reports as a test failure.
         WaitForAllOperations();
 
         ASSERT_EQ(wgpu::Status::Success, surface.Present());
