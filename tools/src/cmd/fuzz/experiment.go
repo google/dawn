@@ -401,7 +401,7 @@ func buildExperimentBinariesIfNeeded(t *taskConfig, settings ExperimentSettings)
 		}
 		if !timeoutOverridden {
 			warnMsg = append(warnMsg,
-				"We highly recommend overriding the default 5s fuzzer timeout (by adding a \"timeout\"",
+				"We highly recommend specifying a fuzzer timeout (by adding a \"timeout\"",
 				"field to your experiment.json) if you proceed with sanitizers.",
 			)
 		}
@@ -567,7 +567,7 @@ func runPendingExperimentTasks(t *taskConfig, pendingTasks []ExperimentTask, set
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	timeoutVal := 5
+	timeoutVal := 0
 	if settings.Timeout != nil && *settings.Timeout > 0 {
 		timeoutVal = *settings.Timeout
 	}
@@ -842,6 +842,100 @@ func appendLibraryArgs(args []string, binDir string, fsReader oswrapper.Filesyst
 	return args
 }
 
+// findProfrawFiles recursively searches for and returns a list of all .profraw files within the specified directory.
+func findProfrawFiles(dir string, fsReader oswrapper.FilesystemReader) ([]string, error) {
+	var files []string
+	err := fsReader.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && filepath.Ext(path) == ".profraw" {
+			files = append(files, path)
+		}
+		return nil
+	})
+	return files, err
+}
+
+// hasValidProfraw returns true if the specified directory contains at least one non-empty .profraw file.
+func hasValidProfraw(dir string, fsReader oswrapper.FilesystemReader) bool {
+	profraws, err := findProfrawFiles(dir, fsReader)
+	if err != nil || len(profraws) == 0 {
+		return false
+	}
+	for _, p := range profraws {
+		if info, err := fsReader.Stat(p); err == nil && info.Size() > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// dumpCorpusCoverage runs the fuzzer with -runs=0 against corpusOut and corpusPath, cleanly dumping
+// the accumulated coverage into workDir.
+func dumpCorpusCoverage(ctx context.Context, t *taskConfig, binDir, fuzzer, workDir, corpusOut, corpusPath string, timeout int) error {
+	// Clean up any zero-byte or corrupted profraw files first
+	if profraws, err := findProfrawFiles(workDir, t.osWrapper); err == nil {
+		for _, p := range profraws {
+			_ = t.osWrapper.Remove(p)
+		}
+	}
+
+	absCorpusOut, err := filepath.Abs(corpusOut)
+	if err != nil {
+		return fmt.Errorf("failed to get absolute path for corpus out: %w", err)
+	}
+
+	absCorpusPath, err := filepath.Abs(corpusPath)
+	if err != nil {
+		return fmt.Errorf("failed to get absolute path for corpus input: %w", err)
+	}
+
+	binPath := filepath.Join(binDir, fuzzer+fileutils.ExeExt)
+	absBin, err := filepath.Abs(binPath)
+	if err != nil {
+		return fmt.Errorf("failed to get absolute path of fuzzer binary: %w", err)
+	}
+
+	covArgs := []string{absCorpusOut, absCorpusPath}
+	if timeout > 0 {
+		covArgs = append(covArgs, fmt.Sprintf("-timeout=%d", timeout))
+	}
+	covArgs = append(covArgs, "-runs=0")
+	cfg, ok := fuzzerConfigs[fuzzer]
+	if !ok {
+		return fmt.Errorf("unknown fuzzer: %s", fuzzer)
+	}
+
+	if cfg.mode == FuzzModeWgsl {
+		dictPath := filepath.Join(filepath.Join(fileutils.DawnRoot(t.osWrapper), "src", "tint", "cmd", "fuzz", "wgsl"), "dictionary.txt")
+		if fileutils.IsFile(dictPath, t.osWrapper) {
+			absDictPath, err := filepath.Abs(dictPath)
+			if err == nil {
+				covArgs = append(covArgs, "-dict="+absDictPath)
+			}
+		}
+	}
+	covArgs = appendLibraryArgs(covArgs, binDir, t.osWrapper)
+
+	for retry := 0; retry < 5; retry++ {
+		cmd := t.execWrapper.CommandContext(ctx, absBin, covArgs...).WithDir(workDir)
+		err = cmd.Run()
+		if err == nil {
+			if !hasValidProfraw(workDir, t.osWrapper) {
+				return fmt.Errorf("fuzzer coverage run for %s in %s did not produce a valid .profraw file", fuzzer, workDir)
+			}
+			return nil
+		}
+		if strings.Contains(err.Error(), "text file busy") {
+			time.Sleep(100 * time.Millisecond)
+			continue
+		}
+		break
+	}
+	return fmt.Errorf("failed to dump corpus coverage for %s in %s: %w", fuzzer, workDir, err)
+}
+
 // runNormalization executes fuzzer normalization profiling multiple times to determine the execution
 // speed (runs/sec) and its standard error (SEM) on the current hardware for normalization of results.
 func runNormalization(t *taskConfig, root string, fuzzer string, settings *ExperimentSettings, machineResultsDir string) (NormalizationScore, error) {
@@ -858,7 +952,7 @@ func runNormalization(t *taskConfig, root string, fuzzer string, settings *Exper
 
 	binPath := filepath.Join(root, kExperimentBinarySubDir, fuzzer+fileutils.ExeExt)
 
-	timeoutVal := 5
+	timeoutVal := 0
 	if settings.Timeout != nil && *settings.Timeout > 0 {
 		timeoutVal = *settings.Timeout
 	}
@@ -923,7 +1017,11 @@ func runNormalizationCmd(t *taskConfig, binPath string, corpusPath string, durat
 	}
 	defer t.osWrapper.RemoveAll(tmpOut)
 
-	args := []string{tmpOut, corpusPath, fmt.Sprintf("-timeout=%d", timeoutVal), fmt.Sprintf("-max_total_time=%d", duration)}
+	args := []string{tmpOut, corpusPath}
+	if timeoutVal > 0 {
+		args = append(args, fmt.Sprintf("-timeout=%d", timeoutVal))
+	}
+	args = append(args, fmt.Sprintf("-max_total_time=%d", duration))
 	args = appendLibraryArgs(args, filepath.Dir(binPath), t.osWrapper)
 
 	start := time.Now()
@@ -958,7 +1056,7 @@ func runBurnIn(t *taskConfig, settings *ExperimentSettings) error {
 
 	fmt.Println("Starting burn-in phase for", burnInDuration, "seconds using", t.numProcesses, "parallel jobs...")
 
-	timeoutVal := 5
+	timeoutVal := 0
 	if settings.Timeout != nil && *settings.Timeout > 0 {
 		timeoutVal = *settings.Timeout
 	}
@@ -1072,7 +1170,10 @@ func executeExperimentTask(ctx context.Context, t *taskConfig, binDir string, ta
 		return fmt.Errorf("failed to get absolute path for corpus input: %w", err)
 	}
 
-	args := []string{absCorpusOut, absCorpusPath, fmt.Sprintf("-timeout=%d", timeoutVal)}
+	args := []string{absCorpusOut, absCorpusPath}
+	if timeoutVal > 0 {
+		args = append(args, fmt.Sprintf("-timeout=%d", timeoutVal))
+	}
 	switch task.LimitType {
 	case ExperimentLimitTypeSeconds:
 		args = append(args, fmt.Sprintf("-max_total_time=%d", task.LimitValue))
@@ -1097,8 +1198,8 @@ func executeExperimentTask(ctx context.Context, t *taskConfig, binDir string, ta
 
 	args = appendLibraryArgs(args, binDir, t.osWrapper)
 
-	fmt.Println(fmt.Sprintf("[%s] Starting: %s on %s (%s=%d, iter %d)",
-		time.Now().Format("15:04:05"), task.FuzzerName, task.CorpusName, task.LimitType, task.LimitValue, task.Iteration))
+	taskTag := fmt.Sprintf("%s on %s (%s=%d, iter %d)", task.FuzzerName, task.CorpusName, task.LimitType, task.LimitValue, task.Iteration)
+	fmt.Println(fmt.Sprintf("[%s] Running: %s", time.Now().Format("15:04:05"), taskTag))
 
 	start := time.Now()
 	// Run the binary directly from binDir, setting working directory to TaskDir so profraw files are not combined
@@ -1110,7 +1211,8 @@ func executeExperimentTask(ctx context.Context, t *taskConfig, binDir string, ta
 	}
 
 	var out []byte
-	for retry := 0; retry < 5; retry++ {
+	retries := time.Duration(0)
+	for range 5 {
 		cmd := t.execWrapper.CommandContext(ctx, absTaskBin, args...).WithDir(task.TaskDir)
 		out, err = cmd.RunWithCombinedOutput()
 		if err == nil {
@@ -1118,18 +1220,20 @@ func executeExperimentTask(ctx context.Context, t *taskConfig, binDir string, ta
 		}
 		if strings.Contains(err.Error(), "text file busy") {
 			time.Sleep(100 * time.Millisecond)
+			retries += 100 * time.Millisecond
 			continue
 		}
 		break
 	}
-	duration := time.Since(start)
+	duration := time.Since(start) - retries
 
-	if err != nil {
+	fuzzerErr := err
+	if fuzzerErr != nil {
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
 		if t.verbose {
-			fmt.Println("Fuzzer process returned error/exit status:", err)
+			fmt.Println("Fuzzer process returned error/exit status:", fuzzerErr)
 		}
 	}
 
@@ -1141,13 +1245,19 @@ func executeExperimentTask(ctx context.Context, t *taskConfig, binDir string, ta
 		return err
 	}
 
+	// Re-run the fuzzer with -runs=0 against the corpus to cleanly generate raw profiling
+	// data regardless of how the main fuzzing run exited.
+	fmt.Println(fmt.Sprintf("[%s] Profiling: %s", time.Now().Format("15:04:05"), taskTag))
+	if err := dumpCorpusCoverage(ctx, t, binDir, task.FuzzerName, task.TaskDir, absCorpusOut, absCorpusPath, timeoutVal); err != nil {
+		return err
+	}
+
 	state.Status = IterStateCompleted
 	state.EndTime = time.Now().Format(time.RFC3339)
 	state.ActualRuns = actualRuns
 	state.ActualSeconds = duration.Seconds()
 
-	fmt.Println(fmt.Sprintf("[%s] Completed: %s on %s (iter %d) in %.2fs, %d runs",
-		time.Now().Format("15:04:05"), task.FuzzerName, task.CorpusName, task.Iteration, duration.Seconds(), actualRuns))
+	fmt.Println(fmt.Sprintf("[%s] Completed: %s in %.2fs, %d runs", time.Now().Format("15:04:05"), taskTag, duration.Seconds(), actualRuns))
 
 	stateBytes, _ = json.MarshalIndent(state, "", "  ")
 	_ = t.osWrapper.WriteFile(statePath, stateBytes, 0644)

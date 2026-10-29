@@ -278,7 +278,7 @@ The following sections define the full configuration schema for
 | `name`                      | `string`               | A human-readable identifier for the experiment, used in the logging/reports.                                                                 |
 | `hash`                      | `string`               | The Git commit hash checkout from which the binaries should be compiled.                                                                     |
 | `fuzzers`                   | `array of strings`     | Fuzzer target names to test(Supported values: `"tint_wgsl_fuzzer"`, `"tint_ir_fuzzer"`, `"tint_wgsl_mesa_fuzzer"`, `"tint_ir_mesa_fuzzer"`). |
-| `timeout`                   | `integer` *optional*   | Timeout limit in seconds for a single fuzzer execution on a test case in libFuzzer (defaults to 5).                                          |
+| `timeout`                   | `integer` *optional*   | Timeout limit in seconds for a single fuzzer execution on a test case in libFuzzer (defaults to libFuzzer's default of 1200).                |
 | `burnin_enabled`            | `boolean` *optional*   | If true, launches parallel workloads to warm up the machine before benching (defaults to true).                                              |
 | `burnin_duration`           | `integer` *optional*   | Target duration in seconds for the initial thermal burn-in (defaults to 300).                                                                |
 | `normalization_duration`    | `integer` *optional*   | Execution duration in seconds for each iteration of the normalization microbenchmarking phase (defaults to 60).                              |

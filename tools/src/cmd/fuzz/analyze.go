@@ -43,6 +43,7 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/glob"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 )
 
 // Analyze mode path stems that get used multiple times
@@ -674,6 +675,16 @@ func (ac *analyzeConfig) printReport(stats []SummaryPoint) error {
 	return nil
 }
 
+// hasCoverageHits returns true if at least one component in the coverage map has LinesHit > 0.
+func hasCoverageHits(coverage IterationCoverage) bool {
+	for _, stats := range coverage {
+		if stats != nil && stats.LinesHit > 0 {
+			return true
+		}
+	}
+	return false
+}
+
 // getOrRunCoverage retrieves calculated coverage data for an iteration or executes
 // the coverage collection if the data isn't present.
 func getOrRunCoverage(t *taskConfig, d *IterationData) error {
@@ -686,16 +697,21 @@ func getOrRunCoverage(t *taskConfig, d *IterationData) error {
 	}
 	coverageJsonPath := filepath.Join(coverageDir, "coverage.json")
 
-	// If coverage already exists, load and return
+	// If coverage already exists, load, validate, and return
 	if fileutils.IsFile(coverageJsonPath, t.osWrapper) {
 		covBytes, err := t.osWrapper.ReadFile(coverageJsonPath)
-		if err == nil {
-			var coverage IterationCoverage
-			if err := json.Unmarshal(covBytes, &coverage); err == nil {
-				d.Coverage = coverage
-				return nil
-			}
+		if err != nil {
+			return fmt.Errorf("failed to read cached coverage file '%s': %w", coverageJsonPath, err)
 		}
+		var coverage IterationCoverage
+		if err := json.Unmarshal(covBytes, &coverage); err != nil {
+			return fmt.Errorf("malformed cached coverage file '%s': %w", coverageJsonPath, err)
+		}
+		if !hasCoverageHits(coverage) {
+			return fmt.Errorf("malformed cached coverage data in '%s': no coverage hits recorded", coverageJsonPath)
+		}
+		d.Coverage = coverage
+		return nil
 	}
 
 	// Ensure coverage dir exists
@@ -708,14 +724,24 @@ func getOrRunCoverage(t *taskConfig, d *IterationData) error {
 		return err
 	}
 
-	// Find .profraw files inside the original iteration directory
-	profrawFiles, err := findProfrawFiles(iterDir)
+	// Find and validate .profraw files inside the original iteration directory
+	profrawFiles, err := findProfrawFiles(iterDir, t.osWrapper)
 	if err != nil {
 		return fmt.Errorf("failed to scan for .profraw files inside %s: %w", iterDir, err)
 	}
 
 	if len(profrawFiles) == 0 {
 		return fmt.Errorf("no .profraw file found inside iteration directory '%s' (make sure the experiment ran with coverage enabled)", iterDir)
+	}
+
+	for _, p := range profrawFiles {
+		info, err := t.osWrapper.Stat(p)
+		if err != nil {
+			return fmt.Errorf("failed to stat .profraw file '%s': %w", p, err)
+		}
+		if info.Size() == 0 {
+			return fmt.Errorf("malformed (empty) .profraw file '%s' inside iteration directory '%s'", p, iterDir)
+		}
 	}
 
 	profdataPath, err := filepath.Abs(filepath.Join(iterDir, "coverage.profdata"))
@@ -733,7 +759,7 @@ func getOrRunCoverage(t *taskConfig, d *IterationData) error {
 	}
 
 	// Parse generated LCOV file
-	lcovFile, err := findLcovFile(coverageDir)
+	lcovFile, err := findLcovFile(coverageDir, t.osWrapper)
 	if err != nil {
 		return fmt.Errorf("failed to find generated LCOV file: %w", err)
 	}
@@ -744,27 +770,15 @@ func getOrRunCoverage(t *taskConfig, d *IterationData) error {
 	}
 
 	d.Coverage = parseLcov(string(lcovContent))
+	if !hasCoverageHits(d.Coverage) {
+		return fmt.Errorf("malformed coverage data for '%s': no coverage hits recorded", iterDir)
+	}
 
 	// Cache result
 	coverageBytes, _ := json.MarshalIndent(d.Coverage, "", "  ")
 	_ = t.osWrapper.WriteFile(coverageJsonPath, coverageBytes, 0644)
 
 	return nil
-}
-
-// findProfrawFiles recursively searches for and returns a list of all .profraw files within the specified directory.
-func findProfrawFiles(dir string) ([]string, error) {
-	var files []string
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() && filepath.Ext(path) == ".profraw" {
-			files = append(files, path)
-		}
-		return nil
-	})
-	return files, err
 }
 
 // mergeProfrawFiles combines multiple .profraw files into a single sparse .profdata file using llvm-profdata.
@@ -823,9 +837,9 @@ func generateLcovReport(t *taskConfig, fuzzer string, binDir string, output stri
 }
 
 // findLcovFile searches for the first .lcov file within the specified directory.
-func findLcovFile(dir string) (string, error) {
+func findLcovFile(dir string, fsReader oswrapper.FilesystemReader) (string, error) {
 	var foundPath string
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+	err := fsReader.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
