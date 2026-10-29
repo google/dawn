@@ -31,8 +31,10 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -41,6 +43,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,6 +56,7 @@ class AsyncHelperTest {
     Thread(runnable, "Test-WebGPU-Thread")
   }.asCoroutineDispatcher()
   private val testScope = CoroutineScope(dispatcher)
+  private var processEventsJob: Job? = null
   private lateinit var device: GPUDevice
   private lateinit var webGpu: WebGpu
 
@@ -69,13 +73,16 @@ class AsyncHelperTest {
   fun setup(): Unit = runBlocking {
     webGpu = createWebGpu(dispatcher)
     device = webGpu.device
-    testScope.launch {
+    processEventsJob = testScope.launch {
       webGpu.processEventsLoop()
     }
   }
 
   @After
   fun teardown() {
+    runBlocking {
+      processEventsJob?.cancelAndJoin()
+    }
     if (::webGpu.isInitialized) {
       webGpu.close()
     }
@@ -201,8 +208,18 @@ class AsyncHelperTest {
             return vec4f(0.0, ${seed}.0, 0.0, 1.0);
         } """
 
+  private fun assumeAsyncPipelineUsesWorkerThread() {
+    val isVulkan = runBlocking {
+      processEventsJob?.cancelAndJoin()
+      processEventsJob = null
+      webGpu.execute { webGpu.adapter.getInfo().backendType == BackendType.Vulkan }
+    }
+    assumeTrue("Async pipeline worker threads require the Vulkan backend", isVulkan)
+  }
+
   @Test
   fun asyncCallbackAttachesThreadWithKernelName() {
+    assumeAsyncPipelineUsesWorkerThread()
     for (iteration in 1..2) {
       val latch = CountDownLatch(1)
       val callbackThreadName = AtomicReference<String>()
@@ -256,6 +273,7 @@ class AsyncHelperTest {
 
   @Test
   fun asyncCallbackForwardsUncaughtExceptionToHandler() {
+    assumeAsyncPipelineUsesWorkerThread()
     val expectedMessage = "Uncaught async callback failure"
     val handlerLatch = CountDownLatch(1)
     val caughtThreadName = AtomicReference<String>()
