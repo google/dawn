@@ -103,6 +103,9 @@ struct Hasher<T*> {
         // Derived from MurmurHash3's finalizer (fmix64 / fmix32 by
         // Austin Appleby),
         // https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp
+        // That source file has this notice:
+        // // MurmurHash3 was written by Austin Appleby, and is placed in the public
+        // // domain. The author hereby disclaims copyright to this source code.
         //
         // Avoids aligned block-allocated pointers and
         // high-bit-saturated 64-bit addresses from clustering in
