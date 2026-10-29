@@ -169,6 +169,11 @@ MaybeError Queue::WriteTextureImpl(const TexelCopyTextureInfo& destination,
         return {};
     }
 
+    // Synchronize with any shared texture memory fences and track the usage of the texture, like
+    // all other uses of textures do (see CommandBufferGL.cpp). The fence waits are enqueued so they
+    // are executed before the write below.
+    DAWN_TRY(ToBackend(destination.texture)->SynchronizeTextureBeforeUse());
+
     SubresourceRange range = GetSubresourcesAffectedByCopy(textureCopy, writeSizePixel);
     bool ensureInitialized = false;
     if (IsCompleteSubresourceCopiedTo(destination.texture, writeSizePixel, destination.mipLevel,
