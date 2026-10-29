@@ -27,6 +27,7 @@
 
 #include "src/dawn/native/d3d12/ResourceTableD3D12.h"
 
+#include <algorithm>
 #include <utility>
 #include <vector>
 
@@ -46,7 +47,15 @@
 
 namespace dawn::native::d3d12 {
 
-// SamplerIndexPool manages a limited pool of sampler indices (e.g. 2048 on D3D12). It also
+// Maximum number of sampler descriptors that a ResourceTable can use. A shader-visible sampler
+// descriptor heap on D3D12 can hold at most D3D12_MAX_SHADER_VISIBLE_SAMPLER_HEAP_SIZE (2048)
+// descriptors, shared between the ResourceTable and all bound BindGroups. Since a pipeline can
+// bind at most kMaxSamplersPerShaderStage * kNumStages (16 * 3 = 48) samplers across all
+// BindGroups, we cap the ResourceTable to the remaining 2000 descriptors.
+constexpr uint32_t kMaxSamplerDescriptors =
+    D3D12_MAX_SHADER_VISIBLE_SAMPLER_HEAP_SIZE - (kMaxSamplersPerShaderStage * kNumStages);
+
+// SamplerIndexPool manages a limited pool of sampler indices (e.g. 2000 on D3D12). It also
 // implements deduplication by returning the same sampler index for an input Sampler pointer,
 // internally tracking ref counts to return the index when all refs to the same Sampler are
 // released. Note that this assumes that the same Sampler pointer is returned for the same
@@ -173,7 +182,7 @@ ResultOrError<ResourceTable::DescriptorRanges> ResourceTable::GetDescriptorRange
             range = &ranges.samplers;
             rangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
             // This size must includes both user and default samplers
-            numDescriptors = D3D12_MAX_SHADER_VISIBLE_SAMPLER_HEAP_SIZE;
+            numDescriptors = kMaxSamplerDescriptors;
             // Force the same offset in the descriptor table to overlaps these ranges.
             // Unlike for SRVs, we can overlap them at register (binding) 0 since as there's
             // no metadata entry in this range.
@@ -228,8 +237,8 @@ MaybeError ResourceTable::Initialize() {
     // (D3D12_MAX_SHADER_VISIBLE_SAMPLER_HEAP_SIZE - defaultSamplersCount) samplers to the table.
     const uint32_t defaultSamplersCount =
         uint32_t{ResourceTableDefaultResources::GetSamplerCount()};
-    const uint32_t numSamplerDescriptors = std::min<uint32_t>(
-        apiSize + defaultSamplersCount, D3D12_MAX_SHADER_VISIBLE_SAMPLER_HEAP_SIZE);
+    const uint32_t numSamplerDescriptors =
+        std::min<uint32_t>(apiSize + defaultSamplersCount, kMaxSamplerDescriptors);
     DAWN_TRY_ASSIGN(mSamplerHeap, AllocateCPUHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
                                                   numSamplerDescriptors));
 

@@ -48,7 +48,8 @@ namespace {
 // These necessarily take up a couple of slots in a resource table.
 constexpr uint32_t kUniqueDefaultSamplers = 2;
 // On D3D12, the max number of unique sampler descriptors available to the user in a ResourceTable.
-constexpr uint32_t kD3D12MaxUniqueSamplers = 2048 - kUniqueDefaultSamplers;
+constexpr uint32_t kD3D12MaxUniqueSamplers =
+    2048 - (kMaxSamplersPerShaderStage * kNumStages) - kUniqueDefaultSamplers;
 
 class ResourceTableTests : public DawnTest {
   protected:
@@ -2143,7 +2144,7 @@ TEST_P(ResourceTableTests, AddUniqueSamplersOverLimit) {
     )");
     auto pipeline = device.CreateComputePipeline(&csDesc);
 
-    auto dispatch = [&](wgpu::ResourceTable table, bool shouldSucceed = true) {
+    auto dispatch = [&](wgpu::ResourceTable table, bool shouldSucceed) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetResourceTable(table);
@@ -2161,7 +2162,7 @@ TEST_P(ResourceTableTests, AddUniqueSamplersOverLimit) {
     wgpu::ResourceTable table = MakeResourceTable(2049);
 
     // Initial draw so that default resources are processed
-    dispatch(table);
+    dispatch(table, /*shouldSucceed*/ true);
 
     // Add kD3D12MaxUniqueSamplers, should all succeed
     for (auto i : Range(kD3D12MaxUniqueSamplers)) {
@@ -2169,7 +2170,7 @@ TEST_P(ResourceTableTests, AddUniqueSamplersOverLimit) {
         EXPECT_EQ(wgpu::Status::Success, table.Update(i, &br));
     }
 
-    dispatch(table);
+    dispatch(table, /*shouldSucceed*/ true);
 
     // Now add one more, should fail
     {
@@ -2177,8 +2178,104 @@ TEST_P(ResourceTableTests, AddUniqueSamplersOverLimit) {
         EXPECT_EQ(wgpu::Status::Success, table.Update(kD3D12MaxUniqueSamplers, &br));
     }
 
-    bool shouldSucceed = !IsD3D12();
-    dispatch(table, shouldSucceed);
+    dispatch(table, /*shouldSucceed*/ !IsD3D12());
+}
+
+// Test what happens when we bind the maximum number of BindGroup samplers across all shader stages
+// alongside a ResourceTable with kD3D12MaxUniqueSamplers unique samplers, and when we add one more.
+TEST_P(ResourceTableTests, AddUniqueSamplersOverLimitWithBindGroups) {
+    // TODO(473444514): Re-enable when compute shaders support ResourceTable on metal
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
+    // TODO(https://issues.chromium.org/issues/490066027): Fails on Mali G78
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
+
+    // Create 3 BindGroups with kMaxSamplersPerShaderStage (16) samplers each (one BindGroup per
+    // shader stage: Vertex, Fragment, Compute), totaling 48 samplers across all three BindGroups.
+    constexpr std::array<wgpu::ShaderStage, kNumStages> kStages = {
+        wgpu::ShaderStage::Vertex,
+        wgpu::ShaderStage::Fragment,
+        wgpu::ShaderStage::Compute,
+    };
+    std::vector<wgpu::BindGroupLayout> bgls;
+    std::vector<wgpu::BindGroup> bgs;
+    uint32_t nextUniqueSamplerId = 0;
+    for (wgpu::ShaderStage stage : kStages) {
+        std::vector<wgpu::BindGroupLayoutEntry> bglEntries;
+        std::vector<wgpu::BindGroupEntry> bgEntries;
+        for (uint32_t i = 0; i < kMaxSamplersPerShaderStage; ++i) {
+            bglEntries.push_back({
+                .binding = i,
+                .visibility = stage,
+                .sampler = {.type = wgpu::SamplerBindingType::Filtering},
+            });
+            bgEntries.push_back({
+                .binding = i,
+                .sampler = CreateUniqueSampler(nextUniqueSamplerId++),
+            });
+        }
+        wgpu::BindGroupLayoutDescriptor bglDesc{
+            .entryCount = bglEntries.size(),
+            .entries = bglEntries.data(),
+        };
+        wgpu::BindGroupLayout bgl = device.CreateBindGroupLayout(&bglDesc);
+        bgls.push_back(bgl);
+
+        wgpu::BindGroupDescriptor bgDesc{
+            .layout = bgl,
+            .entryCount = bgEntries.size(),
+            .entries = bgEntries.data(),
+        };
+        bgs.push_back(device.CreateBindGroup(&bgDesc));
+    }
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.layout = MakePipelineLayoutWithTable(bgls);
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_resource_table;
+        @compute @workgroup_size(1) fn main() {
+            _ = hasResource<texture_2d<f32>>(0);
+        }
+    )");
+    auto pipeline = device.CreateComputePipeline(&csDesc);
+
+    auto dispatch = [&](wgpu::ResourceTable table, bool shouldSucceed) {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        for (auto [s, bg] : Enumerate(bgs)) {
+            pass.SetBindGroup(s, bg);
+        }
+        pass.SetResourceTable(table);
+        pass.SetPipeline(pipeline);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+        if (shouldSucceed) {
+            queue.Submit(1, &commands);
+        } else {
+            EXPECT_DEVICE_LOSS(queue.Submit(1, &commands));
+        }
+    };
+
+    wgpu::ResourceTable table = MakeResourceTable(2049);
+
+    // Initial dispatch with 0 user samplers in the ResourceTable + 48 BindGroup samplers
+    dispatch(table, /*shouldSucceed*/ true);
+
+    // Add kD3D12MaxUniqueSamplers unique samplers to the ResourceTable, should all succeed
+    for (auto i : Range(kD3D12MaxUniqueSamplers)) {
+        wgpu::BindingResource br{.sampler = CreateUniqueSampler(nextUniqueSamplerId++)};
+        EXPECT_EQ(wgpu::Status::Success, table.Update(i, &br));
+    }
+
+    dispatch(table, /*shouldSucceed*/ true);
+
+    // Now add one more unique sampler to the ResourceTable, should fail on D3D12
+    {
+        wgpu::BindingResource br{.sampler = CreateUniqueSampler(nextUniqueSamplerId++)};
+        EXPECT_EQ(wgpu::Status::Success, table.Update(kD3D12MaxUniqueSamplers, &br));
+    }
+
+    dispatch(table, /*shouldSucceed*/ !IsD3D12());
 }
 
 // Test that adding a sampler, draw, then remove and add a duplicate sampler and draw works. This
