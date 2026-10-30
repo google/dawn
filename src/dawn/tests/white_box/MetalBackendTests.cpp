@@ -25,6 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <atomic>
+#include <chrono>
+#include <cstdint>
+#include <limits>
+#include <thread>
+
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/MetalBackend.h"
 #include "src/dawn/tests/DawnTest.h"
@@ -35,7 +41,7 @@ namespace {
 using ::testing::HasSubstr;
 
 class MetalBackendTests : public DawnTest {
-  private:
+  protected:
     void SetUp() override {
         DawnTest::SetUp();
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
@@ -61,6 +67,152 @@ TEST_P(MetalBackendTests, WaitForCommandsToBeScheduledOK) {
 TEST_P(MetalBackendTests, WaitForCommandsToBeScheduledOnDestroyedDevice) {
     DestroyDevice(device);
     metal::WaitForCommandsToBeScheduled(device.Get());
+}
+
+class MetalSuspendedSubmissionTests : public MetalBackendTests {
+  protected:
+    static constexpr uint32_t kValue = 0x12345678u;
+    static constexpr uint64_t kShortWaitNs = 50'000'000;  // 50 ms
+    static constexpr uint64_t kForeverNs = std::numeric_limits<uint64_t>::max();
+
+    void TearDown() override {
+        // Never leave the queue held: the device waits for its work to be destroyed.
+        metal::SetSubmissionSuspended(device.Get(), false);
+        MetalBackendTests::TearDown();
+    }
+
+    // A command buffer copying kValue (written to a source buffer and already on the GPU) into
+    // `dst`, a buffer of the given usage.
+    wgpu::CommandBuffer MakeCopyOfValue(wgpu::Buffer* dst, wgpu::BufferUsage dstUsage) {
+        wgpu::BufferDescriptor srcDesc;
+        srcDesc.size = 4;
+        srcDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+        wgpu::Buffer src = device.CreateBuffer(&srcDesc);
+        queue.WriteBuffer(src, 0, &kValue, sizeof(kValue));
+        WaitForAllOperations();
+
+        wgpu::BufferDescriptor dstDesc;
+        dstDesc.size = 4;
+        dstDesc.usage = dstUsage;
+        *dst = device.CreateBuffer(&dstDesc);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(src, 0, *dst, 0, 4);
+        return encoder.Finish();
+    }
+
+    wgpu::Future WorkDone() {
+        return queue.OnSubmittedWorkDone(
+            wgpu::CallbackMode::WaitAnyOnly,
+            [](wgpu::QueueWorkDoneStatus status, wgpu::StringView) {
+                EXPECT_EQ(status, wgpu::QueueWorkDoneStatus::Success);
+            });
+    }
+};
+
+// Work submitted while the queue is suspended is held, and completes once the queue is resumed.
+TEST_P(MetalSuspendedSubmissionTests, SubmissionCompletesOnceResumed) {
+    wgpu::Buffer dst;
+    wgpu::CommandBuffer commands =
+        MakeCopyOfValue(&dst, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
+
+    metal::SetSubmissionSuspended(device.Get(), true);
+    EXPECT_TRUE(metal::IsSubmissionSuspended(device.Get()));
+    queue.Submit(1, &commands);
+    wgpu::Future done = WorkDone();
+    // Held: nothing completes, and the wait does not deadlock on the flush it asks for.
+    EXPECT_EQ(GetInstance().WaitAny(done, kShortWaitNs), wgpu::WaitStatus::TimedOut);
+
+    metal::SetSubmissionSuspended(device.Get(), false);
+    EXPECT_FALSE(metal::IsSubmissionSuspended(device.Get()));
+    EXPECT_EQ(GetInstance().WaitAny(done, kForeverNs), wgpu::WaitStatus::Success);
+    EXPECT_BUFFER_U32_EQ(kValue, dst, 0);
+}
+
+// Suspending commits the work pending at that point: it completes while the queue is suspended.
+TEST_P(MetalSuspendedSubmissionTests, PendingWorkIsCommittedOnSuspend) {
+    wgpu::Buffer dst;
+    wgpu::CommandBuffer commands =
+        MakeCopyOfValue(&dst, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
+    queue.Submit(1, &commands);
+    wgpu::Future done = WorkDone();
+
+    metal::SetSubmissionSuspended(device.Get(), true);
+    EXPECT_EQ(GetInstance().WaitAny(done, kForeverNs), wgpu::WaitStatus::Success);
+    metal::SetSubmissionSuspended(device.Get(), false);
+    EXPECT_BUFFER_U32_EQ(kValue, dst, 0);
+}
+
+// A thread waiting for held work, like a readback or a promise waiter, wakes once the queue is
+// resumed from another thread. The wait flushes the queue before sleeping, which only the device
+// lock keeps apart from the resume.
+TEST_P(MetalSuspendedSubmissionTests, WaiterWakesOnceResumed) {
+    DAWN_TEST_UNSUPPORTED_IF(!IsImplicitDeviceSyncEnabled());
+
+    wgpu::Buffer dst;
+    wgpu::CommandBuffer commands =
+        MakeCopyOfValue(&dst, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
+
+    metal::SetSubmissionSuspended(device.Get(), true);
+    queue.Submit(1, &commands);
+    wgpu::Future done = WorkDone();
+
+    std::atomic<bool> woke = false;
+    std::thread waiter([&] {
+        EXPECT_EQ(GetInstance().WaitAny(done, kForeverNs), wgpu::WaitStatus::Success);
+        woke.store(true);
+    });
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    EXPECT_FALSE(woke.load());
+
+    metal::SetSubmissionSuspended(device.Get(), false);
+    waiter.join();
+    EXPECT_TRUE(woke.load());
+    EXPECT_BUFFER_U32_EQ(kValue, dst, 0);
+}
+
+// A mapping requested while the queue is suspended resolves, with the held work's result, once
+// the queue is resumed.
+TEST_P(MetalSuspendedSubmissionTests, MapAsyncResolvesOnceResumed) {
+    wgpu::Buffer dst;
+    wgpu::CommandBuffer commands =
+        MakeCopyOfValue(&dst, wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst);
+
+    metal::SetSubmissionSuspended(device.Get(), true);
+    queue.Submit(1, &commands);
+
+    bool mapped = false;
+    dst.MapAsync(wgpu::MapMode::Read, 0, 4, wgpu::CallbackMode::AllowProcessEvents,
+                 [&](wgpu::MapAsyncStatus status, wgpu::StringView) {
+                     EXPECT_EQ(status, wgpu::MapAsyncStatus::Success);
+                     mapped = true;
+                 });
+    for (int i = 0; i < 5 && !mapped; ++i) {
+        WaitABit();
+    }
+    EXPECT_FALSE(mapped);
+
+    metal::SetSubmissionSuspended(device.Get(), false);
+    while (!mapped) {
+        WaitABit();
+    }
+    EXPECT_EQ(*static_cast<const uint32_t*>(dst.GetConstMappedRange(0, 4)), kValue);
+    dst.Unmap();
+}
+
+// Suspending or resuming twice changes nothing, and neither crashes on a destroyed device.
+TEST_P(MetalSuspendedSubmissionTests, RepeatedAndOnDestroyedDevice) {
+    metal::SetSubmissionSuspended(device.Get(), true);
+    metal::SetSubmissionSuspended(device.Get(), true);
+    EXPECT_TRUE(metal::IsSubmissionSuspended(device.Get()));
+    metal::SetSubmissionSuspended(device.Get(), false);
+    metal::SetSubmissionSuspended(device.Get(), false);
+    EXPECT_FALSE(metal::IsSubmissionSuspended(device.Get()));
+
+    DestroyDevice(device);
+    metal::SetSubmissionSuspended(device.Get(), true);
+    EXPECT_TRUE(metal::IsSubmissionSuspended(device.Get()));
+    metal::SetSubmissionSuspended(device.Get(), false);
 }
 
 #if defined(DAWN_ENABLE_ERROR_INJECTION)
@@ -219,6 +371,7 @@ TEST_P(MetalBackendTests, MapAsyncOnFailedCommandBuffer) {
 #endif  // defined(DAWN_ENABLE_ERROR_INJECTION)
 
 DAWN_INSTANTIATE_TEST(MetalBackendTests, MetalBackend());
+DAWN_INSTANTIATE_TEST(MetalSuspendedSubmissionTests, MetalBackend());
 
 }  // anonymous namespace
 }  // namespace dawn::native

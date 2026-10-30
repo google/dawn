@@ -174,6 +174,34 @@ void Queue::WaitForCommandsToBeScheduled() {
     [*lastSubmittedCommands waitUntilScheduled];
 }
 
+void Queue::SetSubmissionSuspended(bool suspended) {
+    if (mSubmissionSuspended.load(std::memory_order_acquire) == suspended) {
+        return;
+    }
+    if (suspended) {
+        // Commit what is pending while commits are still allowed, and make sure it is scheduled:
+        // iOS lets the command buffers scheduled by the time the application returns from
+        // applicationDidEnterBackground complete, and refuses the ones committed after that. No
+        // other thread commits meanwhile, since the caller holds the device lock.
+        WaitForCommandsToBeScheduled();
+        mHeldSubmissions.store(0, std::memory_order_relaxed);
+        mSubmissionSuspended.store(true, std::memory_order_release);
+        return;
+    }
+    mSubmissionSuspended.store(false, std::memory_order_release);
+    if (!IsAlive()) {
+        return;
+    }
+    // What was held goes out now, as one command buffer.
+    if (GetDevice()->ConsumedError(SubmitPendingCommandBuffer())) {
+        return;
+    }
+}
+
+bool Queue::IsSubmissionSuspended() const {
+    return mSubmissionSuspended.load(std::memory_order_acquire);
+}
+
 FutureID Queue::GetCommandsScheduledFuture() {
     if (!IsAlive()) {
         return kNullFutureID;
@@ -233,6 +261,12 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
     DAWN_TRY(CheckExecutionError());
 
     if (!mCommandContext.NeedsSubmit()) {
+        return {};
+    }
+
+    if (mSubmissionSuspended.load(std::memory_order_acquire)) [[unlikely]] {
+        // Held (see SetSubmissionSuspended): the commands stay encoded in the pending command
+        // buffer, which the resume commits. Whoever waits for their serial waits until then.
         return {};
     }
 
@@ -360,6 +394,25 @@ MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
             for (CommandBufferBase* commandBuffer : commands) {
                 DAWN_TRY(ToBackend(commandBuffer)->RecordCommands(commandContext));
             }
+        }
+
+        if (mSubmissionSuspended.load(std::memory_order_acquire)) [[unlikely]] {
+            // Encoded, and committed once resumed (see SetSubmissionSuspended). Every submission
+            // held keeps what it uses alive until then, so a producer that keeps submitting while
+            // the application is in the background is worth finding: say so, once per hold.
+            if (mHeldSubmissions.fetch_add(1, std::memory_order_relaxed) + 1 ==
+                kHeldSubmissionsWarning) {
+                GetDevice()->EmitLog(
+                    wgpu::LoggingType::Warning,
+                    absl::StrFormat(
+                        "%u submissions have been held since the application entered the "
+                        "background (metal_suspend_submissions_in_background). They are committed "
+                        "when it returns to the foreground, and each keeps the resources it uses "
+                        "alive until then: stop submitting GPU work while the application is in "
+                        "the background.",
+                        kHeldSubmissionsWarning));
+            }
+            return {};
         }
 
         DAWN_TRY(SubmitPendingCommandBuffer());

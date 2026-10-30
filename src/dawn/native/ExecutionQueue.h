@@ -120,6 +120,11 @@ class ExecutionQueueBase : public ApiObjectBase {
     // Submit any pending commands that are enqueued.
     MaybeError SubmitPendingCommands();
 
+    // Whether the backend holds the commands it is asked to submit, to commit them later (see
+    // dawn::native::metal::SetSubmissionSuspended): a serial flushed meanwhile stays pending until
+    // the hold is lifted, and whoever waits for it waits until then.
+    virtual bool IsSubmissionSuspended() const;
+
     // During shut down of device, some operations might have been started since the last submit
     // and waiting on a serial that doesn't have a corresponding fence enqueued. Fake serials to
     // make all commands look completed.
