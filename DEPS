@@ -24,7 +24,7 @@ vars = {
   'dawn_wasm': False, # Also fetches dependencies required for building WebAssembly.
   'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
-  'dawn_gn_version': 'git_revision:938087829fcbcc8fd87835ee301dd522c7637685',
+  'dawn_gn_version': 'git_revision:224f6aa73aeb73aafb05df998073ff2c7cae666f',
   # ninja CIPD package version.
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
   'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
@@ -77,7 +77,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': '889295bc741dabc31e49388a501669ba275f8914',
+  'chromium_revision': 'b4098bf1104cd82a08a1befce7ffd90b746fca49',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -108,7 +108,7 @@ vars = {
 
 deps = {
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@2f41b66d4857c8efbfcb2a350f159944f71dbf7e',
+    'url': '{chromium_git}/chromium/src/buildtools@d0d4c192e3c718016b3a0c5d44ccec632bccfe96',
     'condition': 'dawn_standalone',
   },
   'third_party/clang-format/script': {
@@ -141,7 +141,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@b86fc981b72ab966f8260f73b4eca600b3b12677',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@37e67d87efb841c1633c9943cdc334ecb523b921',
     'condition': 'dawn_standalone',
   },
 
@@ -151,13 +151,13 @@ deps = {
   },
 
   'third_party/libc++abi/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@440f88852530ac197479edb1463dda1916692cce',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@ce814c994055b107c631c310b1c668e3714c0704',
     'condition': 'dawn_standalone',
   },
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@567c143bea85f11d15702a120561a8e51f46f02c',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@f95f56b46c39ccb0e4f35f6262d3e052deb692d2',
     'condition': 'dawn_standalone',
   },
 
@@ -172,15 +172,15 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@40b05af6cd90036fce45b09ae38e960eec8048de',
+  'url': '{chromium_git}/chromium/src/build@b93eebb64f990bf65bb52562f49f2292468ba390',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-  'url': '{chromium_git}/chromium/src/tools/clang@cc704f55000e327592594bc295abca5fa004ea99',
+  'url': '{chromium_git}/chromium/src/tools/clang@7ea1bdeeaf498a513c77b66667e56f6f41f9f0b3',
     'condition': 'dawn_standalone',
   },
   'tools/memory': {
-    'url': '{chromium_git}/chromium/src/tools/memory@2fb28c428678b339d788a8f4a2fd26b7a9e6d920',
+    'url': '{chromium_git}/chromium/src/tools/memory@cb2c6b2f37838c5e42538efa607132380e7f48c4',
     'condition': 'dawn_standalone',
   },
   'tools/valgrind': {
@@ -198,7 +198,7 @@ deps = {
 
   # For run-tricium-clang-tidy.py
   'third_party/chromium-tools-build/src': {
-    'url': '{chromium_git}/chromium/tools/build@d2a46d2cb8accee772b2cf8c954f95fdea9167a9',
+    'url': '{chromium_git}/chromium/tools/build@d89fd6acccc3ea7fa45f211e0ee711bff6bccaff',
     'condition': 'dawn_standalone and checkout_clang_tidy',
   },
 
@@ -286,13 +286,13 @@ deps = {
 
   # Used for Dawn-side GN arg definitions.
   'tools/mb': {
-    'url': '{chromium_git}/chromium/src/tools/mb@52495a36a3f3a91078696b8b4fbd4893ba9f7015',
+    'url': '{chromium_git}/chromium/src/tools/mb@c7a91093bfa9c745ccd53c16b7789227967c7857',
     'condition': 'dawn_standalone',
   },
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@1fe1dc8fe61b3344d9fa425d63bf7d5f426c0098',
+    'url': '{chromium_git}/chromium/src/testing@552b3a15abbb1f30005b4ce04571f0f0d37ad99c',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -305,7 +305,7 @@ deps = {
   },
   # This is a dependency of //testing
   'third_party/catapult': {
-    'url': '{chromium_git}/catapult.git@74678266b79e0ee388f1021bea36388c854b4a00',
+    'url': '{chromium_git}/catapult.git@0dbdb5923bae6bd73dd606b17f3975ca2c4e3f00',
     'condition': 'dawn_standalone',
   },
   'third_party/google_benchmark/src': {
@@ -313,7 +313,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'third_party/perfetto': {
-    'url': '{chromium_git}/external/github.com/google/perfetto.git@214c983f4c72c442d71415d9c81a7e1ed11566a7',
+    'url': '{chromium_git}/external/github.com/google/perfetto.git@9886e6744d8ec172f0878084aaa19cd6161564ed',
     'condition': 'dawn_standalone',
   },
 
@@ -341,7 +341,7 @@ deps = {
 
   # Jinja2 and MarkupSafe for the code generator
   'third_party/jinja2': {
-    'url': '{chromium_git}/chromium/src/third_party/jinja2@c3027d884967773057bf74b957e3fea87e5df4d7',
+    'url': '{chromium_git}/chromium/src/third_party/jinja2@fde3c16799bd5937e4f15aedc9037c89f96236b9',
     'condition': 'dawn_standalone',
   },
   'third_party/markupsafe': {
@@ -420,7 +420,7 @@ deps = {
   },
 
   'third_party/abseil-cpp': {
-    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@3ac1241bcd2b9dd66fe734fe963d583f3f1044a8',
+    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@56722f9eb6f40fb1a140caffd36e8f1f61b57aaf',
     'condition': 'dawn_standalone',
   },
 
@@ -677,7 +677,7 @@ deps = {
 
   # Misc dependencies inherited from Tint
   'third_party/protobuf': {
-    'url': '{chromium_git}/chromium/src/third_party/protobuf@4194e8e81c28b56bde8e523b4a52e76ad4bdb3dc',
+    'url': '{chromium_git}/chromium/src/third_party/protobuf@09628b94d7d74ca43fd3dfd81d6b9d11f09bebc2',
     'condition': 'dawn_standalone',
   },
 
@@ -694,7 +694,7 @@ deps = {
   # Dependencies for PartitionAlloc.
   # Doc: https://docs.google.com/document/d/1wz45t0alQthsIU9P7_rQcfQyqnrBMXzrOjSzdQo-V-A
   'third_party/partition_alloc': {
-    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@72cc1f7ea4f1034dd9ad334c7d245054ca575fc9',
+    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@0c290106ed35868e221b0d00d7805c29d7973b81',
     'condition': 'dawn_standalone',
   },
 
@@ -745,7 +745,7 @@ deps = {
     'packages': [
       {
         'package': 'chromium/third_party/jdk/${{platform}}',
-        'version': 'version:2@jdk-25.0.5+8.a4d27635bd.cr0',
+        'version': 'version:2@jdk-25.0.5+8.3b488c3489.cr0',
       },
     ],
     'condition': 'checkout_android and dawn_standalone and non_git_source and '
@@ -754,7 +754,7 @@ deps = {
     'dep_type': 'cipd',
   },
   'third_party/android_build_tools': {
-    'url': Var('chromium_git') + '/chromium/src/third_party/android_build_tools@0582d1b52df26cbd64ddfc41756bdb385550d6ac',
+    'url': Var('chromium_git') + '/chromium/src/third_party/android_build_tools@68e6c1e4120513d98bdf350cd323b7d7d39fd3a4',
     'condition': 'checkout_android and dawn_standalone',
   },
   'third_party/android_build_tools/aapt2/cipd': {
@@ -771,7 +771,7 @@ deps = {
     'packages': [
       {
         'package': 'chromium/third_party/android_build_tools/manifest_merger',
-        'version': 'AOTkL10zrs8MLBJB06RShLmwy8iaJBBwGyLG_TraiRsC',
+        'version': 'NIPbbIC0ftVVQjtkKBeS8QhsdG0N96fo7cvztXAnIA8C',
       },
     ],
     'condition': 'checkout_android and dawn_standalone',
@@ -869,31 +869,31 @@ deps = {
     'condition': 'dawn_standalone and checkout_v8',
     'objects': [
       {
-        'object_name': 'Linux_x64/rust-libclang-8a9dd7abdf013ec10cfeaaa3685feba18ef1c90c-1-llvmorg-24-init-14453-ge063be79.tar.xz',
-        'sha256sum': '505dfa0b8c6c7abb332437c83e1ba169595e53aa8eef8f0aa1ea7adce4576835',
-        'size_bytes': 23017532,
-        'generation': 1792086677820729,
+        'object_name': 'Linux_x64/rust-libclang-8a9dd7abdf013ec10cfeaaa3685feba18ef1c90c-6-llvmorg-24-init-14453-ge063be79.tar.xz',
+        'sha256sum': '693fd176a27508efb6cbc06b7db9c64abfc19497664dbaf4a9f4d489b8b4239a',
+        'size_bytes': 23021680,
+        'generation': 1793195408791425,
         'condition': 'host_os == "linux" and non_git_source',
       },
       {
-        'object_name': 'Mac/rust-libclang-8a9dd7abdf013ec10cfeaaa3685feba18ef1c90c-1-llvmorg-24-init-14453-ge063be79.tar.xz',
-        'sha256sum': 'add54dcb54194a627e6c0b7171aa06114064c231410e33f616a83948e4626882',
-        'size_bytes': 23163236,
-        'generation': 1792086682384306,
+        'object_name': 'Mac/rust-libclang-8a9dd7abdf013ec10cfeaaa3685feba18ef1c90c-6-llvmorg-24-init-14453-ge063be79.tar.xz',
+        'sha256sum': 'b08bf161b5acaba2fe39d9a8089f8134417bfaef33531b6e4e84365e7c828bfe',
+        'size_bytes': 23159048,
+        'generation': 1793195412269519,
         'condition': 'host_os == "mac" and host_cpu == "x64"',
       },
       {
-        'object_name': 'Mac_arm64/rust-libclang-8a9dd7abdf013ec10cfeaaa3685feba18ef1c90c-1-llvmorg-24-init-14453-ge063be79.tar.xz',
-        'sha256sum': '3abad0aab3e8f49e2bb596a85cc88c38ee872bfe1dd55c6dc76fcfab9c6f0ba7',
-        'size_bytes': 20838968,
-        'generation': 1792086685890604,
+        'object_name': 'Mac_arm64/rust-libclang-8a9dd7abdf013ec10cfeaaa3685feba18ef1c90c-6-llvmorg-24-init-14453-ge063be79.tar.xz',
+        'sha256sum': 'aa01ed55d80721dc53acf6fb604113037ba5142f3668ce7f7a02427b787cfea5',
+        'size_bytes': 20842496,
+        'generation': 1793195415799242,
         'condition': 'host_os == "mac" and host_cpu == "arm64"',
       },
       {
-        'object_name': 'Win/rust-libclang-8a9dd7abdf013ec10cfeaaa3685feba18ef1c90c-1-llvmorg-24-init-14453-ge063be79.tar.xz',
-        'sha256sum': 'b0716ed45f80b964b058414a80eb417272cb2e1df684c86efa31edf6ede31211',
-        'size_bytes': 21797328,
-        'generation': 1792086689442006,
+        'object_name': 'Win/rust-libclang-8a9dd7abdf013ec10cfeaaa3685feba18ef1c90c-6-llvmorg-24-init-14453-ge063be79.tar.xz',
+        'sha256sum': '38438c49085b1770020713fc981bf63a6e7d6398d8c1d7f094ec509347d384e8',
+        'size_bytes': 21764276,
+        'generation': 1793195419458813,
         'condition': 'host_os == "win"',
       },
     ],
