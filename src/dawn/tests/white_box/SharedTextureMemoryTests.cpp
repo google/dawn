@@ -3200,6 +3200,10 @@ TEST_P(SharedTextureMemoryTests, WriteStorageThenReadSample) {
     // crbug.com/475503907
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsImgTec());
 
+    // crbug.com/578756716
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsIntelXe2OrLater() &&
+                          GetDriverVersion() >= gpu_info::DriverVersion({26, 0, 8}));
+
     std::vector<wgpu::Device> devices = {device, CreateDevice()};
 
     for (const auto& memories :

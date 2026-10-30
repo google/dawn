@@ -359,6 +359,7 @@ class DawnTestBase {
     bool IsIntelGen9() const;
     bool IsIntelGen12() const;
     bool IsIntelGen12OrLater() const;
+    bool IsIntelXe2OrLater() const;
 
     bool IsWindows() const;
     bool IsWindows11() const;
