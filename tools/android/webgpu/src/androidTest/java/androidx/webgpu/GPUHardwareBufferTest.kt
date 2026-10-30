@@ -18,8 +18,11 @@ package androidx.webgpu
 
 import android.annotation.SuppressLint
 import android.hardware.HardwareBuffer
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
+import androidx.webgpu.ApiLevelSkipRule.Companion.assumeMinApi
 import androidx.webgpu.helper.GPUAndroidHardwareBufferUtil
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
@@ -29,7 +32,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import java.util.concurrent.Executor
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -48,11 +53,10 @@ import java.util.concurrent.Executors
 @RunWith(AndroidJUnit4::class)
 @MediumTest
 @OptIn(ExperimentalWebGpuApi::class)
-@androidx.test.filters.SdkSuppress(minSdkVersion = 29)
 class GPUHardwareBufferTest {
 
     companion object {
-        private const val FENCE_TIMEOUT_MS = 5000L
+        internal const val FENCE_TIMEOUT_MS = 5000L
     }
 
     private val dispatcher: CoroutineDispatcher = Executors.newSingleThreadExecutor { runnable ->
@@ -60,14 +64,18 @@ class GPUHardwareBufferTest {
     }.asCoroutineDispatcher()
     private val testScope = CoroutineScope(dispatcher)
 
-    private lateinit var webGpu: WebGpu
-    private lateinit var device: GPUDevice
+    internal lateinit var webGpu: WebGpu
+    internal lateinit var device: GPUDevice
 
     @get:Rule
     val apiSkipRule = ApiLevelSkipRule()
 
     @Before
     fun setup() = runBlocking {
+        Assume.assumeTrue(
+            "HardwareBuffer tests require Android API 26 or higher",
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O,
+        )
         // 1. Check features BEFORE requesting the device
         initLibrary()
         val instance = createGPUInstance(
@@ -79,7 +87,8 @@ class GPUHardwareBufferTest {
         )
         val adapter = instance.requestAdapter()
         val hasRequiredFeatures = with(adapter) {
-            hasFeature(FeatureName.SharedTextureMemoryAHardwareBuffer) &&
+            getInfo().backendType == BackendType.Vulkan &&
+                    hasFeature(FeatureName.SharedTextureMemoryAHardwareBuffer) &&
                     hasFeature(FeatureName.SharedFenceSyncFD) &&
                     hasFeature(FeatureName.YCbCrVulkanSamplers) &&
                     hasFeature(FeatureName.OpaqueYCbCrAndroidForExternalTexture)
@@ -133,136 +142,8 @@ class GPUHardwareBufferTest {
         if (::webGpu.isInitialized) {
             runCatching { webGpu.close() }
         }
-    }
-
-    private fun createHardwareBuffer(
-        width: Int, height: Int,
-        format: Int = HardwareBuffer.RGBA_8888,
-        usage: Long = HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE
-    ): HardwareBuffer {
-        return HardwareBuffer.create(width, height, format, 1, usage)
-    }
-
-    private data class PixelColor(val r: Int, val g: Int, val b: Int, val a: Int)
-
-    private fun getCenterPixelColor(hardwareBuffer: HardwareBuffer): PixelColor {
-        val hardwareBitmap = android.graphics.Bitmap.wrapHardwareBuffer(
-            hardwareBuffer,
-            android.graphics.ColorSpace.get(android.graphics.ColorSpace.Named.SRGB)
-        )
-        requireNotNull(hardwareBitmap) { "Hardware bitmap must not be null" }
-
-        try {
-            val softwareBitmap = hardwareBitmap.copy(android.graphics.Bitmap.Config.ARGB_8888, false)
-            requireNotNull(softwareBitmap) { "Software bitmap must not be null" }
-
-            try {
-                val centerPixel = softwareBitmap.getPixel(softwareBitmap.width / 2, softwareBitmap.height / 2)
-                return PixelColor(
-                    r = android.graphics.Color.red(centerPixel),
-                    g = android.graphics.Color.green(centerPixel),
-                    b = android.graphics.Color.blue(centerPixel),
-                    a = android.graphics.Color.alpha(centerPixel)
-                )
-            } finally {
-                softwareBitmap.recycle()
-            }
-        } finally {
-            hardwareBitmap.recycle()
-        }
-    }
-
-    private fun assertPixelColor(
-        hardwareBuffer: HardwareBuffer,
-        expectedRed: Int, expectedGreen: Int, expectedBlue: Int,
-        expectedAlpha: Int = 255
-    ) {
-        val color = getCenterPixelColor(hardwareBuffer)
-
-        assertEquals(expectedAlpha, color.a)
-        assertEquals(expectedRed, color.r)
-        assertEquals(expectedGreen, color.g)
-        assertEquals(expectedBlue, color.b)
-    }
-
-    private fun verifyColorSpaceConversion(
-        pipeline: GPURenderPipeline, sampler: GPUSampler,
-        srcBuffer: HardwareBuffer, dstBuffer: HardwareBuffer, dstWrapper: GPUHardwareBufferTexture,
-        width: Int, height: Int,
-        primary: Int, transfer: Int, range: Int, matrix: Int,
-    ) {
-        val extDescriptor = createExternalTextureDescriptor(
-            cropWidth = width, cropHeight = height,
-            primary = primary, transfer = transfer, range = range, matrix = matrix
-        )
-
-        val srcExtWrapper = GPUAndroidHardwareBufferUtil.createExternalTexture(
-            device,
-            srcBuffer,
-            extDescriptor
-        )
-
-        assertNotNull(srcExtWrapper)
-
-        val bindGroup = device.createBindGroup(
-            GPUBindGroupDescriptor(
-                layout = pipeline.getBindGroupLayout(0),
-                entries = arrayOf(
-                    GPUBindGroupEntry(binding = 0, sampler = sampler),
-                    GPUBindGroupEntry(
-                        binding = 1,
-                        externalTextureBindingEntry = GPUExternalTextureBindingEntry(srcExtWrapper.externalTexture)
-                    )
-                )
-            )
-        )
-
-        // Begin access on both wrappers
-        srcExtWrapper.beginAccess(null)
-        dstWrapper.beginAccess(null)
-
-        val view = dstWrapper.texture.createView()
-        val encoder = device.createCommandEncoder()
-        val pass = encoder.beginRenderPass(
-            GPURenderPassDescriptor(
-                colorAttachments = arrayOf(
-                    GPURenderPassColorAttachment(
-                        view = view,
-                        loadOp = LoadOp.Clear,
-                        storeOp = StoreOp.Store,
-                        clearValue = GPUColor(0.0, 0.0, 0.0, 1.0)
-                    )
-                )
-            )
-        )
-        pass.setPipeline(pipeline)
-        pass.setBindGroup(0, bindGroup)
-        pass.draw(3)
-        pass.end()
-
-        device.queue.submit(arrayOf(encoder.finish()))
-        webGpu.instance.processEvents()
-
-        val fenceSrc = requireNotNull(srcExtWrapper.endAccess()) { "Expected a valid fence" }
-        assertTrue("GPU execution did not complete in time", fenceSrc.await(FENCE_TIMEOUT_MS))
-        fenceSrc.close()
-
-        val fenceDst = requireNotNull(dstWrapper.endAccess()) { "Expected a valid fence" }
-        assertTrue("GPU execution did not complete in time", fenceDst.await(FENCE_TIMEOUT_MS))
-        fenceDst.close()
-
-        // 4. Verify transformed color components
-        val color = getCenterPixelColor(dstBuffer)
-
-        // Assert color conversion preserves primarily Red format
-        assertEquals(255, color.a)
-        assertTrue("Expected Red component to be high (got ${color.r})", color.r > 200)
-        assertTrue("Expected Green component to be low (got ${color.g})", color.g < 50)
-        assertTrue("Expected Blue component to be low (got ${color.b})", color.b < 50)
-
-        view.close()
-        bindGroup.close()
-        srcExtWrapper.close()
+        testScope.cancel()
+        (dispatcher as? ExecutorCoroutineDispatcher)?.close()
     }
 
     // =========================================================================
@@ -275,7 +156,7 @@ class GPUHardwareBufferTest {
     @Test
     @MediumTest
     @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
-    fun testImportHardwareBufferLoop_noLeaks() {
+    fun testImportHardwareBufferLoop_noLeaks() = assumeMinApi(Build.VERSION_CODES.O) {
         runBlocking {
             webGpu.execute {
                 for (i in 0 until 50) {
@@ -333,7 +214,7 @@ class GPUHardwareBufferTest {
     @Test
     @MediumTest
     @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
-    fun testRGBHardwareBuffer_asTexture() {
+    fun testRGBHardwareBuffer_asTexture() = assumeMinApi(Build.VERSION_CODES.O) {
         runBlocking {
             webGpu.execute {
                 val (rgbBuffer, wrapper) = createWrappedHardwareBuffer(
@@ -359,7 +240,7 @@ class GPUHardwareBufferTest {
     @Test
     @MediumTest
     @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
-    fun testRGBHardwareBuffer_asExternalTexture() {
+    fun testRGBHardwareBuffer_asExternalTexture() = assumeMinApi(Build.VERSION_CODES.O) {
         runBlocking {
             webGpu.execute {
                 val rgbBuffer = createHardwareBuffer(64, 64)
@@ -377,7 +258,7 @@ class GPUHardwareBufferTest {
     @Test
     @MediumTest
     @ApiRequirement(minApi = 30, onlySkipOnEmulator = true)
-    fun testYUVHardwareBuffer_asExternalTexture() {
+    fun testYUVHardwareBuffer_asExternalTexture() = assumeMinApi(Build.VERSION_CODES.R) {
         runBlocking {
             webGpu.execute {
                 val yuvBuffer = createHardwareBuffer(64, 64, format = HardwareBuffer.YCBCR_420_888)
@@ -393,6 +274,7 @@ class GPUHardwareBufferTest {
     // 3. RACE CONDITIONS & CONCURRENT ACCESS
     // =========================================================================
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun createAndAccessTexture() {
         val rgbBuffer = createHardwareBuffer(32, 32)
         val wrapper = GPUAndroidHardwareBufferUtil.createTexture(
@@ -414,7 +296,7 @@ class GPUHardwareBufferTest {
     @MediumTest
     @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
     @SuppressLint("SuspendBlocks")
-    fun testConcurrentAccess_raceCondition() {
+    fun testConcurrentAccess_raceCondition() = assumeMinApi(Build.VERSION_CODES.O) {
         runBlocking(Dispatchers.IO) {
             val numThreads = 2
             val barrier = java.util.concurrent.CyclicBarrier(numThreads)
@@ -439,7 +321,7 @@ class GPUHardwareBufferTest {
     @Test
     @MediumTest
     @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
-    fun testZeroCopyPipeline_writeAndVerify() {
+    fun testZeroCopyPipeline_writeAndVerify() = assumeMinApi(Build.VERSION_CODES.Q) {
         runBlocking {
             webGpu.execute {
                 val width = 64
@@ -465,7 +347,7 @@ class GPUHardwareBufferTest {
     @Test
     @MediumTest
     @ApiRequirement(minApi = 26, onlySkipOnEmulator = true)
-    fun testAHBChainingAndDepth() {
+    fun testAHBChainingAndDepth() = assumeMinApi(Build.VERSION_CODES.O) {
         runBlocking {
             webGpu.execute {
                 val width = 64
@@ -502,7 +384,7 @@ class GPUHardwareBufferTest {
     @Test
     @MediumTest
     @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
-    fun testZeroCopyPipeline_gpuRenderWriteAndVerify() {
+    fun testZeroCopyPipeline_gpuRenderWriteAndVerify() = assumeMinApi(Build.VERSION_CODES.Q) {
         runBlocking {
             webGpu.execute {
                 val width = 64
@@ -590,7 +472,7 @@ class GPUHardwareBufferTest {
     @Test
     @MediumTest
     @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
-    fun testZeroCopyPipeline_gpuSamplingAndCopyVerify() {
+    fun testZeroCopyPipeline_gpuSamplingAndCopyVerify() = assumeMinApi(Build.VERSION_CODES.Q) {
         runBlocking {
             webGpu.execute {
                 val width = 64
@@ -658,7 +540,7 @@ class GPUHardwareBufferTest {
     @Test
     @MediumTest
     @ApiRequirement(minApi = 30, onlySkipOnEmulator = true)
-    fun testYUVExternalTexture_descriptorTransform_validatesWithoutError() {
+    fun testYUVExternalTexture_descriptorTransform_validatesWithoutError() = assumeMinApi(Build.VERSION_CODES.R) {
         runBlocking {
             webGpu.execute {
                 val yuvBuffer = createHardwareBuffer(128, 128, format = HardwareBuffer.YCBCR_420_888)
@@ -679,7 +561,7 @@ class GPUHardwareBufferTest {
     @Test
     @MediumTest
     @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
-    fun testRGBExternalTexture_descriptorTransform_validatesWithoutError() {
+    fun testRGBExternalTexture_descriptorTransform_validatesWithoutError() = assumeMinApi(Build.VERSION_CODES.O) {
         runBlocking {
             webGpu.execute {
                 val width = 64
@@ -704,7 +586,7 @@ class GPUHardwareBufferTest {
     @MediumTest
     @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
     @SuppressLint("SuspendBlocks")
-    fun testColorSpaceEnumVariants() {
+    fun testColorSpaceEnumVariants() = assumeMinApi(Build.VERSION_CODES.Q) {
         runBlocking {
             webGpu.execute {
                 val width = 64
@@ -769,6 +651,7 @@ class GPUHardwareBufferTest {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun createWrappedHardwareBuffer(
         width: Int = 64, height: Int = 64, textureUsage: Int
     ): Pair<HardwareBuffer, GPUHardwareBufferTexture> {
@@ -809,7 +692,7 @@ class GPUHardwareBufferTest {
         fence.close()
     }
 
-    private fun createExternalTextureDescriptor(
+    internal fun createExternalTextureDescriptor(
         cropWidth: Int = 64, cropHeight: Int = 64,
         cropOriginX: Int = 0, cropOriginY: Int = 0,
         mirrored: Boolean = false,
@@ -829,19 +712,6 @@ class GPUHardwareBufferTest {
             ),
             dstColorSpace = PredefinedColorSpace.SRGB
         )
-    }
-
-    private fun validateExternalTextureImport(buffer: HardwareBuffer, extDescriptor: GPUExternalTextureDescriptor) {
-        val wrapper = GPUAndroidHardwareBufferUtil.createExternalTexture(device, buffer, extDescriptor)
-        assertNotNull(wrapper)
-        assertNotNull(wrapper.externalTexture)
-
-        wrapper.beginAccess(null)
-        val fence = wrapper.endAccess()
-        fence?.close()
-
-        wrapper.close()
-        buffer.close()
     }
 
     private fun createExternalTextureSamplingPipeline(): Pair<GPURenderPipeline, GPUSampler> {
@@ -876,4 +746,160 @@ class GPUHardwareBufferTest {
         )
         return Pair(pipeline, sampler)
     }
+}
+
+// Helpers with HardwareBuffer in their raw JVM method descriptor are kept at file scope so
+// JUnit's Class.getDeclaredMethods() on GPUHardwareBufferTest does not resolve HardwareBuffer
+// on API 24/25 before assumeMinApi skips the test.
+@RequiresApi(Build.VERSION_CODES.O)
+private fun createHardwareBuffer(
+    width: Int, height: Int,
+    format: Int = HardwareBuffer.RGBA_8888,
+    usage: Long = HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE
+): HardwareBuffer {
+    return HardwareBuffer.create(width, height, format, 1, usage)
+}
+
+private data class PixelColor(val r: Int, val g: Int, val b: Int, val a: Int)
+
+@RequiresApi(Build.VERSION_CODES.Q)
+private fun getCenterPixelColor(hardwareBuffer: HardwareBuffer): PixelColor {
+    val hardwareBitmap = android.graphics.Bitmap.wrapHardwareBuffer(
+        hardwareBuffer,
+        android.graphics.ColorSpace.get(android.graphics.ColorSpace.Named.SRGB)
+    )
+    requireNotNull(hardwareBitmap) { "Hardware bitmap must not be null" }
+
+    try {
+        val softwareBitmap = hardwareBitmap.copy(android.graphics.Bitmap.Config.ARGB_8888, false)
+        requireNotNull(softwareBitmap) { "Software bitmap must not be null" }
+
+        try {
+            val centerPixel = softwareBitmap.getPixel(softwareBitmap.width / 2, softwareBitmap.height / 2)
+            return PixelColor(
+                r = android.graphics.Color.red(centerPixel),
+                g = android.graphics.Color.green(centerPixel),
+                b = android.graphics.Color.blue(centerPixel),
+                a = android.graphics.Color.alpha(centerPixel)
+            )
+        } finally {
+            softwareBitmap.recycle()
+        }
+    } finally {
+        hardwareBitmap.recycle()
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.Q)
+private fun assertPixelColor(
+    hardwareBuffer: HardwareBuffer,
+    expectedRed: Int, expectedGreen: Int, expectedBlue: Int,
+    expectedAlpha: Int = 255
+) {
+    val color = getCenterPixelColor(hardwareBuffer)
+
+    assertEquals(expectedAlpha, color.a)
+    assertEquals(expectedRed, color.r)
+    assertEquals(expectedGreen, color.g)
+    assertEquals(expectedBlue, color.b)
+}
+
+@OptIn(ExperimentalWebGpuApi::class)
+@RequiresApi(Build.VERSION_CODES.O)
+private fun GPUHardwareBufferTest.validateExternalTextureImport(
+    buffer: HardwareBuffer,
+    extDescriptor: GPUExternalTextureDescriptor
+) {
+    val wrapper = GPUAndroidHardwareBufferUtil.createExternalTexture(device, buffer, extDescriptor)
+    assertNotNull(wrapper)
+    assertNotNull(wrapper.externalTexture)
+
+    wrapper.beginAccess(null)
+    val fence = wrapper.endAccess()
+    fence?.close()
+
+    wrapper.close()
+    buffer.close()
+}
+
+@OptIn(ExperimentalWebGpuApi::class)
+@RequiresApi(Build.VERSION_CODES.Q)
+private fun GPUHardwareBufferTest.verifyColorSpaceConversion(
+    pipeline: GPURenderPipeline, sampler: GPUSampler,
+    srcBuffer: HardwareBuffer, dstBuffer: HardwareBuffer, dstWrapper: GPUHardwareBufferTexture,
+    width: Int, height: Int,
+    primary: Int, transfer: Int, range: Int, matrix: Int,
+) {
+    val extDescriptor = createExternalTextureDescriptor(
+        cropWidth = width, cropHeight = height,
+        primary = primary, transfer = transfer, range = range, matrix = matrix
+    )
+
+    val srcExtWrapper = GPUAndroidHardwareBufferUtil.createExternalTexture(
+        device,
+        srcBuffer,
+        extDescriptor
+    )
+
+    assertNotNull(srcExtWrapper)
+
+    val bindGroup = device.createBindGroup(
+        GPUBindGroupDescriptor(
+            layout = pipeline.getBindGroupLayout(0),
+            entries = arrayOf(
+                GPUBindGroupEntry(binding = 0, sampler = sampler),
+                GPUBindGroupEntry(
+                    binding = 1,
+                    externalTextureBindingEntry = GPUExternalTextureBindingEntry(srcExtWrapper.externalTexture)
+                )
+            )
+        )
+    )
+
+    // Begin access on both wrappers
+    srcExtWrapper.beginAccess(null)
+    dstWrapper.beginAccess(null)
+
+    val view = dstWrapper.texture.createView()
+    val encoder = device.createCommandEncoder()
+    val pass = encoder.beginRenderPass(
+        GPURenderPassDescriptor(
+            colorAttachments = arrayOf(
+                GPURenderPassColorAttachment(
+                    view = view,
+                    loadOp = LoadOp.Clear,
+                    storeOp = StoreOp.Store,
+                    clearValue = GPUColor(0.0, 0.0, 0.0, 1.0)
+                )
+            )
+        )
+    )
+    pass.setPipeline(pipeline)
+    pass.setBindGroup(0, bindGroup)
+    pass.draw(3)
+    pass.end()
+
+    device.queue.submit(arrayOf(encoder.finish()))
+    webGpu.instance.processEvents()
+
+    val fenceSrc = requireNotNull(srcExtWrapper.endAccess()) { "Expected a valid fence" }
+    assertTrue("GPU execution did not complete in time", fenceSrc.await(GPUHardwareBufferTest.FENCE_TIMEOUT_MS))
+    fenceSrc.close()
+
+    val fenceDst = requireNotNull(dstWrapper.endAccess()) { "Expected a valid fence" }
+    assertTrue("GPU execution did not complete in time", fenceDst.await(GPUHardwareBufferTest.FENCE_TIMEOUT_MS))
+    fenceDst.close()
+
+    // 4. Verify transformed color components
+    val color = getCenterPixelColor(dstBuffer)
+
+    // Assert color conversion preserves primarily Red format
+    assertEquals(255, color.a)
+    assertTrue("Expected Red component to be high (got ${color.r})", color.r > 200)
+    assertTrue("Expected Green component to be low (got ${color.g})", color.g < 50)
+    assertTrue("Expected Blue component to be low (got ${color.b})", color.b < 50)
+
+    view.close()
+    bindGroup.close()
+    srcExtWrapper.close()
 }

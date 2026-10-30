@@ -17,7 +17,6 @@ package androidx.webgpu
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
-import androidx.test.filters.SdkSuppress
 import androidx.webgpu.WebGpuTestConstants.EMULATOR_TESTS_MIN_API_LEVEL
 import androidx.webgpu.helper.createWebGpu
 import androidx.webgpu.helper.WebGpu
@@ -185,8 +184,8 @@ class MultisampleStateTest {
   }
 
   @Test
-    @SdkSuppress(maxSdkVersion = 36) // b/537525245
-  @ApiRequirement(minApi = EMULATOR_TESTS_MIN_API_LEVEL, onlySkipOnEmulator = true)
+  // b/537525245: API 37 emulator software rendering uses the Null backend (emulator-only).
+  @ApiRequirement(minApi = EMULATOR_TESTS_MIN_API_LEVEL, maxApi = 36, onlySkipOnEmulator = true)
   fun verifyDefaultMaskEnablesAllSamplesInMSAARender() = runBlocking {
     webGpu.execute {
       // Default mask (0xFFFFFFFF or -1) should allow drawing.
@@ -201,6 +200,7 @@ class MultisampleStateTest {
   }
 
   @Test
+  @ApiRequirement(minApi = EMULATOR_TESTS_MIN_API_LEVEL, onlySkipOnEmulator = true)
   fun verifyZeroMaskDisablesUpdates() = runBlocking {
     webGpu.execute {
       // Zero mask (0x0) should block all samples from being updated.

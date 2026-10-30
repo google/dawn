@@ -16,7 +16,6 @@
 package androidx.webgpu
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.SdkSuppress
 import androidx.test.filters.SmallTest
 import androidx.webgpu.WebGpuTestConstants.EMULATOR_TESTS_MIN_API_LEVEL
 import androidx.webgpu.helper.initLibrary
@@ -67,8 +66,8 @@ class AdapterTest {
   }
 
   @Test
-  @ApiRequirement(minApi = EMULATOR_TESTS_MIN_API_LEVEL, onlySkipOnEmulator = true)
-    @SdkSuppress(maxSdkVersion = 36) // b/537525245
+  // b/537525245: API 37 emulator software rendering uses the Null backend (emulator-only).
+  @ApiRequirement(minApi = EMULATOR_TESTS_MIN_API_LEVEL, maxApi = 36, onlySkipOnEmulator = true)
   fun adapterBackendTest() {
     val adapterInfo = adapter.getInfo()
     assertEquals(

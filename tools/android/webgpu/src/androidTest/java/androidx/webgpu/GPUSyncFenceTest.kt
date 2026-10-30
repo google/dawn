@@ -17,8 +17,11 @@
 package androidx.webgpu
 
 import android.hardware.HardwareBuffer
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
+import androidx.webgpu.ApiLevelSkipRule.Companion.assumeMinApi
 import androidx.webgpu.helper.GPUAndroidHardwareBufferUtil
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
@@ -29,7 +32,9 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -62,6 +67,10 @@ class GPUSyncFenceTest {
 
     @Before
     fun setup() = runBlocking {
+        Assume.assumeTrue(
+            "HardwareBuffer and SyncFence tests require Android API 26 or higher",
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O,
+        )
         // 1. Check features BEFORE requesting the device
         initLibrary()
         val instance = createGPUInstance(
@@ -73,7 +82,8 @@ class GPUSyncFenceTest {
         )
         val adapter = instance.requestAdapter()
         val hasRequiredFeatures = with(adapter) {
-            hasFeature(FeatureName.SharedTextureMemoryAHardwareBuffer) &&
+            getInfo().backendType == BackendType.Vulkan &&
+                    hasFeature(FeatureName.SharedTextureMemoryAHardwareBuffer) &&
                     hasFeature(FeatureName.SharedFenceSyncFD)
         }
         adapter.close()
@@ -123,6 +133,8 @@ class GPUSyncFenceTest {
         if (::webGpu.isInitialized) {
             runCatching { webGpu.close() }
         }
+        testScope.cancel()
+        (dispatcher as? ExecutorCoroutineDispatcher)?.close()
     }
 
     private fun setupPipelineAndDraw(wrapper: GPUHardwareBufferTexture): GPURenderPipeline {
@@ -196,30 +208,32 @@ class GPUSyncFenceTest {
     @Test
     @MediumTest
     @ApiRequirement(minApi = 29, onlySkipOnEmulator = true)
-    fun testSyncFence_lifecycleAndAwaiting() = runBlocking {
-        webGpu.execute {
-            val (rgbBuffer, wrapper) = createTestTextureWrapper()
+    fun testSyncFence_lifecycleAndAwaiting() = assumeMinApi(Build.VERSION_CODES.O) {
+        runBlocking {
+            webGpu.execute {
+                val (rgbBuffer, wrapper) = createTestTextureWrapper()
 
-            val pipeline = setupPipelineAndDraw(wrapper)
-            val fence = requireNotNull(wrapper.endAccess()) { "Sync fence should not be null" }
+                val pipeline = setupPipelineAndDraw(wrapper)
+                val fence = requireNotNull(wrapper.endAccess()) { "Sync fence should not be null" }
 
-            try {
-                // Await signaling of the sync fence
-                val signaled = fence.await(FENCE_TIMEOUT_MS)
-                assertTrue(signaled)
+                try {
+                    // Await signaling of the sync fence
+                    val signaled = fence.await(FENCE_TIMEOUT_MS)
+                    assertTrue(signaled)
 
-                // Re-access the texture.
-                drawToTexture(wrapper, pipeline, arrayOf(fence))
-                fence.close()
+                    // Re-access the texture.
+                    drawToTexture(wrapper, pipeline, arrayOf(fence))
+                    fence.close()
 
-                webGpu.instance.processEvents()
+                    webGpu.instance.processEvents()
 
-                val nextFence = requireNotNull(wrapper.endAccess()) { "Sync fence should not be null" }
-                assertTrue(nextFence.await(FENCE_TIMEOUT_MS))
-                nextFence.close()
-            } finally {
-                wrapper.close()
-                rgbBuffer.close()
+                    val nextFence = requireNotNull(wrapper.endAccess()) { "Sync fence should not be null" }
+                    assertTrue(nextFence.await(FENCE_TIMEOUT_MS))
+                    nextFence.close()
+                } finally {
+                    wrapper.close()
+                    rgbBuffer.close()
+                }
             }
         }
     }
@@ -254,6 +268,7 @@ class GPUSyncFenceTest {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun createTestTextureWrapper(): Pair<HardwareBuffer, GPUHardwareBufferTexture> {
         val rgbBuffer = HardwareBuffer.create(
             64, 64, HardwareBuffer.RGBA_8888, 1,
