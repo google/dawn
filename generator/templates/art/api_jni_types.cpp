@@ -59,11 +59,19 @@
     {%- endif -%}
 {% endmacro %}
 
-{% macro jni_signature(member) %}
+{% macro jni_signature(member, unwrap_objects=False) %}
     {%- if member.type.name.get() == 'string view' -%}
         Ljava/lang/String;
+    {%- elif member.type.name.get() == 'void' -%}
+        Ljava/nio/ByteBuffer;
+    {%- elif not member.name and member.type.name.get() in ['void *', 'void const *'] -%}
+        Ljava/nio/ByteBuffer;
     {%- elif member.length and (member.length != 'constant' or member.constant_length != 1) -%}
         [{{ jni_signature_single_value(member.type) }}
+    {%- elif unwrap_objects and member.type.category == 'object' -%}
+        J
+    {%- elif unwrap_objects and member.type.category == 'callback function' -%}
+        L{{ kotlin_package.replace('.', '/') }}/GPURequestCallback;
     {%- else -%}
         {{ jni_signature_single_value(member.type) }}
     {%- endif %}

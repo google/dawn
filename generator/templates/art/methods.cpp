@@ -101,18 +101,17 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
 
     //*  A JNI-external method is built with the JNI signature expected to match the host Kotlin.
     //*  Object methods bind to the top-level static native on {{ kotlin_name(object) }}Kt, receiving the handle as a jlong.
-    DEFAULT extern "C"
-    {{ arg_to_jni_type(_kotlin_return) }}
+    static {{ arg_to_jni_type(_kotlin_return) }}
     {% if object %}
-        Java_{{ kotlin_package.replace('.', '_') }}_{{ kotlin_name(object) }}Kt_native{{ method.name.CamelCase() }}
+        {{ kotlin_name(object) }}_native{{ method.name.CamelCase() }}
                 (JNIEnv *env, jclass clazz, jlong _handle
     {%- else %}
-        Java_{{ kotlin_package.replace('.', '_') }}_{{ FunctionSuffix }}
+        {{ FunctionSuffix }}
                 (JNIEnv *env, jclass clazz
     {%- endif -%}
 
     //* Make the signature for each argument in turn.
-    {%- for arg in _kotlin_args %},
+    {%- for arg in (_kotlin_args if object else method.arguments) %},
         {{ 'jlong' if (unwrap_objs and arg.type.category == 'object' and not arg.length) else arg_to_jni_type(arg) }} _{{ as_varName(arg.name) }}
     {%- endfor %}) {
 
@@ -235,17 +234,70 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
 
     //* Every object gets a Release method, to supply a Kotlin AutoCloseable.
     //* The handle is unwrapped on the Kotlin side and passed to the top-level static native on {{ kotlin_name(obj) }}Kt.
-    DEFAULT extern "C"
-    void
-    Java_{{ kotlin_package.replace('.', '_') }}_{{ kotlin_name(obj) }}Kt_nativeClose(
+    static void {{ kotlin_name(obj) }}_nativeClose(
             JNIEnv *env, jclass clazz, jlong _handle) {
         wgpu{{ obj.name.CamelCase() }}Release(reinterpret_cast<{{ as_cType(obj.name) }}>(_handle));
     }
+
+    static const JNINativeMethod k{{ kotlin_name(obj) }}Methods[] = {
+        {% for method in obj.methods if include_method(method) %}
+            {% set _ret = kotlin_return(method) %}
+            {const_cast<char*>("native{{ method.name.CamelCase() }}"),
+             const_cast<char*>("(J{%- for arg in kotlin_record_members(method.arguments) -%}{{ jni_signature(arg, unwrap_objects=True) }}{%- endfor -%}){{ jni_signature(_ret) if _ret else 'V' }}"),
+             reinterpret_cast<void*>({{ kotlin_name(obj) }}_native{{ method.name.CamelCase() }})},
+        {% endfor %}
+        {const_cast<char*>("nativeClose"), const_cast<char*>("(J)V"), reinterpret_cast<void*>({{ kotlin_name(obj) }}_nativeClose)},
+    };
 {% endfor %}
 
 //* Global functions don't have an associated class.
 {% for function in by_category['function'] if include_method(function) %}
     {{ render_method(function, None) }}
 {% endfor %}
+
+static const JNINativeMethod kGPUMethods[] = {
+    {% for function in by_category['function'] if include_method(function) %}
+        {% set _ret = kotlin_return(function) %}
+        {const_cast<char*>("{{ kotlin_name(function) }}"),
+         const_cast<char*>("({%- for arg in function.arguments -%}{{ jni_signature(arg) }}{%- endfor -%}){{ jni_signature(_ret) if _ret else 'V' }}"),
+         reinterpret_cast<void*>(GPU_{{ kotlin_name(function) }})},
+    {% endfor %}
+};
+
+DEFAULT extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
+    JNIEnv* env = nullptr;
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        return JNI_ERR;
+    }
+    auto registerMethods = [env](const char* className, const JNINativeMethod* methods, jint count) {
+        jclass clz = env->FindClass(className);
+        if (!clz) {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+            return false;
+        }
+        jint result = env->RegisterNatives(clz, methods, count);
+        env->DeleteLocalRef(clz);
+        if (result != JNI_OK) {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+            return false;
+        }
+        return true;
+    };
+    {% for obj in by_category['object'] %}
+        if (!registerMethods("{{ jni_name(obj) }}Kt",
+                             k{{ kotlin_name(obj) }}Methods,
+                             static_cast<jint>(std::size(k{{ kotlin_name(obj) }}Methods)))) {
+            return JNI_ERR;
+        }
+    {% endfor %}
+    if (!registerMethods("{{ kotlin_package.replace('.', '/') }}/GPU",
+                         kGPUMethods,
+                         static_cast<jint>(std::size(kGPUMethods)))) {
+        return JNI_ERR;
+    }
+    return JNI_VERSION_1_6;
+}
 
 }  // namespace dawn::kotlin_api
