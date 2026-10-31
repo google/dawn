@@ -42,6 +42,17 @@ void WaitForCommandsToBeScheduled(WGPUDevice device) {
     ToBackend(backendDevice->GetQueue())->WaitForCommandsToBeScheduled();
 }
 
+void SetSubmissionSuspended(WGPUDevice device, bool suspended) {
+    Device* backendDevice = ToBackend(FromAPI(device));
+    auto deviceGuard = backendDevice->GetGuard();
+    ToBackend(backendDevice->GetQueue())->SetSubmissionSuspended(suspended);
+}
+
+bool IsSubmissionSuspended(WGPUDevice device) {
+    Device* backendDevice = ToBackend(FromAPI(device));
+    return ToBackend(backendDevice->GetQueue())->IsSubmissionSuspended();
+}
+
 id<MTLDevice> GetMTLDevice(WGPUDevice device) {
     Device* backendDevice = ToBackend(FromAPI(device));
     return backendDevice->GetMTLDevice();

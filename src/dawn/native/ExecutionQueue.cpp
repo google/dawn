@@ -333,13 +333,17 @@ MaybeError ExecutionQueueBase::EnsureCommandsFlushed(ExecutionSerial serial) {
     if (serial > GetLastSubmittedCommandSerial()) {
         ForceEventualFlushOfCommands();
         DAWN_TRY(SubmitPendingCommands());
-        DAWN_CHECK(serial <= GetLastSubmittedCommandSerial());
+        DAWN_CHECK(serial <= GetLastSubmittedCommandSerial() || IsSubmissionSuspended());
     }
     return {};
 }
 
 MaybeError ExecutionQueueBase::SubmitPendingCommands() {
     return SubmitPendingCommandsImpl();
+}
+
+bool ExecutionQueueBase::IsSubmissionSuspended() const {
+    return false;
 }
 
 void ExecutionQueueBase::AssumeCommandsComplete() {

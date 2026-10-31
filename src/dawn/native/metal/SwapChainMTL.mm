@@ -95,9 +95,17 @@ MaybeError SwapChain::PresentImpl() {
     DAWN_ASSERT(mCurrentDrawable != nullptr);
 
     Queue* queue = ToBackend(GetDevice()->GetQueue());
-    CommandRecordingContext* commandContext = queue->GetPendingCommandContext();
-    [commandContext->GetCommands() presentDrawable:*mCurrentDrawable];
-    DAWN_TRY(queue->SubmitPendingCommandBuffer());
+    if (queue->IsSubmissionSuspended()) {
+        // The application is in the background (see Queue::SetSubmissionSuspended), where the
+        // layer shows nothing: the frame is dropped rather than held, since a drawable kept until
+        // the return would starve the layer's few drawables for the frames rendered meanwhile. The
+        // work encoded into its texture is committed with the rest on the return, and the first
+        // frame drawn then replaces it.
+    } else {
+        CommandRecordingContext* commandContext = queue->GetPendingCommandContext();
+        [commandContext->GetCommands() presentDrawable:*mCurrentDrawable];
+        DAWN_TRY(queue->SubmitPendingCommandBuffer());
+    }
 
     mTexture->APIDestroy();
     mTexture = nullptr;

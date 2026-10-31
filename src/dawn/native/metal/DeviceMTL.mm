@@ -58,6 +58,23 @@
 #include "src/dawn/platform/tracing/TraceEvent.h"
 #include "src/utils/platform.h"
 
+#include <TargetConditionals.h>
+
+#include <mutex>
+#include <utility>
+#include <vector>
+
+#include "src/dawn/common/WeakRef.h"
+
+// iOS and tvOS refuse GPU work from an application in the background (Mac Catalyst and macOS do
+// not): there, the metal_suspend_submissions_in_background toggle follows the application's state.
+#if (TARGET_OS_IOS || TARGET_OS_TV) && !TARGET_OS_MACCATALYST
+#define DAWN_METAL_OBSERVES_APPLICATION_STATE 1
+#import <UIKit/UIKit.h>
+#else
+#define DAWN_METAL_OBSERVES_APPLICATION_STATE 0
+#endif
+
 namespace dawn::native::metal {
 
 struct KalmanInfo {
@@ -119,6 +136,95 @@ void UpdateTimestampPeriod(id<MTLDevice> device,
         *gpuTimestampStart = gpuTimestampEnd;
     }
 }
+
+#if DAWN_METAL_OBSERVES_APPLICATION_STATE
+// Holds the submissions of the devices that enable Toggle::MetalSuspendSubmissionsInBackground
+// while the application is in the background, see Queue::SetSubmissionSuspended. One for the
+// process: UIKit posts the notifications on the main thread, synchronously, so the devices are
+// drained inside UIApplicationDidEnterBackgroundNotification, before the application returns to
+// the system, and resumed on UIApplicationWillEnterForegroundNotification. Devices are kept
+// weakly: a device that goes away unregisters itself (see Device::DestroyImpl), and one being
+// destroyed is skipped.
+class BackgroundSubmissionObserver {
+  public:
+    static BackgroundSubmissionObserver& Get() {
+        static auto* instance = new BackgroundSubmissionObserver();
+        return *instance;
+    }
+
+    void Add(Device* device) {
+        bool backgrounded;
+        {
+            std::lock_guard<std::mutex> lock(mMutex);
+            mDevices.emplace_back(device, GetWeakRef(static_cast<DeviceBase*>(device)));
+            backgrounded = mBackgrounded;
+        }
+        if (backgrounded) {
+            // Made in the background: nothing is committed until the return.
+            ToBackend(device->GetQueue())->SetSubmissionSuspended(true);
+        }
+    }
+
+    void Remove(Device* device) {
+        std::lock_guard<std::mutex> lock(mMutex);
+        std::erase_if(mDevices, [device](const auto& entry) { return entry.first == device; });
+    }
+
+  private:
+    BackgroundSubmissionObserver() {
+        NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
+        [center addObserverForName:UIApplicationDidEnterBackgroundNotification
+                            object:nil
+                             queue:nil
+                        usingBlock:^(NSNotification*) {
+                          SetBackgrounded(true);
+                        }];
+        [center addObserverForName:UIApplicationWillEnterForegroundNotification
+                            object:nil
+                             queue:nil
+                        usingBlock:^(NSNotification*) {
+                          SetBackgrounded(false);
+                        }];
+        // The state the application is in now, which only the main thread may ask for. Until it
+        // is known, the application is taken to be in the foreground.
+        void (^readState)(void) = ^{
+          SetBackgrounded(UIApplication.sharedApplication.applicationState ==
+                          UIApplicationStateBackground);
+        };
+        if ([NSThread isMainThread]) {
+            readState();
+        } else {
+            dispatch_async(dispatch_get_main_queue(), readState);
+        }
+    }
+
+    void SetBackgrounded(bool backgrounded) {
+        std::vector<Ref<DeviceBase>> devices;
+        {
+            std::lock_guard<std::mutex> lock(mMutex);
+            if (mBackgrounded == backgrounded) {
+                return;
+            }
+            mBackgrounded = backgrounded;
+            for (const auto& entry : mDevices) {
+                if (Ref<DeviceBase> device = entry.second.Promote()) {
+                    devices.push_back(std::move(device));
+                }
+            }
+        }
+        // Outside the registry lock: a device may be destroyed, and unregister itself, while the
+        // Refs go away.
+        for (const Ref<DeviceBase>& device : devices) {
+            auto deviceGuard = device->GetGuard();
+            ToBackend(device->GetQueue())->SetSubmissionSuspended(backgrounded);
+        }
+    }
+
+    std::mutex mMutex;
+    bool mBackgrounded = false;
+    std::vector<std::pair<Device*, WeakRef<DeviceBase>>> mDevices;
+};
+#endif  // DAWN_METAL_OBSERVES_APPLICATION_STATE
 
 }  // namespace
 
@@ -191,7 +297,15 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
 
     mCounterSampleBufferAllocator = std::make_unique<CounterSampleBufferAllocator>(this);
 
-    return DeviceBase::Initialize(descriptor, std::move(queue));
+    DAWN_TRY(DeviceBase::Initialize(descriptor, std::move(queue)));
+
+#if DAWN_METAL_OBSERVES_APPLICATION_STATE
+    if (IsToggleEnabled(Toggle::MetalSuspendSubmissionsInBackground)) {
+        BackgroundSubmissionObserver::Get().Add(this);
+    }
+#endif
+
+    return {};
 }
 
 ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(
@@ -386,6 +500,9 @@ void Device::DestroyImpl(DestroyReason reason) {
     // - It may be called when the last ref to the device is dropped and the device
     //   is implicitly destroyed. This case is thread-safe because there are no
     //   other threads using the device since there are no other live refs.
+#if DAWN_METAL_OBSERVES_APPLICATION_STATE
+    BackgroundSubmissionObserver::Get().Remove(this);
+#endif
     mCounterSampleBufferAllocator = nullptr;
     mFencedReferencer = nullptr;
     mMtlDevice = nullptr;

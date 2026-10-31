@@ -30,6 +30,8 @@
 
 #import <Metal/Metal.h>
 
+#include <atomic>
+#include <cstdint>
 #include <map>
 #include <optional>
 #include <string>
@@ -57,6 +59,11 @@ class Queue final : public QueueBase {
     void WaitForCommandsToBeScheduled();
 
     FutureID GetCommandsScheduledFuture();
+
+    // Holds (suspended) or resumes the commit of command buffers, see
+    // dawn::native::metal::SetSubmissionSuspended. Called with the device lock held.
+    void SetSubmissionSuspended(bool suspended);
+    bool IsSubmissionSuspended() const override;
 
     id<MTLSharedEvent> GetMTLSharedEvent() const;
     ResultOrUnknownError<Ref<SharedFence>> GetOrCreateSharedFence();
@@ -92,6 +99,14 @@ class Queue final : public QueueBase {
         mCommandsScheduledEvents;
     // - Error message from the Metal command-buffer-completed handler if completion failed.
     MutexProtected<std::optional<std::string>> mExecutionError;
+
+    // Whether commits are held (see SetSubmissionSuspended). Written with the device lock held;
+    // read without it by whoever asks whether to present or wait.
+    std::atomic<bool> mSubmissionSuspended = false;
+    // The submissions encoded since the hold began, to warn once about a producer that keeps
+    // submitting while the application is in the background.
+    std::atomic<uint32_t> mHeldSubmissions = 0;
+    static constexpr uint32_t kHeldSubmissionsWarning = 600;
 
     // A shared event that can be exported for synchronization with other users of Metal.
     // MTLSharedEvent is not available until macOS 10.14+ so use just `id`.
