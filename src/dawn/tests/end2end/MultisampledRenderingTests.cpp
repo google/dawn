@@ -91,7 +91,7 @@ class MultisampledRenderingTest : public DawnTest {
                 @builtin(frag_depth) depth : f32,
             }
 
-            @fragment fn main() -> FragmentOut {
+            @fragment fn fmain_depth() -> FragmentOut {
                 var output : FragmentOut;
                 output.color = uBuffer.color;
                 output.depth = uBuffer.depth;
@@ -104,7 +104,7 @@ class MultisampledRenderingTest : public DawnTest {
             }
             @group(0) @binding(0) var<uniform> uBuffer : U;
 
-            @fragment fn main() -> @location(0) vec4f {
+            @fragment fn fmain_no_depth() -> @location(0) vec4f {
                 return uBuffer.color;
             })";
 
@@ -218,6 +218,7 @@ class MultisampledRenderingTest : public DawnTest {
                                  uint32_t uniformDataSize) {
         wgpu::Buffer uniformBuffer = utils::CreateBufferFromData(
             device, uniformData, uniformDataSize, wgpu::BufferUsage::Uniform);
+        uniformBuffer.SetLabel("uniformBuffer");
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                                          {{0, uniformBuffer, 0, uniformDataSize}});
 

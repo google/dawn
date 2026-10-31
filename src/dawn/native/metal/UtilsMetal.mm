@@ -938,9 +938,11 @@ MaybeError EncodeMetalRenderPass(Device* device,
 
         // If we found a store + MSAA resolve we need to resolve in a different render pass.
         if (hasStoreAndMSAAResolve) {
-            DAWN_TRY(EncodeMetalRenderPass(device, commandContext, nullptr, mtlRenderPass, width,
-                                           height, std::move(encodeInside), renderPassCmd));
+            // First run the regular render pass to store without resolving.
+            DAWN_TRY(EncodeMetalRenderPass(device, commandContext, resourceUsage, mtlRenderPass,
+                                           width, height, std::move(encodeInside), renderPassCmd));
 
+            // Then run an extra render pass to do the resolve.
             ResolveInAnotherRenderPass(commandContext, mtlRenderPass, resolveTextures);
             return {};
         }
