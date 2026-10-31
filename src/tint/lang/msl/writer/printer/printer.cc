@@ -285,10 +285,10 @@ class Printer : public tint::TextGenerator {
     /// Find all structures that are used in host-shareable address spaces and mark them as such so
     /// that we know to pad the properly when we emit them.
     void FindHostShareableStructs() {
-        auto RecordSubTypes = [&](const core::type::Pointer* ptr) {
+        auto RecordSubTypes = [&](const core::type::Pointer* param_ptr) {
             // Look for structures at any nesting depth of this parameter's type.
             Vector<const core::type::Type*, 8> type_queue;
-            type_queue.Push(ptr->StoreType());
+            type_queue.Push(param_ptr->StoreType());
             while (!type_queue.IsEmpty()) {
                 auto* next = type_queue.Pop();
                 if (auto* str = next->As<core::type::Struct>()) {
@@ -299,6 +299,13 @@ class Printer : public tint::TextGenerator {
                     }
                 } else if (auto* arr = next->As<core::type::Array>()) {
                     type_queue.Push(arr->ElemType());
+                } else if (auto* ptr = next->As<core::type::Pointer>()) {
+                    // In normal WGSL, host-shareable structs don't contain pointers, but argument
+                    // buffer structs (produced by the argument buffers transform) do.
+                    // In that case, we need to recurse into the pointer.
+                    if (core::IsHostShareable(ptr->AddressSpace())) {
+                        type_queue.Push(ptr->StoreType());
+                    }
                 }
             }
         };
@@ -1911,14 +1918,14 @@ class Printer : public tint::TextGenerator {
 
         str_buf.IncrementIndent();
 
-        bool explicit_layout = str->StructFlags().Contains(core::type::kExplicitLayout);
+        bool is_argument_buffer = str->StructFlags().Contains(core::type::kExplicitLayout);
         uint32_t msl_offset = 0;
         for (auto* mem : str->Members()) {
             auto out = Line(&str_buf);
             auto mem_name = NameOf(mem);
             auto ir_offset = mem->Offset();
 
-            if (!explicit_layout && is_host_shareable) {
+            if (!is_argument_buffer && is_host_shareable) {
                 if (DAWN_UNLIKELY(ir_offset < msl_offset)) {
                     // Unimplementable layout
                     TINT_IR_ICE(ir_) << "Structure member offset (" << ir_offset
@@ -2023,7 +2030,7 @@ class Printer : public tint::TextGenerator {
 
             out << ";";
 
-            if (!explicit_layout && is_host_shareable) {
+            if (!is_argument_buffer && is_host_shareable) {
                 // Calculate new MSL offset
                 auto size_align = MslPackedTypeSizeAndAlign(ty);
                 if (DAWN_UNLIKELY(msl_offset % size_align.align)) {
@@ -2035,7 +2042,7 @@ class Printer : public tint::TextGenerator {
             }
         }
 
-        if (!explicit_layout && is_host_shareable && str->Size() != msl_offset) {
+        if (!is_argument_buffer && is_host_shareable && str->Size() != msl_offset) {
             add_padding(str->Size() - msl_offset, msl_offset);
         }
 

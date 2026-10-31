@@ -12,12 +12,12 @@ struct SimParams {
 };
 
 struct Particle {
-  float2 pos;
-  float2 vel;
+  /* 0x0000 */ float2 pos;
+  /* 0x0008 */ float2 vel;
 };
 
 struct Particles {
-  array<Particle, 5> particles;
+  /* 0x0000 */ array<Particle, 5> particles;
 };
 
 struct tint_arg_buffer_struct_0 {
