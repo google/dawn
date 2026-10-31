@@ -51,13 +51,13 @@ FencedDeleter::~FencedDeleter() {
 #define X(Type, DeleteFn, deleteWith)                                            \
     void FencedDeleter::DeleteWhenUnused(Type handle) {                          \
         mPendingDeletions.Use([&](auto pending) {                                \
-            if (pending->mAssumeCompleted) {                                     \
+            ExecutionSerial deletionSerial = GetCurrentDeletionSerial();         \
+            if (pending->mCompletedSerial >= deletionSerial) {                   \
                 [[maybe_unused]] VkDevice device = mDevice->GetVkDevice();       \
                 [[maybe_unused]] VkInstance instance = mDevice->GetVkInstance(); \
                 mDevice->fn.DeleteFn(deleteWith, handle, nullptr);               \
                 return;                                                          \
             }                                                                    \
-            ExecutionSerial deletionSerial = GetCurrentDeletionSerial();         \
             pending->m##Type.Enqueue(handle, deletionSerial);                    \
         });                                                                      \
     }
@@ -94,14 +94,8 @@ void FencedDeleter::UpdateCompletedSerialTo(ExecutionSerial completedSerial) {
         FENCED_DELETER_TYPES(X)
 #undef X
 
-        if (completedSerial == kMaxExecutionSerial) {
-            pending->mAssumeCompleted = true;
-        }
+        pending->mCompletedSerial = std::max(pending->mCompletedSerial, completedSerial);
     });
-}
-
-void FencedDeleter::AssumeCommandsComplete() {
-    UpdateCompletedSerialTo(kMaxExecutionSerial);
 }
 
 }  // namespace dawn::native::vulkan

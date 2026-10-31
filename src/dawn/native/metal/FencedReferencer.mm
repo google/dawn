@@ -44,10 +44,11 @@ FencedReferencer::~FencedReferencer() {
 
 void FencedReferencer::RefUntilUnused(id handle) {
     mPendingDeletions.Use([&](auto pending) {
-        if (pending->mAssumeCompleted) {
+        ExecutionSerial deletionSerial = mDevice->GetQueue()->GetPendingCommandSerial();
+        if (pending->mCompletedSerial >= deletionSerial) {
+            // If the serial has already passed (e.g. queue is shutdown), we can just drop the ref.
             return;
         }
-        ExecutionSerial deletionSerial = mDevice->GetQueue()->GetPendingCommandSerial();
         pending->mObjects.Enqueue(handle, deletionSerial);
     });
 }
@@ -55,14 +56,7 @@ void FencedReferencer::RefUntilUnused(id handle) {
 void FencedReferencer::UpdateCompletedSerialTo(ExecutionSerial completedSerial) {
     mPendingDeletions.Use([&](auto pending) {  //
         pending->mObjects.ClearUpTo(completedSerial);
-    });
-}
-
-void FencedReferencer::AssumeCommandsComplete() {
-    mPendingDeletions.Use([&](auto pending) {
-        // Flush any pending deletions.
-        pending->mObjects.ClearUpTo(kMaxExecutionSerial);
-        pending->mAssumeCompleted = true;
+        pending->mCompletedSerial = std::max(pending->mCompletedSerial, completedSerial);
     });
 }
 

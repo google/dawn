@@ -95,12 +95,4 @@ void AllocationSizeTracker::UpdateCompletedSerialTo(ExecutionSerial completedSer
     mMemoryToDecrement.ClearUpTo(completedSerial);
 }
 
-void AllocationSizeTracker::AssumeCommandsComplete() {
-    Mutex::AutoLock lock(&mMutex);
-    for (auto& size : mMemoryToDecrement.IterateAll()) {
-        mTotalSize -= size;
-    }
-    mMemoryToDecrement.Clear();
-}
-
 }  // namespace dawn::native

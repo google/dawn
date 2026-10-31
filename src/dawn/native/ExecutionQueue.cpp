@@ -36,6 +36,7 @@
 #include "src/dawn/common/Atomic.h"
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/Error.h"
+#include "src/dawn/native/IntegerTypes.h"
 
 namespace dawn::native {
 namespace {
@@ -364,7 +365,7 @@ void ExecutionQueueBase::AssumeCommandsComplete() {
         }
     });
     for (auto& processor : processors) {
-        processor->AssumeCommandsComplete();
+        processor->UpdateCompletedSerialTo(kMaxExecutionSerial);
     }
 }
 

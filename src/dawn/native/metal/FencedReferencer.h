@@ -54,7 +54,6 @@ class FencedReferencer final : public ExecutionQueueBase::SerialProcessor {
 
     // SerialProcessor API.
     void UpdateCompletedSerialTo(ExecutionSerial completedSerial) override;
-    void AssumeCommandsComplete() override;
 
     bool HasPendingObjectsForTesting() const;
 
@@ -63,7 +62,7 @@ class FencedReferencer final : public ExecutionQueueBase::SerialProcessor {
 
     struct PendingDeletions {
         SerialQueue<ExecutionSerial, NSPRef<id>> mObjects;
-        bool mAssumeCompleted = false;
+        ExecutionSerial mCompletedSerial = kBeginningOfGPUTime;
     };
     MutexProtected<PendingDeletions> mPendingDeletions;
 };

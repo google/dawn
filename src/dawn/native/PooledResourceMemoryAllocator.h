@@ -79,7 +79,6 @@ class AllocationSizeTracker : public ExecutionQueueBase::SerialProcessor {
 
     // SerialProcessor implementation
     void UpdateCompletedSerialTo(ExecutionSerial completedSerial) override;
-    void AssumeCommandsComplete() override;
 
   private:
     Mutex mMutex;
