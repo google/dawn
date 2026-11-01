@@ -588,16 +588,10 @@ crbug.com/408250017 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call
 crbug.com/408244895 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ Failure ] # CAT:Accuracy
 crbug.com/408244895 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:3d_coords:* [ Failure ] # CAT:Accuracy
 
-# VulkanValidationLayers have incorrect tracking of partial compressed texture copies.
-crbug.com/407076125 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,image_copy:compressed_textures,unaligned_mip_level_0:initMethod="WriteTexture";checkMethod="PartialCopyT2B";* [ Failure ]
-crbug.com/407076125 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="astc*";dimension="2d" [ Failure ]
-crbug.com/407076125 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="bc*";dimension="2d" [ Failure ]
-crbug.com/407076125 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="eac*";dimension="2d" [ Failure ]
-crbug.com/407076125 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="etc2*";dimension="2d" [ Failure ]
 
 # textureLoad `texture_type="texture_multisampled_2d"` marked failing on all platforms
 crbug.com/407088846 [ amd angle-metal arch-x86_64 desktop graphite-enabled memory_ge_16gb no-asan no-clang-coverage release renderer-skia-gl sonoma target-cpu-64 ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="*";texture_type="texture_multisampled_2d";* [ Failure ]
-crbug.com/407088846 [ angle-d3d11 arch-x86_64 desktop graphite-enabled memory_ge_16gb no-clang-coverage release renderer-skia-gl webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="*";texture_type="texture_multisampled_2d";* [ Failure ]
+crbug.com/407088846 [ angle-d3d11 arch-x86_64 desktop graphite-enabled intel-0x4680 memory_ge_16gb no-asan no-clang-coverage release-x64 renderer-skia-gl target-cpu-64 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="*";texture_type="texture_multisampled_2d";* [ Failure ]
 
 # external_texture failures
 crbug.com/407109053 [ intel-0x9bc5 linux no-clang-coverage webgpu-adapter-default ] webgpu:web_platform,external_texture,* [ Failure ]
@@ -714,7 +708,7 @@ crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call
 crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_2d:* [ Skip ] # CAT:Accuracy
 crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:stage="*";format="stencil8"* [ Failure ] # CAT:Critical
 crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_2d:stage="*";format="stencil8"* [ Failure ] # CAT:Accuracy
-crbug.com/407088850 [ intel webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ intel-0x4680 release-x64 target-cpu-64 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Failure ] # CAT:Accuracy
 crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_2d_coords:* [ Failure ] # CAT:Accuracy
 crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_3d_coords:* [ Failure ] # CAT:Accuracy
 crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_3d_coords:* [ Failure ] # CAT:Accuracy
@@ -797,7 +791,6 @@ crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,ca
 crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords,compressed_unaligned:stage="*";format="astc-8x6-unorm";* [ Failure ] # CAT:Accuracy
 
 # textureLoad:multisampled failures on Windows FXC
-crbug.com/407088851 [ nvidia-0x2184 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Failure ] # CAT:Accuracy
 crbug.com/407088851 [ angle-d3d11 desktop graphite-enabled no-clang-coverage release-x64 renderer-skia-gl webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="*";texture_type="texture_depth_multisampled_2d";* [ Failure ] # CAT:Accuracy
 
 # One case of textureSampleGrad fails on NVIDIA (Linux/Win)
@@ -880,8 +873,6 @@ crbug.com/419047170 [ amd-0x7340 mac ] webgpu:api,operation,command_buffer,image
 crbug.com/419047170 [ amd-0x7340 mac ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="bc6h-rgb-ufloat";dimension="3d" [ Failure ]
 crbug.com/419047170 [ amd-0x7340 mac ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="bc7-rgba-unorm-srgb";dimension="3d" [ Failure ]
 crbug.com/419047170 [ amd-0x7340 mac ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="bc7-rgba-unorm";dimension="3d" [ Failure ]
-crbug.com/419047170 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="bc*";dimension="3d" [ Failure ]
-crbug.com/419047170 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="astc*";dimension="3d" [ Failure ]
 
 # AMD mac textureSampleLevel on 3d  bc7-rgba-norm-srgb, offset=true
 crbug.com/419075526 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:stage="c";format="bc7-rgba-unorm-srgb";dim="3d";filt="linear";mode="m";offset=true [ Failure ] # CAT:Accuracy
@@ -941,7 +932,7 @@ crbug.com/469819316 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.81
 crbug.com/469819317 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,validation,encoding,cmds,render,draw:vertex_buffer_OOB:type="draw";* [ Failure ]
 crbug.com/469819317 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,validation,encoding,cmds,render,draw:vertex_buffer_OOB:type="drawIndexed";* [ Failure ]
 crbug.com/470127836 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,validation,capability_checks,limits,max*,at_over:* [ Failure ]
-crbug.com/470127836 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,validation,capability_checks,limits,min*,at_over:* [ Failure ]
+crbug.com/470127836 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 webgpu-dxc-enabled win11 ] webgpu:api,validation,capability_checks,limits,min*,at_over:* [ Failure ]
 crbug.com/470131712 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:copy_aspects:format="stencil8" [ Failure ]
 crbug.com/470131712 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:texture_format_compatibility:srcFormat="stencil8";dstFormat="stencil8" [ Failure ]
 crbug.com/470115242 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.8180 win11 ] webgpu:api,validation,queue,destroyed,texture:beginRenderPass: [ Failure ]
@@ -952,10 +943,6 @@ crbug.com/542749864 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.16.10
 crbug.com/542749864 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 webgpu-dxc-disabled win11 ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:createRenderPipeline,at_over:*testValueName="atLimit";async=*;items=*primitive_index* [ Failure ]
 crbug.com/542749864 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 webgpu-dxc-disabled win11 ] webgpu:api,operation,render_pipeline,overrides:*:isAsync=true [ Failure ]
 
-crbug.com/542752829 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.16.1074 webgpu-dxc-disabled win11 ] webgpu:shader,execution,expression,unary,af_arithmetic:negation:inputSource="const";* [ Failure ]
-crbug.com/542752829 [ dawn-no-backend-validation nvidia-0x2184 nvidia_ge_32.0.16.1074 webgpu-dxc-disabled win11 ] webgpu:shader,execution,expression,unary,af_assignment:abstract:inputSource="const" [ Failure ]
-crbug.com/542752829 [ dawn-no-backend-validation nvidia-0x2184 nvidia_ge_32.0.16.1074 webgpu-dxc-disabled win11 ] webgpu:shader,execution,expression,call,builtin,fma:f32:inputSource="const";* [ Failure ]
-crbug.com/542752829 [ dawn-no-backend-validation nvidia-0x2184 nvidia_ge_32.0.16.1074 webgpu-dxc-disabled win11 ] webgpu:shader,execution,expression,call,builtin,refract:*:inputSource="const"* [ Failure ]
 
 crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,bitcast:*_to_vec4h:* [ Failure ]
 crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,transpose:f16:inputSource="uniform";cols=3;rows=4 [ Failure ]
@@ -969,34 +956,18 @@ crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader
 
 crbug.com/558821852 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:api,validation,image_copy,texture_related:origin_alignment:method="CopyB2T";* [ Failure ]
 
-crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,buffer*View:* [ Failure ]
-crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="const";* [ Failure ]
-crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,distance:*:inputSource="const"* [ Failure ]
-crbug.com/558827232 [ dawn-no-backend-validation nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,fma:f32:inputSource="const";vectorize="_undef_" [ Failure ]
-crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,mix:*:inputSource="const"* [ Failure ]
-crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,pack2x16float:pack:inputSource="const" [ Failure ]
-crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,pow:*:inputSource="const";* [ Failure ]
-crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,refract:*:inputSource="const"* [ Failure ]
-crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,subgroupAdd:* [ Failure ]
-crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,subgroupBitwise:* [ Failure ]
-crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,subgroupBroadcast:* [ Failure ]
 crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,subgroupMinMax:* [ Failure ]
-crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,subgroupMul:* [ Failure ]
 crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,unary,af_arithmetic:negation:inputSource="const";* [ Failure ]
-crbug.com/558827232 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,unary,ai_assignment:abstract:inputSource="const" [ Failure ]
 
 # Linux/GTX 1660 failures when going to 595.104.02
 crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:* [ Failure ]
 crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:api,operation,render_pipeline,sample_mask:alpha_to_coverage_mask:* [ Failure ]
 crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";* [ Failure ]
-crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,subgroupMinMax:compute,all_active:op="subgroupMax";wgSize=[16,16,1] [ Failure ]
 crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_2d_coords:* [ Failure ]
-crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:* [ Failure ]
 crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:* [ Failure ]
 crbug.com/560276285 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:array_2d_coords:* [ Failure ]
 
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,* [ Failure ]
-crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:api,operation,command_buffer,image_copy:mip_levels:* [ Failure ]
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:* [ Failure ]
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:* [ Failure ]
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:* [ Failure ]
@@ -1005,15 +976,8 @@ crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,c
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:* [ Failure ]
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:* [ Failure ]
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_2d_coords:* [ Failure ]
-crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_3d_coords:* [ Failure ]
-crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_3d_coords:* [ Failure ]
-crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:arrayed_2d_coords:format="depth24plus-stencil8";filt="nearest";modeU="r";modeV="m";offset=true [ Failure ]
-crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:* [ Failure ]
-crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords,lodClamp:* [ Failure ]
-crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:* [ Failure ]
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:* [ Failure ]
 
-crbug.com/568459643 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,bufferArrayView:mixed_types_aliasing* [ Failure ]
 
 # Win/Snapdragon X Elite failures
 # TODO(crbug.com/452840618): Remove this disable block once the tests are actually running.
@@ -1032,98 +996,6 @@ crbug.com/477643914 [ dawn-backend-validation qualcomm-0x36334330 webgpu-dxc-dis
 
 # finder:enable-unused
 
-# Intel linux copyTextureToTexture with compressed textures, dim=2d, dim=3d
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="astc-12x10-unorm";dstFormat="astc-12x10-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="astc-12x10-unorm";dstFormat="astc-12x10-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="astc-12x10-unorm-srgb";dstFormat="astc-12x10-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="astc-12x10-unorm-srgb";dstFormat="astc-12x10-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="astc-4x4-unorm";dstFormat="astc-4x4-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="astc-4x4-unorm";dstFormat="astc-4x4-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="astc-4x4-unorm-srgb";dstFormat="astc-4x4-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="astc-4x4-unorm-srgb";dstFormat="astc-4x4-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="astc-8x6-unorm";dstFormat="astc-8x6-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="astc-8x6-unorm";dstFormat="astc-8x6-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="astc-8x6-unorm-srgb";dstFormat="astc-8x6-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="astc-8x6-unorm-srgb";dstFormat="astc-8x6-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="bc2-rgba-unorm";dstFormat="bc2-rgba-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="bc2-rgba-unorm";dstFormat="bc2-rgba-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="bc2-rgba-unorm-srgb";dstFormat="bc2-rgba-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="bc2-rgba-unorm-srgb";dstFormat="bc2-rgba-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="bc3-rgba-unorm";dstFormat="bc3-rgba-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="bc3-rgba-unorm";dstFormat="bc3-rgba-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="bc3-rgba-unorm-srgb";dstFormat="bc3-rgba-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="bc3-rgba-unorm-srgb";dstFormat="bc3-rgba-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="bc5-rg-snorm";dstFormat="bc5-rg-snorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="bc5-rg-unorm";dstFormat="bc5-rg-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="bc6h-rgb-float";dstFormat="bc6h-rgb-float";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="bc6h-rgb-ufloat";dstFormat="bc6h-rgb-ufloat";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="bc7-rgba-unorm";dstFormat="bc7-rgba-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="bc7-rgba-unorm";dstFormat="bc7-rgba-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="bc7-rgba-unorm-srgb";dstFormat="bc7-rgba-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="bc7-rgba-unorm-srgb";dstFormat="bc7-rgba-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-12x10-unorm";dstFormat="astc-12x10-unorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-12x10-unorm";dstFormat="astc-12x10-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-12x10-unorm";dstFormat="astc-12x10-unorm-srgb";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-12x10-unorm";dstFormat="astc-12x10-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-12x10-unorm-srgb";dstFormat="astc-12x10-unorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-12x10-unorm-srgb";dstFormat="astc-12x10-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-12x10-unorm-srgb";dstFormat="astc-12x10-unorm-srgb";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-12x10-unorm-srgb";dstFormat="astc-12x10-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-4x4-unorm";dstFormat="astc-4x4-unorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-4x4-unorm";dstFormat="astc-4x4-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-4x4-unorm";dstFormat="astc-4x4-unorm-srgb";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-4x4-unorm";dstFormat="astc-4x4-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-4x4-unorm-srgb";dstFormat="astc-4x4-unorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-4x4-unorm-srgb";dstFormat="astc-4x4-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-4x4-unorm-srgb";dstFormat="astc-4x4-unorm-srgb";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-4x4-unorm-srgb";dstFormat="astc-4x4-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-8x6-unorm";dstFormat="astc-8x6-unorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-8x6-unorm";dstFormat="astc-8x6-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-8x6-unorm";dstFormat="astc-8x6-unorm-srgb";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-8x6-unorm";dstFormat="astc-8x6-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-8x6-unorm-srgb";dstFormat="astc-8x6-unorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-8x6-unorm-srgb";dstFormat="astc-8x6-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-8x6-unorm-srgb";dstFormat="astc-8x6-unorm-srgb";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="astc-8x6-unorm-srgb";dstFormat="astc-8x6-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc2-rgba-unorm";dstFormat="bc2-rgba-unorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc2-rgba-unorm";dstFormat="bc2-rgba-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc2-rgba-unorm";dstFormat="bc2-rgba-unorm-srgb";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc2-rgba-unorm";dstFormat="bc2-rgba-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc2-rgba-unorm-srgb";dstFormat="bc2-rgba-unorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc2-rgba-unorm-srgb";dstFormat="bc2-rgba-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc2-rgba-unorm-srgb";dstFormat="bc2-rgba-unorm-srgb";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc2-rgba-unorm-srgb";dstFormat="bc2-rgba-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc3-rgba-unorm";dstFormat="bc3-rgba-unorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc3-rgba-unorm";dstFormat="bc3-rgba-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc3-rgba-unorm";dstFormat="bc3-rgba-unorm-srgb";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc3-rgba-unorm";dstFormat="bc3-rgba-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc3-rgba-unorm-srgb";dstFormat="bc3-rgba-unorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc3-rgba-unorm-srgb";dstFormat="bc3-rgba-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc3-rgba-unorm-srgb";dstFormat="bc3-rgba-unorm-srgb";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc3-rgba-unorm-srgb";dstFormat="bc3-rgba-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc5-rg-snorm";dstFormat="bc5-rg-snorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc5-rg-snorm";dstFormat="bc5-rg-snorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc5-rg-unorm";dstFormat="bc5-rg-unorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc5-rg-unorm";dstFormat="bc5-rg-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc6h-rgb-float";dstFormat="bc6h-rgb-float";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc6h-rgb-float";dstFormat="bc6h-rgb-float";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc6h-rgb-ufloat";dstFormat="bc6h-rgb-ufloat";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc6h-rgb-ufloat";dstFormat="bc6h-rgb-ufloat";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc7-rgba-unorm";dstFormat="bc7-rgba-unorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc7-rgba-unorm";dstFormat="bc7-rgba-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc7-rgba-unorm";dstFormat="bc7-rgba-unorm-srgb";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc7-rgba-unorm";dstFormat="bc7-rgba-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc7-rgba-unorm-srgb";dstFormat="bc7-rgba-unorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc7-rgba-unorm-srgb";dstFormat="bc7-rgba-unorm";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc7-rgba-unorm-srgb";dstFormat="bc7-rgba-unorm-srgb";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc7-rgba-unorm-srgb";dstFormat="bc7-rgba-unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="eac-rg11snorm";dstFormat="eac-rg11snorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="eac-rg11unorm";dstFormat="eac-rg11unorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="etc2-rgba8unorm";dstFormat="etc2-rgba8unorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="etc2-rgba8unorm";dstFormat="etc2-rgba8unorm-srgb";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="etc2-rgba8unorm-srgb";dstFormat="etc2-rgba8unorm";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="etc2-rgba8unorm-srgb";dstFormat="etc2-rgba8unorm-srgb";dimension="2d" [ Failure ]
-crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,unaligned,non_array:* [ Failure ]
 
 # WebGPU-WebGPU canvas copy crashes in D3D12 debug layer on Windows Nvidia with Graphite enabled
 crbug.com/412395829 [ dawn-backend-validation graphite-enabled nvidia release-x64 target-cpu-64 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;* [ RetryOnFailure ]
@@ -1632,7 +1504,6 @@ crbug.com/565375480 [ android-pixel-4 dawn-no-backend-validation webgpu-service-
 crbug.com/565375480 [ android-pixel-10 dawn-no-backend-validation webgpu-service-worker ] webgpu:api,operation,render_pass,storeop2:storeOp_controls_whether_1x1_drawn_quad_is_stored:storeOp="discard" [ RetryOnFailure ]
 crbug.com/565375480 [ android-pixel-10 dawn-no-backend-validation webgpu-service-worker ] webgpu:idl,javascript:device,EventTarget:* [ RetryOnFailure ]
 crbug.com/565375480 [ android-pixel-6 dawn-no-backend-validation webgpu-service-worker ] webgpu:idl,javascript:device,EventTarget:* [ RetryOnFailure ]
-crbug.com/565375480 [ arch-x86_64 graphite-enabled microsoft no-asan release-x64 webgpu-service-worker win10 ] webgpu:idl,javascript:device,EventTarget:test="canPassCustomEventThroughDevice" [ RetryOnFailure ]
 crbug.com/565375480 [ android-pixel-10 dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,canvas,context_creation:return_type:* [ RetryOnFailure ]
 crbug.com/565375480 [ android-pixel-6 dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,canvas,context_creation:return_type:* [ RetryOnFailure ]
 crbug.com/565375480 [ android-pixel-10 dawn-no-backend-validation webgpu-service-worker ] webgpu:web_platform,canvas,getCurrentTexture:compatibility:canvasType="offscreen" [ RetryOnFailure ]
@@ -1660,12 +1531,12 @@ crbug.com/570045303 [ android-pixel-4 ] webgpu:shader,execution,expression,call,
 crbug.com/570045303 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,bufferView:mixed_types_aliasing:* [ Failure ]
 
 # BufferArrayView tests with mixed_types_aliasing failing on AMD Mac.
-crbug.com/570097818 [ amd mac ] webgpu:shader,execution,expression,call,builtin,bufferArrayView:mixed_types_aliasing:buffer="storage";pair="i32_paddedh";overlap="same_start";access="dynamic_base";aliased=true [ Failure ]
-crbug.com/570097818 [ amd mac ] webgpu:shader,execution,expression,call,builtin,bufferArrayView:mixed_types_aliasing:buffer="storage";pair="paddedi_paddedh";overlap="same_start";access="dynamic_base";aliased=true [ Failure ]
-crbug.com/570097818 [ amd mac ] webgpu:shader,execution,expression,call,builtin,bufferArrayView:mixed_types_aliasing:buffer="storage_unsized";pair="i32_paddedh";overlap="same_start";access="dynamic_base";aliased=true [ Failure ]
-crbug.com/570097818 [ amd mac ] webgpu:shader,execution,expression,call,builtin,bufferArrayView:mixed_types_aliasing:buffer="storage_unsized";pair="paddedi_paddedh";overlap="same_start";access="dynamic_base";aliased=true [ Failure ]
+crbug.com/570097818 [ amd-0x7340 mac ] webgpu:shader,execution,expression,call,builtin,bufferArrayView:mixed_types_aliasing:buffer="storage";pair="i32_paddedh";overlap="same_start";access="dynamic_base";aliased=true [ Failure ]
+crbug.com/570097818 [ amd-0x7340 mac ] webgpu:shader,execution,expression,call,builtin,bufferArrayView:mixed_types_aliasing:buffer="storage";pair="paddedi_paddedh";overlap="same_start";access="dynamic_base";aliased=true [ Failure ]
+crbug.com/570097818 [ amd-0x7340 mac ] webgpu:shader,execution,expression,call,builtin,bufferArrayView:mixed_types_aliasing:buffer="storage_unsized";pair="i32_paddedh";overlap="same_start";access="dynamic_base";aliased=true [ Failure ]
+crbug.com/570097818 [ amd-0x7340 mac ] webgpu:shader,execution,expression,call,builtin,bufferArrayView:mixed_types_aliasing:buffer="storage_unsized";pair="paddedi_paddedh";overlap="same_start";access="dynamic_base";aliased=true [ Failure ]
 
-crbug.com/570586294 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_2d_array:stage="c";format="rg11b10ufloat" [ Failure ]
+crbug.com/570586294 [ android-pixel-4 dawn-no-backend-validation ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_2d_array:stage="c";format="rg11b10ufloat" [ Failure ]
 crbug.com/570586294 [ android-pixel-6 android-t dawn-no-backend-validation ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_2d_array:stage="c";format="rg11b10ufloat" [ Failure ]
 crbug.com/570586294 [ android-pixel-6 android-t dawn-no-backend-validation ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_2d_array:stage="f";format="rg11b10ufloat" [ Failure ]
 crbug.com/570586294 [ android-pixel-6 android-t dawn-no-backend-validation ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_2d_array:stage="v";format="rg11b10ufloat" [ Failure ]
@@ -1682,18 +1553,15 @@ crbug.com/570624086 [ dawn-no-backend-validation intel-0x9bc5 release-x64 target
 
 crbug.com/570630415 [ android-pixel-4 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"compute-pass-encoder"};second={"op":"attachment-store","in":"command-encoder"} [ Failure ]
 
-crbug.com/570622519 [ dawn-no-backend-validation intel-0x4680 release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,i32_arithmetic:subtraction_vector_scalar_compound:inputSource="storage_rw";vectorize_lhs=4 [ Failure ]
-crbug.com/570622519 [ dawn-no-backend-validation intel-0x4680 release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,u32_arithmetic:subtraction_scalar_vector:inputSource="const";vectorize_rhs=2 [ Failure ]
 
 crbug.com/570628710 [ intel win ] webgpu:shader,execution,expression,access,structure,index:buffer_align: [ Failure ]
 
 # Flaky timeouts on Windows Intel, even with these tests marked Slow.
 crbug.com/565370020 [ intel win ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersInFragmentStage:createPipeline,at_over:* [ RetryOnFailure ]
-crbug.com/565370020 [ intel win ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersInVertexStage:createPipeline,at_over:* [ RetryOnFailure ]
+crbug.com/565370020 [ dawn-no-backend-validation intel release-x64 target-cpu-64 webgpu-dxc-disabled win ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersInVertexStage:createPipeline,at_over:* [ RetryOnFailure ]
+crbug.com/565370020 [ intel-0x4680 release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersInVertexStage:createPipeline,at_over:* [ RetryOnFailure ]
 crbug.com/565370020 [ intel win ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:* [ RetryOnFailure ]
 
-# device_lost,destroy cases intermittently fail requestDevice with DXGI_ERROR_DEVICE_REMOVED on Windows Intel UHD 630 (FXC with backend validation only)
-crbug.com/571565385 [ intel win ] webgpu:api,validation,state,device_lost,destroy:queue,writeTexture,2d,uncompressed_format:format="r8uint";awaitLost=true [ Failure ]
 
 # bufferView struct_inner_align cases intermittently lose the device with FXC on Windows Intel UHD 770
 crbug.com/571547220 [ intel win ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersInFragmentStage:createPipeline,at_over:limitTest="underDefault";testValueName="overLimit";async=false [ Failure ]
