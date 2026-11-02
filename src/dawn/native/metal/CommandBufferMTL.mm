@@ -440,9 +440,12 @@ void EncodeEmptyBlitEncoderForWriteTimestamp(Device* device,
     if (cmd->querySet.Get() != nullptr) {
         QuerySet* querySet = ToBackend(cmd->querySet.Get());
         descriptor.sampleBufferAttachments[0].sampleBuffer = querySet->GetCounterSampleBuffer();
-        descriptor.sampleBufferAttachments[0].startOfEncoderSampleIndex = MTLCounterDontSample;
-        descriptor.sampleBufferAttachments[0].endOfEncoderSampleIndex =
+        // A macOS 26 Apple GPU driver bug causes kIOGPUCommandBufferCallbackErrorOutOfMemory
+        // when doing a blit pass with no timestamps followed by a blit pass with only an end
+        // timestamp (crbug.com/448394568). Use a start timestamp here to avoid that.
+        descriptor.sampleBufferAttachments[0].startOfEncoderSampleIndex =
             NSUInteger(querySet->GetSampleIndex(cmd->queryIndex));
+        descriptor.sampleBufferAttachments[0].endOfEncoderSampleIndex = MTLCounterDontSample;
 
         id<MTLBlitCommandEncoder> blit = commandContext->BeginBlit(descriptor);
         if (device->IsToggleEnabled(Toggle::MetalUseMockBlitEncoderForWriteTimestamp)) {
@@ -657,6 +660,15 @@ MaybeError CommandBuffer::RecordBeginComputePass(CommandRecordingContext* comman
 
     for (const SyncScopeResourceUsage& scope : resourceUsage.dispatchUsages) {
         DAWN_TRY(LazyClearSyncScope(scope, commandContext));
+    }
+    // A macOS 26 Apple GPU driver bug causes kIOGPUCommandBufferCallbackErrorOutOfMemory
+    // when doing a compute pass with no timestamps followed by a compute pass with only an end
+    // timestamp (crbug.com/448394568). Insert an empty blit encoder here so that can't happen.
+    if (ToBackend(GetDevice())->UseCounterSamplingAtStageBoundary() &&
+        cmd->timestampWrites.querySet.Get() != nullptr &&
+        cmd->timestampWrites.beginningOfPassWriteIndex == kQuerySetIndexUndefinedTyped &&
+        cmd->timestampWrites.endOfPassWriteIndex != kQuerySetIndexUndefinedTyped) {
+        commandContext->EnsureBlit();
     }
     commandContext->EndBlit();
 
