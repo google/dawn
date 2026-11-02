@@ -208,3 +208,10 @@ Files: tools/android/webgpu/*
       of your accepting any such warranty or additional liability.
 
    END OF TERMS AND CONDITIONS
+
+------------------
+
+Files: src/tint/utils/math/hash.h
+
+MurmurHash3 was written by Austin Appleby, and is placed in the public
+domain. The author hereby disclaims copyright to this source code.
