@@ -104,7 +104,11 @@ MaybeError SwapChain::PresentImpl() {
     } else {
         CommandRecordingContext* commandContext = queue->GetPendingCommandContext();
         [commandContext->GetCommands() presentDrawable:*mCurrentDrawable];
-        DAWN_TRY(queue->SubmitPendingCommandBuffer());
+        bool submitted;
+        DAWN_TRY_ASSIGN(submitted, queue->TrySubmitPendingCommandBuffer());
+        // Submissions cannot have been suspended since the check above: that needs the device
+        // lock, which the present holds.
+        DAWN_CHECK(submitted);
     }
 
     mTexture->APIDestroy();

@@ -200,6 +200,24 @@ TEST_P(MetalSuspendedSubmissionTests, MapAsyncResolvesOnceResumed) {
     dst.Unmap();
 }
 
+// WaitForCommandsToBeScheduled covers the command buffers committed so far: it returns while the
+// queue is suspended rather than wait for the held work, which completes once resumed.
+TEST_P(MetalSuspendedSubmissionTests, WaitForCommandsToBeScheduledWhileSuspended) {
+    wgpu::Buffer dst;
+    wgpu::CommandBuffer commands =
+        MakeCopyOfValue(&dst, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
+
+    metal::SetSubmissionSuspended(device.Get(), true);
+    queue.Submit(1, &commands);
+    wgpu::Future done = WorkDone();
+    metal::WaitForCommandsToBeScheduled(device.Get());
+    EXPECT_EQ(GetInstance().WaitAny(done, kShortWaitNs), wgpu::WaitStatus::TimedOut);
+
+    metal::SetSubmissionSuspended(device.Get(), false);
+    EXPECT_EQ(GetInstance().WaitAny(done, kForeverNs), wgpu::WaitStatus::Success);
+    EXPECT_BUFFER_U32_EQ(kValue, dst, 0);
+}
+
 // Suspending or resuming twice changes nothing, and neither crashes on a destroyed device.
 TEST_P(MetalSuspendedSubmissionTests, RepeatedAndOnDestroyedDevice) {
     metal::SetSubmissionSuspended(device.Get(), true);

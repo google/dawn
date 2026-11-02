@@ -53,7 +53,10 @@ class Queue final : public QueueBase {
     static ResultOrError<Ref<Queue>> Create(Device* device, const QueueDescriptor* descriptor);
 
     CommandRecordingContext* GetPendingCommandContext(SubmitMode submitMode = SubmitMode::Normal);
-    MaybeError SubmitPendingCommandBuffer();
+    // Commits the pending command buffer, if any. Returns false when the pending commands were
+    // held instead because submissions are suspended (see SetSubmissionSuspended): they stay
+    // pending and complete only once resumed, which each caller allows for in its own way.
+    ResultOrError<bool> TrySubmitPendingCommandBuffer();
 
     // TODO(crbug.com/444702048): Remove after migrating Chromium to commands scheduled futures.
     void WaitForCommandsToBeScheduled();
@@ -104,7 +107,7 @@ class Queue final : public QueueBase {
     // read without it by whoever asks whether to present or wait.
     std::atomic<bool> mSubmissionSuspended = false;
     // The submissions encoded since the hold began, to warn once about a producer that keeps
-    // submitting while the application is in the background.
+    // submitting while submissions are suspended.
     std::atomic<uint32_t> mHeldSubmissions = 0;
     static constexpr uint32_t kHeldSubmissionsWarning = 600;
 
