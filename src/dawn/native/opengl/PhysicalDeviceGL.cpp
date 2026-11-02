@@ -171,6 +171,10 @@ MaybeError PhysicalDevice::InitializeImpl() {
         default:
             DAWN_UNREACHABLE();
     }
+    // Needed to detect GPU resets, which can discard GPU work without generating GL errors.
+    DAWN_INVALID_IF(mFunctions.GetGraphicsResetStatus == nullptr,
+                    "glGetGraphicsResetStatus (OpenGL ES 3.2, OpenGL 4.5, GL_KHR_robustness, "
+                    "GL_EXT_robustness or GL_ARB_robustness) is required.");
 
     if (mFunctions.GetVersion().IsES()) {
         DAWN_ASSERT(GetBackendType() == wgpu::BackendType::OpenGLES);

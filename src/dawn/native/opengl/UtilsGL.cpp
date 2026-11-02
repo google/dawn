@@ -198,6 +198,22 @@ const char* GLErrorAsString(GLenum error) {
 #undef ERROR_CASE_STRING
 }
 
+const char* GLResetStatusAsString(GLenum status) {
+#define STATUS_CASE_STRING(statusEnum) \
+    case statusEnum:                   \
+        return #statusEnum
+
+    switch (status) {
+        STATUS_CASE_STRING(GL_GUILTY_CONTEXT_RESET);
+        STATUS_CASE_STRING(GL_INNOCENT_CONTEXT_RESET);
+        STATUS_CASE_STRING(GL_UNKNOWN_CONTEXT_RESET);
+        default:
+            return "<Unknown OpenGL reset status>";
+    }
+
+#undef STATUS_CASE_STRING
+}
+
 const char* GLFramebufferStatusAsString(GLenum status) {
 #define STATUS_CASE_STRING(statusEnum) \
     case statusEnum:                   \
@@ -301,7 +317,18 @@ MaybeError CheckError(const OpenGLFunctions& gl,
 
 MaybeError CheckPendingErrorBeforeUserVisibleData(const OpenGLFunctions& gl,
                                                   const char* description) {
+    DAWN_TRY(CheckGraphicsResetStatus(gl, description));
     return CheckError(gl, description, __FILE__, __func__, __LINE__);
+}
+
+MaybeError CheckGraphicsResetStatus(const OpenGLFunctions& gl, const char* description) {
+    GLenum status = gl.GetGraphicsResetStatus();
+    if (status == GL_NO_ERROR) [[likely]] {
+        return {};
+    }
+    return DAWN_BACKEND_DEVICE_LOST_ERROR(std::string(description) +
+                                          ": the OpenGL context was reset with status " +
+                                          GLResetStatusAsString(status));
 }
 
 }  // namespace dawn::native::opengl

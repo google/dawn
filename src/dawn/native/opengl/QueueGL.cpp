@@ -229,6 +229,7 @@ ResultOrError<ExecutionSerial> Queue::WaitForQueueSerialImpl(ExecutionSerial wai
                 case EGL_TIMEOUT_EXPIRED:
                     return kWaitSerialTimeout;
                 case EGL_CONDITION_SATISFIED:
+                    DAWN_TRY(CheckGraphicsResetStatus(gl, "Waiting for a queue serial"));
                     return completedSerial;
                 default:
                     DAWN_UNREACHABLE();
@@ -344,12 +345,18 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
                 DAWN_TRY_ASSIGN(result,
                                 sync->ClientWait(gl, EGL_SYNC_FLUSH_COMMANDS_BIT, Nanoseconds(0u)));
                 if (result == EGL_TIMEOUT_EXPIRED) {
-                    return fenceSerial;
+                    break;
                 }
                 // Update fenceSerial since fence is ready.
                 fenceSerial = std::max(fenceSerial, tentativeSerial);
 
                 fencesInFlight->pop_front();
+            }
+            if (fenceSerial != ExecutionSerial(0u)) {
+                // A fence also signals when the GPU work before it was discarded by a GPU reset, so
+                // check for a reset before results of that work (e.g. mapped buffers) become
+                // visible to the application.
+                DAWN_TRY(CheckGraphicsResetStatus(gl, "Completing a queue serial"));
             }
             return fenceSerial;
         });

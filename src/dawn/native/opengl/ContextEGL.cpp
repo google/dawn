@@ -180,10 +180,14 @@ MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
         DAWN_ASSERT(egl.HasExt(EGLExt::CreateContextRobustness));
         // EGL_EXT_create_context_robustness is promoted to 1.5 but with a different enum value.
         // PowerVR advertises EGL 1.5, but only supports the old enum value.
+        // Request reset notification so that glGetGraphicsResetStatus reports GPU resets.
         if (egl.GetMinorVersion() >= 5 && !disableEGL15Robustness) {
             AddAttrib(EGL_CONTEXT_OPENGL_ROBUST_ACCESS, EGL_TRUE);
+            AddAttrib(EGL_CONTEXT_OPENGL_RESET_NOTIFICATION_STRATEGY, EGL_LOSE_CONTEXT_ON_RESET);
         } else {
             AddAttrib(EGL_CONTEXT_OPENGL_ROBUST_ACCESS_EXT, EGL_TRUE);
+            AddAttrib(EGL_CONTEXT_OPENGL_RESET_NOTIFICATION_STRATEGY_EXT,
+                      EGL_LOSE_CONTEXT_ON_RESET_EXT);
         }
     }
 

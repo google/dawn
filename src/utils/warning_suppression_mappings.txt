@@ -45,12 +45,14 @@ src:*third_party{/,\\}partition_alloc{/,\\}src{/,\\}*
 src:*gen{/,\\}src{/,\\}dawn{/,\\}native{/,\\}opengl{/,\\}OpenGLFunctionsBase_autogen.cpp
 src:*src{/,\\}dawn{/,\\}native{/,\\}opengl{/,\\}ContextEGL.cpp
 src:*src{/,\\}dawn{/,\\}native{/,\\}opengl{/,\\}EGLFunctions.cpp
+src:*src{/,\\}dawn{/,\\}native{/,\\}opengl{/,\\}OpenGLFunctions.cpp
 src:*src{/,\\}dawn{/,\\}native{/,\\}opengl{/,\\}OpenGLVersion.cpp
 # Needed to cast procs in Vulkan.
 src:*src{/,\\}dawn{/,\\}native{/,\\}vulkan{/,\\}VulkanFunctions.cpp
 # Needed to cast procs in webgpu.h.
 src:*gen{/,\\}src{/,\\}dawn{/,\\}native{/,\\}ProcTable.cpp
 src:*src{/,\\}dawn{/,\\}tests{/,\\}end2end{/,\\}EventTests.cpp
+src:*src{/,\\}dawn{/,\\}tests{/,\\}white_box{/,\\}GLGraphicsResetTests.cpp
 src:*src{/,\\}dawn{/,\\}tests{/,\\}unittests{/,\\}GetProcAddressTests.cpp
 # For some unknown reason this one filepath can get a backslash on Windows.
 src:*gen{/,\\}src{/,\\}dawn{/,\\}wire{/,\\}client{/,\\}ApiProcs_autogen.cpp.inc

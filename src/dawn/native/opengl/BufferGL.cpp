@@ -257,14 +257,16 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
             DAWN_GL_TRY(gl, BindBuffer(GL_ARRAY_BUFFER, self->mBuffer));
             void* mappedPointer = nullptr;
             if (mode & wgpu::MapMode::Read) {
-                mappedPointer = DAWN_GL_TRY_ALWAYS_CHECK(
-                    gl, MapBufferRange(GL_ARRAY_BUFFER, offset, size, GL_MAP_READ_BIT));
+                mappedPointer =
+                    DAWN_GL_TRY(gl, MapBufferRange(GL_ARRAY_BUFFER, offset, size, GL_MAP_READ_BIT));
             } else {
                 DAWN_ASSERT(mode & wgpu::MapMode::Write);
-                mappedPointer = DAWN_GL_TRY_ALWAYS_CHECK(
-                    gl, MapBufferRange(GL_ARRAY_BUFFER, offset, size,
-                                       GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT));
+                mappedPointer =
+                    DAWN_GL_TRY(gl, MapBufferRange(GL_ARRAY_BUFFER, offset, size,
+                                                   GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT));
             }
+            // The mapped data becomes visible to the application.
+            DAWN_TRY(CheckPendingErrorBeforeUserVisibleData(gl, "Mapping a buffer"));
 
             // SAFETY: A successful call to glMapBufferRange returns a pointer to `length`
             // bytes of data.
