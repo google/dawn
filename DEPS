@@ -829,7 +829,7 @@ deps = {
 
   # V8 and its dependencies for standalone builds.
   'third_party/v8/src': {
-    'url': '{chromium_git}/v8/v8.git@a7acb42d38dec6b7aa2dc06c0ad1e37c4985929c',
+    'url': '{chromium_git}/v8/v8.git@b685385743c06cdc2c8fcd029a1e93a807019d14',
     'condition': 'dawn_standalone and checkout_v8',
   },
 
@@ -839,7 +839,7 @@ deps = {
   },
 
   'third_party/fast_float/src': {
-    'url': '{chromium_git}/external/github.com/fastfloat/fast_float.git@42f254836ee416ffcf2f4e6576260003ac33d48c',
+    'url': '{chromium_git}/external/github.com/fastfloat/fast_float.git@dbeabeeb3e6791cb96994c2a7a084c36e62ccfb2',
     'condition': 'dawn_standalone and checkout_v8',
   },
 
