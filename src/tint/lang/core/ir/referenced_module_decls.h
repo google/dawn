@@ -147,39 +147,15 @@ class ReferencedModuleDecls {
     /// @param func the function
     /// @returns the set of transitively reference module-scope declarations
     DeclSet& TransitiveReferences(FunctionT* func) {
-        return transitive_references_.GetOrAdd(func, [&] {
-            DeclSet decls;
-            GetTransitiveReferences(func ? func->Block() : nullptr, decls);
-
-            // For a compute entry point, we need to check if subgroup size or any of the workgroup
-            // sizes are built on overrides.
-            if (func && func->Stage() == core::ir::Function::PipelineStage::kCompute) {
-                TINT_ASSERT(func->WorkgroupSize().has_value());
-
-                const auto workgroup_size = func->WorkgroupSize();
-                for (auto wg_size : *workgroup_size) {
-                    if (wg_size->template Is<core::ir::Constant>()) {
-                        continue;
-                    }
-
-                    // Workgroup size is based on instructions, walk up the chain adding those
-                    // instructions to the `decls` list.
-                    auto* inst = wg_size->template As<core::ir::InstructionResult>();
-                    TINT_ASSERT(inst);
-
-                    AddToBlock(decls, inst->Instruction());
-                }
-                const auto subgroup_size = func->SubgroupSize();
-                if (subgroup_size.has_value() &&
-                    !((*subgroup_size)->template Is<core::ir::Constant>())) {
-                    auto* inst = (*subgroup_size)->template As<core::ir::InstructionResult>();
-                    TINT_ASSERT(inst);
-                    AddToBlock(decls, inst->Instruction());
-                }
-            }
-            return decls;
-        });
+        return transitive_references_.GetOrAdd(func, [&] { return CalculateReferences(func); });
     }
+
+  private:
+    /// A map from blocks to their directly referenced declarations.
+    Hashmap<BlockT*, DeclSet, 64> block_to_direct_decls_{};
+
+    /// A map from functions to their transitively referenced declarations.
+    Hashmap<FunctionT*, DeclSet, 8> transitive_references_;
 
     void AddToBlock(DeclSet& decls, core::ir::Instruction* inst) {
         Vector<DeclT*, 32> worklist;
@@ -218,12 +194,44 @@ class ReferencedModuleDecls {
         }
     }
 
-  private:
-    /// A map from blocks to their directly referenced declarations.
-    Hashmap<BlockT*, DeclSet, 64> block_to_direct_decls_{};
+    DeclSet CalculateReferences(FunctionT* func) {
+        DeclSet decls;
+        if (!func) {
+            return decls;
+        }
 
-    /// A map from functions to their transitively referenced declarations.
-    Hashmap<FunctionT*, DeclSet, 8> transitive_references_;
+        GetTransitiveReferences(func->Block(), decls);
+
+        if (func->Stage() != core::ir::Function::PipelineStage::kCompute) {
+            return decls;
+        }
+
+        // For a compute entry point, we need to check if subgroup size or any of the workgroup
+        // sizes are built on overrides.
+        TINT_ASSERT(func->WorkgroupSize().has_value());
+
+        const auto workgroup_size = func->WorkgroupSize();
+        for (auto wg_size : *workgroup_size) {
+            if (wg_size->template Is<core::ir::Constant>()) {
+                continue;
+            }
+
+            // Workgroup size is based on instructions, walk up the chain adding those
+            // instructions to the `decls` list.
+            auto* inst = wg_size->template As<core::ir::InstructionResult>();
+            TINT_ASSERT(inst);
+
+            AddToBlock(decls, inst->Instruction());
+        }
+
+        const auto subgroup_size = func->SubgroupSize();
+        if (subgroup_size.has_value() && !((*subgroup_size)->template Is<core::ir::Constant>())) {
+            auto* inst = (*subgroup_size)->template As<core::ir::InstructionResult>();
+            TINT_ASSERT(inst);
+            AddToBlock(decls, inst->Instruction());
+        }
+        return decls;
+    }
 
     /// Get the set of transitively referenced module-scope declarations for a block.
     /// @param block the block
