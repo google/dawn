@@ -52,7 +52,8 @@ DAWN_NATIVE_EXPORT void WaitForCommandsToBeScheduled(WGPUDevice device);
 // scheduled by then may complete, later ones are refused and would lose the device. While
 // suspended, submitted work is encoded into the pending command buffer but not committed, so it
 // completes (and its callbacks run) only once resumed, and presents are dropped. Resuming commits
-// what was held. Thread-safe.
+// what was held. Thread-safe. The metal_suspend_submissions_in_background toggle does this from
+// the application's own notifications.
 DAWN_NATIVE_EXPORT void SetSubmissionSuspended(WGPUDevice device, bool suspended);
 DAWN_NATIVE_EXPORT bool IsSubmissionSuspended(WGPUDevice device);
 
