@@ -57,7 +57,7 @@ namespace {
 struct Options {
     std::unique_ptr<tint::StyledTextPrinter> printer;
 
-    std::string input_filename;
+    tint::Vector<std::string, 0> input_filenames;
     std::string output_filename;
     std::string input_dirname;
     std::string output_dirname;
@@ -98,15 +98,19 @@ bool ParseArgs(tint::VectorRef<std::string_view> arguments, Options* opts) {
     auto& help = options.Add<BoolOption>("help", "Show usage", ShortName{"h"});
 
     auto show_usage = [&] {
-        std::cout
-            << R"(Usage: ir_fuzz_as [options] '<input-file> <output-file>' or '<input-dir> <output-dir>'
-       ir_fuzz_as [--dump-ir|--dump-proto] [options] '<input-file>' or '<input-dir>'
+        std::cout << R"(Usage: ir_fuzz_as [options] '<input-file> <output-file>'
+       ir_fuzz_as [options] '<input-dir> <output-dir>'
+       ir_fuzz_as [options] '<input-file>... <output-dir>'
+       ir_fuzz_as [--dump-ir|--dump-proto] [options] '<input-file>...' or '<input-dir>'
 The first form takes in a single WGSL shader via <input-file> and produces the corresponding IR test
 binary in <output-file>.
 
 In the second form, the input and output arguments are directories. The files contained in
 <input-dir> will be scanned and any .wgsl files will have a corresponding .tirb file generated in
 <output-dir>.
+
+In the third form, one or more <input-file> arguments are provided followed by an <output-dir>
+directory. Each input file will have a corresponding .tirb file generated in <output-dir>.
 
 When --dump-ir (--emit-ir) or --dump-proto (--emit-proto) is provided, the output argument may be
 omitted to only emit to stdout without writing out a file.
@@ -130,14 +134,14 @@ Options:
     const bool has_dump_flag = *dump_ir.value || *dump_proto.value;
     auto args = result.Get();
     if (!has_dump_flag) {
-        if (args.Length() != 2) {
-            std::cerr << "Expected exactly 2 args, found: "
+        if (args.Length() < 2) {
+            std::cerr << "Expected at least 2 args, found: "
                       << tint::Join(Transform(args, tint::cmd::Quote), ", ") << "\n";
             return false;
         }
     } else {
-        if (args.Length() != 1 && args.Length() != 2) {
-            std::cerr << "Expected 1 or 2 args, found: "
+        if (args.Length() < 1) {
+            std::cerr << "Expected at least 1 arg, found: "
                       << tint::Join(Transform(args, tint::cmd::Quote), ", ") << "\n";
             return false;
         }
@@ -148,31 +152,66 @@ Options:
             opts->input_dirname = args[0];
             opts->batch_mode = true;
         } else {
-            opts->input_filename = args[0];
+            opts->input_filenames.Push(std::string(args[0]));
             opts->batch_mode = false;
         }
         return true;
     }
 
-    bool is_arg0_dir = is_directory(std::filesystem::path{args[0]});
-    bool is_arg1_dir = is_directory(std::filesystem::path{args[1]});
+    bool is_first_dir = is_directory(std::filesystem::path{args[0]});
+    bool is_last_dir = is_directory(std::filesystem::path{args.Back()});
 
-    if (is_arg0_dir && is_arg1_dir) {
-        opts->input_dirname = args[0];
-        opts->output_dirname = args[1];
-        opts->batch_mode = true;
-    } else if (!is_arg0_dir && !is_arg1_dir) {
-        opts->input_filename = args[0];
-        opts->output_filename = args[1];
-        opts->batch_mode = false;
-    } else {
-        std::cerr << "Expected args to either both be directories or both be files ('" << args[0]
-                  << "' is " << (is_arg0_dir ? "DIR" : "FILE") << " and '" << args[1] << "' is "
-                  << (is_arg1_dir ? "DIR" : "FILE") << "\n";
-        return false;
+    if (args.Length() == 2) {
+        if (is_first_dir && is_last_dir) {
+            opts->input_dirname = args[0];
+            opts->output_dirname = args[1];
+            opts->batch_mode = true;
+            return true;
+        }
+        if (!is_first_dir && !is_last_dir) {
+            opts->input_filenames.Push(std::string(args[0]));
+            opts->output_filename = args[1];
+            opts->batch_mode = false;
+            return true;
+        }
+        if (is_first_dir && !is_last_dir) {
+            std::cerr << "Expected args to either both be directories or input files followed by "
+                         "an output file/directory ('"
+                      << args[0] << "' is DIR and '" << args[1] << "' is FILE)\n";
+            return false;
+        }
     }
 
-    return true;
+    if (is_last_dir) {
+        for (size_t i = 0; i < args.Length() - 1; i++) {
+            if (is_directory(std::filesystem::path{args[i]})) {
+                std::cerr << "Expected input argument '" << args[i]
+                          << "' to be a file when passing inputs to output directory '"
+                          << args.Back() << "'\n";
+                return false;
+            }
+            opts->input_filenames.Push(std::string(args[i]));
+        }
+        opts->output_dirname = args.Back();
+        opts->batch_mode = true;
+        return true;
+    }
+
+    if (has_dump_flag) {
+        for (size_t i = 0; i < args.Length(); i++) {
+            if (is_directory(std::filesystem::path{args[i]})) {
+                std::cerr << "Expected argument '" << args[i] << "' to be a file\n";
+                return false;
+            }
+            opts->input_filenames.Push(std::string(args[i]));
+        }
+        opts->batch_mode = true;
+        return true;
+    }
+
+    std::cerr << "Expected last argument '" << args.Back()
+              << "' to be an output directory when passing multiple input files\n";
+    return false;
 }
 
 /// Dumps IR representation for a program.
@@ -266,14 +305,13 @@ void DumpTestCaseProtoDebug(const tint::cmd::fuzz::ir::pb::Root& proto, const Op
     options.printer->Print(tint::StyledText{} << "\n");
 }
 
-bool ProcessFile(const Options& options) {
+bool ProcessFile(const Options& options, const std::string& input_filename) {
     if (options.verbose) {
-        options.printer->Print(tint::StyledText{} << "Processing '" << options.input_filename
-                                                  << "'\n");
+        options.printer->Print(tint::StyledText{} << "Processing '" << input_filename << "'\n");
     }
 
     tint::cmd::LoadProgramOptions opts;
-    opts.filename = options.input_filename;
+    opts.filename = input_filename;
     opts.printer = options.printer.get();
     opts.input_format = tint::cmd::InputFormat::kWgsl;
 
@@ -327,27 +365,31 @@ int main(int argc, const char** argv) {
     }
 
     if (!options.batch_mode) {
-        if (!ProcessFile(options)) {
+        if (!ProcessFile(options, options.input_filenames[0])) {
             return EXIT_FAILURE;
         }
     } else {
-        for (auto const& input_entry :
-             std::filesystem::directory_iterator{std::filesystem::path{options.input_dirname}}) {
-            const std::string input_path = input_entry.path().string();
-            if (input_path.substr(input_path.size() - 5) != ".wgsl") {
-                continue;
+        if (!options.input_dirname.empty()) {
+            for (auto const& input_entry : std::filesystem::directory_iterator{
+                     std::filesystem::path{options.input_dirname}}) {
+                const std::string input_path = input_entry.path().string();
+                if (input_path.size() < 5 || input_path.substr(input_path.size() - 5) != ".wgsl") {
+                    continue;
+                }
+                options.input_filenames.Push(input_path);
             }
+        }
 
-            options.input_filename = input_entry.path().string();
-
+        for (auto const& input_path : options.input_filenames) {
             if (!options.output_dirname.empty()) {
-                auto output_entry = std::filesystem::path{options.output_dirname} /
-                                    input_entry.path().filename().replace_extension(".tirb");
+                auto output_entry =
+                    std::filesystem::path{options.output_dirname} /
+                    std::filesystem::path{input_path}.filename().replace_extension(".tirb");
                 options.output_filename = output_entry.string();
             }
 
-            ProcessFile(options);  // Ignoring the return value, so that one bad file doesn't cause
-                                   // the processing batch to stop.
+            ProcessFile(options, input_path);  // Ignoring the return value, so that one bad file
+                                               // doesn't cause the processing batch to stop.
         }
     }
 

@@ -223,6 +223,7 @@ var (
 			fs.StringVar(&c.inputs, "corpus", defaultWgslCorpusDir(c.osWrapper), "obsolete, use -inputs instead")
 			fs.StringVar(&c.inputs, "inputs", defaultWgslCorpusDir(c.osWrapper), "the directory that holds the files to use")
 			fs.StringVar(&c.out, "out", "<tmp>", "the directory to store outputs to")
+			fs.IntVar(&c.numProcesses, "j", 0, "number of concurrent processes to run (defaults to NumCPU)")
 		},
 		validate: func(fs *flag.FlagSet, c *mainConfig) error {
 			if len(fs.Args()) > 0 {
@@ -230,6 +231,9 @@ var (
 			}
 			if c.out == "" || c.out == "<tmp>" {
 				return fmt.Errorf("need to specify -out when using generate")
+			}
+			if c.numProcesses < 1 {
+				c.numProcesses = runtime.NumCPU()
 			}
 			c.cmdMode = TaskModeGenerate
 			return nil

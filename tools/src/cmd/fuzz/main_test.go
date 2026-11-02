@@ -458,6 +458,13 @@ func TestParseFlagsSubcommands(t *testing.T) {
 		require.Equal(t, FuzzModeIr, cfg.fuzzMode)
 		require.True(t, cfg.mesaMode)
 		require.Equal(t, "/my/corpus", cfg.out)
+		require.Equal(t, runtime.NumCPU(), cfg.numProcesses)
+
+		// Explicit -j flag
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"generate", "-out", "/my/corpus", "-j", "4"}, &cfg, &stdout, &stderr)
+		require.NoError(t, err)
+		require.Equal(t, 4, cfg.numProcesses)
 
 		// Missing -out (error)
 		cfg = newDefaultMainConfig()
