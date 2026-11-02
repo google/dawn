@@ -56,7 +56,12 @@
 #         angle-swiftshader
 #         angle-vulkan ]
 # Skia Renderer
-# tags: [ renderer-skia-gl
+# tags: [ renderer-graphite-dawn-d3d11
+#         renderer-graphite-dawn-d3d12
+#         renderer-graphite-dawn-gl
+#         renderer-graphite-dawn-metal
+#         renderer-graphite-dawn-vulkan
+#         renderer-skia-gl
 #         renderer-skia-vulkan
 #         renderer-software ]
 # Driver
@@ -492,13 +497,13 @@ crbug.com/42241275 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:api,op
 crbug.com/42241275 [ intel-0x9bc5 ubuntu ] webgpu:api,operation,command_buffer,image_copy:* [ RetryOnFailure ]
 
 # Occlusion result incorrect with writeMask 0 on Intel
-crbug.com/42240657 [ angle-d3d11 intel-0x9bc5 release renderer-skia-gl win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,depth:writeMask=0;* [ Failure ]
-crbug.com/42240657 [ angle-d3d11 intel release renderer-skia-gl win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,basic:writeMask=0;* [ Failure ]
-crbug.com/42240657 [ angle-d3d11 intel release renderer-skia-gl win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,scissor:writeMask=0;* [ Failure ]
-crbug.com/42240657 [ angle-d3d11 graphite-enabled intel-0x4680 no-asan release-x64 renderer-skia-gl target-cpu-64 win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;* [ Failure ]
-crbug.com/42240657 [ angle-d3d11 intel-0x4680 no-asan release-x64 renderer-skia-gl target-cpu-64 win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:writeMask=0;* [ Failure ]
-crbug.com/42240657 [ graphite-enabled intel-gen-9 release renderer-skia-gl ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;* [ Skip ]
-crbug.com/42240657 [ intel-gen-9 release renderer-skia-gl ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:writeMask=0;* [ Failure ]
+crbug.com/42240657 [ angle-d3d11 intel-0x9bc5 release win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,depth:writeMask=0;* [ Failure ]
+crbug.com/42240657 [ angle-d3d11 intel release win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,basic:writeMask=0;* [ Failure ]
+crbug.com/42240657 [ angle-d3d11 intel release win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,scissor:writeMask=0;* [ Failure ]
+crbug.com/42240657 [ angle-d3d11 graphite-enabled intel-0x4680 no-asan release-x64 target-cpu-64 win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;* [ Failure ]
+crbug.com/42240657 [ angle-d3d11 intel-0x4680 no-asan release-x64 target-cpu-64 win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:writeMask=0;* [ Failure ]
+crbug.com/42240657 [ graphite-enabled intel-gen-9 release ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;* [ Skip ]
+crbug.com/42240657 [ intel-gen-9 release ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:writeMask=0;* [ Failure ]
 crbug.com/42240657 [ intel-0x3e9b mac ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;* [ Skip ]
 crbug.com/42240657 [ intel-0x3e9b mac ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,sample_mask:writeMask=0;* [ Skip ]
 
@@ -525,7 +530,7 @@ crbug.com/42251180 [ dawn-no-backend-validation intel-0x9bc5 no-asan release-x64
 # Video tests fail on Mac SwiftShader
 crbug.com/40924444 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 crbug.com/40924444 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,external_texture,video:importExternalTexture,* [ Failure ]
-crbug.com/40924444 [ angle-metal graphite-enabled renderer-skia-gl sonoma target-cpu-64 webgpu-adapter-swiftshader ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:* [ Failure ]
+crbug.com/40924444 [ angle-metal graphite-enabled sonoma target-cpu-64 webgpu-adapter-swiftshader ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:* [ Failure ]
 
 # copy_contents_from_*_context_canvas*canvasType="offscreen" failures on Mac SwiftShader
 crbug.com/409512700 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:*canvasType="offscreen";* [ Failure ]
@@ -590,8 +595,8 @@ crbug.com/408244895 [ android-pixel-4 ] webgpu:shader,execution,expression,call,
 
 
 # textureLoad `texture_type="texture_multisampled_2d"` marked failing on all platforms
-crbug.com/407088846 [ amd angle-metal arch-x86_64 desktop graphite-enabled memory_ge_16gb no-asan no-clang-coverage release renderer-skia-gl sonoma target-cpu-64 ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="*";texture_type="texture_multisampled_2d";* [ Failure ]
-crbug.com/407088846 [ angle-d3d11 arch-x86_64 desktop graphite-enabled intel-0x4680 memory_ge_16gb no-asan no-clang-coverage release-x64 renderer-skia-gl target-cpu-64 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="*";texture_type="texture_multisampled_2d";* [ Failure ]
+crbug.com/407088846 [ amd angle-metal arch-x86_64 desktop graphite-enabled memory_ge_16gb no-asan no-clang-coverage release sonoma target-cpu-64 ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="*";texture_type="texture_multisampled_2d";* [ Failure ]
+crbug.com/407088846 [ angle-d3d11 arch-x86_64 desktop graphite-enabled intel-0x4680 memory_ge_16gb no-asan no-clang-coverage release-x64 target-cpu-64 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="*";texture_type="texture_multisampled_2d";* [ Failure ]
 
 # external_texture failures
 crbug.com/407109053 [ intel-0x9bc5 linux no-clang-coverage webgpu-adapter-default ] webgpu:web_platform,external_texture,* [ Failure ]
@@ -697,8 +702,8 @@ crbug.com/407088850 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,ca
 crbug.com/407088850 [ intel win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="depth24plus-stencil8";* [ Failure ] # CAT:Accuracy
 crbug.com/407088850 [ intel win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="depth24plus";* [ Failure ] # CAT:Accuracy
 crbug.com/407088850 [ intel win ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_3d_coords:stage="*";format="depth32float-stencil8";* [ Failure ] # CAT:Accuracy
-crbug.com/407088850 [ angle-d3d11 desktop graphite-enabled intel-0x4680 no-asan no-clang-coverage release-x64 renderer-skia-gl target-cpu-64 win10 ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:* [ Failure ] # CAT:Accuracy
-crbug.com/407088850 [ desktop graphite-enabled intel-gen-9 no-clang-coverage release renderer-skia-gl ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:* [ Skip ] # CAT:Accuracy
+crbug.com/407088850 [ angle-d3d11 desktop graphite-enabled intel-0x4680 no-asan no-clang-coverage release-x64 target-cpu-64 win10 ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:* [ Failure ] # CAT:Accuracy
+crbug.com/407088850 [ desktop graphite-enabled intel-gen-9 no-clang-coverage release ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:* [ Skip ] # CAT:Accuracy
 crbug.com/407088850 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:array_3d_coords:* [ Failure ] # CAT:Accuracy
 crbug.com/407088850 [ intel-0x4680 win ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:array_3d_coords:* [ Failure ] # CAT:Accuracy
 crbug.com/407088850 [ intel-0x9bc5 win ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:array_3d_coords:* [ Failure ] # CAT:Accuracy
@@ -791,7 +796,7 @@ crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,ca
 crbug.com/407076127 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords,compressed_unaligned:stage="*";format="astc-8x6-unorm";* [ Failure ] # CAT:Accuracy
 
 # textureLoad:multisampled failures on Windows FXC
-crbug.com/407088851 [ angle-d3d11 desktop graphite-enabled no-clang-coverage release-x64 renderer-skia-gl webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="*";texture_type="texture_depth_multisampled_2d";* [ Failure ] # CAT:Accuracy
+crbug.com/407088851 [ angle-d3d11 desktop graphite-enabled no-clang-coverage release-x64 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="*";texture_type="texture_depth_multisampled_2d";* [ Failure ] # CAT:Accuracy
 
 # One case of textureSampleGrad fails on NVIDIA (Linux/Win)
 crbug.com/407088852 [ linux nvidia ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="c";format="rgba16float";filt="linear";modeU="r";modeV="m";offset=false [ Failure ] # CAT:Accuracy
