@@ -73,10 +73,12 @@ struct ArgumentBufferInfo {
     struct MemberInfo {
         // [[id()]] annotation (matching MTLArgumentDescriptor.index)
         uint32_t id = 0;
+        // Size of the binding_array (1 if not an array)
+        uint32_t array_size = 1;
         // The type to use for the resource **if** not declared in the shader. Otherwise ignored.
         tint::ResourceType placeholder_type = tint::ResourceType::kEmpty;
 
-        TINT_REFLECT(MemberInfo, id, placeholder_type);
+        TINT_REFLECT(MemberInfo, id, array_size, placeholder_type);
         TINT_REFLECT_HASH_CODE(MemberInfo);
     };
     /// Struct members in order. These come from the BindGroupLayout - they must match it exactly.

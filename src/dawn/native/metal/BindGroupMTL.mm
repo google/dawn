@@ -76,7 +76,7 @@ MaybeError BindGroup::InitializeImpl() {
 
         for (BindingIndex bindingIndex : Range(layout->GetBindingCount())) {
             const BindingInfo& bindingInfo = layout->GetBindingInfo(bindingIndex);
-            uint32_t dstBinding = ToMTLArgumentBufferIndex(bindingIndex - bindingInfo.indexInArray);
+            uint32_t dstBinding = ToMTLArgumentBufferIndex(bindingIndex);
 
             auto HandleTextureBinding = [&]() {
                 auto textureView = ToBackend(GetBindingAsTextureView(bindingIndex));

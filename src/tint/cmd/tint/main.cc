@@ -533,7 +533,7 @@ When specified, automatically enables MSL validation)",
 
     auto& arg_buffer_binding = options.Add<StringOption>(
         "argument-buffer-binding",
-        R"(Mapping for argument buffer struct members, format is GROUP.BINDING[=PLACEHOLDER_TYPE], comma separated)",
+        R"(Mapping for argument buffer struct members, format is GROUP.BINDING[:ARRAY_SIZE][=PLACEHOLDER_TYPE], comma separated)",
         Alias{"argument-buffer-member"});
 
     auto& dynamic_buffer = options.Add<StringOption>(
@@ -818,10 +818,23 @@ Options:
                 placeholder_type = res.Get();
             }
 
+            uint32_t array_size = 1;
+            if (auto colon_idx = bp_str.find(":"); colon_idx != std::string_view::npos) {
+                auto size_str = bp_str.substr(colon_idx + 1);
+                bp_str = bp_str.substr(0, colon_idx);
+                auto size_res = tint::strconv::ParseUint32(size_str);
+                if (size_res != tint::Success) {
+                    std::cerr << "Invalid array size for " << arg_buffer_binding.Name() << ": "
+                              << size_str << "\n";
+                    return false;
+                }
+                array_size = size_res.Get();
+            }
+
             auto bind_point = tint::Split(bp_str, ".");
             if (bind_point.Length() != 2) {
                 std::cerr << "argument-buffer-binding values must be of the form "
-                             "GROUP.BINDING[=PLACEHOLDER_TYPE]\n";
+                             "GROUP.BINDING[:ARRAY_SIZE][=PLACEHOLDER_TYPE]\n";
                 return false;
             }
 
@@ -845,7 +858,11 @@ Options:
                 opts->group_to_argument_buffer_info.insert({group, {}});
             }
             opts->group_to_argument_buffer_info[group].struct_members.push_back(
-                tint::msl::writer::ArgumentBufferInfo::MemberInfo{binding, placeholder_type});
+                tint::msl::writer::ArgumentBufferInfo::MemberInfo{
+                    .id = binding,
+                    .array_size = array_size,
+                    .placeholder_type = placeholder_type,
+                });
         }
     }
 

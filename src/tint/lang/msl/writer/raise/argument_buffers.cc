@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/msl/writer/raise/argument_buffers.h"
 
+#include <limits>
 #include <string>
 #include <utility>
 
@@ -178,9 +179,17 @@ struct State {
         return Success;
     }
 
-    const core::type::Type* CreatePlaceholderMemberType(
+    Result<const core::type::Type*> CreatePlaceholderMemberType(
         const tint::msl::writer::ArgumentBufferInfo::MemberInfo& member) {
-        return CreatePlaceholderMemberElementType(member.placeholder_type);
+        TINT_IR_ASSERT(ir, member.array_size > 0);
+        const auto* element = CreatePlaceholderMemberElementType(member.placeholder_type);
+        if (member.array_size > 1) {
+            if (!element->Is<core::type::SampledTexture>()) {
+                return Failure("binding_array element type must be a sampled texture type");
+            }
+            return ty.binding_array(element, member.array_size);
+        }
+        return element;
     }
 
     const core::type::Type* CreatePlaceholderMemberElementType(const tint::ResourceType& type) {
@@ -315,47 +324,82 @@ struct State {
             // Translate argbuf members from Tint API into IR.
             Vector<core::type::Manager::StructMemberDesc, 8> struct_members;
             for (const auto member : argument_buffer_info.struct_members) {
-                Symbol name;
-                const core::type::Type* type = nullptr;
+                uint32_t slots_covered_by_wgsl = 0;
 
-                // If there's a var for this bindpoint, get the type info from it.
-                // Otherwise, take it from the config.
+                // For all slots (members or elements of a member binding_array) that exist in the
+                // WGSL, use the WGSL type (a handle or a binding_array)...
                 if (auto var = bindpoint_to_var.GetOr(BindingPoint{group, member.id}, nullptr)) {
+                    auto name = ir.NameOf(var);
+                    if (!name.IsValid()) {
+                        name = ir.symbols.New("unnamed");
+                    }
+                    module_vars.Push(var);
+
                     // Note that if there is a binding in the WGSL, we don't look at the type from
                     // the config at all. We simply assume that the caller (Dawn) will catch any
                     // mismatch before reaching this (in pipeline descriptor validation).
-                    type = var->Result()->Type();
+                    const auto* type = var->Result()->Type();
                     // Handle types drop the pointer and are passed around by value.
                     auto* ptr = type->As<core::type::Pointer>();
                     if (ptr->AddressSpace() == core::AddressSpace::kHandle) {
                         type = ptr->StoreType();
                     }
 
-                    name = ir.NameOf(var);
-                    if (!name) {
-                        name = ir.symbols.New("unnamed");
+                    const auto* binding_array = type->As<core::type::BindingArray>();
+                    if (binding_array) {
+                        auto count = binding_array->Count()->As<core::type::ConstantArrayCount>();
+                        TINT_IR_ASSERT(ir, count != nullptr);
+                        slots_covered_by_wgsl = count->value;
+                    } else {
+                        slots_covered_by_wgsl = 1;
                     }
-                    module_vars.Push(var);
 
                     var_to_struct_idx.Add(var, static_cast<uint32_t>(struct_members.Length()));
-                } else {
+                    struct_members.Push({
+                        .name = name,
+                        .type = type,
+                        .attributes =
+                            core::IOAttributes{
+                                .binding_point = BindingPoint{group, member.id},
+                            },
+                    });
+                }
+
+                // ... then, for slots that don't exist in the WGSL, generate placeholder members.
+                // This is just to take up space in the struct, so we only care that it has the
+                // right MSL alignment/size in practice.
+                if (member.array_size < slots_covered_by_wgsl) {
+                    StringStream ss;
+                    ss << "ArgumentBuffersConfig entry for " << BindingPoint{group, member.id}
+                       << " has array_size (" << member.array_size
+                       << ") smaller than WGSL binding count (" << slots_covered_by_wgsl << ")";
+                    return Failure(ss.str());
+                }
+                uint32_t placeholder_slots_needed = member.array_size - slots_covered_by_wgsl;
+                if (placeholder_slots_needed > 0) {
                     if (member.placeholder_type == tint::ResourceType::kEmpty) {
                         StringStream ss;
                         ss << "ArgumentBuffersConfig entry for " << BindingPoint{group, member.id}
                            << " is missing placeholder_type";
                         return Failure(ss.str());
                     }
-                    // Create a placeholder struct member. This is just to take up space in the
-                    // struct, so we only care that it has the right MSL alignment/size in practice.
-                    type = CreatePlaceholderMemberType(member);
-                    name = ir.symbols.New("placeholder");
-                }
 
-                struct_members.Push(core::type::Manager::StructMemberDesc{
-                    name, type,
-                    core::IOAttributes{
-                        .binding_point = BindingPoint{group, member.id},
-                    }});
+                    // Assuming that MSL arrays are laid out flat so the layout for
+                    // {[a, b, c]} = {a, b, c} = {a, [b, c]} = etc.
+                    ArgumentBufferInfo::MemberInfo placeholder_member = member;
+                    placeholder_member.id += slots_covered_by_wgsl;
+                    placeholder_member.array_size = placeholder_slots_needed;
+                    TINT_CHECK_RESULT_UNWRAP(placeholder_type,
+                                             CreatePlaceholderMemberType(placeholder_member));
+                    struct_members.Push({
+                        .name = ir.symbols.New("placeholder"),
+                        .type = placeholder_type,
+                        .attributes =
+                            core::IOAttributes{
+                                .binding_point = BindingPoint{group, placeholder_member.id},
+                            },
+                    });
+                }
             }
 
             // Create the structure.
@@ -522,12 +566,38 @@ Result<SuccessType> ArgumentBuffers(core::ir::Module& ir, const ArgumentBuffersC
 
     std::unordered_set<BindingPoint> seen{};
     for (const auto& [group, info] : config.group_to_argument_buffer_info) {
-        for (const auto member : info.struct_members) {
+        struct Range {
+            uint32_t start;
+            uint32_t end;
+        };
+        Vector<Range, 8> ranges;
+        for (const auto& member : info.struct_members) {
             BindingPoint bp(group, member.id);
             auto [_, inserted] = seen.insert(bp);
             if (!inserted) {
                 std::stringstream ss;
                 ss << "Found duplicate binding point in argument buffer config: " << bp;
+                return Failure{ss.str()};
+            }
+            if (member.array_size == 0) {
+                StringStream ss;
+                ss << "ArgumentBuffersConfig entry for " << bp << " has array_size of 0";
+                return Failure{ss.str()};
+            }
+            if (member.id > std::numeric_limits<uint32_t>::max() - member.array_size) {
+                StringStream ss;
+                ss << "ArgumentBuffersConfig entry for " << bp << " has array_size ("
+                   << member.array_size << ") that overflows uint32_t";
+                return Failure{ss.str()};
+            }
+            ranges.Push({member.id, member.id + member.array_size});
+        }
+        ranges.Sort([](const Range& a, const Range& b) { return a.start < b.start; });
+        for (size_t i = 1; i < ranges.Length(); ++i) {
+            if (ranges[i].start < ranges[i - 1].end) {
+                StringStream ss;
+                ss << "Found duplicate binding point in argument buffer config: "
+                   << BindingPoint(group, ranges[i].start);
                 return Failure{ss.str()};
             }
         }
