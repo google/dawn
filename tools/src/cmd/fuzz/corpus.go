@@ -106,6 +106,8 @@ func runCorpusGeneratorIr(t *taskConfig) error {
 	return nil
 }
 
+var reCopyrightNotice = regexp.MustCompile(`(?s)^// Copyright.*?\r?\n// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE\.\r?\n\s*`)
+
 // gatherWgslFiles cleans up and copies all the .wgsl files in a directory structure over to a flat directory
 // structure, via replacing the path separators for the origins with underscores in the destination
 // file names. It also filters out any '*.expected.*' files. If there are copyright notice blocks in the file contents
@@ -121,6 +123,10 @@ func gatherWgslFiles(inputs string, out string, fsReaderWriter oswrapper.Filesys
 	// Remove '*.expected.*'
 	files = transform.Filter(files, func(s string) bool { return !strings.Contains(s, ".expected.") })
 
+	if err := fsReaderWriter.MkdirAll(out, 0755); err != nil {
+		return fmt.Errorf("failed to create directory '%v': %w", out, err)
+	}
+
 	// Map src file paths to dst filenames where the path separators have been converted to underscores
 	mapping := make(map[string]string, len(files))
 	for _, f := range files {
@@ -132,8 +138,6 @@ func gatherWgslFiles(inputs string, out string, fsReaderWriter oswrapper.Filesys
 		mapping[f] = strings.ReplaceAll(filepath.ToSlash(relPath), "/", "_")
 	}
 
-	reCopyrightNotice := regexp.MustCompile(`(?s)^// Copyright.*?\r?\n// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE\.\r?\n\s*`)
-
 	for src, dest := range mapping {
 		dstPath := filepath.Join(out, dest)
 		contentBytes, err := fsReaderWriter.ReadFile(src)
@@ -141,14 +145,9 @@ func gatherWgslFiles(inputs string, out string, fsReaderWriter oswrapper.Filesys
 			return fmt.Errorf("failed to read '%v': %w", src, err)
 		}
 
-		content := string(contentBytes)
-		content = reCopyrightNotice.ReplaceAllString(content, "")
+		contentBytes = reCopyrightNotice.ReplaceAll(contentBytes, nil)
 
-		if err := fsReaderWriter.MkdirAll(filepath.Dir(dstPath), 0755); err != nil {
-			return fmt.Errorf("failed to create directory for '%v': %w", dstPath, err)
-		}
-
-		if err := fsReaderWriter.WriteFile(dstPath, []byte(content), 0644); err != nil {
+		if err := fsReaderWriter.WriteFile(dstPath, contentBytes, 0644); err != nil {
 			return fmt.Errorf("failed to write '%v': %w", dstPath, err)
 		}
 	}
