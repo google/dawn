@@ -2687,15 +2687,16 @@ class Parser {
                     break;
 
                 case spv::Op::OpGroupNonUniformBroadcast:
-                    EmitSubgroupBuiltinConstantId(inst,
-                                                  spirv::BuiltinFn::kGroupNonUniformBroadcast);
+                    TINT_CHECK_RESULT(EmitSubgroupBuiltinConstantId(
+                        inst, spirv::BuiltinFn::kGroupNonUniformBroadcast));
                     break;
                 case spv::Op::OpGroupNonUniformQuadBroadcast:
-                    EmitSubgroupBuiltinConstantId(inst,
-                                                  spirv::BuiltinFn::kGroupNonUniformQuadBroadcast);
+                    TINT_CHECK_RESULT(EmitSubgroupBuiltinConstantId(
+                        inst, spirv::BuiltinFn::kGroupNonUniformQuadBroadcast));
                     break;
                 case spv::Op::OpGroupNonUniformQuadSwap:
-                    EmitSubgroupBuiltinConstantId(inst, spirv::BuiltinFn::kGroupNonUniformQuadSwap);
+                    TINT_CHECK_RESULT(EmitSubgroupBuiltinConstantId(
+                        inst, spirv::BuiltinFn::kGroupNonUniformQuadSwap));
                     break;
                 case spv::Op::OpGroupNonUniformAll:
                     EmitSubgroupBuiltin(inst, core::BuiltinFn::kSubgroupAll);
@@ -2877,7 +2878,8 @@ class Parser {
         return Success;
     }
 
-    void EmitSubgroupBuiltinConstantId(spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
+    Result<SuccessType> EmitSubgroupBuiltinConstantId(spvtools::opt::Instruction& inst,
+                                                      spirv::BuiltinFn fn) {
         auto id = Value(inst.GetSingleWordInOperand(2));
 
         // TODO(431054356): Convert core::BuiltinFn::kSubgroupBroadcast non-constant values into a
@@ -2885,12 +2887,16 @@ class Parser {
         //
         // For QuadBroadcast this will remain an error as there is no WGSL equivalent.
         // For QuadSwap this will remain an error as there is no WGSL equivalent.
-        TINT_ASSERT(id->Is<core::ir::Constant>())
-            << "non-constant GroupNonUniform `Invocation Id` not supported";
+        //
+        // Spec constants pass SPIR-V validation here but are not `core::ir::Constant`s.
+        if (!id->Is<core::ir::Constant>()) {
+            return Failure("non-constant GroupNonUniform `Invocation Id` not supported");
+        }
 
         AssertSubgroupScope(inst);
         Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, Args(inst, 2)),
              inst.result_id());
+        return Success;
     }
 
     void EmitSubgroupBuiltin(spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {

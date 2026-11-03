@@ -5306,5 +5306,83 @@ TEST_F(SpirvParserTest, NonUniformMinMax_Signed_UnsupportedGroupOperation) {
                 testing::HasSubstr("group operand Reduce required for `Min`/`Max` instructions"));
 }
 
+TEST_F(SpirvParserTest, NonUniformBroadcast_SpecConstantId) {
+    auto* src = R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformBallot
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %id SpecId 0
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+     %uint_1 = OpConstant %uint 1
+         %id = OpSpecConstant %uint 1
+       %void = OpTypeVoid
+    %func_ty = OpTypeFunction %void
+       %main = OpFunction %void None %func_ty
+      %label = OpLabel
+        %res = OpGroupNonUniformBroadcast %uint %uint_3 %uint_1 %id
+               OpReturn
+               OpFunctionEnd
+)";
+    auto result = Run(src, SPV_ENV_VULKAN_1_1);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("non-constant GroupNonUniform `Invocation Id` not supported"));
+}
+
+TEST_F(SpirvParserTest, NonUniformQuadBroadcast_SpecConstantIndex) {
+    auto* src = R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformQuad
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %index SpecId 0
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+     %uint_1 = OpConstant %uint 1
+      %index = OpSpecConstant %uint 1
+       %void = OpTypeVoid
+    %func_ty = OpTypeFunction %void
+       %main = OpFunction %void None %func_ty
+      %label = OpLabel
+        %res = OpGroupNonUniformQuadBroadcast %uint %uint_3 %uint_1 %index
+               OpReturn
+               OpFunctionEnd
+)";
+    auto result = Run(src, SPV_ENV_VULKAN_1_1);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("non-constant GroupNonUniform `Invocation Id` not supported"));
+}
+
+TEST_F(SpirvParserTest, NonUniformQuadSwap_SpecConstantDirection) {
+    auto* src = R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformQuad
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %direction SpecId 0
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+     %uint_1 = OpConstant %uint 1
+  %direction = OpSpecConstant %uint 1
+       %void = OpTypeVoid
+    %func_ty = OpTypeFunction %void
+       %main = OpFunction %void None %func_ty
+      %label = OpLabel
+        %res = OpGroupNonUniformQuadSwap %uint %uint_3 %uint_1 %direction
+               OpReturn
+               OpFunctionEnd
+)";
+    auto result = Run(src, SPV_ENV_VULKAN_1_1);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("non-constant GroupNonUniform `Invocation Id` not supported"));
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
