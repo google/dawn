@@ -30,9 +30,11 @@
 #include <cstddef>
 #include <functional>
 #include <iostream>
+#include <optional>
 #include <span>
 #include <string>
 #include <thread>
+#include <utility>
 
 #include "src/tint/cmd/fuzz/common/runner.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -173,17 +175,18 @@ void Run(const std::function<tint::core::ir::Module()>& acquire_module,
     Context context;
     context.options = options;
 
+    std::optional<tint::core::ir::Module> initial_mod = acquire_module();
     if (!context.options.disable_ir_validator) {
-        auto mod = acquire_module();
         // Inputs that fail validation should not be run against the fuzzing passes, since they are
         // not expected to handle invalid inputs.
-        if (tint::core::ir::Validate(mod, "Pre-run validation") != tint::Success) {
+        if (tint::core::ir::Validate(*initial_mod, "Pre-run validation") != tint::Success) {
             if (context.options.verbose) {
                 std::cout << "Failed to validate before running\n";
             }
             return;
         }
     }
+    const auto module_properties = initial_mod->properties;
 
     // Run each of the program fuzzer functions
     tint::fuzz::common::RunFuzzers(Fuzzers(), options, [&](const IRFuzzer& fuzzer, size_t i) {
@@ -195,18 +198,26 @@ void Run(const std::function<tint::core::ir::Module()>& acquire_module,
                 std::cout << " • Running: " << currently_running << "\n";
             }
         }
-        auto mod = acquire_module();
-        mod.dump_ir_when_validating = context.options.dump_ir_when_validating;
 
         // Skip this fuzzer case if the component being fuzzed does not support one of the
-        // properties used by the module.
-        auto unsupported = mod.properties & fuzzer.unsupported_properties;
+        // properties used by the module, before decoding a fresh IR module.
+        auto unsupported = module_properties & fuzzer.unsupported_properties;
         if (!unsupported.Empty()) {
             if (context.options.verbose) {
                 std::cout << "unsupported property '" << *unsupported.begin() << "'";
             }
             return;
         }
+
+        auto mod = [&] {
+            if (!options.run_concurrently && initial_mod.has_value()) {
+                auto m = std::move(*initial_mod);
+                initial_mod.reset();
+                return m;
+            }
+            return acquire_module();
+        }();
+        mod.dump_ir_when_validating = context.options.dump_ir_when_validating;
 
         // Enable validation assertions.
         // Any validation failure after this point is a bug in Tint which we want to find.

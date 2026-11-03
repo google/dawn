@@ -25,10 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <cstddef>
 #include <filesystem>
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/helper.h"
@@ -274,17 +276,16 @@ tint::Result<tint::cmd::fuzz::ir::pb::Root> GenerateFuzzCaseProto(const tint::Pr
 /// @param options the options that ir_fuzz_as was invoked with
 /// @returns true on success
 bool WriteTestCaseProto(const tint::cmd::fuzz::ir::pb::Root& proto, const Options& options) {
-    tint::Vector<std::byte, 0> buffer;
     size_t len = proto.ByteSizeLong();
-    buffer.Resize(len);
+    std::vector<std::byte> buffer(len);
     if (len > 0) {
-        if (!proto.SerializeToArray(&buffer[0], static_cast<int>(len))) {
+        if (!proto.SerializeToArray(buffer.data(), static_cast<int>(len))) {
             std::cerr << "Failed to serialize test case protobuf";
             return false;
         }
     }
 
-    if (!tint::cmd::WriteFile(options.output_filename, "wb", ToStdVector(buffer))) {
+    if (!tint::cmd::WriteFile(options.output_filename, "wb", buffer)) {
         std::cerr << "Failed to write protobuf binary out to file '" << options.output_filename
                   << "'\n";
         return false;
