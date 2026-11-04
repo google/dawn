@@ -143,6 +143,12 @@ crbug.com/407076121 [ linux nvidia ] webgpu:shader,execution,limits:const_array_
 # point.
 ################################################################################
 
+# Skip until unrestricted_aliasing lands.
+crbug.com/495899057 [ android ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ mac ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ linux ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ win ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
+
 # These tests are invalid under Compat and need to be modified upstream
 crbug.com/520527496 webgpu:shader,execution,memory_model,texture_intra_invocation_coherence:texture_intra_invocation_coherence:format="r32float";dim="2d-array" [ Skip ]
 crbug.com/520527496 webgpu:shader,execution,memory_model,texture_intra_invocation_coherence:texture_intra_invocation_coherence:format="r32sint";dim="2d-array" [ Skip ]
@@ -3166,10 +3172,6 @@ crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,statement,assignment,vector:vector_dynamic_index:elementType="i32";width=3;indexType="u32" [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,value_init:scalars:addressSpace="private";type="u32" [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,value_init:struct:addressSpace="private" [ Failure ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
-crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="offscreen";format="bgra8unorm";usage=8 [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="offscreen";format="bgra8unorm";usage=8 [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="onscreen";format="bgra8unorm";usage=8 [ Failure ]

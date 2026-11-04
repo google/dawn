@@ -203,6 +203,12 @@ crbug.com/449521989 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call
 # point.
 ################################################################################
 
+# Skip until unrestricted_aliasing lands.
+crbug.com/495899057 [ android ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ mac ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ linux ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ win ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
+
 # SharedImage interop failures on Linux
 # Skipped instead of just Crash because of the number of failures
 crbug.com/40782602 [ linux ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Skip ]
@@ -1674,14 +1680,4 @@ crbug.com/0000 [ android-pixel-4 ] webgpu:shader,execution,expression,call,user,
 crbug.com/0000 [ microsoft win ] webgpu:shader,execution,limits:struct_members: [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,validation,extension,dual_source_blending:blend_src_same_type:blendSrc0Type="f32";blendSrc1Type="vec4u" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,validation,extension,dual_source_blending:blend_src_same_type:blendSrc0Type="vec4i";blendSrc1Type="f32" [ Failure ]
-crbug.com/0000 [ amd mac ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
-crbug.com/0000 [ android-pixel-4 ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
-crbug.com/0000 [ apple mac ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
-crbug.com/0000 [ intel mac ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
-crbug.com/0000 [ intel win ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
-crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
-crbug.com/0000 [ microsoft win ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_fully_transparent_ImageData:dstPremultiplied=false [ Failure ]
