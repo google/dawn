@@ -217,11 +217,15 @@ The framework guides execution through the following phases:
 4. **Normalization**: It executes multiple normalization profiling
    runs for each fuzzer against its designated normalization corpus
    (controlled by `normalization_duration` and
-   `normalization_iterations`). The resulting average execution rate
-   (runs/sec) and standard error (SEM) are saved to
-   `normalization_scores.json` and are used to compute "Normalized CPU
-   Seconds" for each fuzzer. All individual profiling runs are
-   archived in `normalization_iterations.csv`.
+   `normalization_iterations`). Each iteration first runs the fuzzer
+   with `-runs=0` to measure the corpus initialization cost (runs and
+   elapsed seconds), then runs the timed benchmark for the discovered
+   initialization duration plus `normalization_duration`, subtracting
+   the initialization baseline to isolate the steady-state execution
+   rate (runs/sec). The resulting average execution rate and standard
+   error (SEM) are saved to `normalization_scores.json` and are used
+   to compute "Normalized CPU Seconds" for each fuzzer. All individual
+   profiling runs are archived in `normalization_iterations.csv`.
 5. **Task Execution**: It calculates the Cartesian product of
    experiments (Fuzzer × Corpus × Duration × Iteration). These are run
    concurrently across available CPU cores (configurable via
