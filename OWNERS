@@ -59,6 +59,7 @@ per-file third_party/libprotobuf-mutator/src=*
 per-file third_party/libunwind/src=*
 per-file third_party/llvm-libc/src=*
 per-file third_party/markupsafe=*
+per-file third_party/mesa/src=*
 per-file third_party/node-addon-api=*
 per-file third_party/node-api-headers=*
 per-file third_party/partition_alloc=*
