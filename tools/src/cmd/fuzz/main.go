@@ -828,12 +828,12 @@ func checkBatch(ctx context.Context, t *taskConfig, files []string, onFilesDone 
 			// All files prior to failedIdx ran and passed before the crash.
 			if failedIdx > 0 {
 				onFilesDone(failedIdx)
-			}
-
-			if failedIdx > 0 {
 				// Re-run the failed file in isolation so its error output is not mixed
 				// with logs from the preceding files in the batch.
 				tasks = append(tasks, []string{batch[failedIdx]})
+			} else {
+				failureChan <- fmt.Errorf("fuzzer '%s' failed to process file '%s' with error: %w\nOutput:\n%s", fuzzer, batch[0], err, string(out))
+				onFilesDone(1)
 			}
 
 			// Continue checking the remaining files in the batch after failedIdx.
@@ -912,6 +912,7 @@ func checkFuzzer(t *taskConfig) error {
 		return err
 	}
 
+	pb.Stop()
 	close(failureChan)
 
 	if len(failureChan) > 0 {

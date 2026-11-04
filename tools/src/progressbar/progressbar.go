@@ -35,6 +35,7 @@ import (
 	"io"
 	"math"
 	"strings"
+	"sync"
 	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/term"
@@ -109,7 +110,11 @@ func New(out io.Writer, cfg *Config) ProgressBar {
 // Does not check if the terminal supports the needed escape characters, which
 // is why it is not exposed outside the package, use New() instead.
 func newRealProgressBar(out io.Writer, cfg *Config) ProgressBar {
-	p := &realProgressBar{out: out, c: make(chan Status, 64)}
+	p := &realProgressBar{
+		out:  out,
+		c:    make(chan Status, 64),
+		done: make(chan struct{}),
+	}
 	if cfg != nil {
 		p.Config = *cfg
 	} else {
@@ -122,19 +127,33 @@ func newRealProgressBar(out io.Writer, cfg *Config) ProgressBar {
 		p.Width = DefaultWidth
 	}
 	go func() {
+		defer close(p.done)
 		var status *Status
+		dirty := false
+		frame := 0
 		t := time.NewTicker(p.RefreshRate)
 		defer t.Stop()
-		for frame := 0; ; frame++ {
+		for {
 			select {
 			case s, ok := <-p.c:
 				if !ok {
+					if status != nil {
+						if dirty {
+							status.Draw(out, p.Width, p.ANSIColors, frame)
+						}
+						if p.ANSIColors {
+							fmt.Fprintln(out)
+						}
+					}
 					return
 				}
 				status = &s
+				dirty = true
 			case <-t.C:
 				if status != nil {
 					status.Draw(out, p.Width, p.ANSIColors, frame)
+					frame++
+					dirty = false
 				}
 			}
 		}
@@ -163,8 +182,10 @@ func (p *StubProgressBar) Stop() {}
 // Note: Does not work if !isatty or if running on windows.
 type realProgressBar struct {
 	Config
-	out io.Writer
-	c   chan Status
+	out      io.Writer
+	c        chan Status
+	done     chan struct{}
+	stopOnce sync.Once
 }
 
 func (p *realProgressBar) Update(s Status) {
@@ -172,7 +193,10 @@ func (p *realProgressBar) Update(s Status) {
 }
 
 func (p *realProgressBar) Stop() {
-	close(p.c)
+	p.stopOnce.Do(func() {
+		close(p.c)
+	})
+	<-p.done
 }
 
 // Draw draws the ProgressBar status to out

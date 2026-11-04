@@ -159,6 +159,9 @@ func runCorpusGeneratorIr(t *taskConfig) error {
 		return err
 	}
 
+	if pb != nil {
+		pb.Stop()
+	}
 	fmt.Println("done")
 	return nil
 }
