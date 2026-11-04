@@ -48,6 +48,7 @@ android {
     defaultConfig {
         minSdkVersion 24
         compileSdk 34
+        consumerProguardFiles 'proguard-rules.pro'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         if (!abiFiltersList.isEmpty()) {
             ndk {
