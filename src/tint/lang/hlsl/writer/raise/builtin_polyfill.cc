@@ -1881,11 +1881,6 @@ struct State {
                 stride = b.Multiply(stride, u32(arr_stride / sm_ty->Type()->Size()));
             }
 
-            // TODO(crbug.com/512455144): 8-bit components need additional work to support.
-            if (sm_ty->Type()->IsAnyOf<core::type::I8, core::type::U8>()) {
-                TINT_IR_UNIMPLEMENTED(ir)
-                    << "8-bit subgroup matrix load from workgroup not supported";
-            }
 
             TINT_IR_ASSERT(
                 ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[1]));
@@ -1943,11 +1938,6 @@ struct State {
                 stride = b.Multiply(stride, u32(arr_stride / sm_ty->Type()->Size()));
             }
 
-            // TODO(crbug.com/512455144): 8-bit components need additional work to support.
-            if (sm_ty->Type()->IsAnyOf<core::type::I8, core::type::U8>()) {
-                TINT_IR_UNIMPLEMENTED(ir)
-                    << "8-bit subgroup matrix store to workgroup not supported";
-            }
 
             TINT_IR_ASSERT(
                 ir, std::holds_alternative<core::Majorness>(call->ExplicitTemplateParams()[0]));

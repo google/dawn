@@ -1,13 +1,13 @@
 SKIP: FAILED
 
 $B1: {  # root
-  %in0:ptr<workgroup, array<u32, 1024>, read_write> = var undef
-  %in1:ptr<workgroup, array<vec2<i32>, 1024>, read_write> = var undef
-  %in2:ptr<workgroup, array<vec3<f32>, 1024>, read_write> = var undef
-  %in3:ptr<workgroup, array<vec4<u32>, 1024>, read_write> = var undef
-  %in5:ptr<workgroup, array<vec2<f16>, 1024>, read_write> = var undef
-  %in6:ptr<workgroup, array<vec3<f16>, 1024>, read_write> = var undef
-  %out:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+  %in0:ptr<workgroup, array<u32, 128>, read_write> = var
+  %in1:ptr<workgroup, array<vec2<i32>, 128>, read_write> = var
+  %in2:ptr<workgroup, array<vec3<f32>, 128>, read_write> = var
+  %in3:ptr<workgroup, array<vec4<u32>, 128>, read_write> = var
+  %in5:ptr<workgroup, array<vec2<f16>, 128>, read_write> = var
+  %in6:ptr<workgroup, array<vec3<f16>, 128>, read_write> = var
+  %out:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(64i, 1i, 1i) func():void {

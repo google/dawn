@@ -1,13 +1,13 @@
 // [hlsl-dxc] flags: --hlsl-shader-model 6.10
 enable chromium_experimental_subgroup_matrix;
 enable f16;
-var<workgroup> out0 : array<u32, 1024>;
-var<workgroup> out1 : array<vec2i, 1024>;
-var<workgroup> out2 : array<vec3f, 1024>;
-var<workgroup> out3 : array<vec4u, 1024>;
-var<workgroup> out4 : array<f16, 1024>;
-var<workgroup> out5 : array<vec2h, 1024>;
-var<workgroup> out6 : array<vec3h, 1024>;
+var<workgroup> out0 : array<u32, 128>;
+var<workgroup> out1 : array<vec2i, 128>;
+var<workgroup> out2 : array<vec3f, 128>;
+var<workgroup> out3 : array<vec4u, 128>;
+var<workgroup> out4 : array<f16, 128>;
+var<workgroup> out5 : array<vec2h, 128>;
+var<workgroup> out6 : array<vec3h, 128>;
 @compute @workgroup_size(64) fn main() {
   let m = subgroup_matrix_result<f16, 8, 8>();
   subgroupMatrixStore<col_major>(&out0, 0u, m, 16u);

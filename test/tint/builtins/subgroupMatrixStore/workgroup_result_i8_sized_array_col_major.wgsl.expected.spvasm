@@ -30,36 +30,36 @@
                OpName %main "main"
                OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex
        %uint = OpTypeInt 32 0
-  %uint_1024 = OpConstant %uint 1024
-%_arr_uint_uint_1024 = OpTypeArray %uint %uint_1024
-%_ptr_Workgroup__arr_uint_uint_1024 = OpTypePointer Workgroup %_arr_uint_uint_1024
-       %out0 = OpVariable %_ptr_Workgroup__arr_uint_uint_1024 Workgroup
+   %uint_128 = OpConstant %uint 128
+%_arr_uint_uint_128 = OpTypeArray %uint %uint_128
+%_ptr_Workgroup__arr_uint_uint_128 = OpTypePointer Workgroup %_arr_uint_uint_128
+       %out0 = OpVariable %_ptr_Workgroup__arr_uint_uint_128 Workgroup
         %int = OpTypeInt 32 1
       %v2int = OpTypeVector %int 2
-%_arr_v2int_uint_1024 = OpTypeArray %v2int %uint_1024
-%_ptr_Workgroup__arr_v2int_uint_1024 = OpTypePointer Workgroup %_arr_v2int_uint_1024
-       %out1 = OpVariable %_ptr_Workgroup__arr_v2int_uint_1024 Workgroup
+%_arr_v2int_uint_128 = OpTypeArray %v2int %uint_128
+%_ptr_Workgroup__arr_v2int_uint_128 = OpTypePointer Workgroup %_arr_v2int_uint_128
+       %out1 = OpVariable %_ptr_Workgroup__arr_v2int_uint_128 Workgroup
       %float = OpTypeFloat 32
     %v3float = OpTypeVector %float 3
-%_arr_v3float_uint_1024 = OpTypeArray %v3float %uint_1024
-%_ptr_Workgroup__arr_v3float_uint_1024 = OpTypePointer Workgroup %_arr_v3float_uint_1024
-       %out2 = OpVariable %_ptr_Workgroup__arr_v3float_uint_1024 Workgroup
+%_arr_v3float_uint_128 = OpTypeArray %v3float %uint_128
+%_ptr_Workgroup__arr_v3float_uint_128 = OpTypePointer Workgroup %_arr_v3float_uint_128
+       %out2 = OpVariable %_ptr_Workgroup__arr_v3float_uint_128 Workgroup
      %v4uint = OpTypeVector %uint 4
-%_arr_v4uint_uint_1024 = OpTypeArray %v4uint %uint_1024
-%_ptr_Workgroup__arr_v4uint_uint_1024 = OpTypePointer Workgroup %_arr_v4uint_uint_1024
-       %out3 = OpVariable %_ptr_Workgroup__arr_v4uint_uint_1024 Workgroup
+%_arr_v4uint_uint_128 = OpTypeArray %v4uint %uint_128
+%_ptr_Workgroup__arr_v4uint_uint_128 = OpTypePointer Workgroup %_arr_v4uint_uint_128
+       %out3 = OpVariable %_ptr_Workgroup__arr_v4uint_uint_128 Workgroup
        %half = OpTypeFloat 16
-%_arr_half_uint_1024 = OpTypeArray %half %uint_1024
-%_ptr_Workgroup__arr_half_uint_1024 = OpTypePointer Workgroup %_arr_half_uint_1024
-       %out4 = OpVariable %_ptr_Workgroup__arr_half_uint_1024 Workgroup
+%_arr_half_uint_128 = OpTypeArray %half %uint_128
+%_ptr_Workgroup__arr_half_uint_128 = OpTypePointer Workgroup %_arr_half_uint_128
+       %out4 = OpVariable %_ptr_Workgroup__arr_half_uint_128 Workgroup
      %v2half = OpTypeVector %half 2
-%_arr_v2half_uint_1024 = OpTypeArray %v2half %uint_1024
-%_ptr_Workgroup__arr_v2half_uint_1024 = OpTypePointer Workgroup %_arr_v2half_uint_1024
-       %out5 = OpVariable %_ptr_Workgroup__arr_v2half_uint_1024 Workgroup
+%_arr_v2half_uint_128 = OpTypeArray %v2half %uint_128
+%_ptr_Workgroup__arr_v2half_uint_128 = OpTypePointer Workgroup %_arr_v2half_uint_128
+       %out5 = OpVariable %_ptr_Workgroup__arr_v2half_uint_128 Workgroup
      %v3half = OpTypeVector %half 3
-%_arr_v3half_uint_1024 = OpTypeArray %v3half %uint_1024
-%_ptr_Workgroup__arr_v3half_uint_1024 = OpTypePointer Workgroup %_arr_v3half_uint_1024
-       %out6 = OpVariable %_ptr_Workgroup__arr_v3half_uint_1024 Workgroup
+%_arr_v3half_uint_128 = OpTypeArray %v3half %uint_128
+%_ptr_Workgroup__arr_v3half_uint_128 = OpTypePointer Workgroup %_arr_v3half_uint_128
+       %out6 = OpVariable %_ptr_Workgroup__arr_v3half_uint_128 Workgroup
 %_ptr_Input_uint = OpTypePointer Input %uint
 %main_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
        %void = OpTypeVoid
@@ -104,7 +104,7 @@
                OpBranch %40
          %40 = OpLabel
          %78 = OpLoad %uint %idx None
-         %79 = OpUGreaterThanEqual %bool %78 %uint_1024
+         %79 = OpUGreaterThanEqual %bool %78 %uint_128
                OpSelectionMerge %81 None
                OpBranchConditional %79 %82 %81
          %82 = OpLabel

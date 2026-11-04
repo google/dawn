@@ -2131,13 +2131,6 @@ TEST_P(SubgroupMatrix_WorkgroupLoadStoreTest, WorkgroupLoadStore) {
     for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
         auto& config = subgroupMatrixConfigs.configs[i];
 
-        // TODO(crbug.com/512455144): Support 8-bit subgroup matrix loads from workgroup memory in
-        // the HLSL writer.
-        if (IsD3D12() && Is8Bit(config.componentType)) {
-            std::cout << "Skipping config: " << config << "\n";
-            continue;
-        }
-
         TestSubgroupMatrixConfig(config, info.subgroupMaxSize, columnMajor);
     }
 }

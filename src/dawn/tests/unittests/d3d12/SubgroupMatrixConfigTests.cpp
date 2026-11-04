@@ -320,7 +320,7 @@ TEST_F(SubgroupMatrixConfigTests, DifferentComponentTypesDoNotMerge) {
     EXPECT_EQ(configs, expected);
 }
 
-// Filtering rules for unsupported type combinations and ShaderF16.
+// Filtering rules for unsupported type combinations, ShaderF16, and WARP 8-bit types.
 TEST_F(SubgroupMatrixConfigTests, TypeAndFeatureFiltering) {
     std::vector supports = {
         // Valid integer and float combinations:
@@ -341,6 +341,8 @@ TEST_F(SubgroupMatrixConfigTests, TypeAndFeatureFiltering) {
     {
         std::vector expected = {
             MakeConfig(I32, I32, {16, 16, 16}, {32, 32}),
+            MakeConfig(I8, I32, {16, 16, 16}, {32, 32}),
+            MakeConfig(U8, U32, {16, 16, 16}, {32, 32}),
             MakeConfig(F16, F32, {16, 16, 16}, {32, 32}),
             MakeConfig(F32, F32, {16, 16, 16}, {32, 32}),
         };
@@ -354,6 +356,8 @@ TEST_F(SubgroupMatrixConfigTests, TypeAndFeatureFiltering) {
     {
         std::vector expected = {
             MakeConfig(I32, I32, {16, 16, 16}, {32, 32}),
+            MakeConfig(I8, I32, {16, 16, 16}, {32, 32}),
+            MakeConfig(U8, U32, {16, 16, 16}, {32, 32}),
         };
         auto configs = EnumerateSubgroupMatrixConfigs(supports, /*vendorId=*/0,
                                                       /*deviceId=*/0,
