@@ -20,6 +20,7 @@
 #include <mutex>
 #include <set>
 #include <span>
+#include <string>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
