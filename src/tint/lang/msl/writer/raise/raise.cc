@@ -234,15 +234,11 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     TINT_CHECK_RESULT(raise::SimdBallot(module));
 
-    // ArgumentBuffers must come before ModuleScopeVars
+    // ArgumentBuffers must come before ChangeImmediateToUniform and ModuleScopeVars
     if (options.use_argument_buffers) {
         raise::ArgumentBuffersConfig cfg{
             .group_to_argument_buffer_info = std::move(options.group_to_argument_buffer_info),
         };
-
-        if (options.immediate_binding_point) {
-            cfg.skip_bindings.insert(options.immediate_binding_point.value());
-        }
 
         if (options.vertex_pulling_config) {
             auto group = options.vertex_pulling_config->pulling_group;
