@@ -314,13 +314,15 @@ MaybeUnknownError SharedResourceMemory::EndAccess(Resource* resource, EndAccessS
 
     DAWN_CHECK(!resource->IsError());
     ExecutionSerial lastUsageSerial = resource->OnEndAccess();
+    // If the last usage serial is non-zero, the resource was used by GPU commands during this
+    // access.
+    const bool usedDuringAccess = lastUsageSerial != kBeginningOfGPUTime;
 
-    // If the last usage serial is non-zero, the texture was used.
-    // Call the error-generating part of the EndAccess implementation to export a fence.
-    // This is separated out because writing the output state must happen regardless of whether
-    // or not EndAccessInternal succeeds.
+    // If the resource was used, call the error-generating part of the EndAccess implementation to
+    // export a fence. This is separated out because writing the output state must happen
+    // regardless of whether or not EndAccessInternal succeeds.
     MaybeUnknownError err;
-    if (lastUsageSerial != kBeginningOfGPUTime) {
+    if (usedDuringAccess) {
         ResultOrUnknownError<FenceAndSignalValue> result =
             EndAccessInternal(lastUsageSerial, resource, state);
         if (result.IsSuccess()) {
@@ -351,7 +353,16 @@ MaybeUnknownError SharedResourceMemory::EndAccess(Resource* resource, EndAccessS
         state->fences = {};
         state->signaledValues = {};
     }
-    state->initialized = resource->IsResourceInitialized();
+    // If EndAccessInternal failed, including because the device is lost (or destroyed), commands
+    // using the resource during this access may not have been flushed, may have been dropped
+    // without ever executing (e.g. a queue.writeTexture recorded in a passive pending command
+    // context, or a submit that failed), or may have been in the middle of executing when the
+    // device was lost, even though the resource was already marked as initialized on the CPU side.
+    // In that case, conservatively report the resource as uninitialized so that the next user
+    // lazily clears it instead of reading back undefined contents. If the resource wasn't used
+    // during the access, its initialized state is still the one set on BeginAccess.
+    bool dirtyDueToErrors = !err.IsSuccess() && usedDuringAccess;
+    state->initialized = resource->IsResourceInitialized() && !dirtyDueToErrors;
     return err;
 }
 
@@ -360,12 +371,15 @@ ResultOrUnknownError<FenceAndSignalValue> SharedResourceMemory::EndAccessInterna
     ExecutionSerial lastUsageSerial,
     Resource* resource,
     EndAccessState* rawState) {
+    // If the device is lost (including when it is destroyed), the backend can't record or submit
+    // any more commands, and the commands using the resource may have been dropped, so there is
+    // nothing to export for them. Return an error so that EndAccess reports the resource as
+    // uninitialized, and so that the backend part of EndAccess is skipped entirely.
+    DAWN_TRY(GetDevice()->ValidateIsAlive());
     UnpackedPtr<EndAccessState> state;
     DAWN_TRY_ASSIGN(state, ValidateAndUnpack(rawState));
-    if (!GetDevice()->IsLost()) {
-        // Ensure that commands are submitted before exporting fences with the last usage serial.
-        DAWN_TRY(GetDevice()->GetQueue()->EnsureCommandsFlushed(lastUsageSerial));
-    }
+    // Ensure that commands are submitted before exporting fences with the last usage serial.
+    DAWN_TRY(GetDevice()->GetQueue()->EnsureCommandsFlushed(lastUsageSerial));
     return EndAccessImpl(resource, lastUsageSerial, state);
 }
 
