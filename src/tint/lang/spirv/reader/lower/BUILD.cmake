@@ -49,6 +49,8 @@ tint_add_target(tint_lang_spirv_reader_lower lib
   lang/spirv/reader/lower/decompose_strided_array.h
   lang/spirv/reader/lower/decompose_strided_matrix.cc
   lang/spirv/reader/lower/decompose_strided_matrix.h
+  lang/spirv/reader/lower/hoist_constant_array.cc
+  lang/spirv/reader/lower/hoist_constant_array.h
   lang/spirv/reader/lower/lower.cc
   lang/spirv/reader/lower/lower.h
   lang/spirv/reader/lower/shader_io.cc
@@ -103,6 +105,7 @@ tint_add_target(tint_lang_spirv_reader_lower_test test
   lang/spirv/reader/lower/builtins_test.cc
   lang/spirv/reader/lower/decompose_strided_array_test.cc
   lang/spirv/reader/lower/decompose_strided_matrix_test.cc
+  lang/spirv/reader/lower/hoist_constant_array_test.cc
   lang/spirv/reader/lower/shader_io_test.cc
   lang/spirv/reader/lower/texture_test.cc
   lang/spirv/reader/lower/transpose_row_major_test.cc
