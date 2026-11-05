@@ -588,5 +588,81 @@ $B1: {  # root
 )");
 }
 
+// WGSL only samples f32 textures (https://www.w3.org/TR/WGSL/#texturesample), while SPIR-V allows
+// OpImageSample* on integer textures. These tests check that such samples are rejected.
+struct IntegerSampleCase {
+    std::string sampled_type;
+    std::string result_type;
+    std::string sample;
+    std::string opcode;
+};
+
+std::ostream& operator<<(std::ostream& out, const IntegerSampleCase& c) {
+    return out << c.sampled_type << "_" << c.opcode;
+}
+
+using SpirvParserIntegerSampleTest = SpirvParserTestWithParam<IntegerSampleCase>;
+
+// Sampling an i32 or u32 texture fails with a message naming the instruction.
+TEST_P(SpirvParserIntegerSampleTest, Rejected) {
+    auto& params = GetParam();
+    auto res = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpDecorate %tex DescriptorSet 0
+               OpDecorate %tex Binding 0
+               OpDecorate %smp DescriptorSet 0
+               OpDecorate %smp Binding 1
+       %void = OpTypeVoid
+         %fn = OpTypeFunction %void
+        %f32 = OpTypeFloat 32
+        %i32 = OpTypeInt 32 1
+        %u32 = OpTypeInt 32 0
+      %vec2f = OpTypeVector %f32 2
+      %vec3f = OpTypeVector %f32 3
+      %vec4i = OpTypeVector %i32 4
+      %vec4u = OpTypeVector %u32 4
+      %f32_0 = OpConstant %f32 0
+    %coord2 = OpConstantComposite %vec2f %f32_0 %f32_0
+    %coord3 = OpConstantComposite %vec3f %f32_0 %f32_0 %f32_0
+        %img = OpTypeImage )" +
+                   params.sampled_type + R"( 2D 0 0 0 1 Unknown
+         %si = OpTypeSampledImage %img
+    %img_ptr = OpTypePointer UniformConstant %img
+    %sampler = OpTypeSampler
+    %smp_ptr = OpTypePointer UniformConstant %sampler
+        %tex = OpVariable %img_ptr UniformConstant
+        %smp = OpVariable %smp_ptr UniformConstant
+       %main = OpFunction %void None %fn
+      %start = OpLabel
+          %t = OpLoad %img %tex
+          %s = OpLoad %sampler %smp
+         %ts = OpSampledImage %si %t %s
+          %r = )" + params.opcode +
+                   " " + params.result_type + " %ts " + params.sample + R"(
+               OpReturn
+               OpFunctionEnd
+)");
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(params.opcode + " on a texture with sampled type " +
+                                   params.sampled_type.substr(1) + " is not supported"));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    SpirvParser,
+    SpirvParserIntegerSampleTest,
+    testing::Values(
+        IntegerSampleCase{"%i32", "%vec4i", "%coord2", "OpImageSampleImplicitLod"},
+        IntegerSampleCase{"%i32", "%vec4i", "%coord2 Lod %f32_0", "OpImageSampleExplicitLod"},
+        IntegerSampleCase{"%i32", "%vec4i", "%coord3", "OpImageSampleProjImplicitLod"},
+        IntegerSampleCase{"%i32", "%vec4i", "%coord3 Lod %f32_0", "OpImageSampleProjExplicitLod"},
+        IntegerSampleCase{"%u32", "%vec4u", "%coord2", "OpImageSampleImplicitLod"},
+        IntegerSampleCase{"%u32", "%vec4u", "%coord2 Lod %f32_0", "OpImageSampleExplicitLod"},
+        IntegerSampleCase{"%u32", "%vec4u", "%coord3", "OpImageSampleProjImplicitLod"},
+        IntegerSampleCase{"%u32", "%vec4u", "%coord3 Lod %f32_0", "OpImageSampleProjExplicitLod"}));
+
 }  // namespace
 }  // namespace tint::spirv::reader
