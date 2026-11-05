@@ -79,6 +79,8 @@ type flags struct {
 	caseTimeout          time.Duration
 	startupAllowance     time.Duration
 	recover              bool
+	shardIndex           int
+	shardCount           int
 	dawn                 node.Flags
 }
 
@@ -143,6 +145,8 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 		flag.BoolVar(&c.flags.isolated, "isolate", false, "run each test in an isolated process")
 	}
 	flag.BoolVar(&c.flags.build, "build", true, "attempt to build the CTS before running")
+	flag.IntVar(&c.flags.shardIndex, "shard-index", 0, "with -shard-count, the shard of the test cases to run, from 0 to -shard-count - 1")
+	flag.IntVar(&c.flags.shardCount, "shard-count", 1, "number of shards to split the test cases into, so that several machines can each run different shards")
 	flag.BoolVar(&c.flags.validate, "validate", false, "enable backend validation")
 	flag.Var(&c.flags.dawn, "flag", "flag to pass to dawn-node as flag=value. multiple flags must be passed in individually")
 	flag.StringVar(&c.flags.backend, "backend", backendDefault, "backend to use: default|null|webgpu|d3d11|d3d12|metal|vulkan|opengl|opengles."+
@@ -205,6 +209,11 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	testCases, err := c.queryTestCases()
 	if err != nil {
 		return err
+	}
+	if c.flags.shardCount > 1 {
+		all := len(testCases)
+		testCases = shardCases(testCases, c.flags.shardIndex, c.flags.shardCount)
+		fmt.Printf("Shard %d of %d: %d of %d test cases\n", c.flags.shardIndex, c.flags.shardCount, len(testCases), all)
 	}
 	fmt.Printf("Testing %d test cases...\n", len(testCases))
 
@@ -349,6 +358,12 @@ func (c *cmd) processFlags(fsReaderWriter oswrapper.FilesystemReaderWriter) erro
 		}
 	} else if c.flags.stageOnly {
 		return fmt.Errorf("-stage-only needs -adb")
+	}
+	if c.flags.shardCount < 1 {
+		return fmt.Errorf("-shard-count must be at least 1")
+	}
+	if c.flags.shardIndex < 0 || c.flags.shardIndex >= c.flags.shardCount {
+		return fmt.Errorf("-shard-index must be from 0 to %d, not %d", c.flags.shardCount-1, c.flags.shardIndex)
 	}
 	if c.flags.NumRunners < 1 {
 		c.flags.NumRunners = 1
