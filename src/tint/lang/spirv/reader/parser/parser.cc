@@ -159,10 +159,11 @@ class Parser {
         for (const auto& ext : spirv_context_->extensions()) {
             auto name = ext.GetOperand(0).AsString();
             if (name != "SPV_KHR_storage_buffer_storage_class" &&
-                name != "SPV_KHR_non_semantic_info" &&     //
-                name != "SPV_KHR_16bit_storage" &&         //
-                name != "SPV_KHR_terminate_invocation" &&  //
-                name != "SPV_KHR_multiview" &&             //
+                name != "SPV_KHR_non_semantic_info" &&            //
+                name != "SPV_KHR_16bit_storage" &&                //
+                name != "SPV_KHR_terminate_invocation" &&         //
+                name != "SPV_EXT_demote_to_helper_invocation" &&  //
+                name != "SPV_KHR_multiview" &&                    //
                 // TODO(423644565): We assume the barriers are correct. We should check for any
                 // operation that makes barrier assumptions that aren't consistent with WGSL and
                 // generate the needed barriers.
@@ -177,6 +178,7 @@ class Parser {
             auto capability = static_cast<spv::Capability>(it->GetSingleWordInOperand(0));
             switch (capability) {
                 case spv::Capability::ClipDistance:
+                case spv::Capability::DemoteToHelperInvocation:
                 case spv::Capability::DerivativeControl:
                 case spv::Capability::Float16:
                 case spv::Capability::Geometry:
@@ -2465,6 +2467,13 @@ class Parser {
                 case spv::Op::OpTerminateInvocation:
                     EmitKill(inst);
                     break;
+                case spv::Op::OpDemoteToHelperInvocation:
+                    EmitWithoutResult(b_.Discard());
+                    break;
+                case spv::Op::OpIsHelperInvocationEXT:
+                    return Failure(
+                        "OpIsHelperInvocationEXT is not supported: WGSL has no way to "
+                        "query whether an invocation is a helper");
                 case spv::Op::OpDot:
                     EmitBuiltinCall(inst, core::BuiltinFn::kDot);
                     break;
