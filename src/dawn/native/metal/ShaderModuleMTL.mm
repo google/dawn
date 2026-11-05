@@ -304,7 +304,7 @@ ResultOrUnknownError<CacheResult<MslCompilation>> TranslateToMSL(
     req.tintOptions.emit_vertex_point_size =
         stage == SingleShaderStage::Vertex &&
         renderPipeline->GetPrimitiveTopology() == wgpu::PrimitiveTopology::PointList;
-    req.tintOptions.immediate_binding_point = tint::BindingPoint{0, kImmediateBlockBufferSlot};
+    req.tintOptions.immediate_binding_point = kImmediateBlockBufferSlot;
     req.tintOptions.array_length_from_constants = std::move(arrayLengthFromConstants);
     req.tintOptions.pixel_local_attachments = std::move(pixelLocalAttachments);
     req.tintOptions.bindings = std::move(bindings);

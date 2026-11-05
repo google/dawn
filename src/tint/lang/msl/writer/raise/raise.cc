@@ -263,9 +263,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     // ChangeImmediateToUniform must come before ModuleScopeVars
     {
-        core::ir::transform::ChangeImmediateToUniformConfig config = {
-            .immediate_binding_point = options.immediate_binding_point,
-        };
+        core::ir::transform::ChangeImmediateToUniformConfig config;
+        // ChangeImmediateToUniform is a shared IR transform that takes a BindingPoint, and MSL
+        // represents entry-point buffer indices in the IR as BindingPoint{0, buffer_idx}.
+        if (options.immediate_binding_point) {
+            config.immediate_binding_point = BindingPoint{0, *options.immediate_binding_point};
+        }
         TINT_CHECK_RESULT(core::ir::transform::ChangeImmediateToUniform(module, config));
     }
 

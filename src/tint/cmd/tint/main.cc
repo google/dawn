@@ -1340,7 +1340,7 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
         ir, options.ep_name, !options.use_argument_buffers, !options.use_argument_buffers);
     gen_options.resource_table = tint::core::ir::transform::GenerateResourceTableConfig(
         ir, options.treat_samplers_as_filtering, options.treat_textures_as_unfilterable);
-    gen_options.immediate_binding_point = tint::BindingPoint{.group = 0u, .binding = 30u};
+    gen_options.immediate_binding_point = 30u;
     gen_options.extensions.disable_demote_to_helper = options.disable_demote_to_helper;
     gen_options.use_argument_buffers = options.use_argument_buffers;
     gen_options.group_to_argument_buffer_info = options.group_to_argument_buffer_info;

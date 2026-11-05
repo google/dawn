@@ -169,7 +169,7 @@ TEST_F(MslWriterTest, ArrayLengthFromImmediate_Unused) {
     });
 
     Options options;
-    options.immediate_binding_point = tint::BindingPoint{0, 30};
+    options.immediate_binding_point = 30u;
     options.array_length_from_constants.bindpoint_to_size_index[{0u, 0u}] = 0u;
     options.array_length_from_constants.buffer_sizes_offset = 64u;
     options.disable_robustness = true;
@@ -203,7 +203,7 @@ TEST_F(MslWriterTest, ArrayLengthFromImmediate_Used) {
     });
 
     Options options;
-    options.immediate_binding_point = tint::BindingPoint{0, 30};
+    options.immediate_binding_point = 30u;
     options.array_length_from_constants.bindpoint_to_size_index[{0u, 0u}] = 0u;
     options.array_length_from_constants.buffer_sizes_offset = 64u;
     options.disable_robustness = true;
@@ -252,7 +252,7 @@ TEST_P(MslWriterStorageBufferSizesTest, ConfiguredLayout) {
 
     Options options;
     options.disable_robustness = true;
-    options.immediate_binding_point = BindingPoint{0, 30};
+    options.immediate_binding_point = 30u;
     options.non_constant_zero_offset = 4u;
     if (GetParam()) {
         options.array_length_from_constants.buffer_sizes_offset = 64u;
@@ -321,7 +321,7 @@ TEST_F(MslWriterTest, ArrayLengthFromImmediate_ZeroOffset) {
     });
 
     Options options;
-    options.immediate_binding_point = BindingPoint{0, 30};
+    options.immediate_binding_point = 30u;
     options.non_constant_zero_offset = 4u;
     options.array_length_from_constants.buffer_sizes_offset = 0u;
     options.array_length_from_constants.bindpoint_to_size_index[{0, 0}] = 0u;
@@ -344,7 +344,7 @@ TEST_F(MslWriterTest, ImmediateF16) {
     });
 
     Options options;
-    options.immediate_binding_point = tint::BindingPoint{0, 30};
+    options.immediate_binding_point = 30u;
     options.non_constant_zero_offset = 64;
     auto result = Generate(options);
     ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
@@ -380,7 +380,7 @@ TEST_F(MslWriterTest, ImmediateVec3F16) {
     });
 
     Options options;
-    options.immediate_binding_point = tint::BindingPoint{0, 30};
+    options.immediate_binding_point = 30u;
     options.non_constant_zero_offset = 64;
     auto result = Generate(options);
     ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
@@ -530,7 +530,7 @@ TEST_F(MslWriterTest, VertexPulling) {
     Options options;
     options.bindings.storage.emplace(BindingPoint{4u, 0u}, BindingPoint{0u, 1u});
     options.vertex_pulling_config = std::move(vertex_pulling_config);
-    options.immediate_binding_point = BindingPoint{0, 30};
+    options.immediate_binding_point = 30u;
     options.array_length_from_constants = std::move(array_length_config);
 
     auto result = Generate(options);

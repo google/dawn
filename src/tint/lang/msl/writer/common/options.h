@@ -250,8 +250,8 @@ struct Options {
     /// The optional vertex pulling configuration.
     std::optional<VertexPullingConfig> vertex_pulling_config = {};
 
-    /// Immediate binding point info
-    std::optional<BindingPoint> immediate_binding_point = {};
+    /// Binding index for immediates buffer (a Metal [[buffer(N)]] slot, not a WGSL BindingPoint).
+    std::optional<uint32_t> immediate_binding_point = {};
 
     /// Map of group id to argument buffer information
     std::unordered_map<uint32_t, ArgumentBufferInfo> group_to_argument_buffer_info;
