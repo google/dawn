@@ -163,7 +163,6 @@ class ShaderBuiltinPartialConstLowHighTest
 };
 
 TEST_P(ShaderBuiltinPartialConstLowHighTest, All) {
-    const auto builtin = GetParam().mBuiltin;
     const auto lowPhase = GetParam().mLowPhase;
     const auto highPhase = GetParam().mHighPhase;
     const auto wgsl = Shader();
@@ -262,7 +261,6 @@ class ShaderBuiltinPartialConstOffsetCountTest
 };
 
 TEST_P(ShaderBuiltinPartialConstOffsetCountTest, All) {
-    const auto builtin = GetParam().mBuiltin;
     const auto offsetPhase = GetParam().mOffsetPhase;
     const auto countPhase = GetParam().mCountPhase;
     const auto offsetTooBig = GetParam().mOffsetTooBig;

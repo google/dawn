@@ -595,7 +595,6 @@ class MultisampleFormatsTest : public TextureFormatsTier1Test {
     // color. This shader outputs red if all samples match the expected color, else green.
     std::string GetMultisampleValidationFS(wgpu::TextureFormat format) {
         std::ostringstream fsCodeStream;
-        std::string componentType = "f32";
         std::string textureType = "texture_multisampled_2d<f32>";
 
         fsCodeStream << R"(

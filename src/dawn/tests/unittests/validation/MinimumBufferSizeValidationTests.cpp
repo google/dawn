@@ -596,8 +596,6 @@ TEST_F(MinBufferSizeDefaultLayoutTests, RenderPassConsidersBothStages) {
 
 // Make sure that buffers with non-struct vec3 types do not include padding in the min buffer size.
 TEST_F(MinBufferSizePipelineCreationTests, NonStructVec3) {
-    std::vector<BindingDescriptor> bindings = {{0, 0, "", "", "", 12}, {0, 1, "", "", "", 12}};
-
     auto MakeShader = [](const char* stageAttributes) {
         std::ostringstream ostream;
         ostream << "@group(0) @binding(0) var<storage, read_write> buffer : vec3u;\n";

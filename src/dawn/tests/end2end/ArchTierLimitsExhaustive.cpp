@@ -753,7 +753,6 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, SemiExhaustiveTestSubgroupMatrixConfigs
             GTEST_SKIP();
         }
     } else {
-        std::string error_str;
         for (; iter_match != iter_end; iter_match++) {
             encountered_error = false;
             auto& expect_configs = iter_match->second;
