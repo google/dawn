@@ -28,6 +28,7 @@
 package common
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -54,6 +55,10 @@ type Flags struct {
 	Node             string // Path to the Node executable
 	Npx              string // Path to the npx executable
 }
+
+// ErrNodeNotFound is the error for a command that runs node when Flags.Node is
+// not set.
+var ErrNodeNotFound = errors.New("cannot find path to node. Specify with --node")
 
 func (f *Flags) Register(fsReader oswrapper.FilesystemReader) {
 	flag.BoolVar(&f.Verbose, "verbose", false, "print extra information while testing")
@@ -107,11 +112,6 @@ func (f *Flags) Process(fsReaderWriter oswrapper.FilesystemReaderWriter) (*State
 		if err := s.Expectations.Load(f.ExpectationsPath); err != nil {
 			return nil, err
 		}
-	}
-
-	// Find node
-	if f.Node == "" {
-		return nil, fmt.Errorf("cannot find path to node. Specify with --node")
 	}
 
 	s.CTS = NewCTS(f.CTS, f.Npx, f.Node)

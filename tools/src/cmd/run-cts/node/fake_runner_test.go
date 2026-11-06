@@ -146,17 +146,6 @@ func isNoExit(testCase string) bool {
 	return strings.Contains(testCase, "noexit")
 }
 
-// nonEmptyLines returns the lines of text that are not empty.
-func nonEmptyLines(text string) []string {
-	lines := []string{}
-	for _, line := range strings.Split(text, "\n") {
-		if line = strings.TrimRight(line, "\r"); line != "" {
-			lines = append(lines, line)
-		}
-	}
-	return lines
-}
-
 // killSelf ends the process abruptly, as a native crash would.
 func killSelf() {
 	if p, err := os.FindProcess(os.Getpid()); err == nil {

@@ -148,10 +148,10 @@ changed. `-stage=always` copies both even if the stamp matches, `-stage=never`
 skips the copy, and `-stage-only` copies and exits.
 `-adb-serial <serial>` picks the device when several are connected.
 
-Everything else works as on the host: the CTS is built and the query expanded
-on the host, each batch runs on the device through `adb shell`, and a hung batch
-is killed on the device. `-j` defaults to 1 with `-adb`; raise it to run several
-runner processes on the device at once.
+Everything else works as on the host: the CTS is built on the host, the runner
+on the device expands the queries and runs each batch through `adb shell`, and a
+hung batch is killed on the device. `-j` defaults to 1 with `-adb`; raise it to
+run several runner processes on the device at once.
 
 ## Running the runner by hand
 

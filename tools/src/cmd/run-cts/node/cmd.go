@@ -31,6 +31,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -398,6 +399,11 @@ func (c *cmd) processFlags(fsReaderWriter oswrapper.FilesystemReaderWriter) erro
 	}
 	c.state = *state
 
+	// Standalone runs need node only to build the CTS with npx.
+	if c.flags.Node == "" && (!c.standalone || c.flags.build) {
+		return common.ErrNodeNotFound
+	}
+
 	return nil
 }
 
@@ -417,7 +423,13 @@ func (c *cmd) queryTestCases() ([]common.TestCase, error) {
 	testCases := []common.TestCase{}
 	queryOf := map[common.TestCase]string{}
 	for _, query := range c.queries {
-		cases, err := c.state.CTS.QueryTestCases(c.flags.Verbose, query)
+		var cases []common.TestCase
+		var err error
+		if c.standalone {
+			cases, err = c.listTestCases(query)
+		} else {
+			cases, err = c.state.CTS.QueryTestCases(c.flags.Verbose, query)
+		}
 		if err != nil {
 			return nil, fmt.Errorf("failed to gather tests: %w", err)
 		}
@@ -428,6 +440,29 @@ func (c *cmd) queryTestCases() ([]common.TestCase, error) {
 			queryOf[testCase] = query
 		}
 		testCases = append(testCases, cases...)
+	}
+	return testCases, nil
+}
+
+// listTestCases returns the test cases that match query, as listed by the
+// standalone runner on the target.
+func (c *cmd) listTestCases(query string) ([]common.TestCase, error) {
+	target, ctsDir := c.target()
+	proc, err := target.start(append(c.runnerArgs(ctsDir), "--list", "-q", query), "")
+	if err != nil {
+		return nil, err
+	}
+	output, err := io.ReadAll(proc.output())
+	exit := proc.wait()
+	if err != nil {
+		return nil, err
+	}
+	if !exit.success {
+		return nil, fmt.Errorf("the runner could not list '%v' (%v):\n%s", query, exit.description, output)
+	}
+	testCases := []common.TestCase{}
+	for _, line := range nonEmptyLines(string(output)) {
+		testCases = append(testCases, common.TestCase(line))
 	}
 	return testCases, nil
 }

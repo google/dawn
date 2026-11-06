@@ -97,6 +97,17 @@ func joinLines(lines []string) string {
 	return strings.Join(lines, "\n") + "\n"
 }
 
+// nonEmptyLines returns the lines of text that are not empty.
+func nonEmptyLines(text string) []string {
+	lines := []string{}
+	for _, line := range strings.Split(text, "\n") {
+		if line = strings.TrimRight(line, "\r"); line != "" {
+			lines = append(lines, line)
+		}
+	}
+	return lines
+}
+
 // readLines sends each line read from r to lines, without the line ending,
 // then closes lines.
 func readLines(r io.Reader, lines chan<- string) {

@@ -85,6 +85,9 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		return err
 	}
 	c.state = *state
+	if c.flags.Node == "" {
+		return common.ErrNodeNotFound
+	}
 
 	// The test query is the optional unnamed argument
 	c.query = "webgpu:*"
