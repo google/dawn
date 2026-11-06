@@ -5,237 +5,224 @@ Dawn and runs the WebGPU CTS directly, without a Node.js installation.
 
 The usual way to run the CTS is [`dawn.node`](../src/dawn/node/README.md), a
 native addon loaded by Node.js. The standalone runner instead embeds its own V8
-and supplies the subset of the Node API the CTS uses. That removes the external
-Node.js dependency. This is important for platforms like Android where Node.js
-is not available.
+and supplies the subset of the Node API the CTS uses, so it also runs where
+Node.js is not available, such as Android.
 
 Both runners execute the same CTS JavaScript and the same Dawn bindings, and
 both are driven by [`run-cts`](../tools/src/cmd/run-cts): `run-cts standalone`
 is to the standalone runner what `run-cts node` is to `dawn.node`.
 
-## Fetching dependencies
+## Setup
+
+### Fetching dependencies
 
 Follow [`docs/building.md`](building.md), using
 `scripts/standalone-with-v8.gclient` in the `Get the code` step so `gclient`
 fetches both the Node bindings (`dawn_node`) and V8 (`checkout_v8`):
 
 ```sh
-# Clone the repo as "dawn"
 git clone https://dawn.googlesource.com/dawn dawn && cd dawn
-
-# Bootstrap the gclient configuration for the standalone CTS runner
 cp scripts/standalone-with-v8.gclient .gclient
-
-# Fetch external dependencies and toolchains with gclient
 gclient sync
 ```
 
-If you are configuring an existing checkout, ensure `.gclient` sets both
-`"checkout_v8": True` and `"dawn_node": True` in `custom_vars` before running
-`gclient sync`. Without `checkout_v8`, the `dawn_standalone_cts_runner` target
-is not declared.
+In an existing checkout, set `"checkout_v8": True` and `"dawn_node": True` in
+the `custom_vars` of `.gclient` instead. Without `checkout_v8`, the
+`dawn_standalone_cts_runner` target is not declared.
 
-## Building the runner
-
-Generate a release build directory and compile `dawn_standalone_cts_runner`
-(building this target compiles only the standalone runner executable and its
-dependencies, not the `dawn.node` shared library):
-
-```sh
-gn gen out/Release --args="is_debug=false dawn_use_swiftshader=false"
-autoninja -C out/Release dawn_standalone_cts_runner
-```
-
-- `is_debug=false` is strongly recommended: the default debug build compiles a
-  debug V8, which runs the CTS roughly 17x slower than a release build.
-- `dawn_use_swiftshader=false` skips building Dawn's bundled SwiftShader
-  renderer and ensures the runner uses the system's drivers. Remove this option
-  if you want to test against SwiftShader.
-
-## Running the CTS
-
-`run-cts standalone` builds the CTS JavaScript when it is out of date, expands
-the query into its test cases, runs them in batches through runner processes,
-and reports the results the way `run-cts` does for `dawn.node`. It needs the
-CTS dependencies installed once:
-
-```sh
-cd third_party/webgpu-cts && npm ci && cd ../..
-```
-
-`npm` and `npx` come with any Node.js installation (`>= 16.0.0`). If you have
-none, add the Node.js fetched by `gclient sync` to your `PATH` first:
-
-```sh
-# Replace linux-amd64 with linux-arm64, mac-amd64, mac-arm64 or windows-amd64.
-export PATH="$PWD/third_party/node/linux-amd64/bin:$PATH"
-```
-
-Then run a query from the Dawn root (on Windows, from Git Bash):
-
-```sh
-./tools/run run-cts standalone -bin out/Release 'webgpu:api,operation,queue,*'
-```
-
-`-bin` is the directory holding `dawn_standalone_cts_runner` (`-runner <path>`
-names the executable itself), and may be omitted when the build directory is
-`out/active`. Several queries may be given, after all of the flags. Quote them:
-CTS queries contain `;` and `"`, which most shells would otherwise interpret.
-
-Each runner process is given a batch of at most `-batch-size` test cases (500
-by default) on its standard input, `-j` processes run at a time, and a short
-list is split evenly over them. Each result is reported as soon as the runner
-prints it. When a process crashes, or prints no result for `-case-timeout` (one
-minute by default), the test case it was running is reported as a crash or a
-timeout, with the output it produced, and a new process runs the rest of the
-batch (`-recover=false` reports the rest as not run instead).
-
-Flags you are likely to want:
-
-- `-backend <name>`, `-adapter <substring>` and `-validate` select the GPU and
-  enable backend validation
-- `-flag <key>=<value>` sets any other Dawn flag, and may be repeated; the keys
-  are listed under [Dawn flags](#dawn-flags) below
-- `-verbose` prints the runner command lines and all of the test output
-- `-output <file>` writes the results as JSON, `-expect <file>` compares a run
-  with such a file, and `-log <file>` records every test and its result
-- `-build=false` skips the CTS build, for example when `npx` is not on `PATH`
-- `-cts <dir>` uses a CTS checkout other than `third_party/webgpu-cts`, and
-  `-cts <zip>` a zip made by `run-cts zip-cts`, which needs no build
-
-`./tools/run run-cts standalone -help` lists the rest.
-
-## Running on Android
-
-There is no Node.js build for Android in the checkout, so the standalone runner
-is the only way to run the command-line CTS directly on an Android device.
-Cross-compiling for Android currently requires a Linux host (the GN build and
-Android NDK toolchain in Dawn's checkout do not support building for Android
-from Windows or macOS).
-
-### Checkout
-
-On a Linux host, add `target_os = ["android"]` to `.gclient` and sync the
-Android NDK and toolchain dependencies:
+To build for Android, which needs a Linux host, also fetch the Android NDK:
 
 ```sh
 printf '\ntarget_os = ["android"]\n' >> .gclient
 gclient sync
 ```
 
-### Build
+### Building the runner
 
-Generate an `arm64` Android release build on Linux and compile the runner:
+```sh
+gn gen out/Release --args="is_debug=false dawn_use_swiftshader=false"
+autoninja -C out/Release dawn_standalone_cts_runner
+```
+
+A debug build also builds a debug V8, which makes the CTS many times slower.
+Drop `dawn_use_swiftshader=false` to test against SwiftShader.
+
+For an arm64 Android device:
 
 ```sh
 gn gen out/Android --args='target_os="android" target_cpu="arm64" is_debug=false'
 autoninja -C out/Android dawn_standalone_cts_runner
 ```
 
-### Running
+## Running with run-cts
 
-With `-adb`, `run-cts standalone` runs the runner on the device connected
-through `adb` (which must be on `PATH`) instead of on the host:
+`run-cts` is Dawn's Go tool for running the CTS and reporting the results.
+`run-cts standalone` builds the CTS JavaScript when it is out of date, expands
+the queries into test cases, runs them in batches of runner processes, and
+reports the results as `run-cts` does for `dawn.node`. A crash or a hang fails
+the test case it happened in, and the run carries on with the next one.
+
+`run-cts` builds the CTS JavaScript with `npx`, which it looks for on your
+`PATH`, but it does not install the CTS dependencies. If you do not have Node.js
+(`>= 16.0.0`) installed, use the one `gclient sync` fetched, then install the
+dependencies once:
+
+```sh
+# Replace linux-amd64 with linux-arm64, mac-amd64, mac-arm64 or windows-amd64.
+export PATH="$PWD/third_party/node/linux-amd64/bin:$PATH"
+cd third_party/webgpu-cts && npm ci && cd ../..
+```
+
+Neither Node.js nor the dependencies are needed to run a [CTS
+zip](#running-from-a-zip), or with `-build=false` once `out-node/` is built.
+
+Then run queries from the Dawn root (on Windows, from Git Bash):
+
+```sh
+./tools/run run-cts standalone -bin out/Release 'webgpu:api,operation,queue,*'
+```
+
+`-bin` is the directory holding `dawn_standalone_cts_runner`, and may be omitted
+when it is `out/active`. Several queries may follow the flags. Quote them: CTS
+queries contain `;` and `"`, which most shells would otherwise interpret.
+
+### On an Android device
+
+With `-adb`, the runner runs on the device connected through `adb`, which must
+be on `PATH`:
 
 ```sh
 ./tools/run run-cts standalone -adb -bin out/Android \
     'webgpu:api,operation,queue,*'
 ```
 
-Before the first batch, it copies the runner and a zip of the compiled CTS into
-`-device-dir`, `/data/local/tmp/cts` by default, as
-`bin/dawn_standalone_cts_runner` and `cts.zip`. The runner reads the CTS
-straight out of the zip, as in [Running from a zip](#running-from-a-zip). A
-`stamp` file there records the hashes of both, so that later runs copy nothing
-unless the runner or the CTS changed. `-stage=always` copies both even if the
-stamp matches, `-stage=never` skips the copy, and `-stage-only` copies and
-exits. `-adb-serial <serial>` picks the device when several are connected.
+The runner and the CTS are copied to the device, and copied again only when they
+change. Flags for `-adb`:
 
-Everything else works as on the host: the CTS is built on the host, the runner
-on the device expands the queries and runs each batch through `adb shell`, and a
-hung batch is killed on the device. `-j` defaults to 1 with `-adb`; raise it to
-run several runner processes on the device at once.
+- `-device-dir <dir>` is where they are copied, `/data/local/tmp/cts` by default
+- `-stage=always` forces the copy, `-stage=never` skips it, and `-stage-only`
+  copies and exits
+- `-adb-serial <serial>` picks the device when several are connected
+- `-j` defaults to 1
 
-## Running the runner by hand
+### Flags
 
-`run-cts` is the convenient way, but the runner needs neither it, nor Go, nor
-Node.js. This section is for running `dawn_standalone_cts_runner` directly, for
-instance on a machine that only has the executable and the compiled CTS.
+- `-backend <name>`, `-adapter <substring>` and `-validate` select the GPU and
+  enable backend validation
+- `-flag <key>=<value>` sets any other [Dawn flag](#dawn-flags), and may be
+  repeated
+- `-verbose` prints the runner command lines and all of the test output
+- `-output <file>` writes the results as JSON, `-expect <file>` compares a run
+  with such a file, and `-log <file>` records every test and its result
+- `-build=false` skips building the CTS JavaScript
+- `-shard-count <n>` with `-shard-index <i>` runs only shard `i` of `n` of the
+  test cases, from 0 to `n` - 1, so that several machines can each run one
+- `-cts <dir>` uses a CTS checkout other than `third_party/webgpu-cts`, and
+  `-cts <zip>` a [CTS zip](#running-from-a-zip)
 
-### Building the CTS JavaScript
+`./tools/run run-cts standalone -help` lists the rest.
 
-The runner executes the CTS's compiled `out-node/` tree, which is not checked in
-and which `run-cts` would otherwise build for you. With `npm` and `npx` on your
-`PATH` (see above), install the CTS dependencies and build `out-node/`:
+## Running from a zip
 
-```sh
-cd third_party/webgpu-cts
-npm ci
-npx grunt node
-cd ../..
-```
-
-`npm ci` alone is not sufficient: `npx grunt node` runs the Grunt tasks that
-generate `out-node/`.
-
-### Running
-
-Run from the Dawn root (or pass `--cts-dir <dir>` if the CTS lives outside
-`third_party/webgpu-cts`):
-
-```sh
-out/Release/dawn_standalone_cts_runner -q 'webgpu:api,operation,queue,*'
-```
-
-`-q` may be repeated. `--query-file <file>` reads queries or test cases, one per
-line, from a file, or from stdin when the file is `-`, and `--list` prints the
-matching test cases instead of running them. Pass `--help` to list all
-supported flags.
-
-### Running from a zip
-
-The runner can also read the compiled CTS straight out of a zip, which is
-quicker to copy to another machine than the ~2,200 files of `out-node/`. The zip
-holds `out-node/` without its `.map` files, which nothing reads at run time, and
-`src/common/runtime/cmdline.ts`, with paths relative to the CTS directory.
-
-With Go, `run-cts` builds the CTS JavaScript if it is out of date and zips it,
-on any host. Pass the zip to the runner with `--cts-zip`, which cannot be
-combined with `--cts-dir`:
+The CTS JavaScript can also be read straight out of a zip, which is one file to
+copy instead of thousands. `run-cts` builds the CTS JavaScript if it is out of
+date and zips it:
 
 ```sh
 ./tools/run run-cts zip-cts -o cts.zip
+./tools/run run-cts standalone -bin out/Release -cts cts.zip \
+    'webgpu:api,operation,queue,*'
+```
+
+With a zip, nothing is built, and `-adb` copies the zip to the device as it is.
+
+### On another machine
+
+`run-cts`, the runner and the zip are all that is needed to run the CTS on a
+machine without a Dawn checkout, Go or Node.js. `run-cts` can be built for that
+machine with the Go toolchain in `tools/golang`. Use the Go for your host, and
+set `GOOS` and `GOARCH` to build for another one:
+
+```sh
+mkdir -p package
+CGO_ENABLED=0 tools/golang/linux-amd64/bin/go build -trimpath \
+    -o package/run-cts ./tools/src/cmd/run-cts
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 tools/golang/linux-amd64/bin/go build \
+    -trimpath -o package/run-cts.exe ./tools/src/cmd/run-cts
+cp out/Release/dawn_standalone_cts_runner package/
+./tools/run run-cts zip-cts -o package/cts.zip
+```
+
+On the test machine, run it from the package's directory. Outside a Dawn
+checkout, `run-cts` has no default runner or CTS, so name both:
+
+```sh
+./run-cts standalone -runner ./dawn_standalone_cts_runner -cts cts.zip \
+    'webgpu:*'
+```
+
+For an Android device, build `run-cts` for the machine that the device is
+connected to and the runner for Android, then add `-adb`.
+
+## Running the runner directly
+
+The runner needs neither `run-cts`, Go nor Node.js once the CTS JavaScript is
+built.
+
+To build the CTS JavaScript yourself, with `npm` and `npx` on your `PATH` as
+[above](#running-with-run-cts):
+
+```sh
+cd third_party/webgpu-cts && npm ci && npx grunt node && cd ../..
+```
+
+Then run from the Dawn root, which finds the CTS in `third_party/webgpu-cts`, or
+pass `--cts-dir <dir>` or `--cts-zip <zip>`:
+
+```sh
+out/Release/dawn_standalone_cts_runner -q 'webgpu:api,operation,queue,*'
 out/Release/dawn_standalone_cts_runner --cts-zip cts.zip \
     -q 'webgpu:api,operation,queue,*'
 ```
 
-Without Go, build `out-node/` as above and replace the `zip-cts` command. On
-Linux or macOS, run from the Dawn root:
+`-q` may be repeated. `--query-file <file>` reads queries or test cases, one per
+line, from a file, or from stdin when the file is `-`, and `--list` prints the
+matching test cases instead of running them. `--help` lists the other flags, and
+`--dawn-flag <key>=<value>` sets a [Dawn flag](#dawn-flags).
+
+### Making the zip without Go
+
+The zip holds `out-node/` without its `.map` files, and
+`src/common/runtime/cmdline.ts`. On Linux or macOS, from the Dawn root:
 
 ```sh
 rm -f cts.zip && (cd third_party/webgpu-cts &&
     zip -q -r ../../cts.zip out-node src/common/runtime/cmdline.ts -x '*.map')
 ```
 
-On Windows, run from `third_party\webgpu-cts` in PowerShell or a Command Prompt:
+On Windows, from `third_party\webgpu-cts` in PowerShell or a Command Prompt:
 
 ```powershell
 tar.exe -a -c -f ..\..\cts.zip --exclude="*.map" out-node src/common/runtime/cmdline.ts
 ```
 
-### Dawn flags
+### On Android
 
-`--dawn-flag` is passed through to the Dawn provider. It takes a single
-`key=value` and may be repeated (`run-cts standalone -flag` sets the same keys):
+Copy the runner and the zip to the device and run it through `adb shell`:
 
 ```sh
-out/Release/dawn_standalone_cts_runner \
-    --dawn-flag backend=vulkan \
-    --dawn-flag enable-dawn-features=dump_shaders \
-    -q 'webgpu:api,operation,queue,*'
+DEV=/data/local/tmp/cts
+adb shell "mkdir -p $DEV"
+adb push out/Android/dawn_standalone_cts_runner cts.zip $DEV/
+adb shell "chmod 755 $DEV/dawn_standalone_cts_runner"
+adb shell "$DEV/dawn_standalone_cts_runner --cts-zip $DEV/cts.zip \
+    -q 'webgpu:api,operation,queue,*'"
 ```
 
-The recognised keys are:
+## Dawn flags
+
+`run-cts standalone -flag` and the runner's `--dawn-flag` take a `key=value` for
+the Dawn provider, and may be repeated. The keys are:
 
 - `backend=<null|webgpu|d3d11|d3d12|d3d|metal|vulkan|vk|opengl|gl|opengles|gles>`
   (defaults to `d3d12` on Windows, `vulkan` on Linux/Android, and `metal` on
@@ -248,30 +235,3 @@ The recognised keys are:
 - `enable-dawn-features=<toggles>` — comma-separated list of
   [Dawn toggles](https://dawn.googlesource.com/dawn/+/refs/heads/main/src/dawn/native/Toggles.cpp)
 - `disable-dawn-features=<toggles>` — comma-separated list of Dawn toggles
-
-### Android by hand
-
-Only the executable and the zip from [Running from a zip](#running-from-a-zip)
-are needed on the device.
-
-> [!NOTE]
-> `dawn.node` is deliberately **not** pushed. The runner's module loader returns
-> its statically-linked binding for `require('dawn.node')`, so the shared
-> library is never loaded.
-
-```sh
-DEV=/data/local/tmp/cts
-adb shell "mkdir -p $DEV/bin"
-
-adb push out/Android/dawn_standalone_cts_runner $DEV/bin/
-adb shell "chmod 755 $DEV/bin/dawn_standalone_cts_runner"
-adb push cts.zip $DEV/
-```
-
-Then run it through `adb shell`:
-
-```sh
-adb shell '/data/local/tmp/cts/bin/dawn_standalone_cts_runner \
-    --cts-zip /data/local/tmp/cts/cts.zip \
-    -q "webgpu:api,operation,queue,*"'
-```
