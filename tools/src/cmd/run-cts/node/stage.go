@@ -51,8 +51,8 @@ const (
 // More paths on the device, relative to the device directory.
 const (
 	deviceStamp      = "stamp"
-	deviceArchive    = "cts.zip"
 	deviceRunnerTemp = deviceRunner + ".new"
+	deviceCTSTemp    = deviceCTS + ".new"
 )
 
 // cmdlineMarker is the file that the runner and cmdline.js look for to find
@@ -96,7 +96,7 @@ func (t *adbTarget) stage(runner, ctsDir string, force bool) error {
 	if err != nil {
 		return err
 	}
-	ctsPart, err := newStagedPart("cts", ctsDir, files, deviceHashes)
+	ctsPart, err := newStagedPart("cts.zip", ctsDir, files, deviceHashes)
 	if err != nil {
 		return err
 	}
@@ -161,11 +161,11 @@ func (t *adbTarget) pushCTS(ctsDir string, files []string) error {
 		return err
 	}
 	defer os.RemoveAll(tempDir)
-	archive := filepath.Join(tempDir, deviceArchive)
+	archive := filepath.Join(tempDir, deviceCTS)
 	if err := writeArchive(archive, ctsDir, files, fastDeflate); err != nil {
 		return err
 	}
-	return t.push(archive, t.devicePath(deviceArchive))
+	return t.push(archive, t.devicePath(deviceCTSTemp))
 }
 
 // install moves the pushed parts into place on the device. It first rewrites
@@ -191,11 +191,8 @@ func (t *adbTarget) install(parts ...*stagedPart) error {
 			commands = append(commands,
 				"mv "+deviceRunnerTemp+" "+deviceRunner,
 				"chmod 755 "+deviceRunner)
-		case "cts":
-			commands = append(commands,
-				"rm -rf "+deviceCTS,
-				"unzip -q "+deviceArchive+" -d "+deviceCTS,
-				"rm "+deviceArchive)
+		case "cts.zip":
+			commands = append(commands, "mv "+deviceCTSTemp+" "+deviceCTS)
 		}
 		commands = append(commands, "echo "+part.name+" "+part.hash+" >> "+deviceStamp)
 	}
@@ -252,8 +249,8 @@ func hashFiles(dir string, files []string) (string, error) {
 
 // writeArchive writes files, which are relative to dir, to a zip whose entry
 // names are those relative paths, so that the archive mirrors the CTS
-// directory. It has no directory entries, since unzip creates the missing
-// directories.
+// directory. It has no directory entries, since the runner infers the
+// directories from the entry names.
 func writeArchive(zipPath, dir string, files []string, compressor zip.Compressor) error {
 	f, err := os.Create(zipPath)
 	if err != nil {

@@ -39,8 +39,8 @@ import (
 )
 
 // newTestRunner returns a cmdlineRunner that runs cases with the fake runner
-// in a new fake CTS directory, and that directory.
-func newTestRunner(t *testing.T, cases ...string) (*cmdlineRunner, string) {
+// in a new fake CTS directory.
+func newTestRunner(t *testing.T, cases ...string) *cmdlineRunner {
 	t.Helper()
 	t.Setenv(fakeRunnerEnv, "1")
 	exe, err := os.Executable()
@@ -60,7 +60,7 @@ func newTestRunner(t *testing.T, cases ...string) (*cmdlineRunner, string) {
 		caseTimeout:      time.Minute,
 		startupAllowance: time.Minute,
 		recover:          true,
-	}, ctsDir
+	}
 }
 
 // runCmdline runs runner and returns its results, checking that every test case has
@@ -95,7 +95,7 @@ func statuses(results map[common.TestCase]common.Result) map[common.TestCase]com
 // Without recovery, the test case in flight when the runner crashes is a
 // crash with the crash output, and the rest are reported as not run.
 func TestRunCrashWithoutRecovery(t *testing.T) {
-	runner, _ := newTestRunner(t, "suite:a:", "suite:crash:", "suite:c:", "suite:d:")
+	runner := newTestRunner(t, "suite:a:", "suite:crash:", "suite:c:", "suite:d:")
 	runner.recover = false
 	results := runCmdline(t, runner)
 	require.Equal(t, common.Pass, results["suite:a:"].Status)
@@ -111,7 +111,7 @@ func TestRunCrashWithoutRecovery(t *testing.T) {
 
 // After a crash, a new process runs the rest of the batch.
 func TestRecoverBatch(t *testing.T) {
-	runner, _ := newTestRunner(t, "suite:a:", "suite:crash:", "suite:c:", "suite:d:")
+	runner := newTestRunner(t, "suite:a:", "suite:crash:", "suite:c:", "suite:d:")
 	results := runCmdline(t, runner)
 	require.Equal(t, map[common.TestCase]common.Status{
 		"suite:a:":     common.Pass,
@@ -124,7 +124,7 @@ func TestRecoverBatch(t *testing.T) {
 // A runner that exits with status 0 before running every test case is not a
 // pass, and the run continues.
 func TestRunStall(t *testing.T) {
-	runner, _ := newTestRunner(t, "suite:a:", "suite:stall:", "suite:c:")
+	runner := newTestRunner(t, "suite:a:", "suite:stall:", "suite:c:")
 	results := runCmdline(t, runner)
 	require.Equal(t, common.Pass, results["suite:a:"].Status)
 	stall := results["suite:stall:"]
@@ -137,7 +137,7 @@ func TestRunStall(t *testing.T) {
 // A test case that reports no result within the case timeout is killed and
 // reported as a timeout, and the run continues.
 func TestTimeout(t *testing.T) {
-	runner, _ := newTestRunner(t, "suite:a:", "suite:hang:", "suite:c:")
+	runner := newTestRunner(t, "suite:a:", "suite:hang:", "suite:c:")
 	runner.caseTimeout = 500 * time.Millisecond
 	start := time.Now()
 	results := runCmdline(t, runner)
@@ -151,7 +151,7 @@ func TestTimeout(t *testing.T) {
 // A process that does not exit after its last test case is killed without
 // blaming any test case.
 func TestHangAtExit(t *testing.T) {
-	runner, _ := newTestRunner(t, "suite:a:", "suite:noexit:")
+	runner := newTestRunner(t, "suite:a:", "suite:noexit:")
 	runner.caseTimeout = 300 * time.Millisecond
 	results := runCmdline(t, runner)
 	require.Equal(t, common.Pass, results["suite:a:"].Status)
@@ -159,7 +159,7 @@ func TestHangAtExit(t *testing.T) {
 }
 
 func TestRunMissingRunner(t *testing.T) {
-	runner, _ := newTestRunner(t, "suite:a:", "suite:b:")
+	runner := newTestRunner(t, "suite:a:", "suite:b:")
 	runner.target = &localTarget{runner: filepath.Join(t.TempDir(), "missing")}
 	results := runCmdline(t, runner)
 	for _, res := range results {

@@ -83,10 +83,10 @@ func installFakeAdb(t *testing.T) {
 }
 
 // newAdbTestRunner returns a cmdlineRunner that runs cases with the fake runner
-// on a fake device whose directory already holds the runner and the CTS.
+// on a fake device whose directory already holds the runner.
 func newAdbTestRunner(t *testing.T, cases ...string) *cmdlineRunner {
 	t.Helper()
-	runner, ctsDir := newTestRunner(t, cases...)
+	runner := newTestRunner(t, cases...)
 	adb, err := exec.LookPath("adb")
 	require.NoError(t, err)
 	target := &adbTarget{adb: adb, serial: "fake-serial", deviceDir: t.TempDir()}
@@ -94,9 +94,7 @@ func newAdbTestRunner(t *testing.T, cases ...string) *cmdlineRunner {
 	require.NoError(t, err)
 	require.NoError(t, os.MkdirAll(filepath.Dir(target.devicePath(deviceRunner)), 0777))
 	require.NoError(t, os.Symlink(exe, target.devicePath(deviceRunner)))
-	require.NoError(t, os.Symlink(ctsDir, target.devicePath(deviceCTS)))
 	runner.target = target
-	runner.args = []string{"--cts-dir", target.devicePath(deviceCTS)}
 	return runner
 }
 

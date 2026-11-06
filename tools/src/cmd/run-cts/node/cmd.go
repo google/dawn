@@ -257,8 +257,9 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	return nil
 }
 
-// target returns where to run the command-line runner, and the CTS directory there.
-func (c *cmd) target() (target, string) {
+// target returns where to run the command-line runner, and the standalone
+// runner's arguments that locate the CTS there.
+func (c *cmd) target() (target, []string) {
 	if c.flags.adb {
 		t := &adbTarget{
 			adb:       c.adbPath,
@@ -266,7 +267,7 @@ func (c *cmd) target() (target, string) {
 			deviceDir: c.flags.deviceDir,
 			verbose:   c.flags.Verbose,
 		}
-		return t, t.devicePath(deviceCTS)
+		return t, []string{"--cts-zip", t.devicePath(deviceCTS)}
 	}
 	runner := c.flags.Node
 	if c.standalone {
@@ -279,7 +280,7 @@ func (c *cmd) target() (target, string) {
 		// The VS Code launch.json output does not work for the standalone runner,
 		// which reads its test cases from stdin.
 		skipVSCodeInfo: c.flags.skipVSCodeInfo || c.standalone,
-	}, c.flags.CTS
+	}, []string{"--cts-dir", c.flags.CTS}
 }
 
 func (c *cmd) processFlags(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
@@ -447,8 +448,8 @@ func (c *cmd) queryTestCases() ([]common.TestCase, error) {
 // listTestCases returns the test cases that match query, as listed by the
 // standalone runner on the target.
 func (c *cmd) listTestCases(query string) ([]common.TestCase, error) {
-	target, ctsDir := c.target()
-	proc, err := target.start(append(c.runnerArgs(ctsDir), "--list", "-q", query), "")
+	target, ctsArgs := c.target()
+	proc, err := target.start(append(c.runnerArgs(ctsArgs), "--list", "-q", query), "")
 	if err != nil {
 		return nil, err
 	}

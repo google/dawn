@@ -142,11 +142,13 @@ through `adb` (which must be on `PATH`) instead of on the host:
 ```
 
 Before the first batch, it copies the runner and a zip of the compiled CTS into
-`-device-dir`, `/data/local/tmp/cts` by default, and records their hashes in a
-stamp file there, so that later runs copy nothing unless the runner or the CTS
-changed. `-stage=always` copies both even if the stamp matches, `-stage=never`
-skips the copy, and `-stage-only` copies and exits.
-`-adb-serial <serial>` picks the device when several are connected.
+`-device-dir`, `/data/local/tmp/cts` by default, as
+`bin/dawn_standalone_cts_runner` and `cts.zip`. The runner reads the CTS
+straight out of the zip, as in [Running from a zip](#running-from-a-zip). A
+`stamp` file there records the hashes of both, so that later runs copy nothing
+unless the runner or the CTS changed. `-stage=always` copies both even if the
+stamp matches, `-stage=never` skips the copy, and `-stage-only` copies and
+exits. `-adb-serial <serial>` picks the device when several are connected.
 
 Everything else works as on the host: the CTS is built on the host, the runner
 on the device expands the queries and runs each batch through `adb shell`, and a

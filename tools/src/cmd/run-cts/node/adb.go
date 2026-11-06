@@ -43,7 +43,7 @@ import (
 // Paths on the device, relative to the device directory.
 const (
 	deviceRunner = "bin/" + runnerName
-	deviceCTS    = "webgpu-cts"
+	deviceCTS    = "cts.zip"
 )
 
 // adbTarget runs the runner on an Android device through adb.

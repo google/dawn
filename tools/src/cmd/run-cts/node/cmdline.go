@@ -52,7 +52,7 @@ const defaultStartupAllowance = 2 * time.Minute
 // newCmdlineRunner returns a cmdlineRunner that runs testCases with the
 // command's flags.
 func (c *cmd) newCmdlineRunner(testCases []common.TestCase, fsReaderWriter oswrapper.FilesystemReaderWriter) *cmdlineRunner {
-	target, ctsDir := c.target()
+	target, ctsArgs := c.target()
 	numWorkers := c.flags.NumRunners
 	if numWorkers < 1 {
 		numWorkers = 1
@@ -63,7 +63,7 @@ func (c *cmd) newCmdlineRunner(testCases []common.TestCase, fsReaderWriter oswra
 	}
 	return &cmdlineRunner{
 		target:           target,
-		args:             c.runnerArgs(ctsDir),
+		args:             c.runnerArgs(ctsArgs),
 		queryStdin:       c.standalone,
 		cases:            testCases,
 		numWorkers:       numWorkers,
@@ -84,11 +84,12 @@ func (c *cmd) runTestCasesWithCmdline(
 }
 
 // runnerArgs returns the command-line runner arguments shared by every process.
-func (c *cmd) runnerArgs(ctsDir string) []string {
+// ctsArgs locate the CTS for the standalone runner.
+func (c *cmd) runnerArgs(ctsArgs []string) []string {
 	var args []string
 	var dawnFlag string
 	if c.standalone {
-		args = []string{"--cts-dir", ctsDir}
+		args = slices.Clone(ctsArgs)
 		dawnFlag = "--dawn-flag"
 	} else {
 		args = []string{
