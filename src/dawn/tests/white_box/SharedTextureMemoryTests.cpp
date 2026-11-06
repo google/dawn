@@ -1091,6 +1091,10 @@ TEST_P(SharedTextureMemoryTests, ImportSharedFenceDeviceDestroyed) {
 // (crbug.com/577360270). The texture is exported as initialized only if it was already
 // initialized on BeginAccess and wasn't used by any GPU commands during the access.
 TEST_P(SharedTextureMemoryTests, InitializedStateOnEndAccessAfterDeviceDestroyedOrLost) {
+    // TODO(crbug.com/555876250): "Failed to create GBM buffer object" crashes the tests.
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia() &&
+                          GetParam().mBackend->Name().find("dma buf") != std::string::npos);
+
     auto DoTest = [&](bool beginInitialized, bool doWrite, auto DestroyOrLoseDevice) {
         // Always create a new device, bypassing SharedTextureMemoryTests::CreateDevice() which
         // returns the shared test device for backends where UseSameDevice() is true. That is only
@@ -1165,6 +1169,10 @@ TEST_P(SharedTextureMemoryTests, InitializedStateOnEndAccessAfterDeviceDestroyed
 // loses the device) and the device is then destroyed while the access is still open, EndAccess
 // must not try to record and submit commands on the destroyed queue.
 TEST_P(SharedTextureMemoryTests, EndAccessAfterFailedSubmitThenDeviceDestroyed) {
+    // TODO(crbug.com/555876250): "Failed to create GBM buffer object" crashes the tests.
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia() &&
+                          GetParam().mBackend->Name().find("dma buf") != std::string::npos);
+
     wgpu::Device testDevice = CreateDevice();
     // Only use memories that can be rendered to so that the submit uses them. Skip multiplanar
     // formats since they must be initialized on BeginAccess and rendering to them requires
