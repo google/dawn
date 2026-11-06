@@ -65,7 +65,7 @@ class PhysicalDevice : public d3d::PhysicalDevice {
 #ifdef DAWN_USE_AGILITY_SDK
     // Exposed for unit tests.
     static std::vector<SubgroupMatrixConfig> EnumerateSubgroupMatrixConfigs(
-        std::span<const D3D12DeviceInfo::LinAlgWMMSupport> supports,
+        std::span<const D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_ENUMERATION_ENTRY> entries,
         uint32_t vendorId,
         uint32_t deviceId,
         bool supportsShaderF16);

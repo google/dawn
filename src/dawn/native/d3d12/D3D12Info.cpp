@@ -27,11 +27,9 @@
 
 #include "src/dawn/native/d3d12/D3D12Info.h"
 
-#include <array>
 #include <utility>
 
 #include "src/dawn/common/GPUInfo.h"
-#include "src/dawn/common/Math.h"
 #include "src/dawn/native/d3d/D3DError.h"
 #include "src/dawn/native/d3d12/BackendD3D12.h"
 #include "src/dawn/native/d3d12/PhysicalDeviceD3D12.h"
@@ -41,81 +39,32 @@ namespace dawn::native::d3d12 {
 
 namespace {
 #ifdef DAWN_USE_AGILITY_SDK
-std::vector<D3D12DeviceInfo::LinAlgWMMSupport> GatherLinAlgWaveMatrixMultiplySupports(
-    ComPtr<ID3D12Device> d3d12Device,
-    uint32_t waveLaneCountMin,
-    uint32_t waveLaneCountMax) {
-    std::vector<D3D12DeviceInfo::LinAlgWMMSupport> result;
-    DAWN_ASSERT(waveLaneCountMin != 0 && IsPowerOfTwo(waveLaneCountMin));
-    DAWN_ASSERT(waveLaneCountMin <= waveLaneCountMax && IsPowerOfTwo(waveLaneCountMax));
+std::vector<D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_ENUMERATION_ENTRY>
+GatherLinAlgWaveMatrixMultiplyEntries(ComPtr<ID3D12Device> d3d12Device) {
+    D3D12_FEATURE_DATA_LINEAR_ALGEBRA_OPERATION_ENUMERATION enumeration{};
+    enumeration.OperationType = D3D12_LINEAR_ALGEBRA_OPERATION_TYPE_WAVE_MATRIX_MULTIPLY;
 
-    auto typesToQuery = std::array{
-        D3D12_LINEAR_ALGEBRA_DATATYPE_SINT32,   //
-        D3D12_LINEAR_ALGEBRA_DATATYPE_UINT32,   //
-        D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT16,  //
-        D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT32,  //
-        D3D12_LINEAR_ALGEBRA_DATATYPE_SINT8,    //
-        D3D12_LINEAR_ALGEBRA_DATATYPE_UINT8,    //
-    };
-
-    for (auto dataTypeAB : typesToQuery) {
-        for (auto dataTypeAcc : typesToQuery) {
-            for (uint32_t waveSize = waveLaneCountMin; waveSize <= waveLaneCountMax;
-                 waveSize *= 2) {
-                D3D12_FEATURE_DATA_LINEAR_ALGEBRA_MATRIX_OPERATION_SUPPORT opSupport{};
-                opSupport.OperationType = D3D12_LINEAR_ALGEBRA_OPERATION_TYPE_WAVE_MATRIX_MULTIPLY;
-                opSupport.WaveMatrixMultiply = {};
-                // D3D12 will report the base (aka native) shapes supported for the input wave size.
-                // All shapes that are multiples of any dimension of the base shapes are supported;
-                // D3D12 will decompose the WMMA ops automatically. Note that setting input wave
-                // size to 0 returns the base shapes supported when no WaveSize attribute is applied
-                // to the shader, although this is not useful for WebGPU.
-                opSupport.WaveMatrixMultiply.Inputs.WaveSize = waveSize;
-                opSupport.WaveMatrixMultiply.Inputs.MatrixAComponentType = dataTypeAB;
-                opSupport.WaveMatrixMultiply.Inputs.MatrixBComponentType = dataTypeAB;
-                opSupport.WaveMatrixMultiply.Inputs.AccumulatorComponentType = dataTypeAcc;
-
-                // First call to get number of shapes
-                opSupport.WaveMatrixMultiply.NumShapes = 0;
-                opSupport.WaveMatrixMultiply.Shapes = nullptr;
-
-                if (FAILED(d3d12Device->CheckFeatureSupport(
-                        D3D12_FEATURE_LINEAR_ALGEBRA_LINEAR_ALGEBRA_MATRIX_OPERATION_SUPPORT,
-                        &opSupport, sizeof(opSupport)))) {
-                    continue;
-                }
-
-                // The preview shape query can return native shapes even when the driver will not
-                // accept this type combination in a shader. SupportFlags is authoritative.
-                if ((opSupport.WaveMatrixMultiply.SupportFlags &
-                     D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAG_SUPPORTED) == 0) {
-                    continue;
-                }
-
-                uint32_t numShapes = opSupport.WaveMatrixMultiply.NumShapes;
-                if (numShapes == 0) {
-                    continue;
-                }
-
-                // Second call to populate shapes
-                std::vector<D3D12_LINEAR_ALGEBRA_MATRIX_MULTIPLY_SHAPE> shapes(numShapes);
-                opSupport.WaveMatrixMultiply.Shapes = shapes.data();
-
-                if (FAILED(d3d12Device->CheckFeatureSupport(
-                        D3D12_FEATURE_LINEAR_ALGEBRA_LINEAR_ALGEBRA_MATRIX_OPERATION_SUPPORT,
-                        &opSupport, sizeof(opSupport)))) {
-                    continue;
-                }
-
-                // Add support entry
-                auto wmm = opSupport.WaveMatrixMultiply;
-                wmm.Shapes = nullptr;  // Clear so that we don't attempt to use this
-                result.emplace_back(wmm.Inputs, wmm.SupportFlags, std::move(shapes));
-            }
-        }
+    // First call to get the number of entries.
+    enumeration.NumEntries = 0;
+    enumeration.WaveMatrixMultiply = nullptr;
+    HRESULT hr = d3d12Device->CheckFeatureSupport(
+        D3D12_FEATURE_LINEAR_ALGEBRA_OPERATION_ENUMERATION, &enumeration, sizeof(enumeration));
+    if (FAILED(hr) || enumeration.NumEntries == 0) {
+        return {};
     }
 
-    return result;
+    // Second call to populate the entries.
+    std::vector<D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_ENUMERATION_ENTRY> entries(
+        enumeration.NumEntries);
+    enumeration.WaveMatrixMultiply = entries.data();
+    hr = d3d12Device->CheckFeatureSupport(D3D12_FEATURE_LINEAR_ALGEBRA_OPERATION_ENUMERATION,
+                                          &enumeration, sizeof(enumeration));
+    if (FAILED(hr)) {
+        return {};
+    }
+    DAWN_ASSERT(enumeration.NumEntries == entries.size());
+
+    return entries;
 }
 #endif  // DAWN_USE_AGILITY_SDK
 }  // namespace
@@ -288,8 +237,7 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
     }
 
 #ifdef DAWN_USE_AGILITY_SDK
-    info.linAlgWaveMatrixMultiplySupports = GatherLinAlgWaveMatrixMultiplySupports(
-        d3d12Device, info.waveLaneCountMin, info.waveLaneCountMax);
+    info.linAlgWaveMatrixMultiplyEntries = GatherLinAlgWaveMatrixMultiplyEntries(d3d12Device);
 #endif
 
     return std::move(info);

@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -221,7 +222,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         const bool supportsLinearAlgebra =
             (SUCCEEDED(hr) &&
              linearAlgebraSupport.LinearAlgebraTier >= D3D12_LINEAR_ALGEBRA_TIER_1_0) ||
-            !mDeviceInfo.linAlgWaveMatrixMultiplySupports.empty();
+            !mDeviceInfo.linAlgWaveMatrixMultiplyEntries.empty();
         if (mDeviceInfo.supportsWaveOps && supportsLinearAlgebra) {
             EnableFeature(Feature::ChromiumExperimentalSubgroupMatrix);
         }
@@ -1098,7 +1099,7 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
     const TogglesState& toggles) const {
 #ifdef DAWN_USE_AGILITY_SDK
     return EnumerateSubgroupMatrixConfigs(
-        GetDeviceInfo().linAlgWaveMatrixMultiplySupports, mVendorId, mDeviceId,
+        GetDeviceInfo().linAlgWaveMatrixMultiplyEntries, mVendorId, mDeviceId,
         IsFeatureSupportedWithToggles(wgpu::FeatureName::ShaderF16, toggles));
 #else
     return {};
@@ -1108,7 +1109,7 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
 #ifdef DAWN_USE_AGILITY_SDK
 // static
 std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs(
-    std::span<const D3D12DeviceInfo::LinAlgWMMSupport> supports,
+    std::span<const D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_ENUMERATION_ENTRY> entries,
     uint32_t vendorId,
     uint32_t deviceId,
     bool supportsShaderF16) {
@@ -1158,16 +1159,38 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
         DAWN_UNREACHABLE();
     };
 
-    auto IsMultipleOf = [](const SubgroupMatrixConfig& a, const SubgroupMatrixConfig& b) {
-        return a.M % b.M == 0 && a.N % b.N == 0 && a.K % b.K == 0;
+    auto IsSupportedType = [](D3D12_LINEAR_ALGEBRA_DATATYPE dataType) {
+        switch (dataType) {
+            case D3D12_LINEAR_ALGEBRA_DATATYPE_SINT32:
+            case D3D12_LINEAR_ALGEBRA_DATATYPE_UINT32:
+            case D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT16:
+            case D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT32:
+            case D3D12_LINEAR_ALGEBRA_DATATYPE_SINT8:
+            case D3D12_LINEAR_ALGEBRA_DATATYPE_UINT8:
+                return true;
+            default:
+                return false;
+        }
     };
 
     std::vector<SubgroupMatrixConfig> subgroupMatrixConfigs;
 
-    for (const auto& wmms : supports) {
-        DAWN_ASSERT(wmms.Inputs.MatrixAComponentType == wmms.Inputs.MatrixBComponentType);
-        auto dataTypeAB = wmms.Inputs.MatrixAComponentType;
-        auto dataTypeAcc = wmms.Inputs.AccumulatorComponentType;
+    for (const auto& entry : entries) {
+        if ((entry.SupportFlags & D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAG_SUPPORTED) ==
+            0) {
+            continue;
+        }
+
+        // WebGPU subgroup matrices require A and B to have the same component type.
+        if (entry.MatrixAComponentType != entry.MatrixBComponentType) {
+            continue;
+        }
+        auto dataTypeAB = entry.MatrixAComponentType;
+        auto dataTypeAcc = entry.AccumulatorComponentType;
+
+        if (!IsSupportedType(dataTypeAB) || !IsSupportedType(dataTypeAcc)) {
+            continue;
+        }
 
         // Don't mix ints and floats as we don't support this (no subgroupMatrixMultiply
         // overloads in Tint).
@@ -1197,75 +1220,36 @@ std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs
             }
         }
 
-        DAWN_ASSERT(IsPowerOfTwo(wmms.Inputs.WaveSize));
-        for (const auto& shape : wmms.Shapes) {
-            SubgroupMatrixConfig config;
-            config.M = shape.M;
-            config.N = shape.N;
-            config.K = shape.K;
-            config.componentType = ToWgpuType(dataTypeAB);
-            config.resultComponentType = ToWgpuType(dataTypeAcc);
-            config.minSubgroupSize = wmms.Inputs.WaveSize;
-            config.maxSubgroupSize = wmms.Inputs.WaveSize;
+        DAWN_ASSERT(IsPowerOfTwo(entry.MinWaveSize) && IsPowerOfTwo(entry.MaxWaveSize));
+        DAWN_ASSERT(entry.MinWaveSize <= entry.MaxWaveSize);
 
-            // D3D12 reports the base shape(s) for each wave size, and automatically decomposes any
-            // multiple of a base shape into native ops. Therefore, when comparing `config` at the
-            // current wave size against a previously added `found` config with consecutive/adjacent
-            // power-of-two subgroup sizes:
-            // - If `config` is a multiple of `found`, `config` is also supported across `found`'s
-            //   subgroup size range, so extend `config.minSubgroupSize` down to
-            //   `found.minSubgroupSize`. E.g. on WARP, curr is 8x8x4 range [8,8], found is 4x4x4
-            //   range [4,4], extend 8x8x4's range to [4,8].
-            // - If `found` is a multiple of `config`, `found` is also supported at the current wave
-            //   size, so extend `found.maxSubgroupSize` up to `wmms.Inputs.WaveSize`. (Handled for
-            //   completeness; e.g. if curr is 4x4x4 range [8,8] and found is 8x8x4 range [4,4],
-            //   extend 8x8x4's range to [4,8].)
-            // - If both are true (`found` and `config` have the exact same shape) and their ranges
-            //   merged, do not insert a duplicate `config`. E.g. on AMD, curr is 16x16x16 range
-            //   [64,64], found is 16x16x16 range [32,32], extend found's range to [32,64] and do
-            //   not add curr.
-            //
-            // Note 1: This depends on `supports` being ordered by non-decreasing WaveSize for each
-            // type pair (asserted below).
-            //
-            // Note 2: The search is O(n), but n is typically small (e.g. 6 on AMD, 14 on WARP), and
-            // this is only performed once at startup.
-            //
-            // TODO(crbug.com/567996254): Remove all this once we can use the Enumeration API
-            bool addConfig = true;
-            for (auto it = subgroupMatrixConfigs.rbegin(); it != subgroupMatrixConfigs.rend();
-                 ++it) {
-                SubgroupMatrixConfig& found = *it;
-                // Skip non-matching type pair
-                if (found.componentType != config.componentType ||
-                    found.resultComponentType != config.resultComponentType) {
-                    continue;
-                }
-
-                const bool configIsMultipleOfFound = IsMultipleOf(config, found);
-                const bool foundIsMultipleOfConfig = IsMultipleOf(found, config);
-
-                if (configIsMultipleOfFound) {
-                    if (found.maxSubgroupSize >= config.minSubgroupSize / 2) {
-                        config.minSubgroupSize =
-                            std::min(config.minSubgroupSize, found.minSubgroupSize);
-                    }
-                }
-                if (foundIsMultipleOfConfig) {
-                    DAWN_ASSERT(wmms.Inputs.WaveSize >= found.maxSubgroupSize);
-                    if (found.maxSubgroupSize >= wmms.Inputs.WaveSize / 2) {
-                        found.maxSubgroupSize = wmms.Inputs.WaveSize;
-                        if (DAWN_LIKELY(configIsMultipleOfFound)) {
-                            addConfig = false;
-                        }
-                    }
-                }
-            }
-            if (addConfig) {
-                subgroupMatrixConfigs.push_back(config);
-            }
-        }
+        SubgroupMatrixConfig config;
+        config.M = entry.Shape.M;
+        config.N = entry.Shape.N;
+        config.K = entry.Shape.K;
+        config.componentType = ToWgpuType(dataTypeAB);
+        config.resultComponentType = ToWgpuType(dataTypeAcc);
+        config.minSubgroupSize = entry.MinWaveSize;
+        config.maxSubgroupSize = entry.MaxWaveSize;
+        subgroupMatrixConfigs.push_back(config);
     }
+
+    // Drivers enumerate entries in differing orders and may report the same config more than once
+    // (e.g. differing only in support flags), so return a canonical sorted, deduplicated list.
+    auto Key = [](const SubgroupMatrixConfig& c) {
+        return std::tuple(c.componentType, c.resultComponentType, c.M, c.N, c.K, c.minSubgroupSize,
+                          c.maxSubgroupSize);
+    };
+    std::sort(subgroupMatrixConfigs.begin(), subgroupMatrixConfigs.end(),
+              [&](const SubgroupMatrixConfig& a, const SubgroupMatrixConfig& b) {
+                  return Key(a) < Key(b);
+              });
+    subgroupMatrixConfigs.erase(
+        std::unique(subgroupMatrixConfigs.begin(), subgroupMatrixConfigs.end(),
+                    [&](const SubgroupMatrixConfig& a, const SubgroupMatrixConfig& b) {
+                        return Key(a) == Key(b);
+                    }),
+        subgroupMatrixConfigs.end());
 
     return subgroupMatrixConfigs;
 }

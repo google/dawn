@@ -27,7 +27,6 @@
 
 #include <ostream>
 #include <span>
-#include <utility>
 #include <vector>
 
 #include "dawn/webgpu_cpp_print.h"
@@ -86,27 +85,33 @@ class SubgroupMatrixConfigTests : public Test {
         }
     }
 
-    D3D12DeviceInfo::LinAlgWMMSupport MakeSupport(uint32_t waveSize,
-                                                  wgpu::SubgroupMatrixComponentType typeAB,
-                                                  wgpu::SubgroupMatrixComponentType typeAcc,
-                                                  std::initializer_list<Shape> shapes) {
-        D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_INPUTS inputs{};
-        inputs.WaveSize = waveSize;
-        inputs.MatrixAComponentType = ToD3D12(typeAB);
-        inputs.MatrixBComponentType = ToD3D12(typeAB);
-        inputs.AccumulatorComponentType = ToD3D12(typeAcc);
+    D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_ENUMERATION_ENTRY MakeEntry(
+        SubgroupSizeRange waveSizeRange,
+        D3D12_LINEAR_ALGEBRA_DATATYPE typeA,
+        D3D12_LINEAR_ALGEBRA_DATATYPE typeB,
+        D3D12_LINEAR_ALGEBRA_DATATYPE typeAcc,
+        Shape shape,
+        D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAGS flags =
+            D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAG_SUPPORTED) {
+        D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_ENUMERATION_ENTRY entry{};
+        entry.MinWaveSize = waveSizeRange.min;
+        entry.MaxWaveSize = waveSizeRange.max;
+        entry.MatrixAComponentType = typeA;
+        entry.MatrixBComponentType = typeB;
+        entry.AccumulatorComponentType = typeAcc;
+        entry.SupportFlags = flags;
+        entry.Shape.M = shape.M;
+        entry.Shape.N = shape.N;
+        entry.Shape.K = shape.K;
+        return entry;
+    }
 
-        std::vector<D3D12_LINEAR_ALGEBRA_MATRIX_MULTIPLY_SHAPE> d3dShapes;
-        for (const auto& s : shapes) {
-            D3D12_LINEAR_ALGEBRA_MATRIX_MULTIPLY_SHAPE d3dShape{};
-            d3dShape.M = s.M;
-            d3dShape.N = s.N;
-            d3dShape.K = s.K;
-            d3dShapes.push_back(d3dShape);
-        }
-
-        return {inputs, D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAG_SUPPORTED,
-                std::move(d3dShapes)};
+    D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_ENUMERATION_ENTRY MakeEntry(
+        SubgroupSizeRange waveSizeRange,
+        wgpu::SubgroupMatrixComponentType typeAB,
+        wgpu::SubgroupMatrixComponentType typeAcc,
+        Shape shape) {
+        return MakeEntry(waveSizeRange, ToD3D12(typeAB), ToD3D12(typeAB), ToD3D12(typeAcc), shape);
     }
 
     SubgroupMatrixConfig MakeConfig(wgpu::SubgroupMatrixComponentType componentType,
@@ -125,228 +130,112 @@ class SubgroupMatrixConfigTests : public Test {
     }
 
     std::vector<SubgroupMatrixConfig> EnumerateSubgroupMatrixConfigs(
-        std::span<const D3D12DeviceInfo::LinAlgWMMSupport> supports,
+        std::span<const D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_ENUMERATION_ENTRY> entries,
         uint32_t vendorId = 0,
         uint32_t deviceId = 0,
         bool supportsShaderF16 = true) {
-        return PhysicalDevice::EnumerateSubgroupMatrixConfigs(supports, vendorId, deviceId,
+        return PhysicalDevice::EnumerateSubgroupMatrixConfigs(entries, vendorId, deviceId,
                                                               supportsShaderF16);
     }
 };
 
-// Identical base shapes across consecutive power-of-two wave sizes merge into a single config.
-TEST_F(SubgroupMatrixConfigTests, SameShapeConsecutiveWaveSizes) {
-    std::vector supports = {
-        MakeSupport(16, F16, F32, {{16, 16, 16}}),
-        MakeSupport(32, F16, F32, {{16, 16, 16}}),
-        MakeSupport(64, F16, F32, {{16, 16, 16}}),
-    };
-    std::vector expected = {
-        MakeConfig(F16, F32, {16, 16, 16}, {16, 64}),
-    };
-    auto configs = EnumerateSubgroupMatrixConfigs(supports);
-    EXPECT_EQ(configs, expected);
-}
-
-// Identical base shapes with a gap in wave sizes only merge consecutive powers of two.
-TEST_F(SubgroupMatrixConfigTests, SameShapeNonConsecutiveWaveSizes) {
-    std::vector supports = {
-        MakeSupport(4, F16, F32, {{16, 16, 16}}),
-        MakeSupport(16, F16, F32, {{16, 16, 16}}),
-        MakeSupport(32, F16, F32, {{16, 16, 16}}),
-    };
-    std::vector expected = {
-        MakeConfig(F16, F32, {16, 16, 16}, {4, 4}),
-        MakeConfig(F16, F32, {16, 16, 16}, {16, 32}),
-    };
-    auto configs = EnumerateSubgroupMatrixConfigs(supports);
-    EXPECT_EQ(configs, expected);
-}
-
-// When a larger wave size reports a shape that is a multiple of a smaller wave size's shape
-// (e.g. WARP reporting 4x4x4 at WaveSize 4 and 8x8x4 at WaveSize 8), the larger shape's
-// minSubgroupSize extends down to the smaller wave size, while the smaller shape stays at its own
-// wave size (e.g WARP's 8x8x4 range should be [4,8]).
-TEST_F(SubgroupMatrixConfigTests, LargerWaveSizeIsMultipleOfSmallerWaveSize) {
-    std::vector supports = {
-        MakeSupport(4, F32, F32, {{4, 4, 4}}),
-        MakeSupport(8, F32, F32, {{8, 8, 4}}),
-        MakeSupport(16, F32, F32, {{16, 16, 4}}),
+// Each enumeration entry maps to one config, with the entry's wave size range as the subgroup size
+// range.
+TEST_F(SubgroupMatrixConfigTests, EntriesMapToConfigs) {
+    std::vector entries = {
+        MakeEntry({4, 4}, F32, F32, {4, 4, 4}),
+        MakeEntry({4, 8}, F32, F32, {8, 8, 4}),
+        MakeEntry({16, 32}, F16, F16, {8, 16, 16}),
+        MakeEntry({32, 64}, I32, U32, {16, 16, 16}),
     };
     std::vector expected = {
         MakeConfig(F32, F32, {4, 4, 4}, {4, 4}),
         MakeConfig(F32, F32, {8, 8, 4}, {4, 8}),
-        MakeConfig(F32, F32, {16, 16, 4}, {4, 16}),
+        MakeConfig(F16, F16, {8, 16, 16}, {16, 32}),
+        MakeConfig(I32, U32, {16, 16, 16}, {32, 64}),
     };
-    auto configs = EnumerateSubgroupMatrixConfigs(supports);
+    auto configs = EnumerateSubgroupMatrixConfigs(entries);
     EXPECT_EQ(configs, expected);
 }
 
-// When a smaller wave size reports a shape that is a multiple of a larger wave size's shape, the
-// larger shape's maxSubgroupSize extends up to the larger wave size. This doesn't seem to happen in
-// practice, but support it in case it does.
-TEST_F(SubgroupMatrixConfigTests, SmallerWaveSizeIsMultipleOfLargerWaveSize) {
-    std::vector supports = {
-        MakeSupport(4, F32, F32, {{16, 16, 4}}),
-        MakeSupport(8, F32, F32, {{8, 8, 4}}),
-        MakeSupport(16, F32, F32, {{4, 4, 4}}),
+// The result is sorted and free of duplicates regardless of the enumeration order.
+TEST_F(SubgroupMatrixConfigTests, ConfigsAreSortedAndDeduplicated) {
+    std::vector entries = {
+        // Grouped by shape first, as some drivers enumerate.
+        MakeEntry({4, 8}, I32, I32, {8, 8, 4}),
+        MakeEntry({4, 4}, I32, I32, {4, 4, 4}),
+        MakeEntry({4, 8}, F32, F32, {8, 8, 4}),
+        MakeEntry({4, 4}, F32, F32, {4, 4, 4}),
+        // Exact duplicate of the previous entry, differing only in the support flags.
+        MakeEntry({4, 4}, D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT32,
+                  D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT32, D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT32,
+                  {4, 4, 4},
+                  D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAG_SUPPORTED |
+                      D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAG_EMULATED_OUTPUTS),
+        // Same types and shape but a different subgroup size range is not a duplicate.
+        MakeEntry({16, 32}, F32, F32, {4, 4, 4}),
     };
     std::vector expected = {
-        MakeConfig(F32, F32, {16, 16, 4}, {4, 16}),
-        MakeConfig(F32, F32, {8, 8, 4}, {8, 16}),
-        MakeConfig(F32, F32, {4, 4, 4}, {16, 16}),
+        MakeConfig(F32, F32, {4, 4, 4}, {4, 4}), MakeConfig(F32, F32, {4, 4, 4}, {16, 32}),
+        MakeConfig(F32, F32, {8, 8, 4}, {4, 8}), MakeConfig(I32, I32, {4, 4, 4}, {4, 4}),
+        MakeConfig(I32, I32, {8, 8, 4}, {4, 8}),
     };
-    auto configs = EnumerateSubgroupMatrixConfigs(supports);
+    auto configs = EnumerateSubgroupMatrixConfigs(entries);
     EXPECT_EQ(configs, expected);
 }
 
-// Shape multiples across non-consecutive wave sizes do not merge across a missing power of two.
-TEST_F(SubgroupMatrixConfigTests, NonConsecutiveMultipleWaveSizes) {
-    std::vector supports = {
-        MakeSupport(4, F32, F32, {{4, 4, 4}}),
-        MakeSupport(16, F32, F32, {{8, 8, 4}}),
+// Entries without the SUPPORTED flag, with different A and B types, or with component types that
+// WebGPU does not expose are skipped.
+TEST_F(SubgroupMatrixConfigTests, UnsupportedEntriesAreSkipped) {
+    std::vector entries = {
+        MakeEntry({16, 32}, D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT16,
+                  D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT16, D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT32,
+                  {16, 16, 16}, D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAG_NONE),
+        MakeEntry({16, 32}, D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT16,
+                  D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT32, D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT32,
+                  {16, 16, 16}),
+        MakeEntry({16, 32}, D3D12_LINEAR_ALGEBRA_DATATYPE_SINT16,
+                  D3D12_LINEAR_ALGEBRA_DATATYPE_SINT16, D3D12_LINEAR_ALGEBRA_DATATYPE_SINT32,
+                  {16, 16, 16}),
+        MakeEntry({16, 32}, D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT8_E4M3FN,
+                  D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT8_E4M3FN,
+                  D3D12_LINEAR_ALGEBRA_DATATYPE_FLOAT32, {16, 16, 16}),
+        MakeEntry({16, 32}, F16, F32, {16, 16, 16}),
     };
     std::vector expected = {
-        MakeConfig(F32, F32, {4, 4, 4}, {4, 4}),
-        MakeConfig(F32, F32, {8, 8, 4}, {16, 16}),
+        MakeConfig(F16, F32, {16, 16, 16}, {16, 32}),
     };
-    auto configs = EnumerateSubgroupMatrixConfigs(supports);
-    EXPECT_EQ(configs, expected);
-}
-
-// Alternating smaller and larger multiple shapes across consecutive wave sizes (combining
-// LargerWaveSizeIsMultipleOfSmallerWaveSize and SmallerWaveSizeIsMultipleOfLargerWaveSize).
-TEST_F(SubgroupMatrixConfigTests, AlternatingMultipleShapesAcrossWaveSizes) {
-    {
-        // 4 -> 8x8x8, 8 -> 16x16x16, 16 -> 8x8x8:
-        // 16x16x16 is supported at 4, 8, and 16, while 8x8x8 is only supported at 4 and 16.
-        std::vector supports = {
-            MakeSupport(4, F32, F32, {{8, 8, 8}}),
-            MakeSupport(8, F32, F32, {{16, 16, 16}}),
-            MakeSupport(16, F32, F32, {{8, 8, 8}}),
-        };
-        std::vector expected = {
-            MakeConfig(F32, F32, {8, 8, 8}, {4, 4}),
-            MakeConfig(F32, F32, {16, 16, 16}, {4, 16}),
-            MakeConfig(F32, F32, {8, 8, 8}, {16, 16}),
-        };
-        auto configs = EnumerateSubgroupMatrixConfigs(supports);
-        EXPECT_EQ(configs, expected);
-    }
-    {
-        // 4 -> 16x16x16, 8 -> 8x8x8, 16 -> 16x16x16:
-        // 16x16x16 is supported at 4, 8, and 16 (single merged entry), while 8x8x8 is only
-        // supported at 8.
-        std::vector supports = {
-            MakeSupport(4, F32, F32, {{16, 16, 16}}),
-            MakeSupport(8, F32, F32, {{8, 8, 8}}),
-            MakeSupport(16, F32, F32, {{16, 16, 16}}),
-        };
-        std::vector expected = {
-            MakeConfig(F32, F32, {16, 16, 16}, {4, 16}),
-            MakeConfig(F32, F32, {8, 8, 8}, {8, 8}),
-        };
-        auto configs = EnumerateSubgroupMatrixConfigs(supports);
-        EXPECT_EQ(configs, expected);
-    }
-    {
-        // 4 -> 4x4x4, 8 -> 16x16x4, 16 -> 8x8x4:
-        // 16x16x4 extends down to 4 (multiple of 4x4x4) and up to 16 (multiple of 8x8x4).
-        std::vector supports = {
-            MakeSupport(4, F32, F32, {{4, 4, 4}}),
-            MakeSupport(8, F32, F32, {{16, 16, 4}}),
-            MakeSupport(16, F32, F32, {{8, 8, 4}}),
-        };
-        std::vector expected = {
-            MakeConfig(F32, F32, {4, 4, 4}, {4, 4}),
-            MakeConfig(F32, F32, {16, 16, 4}, {4, 16}),
-            MakeConfig(F32, F32, {8, 8, 4}, {16, 16}),
-        };
-        auto configs = EnumerateSubgroupMatrixConfigs(supports);
-        EXPECT_EQ(configs, expected);
-    }
-    {
-        // 4 -> 4x4x4, 8 -> 8x8x4, 16 -> 4x4x4, 32 -> 16x16x4:
-        // 8x8x4 extends down to 4 and up to 16, and 16x16x4 extends all the way down to 4.
-        std::vector supports = {
-            MakeSupport(4, F32, F32, {{4, 4, 4}}),
-            MakeSupport(8, F32, F32, {{8, 8, 4}}),
-            MakeSupport(16, F32, F32, {{4, 4, 4}}),
-            MakeSupport(32, F32, F32, {{16, 16, 4}}),
-        };
-        std::vector expected = {
-            MakeConfig(F32, F32, {4, 4, 4}, {4, 4}),
-            MakeConfig(F32, F32, {8, 8, 4}, {4, 16}),
-            MakeConfig(F32, F32, {4, 4, 4}, {16, 16}),
-            MakeConfig(F32, F32, {16, 16, 4}, {4, 32}),
-        };
-        auto configs = EnumerateSubgroupMatrixConfigs(supports);
-        EXPECT_EQ(configs, expected);
-    }
-}
-
-// Shapes where neither is a multiple of the other in all dimensions remain independent.
-TEST_F(SubgroupMatrixConfigTests, NonMultipleShapesAreIndependent) {
-    std::vector supports = {
-        MakeSupport(4, F32, F32, {{4, 8, 4}}),
-        MakeSupport(8, F32, F32, {{8, 4, 4}}),
-    };
-    std::vector expected = {
-        MakeConfig(F32, F32, {4, 8, 4}, {4, 4}),
-        MakeConfig(F32, F32, {8, 4, 4}, {8, 8}),
-    };
-    auto configs = EnumerateSubgroupMatrixConfigs(supports);
-    EXPECT_EQ(configs, expected);
-}
-
-// Configs with different component types or result component types do not merge with each other.
-TEST_F(SubgroupMatrixConfigTests, DifferentComponentTypesDoNotMerge) {
-    std::vector supports = {
-        MakeSupport(4, F32, F32, {{4, 4, 4}}),
-        // Different componentType and resultComponentType (same shape):
-        MakeSupport(8, I32, I32, {{4, 4, 4}}),
-        // Different componentType, same resultComponentType (multiple shape):
-        MakeSupport(8, F16, F32, {{8, 8, 4}}),
-        // Same componentType, different resultComponentType (same shape and multiple shape):
-        MakeSupport(16, F16, F16, {{8, 8, 4}}),
-        MakeSupport(16, I32, U32, {{8, 8, 4}}),
-    };
-    std::vector expected = {
-        MakeConfig(F32, F32, {4, 4, 4}, {4, 4}),   MakeConfig(I32, I32, {4, 4, 4}, {8, 8}),
-        MakeConfig(F16, F32, {8, 8, 4}, {8, 8}),   MakeConfig(F16, F16, {8, 8, 4}, {16, 16}),
-        MakeConfig(I32, U32, {8, 8, 4}, {16, 16}),
-    };
-    auto configs = EnumerateSubgroupMatrixConfigs(supports);
+    auto configs = EnumerateSubgroupMatrixConfigs(entries);
     EXPECT_EQ(configs, expected);
 }
 
 // Filtering rules for unsupported type combinations, ShaderF16, and WARP 8-bit types.
 TEST_F(SubgroupMatrixConfigTests, TypeAndFeatureFiltering) {
-    std::vector supports = {
+    std::vector entries = {
         // Valid integer and float combinations:
-        MakeSupport(32, I32, I32, {{16, 16, 16}}),
-        MakeSupport(32, I8, I32, {{16, 16, 16}}),
-        MakeSupport(32, U8, U32, {{16, 16, 16}}),
-        MakeSupport(32, F16, F32, {{16, 16, 16}}),
-        MakeSupport(32, F32, F32, {{16, 16, 16}}),
+        MakeEntry({32, 32}, I32, I32, {16, 16, 16}),
+        MakeEntry({32, 32}, I8, I32, {16, 16, 16}),
+        MakeEntry({32, 32}, U8, U32, {16, 16, 16}),
+        MakeEntry({32, 32}, F16, F32, {16, 16, 16}),
+        MakeEntry({32, 32}, F32, F32, {16, 16, 16}),
         // Invalid: mixed int/float:
-        MakeSupport(32, I32, F32, {{16, 16, 16}}),
-        MakeSupport(32, F16, I32, {{16, 16, 16}}),
+        MakeEntry({32, 32}, I32, F32, {16, 16, 16}),
+        MakeEntry({32, 32}, F16, I32, {16, 16, 16}),
         // Invalid: input byte size > accumulator byte size:
-        MakeSupport(32, F32, F16, {{16, 16, 16}}),
-        MakeSupport(32, I32, I8, {{16, 16, 16}}),
+        MakeEntry({32, 32}, F32, F16, {16, 16, 16}),
+        MakeEntry({32, 32}, I32, I8, {16, 16, 16}),
     };
 
     // Default (non-WARP, ShaderF16 supported):
     {
         std::vector expected = {
-            MakeConfig(I32, I32, {16, 16, 16}, {32, 32}),
-            MakeConfig(I8, I32, {16, 16, 16}, {32, 32}),
-            MakeConfig(U8, U32, {16, 16, 16}, {32, 32}),
-            MakeConfig(F16, F32, {16, 16, 16}, {32, 32}),
             MakeConfig(F32, F32, {16, 16, 16}, {32, 32}),
+            MakeConfig(F16, F32, {16, 16, 16}, {32, 32}),
+            MakeConfig(I32, I32, {16, 16, 16}, {32, 32}),
+            MakeConfig(U8, U32, {16, 16, 16}, {32, 32}),
+            MakeConfig(I8, I32, {16, 16, 16}, {32, 32}),
         };
-        auto configs = EnumerateSubgroupMatrixConfigs(supports, /*vendorId=*/0,
+        auto configs = EnumerateSubgroupMatrixConfigs(entries, /*vendorId=*/0,
                                                       /*deviceId=*/0,
                                                       /*supportsShaderF16=*/true);
         EXPECT_EQ(configs, expected);
@@ -356,10 +245,10 @@ TEST_F(SubgroupMatrixConfigTests, TypeAndFeatureFiltering) {
     {
         std::vector expected = {
             MakeConfig(I32, I32, {16, 16, 16}, {32, 32}),
-            MakeConfig(I8, I32, {16, 16, 16}, {32, 32}),
             MakeConfig(U8, U32, {16, 16, 16}, {32, 32}),
+            MakeConfig(I8, I32, {16, 16, 16}, {32, 32}),
         };
-        auto configs = EnumerateSubgroupMatrixConfigs(supports, /*vendorId=*/0,
+        auto configs = EnumerateSubgroupMatrixConfigs(entries, /*vendorId=*/0,
                                                       /*deviceId=*/0,
                                                       /*supportsShaderF16=*/false);
         EXPECT_EQ(configs, expected);
@@ -370,12 +259,12 @@ TEST_F(SubgroupMatrixConfigTests, TypeAndFeatureFiltering) {
         constexpr uint32_t kDeviceID_WARP = 0x8c;
         ASSERT_TRUE(gpu_info::IsMicrosoftWARP(gpu_info::kVendorID_Microsoft, kDeviceID_WARP));
         std::vector expected = {
-            MakeConfig(I32, I32, {16, 16, 16}, {32, 32}),
-            MakeConfig(F16, F32, {16, 16, 16}, {32, 32}),
             MakeConfig(F32, F32, {16, 16, 16}, {32, 32}),
+            MakeConfig(F16, F32, {16, 16, 16}, {32, 32}),
+            MakeConfig(I32, I32, {16, 16, 16}, {32, 32}),
         };
         auto configs =
-            EnumerateSubgroupMatrixConfigs(supports, gpu_info::kVendorID_Microsoft, kDeviceID_WARP,
+            EnumerateSubgroupMatrixConfigs(entries, gpu_info::kVendorID_Microsoft, kDeviceID_WARP,
                                            /*supportsShaderF16=*/true);
         EXPECT_EQ(configs, expected);
     }
