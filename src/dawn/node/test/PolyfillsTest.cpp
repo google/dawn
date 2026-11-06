@@ -34,18 +34,22 @@
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <optional>
 #include <ostream>
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <thread>
+#include <utility>
 #include <vector>
 
 #include "src/dawn/common/SystemUtils.h"
 #include "src/dawn/node/napi_v8/napi_v8.h"
 #include "src/dawn/node/standalone/EventLoop.h"
+#include "src/dawn/node/standalone/FileBundle.h"
 #include "src/dawn/node/standalone/Polyfills.h"
+#include "src/dawn/node/test/TestZip.h"
 #include "src/dawn/node/test/V8TestEnvironment.h"
 #include "src/utils/gtest.h"
 
@@ -207,11 +211,31 @@ class PolyfillsTest : public dawn::node::test::V8IsolateTest {
         return result;
     }
 
+    // Writes a zip holding `entries` into `dir` and registers the polyfills with it as the bundle,
+    // rooted at `root`, which defaults to the zip's own path.
+    void RegisterWithBundle(const TempDir& dir,
+                            const std::vector<dawn::node::test::ZipEntry>& entries,
+                            std::string root = "") {
+        const std::filesystem::path zip = std::filesystem::path(dir.JsPath()) / "cts.zip";
+        ASSERT_TRUE(dawn::node::test::WriteZip(zip, entries));
+        dawn::Result<std::unique_ptr<dawn::node::standalone::FileBundle>, std::string> bundle =
+            dawn::node::standalone::FileBundle::OpenZip(zip.string());
+        if (bundle.IsError()) {
+            FAIL() << zip << ": " << *bundle.AcquireError();
+        }
+        bundle_ = bundle.AcquireSuccess();
+        dawn::node::standalone::PolyfillOptions options;
+        options.bundle = bundle_.get();
+        options.bundle_root = root.empty() ? zip.generic_string() : root;
+        dawn::node::standalone::RegisterPolyfills(env_, loop(), options);
+    }
+
     napi_env env_ = nullptr;
 
   private:
     // Held by value once SetUp() has an isolate to give it.
     std::optional<dawn::node::standalone::EventLoop> loop_;
+    std::unique_ptr<dawn::node::standalone::FileBundle> bundle_;
 };
 
 TEST_F(PolyfillsTest, ConsoleGlobals) {
@@ -731,6 +755,115 @@ TEST_F(PolyfillsTest, ProcessArgvAndCwd) {
 
     // cwd() must report the real working directory, not merely something of type string.
     EXPECT_EQ(ToString(RunScript("process.cwd()")), std::filesystem::current_path().string());
+}
+
+TEST_F(PolyfillsTest, BundleIsTheWorkingDirectory) {
+    TempDir dir;
+    RegisterWithBundle(dir, {{"out-node/a.js", "x"}});
+    const std::string root =
+        (std::filesystem::path(dir.JsPath()) / "cts.zip").lexically_normal().string();
+
+    // process.cwd() names the zip, and relative paths resolve into it.
+    EXPECT_EQ(ToString(RunScript("process.cwd()")), root);
+    EXPECT_EQ(ToString(RunScript("_path_polyfill.resolve('out-node/a.js')")),
+              (std::filesystem::path(root) / "out-node" / "a.js").string());
+    EXPECT_EQ(ToString(RunScript("_path_polyfill.resolve('')")), root);
+    EXPECT_EQ(ToString(RunScript("_path_polyfill.relative('out-node', 'out-node/a.js')")), "a.js");
+}
+
+TEST_F(PolyfillsTest, FsReadsTheBundleThroughRelativeAndAbsolutePaths) {
+    TempDir dir;
+    const std::string bytes("\x00\x01\xff\r\n", 5);
+    RegisterWithBundle(dir, {{"dir/text.txt", "Hello zip\n"}, {"dir/bytes.bin", bytes}});
+
+    EXPECT_EQ(ToString(RunScript("_fs_polyfill.readFileSync('dir/text.txt', 'utf8')")),
+              "Hello zip\n");
+    EXPECT_EQ(ToString(RunScript("_fs_polyfill.readFileSync('./dir/../dir/text.txt', 'utf8')")),
+              "Hello zip\n");
+    EXPECT_EQ(ToString(RunScript("_fs_polyfill.readFileSync('" + dir.JsPath() +
+                                 "/cts.zip/dir/text.txt', 'utf8')")),
+              "Hello zip\n");
+    // Without an encoding the bytes come back as a Uint8Array.
+    EXPECT_EQ(
+        ToString(RunScript("Array.from(_fs_polyfill.readFileSync('dir/bytes.bin')).join(',')")),
+        "0,1,255,13,10");
+}
+
+TEST_F(PolyfillsTest, FsUnderTheBundleRootIsServedByTheBundleAlone) {
+    // The root is a real directory with a real file in it that the zip does not hold, so a lookup
+    // that reached the disk would find it.
+    TempDir dir;
+    dir.WriteFile("real.txt", "on disk");
+    RegisterWithBundle(dir, {{"zipped.txt", "in zip"}}, dir.JsPath());
+
+    EXPECT_TRUE(ToBool(RunScript("_fs_polyfill.existsSync('zipped.txt')")));
+    EXPECT_FALSE(ToBool(RunScript("_fs_polyfill.existsSync('real.txt')")));
+    EXPECT_FALSE(ToBool(RunScript("_fs_polyfill.existsSync('" + dir.JsPath() + "/real.txt')")));
+    EXPECT_TRUE(Throws("_fs_polyfill.readFileSync('real.txt', 'utf8')"));
+    EXPECT_TRUE(Throws("_fs_polyfill.statSync('real.txt')"));
+    EXPECT_EQ(ToString(RunScript("_fs_polyfill.readdirSync('.').join(',')")), "zipped.txt");
+}
+
+TEST_F(PolyfillsTest, FsExistsReaddirAndStatOnTheBundle) {
+    TempDir dir;
+    RegisterWithBundle(dir, {{"a/b/c.txt", "c"}, {"a/d.txt", "d"}});
+
+    EXPECT_TRUE(ToBool(RunScript("_fs_polyfill.existsSync('a/b/c.txt')")));
+    EXPECT_TRUE(ToBool(RunScript("_fs_polyfill.existsSync('a/b')")));
+    EXPECT_TRUE(ToBool(RunScript("_fs_polyfill.existsSync('a/b/')")));
+    EXPECT_TRUE(ToBool(RunScript("_fs_polyfill.existsSync('.')")));
+    EXPECT_FALSE(ToBool(RunScript("_fs_polyfill.existsSync('a/b/missing.txt')")));
+    EXPECT_FALSE(ToBool(RunScript("_fs_polyfill.existsSync('')")));
+
+    EXPECT_EQ(ToString(RunScript("_fs_polyfill.readdirSync('a').join(',')")), "b,d.txt");
+    EXPECT_EQ(ToString(RunScript("_fs_polyfill.readdirSync('a/b/..').join(',')")), "b,d.txt");
+    EXPECT_TRUE(Throws("_fs_polyfill.readdirSync('a/d.txt')"));
+    EXPECT_TRUE(Throws("_fs_polyfill.readdirSync('nope')"));
+    EXPECT_TRUE(Throws("_fs_polyfill.readdirSync('')"));
+
+    EXPECT_TRUE(ToBool(RunScript("_fs_polyfill.statSync('a/d.txt').isFile()")));
+    EXPECT_FALSE(ToBool(RunScript("_fs_polyfill.statSync('a/d.txt').isDirectory()")));
+    EXPECT_TRUE(ToBool(RunScript("_fs_polyfill.statSync('a/b').isDirectory()")));
+    EXPECT_FALSE(ToBool(RunScript("_fs_polyfill.statSync('a/b').isFile()")));
+    EXPECT_TRUE(Throws("_fs_polyfill.statSync('a/nope')"));
+}
+
+TEST_F(PolyfillsTest, FsOutsideTheBundleRootReadsTheDisk) {
+    TempDir zip_dir;
+    TempDir disk_dir;
+    const std::string file = disk_dir.WriteFile("disk.txt", "on disk");
+    RegisterWithBundle(zip_dir, {{"zipped.txt", "in zip"}});
+
+    EXPECT_TRUE(ToBool(RunScript("_fs_polyfill.existsSync('" + file + "')")));
+    EXPECT_EQ(ToString(RunScript("_fs_polyfill.readFileSync('" + file + "', 'utf8')")), "on disk");
+    EXPECT_TRUE(
+        ToBool(RunScript("_fs_polyfill.statSync('" + disk_dir.JsPath() + "').isDirectory()")));
+    EXPECT_EQ(
+        ToString(RunScript("_fs_polyfill.readdirSync('" + disk_dir.JsPath() + "').join(',')")),
+        "disk.txt");
+}
+
+TEST_F(PolyfillsTest, FsRelativePathLeavingTheBundleReadsTheDiskBesideIt) {
+    TempDir dir;
+    dir.WriteFile("beside.txt", "beside the zip");
+    RegisterWithBundle(dir, {{"zipped.txt", "in zip"}});
+
+    EXPECT_EQ(ToString(RunScript("_fs_polyfill.readFileSync('../beside.txt', 'utf8')")),
+              "beside the zip");
+}
+
+TEST_F(PolyfillsTest, RequireLoadsModulesFromTheBundle) {
+    TempDir dir;
+    RegisterWithBundle(dir, {{"lib/leaf.js", "exports.dir = __dirname;"},
+                             {"lib/main.js", "module.exports = require('./leaf.js');"}});
+
+    // A specifier relative to the working directory, then one relative to the requiring module,
+    // both inside the zip.
+    RunScript("globalThis.leaf = require('./lib/main.js');");
+    EXPECT_EQ(
+        ToString(RunScript("globalThis.leaf.dir")),
+        (std::filesystem::path(dir.JsPath()) / "cts.zip" / "lib").lexically_normal().string());
+    EXPECT_TRUE(Throws("require('./lib/missing.js')"));
 }
 
 TEST_F(PolyfillsTest, ProcessArgvIsEmptyByDefault) {

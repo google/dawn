@@ -99,6 +99,7 @@ if (checkout_v8 && dawn_node) {
     ]
 
     deps = [
+      ":file_bundle",
       "${dawn_root}/src/dawn/common",
       "${dawn_root}/src/dawn/node/napi_v8",
       "//third_party/v8/src:v8",

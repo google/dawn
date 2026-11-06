@@ -36,11 +36,18 @@
 namespace dawn::node::standalone {
 
 class EventLoop;
+class FileBundle;
 
 // Configuration options for polyfill registration.
 struct PolyfillOptions {
     // Values reported by `process.argv`.
     std::vector<std::string> argv;
+
+    // A bundle that stands in for the JavaScript's working directory: process.cwd() reports
+    // `bundle_root`, relative paths resolve against it, and paths under it come only from `bundle`.
+    // Other paths go to the disk. `bundle` must outlive the `env` passed to RegisterPolyfills().
+    FileBundle* bundle = nullptr;
+    std::string bundle_root;
 };
 
 // Registers Node.js and Web standard polyfills (console, process, fs, path, timers, DOM stubs)
