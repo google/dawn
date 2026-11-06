@@ -51,7 +51,7 @@ type Flags struct {
 	Log              string
 	ResultsPath      string
 	ExpectationsPath string
-	CTS              string // Path to the CTS directory
+	CTS              string // Path to the CTS directory or CTS zip
 	Node             string // Path to the Node executable
 	Npx              string // Path to the npx executable
 }
@@ -88,8 +88,8 @@ func (f *Flags) Process(fsReaderWriter oswrapper.FilesystemReaderWriter) (*State
 	if f.CTS == "" {
 		return nil, subcmd.InvalidCLA()
 	}
-	if !fileutils.IsDir(f.CTS, fsReaderWriter) {
-		return nil, fmt.Errorf("'%v' is not a directory", f.CTS)
+	if _, err := fsReaderWriter.Stat(f.CTS); err != nil {
+		return nil, fmt.Errorf("'%v' does not exist", f.CTS)
 	}
 	absCTS, err := filepath.Abs(f.CTS)
 	if err != nil {

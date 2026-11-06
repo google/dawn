@@ -103,6 +103,7 @@ type cmd struct {
 	coverage   *common.Coverage
 	queries    []string
 	adbPath    string
+	ctsZip     bool // -cts names a CTS zip rather than a directory
 }
 
 func (c *cmd) Name() string {
@@ -199,7 +200,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 
 	target, _ := c.target()
 	if adb, ok := target.(*adbTarget); ok && c.flags.stage != stageNever {
-		if err := adb.stage(c.flags.runner, c.flags.CTS, c.flags.stage == stageAlways); err != nil {
+		if err := adb.stage(c.flags.runner, c.flags.CTS, c.ctsZip, c.flags.stage == stageAlways); err != nil {
 			return fmt.Errorf("failed to stage onto the device: %w", err)
 		}
 		if c.flags.stageOnly {
@@ -273,14 +274,19 @@ func (c *cmd) target() (target, []string) {
 	if c.standalone {
 		runner = c.flags.runner
 	}
+	dir, ctsArgs := c.flags.CTS, []string{"--cts-dir", c.flags.CTS}
+	if c.ctsZip {
+		// A zip cannot be the working directory, so run in the current one.
+		dir, ctsArgs = "", []string{"--cts-zip", c.flags.CTS}
+	}
 	return &localTarget{
 		runner:  runner,
-		dir:     c.flags.CTS,
+		dir:     dir,
 		verbose: c.flags.Verbose,
 		// The VS Code launch.json output does not work for the standalone runner,
 		// which reads its test cases from stdin.
 		skipVSCodeInfo: c.flags.skipVSCodeInfo || c.standalone,
-	}, []string{"--cts-dir", c.flags.CTS}
+	}, ctsArgs
 }
 
 func (c *cmd) processFlags(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
@@ -399,6 +405,15 @@ func (c *cmd) processFlags(fsReaderWriter oswrapper.FilesystemReaderWriter) erro
 		return err
 	}
 	c.state = *state
+
+	// A CTS zip is already built, and only the standalone runner reads one.
+	c.ctsZip = !fileutils.IsDir(c.flags.CTS, fsReaderWriter)
+	if c.ctsZip {
+		if !c.standalone {
+			return fmt.Errorf("'%v' is not a directory; only run-cts standalone can run a CTS zip", c.flags.CTS)
+		}
+		c.flags.build = false
+	}
 
 	// Standalone runs need node only to build the CTS with npx.
 	if c.flags.Node == "" && (!c.standalone || c.flags.build) {

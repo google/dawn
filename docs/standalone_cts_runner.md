@@ -100,7 +100,8 @@ Flags you are likely to want:
 - `-output <file>` writes the results as JSON, `-expect <file>` compares a run
   with such a file, and `-log <file>` records every test and its result
 - `-build=false` skips the CTS build, for example when `npx` is not on `PATH`
-- `-cts <dir>` uses a CTS checkout other than `third_party/webgpu-cts`
+- `-cts <dir>` uses a CTS checkout other than `third_party/webgpu-cts`, and
+  `-cts <zip>` a zip made by `run-cts zip-cts`, which needs no build
 
 `./tools/run run-cts standalone -help` lists the rest.
 

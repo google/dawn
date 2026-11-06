@@ -76,10 +76,11 @@ func newStagedPart(name, dir string, files []string, deviceHashes map[string]str
 	return &stagedPart{name: name, hash: hash, stale: deviceHashes[name] != hash}, nil
 }
 
-// stage copies the runner and the CTS onto the device. The device directory
-// holds a stamp file with the hash of each part it has, and unless force is
-// set, a part whose hash matches is not copied again.
-func (t *adbTarget) stage(runner, ctsDir string, force bool) error {
+// stage copies the runner and the CTS onto the device: a CTS zip as it is, or
+// the files of a CTS directory packed into a zip. The device directory holds a
+// stamp file with the hash of each part it has, and unless force is set, a part
+// whose hash matches is not copied again.
+func (t *adbTarget) stage(runner, cts string, ctsZip, force bool) error {
 	start := time.Now()
 	deviceHashes := map[string]string{}
 	if !force {
@@ -92,9 +93,12 @@ func (t *adbTarget) stage(runner, ctsDir string, force bool) error {
 	if err != nil {
 		return err
 	}
-	files, err := ctsFiles(ctsDir)
-	if err != nil {
-		return err
+	ctsDir, files := filepath.Dir(cts), []string{filepath.Base(cts)}
+	if !ctsZip {
+		ctsDir = cts
+		if files, err = ctsFiles(cts); err != nil {
+			return err
+		}
 	}
 	ctsPart, err := newStagedPart("cts.zip", ctsDir, files, deviceHashes)
 	if err != nil {
@@ -110,7 +114,12 @@ func (t *adbTarget) stage(runner, ctsDir string, force bool) error {
 		}
 	}
 	if ctsPart.stale {
-		if err := t.pushCTS(ctsDir, files); err != nil {
+		if ctsZip {
+			err = t.push(cts, t.devicePath(deviceCTSTemp))
+		} else {
+			err = t.pushCTS(cts, files)
+		}
+		if err != nil {
 			return err
 		}
 	}
