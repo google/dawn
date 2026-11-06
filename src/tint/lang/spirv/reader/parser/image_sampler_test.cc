@@ -588,6 +588,96 @@ $B1: {  # root
 )");
 }
 
+// OpImageFetch keeps every image operand after the mask, in mask bit order. ConstOffset:
+// https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html#Image_Operands
+TEST_F(SpirvParserTest, ImageFetch_LodAndConstOffset) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %var_tex DescriptorSet 0
+               OpDecorate %var_tex Binding 0
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+        %int = OpTypeInt 32 1
+        %tex = OpTypeImage %float 2D 0 0 0 1 Unknown
+    %ptr_tex = OpTypePointer UniformConstant %tex
+      %v2int = OpTypeVector %int 2
+    %v4float = OpTypeVector %float 4
+      %int_1 = OpConstant %int 1
+     %int_n1 = OpConstant %int -1
+     %coords = OpConstantComposite %v2int %int_1 %int_1
+     %offset = OpConstantComposite %v2int %int_n1 %int_1
+    %var_tex = OpVariable %ptr_tex UniformConstant
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+         %im = OpLoad %tex %var_tex
+     %result = OpImageFetch %v4float %im %coords Lod|ConstOffset %int_1 %offset
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write> = load %1
+    %4:vec4<f32> = spirv.image_fetch %3, vec2<i32>(1i), 10u, 1i, vec2<i32>(-1i, 1i)
+    ret
+  }
+}
+)");
+}
+
+// The ConstOffset operand comes before the Sample operand.
+TEST_F(SpirvParserTest, ImageFetch_ConstOffsetAndSample) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %var_tex DescriptorSet 0
+               OpDecorate %var_tex Binding 0
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+        %int = OpTypeInt 32 1
+        %tex = OpTypeImage %float 2D 0 0 1 1 Unknown
+    %ptr_tex = OpTypePointer UniformConstant %tex
+      %v2int = OpTypeVector %int 2
+    %v4float = OpTypeVector %float 4
+      %int_1 = OpConstant %int 1
+      %int_2 = OpConstant %int 2
+     %int_n1 = OpConstant %int -1
+     %coords = OpConstantComposite %v2int %int_1 %int_1
+     %offset = OpConstantComposite %v2int %int_n1 %int_1
+    %var_tex = OpVariable %ptr_tex UniformConstant
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+         %im = OpLoad %tex %var_tex
+     %result = OpImageFetch %v4float %im %coords ConstOffset|Sample %offset %int_2
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, multi_sampled, sampling_compatible, undefined, read_write>, read> = var @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:spirv.image<f32, 2d, not_depth, non_arrayed, multi_sampled, sampling_compatible, undefined, read_write> = load %1
+    %4:vec4<f32> = spirv.image_fetch %3, vec2<i32>(1i), 72u, vec2<i32>(-1i, 1i), 2i
+    ret
+  }
+}
+)");
+}
+
 // WGSL only samples f32 textures (https://www.w3.org/TR/WGSL/#texturesample), while SPIR-V allows
 // OpImageSample* on integer textures. These tests check that such samples are rejected.
 struct IntegerSampleCase {

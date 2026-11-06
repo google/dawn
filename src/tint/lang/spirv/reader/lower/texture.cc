@@ -715,6 +715,17 @@ struct State {
                 // and non-storage texture types.
                 new_args.Push(b.Zero(ty.i32()));
             }
+            if (HasConstOffset(operand_mask)) {
+                core::ir::Value* offset = args[idx++];
+                // VUID-StandaloneSpirv-Offset-04865 only allows ConstOffset on sampled images.
+                TINT_ASSERT(call->Func() == spirv::BuiltinFn::kImageFetch);
+                // WGSL textureLoad has no offset. OpImageFetch uses integer sampling coordinates,
+                // which address texels directly, so the offset can be added to the coordinates
+                // that ProcessCoords separated from the array layer:
+                // https://registry.khronos.org/vulkan/specs/latest/html/vkspec.html#textures-sampling-coordinate-integer
+                offset = b.InsertConvertIfNeeded(new_args[1]->Type(), offset);
+                new_args[1] = b.Add(new_args[1], offset);
+            }
             if (HasSample(operand_mask)) {
                 core::ir::Value* sample = args[idx++];
 

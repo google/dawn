@@ -3547,12 +3547,11 @@ class Parser {
         auto sampled_image = Value(inst.GetSingleWordInOperand(0));
         auto* coord = Value(inst.GetSingleWordInOperand(1));
 
-        Vector<core::ir::Value*, 4> args = {sampled_image, coord};
-
         uint32_t literal_mask = inst.NumInOperands() > 2 ? inst.GetSingleWordInOperand(2) : 0u;
-        args.Push(Literal(literal_mask));
-        if (literal_mask != 0) {
-            args.Push(Value(inst.GetSingleWordInOperand(3)));
+        Vector<core::ir::Value*, 4> args = {sampled_image, coord, Literal(literal_mask)};
+        // The ids after the mask are the operands of each set mask bit, in increasing bit order.
+        for (uint32_t i = 3; i < inst.NumInOperands(); ++i) {
+            args.Push(Value(inst.GetSingleWordInOperand(i)));
         }
 
         Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, args), inst.result_id());

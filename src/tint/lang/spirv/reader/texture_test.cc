@@ -1733,6 +1733,7 @@ TEST_P(ImageAccessTest, Variable) {
     EXPECT_IR(R"(
             OpCapability Shader
             OpCapability StorageImageExtendedFormats
+            OpCapability Sampled1D
             OpMemoryModel Logical Simple
             OpEntryPoint Fragment %main "main"
             OpExecutionMode %main OriginUpperLeft
@@ -1765,6 +1766,7 @@ TEST_P(ImageAccessTest, Variable) {
    %int_4 = OpConstant %int 4
   %int_10 = OpConstant %int 10
   %int_11 = OpConstant %int 11
+  %int_n1 = OpConstant %int -1
   %uint_1 = OpConstant %uint 1
   %uint_2 = OpConstant %uint 2
   %uint_3 = OpConstant %uint 3
@@ -1775,6 +1777,8 @@ TEST_P(ImageAccessTest, Variable) {
  %float_4 = OpConstant %float 4
       %wg = OpVariable %ptr_im_ty UniformConstant
 %offset2i = OpConstantComposite %v2int %int_10 %int_11
+%offset2i_neg = OpConstantComposite %v2int %int_n1 %int_2
+%offset3i_neg = OpConstantComposite %v3int %int_n1 %int_2 %int_3
     %vi12 = OpConstantComposite %v2int %int_1 %int_2
    %vi123 = OpConstantComposite %v3int %int_1 %int_2 %int_3
   %vi1234 = OpConstantComposite %v4int %int_1 %int_2 %int_3 %int_4
@@ -2156,6 +2160,100 @@ INSTANTIATE_TEST_SUITE_P(
             .wgsl_type = "texture_multisampled_2d<f32>",
             .wgsl_fn = R"(
     %4:vec4<f32> = textureLoad %3, vec2<i32>(1i, 2i), 1i)",
+        }));
+
+// WGSL textureLoad (https://www.w3.org/TR/WGSL/#textureload) has no offset parameter, so the
+// ConstOffset operand of OpImageFetch is added to the coordinates. ConstOffset:
+// https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html#Image_Operands
+INSTANTIATE_TEST_SUITE_P(
+    SpirvReaderTest_ImageFetch_ConstOffset,
+    ImageAccessTest,
+    ::testing::Values(
+        // The offset is added to i32 coordinates.
+        ImgData{
+            .name = "2D signed coords with lod",
+            .spirv_type = "%float 2D 0 0 0 1 Unknown",
+            .spirv_fn =
+                "%99 = OpImageFetch %v4float %im %vi12 Lod|ConstOffset %int_3 %offset2i_neg",
+            .wgsl_type = "texture_2d<f32>",
+            .wgsl_fn = R"(
+    %4:vec4<f32> = textureLoad %3, vec2<i32>(0i, 4i), 3i)",
+        },
+        // With u32 coordinates the i32 offset bits are added as u32, which wraps the same way.
+        ImgData{
+            .name = "2D unsigned coords with lod",
+            .spirv_type = "%float 2D 0 0 0 1 Unknown",
+            .spirv_fn =
+                "%99 = OpImageFetch %v4float %im %vu12 Lod|ConstOffset %int_3 %offset2i_neg",
+            .wgsl_type = "texture_2d<f32>",
+            .wgsl_fn = R"(
+    %4:vec4<f32> = textureLoad %3, vec2<u32>(0u, 4u), 3i)",
+        },
+        // A u32 offset is added to u32 coordinates.
+        ImgData{
+            .name = "2D unsigned coords and offset",
+            .spirv_type = "%float 2D 0 0 0 1 Unknown",
+            .spirv_fn = "%99 = OpImageFetch %v4float %im %vu12 ConstOffset %vu12",
+            .wgsl_type = "texture_2d<f32>",
+            .wgsl_fn = R"(
+    %4:vec4<f32> = textureLoad %3, vec2<u32>(2u, 4u), 0i)",
+        },
+        // The array layer is not offset.
+        ImgData{
+            .name = "2D array",
+            .spirv_type = "%float 2D 0 1 0 1 Unknown",
+            .spirv_fn =
+                "%99 = OpImageFetch %v4float %im %vi123 Lod|ConstOffset %int_3 %offset2i_neg",
+            .wgsl_type = "texture_2d_array<f32>",
+            .wgsl_fn = R"(
+    %4:vec4<f32> = textureLoad %3, vec2<i32>(0i, 4i), 3i, 3i)",
+        },
+        // A scalar offset is added to a scalar coordinate.
+        ImgData{
+            .name = "1D",
+            .spirv_type = "%float 1D 0 0 0 1 Unknown",
+            .spirv_fn = "%99 = OpImageFetch %v4float %im %int_1 Lod|ConstOffset %int_3 %int_n1",
+            .wgsl_type = "texture_1d<f32>",
+            .wgsl_fn = R"(
+    %4:vec4<f32> = textureLoad %3, 0i, 3i)",
+        },
+        // A 1D fetch with only a ConstOffset still gets the default level of detail.
+        ImgData{
+            .name = "1D without lod",
+            .spirv_type = "%float 1D 0 0 0 1 Unknown",
+            .spirv_fn = "%99 = OpImageFetch %v4float %im %uint_1 ConstOffset %int_n1",
+            .wgsl_type = "texture_1d<f32>",
+            .wgsl_fn = R"(
+    %4:vec4<f32> = textureLoad %3, 0u, 0i)",
+        },
+        // A 3D fetch offsets all three coordinates.
+        ImgData{
+            .name = "3D",
+            .spirv_type = "%float 3D 0 0 0 1 Unknown",
+            .spirv_fn = "%99 = OpImageFetch %v4float %im %vi123 ConstOffset %offset3i_neg",
+            .wgsl_type = "texture_3d<f32>",
+            .wgsl_fn = R"(
+    %4:vec4<f32> = textureLoad %3, vec3<i32>(0i, 4i, 6i), 0i)",
+        },
+        // The offset is added before the depth result is widened to a vec4.
+        ImgData{
+            .name = "2D depth",
+            .spirv_type = "%float 2D 1 0 0 1 Unknown",
+            .spirv_fn = "%99 = OpImageFetch %v4float %im %vi12 ConstOffset %offset2i_neg",
+            .wgsl_type = "texture_depth_2d",
+            .wgsl_fn = R"(
+    %4:f32 = textureLoad %3, vec2<i32>(0i, 4i), 0i
+    %5:vec4<f32> = construct %4, 0.0f, 0.0f, 0.0f)",
+        },
+        // The ConstOffset operand comes before the Sample operand.
+        ImgData{
+            .name = "2D multisampled",
+            .spirv_type = "%float 2D 0 0 1 1 Unknown",
+            .spirv_fn =
+                "%99 = OpImageFetch %v4float %im %vi12 ConstOffset|Sample %offset2i_neg %int_3",
+            .wgsl_type = "texture_multisampled_2d<f32>",
+            .wgsl_fn = R"(
+    %4:vec4<f32> = textureLoad %3, vec2<i32>(0i, 4i), 3i)",
         }));
 
 using SampledImageAccessTest = SpirvReaderTestWithParam<ImgData>;
