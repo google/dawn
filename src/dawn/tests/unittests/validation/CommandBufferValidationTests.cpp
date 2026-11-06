@@ -29,7 +29,6 @@
 
 #include "src/dawn/tests/unittests/validation/ValidationTest.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -38,6 +37,7 @@ using ::testing::AllOf;
 using ::testing::HasSubstr;
 using ::testing::Not;
 using ::testing::StartsWith;
+using std::string_view_literals::operator""sv;
 
 class CommandBufferValidationTest : public ValidationTest {};
 
@@ -366,7 +366,7 @@ TEST_F(CommandBufferValidationTest, InjectedValidateErrorVariousStringTypes) {
     // Use explicit length which truncates a null-terminated string.
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.InjectValidationError(DAWN_UNSAFE_TODO(std::string_view("my error bad", 8)));
+        encoder.InjectValidationError("my error bad"sv.substr(0, 8));
         ASSERT_DEVICE_ERROR(encoder.Finish(), AllOf(HasSubstr("my error"), Not(HasSubstr("bad"))));
     }
 
@@ -381,7 +381,7 @@ TEST_F(CommandBufferValidationTest, InjectedValidateErrorVariousStringTypes) {
     // Empty, non-null string
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.InjectValidationError(DAWN_UNSAFE_TODO(std::string_view("foobar", 0)));
+        encoder.InjectValidationError("foobar"sv.substr(0, 0));
         // empty error string, followed by a newline and error context
         ASSERT_DEVICE_ERROR(encoder.Finish(), StartsWith("\n"));
     }
@@ -409,8 +409,8 @@ TEST_F(CommandBufferValidationTest, InjectedValidateErrorVariousStringTypes) {
     // part of the injected error.
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.SetLabel(DAWN_UNSAFE_TODO(std::string_view("my\0encoder", 10)));
-        encoder.InjectValidationError(DAWN_UNSAFE_TODO(std::string_view("err\0or", 6)));
+        encoder.SetLabel("my\0encoder"sv);
+        encoder.InjectValidationError("err\0or"sv);
         ASSERT_DEVICE_ERROR(encoder.Finish(), AllOf(HasSubstr("validation error: err."),
                                                     HasSubstr("[CommandEncoder \"my\"]")));
     }

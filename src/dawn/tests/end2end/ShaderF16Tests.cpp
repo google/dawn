@@ -25,12 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <string_view>
 #include <vector>
 
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -66,8 +66,8 @@ class ShaderF16Tests : public DawnTestWithParams<ShaderF16TestsParams> {
         if (!IsD3D12()) {
             mUseDxcEnabledOrNonD3D12 = true;
         } else {
-            for (auto* enabledToggle : GetParam().forceEnabledWorkarounds) {
-                if (DAWN_UNSAFE_TODO(strncmp(enabledToggle, "use_dxc", 7)) == 0) {
+            for (std::string_view enabledToggle : GetParam().forceEnabledWorkarounds) {
+                if (enabledToggle.starts_with("use_dxc")) {
                     mUseDxcEnabledOrNonD3D12 = true;
                     break;
                 }

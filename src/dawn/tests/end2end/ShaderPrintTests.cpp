@@ -55,8 +55,7 @@ class ShaderPrintTest : public DawnTest {
         device.SetLoggingCallback(
             [](wgpu::LoggingType type, wgpu::StringView message, void* userdata) {
                 std::stringstream& output = *static_cast<std::stringstream*>(userdata);
-                std::string_view view =
-                    DAWN_UNSAFE_TODO(std::string_view(message.data, message.length));
+                std::string_view view = message;
                 switch (type) {
                     case wgpu::LoggingType::Verbose:
                         DebugLog() << view;

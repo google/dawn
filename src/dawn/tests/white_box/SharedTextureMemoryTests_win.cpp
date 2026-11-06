@@ -32,9 +32,11 @@
 #include <webgpu/webgpu_cpp.h>
 #include <wrl/client.h>
 
+#include <algorithm>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -43,7 +45,6 @@
 #include "dawn/native/DawnNative.h"
 #include "src/dawn/common/SystemHandle.h"
 #include "src/dawn/tests/white_box/SharedTextureMemoryTests.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -136,9 +137,7 @@ class Backend : public SharedTextureMemoryTestBackend {
 
     bool HasFenceSupport(const wgpu::Device& device) const {
         auto toggles = dawn::native::GetTogglesUsed(device.Get());
-        return std::find_if(toggles.begin(), toggles.end(), [](const char* name) {
-                   return DAWN_UNSAFE_TODO(strcmp("d3d11_disable_fence", name)) == 0;
-               }) == toggles.end();
+        return std::ranges::find(toggles, std::string_view("d3d11_disable_fence")) == toggles.end();
     }
 
     bool UseKeyedMutex() const { return mUseKeyedMutex; }

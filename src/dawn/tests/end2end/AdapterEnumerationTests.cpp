@@ -36,7 +36,6 @@
 #include "src/dawn/common/GPUInfo.h"
 #include "src/dawn/common/Sha3.h"
 #include "src/dawn/common/StringViewUtils.h"
-#include "src/utils/compiler.h"
 
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
 // This must be above VulkanBackend.h otherwise vulkan.h will be included before we can wrap it with
@@ -59,6 +58,7 @@
 #include "dawn/native/OpenGLBackend.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 namespace dawn {
@@ -401,6 +401,10 @@ TEST_F(AdapterEnumerationTests, MatchingVulkanUUIDs) {
 #endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
 
 #if defined(DAWN_ENABLE_BACKEND_WEBGPU)
+using ::testing::Contains;
+using ::testing::HasSubstr;
+using ::testing::StrEq;
+
 // Test enumerating the WebGPU backend with the RequestAdapterWebGPUBackendOptions.
 TEST_F(AdapterEnumerationTests, WebGPUBackend) {
     native::Instance instance;
@@ -434,9 +438,7 @@ TEST_F(AdapterEnumerationTests, WebGPUBackend) {
             adapter.GetInfo(&info);
 
             EXPECT_EQ(info.backendType, wgpu::BackendType::WebGPU);
-            EXPECT_NE(DAWN_UNSAFE_TODO(std::string_view(info.device.data, info.device.length))
-                          .find("Vulkan"),
-                      std::string_view::npos);
+            EXPECT_THAT(std::string_view(info.device), HasSubstr("Vulkan"));
         }
     }
 
@@ -451,9 +453,7 @@ TEST_F(AdapterEnumerationTests, WebGPUBackend) {
             adapter.GetInfo(&info);
 
             EXPECT_EQ(info.backendType, wgpu::BackendType::WebGPU);
-            EXPECT_NE(DAWN_UNSAFE_TODO(std::string_view(info.device.data, info.device.length))
-                          .find("SwiftShader"),
-                      std::string_view::npos);
+            EXPECT_THAT(std::string_view(info.device), HasSubstr("SwiftShader"));
         }
     }
 
@@ -501,10 +501,7 @@ TEST_F(AdapterEnumerationTests, WebGPUBackendToggles) {
 
             // Validate toggles state.
             auto togglesUsed = native::GetTogglesUsed(adapter);
-            DAWN_UNSAFE_TODO(EXPECT_TRUE(
-                std::find_if(togglesUsed.begin(), togglesUsed.end(), [](const char* name) {
-                    return strcmp(kAllowUnsafeAPIToggle, name) == 0;
-                }) != togglesUsed.end()));
+            EXPECT_THAT(togglesUsed, Contains(StrEq(kAllowUnsafeAPIToggle)));
         }
     };
 
