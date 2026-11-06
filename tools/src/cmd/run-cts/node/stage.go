@@ -162,7 +162,7 @@ func (t *adbTarget) pushCTS(ctsDir string, files []string) error {
 	}
 	defer os.RemoveAll(tempDir)
 	archive := filepath.Join(tempDir, deviceArchive)
-	if err := writeArchive(archive, ctsDir, files); err != nil {
+	if err := writeArchive(archive, ctsDir, files, fastDeflate); err != nil {
 		return err
 	}
 	return t.push(archive, t.devicePath(deviceArchive))
@@ -254,14 +254,14 @@ func hashFiles(dir string, files []string) (string, error) {
 // names are those relative paths, so that the archive mirrors the CTS
 // directory. It has no directory entries, since unzip creates the missing
 // directories.
-func writeArchive(zipPath, dir string, files []string) error {
+func writeArchive(zipPath, dir string, files []string, compressor zip.Compressor) error {
 	f, err := os.Create(zipPath)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 	zw := zip.NewWriter(f)
-	zw.RegisterCompressor(zip.Deflate, fastDeflate)
+	zw.RegisterCompressor(zip.Deflate, compressor)
 	for _, file := range files {
 		if err := addFileToArchive(zw, dir, file); err != nil {
 			return err
@@ -274,6 +274,12 @@ func writeArchive(zipPath, dir string, files []string) error {
 // compressing harder takes longer than pushing the extra megabytes.
 func fastDeflate(out io.Writer) (io.WriteCloser, error) {
 	return flate.NewWriter(out, flate.BestSpeed)
+}
+
+// defaultDeflate returns a deflate writer at flate's default level, which packs
+// within a few percent of the best level in a fraction of the time.
+func defaultDeflate(out io.Writer) (io.WriteCloser, error) {
+	return flate.NewWriter(out, flate.DefaultCompression)
 }
 
 // addFileToArchive writes file, which is relative to dir, to zw. The entries

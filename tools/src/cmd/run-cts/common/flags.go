@@ -68,9 +68,9 @@ func (f *Flags) Register(fsReader oswrapper.FilesystemReader) {
 	flag.StringVar(&f.Log, "log", "", "path to log file of tests run and result")
 	flag.StringVar(&f.ResultsPath, "output", "", "path to write test results file")
 	flag.StringVar(&f.ExpectationsPath, "expect", "", "path to expectations file")
-	flag.StringVar(&f.CTS, "cts", defaultCtsPath(fsReader), "root directory of WebGPU CTS")
+	flag.StringVar(&f.CTS, "cts", DefaultCtsPath(fsReader), "root directory of WebGPU CTS")
 	flag.StringVar(&f.Node, "node", fileutils.NodePath(fsReader), "path to node executable")
-	flag.StringVar(&f.Npx, "npx", defaultNpxPath(), "path to npx executable")
+	flag.StringVar(&f.Npx, "npx", DefaultNpxPath(), "path to npx executable")
 }
 
 // Process processes the flags, returning a State.
@@ -159,9 +159,9 @@ func (s *State) Close(results Results) error {
 	return nil
 }
 
-// defaultCtsPath looks for the webgpu-cts directory in dawn's third_party
+// DefaultCtsPath looks for the webgpu-cts directory in dawn's third_party
 // directory. This is used as the default for the --cts command line flag.
-func defaultCtsPath(fsReader oswrapper.FilesystemReader) string {
+func DefaultCtsPath(fsReader oswrapper.FilesystemReader) string {
 	if dawnRoot := fileutils.DawnRoot(fsReader); dawnRoot != "" {
 		cts := filepath.Join(dawnRoot, "third_party", "webgpu-cts")
 		if info, err := fsReader.Stat(cts); err == nil && info.IsDir() {
@@ -171,8 +171,9 @@ func defaultCtsPath(fsReader oswrapper.FilesystemReader) string {
 	return ""
 }
 
-// defaultNpxPath looks for the npx executable on PATH
-func defaultNpxPath() string {
+// DefaultNpxPath looks for the npx executable on PATH. This is used as the
+// default for the --npx command line flag.
+func DefaultNpxPath() string {
 	if p, err := exec.LookPath("npx"); err == nil {
 		return p
 	}

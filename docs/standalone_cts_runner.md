@@ -194,26 +194,30 @@ supported flags.
 The runner can also read the compiled CTS straight out of a zip, which is
 quicker to copy to another machine than the ~2,200 files of `out-node/`. The zip
 holds `out-node/` without its `.map` files, which nothing reads at run time, and
-`src/common/runtime/cmdline.ts`, with paths relative to the CTS directory. On
-Linux or macOS, build it from the Dawn root with:
+`src/common/runtime/cmdline.ts`, with paths relative to the CTS directory.
+
+With Go, `run-cts` builds the CTS JavaScript if it is out of date and zips it,
+on any host. Pass the zip to the runner with `--cts-zip`, which cannot be
+combined with `--cts-dir`:
+
+```sh
+./tools/run run-cts zip-cts -o cts.zip
+out/Release/dawn_standalone_cts_runner --cts-zip cts.zip \
+    -q 'webgpu:api,operation,queue,*'
+```
+
+Without Go, build `out-node/` as above and replace the `zip-cts` command. On
+Linux or macOS, run from the Dawn root:
 
 ```sh
 rm -f cts.zip && (cd third_party/webgpu-cts &&
     zip -q -r ../../cts.zip out-node src/common/runtime/cmdline.ts -x '*.map')
 ```
 
-On Windows, the equivalent is run from `third_party\webgpu-cts` in PowerShell or
-a Command Prompt:
+On Windows, run from `third_party\webgpu-cts` in PowerShell or a Command Prompt:
 
 ```powershell
 tar.exe -a -c -f ..\..\cts.zip --exclude="*.map" out-node src/common/runtime/cmdline.ts
-```
-
-Then pass it with `--cts-zip`, which cannot be combined with `--cts-dir`:
-
-```sh
-out/Release/dawn_standalone_cts_runner --cts-zip cts.zip \
-    -q 'webgpu:api,operation,queue,*'
 ```
 
 ### Dawn flags

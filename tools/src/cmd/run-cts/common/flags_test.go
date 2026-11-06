@@ -27,7 +27,7 @@
 
 package common
 
-// Write unittests for defaultCtsPath().
+// Write unittests for DefaultCtsPath().
 import (
 	"path/filepath"
 	"testing"
@@ -39,13 +39,13 @@ import (
 
 func TestDefaultCtsPath_NoDawnRoot(t *testing.T) {
 	wrapper := oswrapper.CreateFSTestOSWrapper()
-	require.Equal(t, "", defaultCtsPath(wrapper))
+	require.Equal(t, "", DefaultCtsPath(wrapper))
 }
 
 func TestDefaultCtsPath_NoCts(t *testing.T) {
 	wrapper, err := fileutils.CreateFSTestOSWrapperWithFakeDawnRoot()
 	require.NoErrorf(t, err, "Error creating fake Dawn root: %v", err)
-	require.Equal(t, "", defaultCtsPath(wrapper))
+	require.Equal(t, "", DefaultCtsPath(wrapper))
 }
 
 func TestDefaultCtsPath_CtsExists(t *testing.T) {
@@ -53,5 +53,5 @@ func TestDefaultCtsPath_CtsExists(t *testing.T) {
 	require.NoErrorf(t, err, "Error creating fake Dawn root: %v", err)
 	expectedPath := filepath.Join(fileutils.DawnRoot(wrapper), "third_party", "webgpu-cts")
 	wrapper.MkdirAll(expectedPath, 0o666)
-	require.Equal(t, expectedPath, defaultCtsPath(wrapper))
+	require.Equal(t, expectedPath, DefaultCtsPath(wrapper))
 }
