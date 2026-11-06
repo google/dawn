@@ -237,6 +237,7 @@ enum class Toggle {
     Limit3DTexturePotFootprintTo4GB,
     LimitMaxTextureBytesTo1MB,
     VulkanUseDescriptorUpdateTemplate,
+    D3D12DisableRelaxedBufferTextureCopyAlignmentForCompressedFormats,
 
     EnumCount,
     InvalidEnum = EnumCount,

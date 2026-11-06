@@ -993,6 +993,13 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"vulkan_use_descriptor_update_template",
       "Use VkDescriptorUpdateTemplate to update descriptor sets in BindGroup.",
       "https://crbug.com/438554018", ToggleStage::Device}},
+    {Toggle::D3D12DisableRelaxedBufferTextureCopyAlignmentForCompressedFormats,
+     {"d3d12_disable_relaxed_buffer_texture_copy_alignment_for_compressed_formats",
+      "Don't use the relaxed row pitch and offset alignment enabled by "
+      "d3d12_relax_buffer_texture_copy_pitch_and_offset_alignment in buffer-texture copies of "
+      "block-compressed textures. Works around a device hang on some Intel GPUs when many "
+      "buffer-texture copies of BC textures are recorded with unaligned buffer offsets.",
+      "https://crbug.com/581018327", ToggleStage::Device}},
 
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};

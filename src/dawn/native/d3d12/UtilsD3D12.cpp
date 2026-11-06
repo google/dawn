@@ -314,8 +314,14 @@ void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection directio
     const TypedTexelBlockInfo& blockInfo = GetBlockInfo(textureCopy);
     BlockOrigin3D origin = blockInfo.ToBlock(textureCopy.origin);
 
-    bool useRelaxedRowPitchAndOffset = texture->GetDevice()->IsToggleEnabled(
-        Toggle::D3D12RelaxBufferTextureCopyPitchAndOffsetAlignment);
+    const DeviceBase* device = texture->GetDevice();
+    bool useRelaxedRowPitchAndOffset =
+        device->IsToggleEnabled(Toggle::D3D12RelaxBufferTextureCopyPitchAndOffsetAlignment);
+    if (device->IsToggleEnabled(
+            Toggle::D3D12DisableRelaxedBufferTextureCopyAlignmentForCompressedFormats) &&
+        texture->GetFormat().isCompressed) {
+        useRelaxedRowPitchAndOffset = false;
+    }
 
     switch (texture->GetDimension()) {
         case wgpu::TextureDimension::Undefined:

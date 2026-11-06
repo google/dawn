@@ -895,6 +895,15 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::UseBlitForBufferToStencilTextureCopy, true);
     }
 
+    // Many B2T copies of BC textures with relaxed buffer offsets in a single submit may not work
+    // on Intel Gen12 and Xe_LPG GPUs. See https://crbug.com/581018327 for more information.
+    if (gpu_info::IsIntelGen12LP(vendorId, deviceId) ||
+        gpu_info::IsIntelGen12HP(vendorId, deviceId) ||
+        gpu_info::IsIntelXeLPG(vendorId, deviceId)) {
+        deviceToggles->Default(
+            Toggle::D3D12DisableRelaxedBufferTextureCopyAlignmentForCompressedFormats, true);
+    }
+
     // Workaround for the depth-stencil texture fails to be cleared if the clear value is specified
     // in the D3D12_RENDER_PASS_BEGINNING_ACCESS structure of BeginRenderPass on Intel ACM and ARL.
     // This workaround is needed on the driver version < 32.0.101.8247.

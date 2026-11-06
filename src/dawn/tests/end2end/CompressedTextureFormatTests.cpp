@@ -25,9 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
+#include <array>
+#include <utility>
 #include <vector>
 
 #include "src/dawn/common/Constants.h"
+#include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
@@ -1352,6 +1356,124 @@ DAWN_INSTANTIATE_TEST(CompressedTextureFormatSpecificTest,
                       OpenGLESBackend(),
                       VulkanBackend(),
                       VulkanBackend({"use_temporary_buffer_in_texture_to_texture_copy"}),
+                      WebGPUBackend());
+
+class CompressedTextureManyWriteTextureTest : public CompressedTextureFormatSpecificTest {};
+
+// Regression test for a driver issue on Intel Gen12 and Xe LPG GPUs on D3D12 when writing many BC1
+// textures in one submit.
+TEST_P(CompressedTextureManyWriteTextureTest, BC1MipsAndLayersInOneSubmit) {
+    // CopyT2B for compressed texture formats is unimplemented on OpenGL.
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
+
+    constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::BC1RGBAUnorm;
+    constexpr uint32_t kBlockSize = 4;
+    constexpr uint32_t kBlockBytes = 8;
+
+    constexpr std::array<uint32_t, 10> kFillerTextureSizes = {128, 128, 512, 128, 256,
+                                                              128, 128, 256, 128, 512};
+    constexpr uint32_t kFillerRepeatCount = 10;
+    constexpr uint32_t kCheckedTextureSize = 128;
+    constexpr uint32_t kCheckedTextureCount = 6;
+    constexpr uint32_t kCheckedMipLevels = ConstexprLog2(kCheckedTextureSize) + 1;
+
+    auto MakeData = [](uint32_t textureIndex, uint32_t mip, size_t byteSize) {
+        std::vector<uint8_t> data(byteSize);
+        uint32_t seed = textureIndex * 131 + mip * 17;
+        for (size_t i = 0; i < byteSize; ++i) {
+            data[i] = static_cast<uint8_t>(seed + i);
+        }
+        return data;
+    };
+
+    // Creates a BC1 texture with a full mip chain and calls WriteTexture on every mip level. The
+    // writes are not submitted until the next queue.Submit().
+    auto CreateAndWriteTexture = [&](uint32_t size, uint32_t textureIndex) {
+        uint32_t mipLevels = Log2(size) + 1;
+
+        wgpu::TextureDescriptor descriptor;
+        descriptor.size = {size, size, 1};
+        descriptor.mipLevelCount = mipLevels;
+        descriptor.format = kFormat;
+        descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc |
+                           wgpu::TextureUsage::TextureBinding;
+        wgpu::Texture texture = device.CreateTexture(&descriptor);
+
+        for (uint32_t mip = 0; mip < mipLevels; ++mip) {
+            uint32_t blocks = std::max(1u, (size >> mip) / kBlockSize);
+            uint32_t bytesPerRow = blocks * kBlockBytes;
+            std::vector<uint8_t> data = MakeData(textureIndex, mip, bytesPerRow * blocks);
+
+            wgpu::TexelCopyTextureInfo dst =
+                utils::CreateTexelCopyTextureInfo(texture, mip, {0, 0, 0});
+            wgpu::TexelCopyBufferLayout layout =
+                utils::CreateTexelCopyBufferLayout(0, bytesPerRow, blocks);
+            wgpu::Extent3D copySize = {blocks * kBlockSize, blocks * kBlockSize, 1};
+            queue.WriteTexture(&dst, data.data(), data.size(), &layout, &copySize);
+        }
+        return texture;
+    };
+
+    // The driver issue only shows up after a large number of BC1 WriteTextures of various sizes
+    // are recorded into the same submit, so first write a batch of textures whose contents we
+    // don't check.
+    std::vector<wgpu::Texture> fillerTextures;
+    uint32_t textureIndex = 0;
+    for (uint32_t repeat = 0; repeat < kFillerRepeatCount; ++repeat) {
+        for (uint32_t size : kFillerTextureSizes) {
+            fillerTextures.push_back(CreateAndWriteTexture(size, textureIndex++));
+        }
+    }
+
+    // Then write the textures whose contents we check. These would be corrupted by the driver
+    // issue.
+    std::array<wgpu::Texture, kCheckedTextureCount> checkedTextures;
+    const uint32_t firstCheckedTextureIndex = textureIndex;
+    for (wgpu::Texture& texture : checkedTextures) {
+        texture = CreateAndWriteTexture(kCheckedTextureSize, textureIndex++);
+    }
+
+    // Submit all the WriteTextures above together.
+    queue.Submit(0, nullptr);
+
+    for (auto [i, texture] : Enumerate(checkedTextures)) {
+        for (uint32_t mip : {0u, kCheckedMipLevels - 1}) {
+            uint32_t blocks = std::max(1u, (kCheckedTextureSize >> mip) / kBlockSize);
+            uint32_t bytesPerRow = blocks * kBlockBytes;
+            std::vector<uint8_t> expected = MakeData(
+                firstCheckedTextureIndex + static_cast<uint32_t>(i), mip, bytesPerRow * blocks);
+
+            // EXPECT_TEXTURE_EQ doesn't support compressed formats, so do the T2B copy manually.
+            // TODO(582552061): Support compressed texture formats with `EXPECT_TEXTURE_EQ`.
+            wgpu::BufferDescriptor bufferDescriptor;
+            bufferDescriptor.size = Align(expected.size(), 4);
+            bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+            wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
+
+            wgpu::TexelCopyTextureInfo src =
+                utils::CreateTexelCopyTextureInfo(texture, mip, {0, 0, 0});
+            wgpu::TexelCopyBufferInfo dst =
+                utils::CreateTexelCopyBufferInfo(buffer, 0, kTextureBytesPerRowAlignment, blocks);
+            wgpu::Extent3D copySize = {blocks * kBlockSize, blocks * kBlockSize, 1};
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            encoder.CopyTextureToBuffer(&src, &dst, &copySize);
+            wgpu::CommandBuffer commands = encoder.Finish();
+            queue.Submit(1, &commands);
+
+            EXPECT_BUFFER_U8_RANGE_EQ(expected.data(), buffer, 0, expected.size());
+        }
+    }
+}
+
+DAWN_INSTANTIATE_TEST(CompressedTextureManyWriteTextureTest,
+                      D3D11Backend(),
+                      D3D12Backend(),
+                      D3D12Backend({},
+                                   {"d3d12_relax_buffer_texture_copy_pitch_and_offset_alignment"}),
+                      MetalBackend(),
+                      VulkanBackend(),
                       WebGPUBackend());
 
 class CompressedTextureWriteTextureTest : public CompressedTextureFormatTest {
