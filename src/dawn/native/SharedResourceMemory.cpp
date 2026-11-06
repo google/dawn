@@ -305,12 +305,6 @@ MaybeUnknownError SharedResourceMemory::EndAccess(Resource* resource, EndAccessS
     }
 
     PendingFenceList fenceList;
-    // The state transitions to NotAccessed if the exclusive access ends, or the last concurrent
-    // read ends. When this occurs, acquire any pending fences that may remain. This occurs if
-    // the accesses never acquired them.
-    if (mContents->mSharedResourceAccessState == SharedResourceAccessState::NotAccessed) {
-        mContents->AcquirePendingFences(&fenceList);
-    }
 
     DAWN_CHECK(!resource->IsError());
     ExecutionSerial lastUsageSerial = resource->OnEndAccess();
@@ -335,6 +329,18 @@ MaybeUnknownError SharedResourceMemory::EndAccess(Resource* resource, EndAccessS
         } else {
             err = result.AcquireError();
         }
+    }
+
+    // The state transitions to NotAccessed if the exclusive access ends, or the last concurrent
+    // read ends. When this occurs, acquire any pending fences that may remain. This occurs if
+    // the accesses never acquired them. Note that this must happen after EndAccessInternal, which
+    // flushes the commands using the resource, since backends may only acquire and wait on the
+    // pending fences when those commands are submitted. Otherwise, the fences would be returned
+    // here without the submitted commands waiting on them.
+    if (mContents->mSharedResourceAccessState == SharedResourceAccessState::NotAccessed) {
+        PendingFenceList pendingFences;
+        mContents->AcquirePendingFences(&pendingFences);
+        fenceList.insert(fenceList.end(), pendingFences.begin(), pendingFences.end());
     }
 
     // Copy the fences to the output state.
