@@ -33,7 +33,6 @@
 #include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/ityp_array.h"
 #include "src/dawn/common/ityp_vector.h"
-#include "src/utils/compiler.h"
 #include "src/utils/span.h"
 #include "src/utils/typed_integer.h"
 
@@ -44,12 +43,12 @@ using ::testing::Test;
 
 class EnumeratorTest : public Test {
   protected:
-    template <typename Index, typename Thing, typename Value>
-    void Check(Thing thingToEnumerate, const Value* values) {
+    template <typename Index, typename Thing>
+    void Check(Thing thingToEnumerate) {
         size_t i = 0;
         for (auto [index, value] : Enumerate(thingToEnumerate)) {
             ASSERT_EQ(index, Index(i));
-            DAWN_UNSAFE_TODO(ASSERT_EQ(value, values[i]));
+            ASSERT_EQ(value, thingToEnumerate[index]);
             i++;
         }
     }
@@ -72,7 +71,7 @@ TEST_F(EnumeratorTest, StdArray) {
 
     // Non-empty array
     std::array<uint32_t, 3> thing = {37, 45, 67};
-    Check<size_t>(thing, thing.data());
+    Check<size_t>(thing);
 }
 
 // Test that Enumerate works with std::vector
@@ -83,7 +82,7 @@ TEST_F(EnumeratorTest, StdVector) {
 
     // Non-empty vector
     std::vector<uint32_t> thing = {{37, 45, 67}};
-    Check<size_t>(thing, thing.data());
+    Check<size_t>(thing);
 }
 
 // Test that Enumerate works with ityp::array
@@ -94,7 +93,7 @@ TEST_F(EnumeratorTest, ITypArray) {
 
     // Non-empty array
     ityp::array<Int, uint32_t, 3> thing = {37u, 45u, 67u};
-    Check<Int>(thing, thing.data());
+    Check<Int>(thing);
 }
 
 // Test that Enumerate works with ityp::span
@@ -113,7 +112,7 @@ TEST_F(EnumeratorTest, ITypSpan) {
     // Non-empty span
     ityp::array<Int, uint32_t, 3> backingArray = {37u, 45u, 67u};
     ityp::span<Int, uint32_t> thing{backingArray};
-    Check<Int>(thing, thing.data());
+    Check<Int>(thing);
 }
 
 // Test that Enumerate works with ityp::vector
@@ -124,7 +123,7 @@ TEST_F(EnumeratorTest, ITypVector) {
 
     // Non-empty vector
     ityp::vector<Int, uint32_t> thing = {{37, 45, 67}};
-    Check<Int>(thing, thing.data());
+    Check<Int>(thing);
 }
 
 // Test that Enumerate(const container) will give const reference to the values.

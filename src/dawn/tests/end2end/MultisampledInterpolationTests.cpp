@@ -198,8 +198,7 @@ TEST_P(MultisampledInterpolationTest, SamplePositions) {
 
     std::array<wgpu::TextureView, 4> colorViews;
     for (int i = 0; i < 4; i++) {
-        auto& each = DAWN_UNSAFE_TODO(colorViews[i]);
-        each = DAWN_UNSAFE_TODO(colorTextures[i]).CreateView();
+        colorViews[i] = colorTextures[i].CreateView();
     }
     static constexpr uint64_t kResultSize = 4 * sizeof(float) + 4 * sizeof(float);
     uint64_t alignedResultSize = Align(kResultSize, 256);

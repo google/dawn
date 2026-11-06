@@ -30,7 +30,6 @@
 
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -269,7 +268,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
     for (uint32_t i = 0, b = 0; i < kIterations; ++i, b = 1 - b) {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
-        pass.SetBindGroup(0, DAWN_UNSAFE_TODO(bindGroups[b]));
+        pass.SetBindGroup(0, bindGroups[b]);
         pass.DispatchWorkgroups(kNumValues / 4);
         pass.End();
     }

@@ -42,7 +42,6 @@
 #include "src/dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 #include "src/dawn/tests/white_box/SharedTextureMemoryTests.h"
-#include "src/utils/compiler.h"
 
 namespace dawn::native::vulkan {
 namespace {
@@ -635,7 +634,7 @@ TEST_P(SharedTextureMemoryOpaqueFDValidationTest, ViewFormatRequirements) {
         }
         {
             // Passing the second is invalid.
-            imageFormatListInfo.pViewFormats = DAWN_UNSAFE_TODO(vkFormats.data() + 1);
+            imageFormatListInfo.pViewFormats = &vkFormats[1];
             imageFormatListInfo.viewFormatCount = 1;
 
             WithSTMOpaqueFDDescriptorFor(

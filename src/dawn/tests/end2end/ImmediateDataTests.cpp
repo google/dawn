@@ -366,8 +366,7 @@ TEST_P(ImmediateDataTests, SetImmediatesWithRangeOffset) {
         // data range.
         computePassEncoder.SetImmediates(kHalfImmediateDataSize, immediateData.data(),
                                          kHalfImmediateDataSize);
-        computePassEncoder.SetImmediates(0, DAWN_UNSAFE_TODO(immediateData.data() + 2),
-                                         kHalfImmediateDataSize);
+        computePassEncoder.SetImmediates(0, &immediateData[2], kHalfImmediateDataSize);
         computePassEncoder.SetBindGroup(0, CreateBindGroup());
         computePassEncoder.DispatchWorkgroups(1);
         computePassEncoder.End();

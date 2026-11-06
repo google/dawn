@@ -29,7 +29,6 @@
 
 #include "gtest/gtest.h"
 #include "src/dawn/native/EnumMaskIterator.h"
-#include "src/utils/compiler.h"
 
 namespace dawn::native {
 namespace {
@@ -78,7 +77,7 @@ TEST(EnumMaskIteratorTests, All) {
     uint32_t i = 0;
     TestAspect aspects = TestAspect::Color | TestAspect::Depth | TestAspect::Stencil;
     for (TestAspect aspect : IterateEnumMask(aspects)) {
-        DAWN_UNSAFE_TODO(EXPECT_EQ(aspect, expected[i++]));
+        EXPECT_EQ(aspect, expected[i++]);
     }
 }
 
@@ -87,7 +86,7 @@ TEST(EnumMaskIteratorTests, Partial) {
     uint32_t i = 0;
     TestAspect aspects = TestAspect::Stencil | TestAspect::Color;
     for (TestAspect aspect : IterateEnumMask(aspects)) {
-        DAWN_UNSAFE_TODO(EXPECT_EQ(aspect, expected[i++]));
+        EXPECT_EQ(aspect, expected[i++]);
     }
 }
 

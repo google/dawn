@@ -25,9 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <span>
 #include <vector>
 
-#include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
@@ -188,14 +188,13 @@ class PrimitiveTopologyTest : public DawnTest {
     }
 
     struct LocationSpec {
-        raw_ptr<const TestLocation, AllowPtrArithmetic> locations;
-        size_t count;
+        std::span<const TestLocation> locations;
         bool include;
     };
 
     template <std::size_t N>
     constexpr LocationSpec TestPoints(TestLocation const (&points)[N], bool include) noexcept {
-        return {points, N, include};
+        return {points, include};
     }
 
     // Draw the vertices with the given primitive topology and check the pixel values of the test
@@ -233,16 +232,13 @@ class PrimitiveTopologyTest : public DawnTest {
         queue.Submit(1, &commands);
 
         for (auto& locationSpec : locationSpecs) {
-            for (size_t i = 0; i < locationSpec.count; ++i) {
+            for (const TestLocation& location : locationSpec.locations) {
                 // If this pixel is included, check that it is green. Otherwise, check that it is
                 // black
                 utils::RGBA8 color =
                     locationSpec.include ? utils::RGBA8::kGreen : utils::RGBA8::kZero;
-                DAWN_UNSAFE_TODO(EXPECT_PIXEL_RGBA8_EQ(color, renderPass.color,
-                                                       locationSpec.locations[i].x,
-                                                       locationSpec.locations[i].y))
-                    << "Expected (" << DAWN_UNSAFE_TODO(locationSpec.locations[i]).x << ", "
-                    << DAWN_UNSAFE_TODO(locationSpec.locations[i]).y << ") to be " << color;
+                EXPECT_PIXEL_RGBA8_EQ(color, renderPass.color, location.x, location.y)
+                    << "Expected (" << location.x << ", " << location.y << ") to be " << color;
             }
         }
     }
