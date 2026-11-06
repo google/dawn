@@ -470,17 +470,22 @@ dawn_test("dawn_unittests") {
   if (checkout_v8 && dawn_node && is_clang) {
     sources += [
       "${dawn_root}/src/dawn/node/test/EventLoopTest.cpp",
+      "${dawn_root}/src/dawn/node/test/FileBundleTest.cpp",
       "${dawn_root}/src/dawn/node/test/NapiV8Test.cpp",
       "${dawn_root}/src/dawn/node/test/PolyfillsTest.cpp",
+      "${dawn_root}/src/dawn/node/test/TestZip.cpp",
+      "${dawn_root}/src/dawn/node/test/TestZip.h",
       "${dawn_root}/src/dawn/node/test/V8TestEnvironment.cpp",
       "${dawn_root}/src/dawn/node/test/V8TestEnvironment.h",
     ]
     deps += [
       "${dawn_root}/src/dawn/node/napi_v8",
       "${dawn_root}/src/dawn/node/standalone:event_loop",
+      "${dawn_root}/src/dawn/node/standalone:file_bundle",
       "${dawn_root}/src/dawn/node/standalone:polyfills",
       "//third_party/v8/src:v8",
       "//third_party/v8/src:v8_libplatform",
+      "//third_party/zlib:minizip",
     ]
   }
 

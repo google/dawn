@@ -52,6 +52,27 @@ if (checkout_v8 && dawn_node) {
     public_deps = [ "${dawn_abseil_dir}:absl" ]
   }
 
+  config("file_bundle_public_config") {
+    include_dirs = [ "${dawn_root}" ]
+  }
+
+  source_set("file_bundle") {
+    sources = [
+      "FileBundle.cpp",
+      "FileBundle.h",
+    ]
+
+    public_configs = [ ":file_bundle_public_config" ]
+
+    # Public because FileBundle.h includes absl::flat_hash_map, dawn::Result and
+    # minizip's unzip.h.
+    public_deps = [
+      "${dawn_abseil_dir}:absl",
+      "${dawn_root}/src/dawn/common",
+      "//third_party/zlib:minizip",
+    ]
+  }
+
   config("polyfills_public_config") {
     include_dirs = [
       "${dawn_root}",
