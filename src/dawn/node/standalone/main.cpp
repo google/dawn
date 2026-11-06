@@ -39,6 +39,7 @@
 #include "src/dawn/node/Module.h"
 #include "src/dawn/node/napi_v8/napi_v8.h"
 #include "src/dawn/node/standalone/EventLoop.h"
+#include "src/dawn/node/standalone/FileBundle.h"
 #include "src/dawn/node/standalone/Polyfills.h"
 #include "src/dawn/utils/CommandLineParser.h"
 
@@ -88,9 +89,9 @@ class StandaloneRunner {
     }
 
   private:
-    // Parses command-line flags and switches the working directory to `--cts-dir`. Returns an exit
-    // code if the process should terminate early (0 for `--help`, 1 on error), or `std::nullopt`
-    // to continue running the CTS.
+    // Parses command-line flags, then opens `--cts-zip` or switches the working directory to
+    // `--cts-dir`. Returns an exit code if the process should terminate early (0 for `--help`, 1 on
+    // error), or `std::nullopt` to continue running the CTS.
     std::optional<int> ParseCommandLine(int argc, const char* argv[]) {
         auto parse_result = parser_.Parse(argc, argv);
         if (!parse_result.success) {
@@ -126,6 +127,17 @@ class StandaloneRunner {
             return 1;
         }
 
+        if (cts_zip_opt_.IsSet()) {
+            if (cts_dir_opt_.IsSet()) {
+                std::cerr << "Error: --cts-zip and --cts-dir cannot be used together.\n";
+                return 1;
+            }
+            if (!OpenCtsZip(cts_zip_opt_.GetValue())) {
+                return 1;
+            }
+            return std::nullopt;
+        }
+
         // The CTS `cmdline.js` script requires the process working directory to be the root of the
         // CTS checkout: it checks that `src/common/runtime/cmdline.ts` exists relative to the
         // current working directory and loads test resources from `out-node/resources`.
@@ -157,6 +169,39 @@ class StandaloneRunner {
         }
 
         return std::nullopt;
+    }
+
+    // Opens the zip at `path` as the JavaScript's working directory, the CTS that cmdline.js runs.
+    // Returns false on failure.
+    bool OpenCtsZip(const std::string& path) {
+        dawn::Result<std::unique_ptr<dawn::node::standalone::FileBundle>, std::string> bundle =
+            dawn::node::standalone::FileBundle::OpenZip(path);
+        if (bundle.IsError()) {
+            std::cerr << "Error: failed to open --cts-zip '" << path
+                      << "': " << *bundle.AcquireError() << ".\n";
+            return false;
+        }
+        bundle_ = bundle.AcquireSuccess();
+        std::error_code ec;
+        bundle_root_ = std::filesystem::absolute(path, ec).string();
+        if (ec) {
+            std::cerr << "Error: failed to resolve --cts-zip '" << path << "': " << ec.message()
+                      << "\n";
+            return false;
+        }
+        if (bundle_->Stat("src/common/runtime/cmdline.ts") ==
+                dawn::node::standalone::FileBundle::Kind::kNotFound ||
+            bundle_->Stat("out-node/common/runtime/cmdline.js") ==
+                dawn::node::standalone::FileBundle::Kind::kNotFound ||
+            bundle_->Stat("out-node/resources") ==
+                dawn::node::standalone::FileBundle::Kind::kNotFound) {
+            std::cerr << "Error: '" << path
+                      << "' does not hold a built WebGPU CTS (it needs "
+                         "'src/common/runtime/cmdline.ts', 'out-node/common/runtime/cmdline.js' "
+                         "and 'out-node/resources').\n";
+            return false;
+        }
+        return true;
     }
 
     // Builds the `process.argv` array expected by the CTS `cmdline.js` script from the parsed
@@ -267,6 +312,10 @@ class StandaloneRunner {
     void InitializePolyfills(Napi::Env env, dawn::node::standalone::EventLoop& loop) {
         dawn::node::standalone::PolyfillOptions polyfill_options;
         polyfill_options.argv = BuildJsArgs();
+        if (bundle_) {
+            polyfill_options.bundle = bundle_.get();
+            polyfill_options.bundle_root = bundle_root_;
+        }
         dawn::node::standalone::RegisterPolyfills(env, loop, polyfill_options);
     }
 
@@ -331,6 +380,10 @@ class StandaloneRunner {
         return exit_code;
     }
 
+    // The contents of --cts-zip, and the absolute path that stands for it in JavaScript.
+    std::unique_ptr<dawn::node::standalone::FileBundle> bundle_;
+    std::string bundle_root_;
+
     dawn::utils::CommandLineParser parser_;
     dawn::utils::CommandLineParser::BoolOption& help_opt_ = parser_.AddHelp();
     dawn::utils::CommandLineParser::StringOption& cts_dir_opt_ =
@@ -338,6 +391,12 @@ class StandaloneRunner {
             .AddString("cts-dir",
                        "Directory containing the WebGPU CTS (default: third_party/webgpu-cts)")
             .Parameter("dir");
+    dawn::utils::CommandLineParser::StringOption& cts_zip_opt_ =
+        parser_
+            .AddString("cts-zip",
+                       "Zip of the WebGPU CTS to run from without extracting it; cannot be used "
+                       "with --cts-dir")
+            .Parameter("file.zip");
     dawn::utils::CommandLineParser::StringListOption& query_opt_ =
         parser_.AddStringList("query", "CTS test query to run (e.g. 'webgpu:*'); may be repeated")
             .ShortName('q')

@@ -189,6 +189,33 @@ line, from a file, or from stdin when the file is `-`, and `--list` prints the
 matching test cases instead of running them. Pass `--help` to list all
 supported flags.
 
+### Running from a zip
+
+The runner can also read the compiled CTS straight out of a zip, which is
+quicker to copy to another machine than the ~2,200 files of `out-node/`. The zip
+holds `out-node/` without its `.map` files, which nothing reads at run time, and
+`src/common/runtime/cmdline.ts`, with paths relative to the CTS directory. On
+Linux or macOS, build it from the Dawn root with:
+
+```sh
+rm -f cts.zip && (cd third_party/webgpu-cts &&
+    zip -q -r ../../cts.zip out-node src/common/runtime/cmdline.ts -x '*.map')
+```
+
+On Windows, the equivalent is run from `third_party\webgpu-cts` in PowerShell or
+a Command Prompt:
+
+```powershell
+tar.exe -a -c -f ..\..\cts.zip --exclude="*.map" out-node src/common/runtime/cmdline.ts
+```
+
+Then pass it with `--cts-zip`, which cannot be combined with `--cts-dir`:
+
+```sh
+out/Release/dawn_standalone_cts_runner --cts-zip cts.zip \
+    -q 'webgpu:api,operation,queue,*'
+```
+
 ### Dawn flags
 
 `--dawn-flag` is passed through to the Dawn provider. It takes a single
@@ -217,7 +244,8 @@ The recognised keys are:
 
 ### Android by hand
 
-Only the executable and the compiled CTS JavaScript are needed on the device.
+Only the executable and the zip from [Running from a zip](#running-from-a-zip)
+are needed on the device.
 
 > [!NOTE]
 > `dawn.node` is deliberately **not** pushed. The runner's module loader returns
@@ -226,25 +254,17 @@ Only the executable and the compiled CTS JavaScript are needed on the device.
 
 ```sh
 DEV=/data/local/tmp/cts
-adb shell "mkdir -p $DEV/bin $DEV/webgpu-cts"
+adb shell "mkdir -p $DEV/bin"
 
 adb push out/Android/dawn_standalone_cts_runner $DEV/bin/
 adb shell "chmod 755 $DEV/bin/dawn_standalone_cts_runner"
-
-# out-node is ~2200 files; a single archive transfers far faster than letting
-# adb sync each file individually. Include cmdline.ts as well, which both the
-# runner and cmdline.js check as a repository-root marker.
-tar -C third_party/webgpu-cts -czf /tmp/cts.tgz \
-    out-node src/common/runtime/cmdline.ts
-adb push /tmp/cts.tgz $DEV/webgpu-cts/
-adb shell "cd $DEV/webgpu-cts && tar xzf cts.tgz && rm cts.tgz"
-rm /tmp/cts.tgz
+adb push cts.zip $DEV/
 ```
 
 Then run it through `adb shell`:
 
 ```sh
 adb shell '/data/local/tmp/cts/bin/dawn_standalone_cts_runner \
-    --cts-dir /data/local/tmp/cts/webgpu-cts \
+    --cts-zip /data/local/tmp/cts/cts.zip \
     -q "webgpu:api,operation,queue,*"'
 ```

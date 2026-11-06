@@ -363,6 +363,7 @@ if (checkout_v8 && dawn_node) {
       "$dawn_root/src/dawn/native",
       "$dawn_root/src/dawn/utils:system_utils",
       "${dawn_root}/src/dawn/node/napi_v8",
+      "${dawn_root}/src/dawn/node/standalone:file_bundle",
       "${dawn_root}/src/dawn/node/standalone:polyfills",
       "//third_party/v8/src:v8",
       "//third_party/v8/src:v8_libplatform",
