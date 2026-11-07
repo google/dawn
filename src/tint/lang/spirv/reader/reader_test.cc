@@ -902,5 +902,174 @@ $B1: {  # root
 )");
 }
 
+// Image operands are dropped only when WGSL guarantees the same behaviour, and rejected otherwise.
+// https://www.w3.org/TR/WGSL/#private-vs-non-private
+// https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html#Image_Operands
+std::string ImageOperandsModule(std::string body) {
+    return R"(
+               OpCapability Shader
+               OpCapability VulkanMemoryModel
+               OpCapability VulkanMemoryModelDeviceScope
+               OpExtension "SPV_KHR_vulkan_memory_model"
+               OpMemoryModel Logical Vulkan
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %fimg DescriptorSet 0
+               OpDecorate %fimg Binding 0
+               OpDecorate %tex DescriptorSet 0
+               OpDecorate %tex Binding 1
+               OpDecorate %smp DescriptorSet 0
+               OpDecorate %smp Binding 2
+       %void = OpTypeVoid
+         %fn = OpTypeFunction %void
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+        %f32 = OpTypeFloat 32
+      %vec2i = OpTypeVector %i32 2
+      %vec2f = OpTypeVector %f32 2
+      %vec4f = OpTypeVector %f32 4
+      %vec4i = OpTypeVector %i32 4
+      %i32_0 = OpConstant %i32 0
+    %vec4f_0 = OpConstantNull %vec4f
+    %coord_i = OpConstantNull %vec2i
+    %coord_f = OpConstantNull %vec2f
+     %device = OpConstant %u32 1
+  %workgroup = OpConstant %u32 2
+%queue_family = OpConstant %u32 5
+   %subgroup = OpConstant %u32 3
+ %invocation = OpConstant %u32 4
+    %fimg_ty = OpTypeImage %f32 2D 0 0 0 2 Rgba32f
+     %tex_ty = OpTypeImage %i32 2D 0 0 0 1 Unknown
+     %smp_ty = OpTypeSampler
+      %si_ty = OpTypeSampledImage %tex_ty
+   %fimg_ptr = OpTypePointer UniformConstant %fimg_ty
+    %tex_ptr = OpTypePointer UniformConstant %tex_ty
+    %smp_ptr = OpTypePointer UniformConstant %smp_ty
+       %fimg = OpVariable %fimg_ptr UniformConstant
+        %tex = OpVariable %tex_ptr UniformConstant
+        %smp = OpVariable %smp_ptr UniformConstant
+       %main = OpFunction %void None %fn
+      %start = OpLabel
+         %fi = OpLoad %fimg_ty %fimg
+          %t = OpLoad %tex_ty %tex
+          %s = OpLoad %smp_ty %smp
+         %si = OpSampledImage %si_ty %t %s
+)" + body +
+           R"(
+               OpReturn
+               OpFunctionEnd
+)";
+}
+
+constexpr const char* kImageOperandsRoot = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_storage_2d<rgba32float, read_write>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, texture_2d<i32>, read> = var @binding_point(0, 1)
+  %3:ptr<handle, sampler, read> = var @binding_point(0, 2)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %5:texture_storage_2d<rgba32float, read_write> = load %1
+    %6:texture_2d<i32> = load %2
+    %7:sampler = load %3
+)";
+
+// NonPrivateTexel and Workgroup scope MakeTexelVisible/MakeTexelAvailable are dropped.
+TEST_F(SpirvReaderTest, ImageOperands_NonPrivateTexel_WorkgroupScope) {
+    auto got = Run(ImageOperandsModule(R"(
+          %1 = OpImageRead %vec4f %fi %coord_i MakeTexelVisible|NonPrivateTexel %workgroup
+               OpImageWrite %fi %coord_i %1 MakeTexelAvailable|NonPrivateTexel %workgroup
+          %2 = OpImageFetch %vec4i %t %coord_i Lod|NonPrivateTexel %i32_0
+          %3 = OpImageGather %vec4i %si %coord_f %i32_0 ConstOffset|NonPrivateTexel %coord_i
+)"),
+                   SPV_ENV_VULKAN_1_1);
+    ASSERT_EQ(got, Success);
+    EXPECT_EQ(got,
+              std::string(kImageOperandsRoot) + R"(    %8:vec4<f32> = textureLoad %5, vec2<i32>(0i)
+    %9:void = textureStore %5, vec2<i32>(0i), %8
+    %10:vec4<i32> = textureLoad %6, vec2<i32>(0i), 0i
+    %11:vec4<i32> = textureGather 0i, %6, %7, vec2<f32>(0.0f), vec2<i32>(0i)
+    ret
+  }
+}
+)");
+}
+
+// Subgroup and Invocation scope MakeTexelVisible/MakeTexelAvailable are narrower than the
+// Workgroup scope WGSL implies, so they are dropped.
+TEST_F(SpirvReaderTest, ImageOperands_MakeTexel_NarrowerScopes) {
+    auto got = Run(ImageOperandsModule(R"(
+          %1 = OpImageRead %vec4f %fi %coord_i MakeTexelVisible|NonPrivateTexel %subgroup
+               OpImageWrite %fi %coord_i %1 MakeTexelAvailable|NonPrivateTexel %invocation
+)"),
+                   SPV_ENV_VULKAN_1_1);
+    ASSERT_EQ(got, Success);
+    EXPECT_EQ(got,
+              std::string(kImageOperandsRoot) + R"(    %8:vec4<f32> = textureLoad %5, vec2<i32>(0i)
+    %9:void = textureStore %5, vec2<i32>(0i), %8
+    ret
+  }
+}
+)");
+}
+
+// MakeTexelVisible with a scope wider than Workgroup is rejected.
+TEST_F(SpirvReaderTest, ImageOperands_MakeTexelVisible_QueueFamilyScope) {
+    auto got = Run(ImageOperandsModule(R"(
+          %1 = OpImageRead %vec4f %fi %coord_i MakeTexelVisible|NonPrivateTexel %queue_family
+)"),
+                   SPV_ENV_VULKAN_1_1);
+    ASSERT_NE(got, Success);
+    EXPECT_THAT(got.Failure().reason,
+                testing::HasSubstr(
+                    "MakeTexelVisible image operand with QueueFamily scope is not supported"));
+}
+
+// MakeTexelAvailable with a scope wider than Workgroup is rejected.
+TEST_F(SpirvReaderTest, ImageOperands_MakeTexelAvailable_DeviceScope) {
+    auto got = Run(ImageOperandsModule(R"(
+               OpImageWrite %fi %coord_i %vec4f_0 MakeTexelAvailable|NonPrivateTexel %device
+)"),
+                   SPV_ENV_VULKAN_1_1);
+    ASSERT_NE(got, Success);
+    EXPECT_THAT(
+        got.Failure().reason,
+        testing::HasSubstr("MakeTexelAvailable image operand with Device scope is not supported"));
+}
+
+// VolatileTexel is rejected on reads.
+TEST_F(SpirvReaderTest, ImageOperands_VolatileTexel_Read) {
+    auto got = Run(ImageOperandsModule(R"(
+          %1 = OpImageRead %vec4f %fi %coord_i VolatileTexel
+)"),
+                   SPV_ENV_VULKAN_1_1);
+    ASSERT_NE(got, Success);
+    EXPECT_THAT(got.Failure().reason,
+                testing::HasSubstr("VolatileTexel image operand is not supported"));
+}
+
+// VolatileTexel is rejected on writes.
+TEST_F(SpirvReaderTest, ImageOperands_VolatileTexel_Write) {
+    auto got = Run(ImageOperandsModule(R"(
+               OpImageWrite %fi %coord_i %vec4f_0 VolatileTexel
+)"),
+                   SPV_ENV_VULKAN_1_1);
+    ASSERT_NE(got, Success);
+    EXPECT_THAT(got.Failure().reason,
+                testing::HasSubstr("VolatileTexel image operand is not supported"));
+}
+
+// VolatileTexel is rejected on sampled image operations.
+TEST_F(SpirvReaderTest, ImageOperands_VolatileTexel_Gather) {
+    auto got = Run(ImageOperandsModule(R"(
+          %1 = OpImageGather %vec4i %si %coord_f %i32_0 VolatileTexel
+)"),
+                   SPV_ENV_VULKAN_1_1);
+    ASSERT_NE(got, Success);
+    EXPECT_THAT(got.Failure().reason,
+                testing::HasSubstr("VolatileTexel image operand is not supported"));
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

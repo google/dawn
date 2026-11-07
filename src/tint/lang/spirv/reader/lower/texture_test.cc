@@ -30,6 +30,7 @@
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
 #include "src/tint/lang/spirv/type/image.h"
+#include "src/tint/lang/spirv/type/literal.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"
 
 namespace tint::spirv::reader::lower {
@@ -657,6 +658,127 @@ $B1: {  # root
 }
 )";
     ASSERT_EQ(expect, str());
+}
+
+// Vulkan memory model image operands: the mask bits and the scope values they take.
+// https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html#Image_Operands
+constexpr uint32_t kMakeTexelAvailable = 0x100;
+constexpr uint32_t kMakeTexelVisible = 0x200;
+constexpr uint32_t kNonPrivateTexel = 0x400;
+constexpr uint32_t kVolatileTexel = 0x800;
+constexpr uint32_t kDeviceScope = 1;
+constexpr uint32_t kWorkgroupScope = 2;
+
+class SpirvReader_TextureMemoryModelTest : public SpirvReader_TextureTest {
+  protected:
+    core::ir::Value* Literal(uint32_t value) {
+        return b.Constant(mod.constant_values.Get<core::constant::Scalar<u32>>(
+            ty.Get<spirv::type::Literal>(), u32(value)));
+    }
+
+    /// Builds a compute entry point that reads a storage texture with `read_mask` and the given
+    /// extra read operands, then writes it back with `write_mask` and the extra write operands.
+    void Build(uint32_t read_mask,
+               Vector<core::ir::Value*, 1> read_operands,
+               uint32_t write_mask,
+               Vector<core::ir::Value*, 1> write_operands) {
+        auto* img_ty = ty.Get<spirv::type::Image>(
+            ty.f32(), Dim::kD2, Depth::kNotDepth, Arrayed::kNonArrayed,
+            Multisampled::kSingleSampled, Sampled::kReadWriteOpCompatible,
+            core::TexelFormat::kRgba32Float, core::Access::kReadWrite);
+        core::ir::Var* v = nullptr;
+        b.Append(mod.root_block, [&] {
+            v = b.Var("img", ty.ptr(handle, img_ty, read));
+            v->SetBindingPoint(0, 0);
+        });
+
+        auto* ep = b.ComputeFunction("main");
+        b.Append(ep->Block(), [&] {
+            core::ir::Value* img = b.Load(v)->Result();
+            core::ir::Value* coords = b.Zero(ty.vec2<i32>());
+            Vector<core::ir::Value*, 5> read_args = {img, coords, Literal(read_mask)};
+            for (auto* operand : read_operands) {
+                read_args.Push(operand);
+            }
+            core::ir::Value* texel = b.Call<spirv::ir::BuiltinCall>(
+                                          ty.vec4<f32>(), spirv::BuiltinFn::kImageRead, read_args)
+                                         ->Result();
+            Vector<core::ir::Value*, 6> write_args = {img, coords, texel, Literal(write_mask)};
+            for (auto* operand : write_operands) {
+                write_args.Push(operand);
+            }
+            b.Call<spirv::ir::BuiltinCall>(ty.void_(), spirv::BuiltinFn::kImageWrite, write_args);
+            b.Return(ep);
+        });
+    }
+};
+
+// NonPrivateTexel and Workgroup scope MakeTexelVisible/MakeTexelAvailable are dropped.
+TEST_F(SpirvReader_TextureMemoryModelTest, WorkgroupScope_Dropped) {
+    Build(kMakeTexelVisible | kNonPrivateTexel, {b.Constant(u32(kWorkgroupScope))},
+          kMakeTexelAvailable | kNonPrivateTexel, {b.Constant(u32(kWorkgroupScope))});
+
+    auto* src = R"(
+$B1: {  # root
+  %img:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write> = load %img
+    %4:vec4<f32> = spirv.image_read %3, vec2<i32>(0i), 1536u, 2u
+    %5:void = spirv.image_write %3, vec2<i32>(0i), %4, 1280u, 2u
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+    Run(Texture);
+
+    auto* expect = R"(
+$B1: {  # root
+  %img:ptr<handle, texture_storage_2d<rgba32float, read_write>, read> = var @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:texture_storage_2d<rgba32float, read_write> = load %img
+    %4:vec4<f32> = textureLoad %3, vec2<i32>(0i)
+    %5:void = textureStore %3, vec2<i32>(0i), %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(expect, str());
+}
+
+// MakeTexelVisible with a scope wider than Workgroup is rejected.
+TEST_F(SpirvReader_TextureMemoryModelTest, VisibleDeviceScope_Rejected) {
+    Build(kMakeTexelVisible | kNonPrivateTexel, {b.Constant(u32(kDeviceScope))}, 0, {});
+
+    auto res = RunWithFailure(Texture);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason,
+              "MakeTexelVisible image operand with Device scope is not supported");
+}
+
+// MakeTexelAvailable with a scope wider than Workgroup is rejected.
+TEST_F(SpirvReader_TextureMemoryModelTest, AvailableDeviceScope_Rejected) {
+    Build(0, {}, kMakeTexelAvailable | kNonPrivateTexel, {b.Constant(u32(kDeviceScope))});
+
+    auto res = RunWithFailure(Texture);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason,
+              "MakeTexelAvailable image operand with Device scope is not supported");
+}
+
+// VolatileTexel is rejected.
+TEST_F(SpirvReader_TextureMemoryModelTest, VolatileTexel_Rejected) {
+    Build(0, {}, kVolatileTexel, {});
+
+    auto res = RunWithFailure(Texture);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason, "VolatileTexel image operand is not supported");
 }
 
 }  // namespace

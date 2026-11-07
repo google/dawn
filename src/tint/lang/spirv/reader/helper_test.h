@@ -55,10 +55,12 @@ class SpirvReaderTestHelperBase : public BASE {
   protected:
     /// Run the parser on a SPIR-V module and return the Tint IR or an error string.
     /// @param spirv_asm the SPIR-V assembly to parse
+    /// @param spv_version the environment to assemble the module for
     /// @returns the disassembled Tint IR or an error
-    Result<std::string> Run(std::string spirv_asm) {
+    Result<std::string> Run(std::string spirv_asm,
+                            spv_target_env spv_version = SPV_ENV_UNIVERSAL_1_0) {
         // Assemble the SPIR-V input.
-        TINT_CHECK_RESULT_UNWRAP(binary, Assemble(spirv_asm));
+        TINT_CHECK_RESULT_UNWRAP(binary, Assemble(spirv_asm, spv_version));
 
         // Parse the SPIR-V to produce a core IR module.
         Options options{

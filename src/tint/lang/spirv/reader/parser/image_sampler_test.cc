@@ -754,5 +754,103 @@ INSTANTIATE_TEST_SUITE_P(
         IntegerSampleCase{"%u32", "%vec4u", "%coord3", "OpImageSampleProjImplicitLod"},
         IntegerSampleCase{"%u32", "%vec4u", "%coord3 Lod %f32_0", "OpImageSampleProjExplicitLod"}));
 
+// Vulkan memory model image operands are passed through: the mask literal is followed by the
+// scope ids. https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html#Image_Operands
+std::string MemoryModelImageModule(std::string body) {
+    return R"(
+               OpCapability Shader
+               OpCapability VulkanMemoryModel
+               OpExtension "SPV_KHR_vulkan_memory_model"
+               OpMemoryModel Logical Vulkan
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %img DescriptorSet 0
+               OpDecorate %img Binding 0
+       %void = OpTypeVoid
+         %fn = OpTypeFunction %void
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+        %f32 = OpTypeFloat 32
+      %vec2i = OpTypeVector %i32 2
+      %vec4f = OpTypeVector %f32 4
+    %vec4f_0 = OpConstantNull %vec4f
+      %coord = OpConstantNull %vec2i
+  %workgroup = OpConstant %u32 2
+     %img_ty = OpTypeImage %f32 2D 0 0 0 2 Rgba32f
+    %img_ptr = OpTypePointer UniformConstant %img_ty
+        %img = OpVariable %img_ptr UniformConstant
+       %main = OpFunction %void None %fn
+      %start = OpLabel
+          %i = OpLoad %img_ty %img
+)" + body +
+           R"(
+               OpReturn
+               OpFunctionEnd
+)";
+}
+
+// OpImageRead emits the mask followed by the MakeTexelVisible scope id.
+TEST_F(SpirvParserTest, ImageRead_MakeTexelVisible) {
+    EXPECT_IR_SPV(MemoryModelImageModule(R"(
+          %1 = OpImageRead %vec4f %i %coord MakeTexelVisible|NonPrivateTexel %workgroup
+)"),
+                  R"(
+$B1: {  # root
+  %1:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write> = load %1
+    %4:vec4<f32> = spirv.image_read %3, vec2<i32>(0i), 1536u, 2u
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
+// OpImageWrite emits the mask followed by the MakeTexelAvailable scope id.
+TEST_F(SpirvParserTest, ImageWrite_MakeTexelAvailable) {
+    EXPECT_IR_SPV(MemoryModelImageModule(R"(
+               OpImageWrite %i %coord %vec4f_0 MakeTexelAvailable|NonPrivateTexel %workgroup
+)"),
+                  R"(
+$B1: {  # root
+  %1:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write> = load %1
+    %4:void = spirv.image_write %3, vec2<i32>(0i), vec4<f32>(0.0f), 1280u, 2u
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
+// Operands with no id, such as VolatileTexel, only change the mask.
+TEST_F(SpirvParserTest, ImageWrite_VolatileTexel) {
+    EXPECT_IR_SPV(MemoryModelImageModule(R"(
+               OpImageWrite %i %coord %vec4f_0 VolatileTexel
+)"),
+                  R"(
+$B1: {  # root
+  %1:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write> = load %1
+    %4:void = spirv.image_write %3, vec2<i32>(0i), vec4<f32>(0.0f), 2048u
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
