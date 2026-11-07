@@ -30,6 +30,8 @@
 
 #import <Metal/Metal.h>
 
+#include <atomic>
+#include <cstdint>
 #include <map>
 #include <optional>
 #include <string>
@@ -51,12 +53,20 @@ class Queue final : public QueueBase {
     static ResultOrError<Ref<Queue>> Create(Device* device, const QueueDescriptor* descriptor);
 
     CommandRecordingContext* GetPendingCommandContext(SubmitMode submitMode = SubmitMode::Normal);
-    MaybeError SubmitPendingCommandBuffer();
+    // Commits the pending command buffer, if any. Returns false when the pending commands were
+    // held instead because submissions are suspended (see SetSubmissionSuspended): they stay
+    // pending and complete only once resumed, which each caller allows for in its own way.
+    ResultOrError<bool> TrySubmitPendingCommandBuffer();
 
     // TODO(crbug.com/444702048): Remove after migrating Chromium to commands scheduled futures.
     void WaitForCommandsToBeScheduled();
 
     FutureID GetCommandsScheduledFuture();
+
+    // Holds (suspended) or resumes the commit of command buffers, see
+    // dawn::native::metal::SetSubmissionSuspended. Called with the device lock held.
+    void SetSubmissionSuspended(bool suspended);
+    bool IsSubmissionSuspended() const override;
 
     id<MTLSharedEvent> GetMTLSharedEvent() const;
     ResultOrUnknownError<Ref<SharedFence>> GetOrCreateSharedFence();
@@ -92,6 +102,14 @@ class Queue final : public QueueBase {
         mCommandsScheduledEvents;
     // - Error message from the Metal command-buffer-completed handler if completion failed.
     MutexProtected<std::optional<std::string>> mExecutionError;
+
+    // Whether commits are held (see SetSubmissionSuspended). Written with the device lock held;
+    // read without it by whoever asks whether to present or wait.
+    std::atomic<bool> mSubmissionSuspended = false;
+    // The submissions encoded since the hold began, to warn once about a producer that keeps
+    // submitting while submissions are suspended.
+    std::atomic<uint32_t> mHeldSubmissions = 0;
+    static constexpr uint32_t kHeldSubmissionsWarning = 600;
 
     // A shared event that can be exported for synchronization with other users of Metal.
     // MTLSharedEvent is not available until macOS 10.14+ so use just `id`.

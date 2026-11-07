@@ -408,6 +408,17 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "an occlusion query is empty. Workaround this by explicitly filling it with zero if there "
       "are no draw calls.",
       "https://crbug.com/dawn/1707", ToggleStage::Device}},
+    {Toggle::MetalSuspendSubmissionsInBackground,
+     {"metal_suspend_submissions_in_background",
+      "On iOS and tvOS, hold the commit of command buffers while the application is in the "
+      "background, where the system refuses GPU work and a refused command buffer loses the "
+      "device. The work submitted meanwhile is encoded into the pending command buffer and "
+      "committed when the application returns to the foreground; presents meanwhile are dropped. "
+      "When the application enters the background, the pending work is committed first and waited "
+      "on to be scheduled, as Apple asks, so that it may complete. Nothing is lost or reordered, "
+      "but every submission made in the background keeps what it uses alive until the return. No "
+      "effect on other platforms.",
+      "https://github.com/wcandillon/react-native-skia/issues/4290", ToggleStage::Device}},
     {Toggle::UseBlitForBufferToDepthTextureCopy,
      {"use_blit_for_buffer_to_depth_texture_copy",
       "Use a blit instead of a copy command to copy buffer data to the depth aspect of a "
