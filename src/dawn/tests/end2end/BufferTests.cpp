@@ -1951,9 +1951,8 @@ TEST_P(BufferMapExtendedUsagesTests, MapWriteQueryBufferThenDrawThenMapWrite) {
 
     class NonZeroExpectation : public detail::Expectation {
       public:
-        AssertionResult Check(const void* data, size_t size) override {
-            DAWN_ASSERT(size % sizeof(uint64_t) == 0);
-            const uint64_t* actual = static_cast<const uint64_t*>(data);
+        AssertionResult Check(Span<const std::byte> data) override {
+            auto actual = ReinterpretSpan<const uint64_t>(data);
 
             if (actual[0] == 0) {
                 return AssertionFailure() << "Expected data[0] to be non-zero.\n";

@@ -30,7 +30,6 @@
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -75,21 +74,19 @@ class OcclusionExpectation : public detail::Expectation {
 
     explicit OcclusionExpectation(Result expected) { mExpected = expected; }
 
-    AssertionResult Check(const void* data, size_t size) override {
-        DAWN_ASSERT(size % sizeof(uint64_t) == 0);
-        const uint64_t* actual = static_cast<const uint64_t*>(data);
-        for (size_t i = 0; i < size / sizeof(uint64_t); i++) {
-            if (DAWN_UNSAFE_TODO(actual[i]) == kSentinelValue) {
+    AssertionResult Check(Span<const std::byte> data) override {
+        auto actual = ReinterpretSpan<const uint64_t>(data);
+        for (size_t i = 0; i < actual.size(); i++) {
+            if (actual[i] == kSentinelValue) {
                 return AssertionFailure()
                        << "Data[" << i << "] was not written (it kept the sentinel value of "
                        << kSentinelValue << ").\n";
             }
-            if (mExpected == Result::Zero && DAWN_UNSAFE_TODO(actual[i]) != 0) {
+            if (mExpected == Result::Zero && actual[i] != 0) {
                 return AssertionFailure()
-                       << "Expected data[" << i
-                       << "] to be zero, actual: " << DAWN_UNSAFE_TODO(actual[i]) << ".\n";
+                       << "Expected data[" << i << "] to be zero, actual: " << actual[i] << ".\n";
             }
-            if (mExpected == Result::NonZero && DAWN_UNSAFE_TODO(actual[i]) == 0) {
+            if (mExpected == Result::NonZero && actual[i] == 0) {
                 return AssertionFailure() << "Expected data[" << i << "] to be non-zero.\n";
             }
         }
@@ -737,11 +734,10 @@ class TimestampExpectation : public detail::Expectation {
     ~TimestampExpectation() override = default;
 
     // Expect the timestamp results are greater than 0.
-    AssertionResult Check(const void* data, size_t size) override {
-        DAWN_ASSERT(size % sizeof(uint64_t) == 0);
-        const uint64_t* timestamps = static_cast<const uint64_t*>(data);
-        for (size_t i = 0; i < size / sizeof(uint64_t); i++) {
-            if (DAWN_UNSAFE_TODO(timestamps[i]) == 0) {
+    AssertionResult Check(Span<const std::byte> data) override {
+        auto timestamps = ReinterpretSpan<const uint64_t>(data);
+        for (size_t i = 0; i < timestamps.size(); i++) {
+            if (timestamps[i] == 0) {
                 return AssertionFailure() << "Expected data[" << i << "] to be greater than 0.\n";
             }
         }

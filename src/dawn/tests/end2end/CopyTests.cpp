@@ -116,13 +116,9 @@ class ColorExpectation : public detail::CustomTextureExpectation {
 
     uint32_t DataSize() override { return ColorType::kDataSize; }
 
-    AssertionResult Check(const void* data, size_t size) override {
-        size_t expectedSize = sizeof(ColorType) * mExpected.size();
-        DAWN_ASSERT(size == expectedSize);
-        // SAFETY: `data` contains at least `mExpected.size()` ColorType elements as verified by the
-        // assertion above.
-        auto actual = DAWN_UNSAFE_BUFFERS(
-            std::span<const ColorType>(static_cast<const ColorType*>(data), mExpected.size()));
+    AssertionResult Check(Span<const std::byte> data) override {
+        auto actual = ReinterpretSpan<const ColorType>(data);
+        DAWN_ASSERT(actual.size() == mExpected.size());
 
         for (size_t i = 0; i < mExpected.size(); ++i) {
             if (!AreEqual(mExpected[i], actual[i])) {
@@ -2463,14 +2459,9 @@ class ExpectRG11B10Ufloat : public detail::Expectation {
   public:
     explicit ExpectRG11B10Ufloat(std::vector<uint32_t> expected) : mExpected(std::move(expected)) {}
 
-    AssertionResult Check(const void* data, size_t size) override {
-        size_t expectedSize = sizeof(uint32_t) * mExpected.size();
-        DAWN_ASSERT(size == expectedSize);
-
-        // SAFETY: `data` contains at least `mExpected.size()` uint32_t elements as verified by the
-        // assertion above.
-        auto actual = DAWN_UNSAFE_BUFFERS(
-            std::span<const uint32_t>(static_cast<const uint32_t*>(data), mExpected.size()));
+    AssertionResult Check(Span<const std::byte> data) override {
+        auto actual = ReinterpretSpan<const uint32_t>(data);
+        DAWN_ASSERT(actual.size() == mExpected.size());
 
         for (size_t i = 0; i < mExpected.size(); ++i) {
             uint32_t expectedValue = mExpected[i];

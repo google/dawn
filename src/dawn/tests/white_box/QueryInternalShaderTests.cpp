@@ -30,7 +30,6 @@
 #include "src/dawn/native/QueryHelper.h"
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
 #include "src/utils/span.h"
 
 namespace dawn {
@@ -60,8 +59,7 @@ class InternalShaderExpectation : public ::dawn::detail::Expectation {
     }
 
     // Expect the actual results are approximately equal to the expected values.
-    AssertionResult Check(const void* data, size_t size) override {
-        DAWN_ASSERT(size == sizeof(uint64_t) * mExpected.size());
+    AssertionResult Check(Span<const std::byte> data) override {
         // The computations in the shader use a multiplier that's a 16bit integer plus a shift
         // that maximize the multiplier. This means that for the range of periods we care about
         // (1 to 2^16-1 ns per tick), the high order bit of the multiplier will always be set.
@@ -72,12 +70,13 @@ class InternalShaderExpectation : public ::dawn::detail::Expectation {
         constexpr static double kUpperLimitMultiplier = 1.0 + kErrorToleranceRatio;
         constexpr static double kLowerLimitMultiplier = 1.0 - kErrorToleranceRatio;
 
-        const uint64_t* actual = static_cast<const uint64_t*>(data);
+        auto actual = ReinterpretSpan<const uint64_t>(data);
+        DAWN_ASSERT(actual.size() == mExpected.size());
         for (size_t i = 0; i < mExpected.size(); ++i) {
             if (mExpected[i] == 0) {
-                if (DAWN_UNSAFE_TODO(actual[i]) != 0) {
-                    return AssertionFailure() << "Expected data[" << i << "] to be 0, actual "
-                                              << DAWN_UNSAFE_TODO(actual[i]) << "\n";
+                if (actual[i] != 0) {
+                    return AssertionFailure()
+                           << "Expected data[" << i << "] to be 0, actual " << actual[i] << "\n";
                 }
                 continue;
             }
@@ -94,20 +93,18 @@ class InternalShaderExpectation : public ::dawn::detail::Expectation {
             uint64_t quantizationMask64 = ~uint64_t{invertedQuantizationMask};
             lowerLimit &= quantizationMask64;
 
-            if (DAWN_UNSAFE_TODO(actual[i]) < lowerLimit ||
-                DAWN_UNSAFE_TODO(actual[i]) > upperLimit) {
+            if (actual[i] < lowerLimit || actual[i] > upperLimit) {
                 return AssertionFailure()
                        << "Expected data[" << i << "] to be " << expected << ", actual "
-                       << DAWN_UNSAFE_TODO(actual[i]) << ". Error rate is larger than "
-                       << kErrorToleranceRatio << ". Upper limit is " << upperLimit
-                       << ". Lower limit is " << lowerLimit << "\n";
+                       << actual[i] << ". Error rate is larger than " << kErrorToleranceRatio
+                       << ". Upper limit is " << upperLimit << ". Lower limit is " << lowerLimit
+                       << "\n";
             }
 
-            if ((DAWN_UNSAFE_TODO(actual[i]) & ~quantizationMask64) != 0) {
-                return AssertionFailure()
-                       << "Actual data 0x" << std::hex << DAWN_UNSAFE_TODO(actual[i])
-                       << " does not match quantization mask 0x" << std::hex << mQuantizationMask
-                       << "\n";
+            if ((actual[i] & ~quantizationMask64) != 0) {
+                return AssertionFailure() << "Actual data 0x" << std::hex << actual[i]
+                                          << " does not match quantization mask 0x" << std::hex
+                                          << mQuantizationMask << "\n";
             }
         }
 

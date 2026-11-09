@@ -1670,23 +1670,21 @@ class OcclusionExpectation : public detail::Expectation {
 
     explicit OcclusionExpectation(const std::vector<Result> expected) { mExpected = expected; }
 
-    AssertionResult Check(const void* data, size_t size) override {
-        DAWN_ASSERT(size % sizeof(uint64_t) == 0);
-        DAWN_ASSERT(size / sizeof(uint64_t) == mExpected.size());
-        const uint64_t* actual = static_cast<const uint64_t*>(data);
-        for (size_t i = 0; i < size / sizeof(uint64_t); i++) {
-            if (DAWN_UNSAFE_TODO(actual[i]) == kSentinelValue) {
+    AssertionResult Check(Span<const std::byte> data) override {
+        auto actual = ReinterpretSpan<const uint64_t>(data);
+        DAWN_ASSERT(actual.size() == mExpected.size());
+        for (size_t i = 0; i < actual.size(); i++) {
+            if (actual[i] == kSentinelValue) {
                 return AssertionFailure()
                        << "Data[" << i << "] was not written (it kept the sentinel value of "
                        << kSentinelValue << ").\n";
             }
             Result expected = mExpected[i];
-            if (expected == Result::Zero && DAWN_UNSAFE_TODO(actual[i]) != 0) {
+            if (expected == Result::Zero && actual[i] != 0) {
                 return AssertionFailure()
-                       << "Expected data[" << i
-                       << "] to be zero, actual: " << DAWN_UNSAFE_TODO(actual[i]) << ".\n";
+                       << "Expected data[" << i << "] to be zero, actual: " << actual[i] << ".\n";
             }
-            if (expected == Result::NonZero && DAWN_UNSAFE_TODO(actual[i]) == 0) {
+            if (expected == Result::NonZero && actual[i] == 0) {
                 return AssertionFailure() << "Expected data[" << i << "] to be non-zero.\n";
             }
         }

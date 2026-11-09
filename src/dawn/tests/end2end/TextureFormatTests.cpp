@@ -37,7 +37,6 @@
 #include "src/dawn/utils/TextureUtils.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/assert.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -59,14 +58,13 @@ class ExpectFloatWithTolerance : public detail::Expectation {
     ExpectFloatWithTolerance(std::vector<float> expected, float tolerance)
         : mExpected(std::move(expected)), mTolerance(tolerance) {}
 
-    AssertionResult Check(const void* data, size_t size) override {
-        DAWN_ASSERT(size == sizeof(float) * mExpected.size());
-
-        const float* actual = static_cast<const float*>(data);
+    AssertionResult Check(Span<const std::byte> data) override {
+        auto actual = ReinterpretSpan<const float>(data);
+        DAWN_ASSERT(actual.size() == mExpected.size());
 
         for (size_t i = 0; i < mExpected.size(); ++i) {
             float expectedValue = mExpected[i];
-            float actualValue = DAWN_UNSAFE_TODO(actual[i]);
+            float actualValue = actual[i];
 
             if (!FloatsMatch(expectedValue, actualValue)) {
                 AssertionResult result = AssertionFailure()
@@ -105,14 +103,13 @@ class ExpectFloat16 : public detail::Expectation {
   public:
     explicit ExpectFloat16(std::vector<uint16_t> expected) : mExpected(std::move(expected)) {}
 
-    AssertionResult Check(const void* data, size_t size) override {
-        DAWN_ASSERT(size == sizeof(uint16_t) * mExpected.size());
-
-        const uint16_t* actual = static_cast<const uint16_t*>(data);
+    AssertionResult Check(Span<const std::byte> data) override {
+        auto actual = ReinterpretSpan<const uint16_t>(data);
+        DAWN_ASSERT(actual.size() == mExpected.size());
 
         for (size_t i = 0; i < mExpected.size(); ++i) {
             uint16_t expectedValue = mExpected[i];
-            uint16_t actualValue = DAWN_UNSAFE_TODO(actual[i]);
+            uint16_t actualValue = actual[i];
 
             if (!Floats16Match(expectedValue, actualValue)) {
                 AssertionResult result = AssertionFailure()
@@ -141,14 +138,13 @@ class ExpectRG11B10Ufloat : public detail::Expectation {
   public:
     explicit ExpectRG11B10Ufloat(std::vector<uint32_t> expected) : mExpected(std::move(expected)) {}
 
-    AssertionResult Check(const void* data, size_t size) override {
-        DAWN_ASSERT(size == sizeof(uint32_t) * mExpected.size());
-
-        const uint32_t* actual = static_cast<const uint32_t*>(data);
+    AssertionResult Check(Span<const std::byte> data) override {
+        auto actual = ReinterpretSpan<const uint32_t>(data);
+        DAWN_ASSERT(actual.size() == mExpected.size());
 
         for (size_t i = 0; i < mExpected.size(); ++i) {
             uint32_t expectedValue = mExpected[i];
-            uint32_t actualValue = DAWN_UNSAFE_TODO(actual[i]);
+            uint32_t actualValue = actual[i];
 
             if (!RG11B10UfloatMatch(expectedValue, actualValue)) {
                 AssertionResult result = AssertionFailure()

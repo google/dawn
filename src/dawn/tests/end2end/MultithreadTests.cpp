@@ -2146,10 +2146,9 @@ class TimestampExpectation : public detail::Expectation {
     ~TimestampExpectation() override = default;
 
     // Expect the timestamp results are greater than 0.
-    AssertionResult Check(const void* data, size_t size) override {
-        DAWN_ASSERT(size % sizeof(uint64_t) == 0);
-        const uint64_t* timestamps = static_cast<const uint64_t*>(data);
-        for (size_t i = 0; i < size / sizeof(uint64_t); i++) {
+    AssertionResult Check(Span<const std::byte> data) override {
+        auto timestamps = ReinterpretSpan<const uint64_t>(data);
+        for (size_t i = 0; i < timestamps.size(); i++) {
             if (timestamps[i] == 0) {
                 return AssertionFailure() << "Expected data[" << i << "] to be greater than 0.\n";
             }

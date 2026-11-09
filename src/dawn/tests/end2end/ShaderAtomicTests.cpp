@@ -536,10 +536,9 @@ class ExpectLessThan : public detail::Expectation {
   public:
     explicit ExpectLessThan(unsigned int high) : mHigh(high) {}
 
-    AssertionResult Check(const void* data, size_t size) override {
-        DAWN_ASSERT(size == sizeof(uint32_t));
-        // SAFETY: Test-only code.
-        uint32_t val = DAWN_UNSAFE_BUFFERS(*static_cast<const uint32_t*>(data));
+    AssertionResult Check(Span<const std::byte> data) override {
+        DAWN_ASSERT(data.size() == sizeof(uint32_t));
+        uint32_t val = ReinterpretSpan<const uint32_t>(data)[0];
         if (val >= mHigh) {
             return AssertionFailure() << "Found unexpected value " << val
                                       << " (expected between 0 and " << (mHigh - 1) << ")\n";

@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
 #include <bit>
 #include <utility>
 #include <vector>
@@ -470,24 +471,22 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
 
         ~ExtraStencilComponentsExpectation() override = default;
 
-        AssertionResult Check(const void* rawData, size_t size) override {
-            DAWN_ASSERT(size == sizeof(StencilData));
-            const uint32_t* data = static_cast<const uint32_t*>(rawData);
+        AssertionResult Check(Span<const std::byte> data) override {
+            DAWN_ASSERT(data.size() == sizeof(StencilData));
+            auto actual = ReinterpretSpan<const uint32_t>(data);
 
             StencilData ssss = {mExpected, mExpected, mExpected, mExpected};
             StencilData s001 = {mExpected, 0, 0, 1};
 
-            if (DAWN_UNSAFE_TODO(memcmp(data, ssss.data(), size)) == 0 ||
-                DAWN_UNSAFE_TODO(memcmp(data, s001.data(), size)) == 0) {
+            if (std::ranges::equal(actual, ssss) || std::ranges::equal(actual, s001)) {
                 return AssertionSuccess();
             }
 
             return AssertionFailure()
                    << "Expected stencil data to be " << "(" << ssss[0] << ", " << ssss[1] << ", "
                    << ssss[2] << ", " << ssss[3] << ") or " << "(" << s001[0] << ", " << s001[1]
-                   << ", " << s001[2] << ", " << s001[3] << "). Got " << "(" << data[0] << ", "
-                   << DAWN_UNSAFE_TODO(data[1]) << ", " << DAWN_UNSAFE_TODO(data[2]) << ", "
-                   << DAWN_UNSAFE_TODO(data[3]) << ").";
+                   << ", " << s001[2] << ", " << s001[3] << "). Got " << "(" << actual[0] << ", "
+                   << actual[1] << ", " << actual[2] << ", " << actual[3] << ").";
         }
 
       private:

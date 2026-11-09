@@ -35,7 +35,6 @@
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -234,9 +233,9 @@ fn main(
       public:
         explicit ExpectReadSubgroupSizeOutput(uint32_t workgroupSize)
             : mWorkgroupSize(workgroupSize) {}
-        AssertionResult Check(const void* data, size_t size) override {
-            DAWN_ASSERT(size == sizeof(int32_t) * mWorkgroupSize);
-            const uint32_t* actual = static_cast<const uint32_t*>(data);
+        AssertionResult Check(Span<const std::byte> data) override {
+            auto actual = ReinterpretSpan<const uint32_t>(data);
+            DAWN_ASSERT(actual.size() == mWorkgroupSize);
 
             const uint32_t& outputSubgroupSizeAt0 = actual[0];
             // Validate that output subgroup_size is valid
@@ -253,7 +252,7 @@ fn main(
             }
             // Validate that subgroup_size of all invocation are identical.
             for (uint32_t i = 1; i < mWorkgroupSize; i++) {
-                const uint32_t& outputSubgroupSize = DAWN_UNSAFE_TODO(actual[i]);
+                const uint32_t& outputSubgroupSize = actual[i];
                 if (outputSubgroupSize != outputSubgroupSizeAt0) {
                     AssertionResult result = AssertionFailure()
                                              << "Got inconsistent subgroup_size output: "
@@ -412,9 +411,9 @@ class SubgroupsShaderTestsFragment : public SubgroupsTestsBase<AdapterTestParam>
     class ExpectReadSubgroupSizeOutput : public dawn::detail::Expectation {
       public:
         ExpectReadSubgroupSizeOutput() {}
-        AssertionResult Check(const void* data, size_t size) override {
-            DAWN_ASSERT(size == sizeof(int32_t));
-            const uint32_t* actual = static_cast<const uint32_t*>(data);
+        AssertionResult Check(Span<const std::byte> data) override {
+            auto actual = ReinterpretSpan<const uint32_t>(data);
+            DAWN_ASSERT(actual.size() == 1u);
             const uint32_t& outputSubgroupSizeAt0 = actual[0];
             // Subgroup size can vary across fragment invocation (unlike compute) but we could still
             // improve this check by using the min and max subgroup size for the device.
@@ -668,9 +667,9 @@ fn main(
       public:
         explicit ExpectBroadcastSubgroupSizeOutput(uint32_t workgroupSize)
             : mWorkgroupSize(workgroupSize) {}
-        AssertionResult Check(const void* data, size_t size) override {
-            DAWN_ASSERT(size == sizeof(int32_t) * (1 + mWorkgroupSize));
-            const int32_t* actual = static_cast<const int32_t*>(data);
+        AssertionResult Check(Span<const std::byte> data) override {
+            auto actual = ReinterpretSpan<const int32_t>(data);
+            DAWN_ASSERT(actual.size() == 1 + mWorkgroupSize);
 
             int32_t outputSubgroupSize = actual[0];
             if (!(
@@ -704,7 +703,7 @@ fn main(
             uint32_t valueFromInvocation0Count = 0;
             uint32_t valueFromOtherInvocationCount = 0;
             for (uint32_t i = 0; i < mWorkgroupSize; i++) {
-                int32_t broadcastOutput = DAWN_UNSAFE_TODO(actual[i + 1]);
+                int32_t broadcastOutput = actual[i + 1];
                 if (broadcastOutput == valueFromInvocation0) {
                     valueFromInvocation0Count++;
                 } else if (broadcastOutput == SubgroupRegisterInitializer) {
@@ -900,9 +899,9 @@ fn main(
       public:
         explicit ExpectReadSubgroupSizeOutput(uint32_t workgroupSize)
             : mWorkgroupSize(workgroupSize) {}
-        AssertionResult Check(const void* data, size_t size) override {
-            DAWN_ASSERT(size == sizeof(float) * mWorkgroupSize);
-            const float* actual = static_cast<const float*>(data);
+        AssertionResult Check(Span<const std::byte> data) override {
+            auto actual = ReinterpretSpan<const float>(data);
+            DAWN_ASSERT(actual.size() == mWorkgroupSize);
 
             auto approximate_f = [](float actual, float expected) {
                 return abs(actual - expected) / abs(expected) < (kValueInShader / 2.0f);
@@ -915,19 +914,18 @@ fn main(
                                          : kValueInShader;
             float expected_value = init_value;
             for (uint32_t i = 0; i < mWorkgroupSize; i++) {
-                if (!approximate_f(DAWN_UNSAFE_TODO(actual[i]), expected_value)) {
+                if (!approximate_f(actual[i], expected_value)) {
                     // This could be the next subgroup so retest with the initial value.
                     float old_expected_value = expected_value;
                     expected_value = init_value;
-                    if (!approximate_f(DAWN_UNSAFE_TODO(actual[i]), expected_value)) {
+                    if (!approximate_f(actual[i], expected_value)) {
                         AssertionResult result =
                             AssertionFailure()
                             << "Unexpected result for " << GetParam().mSubgroupIntrinsicOp
                             << " for type " << GetParam().mSubgroupOpDataType << " for element "
                             << i << " of a workgroup size of " << mWorkgroupSize
-                            << ". The actual value was " << DAWN_UNSAFE_TODO(actual[i])
-                            << " and the expected was " << expected_value << " or "
-                            << old_expected_value;
+                            << ". The actual value was " << actual[i] << " and the expected was "
+                            << expected_value << " or " << old_expected_value;
 
                         return result;
                     }

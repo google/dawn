@@ -32,7 +32,6 @@
 
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -243,22 +242,21 @@ class ExpectOneNonZero : public detail::Expectation {
   public:
     explicit ExpectOneNonZero(T value) : mValue(value) { DAWN_ASSERT(mValue != T(0)); }
 
-    AssertionResult Check(const void* data, size_t size) override {
-        DAWN_ASSERT(size % sizeof(T) == 0 && size > 0);
-        const T* actual = static_cast<const T*>(data);
+    AssertionResult Check(Span<const std::byte> data) override {
+        auto actual = ReinterpretSpan<const T>(data);
 
         std::optional<size_t> whereFound;
-        for (size_t i = 0; i < size / sizeof(T); i++) {
-            if (DAWN_UNSAFE_TODO(actual[i]) == mValue) {
+        for (size_t i = 0; i < actual.size(); i++) {
+            if (actual[i] == mValue) {
                 if (whereFound.has_value()) {
                     return AssertionFailure() << "Found value " << mValue << " at data["
                                               << whereFound.value() << "] and data[" << i << "]\n";
                 }
                 whereFound = i;
-            } else if (DAWN_UNSAFE_TODO(actual[i]) != 0) {
+            } else if (actual[i] != 0) {
                 return AssertionFailure()
-                       << "Found unexpected value data[" << i
-                       << "] = " << DAWN_UNSAFE_TODO(actual[i]) << " instead of " << mValue << "\n";
+                       << "Found unexpected value data[" << i << "] = " << actual[i]
+                       << " instead of " << mValue << "\n";
             }
         }
         if (!whereFound.has_value()) {

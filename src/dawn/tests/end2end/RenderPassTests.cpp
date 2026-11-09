@@ -50,9 +50,9 @@ class ExpectEqualToOneOf : public detail::CustomTextureExpectation {
 
     uint32_t DataSize() override { return sizeof(utils::RGBA8); }
 
-    AssertionResult Check(const void* data, size_t size) override {
-        DAWN_ASSERT(size == DataSize());
-        utils::RGBA8 actual = *static_cast<const utils::RGBA8*>(data);
+    AssertionResult Check(Span<const std::byte> data) override {
+        DAWN_ASSERT(data.size() == DataSize());
+        utils::RGBA8 actual = ReinterpretSpan<const utils::RGBA8>(data)[0];
         for (const utils::RGBA8& candidate : mCandidates) {
             if (actual == candidate) {
                 return AssertionSuccess();
