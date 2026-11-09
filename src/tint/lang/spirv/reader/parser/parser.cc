@@ -51,7 +51,6 @@ TINT_BEGIN_DISABLE_WARNING(SIGN_CONVERSION);
 TINT_BEGIN_DISABLE_WARNING(WEAK_VTABLES);
 TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 TINT_BEGIN_DISABLE_WARNING(LIFETIME_SAFETY_INVALIDATION);
-#include "source/opcode.h"
 #include "source/opt/build_module.h"
 #include "source/opt/resolve_binding_conflicts_pass.h"
 #include "source/opt/split_combined_image_sampler_pass.h"
@@ -3605,7 +3604,7 @@ class Parser {
         // textures can only be read with textureLoad or textureGather.
         const core::type::Type* elem = Type(inst.type_id())->DeepestElement();
         if (!elem->Is<core::type::F32>()) {
-            return Failure("Op" + std::string(spvOpcodeString(inst.opcode())) +
+            return Failure(std::string(spv::OpToString(inst.opcode())) +
                            " on a texture with sampled type " + elem->FriendlyName() +
                            " is not supported");
         }
