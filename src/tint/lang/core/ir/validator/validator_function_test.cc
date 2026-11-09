@@ -3360,6 +3360,16 @@ TEST_F(IR_ValidatorTest, Function_Vertex_MissingPosition) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Function_Vertex_MissingPosition_WithProperty) {
+    auto* f = b.Function("my_func", ty.void_(), Function::PipelineStage::kVertex);
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    mod.properties.Add(ir::Property::kAllowMissingVertexPosition);
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_Vertex_PositionOnVarWithProperty) {
     auto pos_ty = ty.vec4f();
     auto pos_attr = IOAttributes();

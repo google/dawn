@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/spirv/reader/lower/shader_io.h"
 
+#include <algorithm>
 #include <string>
 #include <utility>
 
@@ -239,7 +240,7 @@ struct State {
     /// @param ep the entry point
     Result<SuccessType> ProcessEntryPointOutputs(core::ir::Function* ep) {
         const auto& referenced_outputs = referenced_output_vars.TransitiveReferences(ep);
-        if (referenced_outputs.IsEmpty()) {
+        if (referenced_outputs.IsEmpty() && !ep->IsVertex()) {
             return Success;
         }
 
@@ -351,6 +352,20 @@ struct State {
                 }
             });
             TINT_CHECK_RESULT(result);
+        }
+
+        // Vulkan leaves Position undefined if the vertex shader does not write it, and allows
+        // omitting BuiltIn Position from OpEntryPoint. In those cases, declare @position and write
+        // 0 to it.
+        if (wrapper->IsVertex() && !std::ranges::any_of(output_descriptors, [](const auto& desc) {
+                return desc.attributes.builtin == core::BuiltinValue::kPosition;
+            })) {
+            b.Append(wrapper->Block(), [&] {
+                core::IOAttributes attrs;
+                attrs.builtin = core::BuiltinValue::kPosition;
+                AddOutput(output_descriptors, results, b.Zero(ty.vec4f()), Symbol{}, ty.vec4f(),
+                          attrs);
+            });
         }
 
         if (output_descriptors.Length() == 1) {
@@ -747,6 +762,7 @@ Result<SuccessType> ShaderIO(core::ir::Module& ir) {
 
     ir.properties.Remove(core::ir::Property::kAllowBackendSpecificShaderIO);
     ir.properties.Remove(core::ir::Property::kAllowLocationForNumericComposites);
+    ir.properties.Remove(core::ir::Property::kAllowMissingVertexPosition);
     ir.properties.Remove(core::ir::Property::kAllowPointSizeBuiltin);
 
     return Success;

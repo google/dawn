@@ -232,6 +232,7 @@ class Parser {
 
         // Set properties that are supported by the SPIR-V parser.
         ir_.properties.Add(core::ir::Property::kAllowLocationForNumericComposites);
+        ir_.properties.Add(core::ir::Property::kAllowMissingVertexPosition);
         ir_.properties.Add(core::ir::Property::kAllowMultipleEntryPoints);
         ir_.properties.Add(core::ir::Property::kAllowNonCoreTypes);
         ir_.properties.Add(core::ir::Property::kAllowOverrides);

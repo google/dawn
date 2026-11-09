@@ -41,6 +41,7 @@ class SpirvReader_ShaderIOTest : public core::ir::transform::TransformTest {
   public:
     void SetUp() override {
         mod.properties.Add(core::ir::Property::kAllowLocationForNumericComposites);
+        mod.properties.Add(core::ir::Property::kAllowMissingVertexPosition);
         mod.properties.Add(core::ir::Property::kAllowMultipleEntryPoints);
         mod.properties.Add(core::ir::Property::kAllowPointSizeBuiltin);
         mod.properties.Add(core::ir::Property::kAllowBackendSpecificShaderIO);
@@ -4148,6 +4149,145 @@ $B1: {  # root
     %26:f32 = access %17, 2u
     %27:tint_symbol_20 = construct %10, %11, %13, %14, %15, %16, %20, %21, %23, %24, %25, %26
     ret %27
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_ShaderIOTest, Vertex_MissingPosition_NoOutputs) {
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {  //
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @vertex func():void {
+  $B1: {
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo_inner = func():void {
+  $B1: {
+    ret
+  }
+}
+%foo = @vertex func():vec4<f32> [@position] {
+  $B2: {
+    %3:void = call %foo_inner
+    ret vec4<f32>(0.0f)
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_ShaderIOTest, Vertex_MissingPosition_WithLocationOutput) {
+    auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4f()));
+    color->SetLocation(0);
+    mod.root_block->Append(color);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {  //
+        b.Store(color, b.Splat<vec4<f32>>(1_f));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %color:ptr<__out, vec4<f32>, read_write> = var @location(0)
+}
+
+%foo = @vertex func():void {
+  $B2: {
+    store %color, vec4<f32>(1.0f)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_symbol_1 = struct @align(16) {
+  color:vec4<f32> @offset(0), @location(0)
+  tint_symbol:vec4<f32> @offset(16), @builtin(position)
+}
+
+$B1: {  # root
+  %color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%foo_inner = func():void {
+  $B2: {
+    store %color, vec4<f32>(1.0f)
+    ret
+  }
+}
+%foo = @vertex func():tint_symbol_1 {
+  $B3: {
+    %4:void = call %foo_inner
+    %5:vec4<f32> = load %color
+    %6:tint_symbol_1 = construct %5, vec4<f32>(0.0f)
+    ret %6
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_ShaderIOTest, Vertex_MissingPosition_OnlyPointSize) {
+    auto* ps = b.Var("point_size", ty.ptr(core::AddressSpace::kOut, ty.f32()));
+    ps->SetBuiltin(core::BuiltinValue::kPointSize);
+    mod.root_block->Append(ps);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {  //
+        b.Store(ps, 1_f);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %point_size:ptr<__out, f32, read_write> = var @builtin(__point_size)
+}
+
+%foo = @vertex func():void {
+  $B2: {
+    store %point_size, 1.0f
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %point_size:ptr<private, f32, read_write> = var 1.0f
+}
+
+%foo_inner = func():void {
+  $B2: {
+    store %point_size, 1.0f
+    ret
+  }
+}
+%foo = @vertex func():vec4<f32> [@position] {
+  $B3: {
+    %4:void = call %foo_inner
+    ret vec4<f32>(0.0f)
   }
 }
 )";

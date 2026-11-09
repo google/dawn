@@ -1071,5 +1071,117 @@ TEST_F(SpirvReaderTest, ImageOperands_VolatileTexel_Gather) {
                 testing::HasSubstr("VolatileTexel image operand is not supported"));
 }
 
+// A vertex shader with no BuiltIn Position output synthesizes a zero @position return value.
+TEST_F(SpirvReaderTest, Vertex_MissingPosition_NoOutputs) {
+    auto got = Run(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %vertex_index
+               OpName %block "S"
+               OpMemberName %block 0 "v"
+               OpName %out_buf "out_buf"
+               OpName %vertex_index "vertex_index"
+               OpName %main "main"
+               OpMemberDecorate %block 0 Offset 0
+               OpDecorate %block Block
+               OpDecorate %out_buf DescriptorSet 0
+               OpDecorate %out_buf Binding 0
+               OpDecorate %vertex_index BuiltIn VertexIndex
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+      %block = OpTypeStruct %uint
+%_ptr_StorageBuffer_block = OpTypePointer StorageBuffer %block
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+%_ptr_Input_uint = OpTypePointer Input %uint
+    %out_buf = OpVariable %_ptr_StorageBuffer_block StorageBuffer
+%vertex_index = OpVariable %_ptr_Input_uint Input
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+        %idx = OpLoad %uint %vertex_index
+        %ptr = OpAccessChain %_ptr_StorageBuffer_uint %out_buf %uint_0
+               OpStore %ptr %idx
+               OpReturn
+               OpFunctionEnd
+)");
+    ASSERT_EQ(got, Success) << got.Failure();
+    EXPECT_EQ(got, R"(
+S = struct @align(4) {
+  v:u32 @offset(0)
+}
+
+$B1: {  # root
+  %out_buf:ptr<storage, S, read_write> = var @binding_point(0, 0)
+}
+
+%main_inner = func(%vertex_index:u32):void {
+  $B2: {
+    %4:ptr<storage, u32, read_write> = access %out_buf, 0u
+    store %4, %vertex_index
+    ret
+  }
+}
+%main = @vertex func(%vertex_index_1:u32 [@vertex_index]):vec4<f32> [@position] {  # %vertex_index_1: 'vertex_index'
+  $B3: {
+    %7:void = call %main_inner, %vertex_index_1
+    ret vec4<f32>(0.0f)
+  }
+}
+)");
+}
+
+// A vertex shader with a location output and no BuiltIn Position synthesizes a @position member.
+TEST_F(SpirvReaderTest, Vertex_MissingPosition_WithLocationOutput) {
+    auto got = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %color
+               OpName %color "color"
+               OpName %main "main"
+               OpDecorate %color Location 0
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+    %float_1 = OpConstant %float 1
+       %ones = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+      %color = OpVariable %_ptr_Output_v4float Output
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               OpStore %color %ones
+               OpReturn
+               OpFunctionEnd
+)");
+    ASSERT_EQ(got, Success) << got.Failure();
+    EXPECT_EQ(got, R"(
+tint_symbol_1 = struct @align(16) {
+  color:vec4<f32> @offset(0), @location(0)
+  tint_symbol:vec4<f32> @offset(16), @builtin(position)
+}
+
+$B1: {  # root
+  %color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_inner = func():void {
+  $B2: {
+    store %color, vec4<f32>(1.0f)
+    ret
+  }
+}
+%main = @vertex func():tint_symbol_1 {
+  $B3: {
+    %4:void = call %main_inner
+    %5:vec4<f32> = load %color
+    %6:tint_symbol_1 = construct %5, vec4<f32>(0.0f)
+    ret %6
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

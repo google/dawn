@@ -182,6 +182,9 @@ void Validator::CheckPositionPresentForVertexOutput(const Function* ep) {
             return;
         }
     }
+    if (ir_.properties.Contains(Property::kAllowMissingVertexPosition)) {
+        return;
+    }
     AddError(ep) << "position must be declared on the return of a vertex entry point";
 }
 
