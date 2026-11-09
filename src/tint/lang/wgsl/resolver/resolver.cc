@@ -1479,7 +1479,7 @@ void Resolver::RegisterBufferView(const sem::Call* call, wgsl::BuiltinFn fn) {
     }
 
     if (const auto* param = call->RootIdentifier()->As<sem::Parameter>()) {
-        auto where = buffer_view_sizes_.GetOrAddEntry(param, [min_type_size, total_size, call]() {
+        auto& where = buffer_view_sizes_.GetOrAddEntry(param, [min_type_size, total_size, call]() {
             BufferViewInfo info;
             info.min_type_size = min_type_size;
             info.total_size = total_size;
@@ -1584,7 +1584,8 @@ void Resolver::RegisterSubgroupMatrixAccess(const sem::Call* call, wgsl::Builtin
     mat_required_size += FindSubgroupMatrixStructOffset(pointer);
 
     if (const auto* param = root->As<sem::Parameter>()) {
-        auto where = subgroup_matrix_sizes_.GetOrAddEntry(param, [&] { return mat_required_size; });
+        auto& where =
+            subgroup_matrix_sizes_.GetOrAddEntry(param, [&] { return mat_required_size; });
         where.value = std::max(where.value, mat_required_size);
     }
 
@@ -1627,7 +1628,7 @@ void Resolver::PropagateSubgroupMatrixAccesses(const sem::Call* call) {
                 }
             },
             [&](const sem::Parameter* param) {
-                auto param_where = subgroup_matrix_sizes_.GetOrAddEntry(
+                auto& param_where = subgroup_matrix_sizes_.GetOrAddEntry(
                     param, [mat_required_size]() { return mat_required_size; });
                 param_where.value = std::max(param_where.value, mat_required_size);
             });
@@ -1688,7 +1689,7 @@ bool Resolver::CheckBufferViews(const sem::Call* call) {
                         return false;
                     }
                 }
-                auto param_where =
+                auto& param_where =
                     buffer_view_sizes_.GetOrAddEntry(param, [where]() { return *where; });
                 param_where.value = {
                     std::max(param_where.value.min_type_size, where->min_type_size),

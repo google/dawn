@@ -2914,6 +2914,88 @@ fn foo(p : ptr<storage, buffer, read_write>) {
     EXPECT_EQ(16u, result[0].size);
 }
 
+TEST_F(InspectorGetResourceBindingsTest, UnsizedBuffer_Direct_SmallAndLarge) {
+    auto* src = R"(
+@group(0) @binding(0) var<storage, read_write> buf : buffer;
+@compute @workgroup_size(1)
+fn ep() {
+  let small = bufferView<u32>(&buf, 0u);
+  let large = bufferView<array<u32, 128>>(&buf, 0u);
+}
+)";
+
+    Inspector& inspector = Initialize(src);
+    auto result = inspector.GetResourceBindings("ep");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer, result[0].resource_type);
+    EXPECT_EQ(512u, result[0].size);
+}
+
+TEST_F(InspectorGetResourceBindingsTest, UnsizedBuffer_Direct_LargeAndSmall) {
+    auto* src = R"(
+@group(0) @binding(0) var<storage, read_write> buf : buffer;
+@compute @workgroup_size(1)
+fn ep() {
+  let large = bufferView<array<u32, 128>>(&buf, 0u);
+  let small = bufferView<u32>(&buf, 0u);
+}
+)";
+
+    Inspector& inspector = Initialize(src);
+    auto result = inspector.GetResourceBindings("ep");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer, result[0].resource_type);
+    EXPECT_EQ(512u, result[0].size);
+}
+
+TEST_F(InspectorGetResourceBindingsTest, UnsizedBuffer_Indirect_SmallAndLarge) {
+    auto* src = R"(
+@group(0) @binding(0) var<storage, read_write> buf : buffer;
+fn indirect(p : ptr<storage, buffer, read_write>) {
+  let small = bufferView<u32>(p, 0u);
+  let large = bufferView<array<u32, 128>>(p, 0u);
+}
+@compute @workgroup_size(1)
+fn ep() {
+  indirect(&buf);
+}
+)";
+
+    Inspector& inspector = Initialize(src);
+    auto result = inspector.GetResourceBindings("ep");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer, result[0].resource_type);
+    EXPECT_EQ(512u, result[0].size);
+}
+
+TEST_F(InspectorGetResourceBindingsTest, UnsizedBuffer_Indirect_LargeAndSmall) {
+    auto* src = R"(
+@group(0) @binding(0) var<storage, read_write> buf : buffer;
+fn indirect(p : ptr<storage, buffer, read_write>) {
+  let large = bufferView<array<u32, 128>>(p, 0u);
+  let small = bufferView<u32>(p, 0u);
+}
+@compute @workgroup_size(1)
+fn ep() {
+  indirect(&buf);
+}
+)";
+
+    Inspector& inspector = Initialize(src);
+    auto result = inspector.GetResourceBindings("ep");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer, result[0].resource_type);
+    EXPECT_EQ(512u, result[0].size);
+}
+
 TEST_F(InspectorGetResourceBindingsTest, SubgroupMatrix_Direct) {
     auto* src = R"(
 enable chromium_experimental_subgroup_matrix;
@@ -3217,6 +3299,104 @@ enable chromium_experimental_subgroup_matrix;
   _ = subgroupMatrixLoad<subgroup_matrix_left<u32, 16, 16>, col_major>(p, 0, 16);
 }
     )";
+
+    Inspector& inspector = Initialize(src);
+    auto result = inspector.GetResourceBindings("ep");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[0].resource_type);
+    EXPECT_EQ(1024u, result[0].size);
+}
+
+TEST_F(InspectorGetResourceBindingsTest, SubgroupMatrix_Indirect_SmallAndLarge) {
+    auto* src = R"(
+enable chromium_experimental_subgroup_matrix;
+@group(0) @binding(0) var<storage> v : array<f32>;
+fn indirect(p : ptr<storage, array<f32>, read>) {
+  let small = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, col_major>(p, 0u, 8u);
+  let large = subgroupMatrixLoad<subgroup_matrix_left<f32, 16, 16>, row_major>(p, 0u, 16u);
+}
+@compute @workgroup_size(1)
+fn ep() {
+  indirect(&v);
+}
+)";
+
+    Inspector& inspector = Initialize(src);
+    auto result = inspector.GetResourceBindings("ep");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[0].resource_type);
+    EXPECT_EQ(1024u, result[0].size);
+}
+
+TEST_F(InspectorGetResourceBindingsTest, SubgroupMatrix_Indirect_LargeAndSmall) {
+    auto* src = R"(
+enable chromium_experimental_subgroup_matrix;
+@group(0) @binding(0) var<storage> v : array<f32>;
+fn indirect(p : ptr<storage, array<f32>, read>) {
+  let large = subgroupMatrixLoad<subgroup_matrix_left<f32, 16, 16>, row_major>(p, 0u, 16u);
+  let small = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, col_major>(p, 0u, 8u);
+}
+@compute @workgroup_size(1)
+fn ep() {
+  indirect(&v);
+}
+)";
+
+    Inspector& inspector = Initialize(src);
+    auto result = inspector.GetResourceBindings("ep");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[0].resource_type);
+    EXPECT_EQ(1024u, result[0].size);
+}
+
+TEST_F(InspectorGetResourceBindingsTest, SubgroupMatrix_Indirect_SmallAndLargeFuncs) {
+    auto* src = R"(
+enable chromium_experimental_subgroup_matrix;
+@group(0) @binding(0) var<storage> v : array<f32>;
+fn small(p : ptr<storage, array<f32>, read>) {
+  let s = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, col_major>(p, 0u, 8u);
+}
+fn large(p : ptr<storage, array<f32>, read>) {
+  let l = subgroupMatrixLoad<subgroup_matrix_left<f32, 16, 16>, row_major>(p, 0u, 16u);
+}
+@compute @workgroup_size(1)
+fn ep() {
+  small(&v);
+  large(&v);
+}
+)";
+
+    Inspector& inspector = Initialize(src);
+    auto result = inspector.GetResourceBindings("ep");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[0].resource_type);
+    EXPECT_EQ(1024u, result[0].size);
+}
+
+TEST_F(InspectorGetResourceBindingsTest, SubgroupMatrix_Indirect_LargeAndSmallFuncs) {
+    auto* src = R"(
+enable chromium_experimental_subgroup_matrix;
+@group(0) @binding(0) var<storage> v : array<f32>;
+fn large(p : ptr<storage, array<f32>, read>) {
+  let l = subgroupMatrixLoad<subgroup_matrix_left<f32, 16, 16>, row_major>(p, 0u, 16u);
+}
+fn small(p : ptr<storage, array<f32>, read>) {
+  let s = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, col_major>(p, 0u, 8u);
+}
+@compute @workgroup_size(1)
+fn ep() {
+  large(&v);
+  small(&v);
+}
+)";
 
     Inspector& inspector = Initialize(src);
     auto result = inspector.GetResourceBindings("ep");

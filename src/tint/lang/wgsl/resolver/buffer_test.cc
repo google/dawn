@@ -587,6 +587,54 @@ input.wgsl:7:24 error: the offset argument of bufferView plus the minimum size o
 )");
 }
 
+TEST_F(ResolverBufferViewTest, MinSizeViolation_Indirect_SmallAndLarge) {
+    EXPECT_ERROR(
+        R"(
+@group(0) @binding(0) var<storage, read_write> b : buffer<256>;
+fn indirect(p : ptr<storage, buffer, read_write>) {
+  let small = bufferView<u32>(p, 0u);
+  let large = bufferView<array<u32, 128>>(p, 0u);
+}
+@compute @workgroup_size(1)
+fn main() {
+  indirect(&b);
+}
+)",
+        R"(
+input.wgsl:2:23 error: buffer size (256 bytes) is smaller than the minimum view size (512 bytes)
+@group(0) @binding(0) var<storage, read_write> b : buffer<256>;
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+input.wgsl:4:15 note: due to call here
+  let small = bufferView<u32>(p, 0u);
+              ^^^^^^^^^^^^^^^^^^^^^^
+)");
+}
+
+TEST_F(ResolverBufferViewTest, MinSizeViolation_Indirect_LargeAndSmall) {
+    EXPECT_ERROR(
+        R"(
+@group(0) @binding(0) var<storage, read_write> b : buffer<256>;
+fn indirect(p : ptr<storage, buffer, read_write>) {
+  let large = bufferView<array<u32, 128>>(p, 0u);
+  let small = bufferView<u32>(p, 0u);
+}
+@compute @workgroup_size(1)
+fn main() {
+  indirect(&b);
+}
+)",
+        R"(
+input.wgsl:2:23 error: buffer size (256 bytes) is smaller than the minimum view size (512 bytes)
+@group(0) @binding(0) var<storage, read_write> b : buffer<256>;
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+input.wgsl:4:15 note: due to call here
+  let large = bufferView<array<u32, 128>>(p, 0u);
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)");
+}
+
 using ResolverBufferArrayViewTest = ResolverTest;
 
 TEST_F(ResolverBufferArrayViewTest, Storage_Unsized) {
