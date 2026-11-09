@@ -51,6 +51,7 @@ tint_target_add_dependencies(tint_lang_spirv_reader_parser lib
   tint_lang_core_constant
   tint_lang_core_intrinsic
   tint_lang_core_ir
+  tint_lang_core_ir_validator
   tint_lang_core_type
   tint_lang_spirv
   tint_lang_spirv_intrinsic
@@ -117,7 +118,6 @@ tint_target_add_dependencies(tint_lang_spirv_reader_parser_test test
   tint_lang_core_constant
   tint_lang_core_intrinsic
   tint_lang_core_ir
-  tint_lang_core_ir_validator
   tint_lang_core_type
   tint_lang_spirv_reader_common
   tint_lang_spirv_reader_common_test

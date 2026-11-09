@@ -65,6 +65,7 @@ TINT_END_DISABLE_WARNING(NEWLINE_EOF);
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/referenced_module_vars.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/spirv/builtin_fn.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
@@ -258,6 +259,10 @@ class Parser {
         RemapSamplers();
         RemapBufferBlockAddressSpace();
         AddRefToOutputsIfNeeded();
+
+        ir_.dump_ir_when_validating = options_.dump_ir_when_validating;
+        ir_.enable_validation_asserts = options_.enable_validation_asserts;
+        TINT_CHECK_RESULT(core::ir::Validate(ir_, "after spirv::Parse"));
 
         return std::move(ir_);
     }

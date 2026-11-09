@@ -394,13 +394,19 @@ TEST_F(SpirvParserTest, Struct_VariableDecoration_VertexOput_U32) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Vertex %main "main" %var
+               OpEntryPoint Vertex %main "main" %position %var
+               OpName %position "position"
+               OpDecorate %position BuiltIn Position
                OpDecorate %var Location 0
        %void = OpTypeVoid
         %int = OpTypeInt 32 1
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
         %str = OpTypeStruct %int
     %fn_type = OpTypeFunction %void
+   %_ptr_pos = OpTypePointer Output %v4float
 %_ptr_Output = OpTypePointer Output %str
+   %position = OpVariable %_ptr_pos Output
         %var = OpVariable %_ptr_Output Output
        %main = OpFunction %void None %fn_type
           %5 = OpLabel
@@ -413,12 +419,14 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<__out, tint_symbol_1, read_write> = var @location(0)
+  %position:ptr<__out, vec4<f32>, read_write> = var @builtin(position)
+  %2:ptr<__out, tint_symbol_1, read_write> = var @location(0)
 }
 
 %main = @vertex func():void {
   $B2: {
-    phony %1
+    phony %2
+    phony %position
     ret
   }
 }

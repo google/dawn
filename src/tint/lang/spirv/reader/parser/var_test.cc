@@ -3805,5 +3805,215 @@ TEST_F(SpirvParserTest, Var_OpUndef_MemoryView_Unsupported) {
                 testing::HasSubstr("cannot create an undef memory view in WGSL"));
 }
 
+// A Private variable larger than the temporary storage limit is rejected.
+TEST_F(SpirvParserTest, Var_Private_ExceedsTemporaryStorageLimit) {
+    auto result = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %f32 = OpTypeFloat 32
+  %u32_16385 = OpConstant %u32 16385
+        %arr = OpTypeArray %f32 %u32_16385
+    %ptr_arr = OpTypePointer Private %arr
+          %p = OpVariable %ptr_arr Private
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+               OpReturn
+               OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr("error: var: result type size (65540) exceeds maximum allowed (65536)"));
+}
+
+// A Function variable larger than the temporary storage limit is rejected.
+TEST_F(SpirvParserTest, Var_Function_ExceedsTemporaryStorageLimit) {
+    auto result = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %f32 = OpTypeFloat 32
+  %u32_16385 = OpConstant %u32 16385
+        %arr = OpTypeArray %f32 %u32_16385
+    %ptr_arr = OpTypePointer Function %arr
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %p = OpVariable %ptr_arr Function
+               OpReturn
+               OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr("error: var: result type size (65540) exceeds maximum allowed (65536)"));
+}
+
+// Private variables that each fit the temporary storage limit are rejected when their combined
+// size exceeds the private variable limit.
+TEST_F(SpirvParserTest, Var_Private_ExceedsCombinedPrivateVariableLimit) {
+    // 129 arrays of 64 KiB is 8 MiB + 64 KiB.
+    std::string vars;
+    for (uint32_t i = 0; i < 129; i++) {
+        vars += "%p" + std::to_string(i) + " = OpVariable %ptr_arr Private\n";
+    }
+    auto result = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %f32 = OpTypeFloat 32
+  %u32_16384 = OpConstant %u32 16384
+        %arr = OpTypeArray %f32 %u32_16384
+    %ptr_arr = OpTypePointer Private %arr
+)" + vars + R"(
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+               OpReturn
+               OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr(
+            "error: var: total size of private address-space variables exceeds 8388608 bytes"));
+}
+
+// A storage buffer may hold an array larger than the temporary storage limit.
+TEST_F(SpirvParserTest, Var_StorageBuffer_ExceedsTemporaryStorageLimit) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %arr ArrayStride 4
+               OpDecorate %str Block
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %p DescriptorSet 0
+               OpDecorate %p Binding 0
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %f32 = OpTypeFloat 32
+      %u32_0 = OpConstant %u32 0
+  %u32_16385 = OpConstant %u32 16385
+        %arr = OpTypeArray %f32 %u32_16385
+        %str = OpTypeStruct %arr
+    %ptr_str = OpTypePointer StorageBuffer %str
+    %ptr_f32 = OpTypePointer StorageBuffer %f32
+          %p = OpVariable %ptr_str StorageBuffer
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+     %access = OpAccessChain %ptr_f32 %p %u32_0 %u32_0
+       %load = OpLoad %f32 %access
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(4) {
+  tint_symbol:array<f32, 16385> @offset(0)
+}
+
+$B1: {  # root
+  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<storage, f32, read_write> = access %1, 0u, 0u
+    %4:f32 = load %3
+    ret
+  }
+}
+)");
+}
+
+// Loading a whole array larger than the temporary storage limit is rejected.
+TEST_F(SpirvParserTest, Load_ExceedsTemporaryStorageLimit) {
+    auto result = Run(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %arr ArrayStride 4
+               OpDecorate %str Block
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %p DescriptorSet 0
+               OpDecorate %p Binding 0
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %f32 = OpTypeFloat 32
+      %u32_0 = OpConstant %u32 0
+  %u32_16385 = OpConstant %u32 16385
+        %arr = OpTypeArray %f32 %u32_16385
+        %str = OpTypeStruct %arr
+    %ptr_str = OpTypePointer StorageBuffer %str
+    %ptr_arr = OpTypePointer StorageBuffer %arr
+          %p = OpVariable %ptr_str StorageBuffer
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+     %access = OpAccessChain %ptr_arr %p %u32_0
+       %load = OpLoad %arr %access
+               OpReturn
+               OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr(
+                    "error: load: result type size (65540) exceeds maximum allowed (65536)"));
+}
+
+// A constant larger than the temporary storage limit is rejected when used as an operand.
+TEST_F(SpirvParserTest, ConstantNull_ExceedsTemporaryStorageLimit) {
+    auto result = Run(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %arr ArrayStride 4
+               OpDecorate %str Block
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %p DescriptorSet 0
+               OpDecorate %p Binding 0
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %f32 = OpTypeFloat 32
+      %u32_0 = OpConstant %u32 0
+  %u32_16385 = OpConstant %u32 16385
+        %arr = OpTypeArray %f32 %u32_16385
+        %str = OpTypeStruct %arr
+    %ptr_str = OpTypePointer StorageBuffer %str
+    %ptr_arr = OpTypePointer StorageBuffer %arr
+          %p = OpVariable %ptr_str StorageBuffer
+       %null = OpConstantNull %arr
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+     %access = OpAccessChain %ptr_arr %p %u32_0
+               OpStore %access %null
+               OpReturn
+               OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr("error: store: operand size (65540) exceeds maximum allowed (65536)"));
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
