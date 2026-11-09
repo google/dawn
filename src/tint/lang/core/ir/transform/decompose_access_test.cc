@@ -90,30 +90,44 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    auto* expect = R"(
-S = struct @align(8) {
-  a:array<array<mat3x2<f32>, 3235>, 55319> @offset(0)
-  b:array<mat3x2<f32>, 5> @offset(4294967160)
-  c:u32 @offset(4294967280)
+    DecomposeAccessConfig options{.uniform = true};
+    auto result = RunWithFailure(DecomposeAccess, options);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason, R"(error: required array bytes (4294967296) is too large)");
 }
 
+TEST_F(IR_DecomposeAccessTest, OverflowArrayBytes) {
+    auto* v = b.Var("v", ty.ptr(workgroup, ty.buffer(0xfffffffc)));
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* view = b.CallExplicit(ty.ptr(workgroup, ty.vec4u()), BuiltinFn::kBufferView,
+                                    Vector<TemplateParameter, 1>{ty.vec4u()}, v, 0_u);
+        b.Load(view);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
 $B1: {  # root
-  %v:ptr<uniform, array<vec4<u32>, 268435456>, read> = var @binding_point(0, 0)
+  %v:ptr<workgroup, buffer<4294967292>, read_write> = var
 }
 
 %foo = func():void {
   $B2: {
-    %3:ptr<uniform, vec4<u32>, read> = access %v, 268435455u
-    %4:u32 = load_vector_element %3, 0u
+    %3:ptr<workgroup, vec4<u32>, read_write> = bufferView<vec4<u32>> %v, 0u
+    %4:vec4<u32> = load %3
     ret
   }
 }
 )";
 
-    DecomposeAccessConfig options{.uniform = true};
-    Run(DecomposeAccess, options);
+    EXPECT_EQ(src, str());
 
-    EXPECT_EQ(expect, str());
+    DecomposeAccessConfig options{.uniform = true};
+    auto result = RunWithFailure(DecomposeAccess, options);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().reason, R"(error: required array bytes (4294967296) is too large)");
 }
 
 TEST_F(IR_DecomposeAccessTest, NoBufferAccess) {

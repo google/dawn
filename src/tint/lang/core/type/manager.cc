@@ -28,6 +28,7 @@
 #include "src/tint/lang/core/type/manager.h"
 
 #include <algorithm>
+#include <limits>
 
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
@@ -361,11 +362,16 @@ const core::type::Buffer* Manager::unsized_buffer() {
 }
 
 const core::type::Array* Manager::array(const core::type::Type* elem_ty, uint32_t count) {
-    uint32_t implicit_stride = tint::RoundUp(elem_ty->Align(), elem_ty->Size());
+    uint64_t implicit_stride = tint::RoundUp(elem_ty->Align(), elem_ty->Size());
+    uint64_t size = count * implicit_stride;
+    // Catch potential overflows.
+    if (size > std::numeric_limits<uint32_t>::max()) {
+        TINT_ICE() << "array is too large";
+    }
 
     return Get<core::type::Array>(/* element type */ elem_ty,
                                   /* element count */ Get<ConstantArrayCount>(count),
-                                  /* array size */ count * implicit_stride);
+                                  /* array size */ static_cast<uint32_t>(size));
 }
 
 const core::type::Array* Manager::runtime_array(const core::type::Type* elem_ty) {
