@@ -370,7 +370,6 @@ mesa_nir_static_sources = [
   "src/src/compiler/nir/nir_divergence_analysis.c",
   "src/src/compiler/nir/nir_dominance.c",
   "src/src/compiler/nir/nir_dominance_lca.c",
-  "src/src/compiler/nir/nir_downgrade_pls_vars.c",
   "src/src/compiler/nir/nir_fixup_is_exported.c",
   "src/src/compiler/nir/nir_format_convert.c",
   "src/src/compiler/nir/nir_from_ssa.c",
