@@ -536,6 +536,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     deviceToggles->Default(Toggle::GLHoistConstantArrayInitializers,
                            mVendorId == gpu_info::kVendorID_ImgTec);
 
+    // (crbug.com/379551588): The ARM Mali shader compiler has memory safety issues when
+    // compiling pack4x8snorm/pack4x8unorm/unpack4x8snorm/unpack4x8unorm. The Vulkan backend
+    // polyfills them on every ARM proprietary driver; do the same for the GL(ES) backend, which
+    // is the default WebGPU compat adapter on Android 10/11 Mali devices.
+    deviceToggles->Default(Toggle::PolyfillPackUnpack4x8Norm, gpu_info::IsARM(mVendorId));
+
     // Enable the integer range analysis for shader robustness by default if the corresponding
     // platform feature is enabled.
     deviceToggles->Default(

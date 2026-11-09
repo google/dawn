@@ -149,8 +149,12 @@ struct Options {
         /// Set to `true` to hoist constant array initializers inside structures.
         bool hoist_constant_array_initializers = false;
 
+        /// Set to `true` to always use the polyfill version of `pack4x8snorm`, `pack4x8unorm`,
+        /// `unpack4x8snorm` and `unpack4x8unorm` (crbug.com/379551588).
+        bool polyfill_pack_unpack_4x8_norm = false;
+
         /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-        TINT_REFLECT(Workarounds, hoist_constant_array_initializers);
+        TINT_REFLECT(Workarounds, hoist_constant_array_initializers, polyfill_pack_unpack_4x8_norm);
         TINT_REFLECT_HASH_CODE(Workarounds);
 
         bool operator==(const Workarounds&) const = default;

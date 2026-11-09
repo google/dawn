@@ -156,6 +156,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.pack_unpack_4x8 = true;
         core_polyfills.pack_4xu8_clamp = true;
         core_polyfills.abs_signed_int = true;
+        // crbug.com/379551588: never hand the native pack/unpack 4x8 norm builtins to drivers
+        // that miscompile them (ARM Mali). Mirrors the SPIR-V writer workaround.
+        core_polyfills.pack_unpack_4x8_norm = options.workarounds.polyfill_pack_unpack_4x8_norm;
         TINT_CHECK_RESULT(core::ir::transform::BuiltinPolyfill(module, core_polyfills));
     }
 
