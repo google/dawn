@@ -502,6 +502,7 @@ void ResourceTableBase::SetEntry(ResourceTableSlot slot, const BindingResource* 
                 mTextureState.erase(currTexture);
                 // Also remove the mapping of texture to this table
                 currTexture->RemoveResourceTableUse(this);
+                mDirtyStateTextures.erase(currTexture);
             }
         }
     } else if (auto sampler = GetRef<SamplerBase>(state.resource)) {
@@ -570,12 +571,14 @@ ResourceTableBase::Updates ResourceTableBase::MakeResourcesVisibleExcept(
     Updates updates;
 
     auto HandleDirtyTexture = [&](TextureBase* texture) {
-        // The texture may not be in mTextureState if, for example, it was destroyed.
+        // A texture is removed from mDirtyStateTextures whenever it is removed from mTextureState
+        // (e.g. when its last slot is removed or when it is destroyed).
         auto iter = mTextureState.find(texture);
-        if (iter == mTextureState.end()) {
-            return;
-        }
+        DAWN_ASSERT(iter != mTextureState.end());
         auto& textureState = iter->second;
+        // A texture is only added to mDirtyStateTextures when it has at least one slot, and removed
+        // from it when it has no more slots.
+        DAWN_ASSERT(!textureState.slots.empty());
 
         // Update visible flag
         bool visible =
@@ -699,6 +702,7 @@ void ResourceTableBase::OnTextureDestroyed(TextureBase* texture) {
         MarkStateDirty(slot);
     }
     mTextureState.erase(iter);
+    mDirtyStateTextures.erase(texture);
 }
 
 }  // namespace dawn::native
