@@ -61,11 +61,18 @@ constexpr double kHighestF32Subnormal = 0x0.fffffep-126;
 // Next ULP up from kHighestF16 for a float64.
 constexpr double kHighestF16NextULP = 0x1.ffc0000000001p+15;
 
+// Next ULP up from kHighestBF16 for a float64.
+constexpr double kHighestBF16NextULP = 0x1.fe00000000001p+127;
+
 // Highest subnormal value for a float16.
 constexpr double kHighestF16Subnormal = 0x0.ffcp-14;
 
+// Highest subnormal value for a bfloat16.
+constexpr double kHighestBF16Subnormal = 0x1.fcp-127;
+
 constexpr double kLowestF32NextULP = -kHighestF32NextULP;
 constexpr double kLowestF16NextULP = -kHighestF16NextULP;
+constexpr double kLowestBF16NextULP = -kHighestBF16NextULP;
 
 // MSVC (only in release builds) can grumble about some of the inlined numerical overflow /
 // underflow that's done in this file. We like to think we know what we're doing, so silence the
@@ -162,6 +169,7 @@ TEST(NumberTest, CheckedConvertIdentity) {
     EXPECT_EQ(CheckedConvert<u16>(u16(0)), u16(0));
     EXPECT_EQ(CheckedConvert<f32>(0_f), 0_f);
     EXPECT_EQ(CheckedConvert<f16>(0_h), 0_h);
+    EXPECT_EQ(CheckedConvert<bf16>(bf16(0)), bf16(0));
 
     EXPECT_EQ(CheckedConvert<AInt>(1_a), 1_a);
     EXPECT_EQ(CheckedConvert<AFloat>(1_a), 1.0_a);
@@ -173,6 +181,7 @@ TEST(NumberTest, CheckedConvertIdentity) {
     EXPECT_EQ(CheckedConvert<u16>(u16(1)), u16(1));
     EXPECT_EQ(CheckedConvert<f32>(1_f), 1_f);
     EXPECT_EQ(CheckedConvert<f16>(1_h), 1_h);
+    EXPECT_EQ(CheckedConvert<bf16>(bf16(1)), bf16(1));
 }
 
 TEST(NumberTest, CheckedConvertLargestValue) {
@@ -185,6 +194,7 @@ TEST(NumberTest, CheckedConvertLargestValue) {
     EXPECT_EQ(CheckedConvert<u16>(AInt(u16::Highest())), u16::Highest());
     EXPECT_EQ(CheckedConvert<f32>(AFloat(f32::Highest())), f32::Highest());
     EXPECT_EQ(CheckedConvert<f16>(AFloat(f16::Highest())), f16::Highest());
+    EXPECT_EQ(CheckedConvert<bf16>(AFloat(bf16::Highest())), bf16::Highest());
 }
 
 TEST(NumberTest, CheckedConvertLowestValue) {
@@ -196,6 +206,7 @@ TEST(NumberTest, CheckedConvertLowestValue) {
     EXPECT_EQ(CheckedConvert<u16>(AInt(u16::Lowest())), u16::Lowest());
     EXPECT_EQ(CheckedConvert<f32>(AFloat(f32::Lowest())), f32::Lowest());
     EXPECT_EQ(CheckedConvert<f16>(AFloat(f16::Lowest())), f16::Lowest());
+    EXPECT_EQ(CheckedConvert<bf16>(AFloat(bf16::Lowest())), bf16::Lowest());
 }
 
 TEST(NumberTest, CheckedConvertSmallestValue) {
@@ -207,6 +218,7 @@ TEST(NumberTest, CheckedConvertSmallestValue) {
     EXPECT_EQ(CheckedConvert<u16>(AInt(0)), u16(0));
     EXPECT_EQ(CheckedConvert<f32>(AFloat(f32::Smallest())), f32::Smallest());
     EXPECT_EQ(CheckedConvert<f16>(AFloat(f16::Smallest())), f16::Smallest());
+    EXPECT_EQ(CheckedConvert<bf16>(AFloat(bf16::Smallest())), bf16::Smallest());
 }
 
 TEST(NumberTest, CheckedConvertExceedsPositiveLimit) {
@@ -237,6 +249,8 @@ TEST(NumberTest, CheckedConvertExceedsPositiveLimit) {
     EXPECT_EQ(CheckedConvert<f32>(AFloat(kHighestF32NextULP)),
               ConversionFailure::kExceedsPositiveLimit);
     EXPECT_EQ(CheckedConvert<f16>(AFloat(kHighestF16NextULP)),
+              ConversionFailure::kExceedsPositiveLimit);
+    EXPECT_EQ(CheckedConvert<bf16>(AFloat(kHighestBF16NextULP)),
               ConversionFailure::kExceedsPositiveLimit);
 }
 
@@ -273,13 +287,17 @@ TEST(NumberTest, CheckedConvertExceedsNegativeLimit) {
               ConversionFailure::kExceedsNegativeLimit);
     EXPECT_EQ(CheckedConvert<f16>(AFloat(kLowestF16NextULP)),
               ConversionFailure::kExceedsNegativeLimit);
+    EXPECT_EQ(CheckedConvert<bf16>(AFloat(kLowestBF16NextULP)),
+              ConversionFailure::kExceedsNegativeLimit);
 }
 
 TEST(NumberTest, CheckedConvertSubnormals) {
     EXPECT_EQ(CheckedConvert<f32>(AFloat(kHighestF32Subnormal)), f32(kHighestF32Subnormal));
     EXPECT_EQ(CheckedConvert<f16>(AFloat(kHighestF16Subnormal)), f16(kHighestF16Subnormal));
+    EXPECT_EQ(CheckedConvert<bf16>(AFloat(kHighestBF16Subnormal)), bf16(kHighestBF16Subnormal));
     EXPECT_EQ(CheckedConvert<f32>(AFloat(-kHighestF32Subnormal)), f32(-kHighestF32Subnormal));
     EXPECT_EQ(CheckedConvert<f16>(AFloat(-kHighestF16Subnormal)), f16(-kHighestF16Subnormal));
+    EXPECT_EQ(CheckedConvert<bf16>(AFloat(-kHighestBF16Subnormal)), bf16(-kHighestBF16Subnormal));
 }
 
 // Test cases for f16 subnormal quantization and BitsRepresentation.

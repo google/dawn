@@ -60,6 +60,10 @@ struct IsNumber<Number<T>> : std::true_type {};
 /// specializing for the f16 type.
 struct NumberKindF16 {};
 
+/// An empty structure used as a unique template type for Number when
+/// specializing for the bf16 type.
+struct NumberKindBF16 {};
+
 /// Helper for obtaining the underlying type for a Number.
 template <typename T>
 struct NumberUnwrapper {
@@ -86,10 +90,12 @@ constexpr bool IsNumber = tint::core::detail::IsNumber<T>::value;
 template <typename T>
 using UnwrapNumber = typename tint::core::detail::NumberUnwrapper<T>::type;
 
-/// Evaluates to true iff T or Number<T> is a floating-point type or is NumberKindF16.
+/// Evaluates to true iff T or Number<T> is a floating-point type, NumberKindF16, or NumberKindBF16.
 template <typename T>
-constexpr bool IsFloatingPoint = std::is_floating_point_v<UnwrapNumber<T>> ||
-                                 std::is_same_v<UnwrapNumber<T>, tint::core::detail::NumberKindF16>;
+constexpr bool IsFloatingPoint =
+    std::is_floating_point_v<UnwrapNumber<T>> ||
+    std::is_same_v<UnwrapNumber<T>, tint::core::detail::NumberKindF16> ||
+    std::is_same_v<UnwrapNumber<T>, tint::core::detail::NumberKindBF16>;
 
 /// Evaluates to true iff T or Number<T> is an integral type.
 template <typename T>
@@ -105,7 +111,8 @@ template <typename T>
 constexpr bool IsUnsignedIntegral =
     std::is_integral_v<UnwrapNumber<T>> && std::is_unsigned_v<UnwrapNumber<T>>;
 
-/// Evaluates to true iff T is an integer type, floating-point type or is NumberKindF16.
+/// Evaluates to true iff T is an integer type, floating-point type, NumberKindF16, or
+/// NumberKindBF16.
 template <typename T>
 constexpr bool IsNumeric = IsIntegral<T> || IsFloatingPoint<T>;
 
@@ -285,6 +292,82 @@ struct Number<tint::core::detail::NumberKindF16>
     type value = {};
 };
 
+/// The partial specification of Number for bf16 type, storing the bf16 value as float,
+/// and enforcing proper explicit casting.
+template <>
+struct Number<tint::core::detail::NumberKindBF16>
+    : NumberBase<Number<tint::core::detail::NumberKindBF16>> {
+    /// C++ does not have a native float16 type, so we use a 32-bit float instead.
+    using type = float;
+    using utype = uint32_t;
+
+    /// Number of bits in the number.
+    static constexpr size_t kNumBits = 16;
+
+    static constexpr uint32_t kMask = 0xffff0000;
+
+    /// Highest finite representable value of this type.
+    /// binary representation 0_11111110_1111111.
+    static constexpr type kHighestValue = 0x1.fep+127f;
+
+    /// Lowest finite representable value of this type.
+    /// binary representation 1_11111110_1111111.
+    static constexpr type kLowestValue = -0x1.fep+127f;
+
+    /// Smallest positive normal value of this type.
+    /// binary representation 0_00000001_0000000.
+    static constexpr type kSmallestValue = 0x1p-126f;
+
+    /// Smallest positive subnormal value of this type.
+    /// binary representation 0_00000000_0000001
+    static constexpr type kSmallestSubnormalValue = 0x1p-133f;
+
+    /// Constructor. The value is zero-initialized.
+    Number() = default;
+
+    /// Constructor.
+    /// @param v the value to initialize this Number to
+    template <typename U>
+        requires(std::is_arithmetic_v<U>)
+    explicit Number(U v) : value(Quantize(static_cast<type>(v))) {}
+
+    /// Constructor.
+    /// @param v the value to initialize this Number to
+    template <typename U>
+    explicit Number(Number<U> v) : value(Quantize(static_cast<type>(v.value))) {}
+
+    /// Conversion operator
+    /// @returns the value as the internal representation type of BF16
+    // NOLINTNEXTLINE(google-explicit-constructor)
+    operator float() const { return value; }
+
+    /// Negation operator
+    /// @returns the negative value of the number
+    Number operator-() const { return Number<tint::core::detail::NumberKindBF16>(-value); }
+
+    /// Assignment operator with parameter as native floating point type
+    /// @param v the new value
+    /// @returns this Number so calls can be chained
+    Number& operator=(type v) {
+        value = v;
+        return *this;
+    }
+
+    /// Get the bfloat16 bit pattern in type uint16_t of this value.
+    /// @returns the bfloat16 bit pattern, in type uint16_t, of the stored quantized bf16 value.
+    uint16_t BitsRepresentation() const;
+
+    /// Creates an bf16 value from the uint16_t bit representation.
+    /// @param bits the bits to convert from
+    /// @returns the binary16 value based off the provided bit pattern.
+    static Number<tint::core::detail::NumberKindBF16> FromBits(uint16_t bits);
+
+    static type Quantize(type value);
+
+    /// The number value, stored as float
+    type value = {};
+};
+
 /// `AInt` is a type alias to `Number<int64_t>`.
 using AInt = Number<int64_t>;
 /// `AFloat` is a type alias to `Number<double>`.
@@ -307,6 +390,9 @@ using f32 = Number<float>;
 /// `f16` is a type alias to `Number<detail::NumberKindF16>`, which should be IEEE 754 binary16.
 /// However since C++ don't have native binary16 type, the value is stored as float.
 using f16 = Number<tint::core::detail::NumberKindF16>;
+/// `bf16` is a type alias to `Number<detail::NumberKindBF16>`, which should be bfloat16.
+/// However since C++ don't have native bfloat16 type, the value is stored as float.
+using bf16 = Number<tint::core::detail::NumberKindBF16>;
 
 /// The algorithms in this module require support for infinity and quiet NaNs on
 /// floating point types.
@@ -337,6 +423,8 @@ const char* FriendlyName() {
         return "f32";
     } else if constexpr (std::is_same_v<T, f16>) {
         return "f16";
+    } else if constexpr (std::is_same_v<T, bf16>) {
+        return "bf16";
     } else {
         static_assert(!sizeof(T), "Unhandled type");
     }
