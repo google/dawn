@@ -1716,19 +1716,19 @@ void ImportedTextureBase::TweakTransition(CommandRecordingContext* recordingCont
         mExternalState == ExternalState::EagerlyTransitioned) {
         recordingContext->specialSyncTextures.insert(this);
 
-        VkImageMemoryBarrier* barrier = &(*barriers)[transitionBarrierStart];
+        VkImageMemoryBarrier& barrier = (*barriers)[transitionBarrierStart];
         // Transfer texture from external queue to graphics queue
-        barrier->srcQueueFamilyIndex = mExportQueueFamilyIndex;
-        barrier->dstQueueFamilyIndex = ToBackend(GetDevice())->GetGraphicsQueueFamily();
+        barrier.srcQueueFamilyIndex = mExportQueueFamilyIndex;
+        barrier.dstQueueFamilyIndex = ToBackend(GetDevice())->GetGraphicsQueueFamily();
 
         // srcAccessMask means nothing when importing. Queue transfers require a barrier on
         // both the importing and exporting queues. The exporting queue should have specified
         // this.
-        barrier->srcAccessMask = 0;
+        barrier.srcAccessMask = 0;
 
         // Save the desired layout. We may need to transition through an intermediate
         // |mPendingAcquireLayout| first.
-        VkImageLayout desiredLayout = barrier->newLayout;
+        VkImageLayout desiredLayout = barrier.newLayout;
 
         if (mExternalState == ExternalState::PendingAcquire) {
             bool isInitialized = IsSubresourceContentInitialized(GetAllSubresources());
@@ -1740,11 +1740,11 @@ void ImportedTextureBase::TweakTransition(CommandRecordingContext* recordingCont
             // https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-VkImageMemoryBarrier-newLayout-01198
             if (!isInitialized || mPendingAcquireNewLayout == VK_IMAGE_LAYOUT_UNDEFINED ||
                 mPendingAcquireNewLayout == VK_IMAGE_LAYOUT_PREINITIALIZED) {
-                barrier->oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-                barrier->newLayout = desiredLayout;
+                barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                barrier.newLayout = desiredLayout;
             } else {
-                barrier->oldLayout = mPendingAcquireOldLayout;
-                barrier->newLayout = mPendingAcquireNewLayout;
+                barrier.oldLayout = mPendingAcquireOldLayout;
+                barrier.newLayout = mPendingAcquireNewLayout;
             }
         } else {
             // In case of ExternalState::EagerlyTransitioned, the layouts of the texture's queue
@@ -1754,23 +1754,23 @@ void ImportedTextureBase::TweakTransition(CommandRecordingContext* recordingCont
             // desired, then the values of oldLayout and newLayout in the release operation's memory
             // barrier must be equal to values of oldLayout and newLayout in the acquire operation's
             // memory barrier.
-            barrier->newLayout = barrier->oldLayout;
+            barrier.newLayout = barrier.oldLayout;
         }
 
         // If these are unequal, we need an another barrier to transition the layout.
-        if (barrier->newLayout != desiredLayout) {
+        if (barrier.newLayout != desiredLayout) {
             VkImageMemoryBarrier layoutBarrier;
             layoutBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
             layoutBarrier.pNext = nullptr;
             layoutBarrier.image = GetHandle();
-            layoutBarrier.subresourceRange = barrier->subresourceRange;
+            layoutBarrier.subresourceRange = barrier.subresourceRange;
 
             // Transition from the acquired new layout to the desired layout.
-            layoutBarrier.oldLayout = barrier->newLayout;
+            layoutBarrier.oldLayout = barrier.newLayout;
             layoutBarrier.newLayout = desiredLayout;
 
             layoutBarrier.srcAccessMask = 0;
-            layoutBarrier.dstAccessMask = barrier->dstAccessMask;
+            layoutBarrier.dstAccessMask = barrier.dstAccessMask;
             layoutBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
             layoutBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
