@@ -319,7 +319,7 @@ deps = {
 
   # Required for fuzzing Mesa via tint fuzzers
   'third_party/mesa/src': {
-    'url': '{chromium_git}/external/gitlab.freedesktop.org/mesa/mesa/@faa32758485694c1548f80523ad074bbf47c8234',
+    'url': '{chromium_git}/external/gitlab.freedesktop.org/mesa/mesa/@5c9832fc1afce8fc11d38665d79f08bf598313f0',
     'condition': 'checkout_mesa and host_os == "linux"',
   },
   'third_party/llvm-dev': {
