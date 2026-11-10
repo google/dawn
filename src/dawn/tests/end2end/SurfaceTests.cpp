@@ -945,5 +945,104 @@ DAWN_INSTANTIATE_TEST(SurfaceTests,
                       VulkanBackend(),
                       WebGPUBackend());
 
+// Rendering into the surface's current texture with an implicit sample count
+// (MSAARenderToSingleSampled). On Vulkan, every single-sampled attachment of such a pass must have
+// been created with VK_IMAGE_CREATE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_BIT_EXT
+// (VUID-VkFramebufferCreateInfo-samples-06881, VUID-VkRenderingInfo-imageView-06859), which
+// swapchain images cannot be, so the surface texture must be a regular texture that is blitted to
+// the swapchain on Present. Without this the validation layers report the error on every driver
+// that advertises the extension, and the Adreno driver crashes in vkCreateFramebuffer.
+// See https://issues.chromium.org/issues/571594984.
+class SurfaceMSRTSSTests : public SurfaceTests {
+  protected:
+    virtual bool UseLoadResolveTexture() const { return false; }
+
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> features;
+        if (SupportsFeatures({wgpu::FeatureName::MSAARenderToSingleSampled})) {
+            features.push_back(wgpu::FeatureName::MSAARenderToSingleSampled);
+        }
+        if (UseLoadResolveTexture() &&
+            SupportsFeatures({wgpu::FeatureName::DawnLoadResolveTexture})) {
+            features.push_back(wgpu::FeatureName::DawnLoadResolveTexture);
+        }
+        return features;
+    }
+
+  public:
+    void SetUp() override {
+        SurfaceTests::SetUp();
+        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::MSAARenderToSingleSampled}));
+        if (UseLoadResolveTexture()) {
+            DAWN_TEST_UNSUPPORTED_IF(
+                !SupportsFeatures({wgpu::FeatureName::DawnLoadResolveTexture}));
+        }
+    }
+
+    void ClearSurfaceTextureWithImplicitSampleCount() {
+        wgpu::Surface surface = CreateTestSurface();
+        wgpu::SurfaceCapabilities caps;
+        surface.GetCapabilities(adapter, &caps);
+        wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+        // When supported, also request CopySrc so the result of the pass can be read back.
+        if (caps.usages & wgpu::TextureUsage::CopySrc) {
+            config.usage |= wgpu::TextureUsage::CopySrc;
+        }
+        surface.Configure(&config);
+
+        wgpu::SurfaceTexture surfaceTexture;
+        surface.GetCurrentTexture(&surfaceTexture);
+        ASSERT_EQ(surfaceTexture.status, wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal);
+
+        // A 4x pass whose only color attachment is the single-sampled surface texture: the
+        // backend rasterizes at 4 samples and resolves on store, with no explicit resolve target.
+        wgpu::DawnRenderPassSampleCount sampleCount;
+        sampleCount.sampleCount = 4;
+
+        utils::ComboRenderPassDescriptor renderPassDesc({surfaceTexture.texture.CreateView()});
+        renderPassDesc.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+        renderPassDesc.cColorAttachments[0].clearValue = {0.0, 1.0, 0.0, 1.0};
+        renderPassDesc.nextInChain = &sampleCount;
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
+        pass.End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        if (surfaceTexture.texture.GetUsage() & wgpu::TextureUsage::CopySrc) {
+            EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, surfaceTexture.texture, 0, 0);
+        }
+
+        // With backend validation enabled, an invalid pass turns into a device loss on the next
+        // tick, which the harness reports as a test failure.
+        WaitForAllOperations();
+
+        ASSERT_EQ(wgpu::Status::Success, surface.Present());
+    }
+};
+
+TEST_P(SurfaceMSRTSSTests, ClearWithImplicitSampleCount) {
+    ClearSurfaceTextureWithImplicitSampleCount();
+}
+
+// Same pass with DawnLoadResolveTexture enabled as well. The Vulkan backend then uses
+// CreateRenderPass2 and vkCreateFramebuffer instead of dynamic rendering, which is the path Skia
+// Graphite takes and where the Adreno driver crashes.
+class SurfaceMSRTSSLoadResolveTests : public SurfaceMSRTSSTests {
+  protected:
+    bool UseLoadResolveTexture() const override { return true; }
+};
+
+TEST_P(SurfaceMSRTSSLoadResolveTests, ClearWithImplicitSampleCount) {
+    ClearSurfaceTextureWithImplicitSampleCount();
+}
+
+DAWN_INSTANTIATE_TEST(SurfaceMSRTSSTests, MetalBackend(), OpenGLESBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(SurfaceMSRTSSLoadResolveTests,
+                      MetalBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());
+
 }  // anonymous namespace
 }  // namespace dawn
