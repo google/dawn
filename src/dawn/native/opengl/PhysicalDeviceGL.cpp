@@ -42,7 +42,6 @@
 #include "src/dawn/native/opengl/DisplayEGL.h"
 #include "src/dawn/native/opengl/SwapChainEGL.h"
 #include "src/dawn/native/opengl/UtilsGL.h"
-#include "src/utils/compiler.h"
 
 namespace dawn::native::opengl {
 
@@ -61,11 +60,11 @@ const Vendor kVendors[] = {{"ATI", gpu_info::kVendorID_AMD},
                            {"Qualcomm", gpu_info::kVendorID_QualcommPCI},
                            {"Samsung", gpu_info::kVendorID_Samsung}};
 
-uint32_t GetVendorIdFromVendors(const char* vendor) {
+uint32_t GetVendorIdFromVendors(std::string_view vendor) {
     uint32_t vendorId = 0;
     for (const auto& it : kVendors) {
         // Matching vendor name with vendor string
-        if (DAWN_UNSAFE_TODO(strstr(vendor, it.vendorName)) != nullptr) {
+        if (vendor.find(it.vendorName) != std::string_view::npos) {
             vendorId = it.vendorId;
             break;
         }
@@ -186,7 +185,7 @@ MaybeError PhysicalDevice::InitializeImpl() {
 
     // Workaroud to find vendor id from vendor name
     const char* vendor = reinterpret_cast<const char*>(mFunctions.GetString(GL_VENDOR));
-    mVendorId = GetVendorIdFromVendors(vendor);
+    mVendorId = vendor != nullptr ? GetVendorIdFromVendors(vendor) : 0;
     // Workaround to find device id from ANGLE render string
     if (mName.find("ANGLE") == 0) {
         mDeviceId = GetDeviceIdFromRender(mName);

@@ -29,6 +29,7 @@
 
 #include <cctype>
 #include <string>
+#include <string_view>
 #include <tuple>
 
 #include "src/utils/compiler.h"
@@ -41,30 +42,34 @@ MaybeError OpenGLVersion::Initialize(GLGetProcProc getProc) {
         return DAWN_UNRECOVERABLE_ERROR("Couldn't load glGetString");
     }
 
-    const char* version = reinterpret_cast<const char*>(getString(GL_VERSION));
-
-    if (DAWN_UNSAFE_TODO(strstr(version, "OpenGL ES")) != nullptr) {
-        // ES spec states that the GL_VERSION string will be in the following format:
-        // "OpenGL ES N.M vendor-specific information"
-        mStandard = Standard::ES;
-        mMajorVersion = DAWN_UNSAFE_TODO(version[10]) - '0';
-        mMinorVersion = DAWN_UNSAFE_TODO(version[12]) - '0';
-
-        // The minor version shouldn't get to two digits.
-        DAWN_UNSAFE_TODO(DAWN_ASSERT(strlen(version) <= 13 || !isdigit(version[13])));
-    } else {
-        // OpenGL spec states the GL_VERSION string will be in the following format:
-        // <version number><space><vendor-specific information>
-        // The version number is either of the form major number.minor number or major
-        // number.minor number.release number, where the numbers all have one or more
-        // digits
-        mStandard = Standard::Desktop;
-        mMajorVersion = version[0] - '0';
-        mMinorVersion = DAWN_UNSAFE_TODO(version[2]) - '0';
-
-        // The minor version shouldn't get to two digits.
-        DAWN_UNSAFE_TODO(DAWN_ASSERT(strlen(version) <= 3 || !isdigit(version[3])));
+    const char* versionString = reinterpret_cast<const char*>(getString(GL_VERSION));
+    if (versionString == nullptr) {
+        return DAWN_UNRECOVERABLE_ERROR("glGetString(GL_VERSION) returned null");
     }
+    std::string_view version = versionString;
+
+    // ES spec states that the GL_VERSION string will be in the following format:
+    // "OpenGL ES N.M vendor-specific information"
+    // OpenGL spec states the GL_VERSION string will be in the following format:
+    // <version number><space><vendor-specific information>
+    // The version number is either of the form major number.minor number or major
+    // number.minor number.release number, where the numbers all have one or more
+    // digits
+    constexpr std::string_view kESPrefix = "OpenGL ES ";
+    if (version.starts_with(kESPrefix)) {
+        mStandard = Standard::ES;
+        version.remove_prefix(kESPrefix.size());
+    } else {
+        mStandard = Standard::Desktop;
+    }
+    if (version.size() < 3) {
+        return DAWN_UNRECOVERABLE_ERROR("Invalid GL_VERSION string: \"%s\"", versionString);
+    }
+    mMajorVersion = version[0] - '0';
+    mMinorVersion = version[2] - '0';
+
+    // The minor version shouldn't get to two digits.
+    DAWN_ASSERT(version.size() <= 3 || !isdigit(version[3]));
 
     return {};
 }
