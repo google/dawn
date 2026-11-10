@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
@@ -171,6 +172,10 @@ const core::type::F16* Manager::f16() {
     return Get<core::type::F16>();
 }
 
+const core::type::BF16* Manager::bf16() {
+    return Get<core::type::BF16>();
+}
+
 const core::type::AbstractFloat* Manager::AFloat() {
     return Get<core::type::AbstractFloat>();
 }
@@ -208,6 +213,9 @@ const core::type::Type* Manager::ShaderScalarType(const core::type::SubgroupMatr
     }
     if (mat->Type()->Is<U8>()) {
         return u32();
+    }
+    if (mat->Type()->Is<BF16>()) {
+        return f32();
     }
     return mat->Type();
 }

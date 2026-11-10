@@ -37,6 +37,7 @@
 #include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/pointer.h"
@@ -79,6 +80,9 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             if (res != Success) {
                 return res.Failure();
             }
+        }
+        if (ty->Is<core::type::BF16>()) {
+            return Failure("bf16 is not supported by the HLSL backend");
         }
     }
 

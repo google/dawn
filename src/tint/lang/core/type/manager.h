@@ -58,6 +58,7 @@ class Array;
 class BindingArray;
 class Bool;
 class F16;
+class BF16;
 class F32;
 class Function;
 class I8;
@@ -167,6 +168,8 @@ class Manager final {
             return Get<core::type::F32>(std::forward<ARGS>(args)...);
         } else if constexpr (std::is_same_v<T, tint::core::f16>) {
             return Get<core::type::F16>(std::forward<ARGS>(args)...);
+        } else if constexpr (std::is_same_v<T, tint::core::bf16>) {
+            return Get<core::type::BF16>(std::forward<ARGS>(args)...);
         } else if constexpr (std::is_same_v<T, bool>) {
             return Get<core::type::Bool>(std::forward<ARGS>(args)...);
         } else if constexpr (std::is_same_v<T, void>) {
@@ -237,6 +240,9 @@ class Manager final {
 
     /// @returns an f16 type
     const core::type::F16* f16();
+
+    /// @returns a bf16 type
+    const core::type::BF16* bf16();
 
     /// @returns a abstract-float type
     const core::type::AbstractFloat* AFloat();

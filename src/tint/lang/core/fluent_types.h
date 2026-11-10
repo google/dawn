@@ -35,6 +35,7 @@
 
 namespace tint::core::fluent_types {
 
+using bf16 = tint::core::bf16;
 using f16 = tint::core::f16;
 using f32 = tint::core::f32;
 using i32 = tint::core::i32;
