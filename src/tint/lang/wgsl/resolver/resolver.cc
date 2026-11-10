@@ -39,6 +39,7 @@
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/atomic.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
@@ -2227,6 +2228,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                             scalar_ty = b.create<core::type::I32>();
                         } else if (m->Type()->Is<core::type::U8>()) {
                             scalar_ty = b.create<core::type::U32>();
+                        } else if (m->Type()->Is<core::type::BF16>()) {
+                            scalar_ty = b.create<core::type::F32>();
                         }
                         auto params = tint::Transform(args, [&](auto, size_t i) {
                             return b.create<sem::Parameter>(nullptr,  // declaration
@@ -2607,6 +2610,8 @@ const core::type::Type* Resolver::BuiltinType(core::BuiltinType builtin_ty,
             return check_no_tmpl_args(I32());
         case core::BuiltinType::kU32:
             return check_no_tmpl_args(U32());
+        case core::BuiltinType::kBf16:
+            return check_no_tmpl_args(BF16(ident));
         case core::BuiltinType::kF16:
             return check_no_tmpl_args(F16(ident));
         case core::BuiltinType::kF32:
@@ -2850,6 +2855,10 @@ const core::type::I8* Resolver::I8(const ast::Identifier* ident) {
 
 const core::type::U8* Resolver::U8(const ast::Identifier* ident) {
     return validator_.CheckU8Enabled(ident->source) ? b.create<core::type::U8>() : nullptr;
+}
+
+const core::type::BF16* Resolver::BF16(const ast::Identifier* ident) {
+    return validator_.CheckBF16Enabled(ident->source) ? b.create<core::type::BF16>() : nullptr;
 }
 
 const core::type::U16* Resolver::U16(const ast::Identifier* ident) {

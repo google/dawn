@@ -30,6 +30,7 @@
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
@@ -111,7 +112,7 @@ bool Type::IsScalar() const {
 }
 
 bool Type::IsFloatScalar() const {
-    return IsAnyOf<F16, F32, AbstractFloat>();
+    return IsAnyOf<BF16, F16, F32, AbstractFloat>();
 }
 
 bool Type::IsFloatMatrix() const {

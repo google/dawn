@@ -104,6 +104,7 @@ enum builtin_type {
   i8
   u8
   u16
+  bf16
   f16
   f32
   i32
@@ -304,6 +305,7 @@ type bool
 type i8
 type u8
 type u16
+type bf16
 @precedence(3) type i32
 @precedence(2) type u32
 @precedence(1) type f32
@@ -393,7 +395,7 @@ match iu8: i8 | u8
 match u16_iu32: u16 | i32 | u32
 match fiu32_fu16: f32 | i32 | u32 | f16 | u16
 
-match subgroup_matrix_elements: f32 | f16 | u32 | i32 | u8 | i8
+match subgroup_matrix_elements: f32 | f16 | u32 | i32 | u8 | i8 | bf16
 match subgroup_matrix_kind_left : subgroup_matrix_kind.left
 match subgroup_matrix_kind_right : subgroup_matrix_kind.right
 match subgroup_matrix_kind_result : subgroup_matrix_kind.result

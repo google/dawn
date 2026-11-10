@@ -29,6 +29,7 @@
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/array_count.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/helper_test.h"
@@ -49,6 +50,7 @@ struct TypeTest : public TestHelper {
         ai = ty.Get<AbstractInt>();
         f32 = ty.f32();
         f16 = ty.f16();
+        bf16 = ty.bf16();
         i32 = ty.i32();
         u32 = ty.u32();
         vec2_f32 = ty.vec2f();
@@ -135,6 +137,7 @@ struct TypeTest : public TestHelper {
     const AbstractInt* ai = nullptr;
     const F32* f32 = nullptr;
     const F16* f16 = nullptr;
+    const BF16* bf16 = nullptr;
     const I32* i32 = nullptr;
     const U32* u32 = nullptr;
     const Vector* vec2_f32 = nullptr;
@@ -277,6 +280,7 @@ TEST_F(TypeTest, ElementsWithCustomInvalid) {
 TEST_F(TypeTest, Element) {
     EXPECT_TYPE(f32->Element(0), nullptr);
     EXPECT_TYPE(f16->Element(1), nullptr);
+    EXPECT_TYPE(bf16->Element(0), nullptr);
     EXPECT_TYPE(i32->Element(2), nullptr);
     EXPECT_TYPE(u32->Element(3), nullptr);
     EXPECT_TYPE(vec2_f32->Element(0), f32);
@@ -314,6 +318,7 @@ TEST_F(TypeTest, Element) {
 TEST_F(TypeTest, DeepestElement) {
     EXPECT_TYPE(f32->DeepestElement(), f32);
     EXPECT_TYPE(f16->DeepestElement(), f16);
+    EXPECT_TYPE(bf16->DeepestElement(), bf16);
     EXPECT_TYPE(i32->DeepestElement(), i32);
     EXPECT_TYPE(u32->DeepestElement(), u32);
     EXPECT_TYPE(vec2_f32->DeepestElement(), f32);
@@ -528,6 +533,7 @@ TEST_F(TypeTest, IsAbstract) {
     EXPECT_TRUE(ai->IsAbstract());
     EXPECT_FALSE(f32->IsAbstract());
     EXPECT_FALSE(f16->IsAbstract());
+    EXPECT_FALSE(bf16->IsAbstract());
     EXPECT_FALSE(i32->IsAbstract());
     EXPECT_FALSE(u32->IsAbstract());
     EXPECT_FALSE(vec2_f32->IsAbstract());

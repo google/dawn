@@ -474,6 +474,9 @@ StyledText Disassembler::ValueToStyledText(const Value* val) {
                         [&](const core::constant::Scalar<f16>* scalar) {
                             text << StyleLiteral(scalar->ValueAs<f16>().value, "h");
                         },
+                        [&](const core::constant::Scalar<bf16>* scalar) {
+                            text << StyleLiteral(scalar->ValueAs<bf16>().value, "bf");
+                        },
                         [&](const core::constant::Scalar<bool>* scalar) {
                             text << StyleLiteral((scalar->ValueAs<bool>() ? "true" : "false"));
                         },

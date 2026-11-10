@@ -1,0 +1,42 @@
+SKIP: FAILED
+
+$B1: {  # root
+  %in0:ptr<workgroup, array<u32, 128>, read_write> = var
+  %in1:ptr<workgroup, array<vec2<i32>, 128>, read_write> = var
+  %in2:ptr<workgroup, array<vec3<f32>, 128>, read_write> = var
+  %in3:ptr<workgroup, array<vec4<u32>, 128>, read_write> = var
+  %in4:ptr<workgroup, array<f16, 128>, read_write> = var
+  %in5:ptr<workgroup, array<vec2<f16>, 128>, read_write> = var
+  %in6:ptr<workgroup, array<vec3<f16>, 128>, read_write> = var
+  %out:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(64i, 1i, 1i) func():void {
+  $B2: {
+    %10:subgroup_matrix_right<bf16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<bf16, 8, 8>, row_major> %in0, 0u, 16u
+    %m0:subgroup_matrix_right<bf16, 8, 8> = let %10
+    %12:void = subgroupMatrixStore<col_major> %out, 0i, %m0, 16i
+    %13:subgroup_matrix_right<bf16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<bf16, 8, 8>, row_major> %in1, 0u, 16u
+    %m1:subgroup_matrix_right<bf16, 8, 8> = let %13
+    %15:void = subgroupMatrixStore<col_major> %out, 0i, %m1, 16i
+    %16:subgroup_matrix_right<bf16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<bf16, 8, 8>, row_major> %in2, 0u, 16u
+    %m2:subgroup_matrix_right<bf16, 8, 8> = let %16
+    %18:void = subgroupMatrixStore<col_major> %out, 0i, %m2, 16i
+    %19:subgroup_matrix_right<bf16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<bf16, 8, 8>, row_major> %in3, 0u, 16u
+    %m3:subgroup_matrix_right<bf16, 8, 8> = let %19
+    %21:void = subgroupMatrixStore<col_major> %out, 0i, %m3, 16i
+    %22:subgroup_matrix_right<bf16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<bf16, 8, 8>, row_major> %in4, 0u, 16u
+    %m4:subgroup_matrix_right<bf16, 8, 8> = let %22
+    %24:void = subgroupMatrixStore<col_major> %out, 0i, %m4, 16i
+    %25:subgroup_matrix_right<bf16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<bf16, 8, 8>, row_major> %in5, 0u, 16u
+    %m5:subgroup_matrix_right<bf16, 8, 8> = let %25
+    %27:void = subgroupMatrixStore<col_major> %out, 0i, %m5, 16i
+    %28:subgroup_matrix_right<bf16, 8, 8> = subgroupMatrixLoad<subgroup_matrix_right<bf16, 8, 8>, row_major> %in6, 0u, 16u
+    %m6:subgroup_matrix_right<bf16, 8, 8> = let %28
+    %30:void = subgroupMatrixStore<col_major> %out, 0i, %m6, 16i
+    ret
+  }
+}
+Failed to generate: bf16 is not supported by the HLSL backend
+
+tint executable returned error: exit status 1

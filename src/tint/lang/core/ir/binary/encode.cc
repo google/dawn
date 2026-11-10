@@ -70,6 +70,7 @@
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
@@ -428,6 +429,7 @@ struct Encoder {
                 [&](const core::type::U32*) { type_out.set_basic(pb::TypeBasic::u32); },
                 [&](const core::type::F32*) { type_out.set_basic(pb::TypeBasic::f32); },
                 [&](const core::type::F16*) { type_out.set_basic(pb::TypeBasic::f16); },
+                [&](const core::type::BF16*) { type_out.set_basic(pb::TypeBasic::bf16); },
                 [&](const core::type::U64*) { type_out.set_basic(pb::TypeBasic::u64); },
                 [&](const core::type::I8*) { type_out.set_basic((pb::TypeBasic::i8)); },
                 [&](const core::type::U8*) { type_out.set_basic((pb::TypeBasic::u8)); },

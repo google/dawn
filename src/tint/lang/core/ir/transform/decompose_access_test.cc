@@ -7355,6 +7355,64 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_DecomposeAccessTest, Workgroup_SubgroupMatrix_BF16_Buffer) {
+    auto* v = b.Var("v", workgroup, ty.buffer(1024));
+    mod.root_block->Append(v);
+
+    auto* mat_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, ty.bf16(), 8, 8);
+    auto* func = b.Function("foo", ty.void_());
+    auto* m = b.FunctionParam("m", mat_ty);
+    auto* b_offset = b.FunctionParam("b_offset", ty.u32());
+    auto* m_offset = b.FunctionParam("m_offset", ty.u32());
+    auto* m_stride = b.FunctionParam("m_stride", ty.u32());
+    func->SetParams({m, b_offset, m_offset, m_stride});
+    b.Append(func->Block(), [&] {
+        auto* view =
+            b.CallExplicit(ty.ptr(workgroup, ty.runtime_array(ty.u32())), BuiltinFn::kBufferView,
+                           Vector<TemplateParameter, 1>{ty.runtime_array(ty.u32())}, v, b_offset);
+        b.CallExplicit(ty.void_(), BuiltinFn::kSubgroupMatrixStore,
+                       Vector<TemplateParameter, 1>{Majorness::kColMajor}, view, m_offset, m,
+                       m_stride);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, buffer<1024>, read_write> = var
+}
+
+%foo = func(%m:subgroup_matrix_left<bf16, 8, 8>, %b_offset:u32, %m_offset:u32, %m_stride:u32):void {
+  $B2: {
+    %7:ptr<workgroup, array<u32>, read_write> = bufferView<array<u32>> %v, %b_offset
+    %8:void = subgroupMatrixStore<col_major> %7, %m_offset, %m, %m_stride
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<workgroup, array<u32, 256>, read_write> = var
+}
+
+%foo = func(%m:subgroup_matrix_left<bf16, 8, 8>, %b_offset:u32, %m_offset:u32, %m_stride:u32):void {
+  $B2: {
+    %7:u32 = mul %b_offset, 1u
+    %8:u32 = div %7, 4u
+    %9:u32 = add %8, %m_offset
+    %10:void = subgroupMatrixStore<col_major> %v, %9, %m, %m_stride
+    ret
+  }
+}
+)";
+
+    DecomposeAccessConfig options{.workgroup = true};
+    Run(DecomposeAccess, options);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IR_DecomposeAccessTest, Workgroup_SubgroupMatrix_U32_Buffer_SmallerAccess) {
     mod.properties.Add(core::ir::Property::kAllow16BitFloats);
     auto* S =

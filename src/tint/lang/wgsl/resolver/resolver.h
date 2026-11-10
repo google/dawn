@@ -171,6 +171,9 @@ class Resolver {
     /// @returns a new u8, if the subgroup matrix extension is enabled, otherwise nullptr
     const core::type::U8* U8(const ast::Identifier* ident);
 
+    /// @returns a new bf16, if the subgroup matrix extension is enabled, otherwise nullptr
+    const core::type::BF16* BF16(const ast::Identifier* ident);
+
     /// @returns nullptr since u16 is not enabled in WGSL.
     const core::type::U16* U16(const ast::Identifier* ident);
 

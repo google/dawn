@@ -113,6 +113,19 @@ struct ptr {
     static constexpr core::Access access = ACCESS;
 };
 
+/// A 'fluent' type helper used to construct an ast::SubgroupMatrix or type::SubgroupMatrix.
+/// @tparam KIND the matrix kind
+/// @tparam T the matrix type
+/// @tparam C the matrix columns
+/// @tparam R the matrix rows
+template <core::SubgroupMatrixKind KIND, typename T, uint32_t C, uint32_t R>
+struct subgroup_matrix {
+    static constexpr core::SubgroupMatrixKind kind = KIND;
+    using type = T;
+    static constexpr uint32_t columns = C;
+    static constexpr uint32_t rows = R;
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 // Aliases
 //
@@ -263,8 +276,18 @@ struct IsPointer {
     static constexpr bool value = false;
 };
 
+template <typename T>
+struct IsSubgroupMatrix {
+    static constexpr bool value = false;
+};
+
 template <core::AddressSpace ADDRESS, typename T, core::Access ACCESS>
 struct IsPointer<ptr<ADDRESS, T, ACCESS>> {
+    static constexpr bool value = true;
+};
+
+template <core::SubgroupMatrixKind KIND, typename T, uint32_t C, uint32_t R>
+struct IsSubgroupMatrix<subgroup_matrix<KIND, T, C, R>> {
     static constexpr bool value = true;
 };
 //! @endcond
@@ -290,6 +313,10 @@ static constexpr bool IsVector = fluent_types::detail::IsVector<T>::value;
 /// Evaluates to true if `T` is a ptr
 template <typename T>
 static constexpr bool IsPointer = fluent_types::detail::IsPointer<T>::value;
+
+/// Evaluates to true if `T` is a subgroup matrix
+template <typename T>
+static constexpr bool IsSubgroupMatrix = fluent_types::detail::IsSubgroupMatrix<T>::value;
 
 }  // namespace tint::core::fluent_types
 

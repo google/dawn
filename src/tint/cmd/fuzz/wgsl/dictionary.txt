@@ -150,6 +150,7 @@
 "b"
 "barycentric_coord"
 "base"
+"bf16"
 "bgra8unorm"
 "binding"
 "binding_array"

@@ -82,6 +82,7 @@ enum TypeBasic {
     u8 = 7;
     u64 = 8;
     string = 9;
+    bf16 = 10;
 }
 
 message TypeVector {

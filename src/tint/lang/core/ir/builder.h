@@ -78,6 +78,7 @@
 #include "src/tint/lang/core/ir/value.h"  // IWYU pragma: export
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/array.h"  // IWYU pragma: export
+#include "src/tint/lang/core/type/bf16.h"   // IWYU pragma: export
 #include "src/tint/lang/core/type/bool.h"   // IWYU pragma: export
 #include "src/tint/lang/core/type/f16.h"    // IWYU pragma: export
 #include "src/tint/lang/core/type/f32.h"    // IWYU pragma: export

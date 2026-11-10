@@ -335,6 +335,13 @@ class Builder {
         /// @returns a 'bool' type
         Type bool_(const Source& source) const;
 
+        /// @returns a 'bf16' type
+        Type bf16() const;
+
+        /// @param source the Source of the node
+        /// @returns a 'bf16' type
+        Type bf16(const Source& source) const;
+
         /// @returns a 'f16' type
         Type f16() const;
 

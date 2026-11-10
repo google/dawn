@@ -3724,20 +3724,22 @@ TEST_P(SubgroupMatrixSizes, Storage_TooSmall_BufferView_Access_Struct) {
 }
 
 // Only worth testing one type of each size.
-INSTANTIATE_TEST_SUITE_P(
-    IR_SubstituteOverridesTest,
-    SubgroupMatrixSizes,
-    testing::Combine(testing::Values(TypeBuilder<f32>, TypeBuilder<f16>, TypeBuilder<i8>),
-                     testing::Values(8, 16),
-                     testing::Values(8, 16),
-                     testing::Values(true, false),
-                     testing::Values(true, false),
-                     testing::Values(true, false),
-                     testing::Values(TypeBuilder<f16>,
-                                     TypeBuilder<u32>,
-                                     TypeBuilder<vec2i>,
-                                     TypeBuilder<vec3f>,
-                                     TypeBuilder<vec4u>)));
+INSTANTIATE_TEST_SUITE_P(IR_SubstituteOverridesTest,
+                         SubgroupMatrixSizes,
+                         testing::Combine(testing::Values(TypeBuilder<f32>,
+                                                          TypeBuilder<f16>,
+                                                          TypeBuilder<i8>,
+                                                          TypeBuilder<bf16>),
+                                          testing::Values(8, 16),
+                                          testing::Values(8, 16),
+                                          testing::Values(true, false),
+                                          testing::Values(true, false),
+                                          testing::Values(true, false),
+                                          testing::Values(TypeBuilder<f16>,
+                                                          TypeBuilder<u32>,
+                                                          TypeBuilder<vec2i>,
+                                                          TypeBuilder<vec3f>,
+                                                          TypeBuilder<vec4u>)));
 
 }  // namespace
 }  // namespace tint::core::ir::transform

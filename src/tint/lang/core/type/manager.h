@@ -180,6 +180,9 @@ class Manager final {
             return mat<T::columns, T::rows, typename T::type>(std::forward<ARGS>(args)...);
         } else if constexpr (core::fluent_types::IsPointer<T>) {
             return ptr<T::address, typename T::type, T::access>(std::forward<ARGS>(args)...);
+        } else if constexpr (core::fluent_types::IsSubgroupMatrix<T>) {
+            return subgroup_matrix<T::kind, typename T::type, T::columns, T::rows>(
+                std::forward<ARGS>(args)...);
         } else if constexpr (core::fluent_types::IsArray<T>) {
             return array<typename T::type, T::length>(std::forward<ARGS>(args)...);
         } else if constexpr (core::fluent_types::IsAtomic<T>) {

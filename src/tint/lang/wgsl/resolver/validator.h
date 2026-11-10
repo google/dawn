@@ -558,6 +558,13 @@ class Validator {
     /// @returns true on success, false otherwise
     bool CheckU8Enabled(const Source& source) const;
 
+    /// Validates that 'chromium_experimental_subgroup_matrix' extension is enabled for bf16 usage
+    /// at
+    /// @p source
+    /// @param source the source of the bf16 usage
+    /// @returns true on success, false otherwise
+    bool CheckBF16Enabled(const Source& source) const;
+
     /// Validates that 'chromium_print' language feature is enabled at @p source
     /// @param source the source of the usage
     /// @returns true if enabled, false otherwise

@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/core/ir/validator/validator.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/buffer.h"
 #include "src/tint/lang/core/type/f16.h"
@@ -115,6 +116,7 @@ void Validator::CheckType(const core::type::Type* root, std::function<diag::Diag
             [&](const core::type::U16*) { return Check16BitInteger(diag); },
             [&](const core::type::U64*) { return Check64BitInteger(diag); },
             [&](const core::type::F16*) { return Check16BitFloat(diag); },
+            [&](const core::type::BF16*) { return Check16BitBFloat(diag, parent); },
             [&](const core::type::Array* arr) { return CheckArray(arr, diag); },
             [&](const core::type::Vector* v) { return CheckVector(v, diag); },
             [&](const core::type::Matrix* m) { return CheckMatrix(m, diag); },
@@ -480,6 +482,17 @@ bool Validator::Check8BitInteger(std::function<diag::Diagnostic&()>& diag,
     return true;
 }
 
+// 16-bit bfloat types are guarded by the Allow16BitBFloats property.
+// They can be used as the component type of a subgroup matrix without the property.
+bool Validator::Check16BitBFloat(std::function<diag::Diagnostic&()>& diag,
+                                 const core::type::Type* parent) {
+    if (!Is<core::type::SubgroupMatrix>(parent)) {
+        diag() << "bf16 types are not permitted";
+        return false;
+    }
+    return true;
+}
+
 // 16-bit integer types are guarded by the Allow16BitIntegers property.
 bool Validator::Check16BitInteger(std::function<diag::Diagnostic&()>& diag) {
     if (!ir_.properties.Contains(Property::kAllow16BitIntegers)) {
@@ -642,7 +655,7 @@ bool Validator::CheckSubgroupMatrix(const core::type::SubgroupMatrix* m,
                                     core::AddressSpace addrspace) {
     if (!m->Type()
              ->IsAnyOf<core::type::F16, core::type::F32, core::type::I8, core::type::I32,
-                       core::type::U8, core::type::U32>()) {
+                       core::type::U8, core::type::U32, core::type::BF16>()) {
         diag() << "invalid subgroup matrix component type: " << NameOf(m->Type());
         return false;
     }

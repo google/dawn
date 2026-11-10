@@ -38,6 +38,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"

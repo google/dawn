@@ -131,6 +131,10 @@ class Manager final {
     const Scalar<f16>* Get(f16 value);
 
     /// @param value the constant value
+    /// @return a Scalar holding the bf16 value @p value
+    const Scalar<bf16>* Get(bf16 value);
+
+    /// @param value the constant value
     /// @return a Scalar holding the bool value @p value
     const Scalar<bool>* Get(bool value);
 

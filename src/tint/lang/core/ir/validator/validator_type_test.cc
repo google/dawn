@@ -37,6 +37,7 @@
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/clone_context.h"
 #include "src/tint/lang/core/type/manager.h"
@@ -45,6 +46,7 @@
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/subgroup_matrix.h"
 
 namespace tint::hlsl {
 /// A mock non-core type used for testing the non-core type validation rule.
@@ -1205,6 +1207,7 @@ INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
                                          std::make_tuple(true, TypeBuilder<i32>),
                                          std::make_tuple(true, TypeBuilder<u8>),
                                          std::make_tuple(true, TypeBuilder<u32>),
+                                         std::make_tuple(true, TypeBuilder<bf16>),
                                          std::make_tuple(false, TypeBuilder<core::type::Bool>),
                                          std::make_tuple(false, TypeBuilder<core::type::Void>)));
 
@@ -1927,6 +1930,120 @@ TEST_F(IR_ValidatorTest, Int16Type_AllowedWithProperty) {
     auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
+
+using IR_ValidatorBF16TypeTest = IRTestParamHelper<std::tuple<
+    /* valid */ bool,
+    /* type_builder */ TypeBuilderFn>>;
+
+TEST_P(IR_ValidatorBF16TypeTest, Var) {
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("foo", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Var("v", ty.ptr(function, type));
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod);
+    if (std::get<0>(GetParam())) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason,
+                    testing::HasSubstr("error: var: bf16 types are not permitted"));
+    }
+}
+
+TEST_P(IR_ValidatorBF16TypeTest, Param) {
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("foo", ty.void_());
+    auto* p = b.FunctionParam("p", type);
+    fn->SetParams({p});
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    auto res = ir::Validate(mod);
+    if (std::get<0>(GetParam())) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason, testing::HasSubstr("bf16 types are not permitted"));
+    }
+}
+
+TEST_P(IR_ValidatorBF16TypeTest, Let) {
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("foo", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Let("let", b.Construct(type));
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod);
+    if (std::get<0>(GetParam())) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason, testing::HasSubstr("bf16 types are not permitted"));
+    }
+}
+
+TEST_P(IR_ValidatorBF16TypeTest, Return) {
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("foo", type);
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Construct(type)); });
+
+    auto res = ir::Validate(mod);
+    if (std::get<0>(GetParam())) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason, testing::HasSubstr("bf16 types are not permitted"));
+    }
+}
+
+TEST_P(IR_ValidatorBF16TypeTest, BlockParam) {
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("foo", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* loop = b.Loop();
+        loop->Continuing()->SetParams({b.BlockParam(type)});
+        b.Append(loop->Body(), [&] {  //
+            b.Continue(loop, b.Undef(type));
+        });
+        b.Append(loop->Continuing(), [&] {  //
+            b.NextIteration(loop);
+        });
+        b.Unreachable();
+    });
+
+    auto res = ir::Validate(mod);
+    if (std::get<0>(GetParam())) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason, testing::HasSubstr("bf16 types are not permitted"));
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    BF16Types,
+    IR_ValidatorBF16TypeTest,
+    testing::Values(
+        std::make_tuple(true,
+                        TypeBuilder<subgroup_matrix<core::SubgroupMatrixKind::kLeft, bf16, 8, 8>>),
+        std::make_tuple(true,
+                        TypeBuilder<subgroup_matrix<core::SubgroupMatrixKind::kRight, bf16, 8, 8>>),
+        std::make_tuple(
+            true,
+            TypeBuilder<subgroup_matrix<core::SubgroupMatrixKind::kResult, bf16, 8, 8>>),
+        std::make_tuple(false, TypeBuilder<bf16>),
+        std::make_tuple(false, TypeBuilder<vec4<bf16>>),
+        std::make_tuple(false, TypeBuilder<array<bf16, 4>>),
+        std::make_tuple(false, TypeBuilder<mat<2, 2, bf16>>)));
 
 using IR_Validator64BitIntTypeTest = IRTestParamHelper<std::tuple<
     /* int64_allowed */ bool,
