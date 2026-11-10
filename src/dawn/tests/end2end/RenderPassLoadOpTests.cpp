@@ -27,7 +27,6 @@
 
 #include <array>
 #include <bit>
-#include <cstring>
 #include <limits>
 #include <tuple>
 #include <type_traits>
@@ -36,7 +35,6 @@
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -511,30 +509,24 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearWithBig32BitIntegralValuesOnMultipleCol
                                   wgpu::Color clearValue,
                                   const std::array<int32_t, 4> expData) {
             AttachmentCase attachmentCase;
-            static_assert(sizeof(int32_t) * expData.size() == sizeof(attachmentCase.mExpData));
             attachmentCase.mFormat = format;
             attachmentCase.mClearValue = clearValue;
-            DAWN_UNSAFE_TODO(memcpy(attachmentCase.mExpData,
-                                    reinterpret_cast<const uint8_t*>(expData.data()),
-                                    sizeof(attachmentCase.mExpData)));
+            attachmentCase.mExpData = std::bit_cast<decltype(attachmentCase.mExpData)>(expData);
             return attachmentCase;
         }
         static AttachmentCase Uint(wgpu::TextureFormat format,
                                    wgpu::Color clearValue,
                                    const std::array<uint32_t, 4> expData) {
             AttachmentCase attachmentCase;
-            static_assert(sizeof(uint32_t) * expData.size() == sizeof(attachmentCase.mExpData));
             attachmentCase.mFormat = format;
             attachmentCase.mClearValue = clearValue;
-            DAWN_UNSAFE_TODO(memcpy(attachmentCase.mExpData,
-                                    reinterpret_cast<const uint8_t*>(expData.data()),
-                                    sizeof(attachmentCase.mExpData)));
+            attachmentCase.mExpData = std::bit_cast<decltype(attachmentCase.mExpData)>(expData);
             return attachmentCase;
         }
 
         wgpu::TextureFormat mFormat{};
         wgpu::Color mClearValue{};
-        uint8_t mExpData[16]{};
+        std::array<uint8_t, 16> mExpData = {};
     };
     using TestCase = std::vector<AttachmentCase>;
     // Test cases are split so that the attachments in each case do not exceed the default
@@ -683,8 +675,8 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearWithBig32BitIntegralValuesOnMultipleCol
         queue.Submit(1, &commandBuffer);
 
         for (uint32_t i = 0; i < testCase.size(); ++i) {
-            EXPECT_BUFFER_U8_RANGE_EQ(testCase.at(i).mExpData, outputBuffers[i], 0,
-                                      sizeof(testCase.at(i).mExpData));
+            EXPECT_BUFFER_U8_RANGE_EQ(testCase.at(i).mExpData.data(), outputBuffers[i], 0,
+                                      testCase.at(i).mExpData.size());
         }
     }
 }

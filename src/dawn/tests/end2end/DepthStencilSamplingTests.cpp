@@ -871,17 +871,12 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
         wgpu::CommandBuffer commands = commandEncoder.Finish();
         queue.Submit(1, &commands);
 
-        float expectedDepth = 0.0f;
-        DAWN_UNSAFE_TODO(memcpy(&expectedDepth,
-                                &passDescriptor.cDepthStencilAttachmentInfo.depthClearValue,
-                                sizeof(float)));
+        float expectedDepth = passDescriptor.cDepthStencilAttachmentInfo.depthClearValue;
         EXPECT_BUFFER(depthOutput, 0, sizeof(float),
                       new ::dawn::detail::ExpectEq<float>(expectedDepth, tolerance));
 
-        uint8_t expectedStencil = 0;
-        DAWN_UNSAFE_TODO(memcpy(&expectedStencil,
-                                &passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue,
-                                sizeof(uint8_t)));
+        uint8_t expectedStencil =
+            static_cast<uint8_t>(passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue);
         EXPECT_BUFFER_U32_EQ(expectedStencil, stencilOutput, 0);
     }
 
@@ -923,17 +918,12 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
         wgpu::CommandBuffer commands = commandEncoder.Finish();
         queue.Submit(1, &commands);
 
-        float expectedDepth = 0.0f;
-        DAWN_UNSAFE_TODO(memcpy(&expectedDepth,
-                                &passDescriptor.cDepthStencilAttachmentInfo.depthClearValue,
-                                sizeof(float)));
+        float expectedDepth = passDescriptor.cDepthStencilAttachmentInfo.depthClearValue;
         EXPECT_BUFFER(depthOutput, 0, sizeof(float),
                       new ::dawn::detail::ExpectEq<float>(expectedDepth, tolerance));
 
-        uint8_t expectedStencil = 0;
-        DAWN_UNSAFE_TODO(memcpy(&expectedStencil,
-                                &passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue,
-                                sizeof(uint8_t)));
+        uint8_t expectedStencil =
+            static_cast<uint8_t>(passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue);
         EXPECT_BUFFER_U32_EQ(expectedStencil, stencilOutput, 0);
     }
 }

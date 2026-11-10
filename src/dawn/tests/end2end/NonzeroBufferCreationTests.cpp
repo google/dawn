@@ -48,8 +48,7 @@ TEST_P(NonzeroBufferCreationTests, BufferCreationWithCopyDstUsage) {
     wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     std::vector<uint8_t> expectedData(kSize, uint8_t{1});
-    DAWN_UNSAFE_TODO(EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<uint32_t*>(expectedData.data()),
-                                                buffer, 0, kSize / sizeof(uint32_t)));
+    EXPECT_BUFFER_U8_RANGE_EQ(expectedData.data(), buffer, 0, expectedData.size());
 }
 
 // Verify that each byte of the buffer has all been initialized to 1 with the toggle enabled when it
@@ -64,8 +63,7 @@ TEST_P(NonzeroBufferCreationTests, BufferCreationWithMapWriteWithoutCopyDstUsage
     wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     std::vector<uint8_t> expectedData(kSize, uint8_t{1});
-    DAWN_UNSAFE_TODO(EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<uint32_t*>(expectedData.data()),
-                                                buffer, 0, kSize / sizeof(uint32_t)));
+    EXPECT_BUFFER_U8_RANGE_EQ(expectedData.data(), buffer, 0, expectedData.size());
 }
 
 // Verify that each byte of the buffer has all been initialized to 1 with the toggle enabled when
@@ -87,8 +85,6 @@ TEST_P(NonzeroBufferCreationTests, BufferCreationWithMappedAtCreation) {
     defaultDescriptor.mappedAtCreation = true;
 
     const std::vector<uint8_t> expectedData(kSize, uint8_t{1});
-    const uint32_t* expectedDataPtr =
-        DAWN_UNSAFE_TODO(reinterpret_cast<const uint32_t*>(expectedData.data()));
 
     // Buffer with MapRead usage
     {
@@ -96,13 +92,16 @@ TEST_P(NonzeroBufferCreationTests, BufferCreationWithMappedAtCreation) {
         descriptor.usage = wgpu::BufferUsage::MapRead;
         wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
-        const uint8_t* mappedData = static_cast<const uint8_t*>(buffer.GetConstMappedRange());
-        DAWN_UNSAFE_TODO(EXPECT_EQ(0, memcmp(mappedData, expectedData.data(), kSize)));
+        std::vector<uint8_t> mappedData(kSize);
+        ASSERT_EQ(wgpu::Status::Success,
+                  buffer.ReadMappedRange(0, mappedData.data(), mappedData.size()));
+        EXPECT_EQ(mappedData, expectedData);
         buffer.Unmap();
 
         MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, kSize);
-        mappedData = static_cast<const uint8_t*>(buffer.GetConstMappedRange());
-        DAWN_UNSAFE_TODO(EXPECT_EQ(0, memcmp(mappedData, expectedData.data(), kSize)));
+        ASSERT_EQ(wgpu::Status::Success,
+                  buffer.ReadMappedRange(0, mappedData.data(), mappedData.size()));
+        EXPECT_EQ(mappedData, expectedData);
         buffer.Unmap();
     }
 
@@ -112,11 +111,13 @@ TEST_P(NonzeroBufferCreationTests, BufferCreationWithMappedAtCreation) {
         descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
         wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
-        const uint8_t* mappedData = static_cast<const uint8_t*>(buffer.GetConstMappedRange());
-        DAWN_UNSAFE_TODO(EXPECT_EQ(0, memcmp(mappedData, expectedData.data(), kSize)));
+        std::vector<uint8_t> mappedData(kSize);
+        ASSERT_EQ(wgpu::Status::Success,
+                  buffer.ReadMappedRange(0, mappedData.data(), mappedData.size()));
+        EXPECT_EQ(mappedData, expectedData);
         buffer.Unmap();
 
-        EXPECT_BUFFER_U32_RANGE_EQ(expectedDataPtr, buffer, 0, kSize / sizeof(uint32_t));
+        EXPECT_BUFFER_U8_RANGE_EQ(expectedData.data(), buffer, 0, expectedData.size());
     }
 
     // Buffer with neither MapRead nor MapWrite usage
@@ -125,11 +126,13 @@ TEST_P(NonzeroBufferCreationTests, BufferCreationWithMappedAtCreation) {
         descriptor.usage = wgpu::BufferUsage::CopySrc;
         wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
-        const uint8_t* mappedData = static_cast<const uint8_t*>(buffer.GetConstMappedRange());
-        DAWN_UNSAFE_TODO(EXPECT_EQ(0, memcmp(mappedData, expectedData.data(), kSize)));
+        std::vector<uint8_t> mappedData(kSize);
+        ASSERT_EQ(wgpu::Status::Success,
+                  buffer.ReadMappedRange(0, mappedData.data(), mappedData.size()));
+        EXPECT_EQ(mappedData, expectedData);
         buffer.Unmap();
 
-        EXPECT_BUFFER_U32_RANGE_EQ(expectedDataPtr, buffer, 0, kSize / sizeof(uint32_t));
+        EXPECT_BUFFER_U8_RANGE_EQ(expectedData.data(), buffer, 0, expectedData.size());
     }
 }
 

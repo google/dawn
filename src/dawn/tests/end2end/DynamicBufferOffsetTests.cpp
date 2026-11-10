@@ -34,7 +34,6 @@
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -696,7 +695,7 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
                                                    GetParam().mReadBufferUsage);
 
     // Fill the dst buffer with 0xFF.
-    DAWN_UNSAFE_TODO(memset(expectedDst.data(), 0xFF, dstBufferSize));
+    std::ranges::fill(expectedDst, 0xFFFFFFFF);
     wgpu::Buffer dst =
         utils::CreateBufferFromData(device, &expectedDst[0], dstBufferSize,
                                     wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);

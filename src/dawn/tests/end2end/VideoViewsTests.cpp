@@ -2316,7 +2316,7 @@ class VideoViewsExtendedUsagesTests : public VideoViewsTestsBase {
                         subsampleFactor.verticalFactor,
                     isCheckerboard, hasAlpha);
 
-                DAWN_UNSAFE_TODO(memcpy(buffer.GetMappedRange(), data.data(), bufferDesc.size));
+                buffer.WriteMappedRange(0, data.data(), bufferDesc.size);
                 buffer.Unmap();
 
                 wgpu::TexelCopyBufferInfo copySrc =
@@ -2644,11 +2644,9 @@ void VideoViewsExtendedUsagesTests::RunT2BCopyPlaneAspectsTest() {
         auto cmdBuffer = encoder.Finish();
         device.GetQueue().Submit(1, &cmdBuffer);
 
-        // Convert 1st pixel's luma component to array of 8 bits bytes.
-        uint8_t expectedYDataAsU8[sizeof(ComponentType)];
-        DAWN_UNSAFE_TODO(memcpy(expectedYDataAsU8, &expectedData[0], sizeof(expectedYDataAsU8)));
-
-        EXPECT_BUFFER_U8_RANGE_EQ(expectedYDataAsU8, dstBuffer, 0, sizeof(expectedYDataAsU8));
+        // Expect 1st pixel's luma component.
+        EXPECT_BUFFER(dstBuffer, 0, sizeof(ComponentType),
+                      new detail::ExpectEq<ComponentType>(expectedData[0]));
     }
 
     // Plane1
@@ -2670,12 +2668,9 @@ void VideoViewsExtendedUsagesTests::RunT2BCopyPlaneAspectsTest() {
         auto cmdBuffer = encoder.Finish();
         device.GetQueue().Submit(1, &cmdBuffer);
 
-        // Convert 1st pixel's chroma component to array of 8 bits bytes.
-        uint8_t expectedUVDataAsU8[sizeof(ComponentType) * 2];
-        DAWN_UNSAFE_TODO(
-            memcpy(expectedUVDataAsU8, expectedData.data(), sizeof(expectedUVDataAsU8)));
-
-        EXPECT_BUFFER_U8_RANGE_EQ(expectedUVDataAsU8, dstBuffer, 0, sizeof(expectedUVDataAsU8));
+        // Expect 1st pixel's chroma components.
+        EXPECT_BUFFER(dstBuffer, 0, 2 * sizeof(ComponentType),
+                      new detail::ExpectEq<ComponentType>(expectedData.data(), 2));
     }
 
     if (hasAlpha) {
@@ -2699,12 +2694,9 @@ void VideoViewsExtendedUsagesTests::RunT2BCopyPlaneAspectsTest() {
             auto cmdBuffer = encoder.Finish();
             device.GetQueue().Submit(1, &cmdBuffer);
 
-            // Convert 1st pixel's alpha component to array of 8 bits bytes.
-            uint8_t expectedADataAsU8[sizeof(ComponentType)];
-            DAWN_UNSAFE_TODO(
-                memcpy(expectedADataAsU8, expectedData.data(), sizeof(expectedADataAsU8)));
-
-            EXPECT_BUFFER_U8_RANGE_EQ(expectedADataAsU8, dstBuffer, 0, sizeof(expectedADataAsU8));
+            // Expect 1st pixel's alpha component.
+            EXPECT_BUFFER(dstBuffer, 0, sizeof(ComponentType),
+                          new detail::ExpectEq<ComponentType>(expectedData[0]));
         }
     }
 }

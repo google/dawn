@@ -25,13 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <bit>
 #include <vector>
 
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/ComboRenderBundleEncoderDescriptor.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -174,9 +174,7 @@ TEST_P(DrawIndexedIndirectTest, BaseVertex) {
     // Test a draw with only the last 3 indices of the second quad (bottom left triangle)
     Test({3, 1, 3, 4, 0}, 0, 0, filled, notFilled);
 
-    const int negFour = -4;
-    uint32_t unsignedNegFour;
-    DAWN_UNSAFE_TODO(std::memcpy(&unsignedNegFour, &negFour, sizeof(int)));
+    const uint32_t unsignedNegFour = std::bit_cast<uint32_t>(int32_t{-4});
 
     // Test negative baseVertex
     // Test a draw with only the first 3 indices of the first quad (bottom left triangle)

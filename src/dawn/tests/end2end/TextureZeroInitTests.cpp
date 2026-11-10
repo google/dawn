@@ -33,7 +33,7 @@
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/TestUtils.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
+#include "src/utils/span.h"
 #include "webgpu/webgpu_cpp.h"
 
 namespace dawn {
@@ -2954,13 +2954,13 @@ TEST_P(CompressedTextureZeroInitTest, Copy2DArrayCompressedB2T2B) {
 
     // Generate expected data. It is the same as the upload data, but padding is zero.
     std::vector<uint8_t> expected(data.size(), 0);
+    const size_t rowSize = static_cast<size_t>(copyWidthInBlock) *
+                           utils::GetTexelBlockSizeInBytes(textureDescriptor.format);
     for (uint32_t z = 0; z < copyExtent3D.depthOrArrayLayers; ++z) {
         for (uint32_t y = 0; y < copyHeightInBlock; ++y) {
-            DAWN_UNSAFE_TODO(
-                memcpy(&expected[copyBytesPerRow * y + copyBytesPerRow * copyRowsPerImage * z],
-                       &data[copyBytesPerRow * y + copyBytesPerRow * copyRowsPerImage * z],
-                       static_cast<size_t>(copyWidthInBlock) *
-                           utils::GetTexelBlockSizeInBytes(textureDescriptor.format)));
+            size_t offset = copyBytesPerRow * (y + copyRowsPerImage * z);
+            Span<const uint8_t> row = Span<const uint8_t>(data).subspan(offset, rowSize);
+            Span<uint8_t>(expected).subspan(offset, rowSize).CopyFrom(row);
         }
     }
     // Check final contents

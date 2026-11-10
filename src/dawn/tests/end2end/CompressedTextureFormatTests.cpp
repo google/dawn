@@ -40,6 +40,7 @@
 #include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn {
 namespace {
@@ -121,13 +122,12 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
         std::vector<uint8_t> oneBlockCompressedTextureData = GetOneBlockFormatTextureData();
         for (uint32_t layer = 0; layer < copyConfig.copyExtent3D.depthOrArrayLayers; ++layer) {
             for (uint32_t h = 0; h < copyHeightInBlock; ++h) {
+                Span<uint8_t> row = Span<uint8_t>(data).subspan(
+                    copyConfig.bufferOffset + copyBytesPerImage * layer + copyBytesPerRow * h,
+                    copyWidthInBlock * oneBlockCompressedTextureData.size());
                 for (uint32_t w = 0; w < copyWidthInBlock; ++w) {
-                    uint32_t uploadBufferOffset = copyConfig.bufferOffset +
-                                                  copyBytesPerImage * layer + copyBytesPerRow * h +
-                                                  oneBlockCompressedTextureData.size() * w;
-                    DAWN_UNSAFE_TODO(
-                        std::memcpy(&data[uploadBufferOffset], oneBlockCompressedTextureData.data(),
-                                    oneBlockCompressedTextureData.size() * sizeof(uint8_t)));
+                    row.TakeFirst(oneBlockCompressedTextureData.size())
+                        .CopyFrom(oneBlockCompressedTextureData);
                 }
             }
         }
