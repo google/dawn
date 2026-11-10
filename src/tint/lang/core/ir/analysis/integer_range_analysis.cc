@@ -74,6 +74,16 @@ bool IsPositiveConstantInteger(const Value* v) {
     return false;
 }
 
+// Returns true if `inst` is in `block` or in a block nested in `block`.
+bool IsInsideBlock(const Instruction* inst, const Block* block) {
+    for (const Block* b = inst->Block(); b; b = b->Parent() ? b->Parent()->Block() : nullptr) {
+        if (b == block) {
+            return true;
+        }
+    }
+    return false;
+}
+
 int64_t GetValueFromConstant(const Constant* value) {
     // Return an int64_t is enough as the type of `value` can only be either i32 or u32.
     [[maybe_unused]] bool is_i32_or_u32 = value->Type()->IsAnyOf<type::I32, type::U32>();
@@ -85,6 +95,9 @@ struct CompareOpAndConstRHS {
     BinaryOp op;
     int64_t const_rhs = 0;
     const Binary* binary = nullptr;
+    // The `load` instruction of the loop control variable used as the operand of the comparison
+    // operator.
+    const Load* load = nullptr;
 };
 
 IntegerRangeInfo ToIntegerRangeInfo(bool is_signed, int64_t min_value, int64_t max_value) {
@@ -144,6 +157,13 @@ struct IntegerRangeAnalysisImpl {
     IntegerRangeInfo GetInfo(const Var* var) { return integer_var_range_info_map_.GetOr(var, {}); }
 
     IntegerRangeInfo GetInfo(const Load* load) {
+        // The `load` instruction in the loop exit condition is executed before the exit condition
+        // is checked, so it can read values outside of the range of the loop control variable
+        // inside the loop.
+        if (auto condition_load_range = loop_condition_load_range_info_map_.Get(load)) {
+            return *condition_load_range;
+        }
+
         const InstructionResult* instruction = load->From()->As<InstructionResult>();
         if (!instruction) {
             return {};
@@ -335,6 +355,27 @@ struct IntegerRangeAnalysisImpl {
             return;
         }
 
+        // The range of `index` computed below is only valid after the exit condition is checked
+        // and before `index` is updated in the continuing block. Verify that every load of `index`
+        // is in such a position or is the load in the exit condition (which gets a wider range),
+        // otherwise the load may read a value out of the range of `index`, e.g. a load between the
+        // update of `index` in the continuing block and the next check of the exit condition.
+        const Load* update_load = loop->Continuing()->Front()->As<Load>();
+        TINT_ASSERT(update_load);
+        for (auto& use : index->Result()->UsagesUnsorted()) {
+            const auto* load = use->instruction->As<Load>();
+            if (!load) {
+                // The only non-load usage is the store in the continuing block.
+                continue;
+            }
+            if (load == compare_info.load || load == update_load) {
+                continue;
+            }
+            if (!IsInsideBlock(load, loop->Body())) {
+                return;
+            }
+        }
+
         TINT_ASSERT(index->Initializer());
 
         // for (var i = init_value; ...), where `init_value` has a valid range [init_min, init_max].
@@ -423,6 +464,13 @@ struct IntegerRangeAnalysisImpl {
 
                 IntegerRangeInfo range_info = ToIntegerRangeInfo(is_signed, init_min, index_max);
                 integer_var_range_info_map_.Add(index, range_info);
+
+                // The load in the exit condition can also read `init_value` when it is greater
+                // than `const_rhs`, or the value `index + step` that makes the loop exit, which is
+                // at most `index_max + step`.
+                loop_condition_load_range_info_map_.Add(
+                    compare_info.load,
+                    ToIntegerRangeInfo(is_signed, init_min, std::max(init_max, index_max + step)));
                 break;
             }
             case BinaryOp::kGreaterThanEqual: {
@@ -481,6 +529,13 @@ struct IntegerRangeAnalysisImpl {
 
                 IntegerRangeInfo range_info = ToIntegerRangeInfo(is_signed, index_min, init_max);
                 integer_var_range_info_map_.Add(index, range_info);
+
+                // The load in the exit condition can also read `init_value` when it is less than
+                // `const_rhs`, or the value `index - step` that makes the loop exit, which is at
+                // least `index_min - step`.
+                loop_condition_load_range_info_map_.Add(
+                    compare_info.load,
+                    ToIntegerRangeInfo(is_signed, std::min(init_min, index_min - step), init_max));
                 break;
             }
             default:
@@ -541,6 +596,9 @@ struct IntegerRangeAnalysisImpl {
     /// - The third instruction is to store the value of the temporary variable into the loop
     ///   control variable.
     /// - The fourth instruction is `next_iteration`.
+    /// Note that `AnalyzeLoop()` also verifies that the loop control variable is not loaded after
+    /// it is updated in the continuing block, so relaxing the above requirements won't make the
+    /// computed range of the loop control variable incorrect.
     const Binary* GetBinaryToUpdateLoopControlVariableInContinuingBlock(
         const Loop* loop,
         const Var* loop_control_variable) {
@@ -893,8 +951,10 @@ struct IntegerRangeAnalysisImpl {
             return compare_info;
         }
 
-        // Set `compare_info.binary` after the loop passes all the above checks.
+        // Set `compare_info.binary` and `compare_info.load` after the loop passes all the above
+        // checks.
         compare_info.binary = exit_condition_on_loop_control_variable;
+        compare_info.load = load_from_loop_control_variable;
         return compare_info;
     }
 
@@ -1548,6 +1608,7 @@ struct IntegerRangeAnalysisImpl {
     Hashmap<const FunctionParam*, Vector<IntegerRangeInfo, 3>, 4>
         integer_function_param_range_info_map_;
     Hashmap<const Var*, IntegerRangeInfo, 8> integer_var_range_info_map_;
+    Hashmap<const Load*, IntegerRangeInfo, 8> loop_condition_load_range_info_map_;
     Hashmap<const Constant*, IntegerRangeInfo, 8> integer_constant_range_info_map_;
     Hashmap<const Binary*, IntegerRangeInfo, 8> integer_binary_range_info_map_;
     Hashmap<const Convert*, IntegerRangeInfo, 8> integer_convert_range_info_map_;

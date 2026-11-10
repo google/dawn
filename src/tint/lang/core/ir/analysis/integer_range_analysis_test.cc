@@ -8923,6 +8923,222 @@ TEST_F(IR_IntegerRangeAnalysisTest, LoadFromLoopControlVariableWithRange) {
     EXPECT_EQ(9, range_load_idx.max_bound);
 }
 
+TEST_F(IR_IntegerRangeAnalysisTest, LoadFromLoopControlVariableInExitCondition_Increasing) {
+    Var* idx = nullptr;
+    Load* condition_load = nullptr;
+    Load* body_load = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 0
+            idx = b.Var("idx", 0_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 10
+            condition_load = b.Load(idx);
+            auto* binary = b.LessThan(condition_load, 10_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            body_load = b.Load(idx);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx += 3
+            b.Store(idx, b.Add(b.Load(idx), 3_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    // `idx` is 0, 3, 6 or 9 inside the loop body.
+    const IntegerRangeInfo& body_load_info = analysis.GetInfo(body_load);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(body_load_info.range));
+    const auto& body_range = std::get<IntegerRangeInfo::SignedIntegerRange>(body_load_info.range);
+    EXPECT_EQ(0, body_range.min_bound);
+    EXPECT_EQ(9, body_range.max_bound);
+
+    // The exit condition also reads 12, which makes the loop exit.
+    const IntegerRangeInfo& condition_load_info = analysis.GetInfo(condition_load);
+    ASSERT_TRUE(
+        std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(condition_load_info.range));
+    const auto& condition_range =
+        std::get<IntegerRangeInfo::SignedIntegerRange>(condition_load_info.range);
+    EXPECT_EQ(0, condition_range.min_bound);
+    EXPECT_EQ(12, condition_range.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest,
+       LoadFromLoopControlVariableInExitCondition_Increasing_InitializerExceedsCondition) {
+    Var* idx = nullptr;
+    Load* condition_load = nullptr;
+    Load* body_load = nullptr;
+    auto* func = b.ComputeFunction("func", 21_u, 1_u, 1_u);
+    auto* local_invocation_id = b.FunctionParam("local_invocation_id", mod.Types().vec3<u32>());
+    local_invocation_id->SetBuiltin(tint::core::BuiltinValue::kLocalInvocationId);
+    func->SetParams({local_invocation_id});
+
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = local_invocation_id.x, which is in [0, 20]
+            auto* init = b.Access(ty.u32(), local_invocation_id, 0_u);
+            idx = b.Var("idx", init);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx < 10
+            condition_load = b.Load(idx);
+            auto* binary = b.LessThan(condition_load, 10_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            body_load = b.Load(idx);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx++
+            b.Store(idx, b.Add(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    const IntegerRangeInfo& body_load_info = analysis.GetInfo(body_load);
+    ASSERT_TRUE(
+        std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(body_load_info.range));
+    const auto& body_range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(body_load_info.range);
+    EXPECT_EQ(0u, body_range.min_bound);
+    EXPECT_EQ(9u, body_range.max_bound);
+
+    // The first exit condition check reads the initial value, which can be up to 20.
+    const IntegerRangeInfo& condition_load_info = analysis.GetInfo(condition_load);
+    ASSERT_TRUE(
+        std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(condition_load_info.range));
+    const auto& condition_range =
+        std::get<IntegerRangeInfo::UnsignedIntegerRange>(condition_load_info.range);
+    EXPECT_EQ(0u, condition_range.min_bound);
+    EXPECT_EQ(20u, condition_range.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, LoadFromLoopControlVariableInExitCondition_Decreasing) {
+    Var* idx = nullptr;
+    Load* condition_load = nullptr;
+    Load* body_load = nullptr;
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = 10
+            idx = b.Var("idx", 10_i);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx > 0
+            condition_load = b.Load(idx);
+            auto* binary = b.GreaterThan(condition_load, 0_i);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            body_load = b.Load(idx);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx -= 4
+            b.Store(idx, b.Subtract(b.Load(idx), 4_i));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    // `idx` is 10, 6 or 2 inside the loop body.
+    const IntegerRangeInfo& body_load_info = analysis.GetInfo(body_load);
+    ASSERT_TRUE(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(body_load_info.range));
+    const auto& body_range = std::get<IntegerRangeInfo::SignedIntegerRange>(body_load_info.range);
+    EXPECT_EQ(2, body_range.min_bound);
+    EXPECT_EQ(10, body_range.max_bound);
+
+    // The exit condition also reads -2, which makes the loop exit.
+    const IntegerRangeInfo& condition_load_info = analysis.GetInfo(condition_load);
+    ASSERT_TRUE(
+        std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(condition_load_info.range));
+    const auto& condition_range =
+        std::get<IntegerRangeInfo::SignedIntegerRange>(condition_load_info.range);
+    EXPECT_EQ(-2, condition_range.min_bound);
+    EXPECT_EQ(10, condition_range.max_bound);
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest,
+       LoadFromLoopControlVariableInExitCondition_Decreasing_InitializerBelowCondition) {
+    Var* idx = nullptr;
+    Load* condition_load = nullptr;
+    Load* body_load = nullptr;
+    auto* func = b.ComputeFunction("func", 21_u, 1_u, 1_u);
+    auto* local_invocation_id = b.FunctionParam("local_invocation_id", mod.Types().vec3<u32>());
+    local_invocation_id->SetBuiltin(tint::core::BuiltinValue::kLocalInvocationId);
+    func->SetParams({local_invocation_id});
+
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {
+            // idx = local_invocation_id.x, which is in [0, 20]
+            auto* init = b.Access(ty.u32(), local_invocation_id, 0_u);
+            idx = b.Var("idx", init);
+            b.NextIteration(loop);
+        });
+        b.Append(loop->Body(), [&] {
+            // idx > 10
+            condition_load = b.Load(idx);
+            auto* binary = b.GreaterThan(condition_load, 10_u);
+            auto* ifelse = b.If(binary);
+            b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+            b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
+            body_load = b.Load(idx);
+            b.Continue(loop);
+        });
+        b.Append(loop->Continuing(), [&] {
+            // idx--
+            b.Store(idx, b.Subtract(b.Load(idx), 1_u));
+            b.NextIteration(loop);
+        });
+        b.Return(func);
+    });
+
+    EXPECT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+
+    const IntegerRangeInfo& body_load_info = analysis.GetInfo(body_load);
+    ASSERT_TRUE(
+        std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(body_load_info.range));
+    const auto& body_range = std::get<IntegerRangeInfo::UnsignedIntegerRange>(body_load_info.range);
+    EXPECT_EQ(11u, body_range.min_bound);
+    EXPECT_EQ(20u, body_range.max_bound);
+
+    // The final update reaches 10, but the first exit condition check can read as low as 0.
+    const IntegerRangeInfo& condition_load_info = analysis.GetInfo(condition_load);
+    ASSERT_TRUE(
+        std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(condition_load_info.range));
+    const auto& condition_range =
+        std::get<IntegerRangeInfo::UnsignedIntegerRange>(condition_load_info.range);
+    EXPECT_EQ(0u, condition_range.min_bound);
+    EXPECT_EQ(20u, condition_range.max_bound);
+}
+
 TEST_F(IR_IntegerRangeAnalysisTest, LoadFromLoopControlVariableWithoutRange) {
     Var* idx = nullptr;
     Loop* loop = nullptr;
