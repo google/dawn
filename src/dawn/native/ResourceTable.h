@@ -52,6 +52,10 @@ namespace dawn::native {
 
 MaybeValError ValidateResourceTableDescriptor(const DeviceBase* device,
                                               const ResourceTableDescriptor* descriptor);
+MaybeValError ValidateSetResourceUsage(const DeviceBase* device,
+                                       const ResourceTableBase* table,
+                                       const UsageBindingResource* resource,
+                                       wgpu::ResourceTableUsage usage);
 
 // ResourceTableBase implements the frontend tracking for GPUResourceTable, a sparse array of
 // heterogeneous resources that can be accessed in shaders. It needs logic for multiple aspects:
@@ -90,6 +94,9 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     uint32_t APIInsert(const BindingResource* resource);
     wgpu::Status APIRemove(uint32_t slot);
     uint32_t APIGetSize() const;
+    void APISetResourceUsage(const UsageBindingResource* resource, wgpu::ResourceTableUsage usage);
+
+    void SetResourceUsage(const UsageBindingResource* resource, wgpu::ResourceTableUsage usage);
 
     // Computes the tint::ResourceType that should be in the metadata buffer for the resource.
     static tint::ResourceType ComputeTypeId(
@@ -202,6 +209,7 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
 
     // The state of textures in the table
     struct TextureState {
+        wgpu::ResourceTableUsage usage = wgpu::ResourceTableUsage::ReadOnly;
         bool visible = false;
         // std::vector<ResourceTableSlot> slots;
         absl::flat_hash_set<ResourceTableSlot> slots;

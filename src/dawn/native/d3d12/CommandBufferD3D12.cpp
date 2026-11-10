@@ -1474,6 +1474,16 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                 break;
             }
 
+            case Command::SetResourceUsage: {
+                SetResourceUsageCmd* cmd = mCommands.NextCommand<SetResourceUsageCmd>();
+                UsageBindingResource resource{
+                    .buffer = cmd->buffer.Get(),
+                    .texture = cmd->texture.Get(),
+                };
+                cmd->table->SetResourceUsage(&resource, cmd->usage);
+                break;
+            }
+
             default:
                 DAWN_UNREACHABLE();
         }
@@ -1637,6 +1647,16 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
             case Command::SetResourceTable: {
                 SetResourceTableCmd* cmd = mCommands.NextCommand<SetResourceTableCmd>();
                 bindingTracker->SetResourceTable(ToBackend(cmd->table.Get()));
+                break;
+            }
+
+            case Command::SetResourceUsage: {
+                SetResourceUsageCmd* cmd = mCommands.NextCommand<SetResourceUsageCmd>();
+                UsageBindingResource resource{
+                    .buffer = cmd->buffer.Get(),
+                    .texture = cmd->texture.Get(),
+                };
+                cmd->table->SetResourceUsage(&resource, cmd->usage);
                 break;
             }
 

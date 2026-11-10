@@ -975,6 +975,15 @@
                 "args": [
                     {"name": "label", "type": "string view"}
                 ]
+            },
+            {
+                "name": "set resource usage",
+                "tags": ["dawn"],
+                "args": [
+                    {"name": "table", "type": "resource table"},
+                    {"name": "resource", "type": "usage binding resource", "annotation": "const*"},
+                    {"name": "usage", "type": "resource table usage"}
+                ]
             }
         ]
     },
@@ -1150,6 +1159,15 @@
                 "tags": ["dawn"],
                 "args": [
                     {"name": "table", "type": "resource table", "optional": true}
+                ]
+            },
+            {
+                "name": "set resource usage",
+                "tags": ["dawn"],
+                "args": [
+                    {"name": "table", "type": "resource table"},
+                    {"name": "resource", "type": "usage binding resource", "annotation": "const*"},
+                    {"name": "usage", "type": "resource table usage"}
                 ]
             }
         ]
@@ -3783,6 +3801,14 @@
                 "args": [
                     {"name": "slot", "type": "uint32_t"}
                 ]
+            },
+            {
+                "name": "set resource usage",
+                "tags": ["dawn"],
+                "args": [
+                    {"name": "resource", "type": "usage binding resource", "annotation": "const*"},
+                    {"name": "usage", "type": "resource table usage"}
+                ]
             }
         ]
     },
@@ -3796,6 +3822,23 @@
             {"name": "size", "type": "uint64_t", "default": "whole size"},
             {"name": "sampler", "type": "sampler", "optional": true},
             {"name": "texture view", "type": "texture view", "optional": true}
+        ]
+    },
+    "usage binding resource": {
+        "category": "structure",
+        "extensible": "in",
+        "tags": ["dawn"],
+        "members": [
+            {"name": "buffer", "type": "buffer", "optional": true},
+            {"name": "texture", "type": "texture", "optional": true}
+        ]
+    },
+    "resource table usage": {
+        "category": "enum",
+        "tags": ["dawn"],
+        "values": [
+            {"value": 1, "name": "none"},
+            {"value": 2, "name": "read only"}
         ]
     },
     "sampler": {

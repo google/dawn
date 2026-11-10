@@ -543,6 +543,35 @@ void ComputePassEncoder::APISetResourceTable(ResourceTableBase* table) {
         "encoding %s.SetResourceTable(%s).", this, table);
 }
 
+void ComputePassEncoder::APISetResourceUsage(ResourceTableBase* table,
+                                             const UsageBindingResource* resource,
+                                             wgpu::ResourceTableUsage usage) {
+    mEncodingContext->TryEncode(
+        this,
+        [&](CommandAllocator* allocator) -> MaybeValError {
+            if (GetDevice()->IsValidationEnabled()) {
+                DAWN_TRY(ValidateSetResourceUsage(GetDevice(), table, resource, usage));
+            }
+
+            mUsageTracker.AddReferencedResourceTable(table);
+            if (resource->buffer != nullptr) {
+                mUsageTracker.AddReferencedBuffer(resource->buffer);
+            }
+            if (resource->texture != nullptr) {
+                mUsageTracker.AddReferencedTexture(resource->texture);
+            }
+
+            SetResourceUsageCmd* cmd =
+                allocator->Allocate<SetResourceUsageCmd>(Command::SetResourceUsage);
+            cmd->table = table;
+            cmd->buffer = resource->buffer;
+            cmd->texture = resource->texture;
+            cmd->usage = usage;
+            return {};
+        },
+        "encoding %s.SetResourceUsage(%s, %p, %s).", this, table, resource, usage);
+}
+
 void ComputePassEncoder::APISetBindGroup(uint32_t groupIndexIn,
                                          BindGroupBase* group,
                                          ityp::span<BindingIndex, const uint32_t> dynamicOffsets) {

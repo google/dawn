@@ -61,6 +61,7 @@
 #include "src/dawn/native/RenderPassEncoder.h"
 #include "src/dawn/native/RenderPassWorkaroundsHelper.h"
 #include "src/dawn/native/RenderPipeline.h"
+#include "src/dawn/native/ResourceTable.h"
 #include "src/dawn/native/ValidationUtils.h"
 #include "src/dawn/native/dawn_platform.h"
 #include "src/dawn/native/utils/NativeHelpers.h"
@@ -1374,6 +1375,7 @@ CommandBufferResourceUsage CommandEncoder::AcquireResourceUsages() {
         std::move(mTopLevelBuffers),
         std::move(mTopLevelTextures),
         std::move(mUsedQuerySets),
+        std::move(mTopLevelResourceTables),
     };
 }
 
@@ -2419,6 +2421,36 @@ void CommandEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t queryInd
             return {};
         },
         "encoding %s.WriteTimestamp(%s, %u).", this, querySet, queryIndex);
+}
+
+void CommandEncoder::APISetResourceUsage(ResourceTableBase* table,
+                                         const UsageBindingResource* resource,
+                                         wgpu::ResourceTableUsage usage) {
+    mEncodingContext.TryEncode(
+        this,
+        [&](CommandAllocator* allocator) -> MaybeValError {
+            if (GetDevice()->IsValidationEnabled()) {
+                DAWN_TRY(ValidateSetResourceUsage(GetDevice(), table, resource, usage));
+            }
+
+            SetResourceUsageCmd* cmd =
+                allocator->Allocate<SetResourceUsageCmd>(Command::SetResourceUsage);
+            cmd->table = table;
+            cmd->buffer = resource->buffer;
+            cmd->texture = resource->texture;
+            cmd->usage = usage;
+
+            mTopLevelResourceTables.insert(table);
+            if (resource->buffer != nullptr) {
+                mTopLevelBuffers.insert(resource->buffer);
+            }
+            if (resource->texture != nullptr) {
+                mTopLevelTextures.insert(resource->texture);
+            }
+
+            return {};
+        },
+        "encoding %s.SetResourceUsage(%s, %p, %s).", this, table, resource, usage);
 }
 
 CommandBufferBase* CommandEncoder::APIFinish(const CommandBufferDescriptor* descriptor) {

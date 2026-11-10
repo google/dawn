@@ -1739,5 +1739,288 @@ TEST_F(ResourceTableValidationTest, GetSizeAfterDestroy) {
     }
 }
 
+// Tests encoder state validation for CommandEncoder::SetResourceUsage and
+// ComputePassEncoder::SetResourceUsage.
+TEST_F(ResourceTableValidationTest, SetResourceUsage_EncoderState) {
+    wgpu::ResourceTable table = MakeResourceTable(1);
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+    };
+    wgpu::Texture texture = device.CreateTexture(&tDesc);
+    wgpu::UsageBindingResource resource = {.texture = texture};
+
+    // Success case: calling CommandEncoder::SetResourceUsage on an open encoder.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceUsage(table, &resource, wgpu::ResourceTableUsage::ReadOnly);
+        encoder.Finish();
+    }
+
+    // Success case: calling ComputePassEncoder::SetResourceUsage on an open compute pass.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetResourceUsage(table, &resource, wgpu::ResourceTableUsage::ReadOnly);
+        pass.End();
+        encoder.Finish();
+    }
+
+    // Calling CommandEncoder::SetResourceUsage after Finish is an error.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.Finish();
+        ASSERT_DEVICE_ERROR(
+            encoder.SetResourceUsage(table, &resource, wgpu::ResourceTableUsage::ReadOnly));
+    }
+
+    // Calling CommandEncoder::SetResourceUsage while a compute pass is open is an error.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        encoder.SetResourceUsage(table, &resource, wgpu::ResourceTableUsage::ReadOnly);
+        pass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Calling CommandEncoder::SetResourceUsage while a render pass is open is an error.
+    {
+        auto rp = utils::CreateBasicRenderPass(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+        encoder.SetResourceUsage(table, &resource, wgpu::ResourceTableUsage::ReadOnly);
+        pass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Calling ComputePassEncoder::SetResourceUsage after End is an error.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.End();
+        pass.SetResourceUsage(table, &resource, wgpu::ResourceTableUsage::ReadOnly);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
+// Tests parameter validation for SetResourceUsage on ResourceTable, CommandEncoder, and
+// ComputePassEncoder.
+TEST_F(ResourceTableValidationTest, SetResourceUsage_Validation) {
+    wgpu::ResourceTable validTable = MakeResourceTable(1);
+    wgpu::ResourceTable errorTable = MakeErrorResourceTable(1);
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+    };
+    wgpu::Texture validTexture = device.CreateTexture(&tDesc);
+
+    tDesc.size = {0, 0};
+    wgpu::Texture errorTexture;
+    ASSERT_DEVICE_ERROR(errorTexture = device.CreateTexture(&tDesc));
+
+    wgpu::BufferDescriptor bDesc{
+        .usage = wgpu::BufferUsage::Storage,
+        .size = 4,
+    };
+    wgpu::Buffer validBuffer = device.CreateBuffer(&bDesc);
+
+    auto CheckAllEntryPoints = [&](wgpu::ResourceTable table,
+                                   const wgpu::UsageBindingResource* resource,
+                                   wgpu::ResourceTableUsage usage, bool success) {
+        // ResourceTable::SetResourceUsage
+        if (success) {
+            table.SetResourceUsage(resource, usage);
+        } else {
+            ASSERT_DEVICE_ERROR(table.SetResourceUsage(resource, usage));
+        }
+
+        // CommandEncoder::SetResourceUsage
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            encoder.SetResourceUsage(table, resource, usage);
+            if (success) {
+                encoder.Finish();
+            } else {
+                ASSERT_DEVICE_ERROR(encoder.Finish());
+            }
+        }
+
+        // ComputePassEncoder::SetResourceUsage
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetResourceUsage(table, resource, usage);
+            pass.End();
+            if (success) {
+                encoder.Finish();
+            } else {
+                ASSERT_DEVICE_ERROR(encoder.Finish());
+            }
+        }
+    };
+
+    wgpu::UsageBindingResource validResource = {.texture = validTexture};
+
+    // Success cases: valid texture with ReadOnly and None usages.
+    CheckAllEntryPoints(validTable, &validResource, wgpu::ResourceTableUsage::ReadOnly, true);
+    CheckAllEntryPoints(validTable, &validResource, wgpu::ResourceTableUsage::None, true);
+
+    // Error cases: invalid ResourceTableUsage enum values.
+    CheckAllEntryPoints(validTable, &validResource, static_cast<wgpu::ResourceTableUsage>(0),
+                        false);
+    CheckAllEntryPoints(validTable, &validResource, static_cast<wgpu::ResourceTableUsage>(99),
+                        false);
+
+    // Error case: invalid ResourceTable.
+    CheckAllEntryPoints(errorTable, &validResource, wgpu::ResourceTableUsage::ReadOnly, false);
+
+    // Error case: nextInChain != nullptr on UsageBindingResource.
+    {
+        wgpu::RenderPassMaxDrawCount maxDraw;
+        maxDraw.maxDrawCount = 1000;
+        wgpu::UsageBindingResource resourceWithChain = {
+            .nextInChain = &maxDraw,
+            .texture = validTexture,
+        };
+        CheckAllEntryPoints(validTable, &resourceWithChain, wgpu::ResourceTableUsage::ReadOnly,
+                            false);
+    }
+
+    // Error case: neither buffer nor texture specified.
+    {
+        wgpu::UsageBindingResource emptyResource = {};
+        CheckAllEntryPoints(validTable, &emptyResource, wgpu::ResourceTableUsage::ReadOnly, false);
+    }
+
+    // Error case: both buffer and texture specified.
+    {
+        wgpu::UsageBindingResource bothResource = {
+            .buffer = validBuffer,
+            .texture = validTexture,
+        };
+        CheckAllEntryPoints(validTable, &bothResource, wgpu::ResourceTableUsage::ReadOnly, false);
+    }
+
+    // Error case: buffer specified (buffers are not supported in SamplingResourceTable).
+    {
+        wgpu::UsageBindingResource bufferResource = {.buffer = validBuffer};
+        CheckAllEntryPoints(validTable, &bufferResource, wgpu::ResourceTableUsage::ReadOnly, false);
+    }
+
+    // Error case: error texture specified.
+    {
+        wgpu::UsageBindingResource errorTextureResource = {.texture = errorTexture};
+        CheckAllEntryPoints(validTable, &errorTextureResource, wgpu::ResourceTableUsage::ReadOnly,
+                            false);
+    }
+
+    // Destroyed texture and destroyed table do not produce device validation errors.
+    {
+        tDesc.size = {1, 1};
+        wgpu::Texture destroyedTex = device.CreateTexture(&tDesc);
+        destroyedTex.Destroy();
+        wgpu::UsageBindingResource destroyedTexResource = {.texture = destroyedTex};
+        CheckAllEntryPoints(validTable, &destroyedTexResource, wgpu::ResourceTableUsage::ReadOnly,
+                            true);
+
+        wgpu::ResourceTable destroyedTable = MakeResourceTable(1);
+        destroyedTable.Destroy();
+        CheckAllEntryPoints(destroyedTable, &validResource, wgpu::ResourceTableUsage::ReadOnly,
+                            true);
+    }
+}
+
+// Tests that ResourceTables and Textures referenced by CommandEncoder::SetResourceUsage or
+// ComputePassEncoder::SetResourceUsage are validated not to be destroyed on Queue::Submit.
+TEST_F(ResourceTableValidationTest, SetResourceUsage_CanUseInSubmit) {
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+    };
+
+    // Success case: neither table nor texture is destroyed before Submit.
+    {
+        wgpu::ResourceTable table = MakeResourceTable(1);
+        wgpu::Texture texture = device.CreateTexture(&tDesc);
+        wgpu::UsageBindingResource resource = {.texture = texture};
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceUsage(table, &resource, wgpu::ResourceTableUsage::None);
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetResourceUsage(table, &resource, wgpu::ResourceTableUsage::ReadOnly);
+        pass.End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+        device.GetQueue().Submit(1, &commands);
+    }
+
+    // Failure case: table referenced by CommandEncoder::SetResourceUsage is destroyed before
+    // Submit.
+    {
+        wgpu::ResourceTable table = MakeResourceTable(1);
+        wgpu::Texture texture = device.CreateTexture(&tDesc);
+        wgpu::UsageBindingResource resource = {.texture = texture};
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceUsage(table, &resource, wgpu::ResourceTableUsage::None);
+        wgpu::CommandBuffer commands = encoder.Finish();
+
+        table.Destroy();
+        ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
+    }
+
+    // Failure case: texture referenced by CommandEncoder::SetResourceUsage is destroyed before
+    // Submit.
+    {
+        wgpu::ResourceTable table = MakeResourceTable(1);
+        wgpu::Texture texture = device.CreateTexture(&tDesc);
+        wgpu::UsageBindingResource resource = {.texture = texture};
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetResourceUsage(table, &resource, wgpu::ResourceTableUsage::None);
+        wgpu::CommandBuffer commands = encoder.Finish();
+
+        texture.Destroy();
+        ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
+    }
+
+    // Failure case: table referenced by ComputePassEncoder::SetResourceUsage is destroyed before
+    // Submit.
+    {
+        wgpu::ResourceTable table = MakeResourceTable(1);
+        wgpu::Texture texture = device.CreateTexture(&tDesc);
+        wgpu::UsageBindingResource resource = {.texture = texture};
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetResourceUsage(table, &resource, wgpu::ResourceTableUsage::None);
+        pass.End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+
+        table.Destroy();
+        ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
+    }
+
+    // Failure case: texture referenced by ComputePassEncoder::SetResourceUsage is destroyed before
+    // Submit.
+    {
+        wgpu::ResourceTable table = MakeResourceTable(1);
+        wgpu::Texture texture = device.CreateTexture(&tDesc);
+        wgpu::UsageBindingResource resource = {.texture = texture};
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetResourceUsage(table, &resource, wgpu::ResourceTableUsage::None);
+        pass.End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+
+        texture.Destroy();
+        ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
+    }
+}
+
 }  // namespace
 }  // namespace dawn

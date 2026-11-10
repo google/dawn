@@ -51,10 +51,12 @@ constexpr uint32_t kUniqueDefaultSamplers = 2;
 constexpr uint32_t kD3D12MaxUniqueSamplers =
     2048 - (kMaxSamplersPerShaderStage * kNumStages) - kUniqueDefaultSamplers;
 
-class ResourceTableTests : public DawnTest {
+class ResourceTableTestsBase : public DawnTestBase {
   protected:
+    using DawnTestBase::DawnTestBase;
+
     void SetUp() override {
-        DawnTest::SetUp();
+        DawnTestBase::SetUp();
         DAWN_TEST_UNSUPPORTED_IF(
             !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable}));
 
@@ -229,10 +231,11 @@ class ResourceTableTests : public DawnTest {
         queue.Submit(1, &commands);
     }
 
-    wgpu::TextureView MakeU8View(uint8_t value) {
+    wgpu::Texture MakeU8Texture(uint8_t value,
+                                wgpu::TextureUsage extraUsage = wgpu::TextureUsage::None) {
         // Create the texture.
         wgpu::TextureDescriptor tDesc{
-            .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst,
+            .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst | extraUsage,
             .size = {1, 1},
             .format = wgpu::TextureFormat::R8Uint,
         };
@@ -244,8 +247,43 @@ class ResourceTableTests : public DawnTest {
         wgpu::Extent3D copySize = {1, 1, 1};
         queue.WriteTexture(&srcInfo, &value, 1, &dstInfo, &copySize);
 
-        // Return a view to the texture.
-        return tex.CreateView();
+        return tex;
+    }
+
+    wgpu::TextureView MakeU8View(uint8_t value) { return MakeU8Texture(value).CreateView(); }
+
+    wgpu::Texture MakeU32Texture(uint32_t value = 0,
+                                 wgpu::TextureUsage extraUsage = wgpu::TextureUsage::None) {
+        // Create the texture.
+        wgpu::TextureDescriptor tDesc{
+            .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst | extraUsage,
+            .size = {1, 1},
+            .format = wgpu::TextureFormat::R32Uint,
+        };
+        wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+        // Write the u32
+        wgpu::TexelCopyTextureInfo srcInfo = utils::CreateTexelCopyTextureInfo(tex);
+        wgpu::TexelCopyBufferLayout dstInfo = {};
+        wgpu::Extent3D copySize = {1, 1, 1};
+        queue.WriteTexture(&srcInfo, &value, sizeof(value), &dstInfo, &copySize);
+
+        return tex;
+    }
+
+    void EncodeBindfulRender(wgpu::CommandEncoder encoder, wgpu::Texture texture, uint32_t value) {
+        wgpu::RenderPassColorAttachment attachment{
+            .view = texture.CreateView(),
+            .loadOp = wgpu::LoadOp::Clear,
+            .storeOp = wgpu::StoreOp::Store,
+            .clearValue = {.r = static_cast<double>(value)},
+        };
+        wgpu::RenderPassDescriptor passDesc{
+            .colorAttachmentCount = 1,
+            .colorAttachments = &attachment,
+        };
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDesc);
+        pass.End();
     }
 
     // For each table in `cases`, sets the `table` and dipatches on a compute pass encoder,
@@ -498,6 +536,8 @@ class ResourceTableTests : public DawnTest {
         return device.CreateSampler(&descriptor);
     }
 };
+
+using ResourceTableTests = DawnTestWithParams<AdapterTestParam, ResourceTableTestsBase>;
 
 // Test that creating resource tables doesn't crash in backends.
 TEST_P(ResourceTableTests, ResourceTableCreation) {
@@ -3154,6 +3194,303 @@ TEST_P(ResourceTableTests, UnfilterableTextureWithBindlessSampler) {
     EXPECT_BUFFER_FLOAT_RANGE_EQ(kTexelData, resultBuffer, 3ULL * 4 * sizeof(float), 4);
 }
 
+// Test ResourceTable::SetResourceUsage toggling visibility between ReadOnly and None, including
+// calling SetResourceUsage before Insert/Update and across Remove + re-Update.
+TEST_P(ResourceTableTests, SetResourceUsage_ResourceTable) {
+    // TODO(473444514): Re-enable when compute shaders support ResourceTable on metal
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
+
+    wgpu::Texture tex0 = MakeU8Texture(17);
+    wgpu::Texture tex1 = MakeU8Texture(42);
+    wgpu::Texture tex2 = MakeU8Texture(99);
+
+    wgpu::TextureView view0 = tex0.CreateView();
+    wgpu::TextureView view1 = tex1.CreateView();
+    wgpu::TextureView view2 = tex2.CreateView();
+
+    wgpu::UsageBindingResource usageRes0 = {.texture = tex0};
+    wgpu::UsageBindingResource usageRes1 = {.texture = tex1};
+    wgpu::UsageBindingResource usageRes2 = {.texture = tex2};
+
+    wgpu::ResourceTable table = MakeResourceTable(4, {
+                                                         {0, {.textureView = view0}},
+                                                         {1, {.textureView = view1}},
+                                                         {2, {.textureView = view0}},
+                                                     });
+
+    // By default, inserted textures have ReadOnly usage and are visible.
+    TestHasU8BindingsAll(table, {{17}, {42}, {17}, {}});
+
+    // Setting tex0 usage to None hides all slots containing tex0 (slots 0 and 2).
+    table.SetResourceUsage(&usageRes0, wgpu::ResourceTableUsage::None);
+    TestHasU8BindingsAll(table, {{}, {42}, {}, {}});
+
+    // Setting tex1 usage to None hides slot 1 as well.
+    table.SetResourceUsage(&usageRes1, wgpu::ResourceTableUsage::None);
+    TestHasU8BindingsAll(table, {{}, {}, {}, {}});
+
+    // Setting tex0 usage back to ReadOnly makes slots 0 and 2 visible again.
+    table.SetResourceUsage(&usageRes0, wgpu::ResourceTableUsage::ReadOnly);
+    TestHasU8BindingsAll(table, {{17}, {}, {17}, {}});
+
+    // Setting tex1 usage back to ReadOnly makes slot 1 visible again.
+    table.SetResourceUsage(&usageRes1, wgpu::ResourceTableUsage::ReadOnly);
+    TestHasU8BindingsAll(table, {{17}, {42}, {17}, {}});
+
+    // Calling SetResourceUsage(ReadOnly) on a texture not in the table is a no-op.
+    table.SetResourceUsage(&usageRes2, wgpu::ResourceTableUsage::ReadOnly);
+    TestHasU8BindingsAll(table, {{17}, {42}, {17}, {}});
+
+    // Setting tex2 usage to None and then back to ReadOnly while tex2 has no slots in the table
+    // stops tracking tex2, so inserting it afterward leaves it visible with default ReadOnly usage.
+    table.SetResourceUsage(&usageRes2, wgpu::ResourceTableUsage::None);
+    table.SetResourceUsage(&usageRes2, wgpu::ResourceTableUsage::ReadOnly);
+    TestHasU8BindingsAll(table, {{17}, {42}, {17}, {}});
+
+    // Setting tex2 usage to None before inserting it into the table keeps it hidden once inserted.
+    table.SetResourceUsage(&usageRes2, wgpu::ResourceTableUsage::None);
+    wgpu::BindingResource bindRes2 = {.textureView = view2};
+    EXPECT_EQ(wgpu::Status::Success, table.Update(3, &bindRes2));
+    TestHasU8BindingsAll(table, {{17}, {42}, {17}, {}});
+
+    // Setting tex2 usage to ReadOnly makes slot 3 visible.
+    table.SetResourceUsage(&usageRes2, wgpu::ResourceTableUsage::ReadOnly);
+    TestHasU8BindingsAll(table, {{17}, {42}, {17}, {99}});
+
+    // Setting tex2 usage to None, removing slot 3, and re-adding tex2 preserves the None usage.
+    table.SetResourceUsage(&usageRes2, wgpu::ResourceTableUsage::None);
+    EXPECT_EQ(wgpu::Status::Success, table.Remove(3));
+    TestHasU8BindingsAll(table, {{17}, {42}, {17}, {}});
+    WaitForAllOperations();
+
+    EXPECT_EQ(wgpu::Status::Success, table.Update(3, &bindRes2));
+    TestHasU8BindingsAll(table, {{17}, {42}, {17}, {}});
+
+    // Removing slot 3 while tex2 has None usage, then setting tex2 back to ReadOnly while it has
+    // no slots, makes tex2 visible when re-added to slot 3.
+    EXPECT_EQ(wgpu::Status::Success, table.Remove(3));
+    table.SetResourceUsage(&usageRes2, wgpu::ResourceTableUsage::ReadOnly);
+    WaitForAllOperations();
+
+    EXPECT_EQ(wgpu::Status::Success, table.Update(3, &bindRes2));
+    TestHasU8BindingsAll(table, {{17}, {42}, {17}, {99}});
+
+    // When tex2 is in slot 1 with None usage, adding tex2 to another slot (slot 3) also keeps the
+    // newly added slot hidden until ReadOnly is restored.
+    EXPECT_EQ(wgpu::Status::Success, table.Remove(1));
+    EXPECT_EQ(wgpu::Status::Success, table.Remove(3));
+    WaitForAllOperations();
+
+    table.SetResourceUsage(&usageRes2, wgpu::ResourceTableUsage::None);
+    EXPECT_EQ(wgpu::Status::Success, table.Update(1, &bindRes2));
+    TestHasU8BindingsAll(table, {{17}, {}, {17}, {}});
+    EXPECT_EQ(wgpu::Status::Success, table.Update(3, &bindRes2));
+    TestHasU8BindingsAll(table, {{17}, {}, {17}, {}});
+
+    table.SetResourceUsage(&usageRes2, wgpu::ResourceTableUsage::ReadOnly);
+    TestHasU8BindingsAll(table, {{17}, {99}, {17}, {99}});
+}
+
+// Test CommandEncoder::SetResourceUsage across multiple render passes within a single command
+// buffer, including rendering to a texture while its table usage is set to None and then restoring
+// ReadOnly to sample the updated contents.
+TEST_P(ResourceTableTests, SetResourceUsage_CommandEncoder) {
+    // TODO(https://issues.chromium.org/issues/530631417): Fails on PowerVR DXT-48-1536
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_resource_table;
+
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0, 0, 0.5, 0.5);
+        }
+
+        @group(0) @binding(0) var<storage, read_write> results : array<u32>;
+        var<immediate> passOffset : u32;
+
+        @fragment fn main() -> @location(0) vec4f {
+            for (var i = 0u; i < 2u; i++) {
+                if !hasResource<texture_2d<u32>>(i) {
+                    results[passOffset + i] = 0xBEEFu;
+                } else {
+                    let tex = getResource<texture_2d<u32>>(i);
+                    results[passOffset + i] = textureLoad(tex, vec2(0), 0).x;
+                }
+            }
+            return vec4f();
+        }
+    )");
+
+    wgpu::BindGroupLayout resultBGL = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage}});
+
+    utils::ComboRenderPipelineDescriptor pDesc;
+    pDesc.layout = MakePipelineLayoutWithTable({resultBGL}, 4);
+    pDesc.vertex.module = module;
+    pDesc.cFragment.module = module;
+    pDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    wgpu::RenderPipeline testPipeline = device.CreateRenderPipeline(&pDesc);
+
+    wgpu::Texture texA = MakeU8Texture(11, wgpu::TextureUsage::RenderAttachment);
+    wgpu::Texture texB = MakeU8Texture(22);
+
+    wgpu::ResourceTable table =
+        MakeResourceTable(2, {
+                                 {0, {.textureView = CreateViewForTable(texA)}},
+                                 {1, {.textureView = CreateViewForTable(texB)}},
+                             });
+
+    wgpu::BufferDescriptor bDesc = {
+        .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
+        .size = sizeof(uint32_t) * 6,
+    };
+    wgpu::Buffer resultBuffer = device.CreateBuffer(&bDesc);
+    wgpu::BindGroup resultBG = utils::MakeBindGroup(device, resultBGL, {{0, resultBuffer}});
+
+    auto rp = utils::CreateBasicRenderPass(device, 1, 1);
+    wgpu::UsageBindingResource usageResA = {.texture = texA};
+
+    auto recordReadPass = [&](wgpu::CommandEncoder& encoder, uint32_t passOffset) {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+        pass.SetResourceTable(table);
+        pass.SetImmediates(0, &passOffset, sizeof(passOffset));
+        pass.SetBindGroup(0, resultBG);
+        pass.SetPipeline(testPipeline);
+        pass.Draw(1);
+        pass.End();
+    };
+
+    std::vector<uint32_t> expected;
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+    // Pass 0: Both texA and texB are ReadOnly -> {11, 22}.
+    recordReadPass(encoder, 0u);
+    expected.insert(expected.end(), {11u, 22u});
+
+    // Set texA usage to None on the command encoder.
+    encoder.SetResourceUsage(table, &usageResA, wgpu::ResourceTableUsage::None);
+
+    // Clear texA to 33 in a render pass while texA usage in the table is None.
+    EncodeBindfulRender(encoder, texA, 33);
+
+    // Pass 1: Read from table while texA usage is still None -> {0xBEEF, 22}.
+    recordReadPass(encoder, 2u);
+    expected.insert(expected.end(), {0xBEEFu, 22u});
+
+    // Restore texA usage to ReadOnly on the command encoder.
+    encoder.SetResourceUsage(table, &usageResA, wgpu::ResourceTableUsage::ReadOnly);
+
+    // Pass 2: Read from table; texA is visible again with the new value 33 -> {33, 22}.
+    recordReadPass(encoder, 4u);
+    expected.insert(expected.end(), {33u, 22u});
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), resultBuffer, 0, expected.size());
+}
+
+// Test ComputePassEncoder::SetResourceUsage between dispatches in a single compute pass, and verify
+// its interaction with implicit hiding from writable storage texture bind groups.
+TEST_P(ResourceTableTests, SetResourceUsage_ComputePassEncoder) {
+    // TODO(473444514): Re-enable when compute shaders support ResourceTable on metal
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
+
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_resource_table;
+
+        @group(0) @binding(0) var<storage, read_write> results : array<u32>;
+        @group(0) @binding(1) var writeTex : texture_storage_2d<r32uint, write>;
+        var<immediate> dispatchOffset : u32;
+
+        @compute @workgroup_size(1) fn main() {
+            for (var i = 0u; i < 2u; i++) {
+                if !hasResource<texture_2d<u32>>(i) {
+                    results[dispatchOffset + i] = 0xBEEFu;
+                } else {
+                    let tex = getResource<texture_2d<u32>>(i);
+                    results[dispatchOffset + i] = textureLoad(tex, vec2(0), 0).x;
+                }
+            }
+            textureStore(writeTex, vec2u(0, 0), vec4u(77u, 0, 0, 0));
+        }
+    )");
+
+    wgpu::ComputePipelineDescriptor csDesc = {.compute = {.module = module}};
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    wgpu::Texture texA = MakeU32Texture(11, wgpu::TextureUsage::StorageBinding);
+    wgpu::Texture texB = MakeU8Texture(22);
+    wgpu::Texture texScratch = MakeU32Texture(0, wgpu::TextureUsage::StorageBinding);
+
+    wgpu::ResourceTable table =
+        MakeResourceTable(2, {
+                                 {0, {.textureView = CreateViewForTable(texA)}},
+                                 {1, {.textureView = CreateViewForTable(texB)}},
+                             });
+
+    wgpu::BufferDescriptor bDesc = {
+        .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
+        .size = sizeof(uint32_t) * 10,
+    };
+    wgpu::Buffer resultBuffer = device.CreateBuffer(&bDesc);
+
+    wgpu::BindGroup bgWriteScratch = utils::MakeBindGroup(
+        device, pipeline.GetBindGroupLayout(0), {{0, resultBuffer}, {1, texScratch.CreateView()}});
+    wgpu::BindGroup bgWriteA = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                    {{0, resultBuffer}, {1, texA.CreateView()}});
+
+    wgpu::UsageBindingResource usageResA = {.texture = texA};
+    wgpu::UsageBindingResource usageResB = {.texture = texB};
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.SetResourceTable(table);
+
+    auto dispatchAt = [&](uint32_t dispatchOffset) {
+        pass.SetImmediates(0, &dispatchOffset, sizeof(dispatchOffset));
+        pass.DispatchWorkgroups(1);
+    };
+
+    std::vector<uint32_t> expected;
+
+    // Dispatch 0: Both texA and texB are ReadOnly -> {11, 22}.
+    pass.SetBindGroup(0, bgWriteScratch);
+    dispatchAt(0u);
+    expected.insert(expected.end(), {11u, 22u});
+
+    // Dispatch 1: Hide texA via ComputePassEncoder::SetResourceUsage -> {0xBEEF, 22}.
+    pass.SetResourceUsage(table, &usageResA, wgpu::ResourceTableUsage::None);
+    dispatchAt(2u);
+    expected.insert(expected.end(), {0xBEEFu, 22u});
+
+    // Dispatch 2: Restore texA to ReadOnly and hide texB -> {11, 0xBEEF}.
+    pass.SetResourceUsage(table, &usageResA, wgpu::ResourceTableUsage::ReadOnly);
+    pass.SetResourceUsage(table, &usageResB, wgpu::ResourceTableUsage::None);
+    dispatchAt(4u);
+    expected.insert(expected.end(), {11u, 0xBEEFu});
+
+    // Dispatch 3: Restore texB to ReadOnly, but bind bgWriteA which writes to texA (implicitly
+    // hiding texA in the table and writing 77 into texA) -> {0xBEEF, 22}.
+    pass.SetResourceUsage(table, &usageResB, wgpu::ResourceTableUsage::ReadOnly);
+    pass.SetBindGroup(0, bgWriteA);
+    dispatchAt(6u);
+    expected.insert(expected.end(), {0xBEEFu, 22u});
+
+    // Dispatch 4: Switch back to bgWriteScratch; texA is unhidden and now has value 77 -> {77, 22}.
+    pass.SetBindGroup(0, bgWriteScratch);
+    dispatchAt(8u);
+    expected.insert(expected.end(), {77u, 22u});
+
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), resultBuffer, 0, expected.size());
+}
+
 DAWN_INSTANTIATE_TEST(ResourceTableTests, D3D12Backend(), MetalBackend(), VulkanBackend());
 
 // Test that a resource used in a bindful way outside of a usage scope will get correctly barriered
@@ -3192,27 +3529,9 @@ std::ostream& operator<<(std::ostream& os, BindfulWriteKind write) {
 
 DAWN_TEST_PARAM_STRUCT(BindfulInteractionParams, BindlessReadKind, BindfulWriteKind);
 
-class ResourceTableBindfulInteractionTests : public DawnTestWithParams<BindfulInteractionParams> {
+class ResourceTableBindfulInteractionTests
+    : public DawnTestWithParams<BindfulInteractionParams, ResourceTableTestsBase> {
   protected:
-    void SetUp() override {
-        DawnTestWithParams<BindfulInteractionParams>::SetUp();
-        DAWN_TEST_UNSUPPORTED_IF(
-            !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable}));
-
-        // Swiftshader doesn't support variable count descriptor sets used in draw operations. In
-        // vk::DescriptorSet::ParseDescriptors it iterates over all the descriptors to prep various
-        // things but iterates over the whole size defined in the vkDescriptorSetLayout instead of
-        // taking into account the variable count.
-        DAWN_SUPPRESS_TEST_IF(IsSwiftshader());
-    }
-
-    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        if (SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable})) {
-            return {wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable};
-        }
-        return {};
-    }
-
     void DoTest(BindlessReadKind read, BindfulWriteKind write) {
         switch (read) {
             case BindlessReadKind::Compute:
@@ -3228,29 +3547,9 @@ class ResourceTableBindfulInteractionTests : public DawnTestWithParams<BindfulIn
     // Makes the texture that we'll use for the test and put it in a single-entry ResourceTable.
     std::pair<wgpu::Texture, wgpu::ResourceTable> CreateTestTextureAndTable(BindfulWriteKind write,
                                                                             uint32_t initialValue) {
-        // Create and initialize the texture.
-        wgpu::TextureDescriptor tDesc = {
-            .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst |
-                     TextureUsageForWriteKind(write),
-            .size = {1, 1},
-            .format = wgpu::TextureFormat::R32Uint,
-        };
-        wgpu::Texture texture = device.CreateTexture(&tDesc);
-
-        wgpu::TexelCopyTextureInfo srcInfo = utils::CreateTexelCopyTextureInfo(texture);
-        wgpu::TexelCopyBufferLayout dstInfo = {};
-        wgpu::Extent3D copySize = {1, 1, 1};
-        queue.WriteTexture(&srcInfo, &initialValue, sizeof(initialValue), &dstInfo, &copySize);
-
-        // Create and initialize the resource table.
-        wgpu::ResourceTableDescriptor tableDesc;
-        tableDesc.size = 1;
-        wgpu::ResourceTable table = device.CreateResourceTable(&tableDesc);
-
-        wgpu::TextureViewDescriptor vDesc = {.usage = wgpu::TextureUsage::TextureBinding};
-        wgpu::BindingResource resource = {.textureView = texture.CreateView(&vDesc)};
-        EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
-
+        wgpu::Texture texture = MakeU32Texture(initialValue, TextureUsageForWriteKind(write));
+        wgpu::ResourceTable table =
+            MakeResourceTable(1, {{0, {.textureView = CreateViewForTable(texture)}}});
         return {std::move(texture), std::move(table)};
     }
 
@@ -3409,21 +3708,6 @@ class ResourceTableBindfulInteractionTests : public DawnTestWithParams<BindfulIn
                 EncodeBindfulComputeStorageWrite(encoder, texture, value);
                 break;
         }
-    }
-
-    void EncodeBindfulRender(wgpu::CommandEncoder encoder, wgpu::Texture texture, uint32_t value) {
-        wgpu::RenderPassColorAttachment attachment{
-            .view = texture.CreateView(),
-            .loadOp = wgpu::LoadOp::Clear,
-            .storeOp = wgpu::StoreOp::Store,
-            .clearValue = {.r = static_cast<double>(value)},
-        };
-        wgpu::RenderPassDescriptor passDesc{
-            .colorAttachmentCount = 1,
-            .colorAttachments = &attachment,
-        };
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDesc);
-        pass.End();
     }
 
     void EncodeBindfulCopy(wgpu::CommandEncoder encoder, wgpu::Texture texture, uint32_t value) {

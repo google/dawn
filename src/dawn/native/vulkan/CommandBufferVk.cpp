@@ -1539,6 +1539,16 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                 break;
             }
 
+            case Command::SetResourceUsage: {
+                SetResourceUsageCmd* cmd = mCommands.NextCommand<SetResourceUsageCmd>();
+                UsageBindingResource resource{
+                    .buffer = cmd->buffer.Get(),
+                    .texture = cmd->texture.Get(),
+                };
+                cmd->table->SetResourceUsage(&resource, cmd->usage);
+                break;
+            }
+
             default:
                 break;
         }
@@ -1702,6 +1712,16 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
             case Command::SetResourceTable: {
                 SetResourceTableCmd* cmd = mCommands.NextCommand<SetResourceTableCmd>();
                 state.descriptorSets.SetResourceTable(ToBackend(cmd->table.Get()));
+                break;
+            }
+
+            case Command::SetResourceUsage: {
+                SetResourceUsageCmd* cmd = mCommands.NextCommand<SetResourceUsageCmd>();
+                UsageBindingResource resource{
+                    .buffer = cmd->buffer.Get(),
+                    .texture = cmd->texture.Get(),
+                };
+                cmd->table->SetResourceUsage(&resource, cmd->usage);
                 break;
             }
 

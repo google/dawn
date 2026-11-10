@@ -29,6 +29,7 @@
 
 #include <utility>
 
+#include "dawn/native/ValidationUtils_autogen.h"
 #include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/MatchVariant.h"
 #include "src/dawn/common/Range.h"
@@ -53,6 +54,11 @@ Ref<T> GetRef(Variant&& variant) {
         return {};
     }
     return *p;
+}
+
+bool IsVisible(const TextureBase* texture, wgpu::ResourceTableUsage usage) {
+    return !texture->IsDestroyed() && texture->HasAccess() &&
+           usage == wgpu::ResourceTableUsage::ReadOnly;
 }
 
 MaybeValError ValidateBindingResource(const DeviceBase* device, const BindingResource* resource) {
@@ -93,6 +99,27 @@ MaybeValError ValidateBindingResource(const DeviceBase* device, const BindingRes
     return {};
 }
 
+MaybeValError ValidateUsageBindingResource(const DeviceBase* device,
+                                           const UsageBindingResource* resource) {
+    DAWN_INVALID_IF(resource->nextInChain != nullptr, "nextInChain is not null.");
+
+    uint32_t resourceCount =
+        uint32_t{resource->buffer != nullptr} + uint32_t{resource->texture != nullptr};
+    DAWN_INVALID_IF(resourceCount != 1,
+                    "%i resources are specified (when there must be exactly 1).", resourceCount);
+
+    if (resource->buffer != nullptr) {
+        // TODO(https://issues.chromium.org/473444515): Support buffers in FullResourceTable.
+        return DAWN_VALIDATION_ERROR("Buffers are not supported.");
+    } else if (TextureBase* texture = resource->texture) {
+        DAWN_TRY(device->ValidateObject(texture));
+    } else {
+        DAWN_UNREACHABLE();
+    }
+
+    return {};
+}
+
 }  // anonymous namespace
 
 MaybeValError ValidateResourceTableDescriptor(const DeviceBase* device,
@@ -104,6 +131,17 @@ MaybeValError ValidateResourceTableDescriptor(const DeviceBase* device,
                     wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable);
 
     DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain is not nullptr.");
+
+    return {};
+}
+
+MaybeValError ValidateSetResourceUsage(const DeviceBase* device,
+                                       const ResourceTableBase* table,
+                                       const UsageBindingResource* resource,
+                                       wgpu::ResourceTableUsage usage) {
+    DAWN_TRY(device->ValidateObject(table));
+    DAWN_TRY(ValidateResourceTableUsage(usage));
+    DAWN_TRY(ValidateUsageBindingResource(device, resource));
 
     return {};
 }
@@ -294,6 +332,56 @@ wgpu::Status ResourceTableBase::APIRemove(uint32_t slotIn) {
 
 uint32_t ResourceTableBase::APIGetSize() const {
     return uint32_t{mAPISize};
+}
+
+void ResourceTableBase::APISetResourceUsage(const UsageBindingResource* resource,
+                                            wgpu::ResourceTableUsage usage) {
+    if (GetDevice()->ConsumedError(ValidateSetResourceUsage(GetDevice(), this, resource, usage),
+                                   "validating %s.SetResourceUsage(%p, %s)", this, resource,
+                                   usage)) {
+        return;
+    }
+
+    SetResourceUsage(resource, usage);
+}
+
+void ResourceTableBase::SetResourceUsage(const UsageBindingResource* resource,
+                                         wgpu::ResourceTableUsage usage) {
+    DAWN_CHECK(resource->buffer == nullptr);
+    TextureBase* texture = resource->texture;
+    DAWN_ASSERT(texture != nullptr);
+    if (IsDestroyed() || texture->IsDestroyed()) {
+        return;
+    }
+
+    auto iter = mTextureState.find(texture);
+
+    // Special-case ReadOnly to not track textures that have no slots since it is the default
+    // state. This avoids keeping around references to textures that may never be put in the
+    // resource table.
+    if (usage == wgpu::ResourceTableUsage::ReadOnly) {
+        if (iter == mTextureState.end()) {
+            return;
+        }
+        if (iter->second.slots.empty()) {
+            texture->RemoveResourceTableUse(this);
+            mTextureState.erase(iter);
+            return;
+        }
+    }
+
+    // Track textures with non-default usage even if they are not currently in the resource
+    // table, so that their usage state is remembered if they are inserted later.
+    if (iter == mTextureState.end()) {
+        iter = mTextureState.emplace(texture, TextureState{}).first;
+        texture->AddResourceTableUse(this);
+    }
+
+    TextureState& textureState = iter->second;
+    if (textureState.usage != usage) {
+        textureState.usage = usage;
+        OnTextureStateChange(texture);
+    }
 }
 
 // static
@@ -494,14 +582,18 @@ void ResourceTableBase::SetEntry(ResourceTableSlot slot, const BindingResource* 
         if (currView != nullptr) {
             // Remove from mTextureState
             TextureBase* currTexture = currView->GetTexture();
-            auto& slots = mTextureState[currTexture].slots;
-            [[maybe_unused]] const bool erased = slots.erase(slot);
+            TextureState& textureState = mTextureState[currTexture];
+            [[maybe_unused]] const bool erased = textureState.slots.erase(slot);
             DAWN_ASSERT(erased);
-            // If it's the last slot, remove the entry
-            if (slots.empty()) {
-                mTextureState.erase(currTexture);
-                // Also remove the mapping of texture to this table
-                currTexture->RemoveResourceTableUse(this);
+            // If it's the last slot, stop tracking dirty state for this texture, and remove it
+            // from mTextureState if it has default usage (ReadOnly). Otherwise, keep the
+            // mTextureState entry so its non-default usage is remembered if it is added back to
+            // the table.
+            if (textureState.slots.empty()) {
+                if (textureState.usage == wgpu::ResourceTableUsage::ReadOnly) {
+                    currTexture->RemoveResourceTableUse(this);
+                    mTextureState.erase(currTexture);
+                }
                 mDirtyStateTextures.erase(currTexture);
             }
         }
@@ -522,9 +614,16 @@ void ResourceTableBase::SetEntry(ResourceTableSlot slot, const BindingResource* 
         auto [iter, added] = mTextureState.try_emplace(inputTexture);
         TextureState& textureState = iter->second;
         if (added) {
-            textureState.visible = !inputTexture->IsDestroyed() && inputTexture->HasAccess();
             // Add the mapping to this table on the texture
             inputTexture->AddResourceTableUse(this);
+        }
+        // If inputTexture is being (re-)added to its first slot, we must update visibility and mark
+        // it dirty to ensure its state is not stale. Note that we don't do this 'if (added)'
+        // because a texture state may exist for a texture if its usage was not ReadOnly either
+        // because SetResourceUsage was called before, or because this texture was removed then
+        // re-added again.
+        if (textureState.slots.empty()) {
+            textureState.visible = IsVisible(inputTexture, textureState.usage);
             // Make it dirty to ensure it gets transitioned
             mDirtyStateTextures.insert(inputTexture);
         }
@@ -582,7 +681,7 @@ ResourceTableBase::Updates ResourceTableBase::MakeResourcesVisibleExcept(
 
         // Update visible flag
         bool visible =
-            !texture->IsDestroyed() && texture->HasAccess() && !writableTextures.contains(texture);
+            IsVisible(texture, textureState.usage) && !writableTextures.contains(texture);
 
         if (visible) {
             updates.texturesToTransition.insert(texture);
@@ -613,9 +712,9 @@ ResourceTableBase::Updates ResourceTableBase::MakeResourcesVisibleExcept(
     // We also make sure to add them to texturesDirtyAfterUpdate so that if they're not writable
     // next call, we unhide them.
     for (TextureBase* texture : writableTextures) {
-        if (mTextureState.contains(texture)) {
-            // We may be recomputing visibility unnecessarily, but it will be possible to optimize,
-            // and it will get more complex once we support resource state.
+        auto iter = mTextureState.find(texture);
+        if (iter != mTextureState.end() && !iter->second.slots.empty()) {
+            // We may be recomputing visibility unnecessarily, but it will be possible to optimize.
             HandleDirtyTexture(texture);
             updates.texturesDirtyAfterUpdate.insert(texture);
         }
@@ -685,8 +784,11 @@ void ResourceTableBase::MarkStateDirty(ResourceTableSlot slot) {
 }
 
 void ResourceTableBase::OnTextureStateChange(TextureBase* texture) {
-    DAWN_ASSERT(mTextureState.contains(texture));
-    mDirtyStateTextures.insert(texture);
+    auto iter = mTextureState.find(texture);
+    DAWN_ASSERT(iter != mTextureState.end());
+    if (!iter->second.slots.empty()) {
+        mDirtyStateTextures.insert(texture);
+    }
 }
 
 void ResourceTableBase::OnTextureDestroyed(TextureBase* texture) {

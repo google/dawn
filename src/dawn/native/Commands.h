@@ -89,6 +89,7 @@ enum class Command : uint32_t {
     SetIndexBuffer,
     SetVertexBuffer,
     SetResourceTable,
+    SetResourceUsage,
     WriteBuffer,
     WriteTimestamp,
 };
@@ -452,6 +453,16 @@ struct SetResourceTableCmd {
     ~SetResourceTableCmd();
 
     Ref<ResourceTableBase> table;
+};
+
+struct SetResourceUsageCmd {
+    SetResourceUsageCmd();
+    ~SetResourceUsageCmd();
+
+    Ref<ResourceTableBase> table;
+    Ref<BufferBase> buffer;
+    Ref<TextureBase> texture;
+    wgpu::ResourceTableUsage usage;
 };
 
 struct WriteBufferCmd {

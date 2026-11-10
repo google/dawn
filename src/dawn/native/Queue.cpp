@@ -550,6 +550,9 @@ MaybeValError QueueBase::ValidateSubmit(Span<CommandBufferBase* const> commands,
         for (const QuerySetBase* querySet : usages.usedQuerySets) {
             DAWN_TRY(querySet->ValidateCanUseInSubmitNow());
         }
+        for (const ResourceTableBase* resourceTable : usages.topLevelResourceTables) {
+            DAWN_TRY(resourceTable->ValidateCanUseInSubmitNow());
+        }
     }
 
     return {};

@@ -324,8 +324,8 @@ class DawnTestBase {
     explicit DawnTestBase(const AdapterTestParam& param);
     virtual ~DawnTestBase();
 
-    void SetUp();
-    void TearDown();
+    virtual void SetUp();
+    virtual void TearDown();
 
     bool IsD3D11() const;
     bool IsD3D12() const;
@@ -955,19 +955,19 @@ class DawnTestBase {
     } while (0)
 #define EXPECT_DEPRECATION_WARNING(statement) EXPECT_DEPRECATION_WARNINGS(statement, 1)
 
-template <typename Params = AdapterTestParam>
-class DawnTestWithParams : public DawnTestBase, public ::testing::TestWithParam<Params> {
+template <typename Params = AdapterTestParam, typename TestBase = DawnTestBase>
+class DawnTestWithParams : public TestBase, public ::testing::TestWithParam<Params> {
   protected:
     DawnTestWithParams();
     ~DawnTestWithParams() override = default;
 
-    void SetUp() override { DawnTestBase::SetUp(); }
+    void SetUp() override { TestBase::SetUp(); }
 
-    void TearDown() override { DawnTestBase::TearDown(); }
+    void TearDown() override { TestBase::TearDown(); }
 };
 
-template <typename Params>
-DawnTestWithParams<Params>::DawnTestWithParams() : DawnTestBase(this->GetParam()) {}
+template <typename Params, typename TestBase>
+DawnTestWithParams<Params, TestBase>::DawnTestWithParams() : TestBase(this->GetParam()) {}
 
 using DawnTest = DawnTestWithParams<>;
 

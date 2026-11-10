@@ -638,6 +638,15 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                     RecordWriteBuffer(commandContext, mCommands.NextCommand<WriteBufferCmd>()));
                 break;
             }
+            case Command::SetResourceUsage: {
+                SetResourceUsageCmd* cmd = mCommands.NextCommand<SetResourceUsageCmd>();
+                UsageBindingResource resource{
+                    .buffer = cmd->buffer.Get(),
+                    .texture = cmd->texture.Get(),
+                };
+                cmd->table->SetResourceUsage(&resource, cmd->usage);
+                break;
+            }
             default: {
                 DAWN_UNREACHABLE();
             }
@@ -850,6 +859,16 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
             case Command::SetResourceTable: {
                 return DAWN_UNRECOVERABLE_ERROR(
                     "ResourceTable currently not supported in Compute passes on Metal.");
+            }
+
+            case Command::SetResourceUsage: {
+                SetResourceUsageCmd* cmd = mCommands.NextCommand<SetResourceUsageCmd>();
+                UsageBindingResource resource{
+                    .buffer = cmd->buffer.Get(),
+                    .texture = cmd->texture.Get(),
+                };
+                cmd->table->SetResourceUsage(&resource, cmd->usage);
+                break;
             }
 
             default: {

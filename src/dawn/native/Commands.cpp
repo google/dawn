@@ -239,6 +239,11 @@ void FreeCommands(CommandIterator* commands) {
                 cmd->~SetResourceTableCmd();
                 break;
             }
+            case Command::SetResourceUsage: {
+                SetResourceUsageCmd* cmd = commands->NextCommand<SetResourceUsageCmd>();
+                cmd->~SetResourceUsageCmd();
+                break;
+            }
             case Command::WriteBuffer: {
                 WriteBufferCmd* write = commands->NextCommand<WriteBufferCmd>();
                 commands->NextData<uint8_t>(write->size);
@@ -417,6 +422,11 @@ void SkipCommand(CommandIterator* commands, Command type) {
             break;
         }
 
+        case Command::SetResourceUsage: {
+            commands->NextCommand<SetResourceUsageCmd>();
+            break;
+        }
+
         case Command::WriteBuffer: {
             auto cmd = commands->NextCommand<WriteBufferCmd>();
             commands->NextData<uint8_t>(cmd->size);
@@ -541,6 +551,9 @@ SetVertexBufferCmd::~SetVertexBufferCmd() = default;
 
 SetResourceTableCmd::SetResourceTableCmd() = default;
 SetResourceTableCmd::~SetResourceTableCmd() = default;
+
+SetResourceUsageCmd::SetResourceUsageCmd() = default;
+SetResourceUsageCmd::~SetResourceUsageCmd() = default;
 
 WriteBufferCmd::WriteBufferCmd() = default;
 WriteBufferCmd::~WriteBufferCmd() = default;
