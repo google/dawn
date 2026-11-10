@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <limits>
 #include <optional>
 #include <string>
 #include <utility>
@@ -1045,6 +1046,13 @@ struct Decoder {
         if (count >= internal_limits::kMaxArrayElementCount) {
             err_ << "array count (" << count << ") must be less than "
                  << internal_limits::kMaxArrayElementCount << "\n";
+            return mod_out_.Types().invalid();
+        }
+
+        uint64_t size = element->Size();
+        size *= count;
+        if (size >= std::numeric_limits<uint32_t>::max()) {
+            err_ << "array size (" << size << ") exceeds 32 bits";
             return mod_out_.Types().invalid();
         }
 
