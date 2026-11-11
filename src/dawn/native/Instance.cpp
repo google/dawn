@@ -209,6 +209,33 @@ static constexpr auto kSupportedFeatures = std::array{
     wgpu::InstanceFeatureName::MultipleDevicesPerAdapter,
 };
 
+namespace {
+
+consteval size_t GetStableSupportedFeaturesCount() {
+    size_t count = 0;
+    for (wgpu::InstanceFeatureName feature : kSupportedFeatures) {
+        if (IsInstanceFeatureStable(feature)) {
+            count++;
+        }
+    }
+    return count;
+}
+
+consteval auto MakeStableSupportedFeatures() {
+    std::array<wgpu::InstanceFeatureName, GetStableSupportedFeaturesCount()> result{};
+    size_t i = 0;
+    for (wgpu::InstanceFeatureName feature : kSupportedFeatures) {
+        if (IsInstanceFeatureStable(feature)) {
+            result[i++] = feature;
+        }
+    }
+    return result;
+}
+
+static constexpr auto kStableSupportedFeatures = MakeStableSupportedFeatures();
+
+}  // namespace
+
 bool APIHasInstanceFeature(wgpu::InstanceFeatureName feature) {
     return std::find(kSupportedFeatures.begin(), kSupportedFeatures.end(), feature) !=
            kSupportedFeatures.end();
@@ -216,6 +243,15 @@ bool APIHasInstanceFeature(wgpu::InstanceFeatureName feature) {
 
 void APIGetInstanceFeatures(SupportedInstanceFeatures* features) {
     features->features = kSupportedFeatures;
+}
+
+bool APIStableHasInstanceFeature(wgpu::InstanceFeatureName feature) {
+    return std::find(kStableSupportedFeatures.begin(), kStableSupportedFeatures.end(), feature) !=
+           kStableSupportedFeatures.end();
+}
+
+void APIStableGetInstanceFeatures(SupportedInstanceFeatures* features) {
+    features->features = kStableSupportedFeatures;
 }
 
 void APISupportedInstanceFeaturesFreeMembers(WGPUSupportedInstanceFeatures) {
@@ -229,6 +265,27 @@ InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor) {
         return nullptr;
     }
     return ReturnToAPI(result.AcquireSuccess());
+}
+
+InstanceBase* APIStableCreateInstance(const InstanceDescriptor* descriptor) {
+    InstanceDescriptor localDesc = descriptor != nullptr ? *descriptor : InstanceDescriptor{};
+    if (localDesc.nextInChain != nullptr) {
+        dawn::ErrorLog()
+            << "Chained structs on InstanceDescriptor are not allowed for a stable instance.";
+        return nullptr;
+    }
+
+    // Enable the no-op webview_instance toggle on stable instances so Dawn can gate temporary
+    // workarounds or reverts for WebView application regressions without affecting regular
+    // instances, and disable experimental and unsafe APIs.
+    static constexpr auto kEnabledToggles = std::array{"webview_instance"};
+    static constexpr auto kDisabledToggles =
+        std::array{"allow_experimental_apis", "allow_unsafe_apis"};
+    DawnTogglesDescriptor togglesDesc = {};
+    togglesDesc.enabledToggles = kEnabledToggles;
+    togglesDesc.disabledToggles = kDisabledToggles;
+    localDesc.nextInChain = &togglesDesc;
+    return APICreateInstance(&localDesc);
 }
 
 // InstanceBase

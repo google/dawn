@@ -44,6 +44,31 @@ namespace {
 using ::testing::HasSubstr;
 using ::testing::Not;
 
+WGPUStringView ToStringView(const char* s) {
+    return {s, WGPU_STRLEN};
+}
+
+// The free functions of the stable table, resolved through GetStableProcAddress.
+struct StableProcs {
+    WGPUProcCreateInstance createInstance;
+    WGPUProcGetInstanceFeatures getInstanceFeatures;
+    WGPUProcHasInstanceFeature hasInstanceFeature;
+    WGPUProcGetProcAddress getProcAddress;
+};
+
+StableProcs GetStableProcs() {
+    StableProcs procs;
+    procs.createInstance = reinterpret_cast<WGPUProcCreateInstance>(
+        native::GetStableProcAddress(ToStringView("wgpuCreateInstance")));
+    procs.getInstanceFeatures = reinterpret_cast<WGPUProcGetInstanceFeatures>(
+        native::GetStableProcAddress(ToStringView("wgpuGetInstanceFeatures")));
+    procs.hasInstanceFeature = reinterpret_cast<WGPUProcHasInstanceFeature>(
+        native::GetStableProcAddress(ToStringView("wgpuHasInstanceFeature")));
+    procs.getProcAddress = reinterpret_cast<WGPUProcGetProcAddress>(
+        native::GetStableProcAddress(ToStringView("wgpuGetProcAddress")));
+    return procs;
+}
+
 // The ValidationTest instance, adapter, and device are created with allow_experimental_apis (and
 // allow_unsafe_apis) disabled. A regular instance, adapter, and device are created next to them
 // for comparison.
@@ -53,6 +78,12 @@ class StableInstanceValidationTest : public ValidationTest {
         ValidationTest::SetUp();
         // The tests check dawn::native objects (toggles, feature info, error objects) directly.
         DAWN_SKIP_TEST_IF(UsesWire());
+
+        mStableProcs = GetStableProcs();
+        ASSERT_NE(mStableProcs.createInstance, nullptr);
+        ASSERT_NE(mStableProcs.getInstanceFeatures, nullptr);
+        ASSERT_NE(mStableProcs.hasInstanceFeature, nullptr);
+        ASSERT_NE(mStableProcs.getProcAddress, nullptr);
 
         mRegularInstance = wgpu::CreateInstance();
         ASSERT_NE(mRegularInstance, nullptr);
@@ -76,18 +107,10 @@ class StableInstanceValidationTest : public ValidationTest {
     bool AllowUnsafeAPIs() override { return false; }
     bool AllowExperimentalAPIs() override { return false; }
 
-    static wgpu::Instance CreateStableModeInstance(
-        const wgpu::InstanceDescriptor* baseDesc = nullptr) {
-        static const char* const kDisabled = "allow_experimental_apis";
-        wgpu::DawnTogglesDescriptor togglesDesc = {};
-        togglesDesc.disabledToggleCount = 1;
-        togglesDesc.disabledToggles = &kDisabled;
-
-        wgpu::InstanceDescriptor localDesc =
-            baseDesc != nullptr ? *baseDesc : wgpu::InstanceDescriptor{};
-        togglesDesc.nextInChain = localDesc.nextInChain;
-        localDesc.nextInChain = &togglesDesc;
-        return wgpu::CreateInstance(&localDesc);
+    // Creates an instance through the stable wgpuCreateInstance entry point.
+    wgpu::Instance CreateStableInstance(const wgpu::InstanceDescriptor* desc = nullptr) const {
+        return wgpu::Instance::Acquire(
+            mStableProcs.createInstance(reinterpret_cast<const WGPUInstanceDescriptor*>(desc)));
     }
 
     static wgpu::Adapter GetNullAdapter(const wgpu::Instance& targetInstance) {
@@ -142,6 +165,7 @@ class StableInstanceValidationTest : public ValidationTest {
         return result;
     }
 
+    StableProcs mStableProcs;
     wgpu::Instance mRegularInstance;
     wgpu::Adapter mRegularAdapter;
     wgpu::Device mRegularDevice;
@@ -173,31 +197,113 @@ TEST_F(StableInstanceValidationTest, FeatureLabels) {
               native::FeatureInfo::FeatureStability::Experimental);
 }
 
-// A regular instance keeps allow_experimental_apis enabled by default and allow_unsafe_apis
-// disabled, whereas an instance with allow_experimental_apis disabled propagates that state to its
-// adapters and devices.
+// A regular instance keeps allow_experimental_apis enabled by default, allow_unsafe_apis
+// disabled, and webview_instance unset, whereas a stable instance disables
+// allow_experimental_apis and allow_unsafe_apis, enables webview_instance, and propagates that
+// state to its adapters and devices.
 TEST_F(StableInstanceValidationTest, ToggleDefaults) {
-    // The stable-mode instance has both allow_experimental_apis and allow_unsafe_apis disabled.
-    EXPECT_FALSE(HasToggle(instance, "allow_experimental_apis"));
-    EXPECT_FALSE(HasToggle(instance, "allow_unsafe_apis"));
+    // A stable instance disables allow_experimental_apis and allow_unsafe_apis and enables
+    // webview_instance.
+    wgpu::Instance stable = CreateStableInstance();
+    ASSERT_NE(stable, nullptr);
+    EXPECT_FALSE(HasToggle(stable, "allow_experimental_apis"));
+    EXPECT_FALSE(HasToggle(stable, "allow_unsafe_apis"));
+    EXPECT_TRUE(HasToggle(stable, "webview_instance"));
 
-    // A regular instance enables allow_experimental_apis by default and keeps allow_unsafe_apis
-    // disabled.
+    // A regular instance enables allow_experimental_apis by default, keeps allow_unsafe_apis
+    // disabled, and leaves webview_instance unset.
     EXPECT_TRUE(HasToggle(mRegularInstance, "allow_experimental_apis"));
     EXPECT_FALSE(HasToggle(mRegularInstance, "allow_unsafe_apis"));
+    EXPECT_FALSE(HasToggle(mRegularInstance, "webview_instance"));
 
-    // Adapters and devices inherit the disabled toggle state from the stable-mode instance.
-    EXPECT_FALSE(HasToggle(adapter, "allow_experimental_apis"));
-    EXPECT_FALSE(HasToggle(adapter, "allow_unsafe_apis"));
-    EXPECT_FALSE(HasToggle(device, "allow_experimental_apis"));
-    EXPECT_FALSE(HasToggle(device, "allow_unsafe_apis"));
+    // Adapters and devices inherit the toggle state from the stable instance.
+    wgpu::Adapter stableAdapter = GetNullAdapter(stable);
+    ASSERT_NE(stableAdapter, nullptr);
+    EXPECT_FALSE(HasToggle(stableAdapter, "allow_experimental_apis"));
+    EXPECT_FALSE(HasToggle(stableAdapter, "allow_unsafe_apis"));
+    EXPECT_TRUE(HasToggle(stableAdapter, "webview_instance"));
+
+    wgpu::Device stableDevice;
+    wgpu::DeviceDescriptor deviceDesc = {};
+    EXPECT_EQ(RequestDeviceMessage(stableAdapter, &deviceDesc, &stableDevice), "");
+    ASSERT_NE(stableDevice, nullptr);
+    EXPECT_FALSE(HasToggle(stableDevice, "allow_experimental_apis"));
+    EXPECT_FALSE(HasToggle(stableDevice, "allow_unsafe_apis"));
+    EXPECT_TRUE(HasToggle(stableDevice, "webview_instance"));
+}
+
+// Regular instances can opt in to webview_instance for testing temporary workarounds, whereas
+// stable instances reject attempts to disable webview_instance at instance, adapter, or device
+// creation.
+TEST_F(StableInstanceValidationTest, WebViewInstanceToggle) {
+    const char* kWebViewToggle = "webview_instance";
+
+    // Opting in via DawnTogglesDescriptor on a regular instance propagates webview_instance to
+    // adapters and devices.
+    {
+        wgpu::DawnTogglesDescriptor togglesDesc = {};
+        togglesDesc.enabledToggleCount = 1;
+        togglesDesc.enabledToggles = &kWebViewToggle;
+
+        wgpu::InstanceDescriptor instanceDesc = {};
+        instanceDesc.nextInChain = &togglesDesc;
+        wgpu::Instance optInInstance = wgpu::CreateInstance(&instanceDesc);
+        ASSERT_NE(optInInstance, nullptr);
+        EXPECT_TRUE(HasToggle(optInInstance, "webview_instance"));
+
+        wgpu::Adapter optInAdapter = GetNullAdapter(optInInstance);
+        ASSERT_NE(optInAdapter, nullptr);
+        EXPECT_TRUE(HasToggle(optInAdapter, "webview_instance"));
+
+        wgpu::Device optInDevice;
+        wgpu::DeviceDescriptor deviceDesc = {};
+        EXPECT_EQ(RequestDeviceMessage(optInAdapter, &deviceDesc, &optInDevice), "");
+        ASSERT_NE(optInDevice, nullptr);
+        EXPECT_TRUE(HasToggle(optInDevice, "webview_instance"));
+    }
+
+    // Attempting to disable webview_instance on a stable instance, adapter, or device is rejected.
+    {
+        wgpu::DawnTogglesDescriptor disableDesc = {};
+        disableDesc.disabledToggleCount = 1;
+        disableDesc.disabledToggles = &kWebViewToggle;
+
+        wgpu::InstanceDescriptor instanceDesc = {};
+        instanceDesc.nextInChain = &disableDesc;
+        EXPECT_EQ(CreateStableInstance(&instanceDesc), nullptr);
+
+        wgpu::Instance stable = CreateStableInstance();
+        ASSERT_NE(stable, nullptr);
+
+        wgpu::RequestAdapterOptions adapterOpts = {};
+        adapterOpts.backendType = wgpu::BackendType::Null;
+        adapterOpts.nextInChain = &disableDesc;
+        wgpu::Adapter rejectedAdapter;
+        bool called = false;
+        stable.RequestAdapter(
+            &adapterOpts, wgpu::CallbackMode::AllowSpontaneous,
+            [&](wgpu::RequestAdapterStatus status, wgpu::Adapter found, wgpu::StringView) {
+                called = true;
+                if (status == wgpu::RequestAdapterStatus::Success) {
+                    rejectedAdapter = std::move(found);
+                }
+            });
+        EXPECT_TRUE(called);
+        EXPECT_EQ(rejectedAdapter, nullptr);
+
+        wgpu::Adapter stableAdapter = GetNullAdapter(stable);
+        ASSERT_NE(stableAdapter, nullptr);
+        wgpu::DeviceDescriptor deviceDesc = {};
+        deviceDesc.nextInChain = &disableDesc;
+        EXPECT_NE(RequestDeviceMessage(stableAdapter, &deviceDesc), "");
+    }
 }
 
 // Instance features: unsupported values are rejected everywhere; Experimental ones
 // (ShaderSourceSPIRV) are rejected when allow_experimental_apis is disabled.
 TEST_F(StableInstanceValidationTest, RequiredInstanceFeatures) {
     // Stable instance features (TimedWaitAny, MultipleDevicesPerAdapter) are accepted on both
-    // stable-mode and regular instances.
+    // stable and regular instances.
     {
         wgpu::InstanceFeatureName features[] = {
             wgpu::InstanceFeatureName::TimedWaitAny,
@@ -205,27 +311,27 @@ TEST_F(StableInstanceValidationTest, RequiredInstanceFeatures) {
         wgpu::InstanceDescriptor desc = {};
         desc.requiredFeatureCount = 2;
         desc.requiredFeatures = features;
-        EXPECT_NE(CreateStableModeInstance(&desc), nullptr);
+        EXPECT_NE(CreateStableInstance(&desc), nullptr);
         EXPECT_NE(wgpu::CreateInstance(&desc), nullptr);
     }
     // ShaderSourceSPIRV is a supported Dawn instance feature that is not part of the stable ABI,
-    // so stable-mode instances reject it while regular instances accept it.
+    // so stable instances reject it while regular instances accept it.
     {
         wgpu::InstanceFeatureName unstableFeature = wgpu::InstanceFeatureName::ShaderSourceSPIRV;
         wgpu::InstanceDescriptor desc = {};
         desc.requiredFeatureCount = 1;
         desc.requiredFeatures = &unstableFeature;
-        EXPECT_EQ(CreateStableModeInstance(&desc), nullptr);
+        EXPECT_EQ(CreateStableInstance(&desc), nullptr);
         EXPECT_NE(wgpu::CreateInstance(&desc), nullptr);
     }
-    // Unknown instance feature enum values are rejected on both stable-mode and regular instances.
+    // Unknown instance feature enum values are rejected on both stable and regular instances.
     {
         wgpu::InstanceFeatureName invalidFeature =
             static_cast<wgpu::InstanceFeatureName>(0x7FFFFFF0);
         wgpu::InstanceDescriptor desc = {};
         desc.requiredFeatureCount = 1;
         desc.requiredFeatures = &invalidFeature;
-        EXPECT_EQ(CreateStableModeInstance(&desc), nullptr);
+        EXPECT_EQ(CreateStableInstance(&desc), nullptr);
         EXPECT_EQ(wgpu::CreateInstance(&desc), nullptr);
     }
 }
@@ -274,6 +380,7 @@ TEST_F(StableInstanceValidationTest, RegularInstanceWithExperimentalAPIsDisabled
     wgpu::Instance disabledInstance = wgpu::CreateInstance(&desc);
     ASSERT_NE(disabledInstance, nullptr);
     EXPECT_FALSE(HasToggle(disabledInstance, "allow_experimental_apis"));
+    EXPECT_FALSE(HasToggle(disabledInstance, "webview_instance"));
 
     wgpu::Adapter disabledAdapter = GetNullAdapter(disabledInstance);
     ASSERT_NE(disabledAdapter, nullptr);
@@ -440,7 +547,7 @@ TEST_F(StableInstanceValidationTest, InstanceLimitsAndSurfaceCapabilitiesChainsR
         limits.nextInChain = &dummyChain;
         wgpu::InstanceDescriptor desc = {};
         desc.requiredLimits = &limits;
-        EXPECT_EQ(CreateStableModeInstance(&desc), nullptr);
+        EXPECT_EQ(CreateStableInstance(&desc), nullptr);
         EXPECT_EQ(wgpu::CreateInstance(&desc), nullptr);
     }
 
@@ -466,6 +573,152 @@ TEST_F(StableInstanceValidationTest, InstanceLimitsAndSurfaceCapabilitiesChainsR
     caps.nextInChain = &badOutChain;
     ASSERT_DEVICE_ERROR(EXPECT_EQ(surface.GetCapabilities(adapter, &caps), wgpu::Status::Error),
                         HasSubstr("Unexpected chained struct"));
+}
+
+// The stable proc map is a strict subset of the full proc map and resolves every entry to the
+// same function as the full table (except for the stable free-function overrides).
+TEST_F(StableInstanceValidationTest, StableProcMapIsSubsetOfProcMap) {
+    std::vector<std::string_view> stable = native::GetStableProcMapNamesForTesting();
+    EXPECT_FALSE(stable.empty());
+
+    for (std::string_view name : stable) {
+        WGPUStringView sv = {name.data(), name.size()};
+        WGPUProc stableProc = native::GetStableProcAddress(sv);
+        EXPECT_NE(stableProc, nullptr) << name;
+        EXPECT_NE(native::GetProcs().getProcAddress(sv), nullptr) << name;
+        EXPECT_EQ(stableProc, mStableProcs.getProcAddress(sv)) << name;
+    }
+    // Dawn-only entry points exist in the full table but not in the stable one.
+    WGPUStringView dawnOnly = {"wgpuDeviceCreateErrorBuffer", WGPU_STRLEN};
+    EXPECT_NE(native::GetProcs().getProcAddress(dawnOnly), nullptr);
+    EXPECT_EQ(native::GetStableProcAddress(dawnOnly), nullptr);
+}
+
+// Entry points in Dawn's stable C header resolve through GetStableProcAddress; Dawn-only entry
+// points, including Dawn-only methods on otherwise stable objects, resolve to nullptr.
+TEST_F(StableInstanceValidationTest, StableProcMapContents) {
+    const char* kStable[] = {
+        "wgpuInstanceRequestAdapter", "wgpuAdapterRequestDevice",
+        "wgpuDeviceCreateBuffer",     "wgpuQueueSubmit",
+        "wgpuAdapterInfoFreeMembers",
+    };
+    for (const char* name : kStable) {
+        EXPECT_NE(native::GetStableProcAddress(ToStringView(name)), nullptr) << name;
+    }
+
+    const char* kExperimental[] = {
+        "wgpuDeviceTick",
+        "wgpuDeviceCreateErrorBuffer",
+    };
+    for (const char* name : kExperimental) {
+        EXPECT_NE(native::GetProcs().getProcAddress(ToStringView(name)), nullptr) << name;
+        EXPECT_EQ(native::GetStableProcAddress(ToStringView(name)), nullptr) << name;
+        EXPECT_EQ(mStableProcs.getProcAddress(ToStringView(name)), nullptr) << name;
+    }
+
+    // Invalid inputs and length-delimited string views.
+    EXPECT_EQ(native::GetStableProcAddress({nullptr, WGPU_STRLEN}), nullptr);
+    EXPECT_EQ(native::GetStableProcAddress({nullptr, 0}), nullptr);
+    EXPECT_EQ(native::GetStableProcAddress(ToStringView("")), nullptr);
+    EXPECT_EQ(native::GetStableProcAddress(ToStringView("wgpuDeviceDoSomething")), nullptr);
+    EXPECT_EQ(native::GetStableProcAddress(ToStringView("zzzzzzz")), nullptr);
+    EXPECT_EQ(native::GetStableProcAddress({"wgpuQueueSubmitExtraString", 15}),
+              reinterpret_cast<WGPUProc>(native::GetProcs().queueSubmit));
+    EXPECT_EQ(native::GetStableProcAddress({"wgpuQueueSubmit", 14}), nullptr);
+}
+
+// wgpuGetProcAddress resolves to the stable resolver itself, and wgpuCreateInstance /
+// wgpuGetInstanceFeatures / wgpuHasInstanceFeature resolve to their stable variants.
+TEST_F(StableInstanceValidationTest, StableFreeStandingFunctions) {
+    WGPUProc stableGetProcAddress =
+        native::GetStableProcAddress(ToStringView("wgpuGetProcAddress"));
+    ASSERT_NE(stableGetProcAddress, nullptr);
+    EXPECT_NE(stableGetProcAddress, reinterpret_cast<WGPUProc>(native::GetProcs().getProcAddress));
+    EXPECT_EQ(mStableProcs.getProcAddress(ToStringView("wgpuGetProcAddress")),
+              stableGetProcAddress);
+
+    EXPECT_NE(reinterpret_cast<WGPUProc>(mStableProcs.createInstance),
+              reinterpret_cast<WGPUProc>(native::GetProcs().createInstance));
+    EXPECT_NE(reinterpret_cast<WGPUProc>(mStableProcs.getInstanceFeatures),
+              reinterpret_cast<WGPUProc>(native::GetProcs().getInstanceFeatures));
+    EXPECT_NE(reinterpret_cast<WGPUProc>(mStableProcs.hasInstanceFeature),
+              reinterpret_cast<WGPUProc>(native::GetProcs().hasInstanceFeature));
+}
+
+// Stable instance feature queries only report features that are part of Dawn's stable ABI:
+// ShaderSourceSPIRV is hidden while TimedWaitAny and MultipleDevicesPerAdapter are reported.
+TEST_F(StableInstanceValidationTest, StableInstanceFeatureQueries) {
+    EXPECT_TRUE(mStableProcs.hasInstanceFeature(WGPUInstanceFeatureName_TimedWaitAny));
+    EXPECT_TRUE(mStableProcs.hasInstanceFeature(WGPUInstanceFeatureName_MultipleDevicesPerAdapter));
+    EXPECT_FALSE(mStableProcs.hasInstanceFeature(WGPUInstanceFeatureName_ShaderSourceSPIRV));
+    EXPECT_TRUE(native::GetProcs().hasInstanceFeature(WGPUInstanceFeatureName_ShaderSourceSPIRV));
+
+    WGPUSupportedInstanceFeatures stableFeatures = {};
+    mStableProcs.getInstanceFeatures(&stableFeatures);
+    WGPUSupportedInstanceFeatures allFeatures = {};
+    native::GetProcs().getInstanceFeatures(&allFeatures);
+    EXPECT_LT(stableFeatures.featureCount, allFeatures.featureCount);
+
+    std::span<const WGPUInstanceFeatureName> stableSpan(stableFeatures.features,
+                                                        stableFeatures.featureCount);
+    for (WGPUInstanceFeatureName f : stableSpan) {
+        EXPECT_NE(f, WGPUInstanceFeatureName_ShaderSourceSPIRV);
+        EXPECT_TRUE(mStableProcs.hasInstanceFeature(f));
+        EXPECT_TRUE(native::GetProcs().hasInstanceFeature(f));
+    }
+    for (WGPUInstanceFeatureName f : std::span(allFeatures.features, allFeatures.featureCount)) {
+        const bool inStableList = std::ranges::find(stableSpan, f) != stableSpan.end();
+        EXPECT_EQ(inStableList, static_cast<bool>(mStableProcs.hasInstanceFeature(f)));
+    }
+    native::GetProcs().supportedInstanceFeaturesFreeMembers(stableFeatures);
+    native::GetProcs().supportedInstanceFeaturesFreeMembers(allFeatures);
+}
+
+// A stable instance rejects external chained structs on InstanceDescriptor (including
+// DawnTogglesDescriptor, DawnInstanceDescriptor, and DawnWGSLBlocklist), while a regular instance
+// continues accepting them.
+TEST_F(StableInstanceValidationTest, CreateStableInstanceRejectsChainedStructs) {
+    const char* kToggles[] = {"allow_experimental_apis", "allow_unsafe_apis"};
+    wgpu::DawnTogglesDescriptor togglesDesc = {};
+    togglesDesc.enabledToggleCount = 2;
+    togglesDesc.enabledToggles = kToggles;
+
+    // Chaining DawnTogglesDescriptor on InstanceDescriptor is rejected by CreateStableInstance.
+    {
+        wgpu::InstanceDescriptor desc = {};
+        desc.nextInChain = &togglesDesc;
+        EXPECT_EQ(CreateStableInstance(&desc), nullptr);
+
+        wgpu::Instance regular = wgpu::CreateInstance(&desc);
+        ASSERT_NE(regular, nullptr);
+        EXPECT_TRUE(HasToggle(regular, "allow_experimental_apis"));
+        EXPECT_TRUE(HasToggle(regular, "allow_unsafe_apis"));
+    }
+    // Chaining an empty DawnTogglesDescriptor on InstanceDescriptor is also rejected by
+    // CreateStableInstance.
+    {
+        wgpu::DawnTogglesDescriptor emptyTogglesDesc = {};
+        wgpu::InstanceDescriptor desc = {};
+        desc.nextInChain = &emptyTogglesDesc;
+        EXPECT_EQ(CreateStableInstance(&desc), nullptr);
+        EXPECT_NE(wgpu::CreateInstance(&desc), nullptr);
+    }
+    // Chaining other Dawn-specific structs (DawnInstanceDescriptor, DawnWGSLBlocklist) on
+    // InstanceDescriptor is also rejected by CreateStableInstance.
+    {
+        native::DawnInstanceDescriptor dawnDesc = {};
+        wgpu::InstanceDescriptor desc = {};
+        desc.nextInChain = &dawnDesc;
+        EXPECT_EQ(CreateStableInstance(&desc), nullptr);
+        EXPECT_NE(wgpu::CreateInstance(&desc), nullptr);
+    }
+    {
+        wgpu::DawnWGSLBlocklist blocklist = {};
+        wgpu::InstanceDescriptor desc = {};
+        desc.nextInChain = &blocklist;
+        EXPECT_EQ(CreateStableInstance(&desc), nullptr);
+        EXPECT_NE(wgpu::CreateInstance(&desc), nullptr);
+    }
 }
 
 using RegularInstanceValidationTest = ValidationTest;

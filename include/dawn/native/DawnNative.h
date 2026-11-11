@@ -247,6 +247,15 @@ DAWN_NATIVE_EXPORT bool IsTextureSubresourceInitialized(
     uint32_t layerCount,
     WGPUTextureAspect aspect = WGPUTextureAspect_All);
 
+// Resolver restricted to Dawn's stable C ABI: it only returns entry points that are part of
+// Dawn's stable C header, resolves "wgpuGetProcAddress" to itself, filters instance feature
+// queries to stable features, and routes "wgpuCreateInstance" to create an instance with
+// allow_experimental_apis and allow_unsafe_apis disabled.
+DAWN_NATIVE_EXPORT WGPUProc GetStableProcAddress(WGPUStringView procName);
+
+// Backdoor to get the names in the stable ProcMap for testing.
+DAWN_NATIVE_EXPORT std::vector<std::string_view> GetStableProcMapNamesForTesting();
+
 DAWN_NATIVE_EXPORT bool DeviceTick(WGPUDevice device);
 
 DAWN_NATIVE_EXPORT bool InstanceProcessEvents(WGPUInstance instance);

@@ -240,6 +240,18 @@ bool IsTextureSubresourceInitialized(WGPUTexture texture,
     return textureBase->IsSubresourceContentInitialized(range);
 }
 
+// Generated in ProcTable.cpp for entry points in Dawn's stable C ABI.
+WGPUProc NativeStableGetProcAddress(WGPUStringView procName);
+std::vector<std::string_view> GetStableProcMapNamesForTestingAutogen();
+
+WGPUProc GetStableProcAddress(WGPUStringView procName) {
+    return NativeStableGetProcAddress(procName);
+}
+
+std::vector<std::string_view> GetStableProcMapNamesForTesting() {
+    return GetStableProcMapNamesForTestingAutogen();
+}
+
 DAWN_NATIVE_EXPORT bool DeviceTick(WGPUDevice device) {
     return FromAPI(device)->APITick();
 }

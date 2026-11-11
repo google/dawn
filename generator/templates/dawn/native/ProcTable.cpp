@@ -116,6 +116,69 @@ namespace {{native_namespace}} {
         return it != sProcMap->end() ? it->second : nullptr;
     }
 
+    WGPUProc NativeStableGetProcAddress(WGPUStringView cProcName);
+
+    //* Stable-ABI overrides for free functions whose behavior differs on a stable instance:
+    //* wgpuCreateInstance routes to APIStableCreateInstance, the instance feature queries only
+    //* report features that are part of the stable C ABI, and wgpuGetProcAddress routes to
+    //* NativeStableGetProcAddress.
+    {% set stable_function_overrides = [
+        "create instance",
+        "get instance features",
+        "has instance feature",
+        "get proc address",
+    ] %}
+    {% for function in by_category["function"] if function.name.get() in stable_function_overrides and function.name.get() != "get proc address" %}
+        {% set suffix = "Stable" + function.name.CamelCase() %}
+        {{as_annotated_cType(function.returns)}} Native{{suffix}}(
+            {%- for arg in function.arguments -%}
+                {%- if not loop.first %}, {% endif -%}
+                {{as_annotated_cType(arg)}}
+            {%- endfor -%}
+        ) {
+            {{convert_arguments_and_call(function, "API" + suffix)}}
+        }
+    {% endfor %}
+
+    namespace {
+
+        const absl::flat_hash_map<std::string_view, {{c_prefix}}Proc>& GetStableProcMap() {
+            //* The stable proc map only contains entry points that are part of Dawn's stable C ABI
+            //* (together with their parent object or structure), substituting the stable overrides
+            //* above for free functions.
+            static const absl::NoDestructor<absl::flat_hash_map<std::string_view, {{c_prefix}}Proc>> sStableProcMap(
+                absl::flat_hash_map<std::string_view, {{c_prefix}}Proc>{
+                    {% for (type, method) in c_methods_sorted_by_name if is_stable(method, type) %}
+                        {% set Stable = "Stable" if not type and method.name.get() in stable_function_overrides else "" %}
+                        {"{{as_cMethod(type.name, method.name)}}", reinterpret_cast<{{c_prefix}}Proc>(Native{{Stable}}{{as_MethodSuffix(type.name, method.name)}})},
+                    {% endfor %}
+                });
+            return *sStableProcMap;
+        }
+
+    }  // anonymous namespace
+
+    WGPUProc NativeStableGetProcAddress(WGPUStringView cProcName) {
+        if (cProcName.data == nullptr) {
+            return nullptr;
+        }
+
+        const auto& stableProcMap = GetStableProcMap();
+        std::string_view procName(cProcName.data, cProcName.length != WGPU_STRLEN ? cProcName.length : strlen(cProcName.data));
+        auto it = stableProcMap.find(procName);
+        return it != stableProcMap.end() ? it->second : nullptr;
+    }
+
+    std::vector<std::string_view> GetStableProcMapNamesForTestingAutogen() {
+        const auto& stableProcMap = GetStableProcMap();
+        std::vector<std::string_view> result;
+        result.reserve(stableProcMap.size());
+        for (const auto& entry : stableProcMap) {
+            result.push_back(entry.first);
+        }
+        return result;
+    }
+
     constexpr {{Prefix}}ProcTable MakeProcTable() {
         {{Prefix}}ProcTable procs = {};
         std::ranges::copy(dawn::kDawnVersion, procs.version);

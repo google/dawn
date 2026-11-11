@@ -73,6 +73,14 @@ bool APIHasInstanceFeature(wgpu::InstanceFeatureName feature);
 void APIGetInstanceFeatures(SupportedInstanceFeatures* features);
 InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor);
 
+// Stable-ABI variants served by GetStableProcAddress under the standard names. The instance
+// feature queries only report features in Dawn's stable ABI, and APIStableCreateInstance creates
+// an instance with allow_experimental_apis and allow_unsafe_apis disabled that rejects external
+// chained structs on InstanceDescriptor.
+bool APIStableHasInstanceFeature(wgpu::InstanceFeatureName feature);
+void APIStableGetInstanceFeatures(SupportedInstanceFeatures* features);
+InstanceBase* APIStableCreateInstance(const InstanceDescriptor* descriptor);
+
 // This is called InstanceBase for consistency across the frontend, even if the backends don't
 // specialize this class.
 class InstanceBase final : public ErrorSink, public RefCounted {

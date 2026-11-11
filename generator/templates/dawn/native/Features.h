@@ -51,6 +51,18 @@ struct EnumCount<Feature> {
     static constexpr uint32_t value = {{counter.value}};
 };
 
+// Whether an instance feature is part of Dawn's stable ABI (generated from dawn_version.json).
+constexpr bool IsInstanceFeatureStable(wgpu::InstanceFeatureName feature) {
+  switch (feature) {
+    {% for enum in types["instance feature name"].values if enum.valid %}
+      case wgpu::InstanceFeatureName::{{as_cppEnum(enum.name)}}:
+        return {{ "true" if is_stable(enum) else "false" }};
+    {% endfor %}
+    default:
+      return false;
+  }
+}
+
 }  // namespace dawn::native
 
 #endif  // {{DIR}}_FEATURES_AUTOGEN_H_

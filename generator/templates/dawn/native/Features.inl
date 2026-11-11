@@ -90,15 +90,4 @@ static constexpr ityp::array<Feature, FeatureInfo, kEnumCount<Feature>> Initiali
 
 const ityp::array<Feature, FeatureInfo, kEnumCount<Feature>> kFeatureNameAndInfoList = InitializeFeatureEnumAndInfoList();
 
-bool IsInstanceFeatureStable(wgpu::InstanceFeatureName feature) {
-  switch (feature) {
-    {% for enum in types["instance feature name"].values if enum.valid %}
-      case wgpu::InstanceFeatureName::{{as_cppEnum(enum.name)}}:
-        return {{ "true" if is_stable(enum) else "false" }};
-    {% endfor %}
-    default:
-      return false;
-  }
-}
-
 }

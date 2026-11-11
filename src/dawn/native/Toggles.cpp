@@ -184,6 +184,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "whose C header definitions and ABI are not stable yet and may change across Dawn versions. "
       "When disabled, only APIs with a stable C header and ABI are exposed.",
       "https://crbug.com/577079442", ToggleStage::Instance}},
+    {Toggle::WebViewInstance,
+     {"webview_instance",
+      "Enabled on stable instances for Android WebView. Has no effect by default; used to "
+      "gate short-term workarounds or reverts for application regressions.",
+      "https://crbug.com/578760566", ToggleStage::Instance}},
     {Toggle::FlushBeforeClientWaitSync,
      {"flush_before_client_wait_sync",
       "Call glFlush before glClientWaitSync to work around bugs in the latter",
