@@ -200,7 +200,6 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
         ExecutionSerial availableAfter = kBeginningOfGPUTime;
         bool metadataDirty = false;
         bool resourceDirty = false;  // resourceDirty implies metadataDirty.
-        bool visible = false;        // Applies to textures
     };
     ityp::vector<ResourceTableSlot, SlotState> mSlots;
 
