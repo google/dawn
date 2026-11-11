@@ -191,8 +191,9 @@ MaybeError PhysicalDevice::InitializeImpl() {
         mDeviceId = GetDeviceIdFromRender(mName);
     }
 
-    mDriverDescription = std::string("OpenGL version ") +
-                         reinterpret_cast<const char*>(mFunctions.GetString(GL_VERSION));
+    mDriverDescription = absl::StrFormat(
+        "OpenGL version %s on %s", reinterpret_cast<const char*>(mFunctions.GetString(GL_VERSION)),
+        reinterpret_cast<const char*>(mFunctions.GetString(GL_RENDERER)));
 
     if (mName.find("SwiftShader") != std::string::npos) {
         mAdapterType = wgpu::AdapterType::CPU;
