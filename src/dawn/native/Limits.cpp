@@ -356,6 +356,18 @@ LimitsForShaderModuleParseRequest LimitsForShaderModuleParseRequest::Create(cons
 #undef DAWN_INTERNAL_LIMITS_MEMBER_ASSIGNMENT
 
 void NormalizeLimits(CombinedLimits* limits) {
+    // Reserve kLimitU32Undefined / kLimitU64Undefined for unrequested requiredLimits only.
+#define X(Scope, Class, limitName, ...)                                       \
+    if constexpr (detail::LimitClass::Class == detail::LimitClass::Maximum) { \
+        if (detail::IsLimitUndefined(limits->Scope.limitName)) {              \
+            limits->Scope.limitName -= 1;                                     \
+        }                                                                     \
+    } else {                                                                  \
+        DAWN_ASSERT(!detail::IsLimitUndefined(limits->Scope.limitName));      \
+    }
+    LIMITS(X)
+#undef X
+
     // Enforce internal Dawn constants for some limits to ensure they don't go over fixed limits
     // in Dawn's internal code.
     limits->v1.maxVertexBufferArrayStride =

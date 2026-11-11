@@ -578,6 +578,26 @@ TEST(Limits, NormalizeLimits) {
         EXPECT_EQ(limits.v1.maxBufferSize, reportedMaxBufferSize);
         EXPECT_EQ(limits.v1.maxUniformBufferBindingSize, reportedMaxBufferSize);
     }
+
+    // Clamp Maximum limits below kLimitU32Undefined / kLimitU64Undefined so adapters never expose
+    // the undefined sentinel values.
+    {
+        CombinedLimits limits = defaults;
+        limits.v1.maxComputeWorkgroupsPerDimension = wgpu::kLimitU32Undefined;
+        limits.v1.maxComputeWorkgroupSizeX = wgpu::kLimitU32Undefined;
+        limits.v1.maxBufferSize = wgpu::kLimitU64Undefined;
+        limits.v1.maxStorageBufferBindingSize = wgpu::kLimitU64Undefined;
+        limits.v1.maxUniformBufferBindingSize = wgpu::kLimitU64Undefined;
+
+        NormalizeLimits(&limits);
+
+        EXPECT_EQ(limits.v1.maxComputeWorkgroupsPerDimension, wgpu::kLimitU32Undefined - 1);
+        EXPECT_EQ(limits.v1.maxComputeWorkgroupSizeX, wgpu::kLimitU32Undefined - 1);
+        EXPECT_EQ(limits.v1.maxBufferSize, wgpu::kLimitU64Undefined - 1);
+        EXPECT_EQ(limits.v1.maxStorageBufferBindingSize,
+                  AlignDown(wgpu::kLimitU64Undefined - 1, 4));
+        EXPECT_EQ(limits.v1.maxUniformBufferBindingSize, wgpu::kLimitU64Undefined - 1);
+    }
 }
 
 // Test |FixupDeviceLimits| works fix up the limits

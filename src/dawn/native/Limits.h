@@ -168,7 +168,8 @@ DAWN_SERIALIZABLE(struct,
 //   1. Enforce internal Dawn constants for some limits to ensure they don't go over fixed-size
 //      arrays in Dawn's internal code;
 //   2. Additional enforcement for dependent limits, e.g. maxStorageBufferBindingSize and
-//      maxUniformBufferBindingSize must not be larger than maxBufferSize.
+//      maxUniformBufferBindingSize must not be larger than maxBufferSize;
+//   3. Clamp Maximum limits below the kLimitU32Undefined and kLimitU64Undefined sentinels.
 void NormalizeLimits(CombinedLimits* limits);
 
 // Validate that |outputLimits| has a valid chain and fill it with |supportedFeatures| and
