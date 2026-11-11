@@ -126,6 +126,7 @@ class InstanceBase final : public ErrorSink, public RefCounted {
     }
 
     const TogglesState& GetTogglesState() const;
+    std::vector<const char*> GetTogglesUsed() const;
     const absl::flat_hash_set<tint::wgsl::LanguageFeature>& GetAllowedWGSLLanguageFeatures() const;
 
     // Used to query the details of a toggle. Return nullptr if toggleName is not a valid name

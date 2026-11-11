@@ -62,6 +62,7 @@ void DawnMockTest::SetUp() {
     Ref<DeviceBase::DeviceLostEvent> lostEvent = DeviceBase::DeviceLostEvent::Create(nativeDesc);
 
     mDeviceToggles.SetForTesting(Toggle::AllowUnsafeAPIs, true, true);
+    mDeviceToggles.SetForTesting(Toggle::AllowExperimentalAPIs, true, true);
     auto deviceMock = AcquireRef(
         new NiceMock<DeviceMock>(adapters[0].Get(), unpackedDesc, mDeviceToggles, lostEvent.Get()));
     mDeviceMock = deviceMock.Get();

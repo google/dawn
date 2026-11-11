@@ -101,7 +101,7 @@ TEST_F(InstanceToggleTest, InstanceTogglesSet) {
 
         // Create an instance with default toggles, where AllowUnsafeAPIs is disabled.
         instance = std::make_unique<native::Instance>();
-        validateInstanceToggles(instance.get(), {}, {"allow_unsafe_apis"});
+        validateInstanceToggles(instance.get(), {"allow_experimental_apis"}, {"allow_unsafe_apis"});
     }
 
     // Create instance with empty toggles descriptor
@@ -118,7 +118,7 @@ TEST_F(InstanceToggleTest, InstanceTogglesSet) {
         // Create an instance with default toggles, where AllowUnsafeAPIs is disabled and
         // DisallowUnsafeAPIs is enabled.
         instance = std::make_unique<native::Instance>(&instanceDesc);
-        validateInstanceToggles(instance.get(), {}, {"allow_unsafe_apis"});
+        validateInstanceToggles(instance.get(), {"allow_experimental_apis"}, {"allow_unsafe_apis"});
     }
 
     // Create instance with AllowUnsafeAPIs explicitly enabled in toggles descriptor
@@ -136,7 +136,8 @@ TEST_F(InstanceToggleTest, InstanceTogglesSet) {
 
         // Create an instance with AllowUnsafeAPIs explicitly enabled.
         instance = std::make_unique<native::Instance>(&instanceDesc);
-        validateInstanceToggles(instance.get(), {allowUnsafeApisToggle}, {});
+        validateInstanceToggles(instance.get(), {allowUnsafeApisToggle, "allow_experimental_apis"},
+                                {});
     }
 
     // Create instance with AllowUnsafeAPIs explicitly disabled in toggles descriptor
@@ -154,7 +155,8 @@ TEST_F(InstanceToggleTest, InstanceTogglesSet) {
 
         // Create an instance with AllowUnsafeAPIs explicitly disabled.
         instance = std::make_unique<native::Instance>(&instanceDesc);
-        validateInstanceToggles(instance.get(), {}, {allowUnsafeApisToggle});
+        validateInstanceToggles(instance.get(), {"allow_experimental_apis"},
+                                {allowUnsafeApisToggle});
     }
 }
 
@@ -290,11 +292,14 @@ TEST_F(AdapterToggleTest, AdapterTogglesSetAndInheritToDevice) {
 
     const char* allowUnsafeApisToggle = "allow_unsafe_apis";
     const char* useDXCToggle = "use_dxc";
+    // allow_experimental_apis is enabled by default on a regular instance and inherited.
+    const char* allowExperimentalApisToggle = "allow_experimental_apis";
 
     // Create adapter with no toggles descriptor
     {
         // The created adapter should inherit disabled AllowUnsafeAPIs toggle from instance.
-        CreateAdapterAndValidateToggles(nullptr, {}, {allowUnsafeApisToggle});
+        CreateAdapterAndValidateToggles(nullptr, {allowExperimentalApisToggle},
+                                        {allowUnsafeApisToggle});
     }
 
     // Create adapter with empty toggles descriptor
@@ -302,7 +307,8 @@ TEST_F(AdapterToggleTest, AdapterTogglesSetAndInheritToDevice) {
         wgpu::DawnTogglesDescriptor adapterTogglesDesc = {};
 
         // The created adapter should inherit disabled AllowUnsafeAPIs toggle from instance.
-        CreateAdapterAndValidateToggles(&adapterTogglesDesc, {}, {allowUnsafeApisToggle});
+        CreateAdapterAndValidateToggles(&adapterTogglesDesc, {allowExperimentalApisToggle},
+                                        {allowUnsafeApisToggle});
     }
 
     // Create adapter with UseDXC enabled in toggles descriptor
@@ -313,7 +319,8 @@ TEST_F(AdapterToggleTest, AdapterTogglesSetAndInheritToDevice) {
 
         // The created adapter should enable required UseDXC toggle and inherit disabled
         // AllowUnsafeAPIs toggle from instance.
-        CreateAdapterAndValidateToggles(&adapterTogglesDesc, {useDXCToggle},
+        CreateAdapterAndValidateToggles(&adapterTogglesDesc,
+                                        {useDXCToggle, allowExperimentalApisToggle},
                                         {allowUnsafeApisToggle});
     }
 
@@ -324,7 +331,8 @@ TEST_F(AdapterToggleTest, AdapterTogglesSetAndInheritToDevice) {
         adapterTogglesDesc.enabledToggles = &allowUnsafeApisToggle;
 
         // The created adapter should enable overridden AllowUnsafeAPIs toggle.
-        CreateAdapterAndValidateToggles(&adapterTogglesDesc, {allowUnsafeApisToggle}, {});
+        CreateAdapterAndValidateToggles(&adapterTogglesDesc,
+                                        {allowUnsafeApisToggle, allowExperimentalApisToggle}, {});
     }
 
     // Create adapter with UseDXC enabled and explicitly overriding AllowUnsafeAPIs in toggles
@@ -336,8 +344,9 @@ TEST_F(AdapterToggleTest, AdapterTogglesSetAndInheritToDevice) {
         adapterTogglesDesc.enabledToggles = enableAdapterToggles.data();
 
         // The created adapter should enable required UseDXC and overridden AllowUnsafeAPIs toggle.
-        CreateAdapterAndValidateToggles(&adapterTogglesDesc, {useDXCToggle, allowUnsafeApisToggle},
-                                        {});
+        CreateAdapterAndValidateToggles(
+            &adapterTogglesDesc, {useDXCToggle, allowUnsafeApisToggle, allowExperimentalApisToggle},
+            {});
     }
 }
 

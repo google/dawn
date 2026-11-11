@@ -68,6 +68,7 @@ enum class Toggle {
     DisableRobustness,
     MetalEnableVertexPulling,
     AllowUnsafeAPIs,
+    AllowExperimentalAPIs,
     FlushBeforeClientWaitSync,
     UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
     EmitHLSLDebugSymbols,
@@ -294,7 +295,7 @@ class TogglesState {
     // inherited to all later stage as forced.
     void ForceSet(Toggle toggle, bool enabled);
 
-    // Set a toggle of any stage for testing propose. Return *this to allow method chaining
+    // Set a toggle of any stage for testing purpose. Return *this to allow method chaining
     // manner.
     TogglesState& SetForTesting(Toggle toggle, bool enabled, bool forced);
 

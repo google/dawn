@@ -198,6 +198,7 @@ set(end2end_sources
     "end2end/ShaderPrintTests.cpp"
     "end2end/ShaderTests.cpp"
     "end2end/ShaderValidationTests.cpp"
+    "end2end/StableInstanceTests.cpp"
     "end2end/StorageTextureTests.cpp"
     "end2end/SubgroupMatrixTests.cpp"
     "end2end/SubgroupsTests.cpp"

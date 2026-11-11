@@ -256,6 +256,13 @@ ResultOrError<Ref<InstanceBase>> InstanceBase::Create(const InstanceDescriptor* 
     // By default disable the AllowUnsafeAPIs instance toggle, it will be inherited to adapters
     // and devices created by this instance if not overriden.
     instanceToggles.Default(Toggle::AllowUnsafeAPIs, false);
+    // AllowExperimentalAPIs decides whether features and chained structs outside the stable ABI
+    // are exposed, and is inherited by adapters and devices the same way. The end state is false
+    // everywhere (stable-by-default); this stays true until in-tree callers that chain Dawn-only
+    // structs or request Dawn-only features opt in explicitly, so that flipping it is a one-line,
+    // separately rolled change.
+    // TODO(crbug.com/577079442): Flip to false once Chromium passes allow_experimental_apis.
+    instanceToggles.Default(Toggle::AllowExperimentalAPIs, true);
 
     Ref<InstanceBase> instance = AcquireRef(new InstanceBase(instanceToggles));
     DAWN_TRY(instance->Initialize(unpacked));
@@ -310,6 +317,9 @@ MaybeError InstanceBase::Initialize(const UnpackedPtr<InstanceDescriptor>& descr
     }
 #endif
 
+    // Created first so that DeleteThis() can run after any failure below.
+    mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
+
     // Initialize the platform to the default for now.
     mDefaultPlatform = std::make_unique<dawn::platform::Platform>();
     SetPlatform(mDefaultPlatform.get());
@@ -340,6 +350,13 @@ MaybeError InstanceBase::Initialize(const UnpackedPtr<InstanceDescriptor>& descr
     }
     mRuntimeSearchPaths.push_back("");
 
+    for (wgpu::InstanceFeatureName feature : descriptor->requiredFeatures) {
+        DAWN_INVALID_IF(!APIHasInstanceFeature(feature),
+                        "Required instance feature %s is not supported.", feature);
+        DAWN_INVALID_IF(
+            !mToggles.IsEnabled(Toggle::AllowExperimentalAPIs) && !IsInstanceFeatureStable(feature),
+            "Required instance feature %s is guarded by toggle allow_experimental_apis.", feature);
+    }
     mInstanceFeatures = {descriptor->requiredFeatures.begin(), descriptor->requiredFeatures.end()};
 
     if (descriptor->requiredLimits != nullptr) {
@@ -349,7 +366,6 @@ MaybeError InstanceBase::Initialize(const UnpackedPtr<InstanceDescriptor>& descr
     }
     DAWN_TRY(ValidateLimits(mLimits));
 
-    mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
     GatherWGSLFeatures(descriptor.Get<DawnWGSLBlocklist>());
 
     return {};
@@ -420,6 +436,10 @@ Ref<AdapterBase> InstanceBase::CreateAdapter(Ref<PhysicalDeviceBase> physicalDev
 
 const TogglesState& InstanceBase::GetTogglesState() const {
     return mToggles;
+}
+
+std::vector<const char*> InstanceBase::GetTogglesUsed() const {
+    return mToggles.GetEnabledToggleNames();
 }
 
 const ToggleInfo* InstanceBase::GetToggleInfo(const char* toggleName) {

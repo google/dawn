@@ -44,6 +44,9 @@ extern const ityp::array<Feature, FeatureInfo, kEnumCount<Feature>> kFeatureName
 wgpu::FeatureName ToCppAPI(Feature feature);
 Feature FromCppAPI(wgpu::FeatureName feature);
 
+// Whether an instance feature is part of Dawn's stable ABI (generated from dawn_version.json).
+bool IsInstanceFeatureStable(wgpu::InstanceFeatureName feature);
+
 // A wrapper of the bitset to store if an feature is enabled or not. This wrapper provides the
 // convenience to convert the enums of enum class Feature to the indices of a bitset.
 using FeaturesBitSet = ityp::bitset<Feature, kEnumCount<Feature>>;

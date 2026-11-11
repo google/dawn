@@ -193,8 +193,15 @@ FeatureValidationResult PhysicalDeviceBase::ValidateFeatureSupportedWithToggles(
     }
 
     const FeatureInfo* featureInfo = GetFeatureInfo(feature);
-    // Experimental features are guarded by the AllowUnsafeAPIs toggle.
-    if (featureInfo->featureState == FeatureInfo::FeatureState::Experimental) {
+    // Experimental (ABI-unstable) features are guarded by the AllowExperimentalAPIs toggle.
+    if (featureInfo->featureStability == FeatureInfo::FeatureStability::Experimental) {
+        if (!toggles.IsEnabled(Toggle::AllowExperimentalAPIs)) {
+            return FeatureValidationResult(absl::StrFormat(
+                "Feature %s is guarded by toggle allow_experimental_apis.", featureInfo->name));
+        }
+    }
+    // Unsafe features are guarded by the AllowUnsafeAPIs toggle.
+    if (featureInfo->featureSafety == FeatureInfo::FeatureSafety::Unsafe) {
         // AllowUnsafeAPIs toggle is by default disabled if not explicitly enabled.
         if (!toggles.IsEnabled(Toggle::AllowUnsafeAPIs)) {
             return FeatureValidationResult(absl::StrFormat(

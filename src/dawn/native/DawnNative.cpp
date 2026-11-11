@@ -54,6 +54,11 @@ const DawnProcTable& GetProcsAutogen();
 const DawnProcTable& GetProcs() {
     return GetProcsAutogen();
 }
+
+std::vector<const char*> GetTogglesUsed(const wgpu::Instance& instance) {
+    return FromAPI(instance.Get())->GetTogglesUsed();
+}
+
 std::vector<const char*> GetTogglesUsed(const wgpu::Adapter& adapter) {
     return FromAPI(adapter.Get())->GetTogglesUsed();
 }

@@ -54,18 +54,27 @@ class FeatureTests : public Test {
               return dawn::native::APICreateInstance(&instanceDesc);
           }()),
           mPhysicalDevice(native::null::PhysicalDevice::Create(mInstanceBase.Get())),
-          mUnsafePhysicalDevice(native::null::PhysicalDevice::Create(mInstanceBase.Get())),
           mAdapterBase(mInstanceBase.Get(),
                        mPhysicalDevice.Get(),
                        wgpu::FeatureLevel::Core,
-                       native::TogglesState(native::ToggleStage::Adapter),
+                       native::TogglesState(native::ToggleStage::Adapter)
+                           .SetForTesting(native::Toggle::AllowExperimentalAPIs, true, false),
                        wgpu::PowerPreference::Undefined),
           mUnsafeAdapterBase(mInstanceBase.Get(),
-                             mUnsafePhysicalDevice.Get(),
+                             mPhysicalDevice.Get(),
                              wgpu::FeatureLevel::Core,
                              native::TogglesState(native::ToggleStage::Adapter)
-                                 .SetForTesting(native::Toggle::AllowUnsafeAPIs, true, true),
-                             wgpu::PowerPreference::Undefined) {}
+                                 .SetForTesting(native::Toggle::AllowUnsafeAPIs, true, true)
+                                 .SetForTesting(native::Toggle::AllowExperimentalAPIs, true, true),
+                             wgpu::PowerPreference::Undefined),
+          mStableOnlyAdapterBase(
+              mInstanceBase.Get(),
+              mPhysicalDevice.Get(),
+              wgpu::FeatureLevel::Core,
+              native::TogglesState(native::ToggleStage::Adapter)
+                  .SetForTesting(native::Toggle::AllowUnsafeAPIs, false, false)
+                  .SetForTesting(native::Toggle::AllowExperimentalAPIs, false, false),
+              wgpu::PowerPreference::Undefined) {}
 
     std::vector<wgpu::FeatureName> GetAllFeatureNames() {
         std::vector<wgpu::FeatureName> allFeatureNames(kTotalFeaturesCount);
@@ -79,14 +88,16 @@ class FeatureTests : public Test {
         static_cast<size_t>(native::kEnumCount<native::Feature>);
 
   protected:
-    // By default DisallowUnsafeAPIs is enabled in this instance.
+    // By default AllowUnsafeAPIs is disabled in this instance.
     Ref<dawn::native::InstanceBase> mInstanceBase;
     Ref<native::null::PhysicalDevice> mPhysicalDevice;
-    Ref<native::null::PhysicalDevice> mUnsafePhysicalDevice;
-    // The adapter that inherit toggles states from the instance, also have DisallowUnsafeAPIs
-    // enabled.
+    // Adapters configured with different toggle states on the same physical device:
+    // - mAdapterBase: AllowUnsafeAPIs disabled, AllowExperimentalAPIs enabled.
+    // - mUnsafeAdapterBase: both AllowUnsafeAPIs and AllowExperimentalAPIs enabled.
+    // - mStableOnlyAdapterBase: both AllowUnsafeAPIs and AllowExperimentalAPIs disabled.
     native::AdapterBase mAdapterBase;
     native::AdapterBase mUnsafeAdapterBase;
+    native::AdapterBase mStableOnlyAdapterBase;
 };
 
 // Test the creation of a device will fail if the requested feature is not supported on the
@@ -98,10 +109,10 @@ TEST_F(FeatureTests, AdapterWithRequiredFeatureDisabled) {
 
         std::vector<wgpu::FeatureName> featureNamesWithoutOne = kAllFeatureNames;
         featureNamesWithoutOne.erase(featureNamesWithoutOne.begin() + i);
+        mPhysicalDevice->SetSupportedFeaturesForTesting(featureNamesWithoutOne);
 
         // Test that the default adapter validates features as expected.
         {
-            mPhysicalDevice->SetSupportedFeaturesForTesting(featureNamesWithoutOne);
             native::Adapter adapterWithoutFeature(&mAdapterBase);
 
             wgpu::DeviceDescriptor deviceDescriptor;
@@ -116,8 +127,22 @@ TEST_F(FeatureTests, AdapterWithRequiredFeatureDisabled) {
 
         // Test that an adapter with AllowUnsafeApis enabled validates features as expected.
         {
-            mUnsafePhysicalDevice->SetSupportedFeaturesForTesting(featureNamesWithoutOne);
             native::Adapter adapterWithoutFeature(&mUnsafeAdapterBase);
+
+            wgpu::DeviceDescriptor deviceDescriptor;
+            wgpu::FeatureName featureName = native::ToCppAPI(notSupportedFeature);
+            deviceDescriptor.requiredFeatures = &featureName;
+            deviceDescriptor.requiredFeatureCount = 1;
+
+            WGPUDevice deviceWithFeature = adapterWithoutFeature.CreateDevice(
+                reinterpret_cast<const WGPUDeviceDescriptor*>(&deviceDescriptor));
+            ASSERT_EQ(nullptr, deviceWithFeature);
+        }
+
+        // Test that an adapter with both AllowUnsafeAPIs and AllowExperimentalAPIs disabled
+        // validates features as expected.
+        {
+            native::Adapter adapterWithoutFeature(&mStableOnlyAdapterBase);
 
             wgpu::DeviceDescriptor deviceDescriptor;
             wgpu::FeatureName featureName = native::ToCppAPI(notSupportedFeature);
@@ -131,17 +156,23 @@ TEST_F(FeatureTests, AdapterWithRequiredFeatureDisabled) {
     }
 }
 
-bool IsExperimental(wgpu::FeatureName feature) {
-    return native::kFeatureNameAndInfoList[native::FromCppAPI(feature)].featureState ==
-           native::FeatureInfo::FeatureState::Experimental;
+bool IsUnsafe(wgpu::FeatureName feature) {
+    return native::kFeatureNameAndInfoList[native::FromCppAPI(feature)].featureSafety ==
+           native::FeatureInfo::FeatureSafety::Unsafe;
 }
 
-// Test creating device requiring a supported feature can succeed (with DisallowUnsafeApis adapter
-// toggle disabled for experimental features), and Device.GetEnabledFeatures() can return the names
-// of the enabled features correctly.
+bool IsExperimental(wgpu::FeatureName feature) {
+    return native::kFeatureNameAndInfoList[native::FromCppAPI(feature)].featureStability ==
+           native::FeatureInfo::FeatureStability::Experimental;
+}
+
+// Test creating device requiring a supported feature can succeed (with AllowUnsafeAPIs enabled on
+// the adapter for unsafe features), and Device.APIGetFeatures() can return the enabled features
+// correctly.
 TEST_F(FeatureTests, RequireAndGetEnabledFeatures) {
     native::Adapter adapter(&mAdapterBase);
     native::Adapter unsafeAdapterAllow(&mUnsafeAdapterBase);
+    native::Adapter stableOnlyAdapter(&mStableOnlyAdapterBase);
 
     for (size_t i = 0; i < kTotalFeaturesCount; ++i) {
         native::Feature feature = static_cast<native::Feature>(i);
@@ -153,8 +184,10 @@ TEST_F(FeatureTests, RequireAndGetEnabledFeatures) {
 
         std::vector<wgpu::FeatureName> features(requiredFeaturesSet.cbegin(),
                                                 requiredFeaturesSet.cend());
+        bool requiredUnsafeFeature = false;
         bool requiredExperimentalFeature = false;
         for (auto requiredFeature : features) {
+            requiredUnsafeFeature = requiredUnsafeFeature || IsUnsafe(requiredFeature);
             requiredExperimentalFeature =
                 requiredExperimentalFeature || IsExperimental(requiredFeature);
         }
@@ -187,12 +220,12 @@ TEST_F(FeatureTests, RequireAndGetEnabledFeatures) {
             native::DeviceBase* deviceBase = native::FromAPI(adapter.CreateDevice(
                 reinterpret_cast<const WGPUDeviceDescriptor*>(&deviceDescriptor)));
 
-            // Creating a device with experimental feature requires the adapter enables
-            // AllowUnsafeAPIs or disables DisallowUnsafeApis, otherwise expect validation error.
-            if (requiredExperimentalFeature) {
+            // Creating a device with unsafe feature requires the adapter enables
+            // AllowUnsafeAPIs, otherwise expect validation error.
+            if (requiredUnsafeFeature) {
                 ASSERT_EQ(nullptr, deviceBase) << i;
             } else {
-                // Requiring stable features should succeed.
+                // Requiring safe features should succeed.
                 ASSERT_NE(nullptr, deviceBase);
                 ExpectDeviceHasRequiredFeatures(deviceBase);
                 deviceBase->APIRelease();
@@ -208,6 +241,21 @@ TEST_F(FeatureTests, RequireAndGetEnabledFeatures) {
             ASSERT_NE(nullptr, deviceBase);
             ExpectDeviceHasRequiredFeatures(deviceBase);
             deviceBase->APIRelease();
+        }
+
+        // Test with an adapter that disables both AllowUnsafeAPIs and AllowExperimentalAPIs:
+        // only Safe + Stable features succeed.
+        {
+            native::DeviceBase* deviceBase = native::FromAPI(stableOnlyAdapter.CreateDevice(
+                reinterpret_cast<const WGPUDeviceDescriptor*>(&deviceDescriptor)));
+
+            if (requiredUnsafeFeature || requiredExperimentalFeature) {
+                ASSERT_EQ(nullptr, deviceBase) << i;
+            } else {
+                ASSERT_NE(nullptr, deviceBase) << i;
+                ExpectDeviceHasRequiredFeatures(deviceBase);
+                deviceBase->APIRelease();
+            }
         }
     }
 }

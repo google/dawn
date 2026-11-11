@@ -178,6 +178,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Suppresses validation errors on API entry points or parameter combinations that aren't "
       "considered secure yet.",
       "http://crbug.com/1138528", ToggleStage::Instance}},
+    {Toggle::AllowExperimentalAPIs,
+     {"allow_experimental_apis",
+      "Allows using experimental APIs (such as features, instance features, and chained structs) "
+      "whose C header definitions and ABI are not stable yet and may change across Dawn versions. "
+      "When disabled, only APIs with a stable C header and ABI are exposed.",
+      "https://crbug.com/577079442", ToggleStage::Instance}},
     {Toggle::FlushBeforeClientWaitSync,
      {"flush_before_client_wait_sync",
       "Call glFlush before glClientWaitSync to work around bugs in the latter",

@@ -71,10 +71,15 @@ struct FeatureInfo {
     const char* name;
     const char* description;
     const char* url;
-    // The enum of feature state, could be stable or experimental. Using an experimental feature
-    // requires the AllowUnsafeAPIs toggle to be enabled.
-    enum class FeatureState { Stable = 0, Experimental };
-    FeatureState featureState;
+    // Whether the feature has exhaustive validation and security checks and can be used as a
+    // security boundary like in Web browsers. Using an Unsafe feature requires the AllowUnsafeAPIs
+    // toggle to be enabled.
+    enum class FeatureSafety { Safe = 0, Unsafe };
+    FeatureSafety featureSafety;
+    // Whether the feature's C header definition and ABI are stable. Using an Experimental feature
+    // requires the AllowExperimentalAPIs toggle to be enabled.
+    enum class FeatureStability { Stable = 0, Experimental };
+    FeatureStability featureStability;
 };
 
 // An adapter is an object that represent on possibility of creating devices in the system.
@@ -215,6 +220,9 @@ class DAWN_NATIVE_EXPORT Instance {
 
 // Backend-agnostic API for dawn_native
 DAWN_NATIVE_EXPORT const DawnProcTable& GetProcs();
+
+// Query the names of all the toggles that are enabled in instance
+DAWN_NATIVE_EXPORT std::vector<const char*> GetTogglesUsed(const wgpu::Instance& instance);
 
 // Query the names of all the toggles that are enabled in adapter
 DAWN_NATIVE_EXPORT std::vector<const char*> GetTogglesUsed(const wgpu::Adapter& adapter);

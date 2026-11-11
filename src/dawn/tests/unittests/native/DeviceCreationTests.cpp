@@ -199,8 +199,8 @@ TEST_F(DeviceCreationTest, CreateDeviceRequiringExperimentalFeatures) {
         Feature feature = static_cast<Feature>(i);
         wgpu::FeatureName featureName = ToCppAPI(feature);
 
-        // Only test experimental features.
-        if (kFeatureNameAndInfoList[feature].featureState == FeatureInfo::FeatureState::Stable) {
+        // Only test unsafe features.
+        if (kFeatureNameAndInfoList[feature].featureSafety == FeatureInfo::FeatureSafety::Safe) {
             continue;
         }
 
