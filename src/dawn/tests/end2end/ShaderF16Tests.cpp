@@ -25,7 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <string_view>
 #include <vector>
 
 #include "src/dawn/tests/DawnTest.h"
@@ -63,18 +62,7 @@ class ShaderF16Tests : public DawnTestWithParams<ShaderF16TestsParams> {
             return {};
         }
 
-        if (!IsD3D12()) {
-            mUseDxcEnabledOrNonD3D12 = true;
-        } else {
-            for (std::string_view enabledToggle : GetParam().forceEnabledWorkarounds) {
-                if (enabledToggle.starts_with("use_dxc")) {
-                    mUseDxcEnabledOrNonD3D12 = true;
-                    break;
-                }
-            }
-        }
-
-        if (GetParam().mRequireShaderF16Feature && mUseDxcEnabledOrNonD3D12) {
+        if (GetParam().mRequireShaderF16Feature) {
             return {wgpu::FeatureName::ShaderF16};
         }
 
@@ -82,11 +70,9 @@ class ShaderF16Tests : public DawnTestWithParams<ShaderF16TestsParams> {
     }
 
     bool IsShaderF16SupportedOnAdapter() const { return mIsShaderF16SupportedOnAdapter; }
-    bool UseDxcEnabledOrNonD3D12() const { return mUseDxcEnabledOrNonD3D12; }
 
   private:
     bool mIsShaderF16SupportedOnAdapter = false;
-    bool mUseDxcEnabledOrNonD3D12 = false;
 };
 
 // Test simple f16 arithmetic within shader with enable directive. The result should be as expect if
@@ -111,9 +97,7 @@ TEST_P(ShaderF16Tests, BasicShaderF16FeaturesTest) {
         // Required when creating device
         GetParam().mRequireShaderF16Feature &&
         // Adapter support the feature
-        IsShaderF16SupportedOnAdapter() &&
-        // Proper toggle, use_dxc if d3d12
-        UseDxcEnabledOrNonD3D12();
+        IsShaderF16SupportedOnAdapter();
     const bool deviceSupportShaderF16Feature = device.HasFeature(wgpu::FeatureName::ShaderF16);
     EXPECT_EQ(deviceSupportShaderF16Feature, shouldShaderF16FeatureSupportedByDevice);
 
