@@ -7,6 +7,7 @@
 /.gclient_previous_custom_vars
 /.gclient_previous_sync_commits
 /.gcs_entries
+/.reproxy_cache
 /bazel-*
 /build
 /buildtools
