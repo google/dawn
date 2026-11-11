@@ -28,6 +28,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_EVALUATOR_H_
 #define SRC_TINT_LANG_CORE_IR_EVALUATOR_H_
 
+#include <cstdint>
+
 #include "src/tint/lang/core/constant/eval.h"
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/ir/access.h"
@@ -41,6 +43,8 @@
 #include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/value.h"
+#include "src/tint/utils/containers/hashmap.h"
+#include "src/tint/utils/containers/vector.h"
 
 namespace tint::core::ir {
 class Builder;
@@ -59,7 +63,14 @@ class Evaluator {
     /// @returns the generated constant or a failure result.
     diag::Result<core::ir::Constant*> Evaluate(core::ir::Value* src);
 
-    using EvalResult = Result<const core::constant::Value*>;
+    enum class EvalFailure : uint8_t {
+        /// Evaluation encountered a diagnostic error (recorded in `diagnostics_`).
+        kError,
+        /// A dependency has not been evaluated yet and was pushed onto `EvalTasks`.
+        kNotEvaluated,
+    };
+    using EvalResult = Result<const core::constant::Value*, EvalFailure>;
+    using EvalTasks = Vector<core::ir::InstructionResult*, 16>;
 
     /// Evaluate the binary operator `op` on `lhs` and `rhs`
     /// @param op the operation
@@ -67,21 +78,25 @@ class Evaluator {
     /// @param lhs the lhs value
     /// @param rhs the rhs value
     /// @param source the source location
+    /// @param tasks optional work stack for iterative dependency evaluation
     EvalResult EvalCoreBinary(BinaryOp op,
                               const core::type::Type* result_ty,
                               core::ir::Value* lhs,
                               core::ir::Value* rhs,
-                              const Source& source = {});
+                              const Source& source = {},
+                              EvalTasks* tasks = nullptr);
 
     /// Evaluate the unary operator `op` on `input`
     /// @param op the operation
     /// @param result_ty the result type
     /// @param input the input value
     /// @param source the source location
+    /// @param tasks optional work stack for iterative dependency evaluation
     EvalResult EvalCoreUnary(UnaryOp op,
                              const core::type::Type* result_ty,
                              core::ir::Value* input,
-                             const Source& source = {});
+                             const Source& source = {},
+                             EvalTasks* tasks = nullptr);
 
     /// Evaluate the core builtin call on `args`
     /// @param fn the core builtin function
@@ -89,64 +104,81 @@ class Evaluator {
     /// @param args the argument values
     /// @param explicit_params the explicit template parameters
     /// @param source the source location
+    /// @param tasks optional work stack for iterative dependency evaluation
     EvalResult EvalCoreBuiltinCall(
         core::BuiltinFn fn,
         const core::type::Type* result_ty,
         VectorRef<core::ir::Value*> args,
         VectorRef<core::ir::TemplateParameter> explicit_params = tint::Empty,
-        const Source& source = {});
+        const Source& source = {},
+        EvalTasks* tasks = nullptr);
 
     /// Evaluate construct of `result_ty` with `args`
     /// @param result_ty the result type
     /// @param args the argument values
     /// @param source the source location
+    /// @param tasks optional work stack for iterative dependency evaluation
     EvalResult EvalConstruct(const core::type::Type* result_ty,
                              VectorRef<core::ir::Value*> args,
-                             const Source& source = {});
+                             const Source& source = {},
+                             EvalTasks* tasks = nullptr);
 
     /// Evaluate conversion of `arg` to `result_ty`
     /// @param result_ty the result type
     /// @param arg the argument value
     /// @param source the source location
+    /// @param tasks optional work stack for iterative dependency evaluation
     EvalResult EvalConvert(const core::type::Type* result_ty,
                            core::ir::Value* arg,
-                           const Source& source = {});
+                           const Source& source = {},
+                           EvalTasks* tasks = nullptr);
 
     /// Evaluate swizzle of `object` with `indices`
     /// @param result_ty the result type
     /// @param object the object
     /// @param indices the indices
+    /// @param tasks optional work stack for iterative dependency evaluation
     EvalResult EvalSwizzle(const core::type::Type* result_ty,
                            core::ir::Value* object,
-                           VectorRef<uint32_t> indices);
+                           VectorRef<uint32_t> indices,
+                           EvalTasks* tasks = nullptr);
 
     /// Evaluate access of `object` with `indices`
     /// @param object the object
     /// @param indices the indices
     /// @param source the source location
+    /// @param tasks optional work stack for iterative dependency evaluation
     EvalResult EvalAccess(core::ir::Value* object,
                           VectorRef<core::ir::Value*> indices,
-                          const Source& source = {});
+                          const Source& source = {},
+                          EvalTasks* tasks = nullptr);
 
   private:
+    struct CacheEntry {
+        bool in_progress = true;
+        EvalResult result{nullptr};
+    };
+
     diag::Diagnostic& AddError(Source src);
     Source SourceOf(core::ir::Instruction* val);
 
-    EvalResult EvalValue(core::ir::Value* val);
-    EvalResult EvalAccess(core::ir::Access* a);
-    EvalResult EvalConvert(core::ir::Convert* c);
-    EvalResult EvalConstruct(core::ir::Construct* c);
-    EvalResult EvalSwizzle(core::ir::Swizzle* s);
-    EvalResult EvalOverride(core::ir::Override* o);
-    EvalResult EvalUnary(core::ir::CoreUnary* u);
-    EvalResult EvalBinary(core::ir::CoreBinary* cb);
-    EvalResult EvalCoreBuiltinCall(core::ir::CoreBuiltinCall* c);
-    EvalResult EvalConstExprIf(core::ir::ConstExprIf* c);
+    EvalResult EvalValue(core::ir::Value* val, EvalTasks* tasks = nullptr);
+    EvalResult EvalAccess(core::ir::Access* a, EvalTasks* tasks);
+    EvalResult EvalConvert(core::ir::Convert* c, EvalTasks* tasks);
+    EvalResult EvalConstruct(core::ir::Construct* c, EvalTasks* tasks);
+    EvalResult EvalSwizzle(core::ir::Swizzle* s, EvalTasks* tasks);
+    EvalResult EvalOverride(core::ir::Override* o, EvalTasks* tasks);
+    EvalResult EvalUnary(core::ir::CoreUnary* u, EvalTasks* tasks);
+    EvalResult EvalBinary(core::ir::CoreBinary* cb, EvalTasks* tasks);
+    EvalResult EvalCoreBuiltinCall(core::ir::CoreBuiltinCall* c, EvalTasks* tasks);
+    EvalResult EvalConstExprIf(core::ir::ConstExprIf* c, EvalTasks* tasks);
 
     ir::Builder& b_;
     diag::List diagnostics_;
     core::constant::Eval const_eval_;
     bool eval_override_ = true;
+    uint32_t inst_evals_ = 0;
+    Hashmap<core::ir::InstructionResult*, CacheEntry, 0> eval_cache_;
 };
 
 namespace eval {

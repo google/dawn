@@ -63,6 +63,7 @@ Evaluator::~Evaluator() = default;
 diag::Result<core::ir::Constant*> Evaluator::Evaluate(core::ir::Value* src) {
     auto res = EvalValue(src);
     if (res != Success) {
+        TINT_ASSERT(res != EvalFailure::kNotEvaluated);
         return diag::Failure(diagnostics_);
     }
     if (!res.Get()) {
@@ -82,50 +83,111 @@ Source Evaluator::SourceOf(core::ir::Instruction* val) {
     return b_.ir.SourceOf(val);
 }
 
-Evaluator::EvalResult Evaluator::EvalValue(core::ir::Value* val) {
-    return tint::Switch(
-        val,  //
-        [&](core::ir::Constant* c) { return c->Value(); },
-        [&](core::ir::FunctionParam*) { return nullptr; },
-        [&](core::ir::BlockParam*) { return nullptr; },  //
-        [&](core::ir::Unused*) { return nullptr; },
-        [&](core::ir::InstructionResult* r) {
-            return tint::Switch(
-                r->Instruction(),  //
-                [&](core::ir::Access* a) { return EvalAccess(a); },
-                [&](core::ir::ConstExprIf* c) { return EvalConstExprIf(c); },
-                [&](core::ir::Construct* c) { return EvalConstruct(c); },
-                [&](core::ir::Convert* c) { return EvalConvert(c); },
-                [&](core::ir::CoreBinary* cb) { return EvalBinary(cb); },
-                [&](core::ir::CoreBuiltinCall* c) { return EvalCoreBuiltinCall(c); },
-                [&](core::ir::CoreUnary* u) { return EvalUnary(u); },
-                [&](core::ir::Override* o) { return EvalOverride(o); },  //
-                [&](core::ir::Swizzle* s) { return EvalSwizzle(s); },    //
-                [&](Default) {
-                    // Treat any unknown instruction as a termination point for trying to eval.
-                    return nullptr;
-                });
-        },
-        TINT_ICE_ON_NO_MATCH);
+Evaluator::EvalResult Evaluator::EvalValue(core::ir::Value* val, EvalTasks* tasks) {
+    auto try_eval = [&](core::ir::Value* v, EvalTasks& task_stack) -> EvalResult {
+        return tint::Switch(
+            v,  //
+            [&](core::ir::Constant* c) -> EvalResult { return c->Value(); },
+            [&](core::ir::FunctionParam*) -> EvalResult { return nullptr; },
+            [&](core::ir::BlockParam*) -> EvalResult { return nullptr; },  //
+            [&](core::ir::Unused*) -> EvalResult { return nullptr; },
+            [&](core::ir::InstructionResult* r) -> EvalResult {
+                if (auto cached = eval_cache_.Get(r)) {
+                    TINT_ASSERT(!cached->in_progress);
+                    return cached->result;
+                }
+                task_stack.Push(r);
+                return EvalFailure::kNotEvaluated;
+            },
+            TINT_ICE_ON_NO_MATCH);
+    };
+
+    if (tasks != nullptr) {
+        return try_eval(val, *tasks);
+    }
+
+    EvalTasks local_tasks;
+    auto initial = try_eval(val, local_tasks);
+    if (initial != EvalFailure::kNotEvaluated) {
+        return initial;
+    }
+
+    while (!local_tasks.IsEmpty()) {
+        auto* r = local_tasks.Back();
+        auto cached = eval_cache_.Get(r);
+        if (!cached) {
+            if (!eval_override_) {
+                constexpr uint32_t kMaxBuilderEvalDepth = 4;
+                constexpr uint32_t kMaxBuilderInstEvals = 8;
+                if (local_tasks.Length() > kMaxBuilderEvalDepth ||
+                    inst_evals_ >= kMaxBuilderInstEvals) {
+                    eval_cache_.Add(r, CacheEntry{/* in_progress */ false, nullptr});
+                    local_tasks.Pop();
+                    continue;
+                }
+                ++inst_evals_;
+            }
+            eval_cache_.Add(r, CacheEntry{/* in_progress */ true, nullptr});
+        } else if (!cached->in_progress) {
+            local_tasks.Pop();
+            continue;
+        }
+
+        const size_t prev_len = local_tasks.Length();
+        auto res = tint::Switch(
+            r->Instruction(),  //
+            [&](core::ir::Access* a) { return EvalAccess(a, &local_tasks); },
+            [&](core::ir::ConstExprIf* c) { return EvalConstExprIf(c, &local_tasks); },
+            [&](core::ir::Construct* c) { return EvalConstruct(c, &local_tasks); },
+            [&](core::ir::Convert* c) { return EvalConvert(c, &local_tasks); },
+            [&](core::ir::CoreBinary* cb) { return EvalBinary(cb, &local_tasks); },
+            [&](core::ir::CoreBuiltinCall* c) { return EvalCoreBuiltinCall(c, &local_tasks); },
+            [&](core::ir::CoreUnary* u) { return EvalUnary(u, &local_tasks); },
+            [&](core::ir::Override* o) { return EvalOverride(o, &local_tasks); },
+            [&](core::ir::Swizzle* s) { return EvalSwizzle(s, &local_tasks); },
+            [&](Default) -> EvalResult {
+                // Treat any unknown instruction as a termination point for trying to eval.
+                return nullptr;
+            });
+        if (res != Success) {
+            if (res == EvalFailure::kNotEvaluated) {
+                TINT_ASSERT(local_tasks.Length() > prev_len);
+                continue;
+            }
+            eval_cache_.Replace(r, CacheEntry{/* in_progress */ false, res});
+            return res;
+        }
+
+        eval_cache_.Replace(r, CacheEntry{/* in_progress */ false, res});
+        local_tasks.Pop();
+    }
+
+    auto cached = eval_cache_.Get(val->As<core::ir::InstructionResult>());
+    TINT_ASSERT(cached && !cached->in_progress);
+    return cached->result;
 }
 
-Evaluator::EvalResult Evaluator::EvalAccess(core::ir::Access* a) {
-    return EvalAccess(a->Object(), a->Indices(), SourceOf(a));
+Evaluator::EvalResult Evaluator::EvalAccess(core::ir::Access* a, EvalTasks* tasks) {
+    return EvalAccess(a->Object(), a->Indices(), SourceOf(a), tasks);
 }
 
 Evaluator::EvalResult Evaluator::EvalAccess(core::ir::Value* object,
                                             VectorRef<core::ir::Value*> indices,
-                                            const Source& source) {
+                                            const Source& source,
+                                            EvalTasks* tasks) {
     // Some transforms create invalid instructions.
     if (!object || !object->Type()) {
         return nullptr;
     }
 
-    TINT_CHECK_RESULT_UNWRAP(obj, EvalValue(object));
+    TINT_CHECK_RESULT_UNWRAP(obj, EvalValue(object, tasks));
+    if (!eval_override_ && !obj) {
+        return nullptr;
+    }
 
     auto* access_obj_type = object->Type()->UnwrapPtrOrRef();
     for (auto* idx : indices) {
-        TINT_CHECK_RESULT_UNWRAP(val, EvalValue(idx));
+        TINT_CHECK_RESULT_UNWRAP(val, EvalValue(idx, tasks));
 
         // Check if the value could be evaluated
         constexpr uint32_t kDefaultConstIndex = 0;
@@ -133,9 +195,12 @@ Evaluator::EvalResult Evaluator::EvalAccess(core::ir::Value* object,
         if (val) {
             TINT_ASSERT(val->Is<core::constant::Value>());
 
-            TINT_CHECK_RESULT_UNWRAP(res, const_eval_.Index(obj, access_obj_type, val, source));
+            auto res = const_eval_.Index(obj, access_obj_type, val, source);
+            if (res != Success) {
+                return EvalFailure::kError;
+            }
             index_const = val->ValueAs<u32>();
-            obj = res;
+            obj = res.Get();
         } else {
             // No constant array evaluation possible for non-const (dynamic) indices. Only
             // validation of bounds is possible at this stage.
@@ -149,15 +214,14 @@ Evaluator::EvalResult Evaluator::EvalAccess(core::ir::Value* object,
     return obj;
 }
 
-Evaluator::EvalResult Evaluator::EvalConstruct(core::ir::Construct* c) {
-    return EvalConstruct(c->Result()->Type(), c->Args(), SourceOf(c));
+Evaluator::EvalResult Evaluator::EvalConstruct(core::ir::Construct* c, EvalTasks* tasks) {
+    return EvalConstruct(c->Result()->Type(), c->Args(), SourceOf(c), tasks);
 }
 
 Evaluator::EvalResult Evaluator::EvalConstruct(const core::type::Type* result_ty,
                                                VectorRef<core::ir::Value*> args,
-                                               const Source& source) {
-    auto table = core::intrinsic::Table<core::intrinsic::Dialect>(b_.ir.Types(), b_.ir.symbols);
-
+                                               const Source& source,
+                                               EvalTasks* tasks) {
     // Some transforms create invalid instructions.
     if (!result_ty) {
         return nullptr;
@@ -171,7 +235,7 @@ Evaluator::EvalResult Evaluator::EvalConstruct(const core::type::Type* result_ty
     for (auto* arg : args) {
         arg_types.Push(arg->Type());
 
-        TINT_CHECK_RESULT_UNWRAP(val, EvalValue(arg));
+        TINT_CHECK_RESULT_UNWRAP(val, EvalValue(arg, tasks));
         // Check if the value could be evaluated
         if (!val) {
             return nullptr;
@@ -179,6 +243,7 @@ Evaluator::EvalResult Evaluator::EvalConstruct(const core::type::Type* result_ty
         arg_values.Push(val);
     }
 
+    auto table = core::intrinsic::Table<core::intrinsic::Dialect>(b_.ir.Types(), b_.ir.symbols);
     auto eval_stage =
         eval_override_ ? core::EvaluationStage::kOverride : core::EvaluationStage::kConstant;
     auto mat_vec = [&](const core::type::Type* type,
@@ -237,33 +302,37 @@ Evaluator::EvalResult Evaluator::EvalConstruct(const core::type::Type* result_ty
         });
 
     if (r != Success) {
-        return Failure();
+        return EvalFailure::kError;
     }
     return r.Get();
 }
 
-Evaluator::EvalResult Evaluator::EvalConvert(core::ir::Convert* c) {
-    return EvalConvert(c->Result()->Type(), c->Args()[0], SourceOf(c));
+Evaluator::EvalResult Evaluator::EvalConvert(core::ir::Convert* c, EvalTasks* tasks) {
+    return EvalConvert(c->Result()->Type(), c->Args()[0], SourceOf(c), tasks);
 }
 
 Evaluator::EvalResult Evaluator::EvalConvert(const core::type::Type* result_ty,
                                              core::ir::Value* arg,
-                                             const Source& source) {
-    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(arg));
+                                             const Source& source,
+                                             EvalTasks* tasks) {
+    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(arg, tasks));
     // Check if the value could be evaluated
     if (!val) {
         return nullptr;
     }
-    TINT_CHECK_RESULT_UNWRAP(r, const_eval_.Convert(result_ty, val, source));
-    return r;
+    auto r = const_eval_.Convert(result_ty, val, source);
+    if (r != Success) {
+        return EvalFailure::kError;
+    }
+    return r.Get();
 }
 
-Evaluator::EvalResult Evaluator::EvalOverride(core::ir::Override* o) {
+Evaluator::EvalResult Evaluator::EvalOverride(core::ir::Override* o, EvalTasks* tasks) {
     if (!eval_override_) {
         return nullptr;
     }
 
-    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(o->Initializer()));
+    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(o->Initializer(), tasks));
     // Check if the value could be evaluated
     if (!val) {
         return nullptr;
@@ -271,8 +340,8 @@ Evaluator::EvalResult Evaluator::EvalOverride(core::ir::Override* o) {
     return val;
 }
 
-Evaluator::EvalResult Evaluator::EvalConstExprIf(core::ir::ConstExprIf* c) {
-    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(c->Condition()));
+Evaluator::EvalResult Evaluator::EvalConstExprIf(core::ir::ConstExprIf* c, EvalTasks* tasks) {
+    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(c->Condition(), tasks));
     // Check if the value could be evaluated
     if (!val) {
         return nullptr;
@@ -282,8 +351,8 @@ Evaluator::EvalResult Evaluator::EvalConstExprIf(core::ir::ConstExprIf* c) {
 
     // Note: ConstExprIf must be limited to side effect boolean values for this evaluation to be
     // correct. This is currently the case as ConstExprIf was created for the singular purpose of
-    // correctly semantically representing short circuiting operations (and/or).
-    TINT_CHECK_RESULT_UNWRAP(ret, EvalValue(inline_block->Terminator()->Args()[0]));
+    // correctly semantically representing short-circuiting operations (and/or).
+    TINT_CHECK_RESULT_UNWRAP(ret, EvalValue(inline_block->Terminator()->Args()[0], tasks));
     // Check if the value could be evaluated
     if (!ret) {
         return nullptr;
@@ -292,71 +361,91 @@ Evaluator::EvalResult Evaluator::EvalConstExprIf(core::ir::ConstExprIf* c) {
     return ret;
 }
 
-Evaluator::EvalResult Evaluator::EvalSwizzle(core::ir::Swizzle* s) {
-    return EvalSwizzle(s->Result()->Type(), s->Object(), s->Indices());
+Evaluator::EvalResult Evaluator::EvalSwizzle(core::ir::Swizzle* s, EvalTasks* tasks) {
+    return EvalSwizzle(s->Result()->Type(), s->Object(), s->Indices(), tasks);
 }
 
 Evaluator::EvalResult Evaluator::EvalSwizzle(const core::type::Type* result_ty,
                                              core::ir::Value* object,
-                                             VectorRef<uint32_t> indices) {
-    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(object));
+                                             VectorRef<uint32_t> indices,
+                                             EvalTasks* tasks) {
+    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(object, tasks));
     // Check if the value could be evaluated
     if (!val) {
         return nullptr;
     }
 
-    TINT_CHECK_RESULT_UNWRAP(r, const_eval_.Swizzle(result_ty, val, indices));
-    return r;
+    auto r = const_eval_.Swizzle(result_ty, val, indices);
+    if (r != Success) {
+        return EvalFailure::kError;
+    }
+    return r.Get();
 }
 
-Evaluator::EvalResult Evaluator::EvalUnary(core::ir::CoreUnary* u) {
-    return EvalCoreUnary(u->Op(), u->Result()->Type(), u->Val(), SourceOf(u));
+Evaluator::EvalResult Evaluator::EvalUnary(core::ir::CoreUnary* u, EvalTasks* tasks) {
+    return EvalCoreUnary(u->Op(), u->Result()->Type(), u->Val(), SourceOf(u), tasks);
 }
 
 Evaluator::EvalResult Evaluator::EvalCoreUnary(UnaryOp op,
                                                const core::type::Type* result_ty,
                                                core::ir::Value* input,
-                                               const Source& source) {
+                                               const Source& source,
+                                               EvalTasks* tasks) {
+    TINT_CHECK_RESULT_UNWRAP(val, EvalValue(input, tasks));
+    // Check if the value could be evaluated
+    if (!val) {
+        return nullptr;
+    }
+
     intrinsic::Context context{core::intrinsic::Dialect::kData, b_.ir.Types(), b_.ir.symbols};
 
     auto overload =
         core::intrinsic::LookupUnary(context, op, result_ty, core::EvaluationStage::kOverride);
     if (overload != Success) {
         AddError(source) << overload.Failure().Plain();
-        return Failure();
+        return EvalFailure::kError;
     }
 
     auto const_eval_fn = overload->const_eval_fn;
     if (!const_eval_fn) {
         AddError(source) << "invalid unary expression";
-        return Failure();
+        return EvalFailure::kError;
     }
 
-    auto val = EvalValue(input);
-    if (val != Success) {
-        return Failure();
-    }
-    // Check if the value could be evaluated
-    if (!val.Get()) {
-        return nullptr;
-    }
-
-    auto r = (const_eval_.*const_eval_fn)(result_ty, Vector{val.Get()}, source);
+    auto r = (const_eval_.*const_eval_fn)(result_ty, Vector{val}, source);
     if (r != Success) {
-        return Failure();
+        return EvalFailure::kError;
     }
     return r.Get();
 }
 
-Evaluator::EvalResult Evaluator::EvalBinary(core::ir::CoreBinary* cb) {
-    return EvalCoreBinary(cb->Op(), cb->Result()->Type(), cb->LHS(), cb->RHS(), SourceOf(cb));
+Evaluator::EvalResult Evaluator::EvalBinary(core::ir::CoreBinary* cb, EvalTasks* tasks) {
+    return EvalCoreBinary(cb->Op(), cb->Result()->Type(), cb->LHS(), cb->RHS(), SourceOf(cb),
+                          tasks);
 }
 
 Evaluator::EvalResult Evaluator::EvalCoreBinary(core::BinaryOp op,
                                                 const core::type::Type* result_ty,
                                                 core::ir::Value* lhs,
                                                 core::ir::Value* rhs,
-                                                const Source& source) {
+                                                const Source& source,
+                                                EvalTasks* tasks) {
+    // These short-circuiting operators should not be present in the IR at any time. These need
+    // special handling and are transformed into ConstExprIfs on program construction.
+    TINT_ASSERT(op != tint::core::BinaryOp::kLogicalAnd && op != tint::core::BinaryOp::kLogicalOr);
+
+    TINT_CHECK_RESULT_UNWRAP(eval_lhs, EvalValue(lhs, tasks));
+    // Check LHS could be evaluated
+    if (!eval_lhs) {
+        return nullptr;
+    }
+
+    TINT_CHECK_RESULT_UNWRAP(eval_rhs, EvalValue(rhs, tasks));
+    // Check RHS could be evaluated
+    if (!eval_rhs) {
+        return nullptr;
+    }
+
     intrinsic::Context context{core::intrinsic::Dialect::kData, b_.ir.Types(), b_.ir.symbols};
 
     auto overload =
@@ -364,39 +453,26 @@ Evaluator::EvalResult Evaluator::EvalCoreBinary(core::BinaryOp op,
                                       core::EvaluationStage::kOverride, /* is_compound */ false);
     if (overload != Success) {
         AddError(source) << overload.Failure().Plain();
-        return Failure();
+        return EvalFailure::kError;
     }
 
     auto const_eval_fn = overload->const_eval_fn;
     if (!const_eval_fn) {
         AddError(source) << "invalid binary expression";
-        return Failure();
+        return EvalFailure::kError;
     }
 
-    TINT_CHECK_RESULT_UNWRAP(eval_lhs, EvalValue(lhs));
-    // Check LHS could be evaluated
-    if (!eval_lhs) {
-        return nullptr;
+    auto r = (const_eval_.*const_eval_fn)(result_ty, Vector{eval_lhs, eval_rhs}, source);
+    if (r != Success) {
+        return EvalFailure::kError;
     }
-
-    // These short circuiting operators should not be present in the IR at any time. These need
-    // special handling and are transformed into ConstExprIfs on program construction.
-    TINT_ASSERT(op != tint::core::BinaryOp::kLogicalAnd && op != tint::core::BinaryOp::kLogicalOr);
-
-    TINT_CHECK_RESULT_UNWRAP(eval_rhs, EvalValue(rhs));
-    // Check RHS could be evaluated
-    if (!eval_rhs) {
-        return nullptr;
-    }
-
-    TINT_CHECK_RESULT_UNWRAP(
-        r, (const_eval_.*const_eval_fn)(result_ty, Vector{eval_lhs, eval_rhs}, source));
-    return r;
+    return r.Get();
 }
 
-Evaluator::EvalResult Evaluator::EvalCoreBuiltinCall(core::ir::CoreBuiltinCall* c) {
+Evaluator::EvalResult Evaluator::EvalCoreBuiltinCall(core::ir::CoreBuiltinCall* c,
+                                                     EvalTasks* tasks) {
     return EvalCoreBuiltinCall(c->Func(), c->Result()->Type(), c->Args(),
-                               c->ExplicitTemplateParams(), SourceOf(c));
+                               c->ExplicitTemplateParams(), SourceOf(c), tasks);
 }
 
 Evaluator::EvalResult Evaluator::EvalCoreBuiltinCall(
@@ -404,17 +480,18 @@ Evaluator::EvalResult Evaluator::EvalCoreBuiltinCall(
     const core::type::Type* result_ty,
     VectorRef<core::ir::Value*> args,
     VectorRef<core::ir::TemplateParameter> explicit_params,
-    const Source& source) {
+    const Source& source,
+    EvalTasks* tasks) {
     intrinsic::Context context{core::intrinsic::Dialect::kData, b_.ir.Types(), b_.ir.symbols};
 
-    Vector<const core::type::Type*, 0> arg_types;
+    Vector<const core::type::Type*, 4> arg_types;
     arg_types.Reserve(args.Length());
-    Vector<const core::constant::Value*, 0> arg_values;
-    arg_values.Reserve(arg_values.Length());
+    Vector<const core::constant::Value*, 4> arg_values;
+    arg_values.Reserve(args.Length());
     for (auto* arg : args) {
         arg_types.Push(arg->Type());
 
-        TINT_CHECK_RESULT_UNWRAP(val, EvalValue(arg));
+        TINT_CHECK_RESULT_UNWRAP(val, EvalValue(arg, tasks));
         // Check if the value could be evaluated
         if (!val) {
             return nullptr;
@@ -428,12 +505,12 @@ Evaluator::EvalResult Evaluator::EvalCoreBuiltinCall(
                                               explicit_params, arg_types, eval_stage);
     if (overload != Success) {
         AddError(source) << overload.Failure();
-        return Failure();
+        return EvalFailure::kError;
     }
 
-    // If there is no `@const` override, we don't fail the eval, we return a nullptr. This is
-    // because we can call eval for things like `dpdx` which is not overridable but that's not an
-    // eval failure, we just don't eval.
+    // If there is no `@const` override, don't fail the eval, return a nullptr. This is
+    // because eval can be called for things like `dpdx` which is not overridable but that's not an
+    // eval failure, just don't eval.
     auto const_eval_fn = overload->const_eval_fn;
     if (!const_eval_fn) {
         return nullptr;
@@ -441,7 +518,7 @@ Evaluator::EvalResult Evaluator::EvalCoreBuiltinCall(
 
     auto r = (const_eval_.*const_eval_fn)(result_ty, arg_values, source);
     if (r != Success) {
-        return Failure();
+        return EvalFailure::kError;
     }
     return r.Get();
 }
