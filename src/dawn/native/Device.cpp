@@ -1919,7 +1919,8 @@ wgpu::Status DeviceBase::APIGetAHardwareBufferProperties(void* handle,
 }
 
 wgpu::Status DeviceBase::APIGetLimits(Limits* limits) const {
-    if (GetAdapter()->GetInstance()->ConsumedError(FillLimits(limits, mEnabledFeatures, mLimits))) {
+    if (GetAdapter()->GetInstance()->ConsumedError(ValidateAndFillLimits(
+            limits, mEnabledFeatures, mLimits, IsToggleEnabled(Toggle::AllowExperimentalAPIs)))) {
         return wgpu::Status::Error;
     }
     return wgpu::Status::Success;
@@ -2311,6 +2312,12 @@ ResultOrUnknownError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
     UnpackedPtr<ShaderModuleDescriptor> unpacked;
     DAWN_TRY_ASSIGN_CONTEXT(unpacked, ValidateAndUnpack(descriptor), "validating and unpacking %s",
                             descriptor);
+    if (!IsToggleEnabled(Toggle::AllowExperimentalAPIs)) {
+        // Only the chained structs that are part of the stable ABI may be used (this excludes the
+        // Dawn-only SPIR-V structs).
+        DAWN_TRY_CONTEXT(unpacked.ValidateStable(),
+                         "validating %s with allow_experimental_apis disabled", descriptor);
+    }
 
     // A WGSL (xor SPIR-V, if enabled) subdescriptor is required, and a Dawn-specific SPIR-V
     // options descriptor is allowed when using SPIR-V.

@@ -264,6 +264,13 @@ ResultOrError<Ref<InstanceBase>> InstanceBase::Create(const InstanceDescriptor* 
     // TODO(crbug.com/577079442): Flip to false once Chromium passes allow_experimental_apis.
     instanceToggles.Default(Toggle::AllowExperimentalAPIs, true);
 
+    if (!instanceToggles.IsEnabled(Toggle::AllowExperimentalAPIs)) {
+        // The caller explicitly opted out through the toggles descriptor: that descriptor is the
+        // only chained struct allowed, everything else is validated like on a stable instance.
+        DAWN_TRY_CONTEXT(unpacked.ValidateSubset<DawnTogglesDescriptor>(),
+                         "validating the InstanceDescriptor with allow_experimental_apis disabled");
+    }
+
     Ref<InstanceBase> instance = AcquireRef(new InstanceBase(instanceToggles));
     DAWN_TRY(instance->Initialize(unpacked));
     return instance;
@@ -360,7 +367,14 @@ MaybeError InstanceBase::Initialize(const UnpackedPtr<InstanceDescriptor>& descr
     mInstanceFeatures = {descriptor->requiredFeatures.begin(), descriptor->requiredFeatures.end()};
 
     if (descriptor->requiredLimits != nullptr) {
-        mLimits = ReifyDefaultLimits(*(descriptor->requiredLimits));
+        UnpackedPtr<InstanceLimits> unpackedLimits;
+        DAWN_TRY_ASSIGN(unpackedLimits,
+                        ValidateAndUnpack(const_cast<InstanceLimits*>(descriptor->requiredLimits)));
+        if (!mToggles.IsEnabled(Toggle::AllowExperimentalAPIs)) {
+            DAWN_TRY_CONTEXT(unpackedLimits.ValidateStable(),
+                             "validating requiredLimits with allow_experimental_apis disabled");
+        }
+        mLimits = ReifyDefaultLimits(**unpackedLimits);
     } else {
         GetDefaultLimits(&mLimits);
     }
@@ -460,7 +474,14 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
     }
 
     RequestAdapterOptions rawOptions = WithTrivialFrontendDefaults(*options);
-    UnpackedPtr<RequestAdapterOptions> unpacked = Unpack(&rawOptions);
+    UnpackedPtr<RequestAdapterOptions> unpacked;
+    if (ConsumedErrorAndWarnOnce(ValidateAndUnpack(&rawOptions), &unpacked)) {
+        return {};
+    }
+    if (!mToggles.IsEnabled(Toggle::AllowExperimentalAPIs) &&
+        ConsumedErrorAndWarnOnce(unpacked.ValidateStable())) {
+        return {};
+    }
     if (unpacked.Has<RequestAdapterWebXROptions>()) {
         std::unique_ptr<ValidationError> err =
             DAWN_VALIDATION_ERROR("RequestAdapterWebXROptions unsupported.");

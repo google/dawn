@@ -70,7 +70,13 @@ MaybeValError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescrip
     DAWN_TRY(ValidateAddressMode(descriptor->addressModeW));
     DAWN_TRY(ValidateCompareFunction(descriptor->compare));
 
-    UnpackedPtr<SamplerDescriptor> unpacked = Unpack(descriptor);
+    UnpackedPtr<SamplerDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
+    if (!device->IsToggleEnabled(Toggle::AllowExperimentalAPIs)) {
+        // Only the chained structs that are part of the stable ABI may be used.
+        DAWN_TRY_CONTEXT(unpacked.ValidateStable(),
+                         "validating %s with allow_experimental_apis disabled", descriptor);
+    }
     if (auto* ycbcr = unpacked.Get<YCbCrVkDescriptor>()) {
         DAWN_INVALID_IF(!device->HasFeature(Feature::YCbCrVulkanSamplers), "%s is not enabled.",
                         wgpu::FeatureName::YCbCrVulkanSamplers);

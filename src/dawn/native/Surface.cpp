@@ -104,6 +104,11 @@ ResultOrValError<UnpackedPtr<SurfaceDescriptor>> ValidateSurfaceDescriptor(
                     rawDescriptor);
     UnpackedPtr<SurfaceDescriptor> descriptor;
     DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
+    if (!instance->GetTogglesState().IsEnabled(Toggle::AllowExperimentalAPIs)) {
+        // Only the chained structs that are part of the stable ABI may be used.
+        DAWN_TRY_CONTEXT(descriptor.ValidateStable(),
+                         "validating %s with allow_experimental_apis disabled", rawDescriptor);
+    }
 
     if (descriptor.Has<SurfaceColorManagement>()) {
         return DAWN_VALIDATION_ERROR("SurfaceColorManagement unsupported.");
@@ -558,12 +563,19 @@ MaybeValError Surface::Unconfigure() {
 
 MaybeUnknownError Surface::GetCapabilities(AdapterBase* adapter,
                                            SurfaceCapabilities* capabilities) const {
+    UnpackedPtr<SurfaceCapabilities> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(capabilities));
+    if (!mInstance->GetTogglesState().IsEnabled(Toggle::AllowExperimentalAPIs)) {
+        DAWN_TRY_CONTEXT(unpacked.ValidateStable(),
+                         "validating SurfaceCapabilities chain with allow_experimental_apis "
+                         "disabled");
+    }
+
     DAWN_INVALID_IF(IsError(), "%s is invalid.", this);
 
     DAWN_TRY(mCapabilityCache->WithAdapterCapabilities(
         adapter, this,
         [&capabilities](const PhysicalDeviceSurfaceCapabilities& caps) -> MaybeValError {
-            capabilities->nextInChain = nullptr;
             capabilities->usages = caps.usages;
             capabilities->formats = HeapArrayFrom(caps.formats).MoveToSpan();
             capabilities->presentModes = HeapArrayFrom(caps.presentModes).MoveToSpan();
@@ -624,8 +636,8 @@ wgpu::Status Surface::APIGetCapabilities(AdapterBase* adapter,
         return mInstance->ConsumedError(std::move(maybeError)) ? wgpu::Status::Error
                                                                : wgpu::Status::Success;
     } else {
-        return GetCurrentDevice()->ConsumedError(std::move(maybeError), "calling %s.Configure().",
-                                                 this)
+        return GetCurrentDevice()->ConsumedError(std::move(maybeError),
+                                                 "calling %s.GetCapabilities().", this)
                    ? wgpu::Status::Error
                    : wgpu::Status::Success;
     }

@@ -122,11 +122,14 @@ void EnforceLimitSpecInvariants(CombinedLimits* limits, wgpu::FeatureLevel featu
 MaybeValError ValidateLimits(const CombinedLimits& supportedLimits,
                              const CombinedLimits& requiredLimits);
 
-// Validtate that the |chainedLimits| are valid and unpack them into |out|.
+// Validate that the |chainedLimits| are valid and unpack them into |out|.
+// When allowExperimentalChains is false, only chained limits structs that are part of Dawn's
+// stable ABI are accepted.
 MaybeValError ValidateAndUnpackLimitsIn(
     const Limits* chainedLimits,
     const std::unordered_set<wgpu::FeatureName>& supportedFeatures,
-    CombinedLimits* out);
+    CombinedLimits* out,
+    bool allowExperimentalChains);
 
 // Unpack |chainedLimits| into |out|.
 void UnpackLimitsIn(const Limits* chainedLimits, CombinedLimits* out);
@@ -168,10 +171,13 @@ DAWN_SERIALIZABLE(struct,
 //      maxUniformBufferBindingSize must not be larger than maxBufferSize.
 void NormalizeLimits(CombinedLimits* limits);
 
-// Fill |outputLimits| with |supportedFeatures| and |combinedLimits|.
-MaybeError FillLimits(Limits* outputLimits,
-                      const FeaturesSet& supportedFeatures,
-                      const CombinedLimits& combinedLimits);
+// Validate that |outputLimits| has a valid chain and fill it with |supportedFeatures| and
+// |combinedLimits|. When allowExperimentalChains is false, only chained limits structs that are
+// part of Dawn's stable ABI may be requested.
+MaybeValError ValidateAndFillLimits(Limits* outputLimits,
+                                    const FeaturesSet& supportedFeatures,
+                                    const CombinedLimits& combinedLimits,
+                                    bool allowExperimentalChains);
 
 }  // namespace dawn::native
 

@@ -213,13 +213,19 @@ CombinedLimits ReifyDefaultLimits(const CombinedLimits& limits, wgpu::FeatureLev
 MaybeValError ValidateAndUnpackLimitsIn(
     const Limits* chainedLimits,
     const std::unordered_set<wgpu::FeatureName>& supportedFeatures,
-    CombinedLimits* out) {
+    CombinedLimits* out,
+    bool allowExperimentalChains) {
     DAWN_ASSERT(chainedLimits != nullptr);
     DAWN_ASSERT(out != nullptr);
 
     Limits* chainedLimitsPtr = const_cast<Limits*>(chainedLimits);
     UnpackedPtr<Limits> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(chainedLimitsPtr));
+    if (!allowExperimentalChains) {
+        DAWN_TRY_CONTEXT(unpacked.ValidateStable(),
+                         "validating the required limits chain with allow_experimental_apis "
+                         "disabled");
+    }
 
     // copy required v1 limits.
     out->v1 = **unpacked;
@@ -459,12 +465,17 @@ void EnforceLimitSpecInvariants(CombinedLimits* limits, wgpu::FeatureLevel featu
     }
 }
 
-MaybeError FillLimits(Limits* outputLimits,
-                      const FeaturesSet& supportedFeatures,
-                      const CombinedLimits& combinedLimits) {
+MaybeValError ValidateAndFillLimits(Limits* outputLimits,
+                                    const FeaturesSet& supportedFeatures,
+                                    const CombinedLimits& combinedLimits,
+                                    bool allowExperimentalChains) {
     DAWN_ASSERT(outputLimits != nullptr);
     UnpackedPtr<Limits> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(outputLimits));
+    if (!allowExperimentalChains) {
+        DAWN_TRY_CONTEXT(unpacked.ValidateStable(),
+                         "validating the limits chain with allow_experimental_apis disabled");
+    }
     {
         wgpu::ChainedStructOut* originalChain = unpacked->nextInChain;
         **unpacked = combinedLimits.v1;

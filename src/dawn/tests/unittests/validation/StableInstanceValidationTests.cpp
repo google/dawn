@@ -42,6 +42,7 @@ namespace dawn {
 namespace {
 
 using ::testing::HasSubstr;
+using ::testing::Not;
 
 // The ValidationTest instance, adapter, and device are created with allow_experimental_apis (and
 // allow_unsafe_apis) disabled. A regular instance, adapter, and device are created next to them
@@ -258,6 +259,225 @@ TEST_F(StableInstanceValidationTest, AdapterHidesExperimentalFeatures) {
     desc.requiredFeatures = &feature;
     EXPECT_THAT(RequestDeviceMessage(adapter, &desc), HasSubstr("allow_experimental_apis"));
     EXPECT_EQ(RequestDeviceMessage(mRegularAdapter, &desc), "");
+}
+
+// A regular instance that explicitly disables allow_experimental_apis accepts only the toggles
+// descriptor on InstanceDescriptor and rejects any additional chained structs.
+TEST_F(StableInstanceValidationTest, RegularInstanceWithExperimentalAPIsDisabled) {
+    const char* kToggle = "allow_experimental_apis";
+    wgpu::DawnTogglesDescriptor togglesDesc = {};
+    togglesDesc.disabledToggleCount = 1;
+    togglesDesc.disabledToggles = &kToggle;
+
+    wgpu::InstanceDescriptor desc = {};
+    desc.nextInChain = &togglesDesc;
+    wgpu::Instance disabledInstance = wgpu::CreateInstance(&desc);
+    ASSERT_NE(disabledInstance, nullptr);
+    EXPECT_FALSE(HasToggle(disabledInstance, "allow_experimental_apis"));
+
+    wgpu::Adapter disabledAdapter = GetNullAdapter(disabledInstance);
+    ASSERT_NE(disabledAdapter, nullptr);
+    EXPECT_FALSE(disabledAdapter.HasFeature(wgpu::FeatureName::DawnInternalUsages));
+
+    // Co-chaining DawnInstanceDescriptor when allow_experimental_apis is disabled is rejected.
+    native::DawnInstanceDescriptor dawnDesc = {};
+    togglesDesc.nextInChain = &dawnDesc;
+    EXPECT_EQ(wgpu::CreateInstance(&desc), nullptr);
+}
+
+// When allow_experimental_apis is disabled, Experimental chained structs on RequestAdapterOptions
+// cause adapter enumeration and RequestAdapter to fail, preventing toggles from being re-enabled.
+TEST_F(StableInstanceValidationTest, RequestAdapterRejectsExperimentalChain) {
+    const char* kToggle = "allow_experimental_apis";
+    wgpu::DawnTogglesDescriptor togglesDesc = {};
+    togglesDesc.enabledToggleCount = 1;
+    togglesDesc.enabledToggles = &kToggle;
+
+    wgpu::RequestAdapterOptions options = {};
+    options.backendType = wgpu::BackendType::Null;
+    options.nextInChain = &togglesDesc;
+
+    // RequestAdapter with DawnTogglesDescriptor fails on the stable-mode instance.
+    bool stableCalled = false;
+    instance.RequestAdapter(
+        &options, wgpu::CallbackMode::AllowSpontaneous,
+        [&](wgpu::RequestAdapterStatus status, wgpu::Adapter found, wgpu::StringView) {
+            stableCalled = true;
+            EXPECT_NE(status, wgpu::RequestAdapterStatus::Success);
+            EXPECT_EQ(found, nullptr);
+        });
+    EXPECT_TRUE(stableCalled);
+
+    // The same RequestAdapterOptions succeeds on a regular instance.
+    bool regularCalled = false;
+    mRegularInstance.RequestAdapter(
+        &options, wgpu::CallbackMode::AllowSpontaneous,
+        [&](wgpu::RequestAdapterStatus status, wgpu::Adapter found, wgpu::StringView) {
+            regularCalled = true;
+            EXPECT_EQ(status, wgpu::RequestAdapterStatus::Success);
+            EXPECT_NE(found, nullptr);
+        });
+    EXPECT_TRUE(regularCalled);
+
+    // Without the chained struct, the stable-mode instance finds the adapter.
+    EXPECT_NE(GetNullAdapter(instance), nullptr);
+}
+
+// On a stable-mode instance, Experimental chained structs on DeviceDescriptor (including
+// DawnTogglesDescriptor and DawnCacheDeviceDescriptor) are rejected at device creation.
+TEST_F(StableInstanceValidationTest, RequestDeviceRejectsExperimentalChains) {
+    // Chaining DawnTogglesDescriptor on DeviceDescriptor is rejected on the stable adapter.
+    {
+        const char* kToggles[] = {"allow_experimental_apis", "allow_unsafe_apis"};
+        wgpu::DawnTogglesDescriptor togglesDesc = {};
+        togglesDesc.enabledToggleCount = 2;
+        togglesDesc.enabledToggles = kToggles;
+        wgpu::DeviceDescriptor desc = {};
+        desc.nextInChain = &togglesDesc;
+
+        EXPECT_THAT(RequestDeviceMessage(adapter, &desc), HasSubstr("allow_experimental_apis"));
+
+        wgpu::Device regularDevice;
+        EXPECT_EQ(RequestDeviceMessage(mRegularAdapter, &desc, &regularDevice), "");
+        ASSERT_NE(regularDevice, nullptr);
+        EXPECT_TRUE(HasToggle(regularDevice, "allow_unsafe_apis"));
+    }
+    // Chaining DawnCacheDeviceDescriptor on DeviceDescriptor is rejected on the stable adapter.
+    {
+        wgpu::DawnCacheDeviceDescriptor cacheDesc = {};
+        wgpu::DeviceDescriptor desc = {};
+        desc.nextInChain = &cacheDesc;
+        EXPECT_THAT(RequestDeviceMessage(adapter, &desc), HasSubstr("allow_experimental_apis"));
+
+        wgpu::Adapter secondRegularAdapter = GetNullAdapter(mRegularInstance);
+        ASSERT_NE(secondRegularAdapter, nullptr);
+        EXPECT_EQ(RequestDeviceMessage(secondRegularAdapter, &desc), "");
+    }
+}
+
+// Surface creation on a stable-mode instance rejects Dawn-only surface descriptors.
+TEST_F(StableInstanceValidationTest, SurfaceDescriptorValidation) {
+    wgpu::SurfaceDescriptorFromWindowsCoreWindow coreWindow = {};
+    wgpu::SurfaceDescriptor desc = {};
+    desc.nextInChain = &coreWindow;
+
+    wgpu::Surface stableSurface = instance.CreateSurface(&desc);
+    EXPECT_TRUE(native::CheckIsErrorForTesting(stableSurface.Get()));
+    wgpu::SurfaceCapabilities caps = {};
+    EXPECT_EQ(stableSurface.GetCapabilities(adapter, &caps), wgpu::Status::Error);
+}
+
+// Runtime checks on stable-mode vs. regular adapters and devices for AdapterInfo, Limits,
+// SamplerDescriptor, and ShaderModuleDescriptor chains.
+TEST_F(StableInstanceValidationTest, DeviceAndAdapterChains) {
+    // Adapter::GetInfo rejects Experimental chained structs on a stable adapter while accepting
+    // them on a regular adapter.
+    {
+        wgpu::DawnAdapterPropertiesPowerPreference powerPref = {};
+        wgpu::AdapterInfo info = {};
+        info.nextInChain = &powerPref;
+        EXPECT_EQ(adapter.GetInfo(&info), wgpu::Status::Error);
+        EXPECT_EQ(mRegularAdapter.GetInfo(&info), wgpu::Status::Success);
+    }
+
+    // Adapter::GetLimits and Device::GetLimits accept Stable chained limits structs
+    // (CompatibilityModeLimits) and reject Experimental ones
+    // (DawnTexelCopyBufferRowAlignmentLimits) on a stable instance, while accepting both on a
+    // regular instance.
+    {
+        wgpu::CompatibilityModeLimits compatLimits = {};
+        wgpu::Limits stableLimits = {};
+        stableLimits.nextInChain = &compatLimits;
+        EXPECT_EQ(adapter.GetLimits(&stableLimits), wgpu::Status::Success);
+        EXPECT_EQ(device.GetLimits(&stableLimits), wgpu::Status::Success);
+
+        wgpu::DawnTexelCopyBufferRowAlignmentLimits dawnLimits = {};
+        wgpu::Limits expLimits = {};
+        expLimits.nextInChain = &dawnLimits;
+        EXPECT_EQ(adapter.GetLimits(&expLimits), wgpu::Status::Error);
+        EXPECT_EQ(device.GetLimits(&expLimits), wgpu::Status::Error);
+        EXPECT_EQ(mRegularAdapter.GetLimits(&expLimits), wgpu::Status::Success);
+        EXPECT_EQ(mRegularDevice.GetLimits(&expLimits), wgpu::Status::Success);
+    }
+
+    // SamplerDescriptor chaining YCbCrVkDescriptor is rejected with allow_experimental_apis
+    // disabled before reaching feature checks.
+    {
+        wgpu::YCbCrVkDescriptor ycbcr = {};
+        wgpu::SamplerDescriptor samplerDesc = {};
+        samplerDesc.nextInChain = &ycbcr;
+        ASSERT_DEVICE_ERROR(device.CreateSampler(&samplerDesc),
+                            HasSubstr("allow_experimental_apis"));
+    }
+
+    // ShaderModuleDescriptor accepts ShaderSourceWGSL and rejects ShaderSourceSPIRV on a stable
+    // device.
+    {
+        wgpu::ShaderSourceWGSL wgsl = {};
+        wgsl.code = "@compute @workgroup_size(1) fn main() {}";
+        wgpu::ShaderModuleDescriptor wgslDesc = {};
+        wgslDesc.nextInChain = &wgsl;
+        device.CreateShaderModule(&wgslDesc);
+
+        static constexpr uint32_t kDummySpirv[] = {0x07230203, 0x00010000, 0, 1, 0};
+        wgpu::ShaderSourceSPIRV spirv = {};
+        spirv.codeSize = 5;
+        spirv.code = kDummySpirv;
+        wgpu::ShaderModuleDescriptor spirvDesc = {};
+        spirvDesc.nextInChain = &spirv;
+        ASSERT_DEVICE_ERROR(device.CreateShaderModule(&spirvDesc),
+                            HasSubstr("allow_experimental_apis"));
+    }
+}
+
+// InstanceLimits and SurfaceCapabilities reject unexpected chained structs.
+TEST_F(StableInstanceValidationTest, InstanceLimitsAndSurfaceCapabilitiesChainsRejected) {
+    // InstanceDescriptor.requiredLimits with a non-null nextInChain is rejected.
+    {
+        wgpu::ChainedStructOut dummyChain = {};
+        dummyChain.sType = wgpu::SType::AdapterPropertiesMemoryHeaps;
+        wgpu::InstanceLimits limits = {};
+        limits.nextInChain = &dummyChain;
+        wgpu::InstanceDescriptor desc = {};
+        desc.requiredLimits = &limits;
+        EXPECT_EQ(CreateStableModeInstance(&desc), nullptr);
+        EXPECT_EQ(wgpu::CreateInstance(&desc), nullptr);
+    }
+
+    // Create a surface and configure it with the device so surface validation errors are reported
+    // to the device.
+    wgpu::SurfaceDescriptor emptySurfaceDesc = {};
+    wgpu::Surface surface = instance.CreateSurface(&emptySurfaceDesc);
+    ASSERT_NE(surface, nullptr);
+
+    wgpu::SurfaceConfiguration config = {};
+    config.device = device;
+    config.format = wgpu::TextureFormat::RGBA8Unorm;
+    config.usage = wgpu::TextureUsage::RenderAttachment;
+    config.width = 4;
+    config.height = 4;
+    config.presentMode = wgpu::PresentMode::Fifo;
+    config.alphaMode = wgpu::CompositeAlphaMode::Opaque;
+    ASSERT_DEVICE_ERROR(surface.Configure(&config));
+
+    wgpu::ChainedStructOut badOutChain = {};
+    badOutChain.sType = wgpu::SType::AdapterPropertiesMemoryHeaps;
+    wgpu::SurfaceCapabilities caps = {};
+    caps.nextInChain = &badOutChain;
+    ASSERT_DEVICE_ERROR(EXPECT_EQ(surface.GetCapabilities(adapter, &caps), wgpu::Status::Error),
+                        HasSubstr("Unexpected chained struct"));
+}
+
+using RegularInstanceValidationTest = ValidationTest;
+
+// On a regular instance the same YCbCrVkDescriptor chain is not rejected for stability: it only
+// fails the feature check.
+TEST_F(RegularInstanceValidationTest, SamplerChainIsNotCheckedForStability) {
+    wgpu::YCbCrVkDescriptor ycbcr = {};
+    wgpu::SamplerDescriptor samplerDesc = {};
+    samplerDesc.nextInChain = &ycbcr;
+    ASSERT_DEVICE_ERROR(device.CreateSampler(&samplerDesc),
+                        Not(HasSubstr("allow_experimental_apis")));
 }
 
 }  // anonymous namespace

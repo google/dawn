@@ -57,6 +57,11 @@ ResultOrValError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDe
     PipelineCompatibilityToken pipelineCompatibilityToken) {
     UnpackedPtr<PipelineLayoutDescriptor> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
+    if (!device->IsToggleEnabled(Toggle::AllowExperimentalAPIs)) {
+        // Only the chained structs that are part of the stable ABI may be used.
+        DAWN_TRY_CONTEXT(unpacked.ValidateStable(),
+                         "validating %s with allow_experimental_apis disabled", descriptor);
+    }
 
     // A binding count that will be updated as we validate the various parts ot the pipeline layout.
     BindingCounts bindingCounts{};
