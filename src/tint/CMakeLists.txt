@@ -122,6 +122,8 @@ function(tint_default_compile_options TARGET)
     -Wno-c2y-extensions
     -Wno-lifetime-safety-intra-tu-suggestions
     -Wno-lifetime-safety-cross-tu-suggestions
+    -Wno-lifetime-safety-experimental
+    # Kept for compatibility with pre-Clang 24 toolchains:
     -Wno-lifetime-safety-invalidation
     -Wno-experimental-lifetime-safety-field-origin-escape
   )
