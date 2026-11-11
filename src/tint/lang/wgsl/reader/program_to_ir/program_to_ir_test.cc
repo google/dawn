@@ -1615,7 +1615,7 @@ fn main() {
     auto m = Build(wgsl);
     ASSERT_NE(m, Success);
     EXPECT_EQ(m.Failure().reason,
-              R"(test.wgsl:4:3 error: result type size (160000) exceeds maximum allowed (65536)
+              R"(test.wgsl:4:3 error: result type size (160000) exceeds maximum allowed (32768)
   var a: array<i32, 40000>;
   ^^^^^^^^^^^^^^^^^^^^^^^^
 )");
@@ -1642,13 +1642,13 @@ fn main() {
     // element constructor
     EXPECT_THAT(m.Failure().reason,
                 testing::HasSubstr(
-                    ":4:7 error: result type size (160000) exceeds maximum allowed (65536)"));
+                    ":4:7 error: result type size (160000) exceeds maximum allowed (32768)"));
 }
 
 TEST_F(IR_FromProgramTest, OperandTooLarge) {
     auto* wgsl = R"(
 struct S {
-  a : array<vec4f, 4097>,
+  a : array<vec4f, 2049>,
 }
 
 fn f(s : S) {}
@@ -1662,7 +1662,7 @@ fn main() {
     auto m = Build(wgsl);
     ASSERT_NE(m, Success);
     EXPECT_EQ(m.Failure().reason,
-              R"(test.wgsl:10:3 error: call: operand size (65552) exceeds maximum allowed (65536)
+              R"(test.wgsl:10:3 error: call: operand size (32784) exceeds maximum allowed (32768)
   f(S());
   ^
 )");

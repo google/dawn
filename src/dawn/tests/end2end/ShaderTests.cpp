@@ -50,6 +50,14 @@ class ShaderTests : public DawnTest {
         supported.UnlinkedCopyTo(&required);
     }
 
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> features;
+        if (SupportsFeatures({wgpu::FeatureName::ShaderF16})) {
+            features.push_back(wgpu::FeatureName::ShaderF16);
+        }
+        return features;
+    }
+
   public:
     wgpu::Buffer CreateBuffer(const std::vector<uint32_t>& data,
                               wgpu::BufferUsage usage = wgpu::BufferUsage::Storage |
@@ -3868,6 +3876,44 @@ fn main(@builtin(global_invocation_id) gid : vec3u) {
 
     queue.Submit(1, &commands);
     WaitForAllOperations();
+}
+
+// Regression test for crbug.com/581340668 where a function-local array with 32768 elements
+// combined with 32768 scalar stores caused a 16-bit store counter in the Arm Mali shader compiler
+// to overflow.
+TEST_P(ShaderTests, ExcessiveArraySizeWithScalarStores) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+    DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(wgpu::FeatureName::ShaderF16));
+
+    std::string shader;
+    shader.reserve(1024 * 1024);
+    shader += R"(
+enable f16;
+
+@group(0) @binding(0) var<storage, read_write> s : array<u32>;
+
+@compute @workgroup_size(1)
+fn main(@builtin(global_invocation_id) gid : vec3u) {
+    var local_data : array<f16, 32768>;
+)";
+
+    // 16,384 descending odd indices (32767 down to 1):
+    for (int i = 32767; i >= 1; i -= 2) {
+        shader += "    local_data[" + std::to_string(i) + "] = 1.0h;\n";
+    }
+
+    // 16,384 descending even indices (32766 down to 0):
+    for (int i = 32766; i >= 0; i -= 2) {
+        shader += "    local_data[" + std::to_string(i) + "] = 1.0h;\n";
+    }
+
+    shader += R"(
+    let idx = gid.x % 32768u;
+    s[0] = u32(local_data[idx]);
+}
+)";
+
+    ASSERT_DEVICE_ERROR(CreateComputePipeline(shader, "main"));
 }
 
 DAWN_INSTANTIATE_TEST(ShaderTests,

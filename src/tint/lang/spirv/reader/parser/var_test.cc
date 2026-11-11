@@ -3815,8 +3815,8 @@ TEST_F(SpirvParserTest, Var_Private_ExceedsTemporaryStorageLimit) {
        %void = OpTypeVoid
         %u32 = OpTypeInt 32 0
         %f32 = OpTypeFloat 32
-  %u32_16385 = OpConstant %u32 16385
-        %arr = OpTypeArray %f32 %u32_16385
+   %u32_8193 = OpConstant %u32 8193
+        %arr = OpTypeArray %f32 %u32_8193
     %ptr_arr = OpTypePointer Private %arr
           %p = OpVariable %ptr_arr Private
      %voidfn = OpTypeFunction %void
@@ -3828,7 +3828,7 @@ TEST_F(SpirvParserTest, Var_Private_ExceedsTemporaryStorageLimit) {
     EXPECT_NE(result, Success);
     EXPECT_THAT(
         result.Failure().reason,
-        testing::HasSubstr("error: var: result type size (65540) exceeds maximum allowed (65536)"));
+        testing::HasSubstr("error: var: result type size (32772) exceeds maximum allowed (32768)"));
 }
 
 // A Function variable larger than the temporary storage limit is rejected.
@@ -3841,8 +3841,8 @@ TEST_F(SpirvParserTest, Var_Function_ExceedsTemporaryStorageLimit) {
        %void = OpTypeVoid
         %u32 = OpTypeInt 32 0
         %f32 = OpTypeFloat 32
-  %u32_16385 = OpConstant %u32 16385
-        %arr = OpTypeArray %f32 %u32_16385
+   %u32_8193 = OpConstant %u32 8193
+        %arr = OpTypeArray %f32 %u32_8193
     %ptr_arr = OpTypePointer Function %arr
      %voidfn = OpTypeFunction %void
        %main = OpFunction %void None %voidfn
@@ -3854,15 +3854,15 @@ TEST_F(SpirvParserTest, Var_Function_ExceedsTemporaryStorageLimit) {
     EXPECT_NE(result, Success);
     EXPECT_THAT(
         result.Failure().reason,
-        testing::HasSubstr("error: var: result type size (65540) exceeds maximum allowed (65536)"));
+        testing::HasSubstr("error: var: result type size (32772) exceeds maximum allowed (32768)"));
 }
 
 // Private variables that each fit the temporary storage limit are rejected when their combined
 // size exceeds the private variable limit.
 TEST_F(SpirvParserTest, Var_Private_ExceedsCombinedPrivateVariableLimit) {
-    // 129 arrays of 64 KiB is 8 MiB + 64 KiB.
+    // 257 arrays of 32 KiB is 8 MiB + 32 KiB.
     std::string vars;
-    for (uint32_t i = 0; i < 129; i++) {
+    for (uint32_t i = 0; i < 257; i++) {
         vars += "%p" + std::to_string(i) + " = OpVariable %ptr_arr Private\n";
     }
     auto result = Run(R"(
@@ -3873,8 +3873,8 @@ TEST_F(SpirvParserTest, Var_Private_ExceedsCombinedPrivateVariableLimit) {
        %void = OpTypeVoid
         %u32 = OpTypeInt 32 0
         %f32 = OpTypeFloat 32
-  %u32_16384 = OpConstant %u32 16384
-        %arr = OpTypeArray %f32 %u32_16384
+   %u32_8192 = OpConstant %u32 8192
+        %arr = OpTypeArray %f32 %u32_8192
     %ptr_arr = OpTypePointer Private %arr
 )" + vars + R"(
      %voidfn = OpTypeFunction %void
@@ -3957,8 +3957,8 @@ TEST_F(SpirvParserTest, Load_ExceedsTemporaryStorageLimit) {
         %u32 = OpTypeInt 32 0
         %f32 = OpTypeFloat 32
       %u32_0 = OpConstant %u32 0
-  %u32_16385 = OpConstant %u32 16385
-        %arr = OpTypeArray %f32 %u32_16385
+   %u32_8193 = OpConstant %u32 8193
+        %arr = OpTypeArray %f32 %u32_8193
         %str = OpTypeStruct %arr
     %ptr_str = OpTypePointer StorageBuffer %str
     %ptr_arr = OpTypePointer StorageBuffer %arr
@@ -3974,7 +3974,7 @@ TEST_F(SpirvParserTest, Load_ExceedsTemporaryStorageLimit) {
     EXPECT_NE(result, Success);
     EXPECT_THAT(result.Failure().reason,
                 testing::HasSubstr(
-                    "error: load: result type size (65540) exceeds maximum allowed (65536)"));
+                    "error: load: result type size (32772) exceeds maximum allowed (32768)"));
 }
 
 // A constant larger than the temporary storage limit is rejected when used as an operand.
@@ -3994,8 +3994,8 @@ TEST_F(SpirvParserTest, ConstantNull_ExceedsTemporaryStorageLimit) {
         %u32 = OpTypeInt 32 0
         %f32 = OpTypeFloat 32
       %u32_0 = OpConstant %u32 0
-  %u32_16385 = OpConstant %u32 16385
-        %arr = OpTypeArray %f32 %u32_16385
+   %u32_8193 = OpConstant %u32 8193
+        %arr = OpTypeArray %f32 %u32_8193
         %str = OpTypeStruct %arr
     %ptr_str = OpTypePointer StorageBuffer %str
     %ptr_arr = OpTypePointer StorageBuffer %arr
@@ -4012,7 +4012,7 @@ TEST_F(SpirvParserTest, ConstantNull_ExceedsTemporaryStorageLimit) {
     EXPECT_NE(result, Success);
     EXPECT_THAT(
         result.Failure().reason,
-        testing::HasSubstr("error: store: operand size (65540) exceeds maximum allowed (65536)"));
+        testing::HasSubstr("error: store: operand size (32772) exceeds maximum allowed (32768)"));
 }
 
 }  // namespace

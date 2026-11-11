@@ -447,7 +447,7 @@ TEST_F(IR_ValidatorTest, Var_ExcessiveElements) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr("result type size (80000) exceeds maximum allowed (65536)"))
+                testing::HasSubstr("result type size (80000) exceeds maximum allowed (32768)"))
         << res.Failure();
 }
 
@@ -462,7 +462,7 @@ TEST_F(IR_ValidatorTest, Construct_ExcessiveElements) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr("result type size (160000) exceeds maximum allowed (65536)"))
+                testing::HasSubstr("result type size (160000) exceeds maximum allowed (32768)"))
         << res.Failure();
 }
 
@@ -483,7 +483,7 @@ TEST_F(IR_ValidatorTest, Construct_Struct_ExcessiveElements) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr("result type size (160000) exceeds maximum allowed (65536)"))
+                testing::HasSubstr("result type size (160000) exceeds maximum allowed (32768)"))
         << res.Failure();
 }
 
@@ -1359,7 +1359,7 @@ TEST_F(IR_ValidatorTest, Let_ExcessiveElements) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr("result type size (160000) exceeds maximum allowed (65536)"))
+                testing::HasSubstr("result type size (160000) exceeds maximum allowed (32768)"))
         << res.Failure();
 }
 
