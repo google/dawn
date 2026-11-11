@@ -244,7 +244,7 @@ TEST_F(ResolverEvaluationStageTest, IndexAccessor_Const_Runtime) {
     // let idx = 1_i;
     // vec[idx]
     auto* vec = Const("vec", ast::Type{}, Call<vec4<f32>>());
-    auto* idx = Let("idx", Expr(1_i));
+    auto* idx = Let("idx", ast::Type{}, Expr(1_i));
     auto* expr = IndexAccessor(vec, idx);
     WrapInFunction(vec, idx, expr);
 
@@ -309,11 +309,11 @@ TEST_F(ResolverEvaluationStageTest, MemberAccessor_Runtime) {
 TEST_F(ResolverEvaluationStageTest, Binary_Runtime) {
     // let one = 1;
     // let result = (one == 1) && (one == 1);
-    auto* one = Let("one", Expr(1_a));
+    auto* one = Let("one", ast::Type{}, Expr(1_a));
     auto* lhs = Equal("one", 1_a);
     auto* rhs = Equal("one", 1_a);
     auto* binary = LogicalAnd(lhs, rhs);
-    auto* result = Let("result", binary);
+    auto* result = Let("result", ast::Type{}, binary);
     WrapInFunction(one, result);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -359,11 +359,11 @@ TEST_F(ResolverEvaluationStageTest, FnCall_Runtime) {
     // let l = false
     // let result = l && f();
     Func("f", Empty, ty.bool_(), Vector{Return(true)});
-    auto* let = Let("l", Expr(false));
+    auto* let = Let("l", ast::Type{}, Expr(false));
     auto* lhs = Expr(let);
     auto* rhs = Call("f");
     auto* binary = LogicalAnd(lhs, rhs);
-    auto* result = Let("result", binary);
+    auto* result = Let("result", ast::Type{}, binary);
     WrapInFunction(let, result);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -378,7 +378,7 @@ TEST_F(ResolverEvaluationStageTest, FnCall_NotEvaluated) {
     auto* rhs = Call("f");
     auto* lhs = Expr(false);
     auto* binary = LogicalAnd(lhs, rhs);
-    auto* result = Let("result", binary);
+    auto* result = Let("result", ast::Type{}, binary);
     WrapInFunction(result);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -396,7 +396,7 @@ TEST_F(ResolverEvaluationStageTest, NestedFnCall_NotEvaluated) {
     auto* rhs_2 = Call("f", rhs_1);
     auto* lhs = Expr(false);
     auto* binary = LogicalAnd(lhs, rhs_2);
-    auto* result = Let("result", binary);
+    auto* result = Let("result", ast::Type{}, binary);
     WrapInFunction(result);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();

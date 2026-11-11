@@ -157,7 +157,7 @@ TEST_F(ResolverRootIdentifierTest, PointerParameter) {
     // }
     auto* param = Param("a", ty.ptr<function, f32>());
     auto* expr_param = Expr(param);
-    auto* let = Let("b", expr_param);
+    auto* let = Let("b", ast::Type{}, expr_param);
     auto* expr_let = Expr("b");
     Func("foo", Vector{param}, ty.void_(), Vector{WrapInStatement(let), WrapInStatement(expr_let)});
 
@@ -248,10 +248,10 @@ TEST_F(ResolverRootIdentifierTest, ThroughPointers) {
     auto* address_of_1 = AddressOf(a);
     auto* deref_1 = Deref(address_of_1);
     auto* address_of_2 = AddressOf(deref_1);
-    auto* a_ptr1 = Let("a_ptr1", address_of_2);
+    auto* a_ptr1 = Let("a_ptr1", ast::Type{}, address_of_2);
     auto* deref_2 = Deref(a_ptr1);
     auto* address_of_3 = AddressOf(deref_2);
-    auto* a_ptr2 = Let("a_ptr2", address_of_3);
+    auto* a_ptr2 = Let("a_ptr2", ast::Type{}, address_of_3);
     WrapInFunction(a_ptr1, a_ptr2);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

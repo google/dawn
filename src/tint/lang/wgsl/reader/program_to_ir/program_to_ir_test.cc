@@ -389,7 +389,7 @@ TEST_F(IR_FromProgramTest, Loop_WithContinuing_BreakIf) {
 }
 
 TEST_F(IR_FromProgramTest, Loop_Continuing_Body_Scope) {
-    auto* a = Decl(Let("a", Expr(true)));
+    auto* a = Decl(Let("a", ast::Type{}, Expr(true)));
     auto* ast_break_if = BreakIf("a");
     auto* ast_loop = Loop(Block(a), Block(ast_break_if));
     WrapInFunction(ast_loop);
@@ -1350,7 +1350,7 @@ TEST_F(IR_FromProgramTest, OverrideShortCircuitStatementInFunction) {
 
 TEST_F(IR_FromProgramTest, NonOverrideShortCircuitStatementInFunction) {
     auto* o0 = Override(Source{{1, 2}}, "a", ty.u32());
-    auto* o1 = Decl(Let("x", Expr(true)));
+    auto* o1 = Decl(Let("x", ast::Type{}, Expr(true)));
     auto* logical = LogicalAnd(o1->variable, Equal(Div(1_u, o0), 0_u));
     WrapInFunction(o1, logical);
 

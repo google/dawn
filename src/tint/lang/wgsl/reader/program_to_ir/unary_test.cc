@@ -133,7 +133,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Negation) {
 TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_AddressOf) {
     GlobalVar("v1", core::AddressSpace::kPrivate, ty.i32());
 
-    auto* expr = Decl(Let("v2", AddressOf("v1")));
+    auto* expr = Decl(Let("v2", ast::Type{}, AddressOf("v1")));
     WrapInFunction(expr);
 
     auto m = Build();
@@ -155,7 +155,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_AddressOf) {
 TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Indirection) {
     GlobalVar("v1", core::AddressSpace::kPrivate, ty.i32());
     Vector stmts = {
-        Decl(Let("v3", AddressOf("v1"))),
+        Decl(Let("v3", ast::Type{}, AddressOf("v1"))),
         Assign(Deref("v3"), 42_i),
     };
     WrapInFunction(stmts);

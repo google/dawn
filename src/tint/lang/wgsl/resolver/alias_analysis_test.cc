@@ -604,7 +604,7 @@ TEST_P(Use, Read_IndexAccessor) {
 
 TEST_P(Use, Read_LetInitializer) {
     // let x = *p2;
-    Run(Decl(Let("x", Deref("p2"))), R"(56:78 error: invalid aliased pointer argument
+    Run(Decl(Let("x", ast::Type{}, Deref("p2"))), R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
@@ -640,7 +640,7 @@ TEST_P(Use, Read_Switch) {
 TEST_P(Use, NoAccess_AddressOf_Deref) {
     // Should not invoke the load-rule, and therefore expect no errors even when aliasing occurs.
     // let newp = &(*p2);
-    Run(Decl(Let("newp", AddressOf(Deref("p2")))));
+    Run(Decl(Let("newp", ast::Type{}, AddressOf(Deref("p2")))));
 }
 
 INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,
@@ -747,7 +747,7 @@ TEST_F(ResolverAliasAnalysisTest, NoAccess_MemberAccessor) {
          },
          ty.void_(),
          Vector{
-             Decl(Let("newp", AddressOf(MemberAccessor(Deref("p2"), "a")))),
+             Decl(Let("newp", ast::Type{}, AddressOf(MemberAccessor(Deref("p2"), "a")))),
              Assign(MemberAccessor(Deref("p1"), "a"), 42_a),
          });
     Func("f1", tint::Empty, ty.void_(),
@@ -926,8 +926,8 @@ TEST_F(ResolverAliasAnalysisTest, AliasingInsideFunction) {
     Func("f1", tint::Empty, ty.void_(),
          Vector{
              Decl(Var("v", ty.i32())),
-             Decl(Let("p1", AddressOf("v"))),
-             Decl(Let("p2", AddressOf("v"))),
+             Decl(Let("p1", ast::Type{}, AddressOf("v"))),
+             Decl(Let("p2", ast::Type{}, AddressOf("v"))),
              Assign(Deref("p1"), 42_a),
              Assign(Deref("p2"), 42_a),
          });

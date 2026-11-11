@@ -54,7 +54,7 @@ TEST_F(WgslASTPrinterTest, IndexAccessor) {
 TEST_F(WgslASTPrinterTest, IndexAccessor_OfDref) {
     GlobalVar("ary", ty.array<i32, 10>(), core::AddressSpace::kPrivate);
 
-    auto* p = Let("p", AddressOf("ary"));
+    auto* p = Let("p", ast::Type{}, AddressOf("ary"));
     auto* expr = IndexAccessor(Deref("p"), 5_i);
     WrapInFunction(p, expr);
 

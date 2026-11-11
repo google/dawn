@@ -40,7 +40,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraySingleIndex) {
     // let b = a[2]
 
     auto* a = Var("a", ty.array<u32, 3>(), core::AddressSpace::kFunction);
-    auto* expr = Decl(Let("b", IndexAccessor(a, 2_u)));
+    auto* expr = Decl(Let("b", ast::Type{}, IndexAccessor(a, 2_u)));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
@@ -65,8 +65,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraySingleIndex_ViaDerefPointerInd
     // let b = (*p)[2]
 
     auto* a = Var("a", ty.array<u32, 3>(), core::AddressSpace::kFunction);
-    auto* p = Let("p", AddressOf(a));
-    auto* expr = Decl(Let("b", IndexAccessor(Deref(p), 2_u)));
+    auto* p = Let("p", ast::Type{}, AddressOf(a));
+    auto* expr = Decl(Let("b", ast::Type{}, IndexAccessor(Deref(p), 2_u)));
     WrapInFunction(Decl(a), Decl(p), expr);
 
     auto m = Build();
@@ -92,8 +92,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraySingleIndex_ViaPointerIndex) {
     // let b = p[2]
 
     auto* a = Var("a", ty.array<u32, 3>(), core::AddressSpace::kFunction);
-    auto* p = Let("p", AddressOf(a));
-    auto* expr = Decl(Let("b", IndexAccessor(p, 2_u)));
+    auto* p = Let("p", ast::Type{}, AddressOf(a));
+    auto* expr = Decl(Let("b", ast::Type{}, IndexAccessor(p, 2_u)));
     WrapInFunction(Decl(a), Decl(p), expr);
 
     auto m = Build();
@@ -119,8 +119,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Multiple) {
     // let c = a[1]
 
     auto* a = Let("a", ty.vec3<u32>(), vec(ty.u32(), 3));
-    auto* expr = Decl(Let("b", IndexAccessor(a, 2_u)));
-    auto* expr2 = Decl(Let("c", IndexAccessor(a, 1_u)));
+    auto* expr = Decl(Let("b", ast::Type{}, IndexAccessor(a, 2_u)));
+    auto* expr2 = Decl(Let("c", ast::Type{}, IndexAccessor(a, 1_u)));
 
     WrapInFunction(Decl(a), expr, expr2);
 
@@ -146,7 +146,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorSingleIndex) {
     // let b = a[2]
 
     auto* a = Var("a", ty.vec3<u32>(), core::AddressSpace::kFunction);
-    auto* expr = Decl(Let("b", IndexAccessor(a, 2_u)));
+    auto* expr = Decl(Let("b", ast::Type{}, IndexAccessor(a, 2_u)));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
@@ -170,8 +170,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorSingleIndex_ViaDerefPointerIn
     // let b = (*p)[2]
 
     auto* a = Var("a", ty.vec3<u32>(), core::AddressSpace::kFunction);
-    auto* p = Let("p", AddressOf(a));
-    auto* expr = Decl(Let("b", IndexAccessor(Deref(p), 2_u)));
+    auto* p = Let("p", ast::Type{}, AddressOf(a));
+    auto* expr = Decl(Let("b", ast::Type{}, IndexAccessor(Deref(p), 2_u)));
     WrapInFunction(Decl(a), Decl(p), expr);
 
     auto m = Build();
@@ -196,8 +196,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorSingleIndex_ViaPointerIndex) 
     // let b = p[2]
 
     auto* a = Var("a", ty.vec3<u32>(), core::AddressSpace::kFunction);
-    auto* p = Let("p", AddressOf(a));
-    auto* expr = Decl(Let("b", IndexAccessor(p, 2_u)));
+    auto* p = Let("p", ast::Type{}, AddressOf(a));
+    auto* expr = Decl(Let("b", ast::Type{}, IndexAccessor(p, 2_u)));
     WrapInFunction(Decl(a), Decl(p), expr);
 
     auto m = Build();
@@ -221,7 +221,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraysMultiIndex) {
     // let b = a[2][3]
 
     auto* a = Var("a", ty.array<array<f32, 4>, 3>(), core::AddressSpace::kFunction);
-    auto* expr = Decl(Let("b", IndexAccessor(IndexAccessor(a, 2_u), 3_u)));
+    auto* expr = Decl(Let("b", ast::Type{}, IndexAccessor(IndexAccessor(a, 2_u), 3_u)));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
@@ -246,8 +246,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraysMultiIndex_ViaDerefPointerInd
     // let b = (*p)[2][3]
 
     auto* a = Var("a", ty.array<array<f32, 4>, 3>(), core::AddressSpace::kFunction);
-    auto* p = Let("p", AddressOf(a));
-    auto* expr = Decl(Let("b", IndexAccessor(IndexAccessor(Deref(p), 2_u), 3_u)));
+    auto* p = Let("p", ast::Type{}, AddressOf(a));
+    auto* expr = Decl(Let("b", ast::Type{}, IndexAccessor(IndexAccessor(Deref(p), 2_u), 3_u)));
     WrapInFunction(Decl(a), Decl(p), expr);
 
     auto m = Build();
@@ -273,8 +273,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraysMultiIndex_ViaPointerIndex) {
     // let b = p[2][3]
 
     auto* a = Var("a", ty.array<array<f32, 4>, 3>(), core::AddressSpace::kFunction);
-    auto* p = Let("p", AddressOf(a));
-    auto* expr = Decl(Let("b", IndexAccessor(IndexAccessor(p, 2_u), 3_u)));
+    auto* p = Let("p", ast::Type{}, AddressOf(a));
+    auto* expr = Decl(Let("b", ast::Type{}, IndexAccessor(IndexAccessor(p, 2_u), 3_u)));
     WrapInFunction(Decl(a), Decl(p), expr);
 
     auto m = Build();
@@ -299,7 +299,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MatrixMultiIndex) {
     // let b = a[2][3]
 
     auto* a = Var("a", ty.mat3x4<f32>(), core::AddressSpace::kFunction);
-    auto* expr = Decl(Let("b", IndexAccessor(IndexAccessor(a, 2_u), 3_u)));
+    auto* expr = Decl(Let("b", ast::Type{}, IndexAccessor(IndexAccessor(a, 2_u), 3_u)));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
@@ -327,7 +327,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_SingleMember) {
                                         Member("foo", ty.i32()),
                                     });
     auto* a = Var("a", ty.Of(s), core::AddressSpace::kFunction);
-    auto* expr = Decl(Let("b", MemberAccessor(a, "foo")));
+    auto* expr = Decl(Let("b", ast::Type{}, MemberAccessor(a, "foo")));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
@@ -360,8 +360,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_SingleMember_ViaDerefPointerIndex) 
                                         Member("foo", ty.i32()),
                                     });
     auto* a = Var("a", ty.Of(s), core::AddressSpace::kFunction);
-    auto* p = Let("p", AddressOf(a));
-    auto* expr = Decl(Let("b", MemberAccessor(Deref(p), "foo")));
+    auto* p = Let("p", ast::Type{}, AddressOf(a));
+    auto* expr = Decl(Let("b", ast::Type{}, MemberAccessor(Deref(p), "foo")));
     WrapInFunction(Decl(a), Decl(p), expr);
 
     auto m = Build();
@@ -395,8 +395,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_SingleMember_ViaPointerIndex) {
                                         Member("foo", ty.i32()),
                                     });
     auto* a = Var("a", ty.Of(s), core::AddressSpace::kFunction);
-    auto* p = Let("p", AddressOf(a));
-    auto* expr = Decl(Let("b", MemberAccessor(p, "foo")));
+    auto* p = Let("p", ast::Type{}, AddressOf(a));
+    auto* expr = Decl(Let("b", ast::Type{}, MemberAccessor(p, "foo")));
     WrapInFunction(Decl(a), Decl(p), expr);
 
     auto m = Build();
@@ -434,7 +434,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiMember) {
                                          Member("foo", ty.Of(inner)),
                                      });
     auto* a = Var("a", ty.Of(outer), core::AddressSpace::kFunction);
-    auto* expr = Decl(Let("b", MemberAccessor(MemberAccessor(a, "foo"), "bar")));
+    auto* expr = Decl(Let("b", ast::Type{}, MemberAccessor(MemberAccessor(a, "foo"), "bar")));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
@@ -479,7 +479,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_Mixed) {
                                      });
     auto* a = Var("a", ty.array(ty.Of(outer), 4_u), core::AddressSpace::kFunction);
     auto* expr = Decl(Let(
-        "b",
+        "b", ast::Type{},
         MemberAccessor(IndexAccessor(MemberAccessor(IndexAccessor(a, 0_u), "foo"), 1_u), "bar")));
     WrapInFunction(Decl(a), expr);
 
@@ -538,7 +538,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorElementSwizzle) {
     // let b = a.y
 
     auto* a = Var("a", ty.vec2<f32>(), core::AddressSpace::kFunction);
-    auto* expr = Decl(Let("b", MemberAccessor(a, "y")));
+    auto* expr = Decl(Let("b", ast::Type{}, MemberAccessor(a, "y")));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
@@ -562,8 +562,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorElementSwizzle_ViaDerefPointe
     // let b = (*p).y
 
     auto* a = Var("a", ty.vec2<f32>(), core::AddressSpace::kFunction);
-    auto* p = Let("p", AddressOf(a));
-    auto* expr = Decl(Let("b", MemberAccessor(Deref(p), "y")));
+    auto* p = Let("p", ast::Type{}, AddressOf(a));
+    auto* expr = Decl(Let("b", ast::Type{}, MemberAccessor(Deref(p), "y")));
     WrapInFunction(Decl(a), Decl(p), expr);
 
     auto m = Build();
@@ -588,8 +588,8 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorElementSwizzle_ViaPointerInde
     // let b = p.y
 
     auto* a = Var("a", ty.vec2<f32>(), core::AddressSpace::kFunction);
-    auto* p = Let("p", AddressOf(a));
-    auto* expr = Decl(Let("b", MemberAccessor(p, "y")));
+    auto* p = Let("p", ast::Type{}, AddressOf(a));
+    auto* expr = Decl(Let("b", ast::Type{}, MemberAccessor(p, "y")));
     WrapInFunction(Decl(a), Decl(p), expr);
 
     auto m = Build();
@@ -613,7 +613,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiElementSwizzle) {
     // let b = a.zyxz
 
     auto* a = Var("a", ty.vec3<f32>(), core::AddressSpace::kFunction);
-    auto* expr = Decl(Let("b", MemberAccessor(a, "zyxz")));
+    auto* expr = Decl(Let("b", ast::Type{}, MemberAccessor(a, "zyxz")));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
@@ -637,7 +637,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiElementSwizzleOfSwizzle) {
     // let b = a.zyx.yy
 
     auto* a = Var("a", ty.vec3<f32>(), core::AddressSpace::kFunction);
-    auto* expr = Decl(Let("b", MemberAccessor(MemberAccessor(a, "zyx"), "yy")));
+    auto* expr = Decl(Let("b", ast::Type{}, MemberAccessor(MemberAccessor(a, "zyx"), "yy")));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
@@ -667,7 +667,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiElementSwizzle_MiddleOfChain) 
                                     });
     auto* a = Var("a", ty.Of(s), core::AddressSpace::kFunction);
     auto* expr = Decl(Let(
-        "b",
+        "b", ast::Type{},
         IndexAccessor(MemberAccessor(MemberAccessor(MemberAccessor(a, "foo"), "zyx"), "yx"), 0_u)));
     WrapInFunction(Decl(a), expr);
 
@@ -697,7 +697,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_SingleElementSwizzleOfSwizzle) {
     // let b = a.zyx.x
 
     auto* a = Var("a", ty.vec4<f32>(), core::AddressSpace::kFunction);
-    auto* expr = Decl(Let("b", MemberAccessor(MemberAccessor(a, "zyx"), "x")));
+    auto* expr = Decl(Let("b", ast::Type{}, MemberAccessor(MemberAccessor(a, "zyx"), "x")));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
@@ -721,7 +721,7 @@ TEST_F(ProgramToIRAccessorTest,
     // let b = a.zyx.x
 
     auto* a = Var("a", ty.vec4<f32>(), core::AddressSpace::kFunction);
-    auto* expr = Decl(Let("b", MemberAccessor(MemberAccessor(a, "zyx"), "x")));
+    auto* expr = Decl(Let("b", ast::Type{}, MemberAccessor(MemberAccessor(a, "zyx"), "x")));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build(wgsl::AllowedFeatures{});
@@ -743,7 +743,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_SingleIndex) {
     // let a: vec3<u32> = vec3()
     // let b = a[2]
     auto* a = Let("a", ty.vec3<u32>(), vec(ty.u32(), 3));
-    auto* expr = Decl(Let("b", IndexAccessor(a, 2_u)));
+    auto* expr = Decl(Let("b", ast::Type{}, IndexAccessor(a, 2_u)));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
@@ -766,7 +766,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiIndex) {
     // let b = a[2][3]
 
     auto* a = Let("a", ty.mat3x4<f32>(), Call<mat3x4<f32>>());
-    auto* expr = Decl(Let("b", IndexAccessor(IndexAccessor(a, 2_u), 3_u)));
+    auto* expr = Decl(Let("b", ast::Type{}, IndexAccessor(IndexAccessor(a, 2_u), 3_u)));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
@@ -793,7 +793,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_SingleMember) {
                                         Member("foo", ty.i32()),
                                     });
     auto* a = Let("a", ty.Of(s), Call("MyStruct"));
-    auto* expr = Decl(Let("b", MemberAccessor(a, "foo")));
+    auto* expr = Decl(Let("b", ast::Type{}, MemberAccessor(a, "foo")));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
@@ -829,7 +829,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiMember) {
                                          Member("foo", ty.Of(inner)),
                                      });
     auto* a = Let("a", ty.Of(outer), Call("Outer"));
-    auto* expr = Decl(Let("b", MemberAccessor(MemberAccessor(a, "foo"), "bar")));
+    auto* expr = Decl(Let("b", ast::Type{}, MemberAccessor(MemberAccessor(a, "foo"), "bar")));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
@@ -873,7 +873,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_Mixed) {
                                      });
     auto* a = Let("a", ty.array(ty.Of(outer), 4_u), Call(ty.array(ty.Of(outer), 4_u)));
     auto* expr = Decl(Let(
-        "b",
+        "b", ast::Type{},
         MemberAccessor(IndexAccessor(MemberAccessor(IndexAccessor(a, 0_u), "foo"), 1_u), "bar")));
     WrapInFunction(Decl(a), expr);
 
@@ -908,7 +908,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_SingleElement) {
     // let b = a.y
 
     auto* a = Let("a", ty.vec2<f32>(), vec(ty.f32(), 2));
-    auto* expr = Decl(Let("b", MemberAccessor(a, "y")));
+    auto* expr = Decl(Let("b", ast::Type{}, MemberAccessor(a, "y")));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
@@ -931,7 +931,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiElementSwizzle) {
     // let b = a.zyxz
 
     auto* a = Let("a", ty.vec3<f32>(), vec(ty.f32(), 3));
-    auto* expr = Decl(Let("b", MemberAccessor(a, "zyxz")));
+    auto* expr = Decl(Let("b", ast::Type{}, MemberAccessor(a, "zyxz")));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
@@ -954,7 +954,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiElementSwizzleOfSwizzle) {
     // let b = a.zyx.yy
 
     auto* a = Let("a", ty.vec3<f32>(), vec(ty.f32(), 3));
-    auto* expr = Decl(Let("b", MemberAccessor(MemberAccessor(a, "zyx"), "yy")));
+    auto* expr = Decl(Let("b", ast::Type{}, MemberAccessor(MemberAccessor(a, "zyx"), "yy")));
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
@@ -984,7 +984,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiElementSwizzle_MiddleOfChain) 
                                     });
     auto* a = Let("a", ty.Of(s), Call("MyStruct"));
     auto* expr = Decl(Let(
-        "b",
+        "b", ast::Type{},
         IndexAccessor(MemberAccessor(MemberAccessor(MemberAccessor(a, "foo"), "zyx"), "yx"), 0_u)));
     WrapInFunction(Decl(a), expr);
 
@@ -1017,7 +1017,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Const_AbstractVectorWithIndex) {
     // var b = v[i];
 
     auto* v = Const("v", ast::Type{}, Call<vec3<Infer>>(1_a, 2_a, 3_a));
-    auto* i = Let("i", Expr(1_i));
+    auto* i = Let("i", ast::Type{}, Expr(1_i));
     auto* b = Var("b", IndexAccessor("v", "i"));
     WrapInFunction(v, i, b);
 
@@ -1042,7 +1042,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Const_AbstractVectorWithSwizzleAndIndex
     // var b = v.rg[i];
 
     auto* v = Const("v", ast::Type{}, Call<vec3<Infer>>(1_a, 2_a, 3_a));
-    auto* i = Let("i", Expr(1_i));
+    auto* i = Let("i", ast::Type{}, Expr(1_i));
     auto* b = Var("b", IndexAccessor(MemberAccessor("v", "rg"), "i"));
     WrapInFunction(v, i, b);
 
@@ -1067,7 +1067,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Const_ExpressionIndex) {
     // var b = v.rg[i + 2 - 3];
 
     auto* v = Const("v", ast::Type{}, Call<vec3<Infer>>(1_a, 2_a, 3_a));
-    auto* i = Let("i", Expr(1_i));
+    auto* i = Let("i", ast::Type{}, Expr(1_i));
     auto* b = Var("b", IndexAccessor(MemberAccessor("v", "rg"), Sub(Add("i", 2_i), 3_i)));
     WrapInFunction(v, i, b);
 

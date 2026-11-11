@@ -1664,13 +1664,6 @@ class Builder {
         return Let(source_, name, type, init);
     }
 
-    /// @param name the variable name
-    /// @param init initializer expression (required)
-    /// @returns an `Let` with the given name, type and initializer
-    const ast::Let* Let(std::string_view name, const Expression* init) {
-        return Let(source_, name, ast::Type{}, init);
-    }
-
     /// @param source the source location
     /// @param name the variable name
     /// @param type the variable's type
@@ -1698,15 +1691,6 @@ class Builder {
                         Type type,
                         const Expression* init) {
         return create<ast::Let>(source, name, type, init);
-    }
-
-    /// @param source the source location
-    /// @param name the variable name
-    /// @param type the variable's type
-    /// @param init initializer expression (required)
-    /// @returns an `Let` with the given name, type and initializer
-    const ast::Let* Let(const Source& source, std::string_view name, const Expression* init) {
-        return Let(source, name, ast::Type{}, init);
     }
 
     /// @param source the source location

@@ -73,7 +73,7 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_AInt) {
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -91,7 +91,7 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_AFloat) {
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -109,7 +109,7 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_i32) {
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -127,7 +127,7 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_u32) {
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -145,7 +145,7 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_f32) {
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -165,7 +165,7 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_f16) {
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -185,7 +185,7 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_vec3_AInt) {
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -203,7 +203,7 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_vec3_AFloat) {
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -221,7 +221,7 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_vec3_f32) {
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -241,7 +241,7 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_vec3_f16) {
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -261,7 +261,7 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_mat2x3_AFloat) {
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -279,7 +279,7 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_mat2x3_f32) {
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -299,7 +299,7 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_mat2x3_f16) {
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -319,7 +319,7 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_arr_f32) {
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -341,7 +341,7 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_arr_vec2_bool) {
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();

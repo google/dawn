@@ -128,7 +128,7 @@ TEST_F(ResolverPtrRefTest, ArrayIndexAccessorViaDerefPointer) {
     // (*p)[0]
 
     auto* v = Var("v", ty.array<i32, 3>());
-    auto* p = Let("p", AddressOf(v));
+    auto* p = Let("p", ast::Type{}, AddressOf(v));
     auto* expr = IndexAccessor(Deref(p), 0_i);
 
     WrapInFunction(v, p, expr);
@@ -151,7 +151,7 @@ TEST_F(ResolverPtrRefTest, ArrayIndexAccessorViaPointer) {
     // p[0]
 
     auto* v = Var("v", ty.array<i32, 3>());
-    auto* p = Let("p", AddressOf(v));
+    auto* p = Let("p", ast::Type{}, AddressOf(v));
     auto* expr = IndexAccessor(p, 0_i);
     WrapInFunction(v, p, expr);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -172,7 +172,7 @@ TEST_F(ResolverPtrRefTest, VectorIndexAccessorViaDerefPointer) {
     // (*p)[0]
 
     auto* v = Var("v", ty.vec3<i32>());
-    auto* p = Let("p", AddressOf(v));
+    auto* p = Let("p", ast::Type{}, AddressOf(v));
     auto* expr = IndexAccessor(Deref(p), 0_i);
     WrapInFunction(v, p, expr);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -193,7 +193,7 @@ TEST_F(ResolverPtrRefTest, VectorIndexAccessorViaPointer) {
     // p[0]
 
     auto* v = Var("v", ty.vec3<i32>());
-    auto* p = Let("p", AddressOf(v));
+    auto* p = Let("p", ast::Type{}, AddressOf(v));
     auto* expr = IndexAccessor(p, 0_i);
     WrapInFunction(v, p, expr);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -214,7 +214,7 @@ TEST_F(ResolverPtrRefTest, VectorMemberAccessorViaDerefPointer) {
     // (*p).x
 
     auto* v = Var("v", ty.vec3<i32>());
-    auto* p = Let("p", AddressOf(v));
+    auto* p = Let("p", ast::Type{}, AddressOf(v));
     auto* expr = MemberAccessor(Deref(p), "x");
     WrapInFunction(v, p, expr);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -235,7 +235,7 @@ TEST_F(ResolverPtrRefTest, VectorMemberAccessorViaPointer) {
     // p.x
 
     auto* v = Var("v", ty.vec3<i32>());
-    auto* p = Let("p", AddressOf(v));
+    auto* p = Let("p", ast::Type{}, AddressOf(v));
     auto* expr = MemberAccessor(p, "x");
     WrapInFunction(v, p, expr);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -256,7 +256,7 @@ TEST_F(ResolverPtrRefTest, MatrixIndexAccessorViaDerefPointer) {
     // (*p)[0]
 
     auto* v = Var("v", ty.mat2x3<f32>());
-    auto* p = Let("p", AddressOf(v));
+    auto* p = Let("p", ast::Type{}, AddressOf(v));
     auto* expr = IndexAccessor(Deref(p), 0_i);
     WrapInFunction(v, p, expr);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -280,7 +280,7 @@ TEST_F(ResolverPtrRefTest, MatrixIndexAccessorViaPointer) {
     // p[0]
 
     auto* v = Var("v", ty.mat2x3<f32>());
-    auto* p = Let("p", AddressOf(v));
+    auto* p = Let("p", ast::Type{}, AddressOf(v));
     auto* expr = IndexAccessor(p, 0_i);
     WrapInFunction(v, p, expr);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -308,7 +308,7 @@ TEST_F(ResolverPtrRefTest, StructMemberAccessorViaDerefPointer) {
                                  Member("a", ty.i32()),
                              });
     auto* v = Var("v", ty.Of(s));
-    auto* p = Let("p", AddressOf(v));
+    auto* p = Let("p", ast::Type{}, AddressOf(v));
     auto* expr = MemberAccessor(Deref(p), "a");
     WrapInFunction(v, p, expr);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -333,7 +333,7 @@ TEST_F(ResolverPtrRefTest, StructMemberAccessorViaPointer) {
                                  Member("a", ty.i32()),
                              });
     auto* v = Var("v", ty.Of(s));
-    auto* p = Let("p", AddressOf(v));
+    auto* p = Let("p", ast::Type{}, AddressOf(v));
     auto* expr = MemberAccessor(p, "a");
     WrapInFunction(v, p, expr);
     EXPECT_TRUE(r()->Resolve()) << r()->error();

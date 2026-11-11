@@ -161,7 +161,7 @@ TEST_F(ResolverVariableValidationTest, LetTypeNotConstructible) {
     // let t2 : t1;
     auto* t1 = GlobalVar("t1", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
                          Group(0_a), Binding(0_a));
-    auto* t2 = Let(Source{{56, 78}}, "t2", Expr(t1));
+    auto* t2 = Let(Source{{56, 78}}, "t2", ast::Type{}, Expr(t1));
     WrapInFunction(t2);
 
     wgsl::AllowedFeatures allowed_features{};
@@ -486,7 +486,7 @@ TEST_F(ResolverVariableValidationTest, ConstInitWithOverride) {
 }
 
 TEST_F(ResolverVariableValidationTest, ConstInitWithLet) {
-    auto* l = Let("v", Expr(1_i));
+    auto* l = Let("v", ast::Type{}, Expr(1_i));
     auto* c = Const("c", ast::Type{}, Expr(Source{{12, 34}}, l));
     WrapInFunction(l, Decl(Source{{56, 78}}, c));
 

@@ -43,7 +43,7 @@ TEST_F(ResolverTextureAndSamplerLetExtensionTest, UseWithoutFeature) {
               ty.sampled_texture(core::type::TextureDimension::k2d, ty.i32()), Group(0_a),
               Binding(0_a));
 
-    WrapInFunction(Decl(Let("l", Expr("tex"))));
+    WrapInFunction(Decl(Let("l", ast::Type{}, Expr("tex"))));
 
     wgsl::AllowedFeatures allowed_features{};
 
@@ -57,7 +57,7 @@ TEST_F(ResolverTextureAndSamplerLetExtensionTest, UseWithFeature) {
               ty.sampled_texture(core::type::TextureDimension::k2d, ty.i32()), Group(0_a),
               Binding(0_a));
 
-    WrapInFunction(Decl(Let("l", Expr("tex"))));
+    WrapInFunction(Decl(Let("l", ast::Type{}, Expr("tex"))));
 
     wgsl::AllowedFeatures allowed_features{};
     allowed_features.features.insert(wgsl::LanguageFeature::kTextureAndSamplerLet);

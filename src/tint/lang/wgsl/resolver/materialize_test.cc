@@ -923,7 +923,7 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
             break;
         }
         case Method::kLet: {
-            WrapInFunction(Decl(Let("a", abstract_expr())));
+            WrapInFunction(Decl(Let("a", ast::Type{}, abstract_expr())));
             break;
         }
         case Method::kBitcastI32Arg: {

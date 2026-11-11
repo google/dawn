@@ -120,7 +120,7 @@ TEST_F(WgslASTPrinterTest, EmitVariable_Let_Explicit) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitVariable_Let_Inferred) {
-    auto* v = Let("a", Expr(1_f));
+    auto* v = Let("a", ast::Type{}, Expr(1_f));
     WrapInFunction(v);
 
     ASTPrinter& gen = Build();

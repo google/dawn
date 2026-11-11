@@ -339,9 +339,9 @@ TEST_F(ResolverCallValidationTest, ComplexPointerChain) {
     Func("main", tint::Empty, ty.void_(),
          Vector{
              Decl(Var("v", ty.array<i32, 4>())),
-             Decl(Let("p1", AddressOf("v"))),
-             Decl(Let("p2", Expr("p1"))),
-             Decl(Let("p3", AddressOf(Deref("p2")))),
+             Decl(Let("p1", ast::Type{}, AddressOf("v"))),
+             Decl(Let("p2", ast::Type{}, Expr("p1"))),
+             Decl(Let("p3", ast::Type{}, AddressOf(Deref("p2")))),
              CallStmt(Call("foo", AddressOf(Source{{12, 34}}, Deref("p3")))),
          },
          Vector{
@@ -369,9 +369,9 @@ TEST_F(ResolverCallValidationTest, ComplexPointerChain_NotWholeVar) {
     Func("main", tint::Empty, ty.void_(),
          Vector{
              Decl(Var("v", ty.array<i32, 4>())),
-             Decl(Let("p1", AddressOf("v"))),
-             Decl(Let("p2", Expr("p1"))),
-             Decl(Let("p3", AddressOf(IndexAccessor(Deref("p2"), 0_a)))),
+             Decl(Let("p1", ast::Type{}, AddressOf("v"))),
+             Decl(Let("p2", ast::Type{}, Expr("p1"))),
+             Decl(Let("p3", ast::Type{}, AddressOf(IndexAccessor(Deref("p2"), 0_a)))),
              CallStmt(Call("foo", AddressOf(Source{{12, 34}}, Deref("p3")))),
          },
          Vector{

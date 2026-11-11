@@ -1481,7 +1481,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, InferredType) {
     GlobalVar("a", Expr(1_i));
     GlobalConst("b", Expr(1_i));
     WrapInFunction(Var("c", Expr(1_i)),  //
-                   Let("d", Expr(1_i)));
+                   Let("d", ast::Type{}, Expr(1_i)));
     Build();
 }
 

@@ -62,7 +62,8 @@ TEST_F(WgslUnaryOpTest, Complement) {
 
 TEST_F(WgslUnaryOpTest, Indirection) {
     GlobalVar("G", ty.f32(), core::AddressSpace::kPrivate);
-    auto* p = Let("expr", create<ast::UnaryOpExpression>(core::UnaryOp::kAddressOf, Expr("G")));
+    auto* p = Let("expr", ast::Type{},
+                  create<ast::UnaryOpExpression>(core::UnaryOp::kAddressOf, Expr("G")));
     auto* op = create<ast::UnaryOpExpression>(core::UnaryOp::kIndirection, Expr("expr"));
     WrapInFunction(p, op);
 

@@ -62,7 +62,7 @@ TEST_F(ResolverLoadTest, LetInitializer) {
     // let l = ref;
     auto* ident = Expr("ref");
     WrapInFunction(Var("ref", Expr(1_i)),  //
-                   Let("l", ident));
+                   Let("l", ast::Type{}, ident));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* load = Sem().Get<sem::Load>(ident);
@@ -126,7 +126,7 @@ TEST_F(ResolverLoadTest, UnaryOp_NoLoad) {
     // let v = &ref;
     auto* ident = Expr("ref");
     WrapInFunction(Var("ref", Expr(1_i)),  //
-                   Let("v", AddressOf(ident)));
+                   Let("v", ast::Type{}, AddressOf(ident)));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* var_user = Sem().Get<sem::VariableUser>(ident);
@@ -197,8 +197,8 @@ TEST_F(ResolverLoadTest, MultiComponentSwizzle_FromPointer) {
     // let ptr = &ref;
     // var v = ptr.xyz;
     auto* ident = Expr("ptr");
-    WrapInFunction(Var("ref", Call<vec4<i32>>(1_i)),  //
-                   Let("ptr", AddressOf("ref")),      //
+    WrapInFunction(Var("ref", Call<vec4<i32>>(1_i)),           //
+                   Let("ptr", ast::Type{}, AddressOf("ref")),  //
                    Var("v", MemberAccessor(ident, "xyz")));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -398,7 +398,7 @@ TEST_F(ResolverLoadTest, AddressOf) {
     // let l = &ref;
     auto* ident = Expr("ref");
     WrapInFunction(Var("ref", Expr(1_i)),  //
-                   Let("l", AddressOf(ident)));
+                   Let("l", ast::Type{}, AddressOf(ident)));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* no_load = Sem().GetVal(ident);

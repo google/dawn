@@ -458,7 +458,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundXor) {
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LogicalAnd) {
     Func("my_func", tint::Empty, ty.bool_(), Vector{Return(true)});
-    auto* let = Let("logical_and", LogicalAnd(Call("my_func"), false));
+    auto* let = Let("logical_and", ast::Type{}, LogicalAnd(Call("my_func"), false));
     auto* expr = If(let, Block());
     WrapInFunction(let, expr);
 
@@ -495,7 +495,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LogicalAnd) {
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LogicalOr) {
     Func("my_func", tint::Empty, ty.bool_(), Vector{Return(true)});
-    auto* let = Let("logical_or", LogicalOr(Call("my_func"), true));
+    auto* let = Let("logical_or", ast::Type{}, LogicalOr(Call("my_func"), true));
     auto* expr = If(let, Block());
     WrapInFunction(let, expr);
 

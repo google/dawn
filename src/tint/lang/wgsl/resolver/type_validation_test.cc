@@ -477,7 +477,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_FunctionLet_Implicit)
     GlobalVar("w", ty.array(ty.f32(), Expr("size")), core::AddressSpace::kWorkgroup);
     Func("f", tint::Empty, ty.void_(),
          Vector{
-             Decl(Let(Source{{12, 34}}, "a", Expr("w"))),
+             Decl(Let(Source{{12, 34}}, "a", ast::Type{}, Expr("w"))),
          });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -590,7 +590,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FunctionLet) {
     //   let size = 10;
     //   var a : array<f32, size>;
     // }
-    auto* size = Let("size", Expr(10_i));
+    auto* size = Let("size", ast::Type{}, Expr(10_i));
     auto* a = Var("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")));
     WrapInFunction(size, a);
     EXPECT_FALSE(r()->Resolve());

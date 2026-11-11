@@ -7701,7 +7701,7 @@ TEST_F(UniformityAnalysisTest, MaximumNumberOfPointerParameters) {
     for (int i = 1; i < 255; i++) {
         rhs_init = b.Add(rhs_init, b.Deref("p" + std::to_string(i)));
     }
-    foo_body.Push(b.Decl(b.Let("rhs", rhs_init)));
+    foo_body.Push(b.Decl(b.Let("rhs", ast::Type{}, rhs_init)));
     for (int i = 0; i < 255; i++) {
         params.Push(b.Param("p" + std::to_string(i), ty.ptr<function, i32>()));
         if (i > 0) {

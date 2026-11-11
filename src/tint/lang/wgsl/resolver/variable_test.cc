@@ -281,7 +281,7 @@ TEST_F(ResolverVariableTest, LocalLet_InheritsAccessFromOriginatingVariable) {
                               core::Access::kReadWrite, Binding(0_a), Group(0_a));
 
     auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 3_i);
-    auto* ptr = Let("p", AddressOf(expr));
+    auto* ptr = Let("p", ast::Type{}, AddressOf(expr));
 
     WrapInFunction(ptr);
 
@@ -617,7 +617,7 @@ TEST_F(ResolverVariableTest, GlobalVar_UseTemplatedIdent) {
     GlobalVar(Source{{56, 78}}, "a", ty.i32(), core::AddressSpace::kPrivate);
     Func("F", tint::Empty, ty.void_(),
          Vector{
-             Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
+             Decl(Let("l", ast::Type{}, Expr(Ident(Source{{12, 34}}, "a", "i32")))),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -635,7 +635,7 @@ TEST_F(ResolverVariableTest, GlobalConst_UseTemplatedIdent) {
     GlobalConst(Source{{56, 78}}, "a", Expr(1_i));
     Func("F", tint::Empty, ty.void_(),
          Vector{
-             Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
+             Decl(Let("l", ast::Type{}, Expr(Ident(Source{{12, 34}}, "a", "i32")))),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -653,7 +653,7 @@ TEST_F(ResolverVariableTest, GlobalOverride_UseTemplatedIdent) {
     Override(Source{{56, 78}}, "a", Expr(1_i));
     Func("F", tint::Empty, ty.void_(),
          Vector{
-             Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
+             Decl(Let("l", ast::Type{}, Expr(Ident(Source{{12, 34}}, "a", "i32")))),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -668,7 +668,7 @@ TEST_F(ResolverVariableTest, Param_UseTemplatedIdent) {
 
     Func("F", Vector{Param(Source{{56, 78}}, "a", ty.i32())}, ty.void_(),
          Vector{
-             Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
+             Decl(Let("l", ast::Type{}, Expr(Ident(Source{{12, 34}}, "a", "i32")))),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -685,7 +685,7 @@ TEST_F(ResolverVariableTest, LocalVar_UseTemplatedIdent) {
     Func("F", tint::Empty, ty.void_(),
          Vector{
              Decl(Var(Source{{56, 78}}, "a", ty.i32())),
-             Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
+             Decl(Let("l", ast::Type{}, Expr(Ident(Source{{12, 34}}, "a", "i32")))),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -701,8 +701,8 @@ TEST_F(ResolverVariableTest, Let_UseTemplatedIdent) {
 
     Func("F", tint::Empty, ty.void_(),
          Vector{
-             Decl(Let(Source{{56, 78}}, "a", Expr(1_i))),
-             Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
+             Decl(Let(Source{{56, 78}}, "a", ast::Type{}, Expr(1_i))),
+             Decl(Let("l", ast::Type{}, Expr(Ident(Source{{12, 34}}, "a", "i32")))),
          });
 
     EXPECT_FALSE(r()->Resolve());

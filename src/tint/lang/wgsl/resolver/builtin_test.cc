@@ -77,10 +77,10 @@ TEST_F(ResolverBuiltinTest, SameOverloadReturnsSameCallTarget) {
     auto* select_a = Call(wgsl::BuiltinFn::kSelect, 1_i, 2_i, true);
     auto* select_b = Call(wgsl::BuiltinFn::kSelect, 3_i, 4_i, false);
     auto* select_c = Call(wgsl::BuiltinFn::kSelect, 5_u, 6_u, true);
-    WrapInFunction(Decl(Let("i", Expr(42_i))),  //
-                   Decl(Let("a", select_a)),    //
-                   Decl(Let("b", select_b)),    //
-                   Decl(Let("c", select_c)));
+    WrapInFunction(Decl(Let("i", ast::Type{}, Expr(42_i))),  //
+                   Decl(Let("a", ast::Type{}, select_a)),    //
+                   Decl(Let("b", ast::Type{}, select_b)),    //
+                   Decl(Let("c", ast::Type{}, select_c)));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -2287,9 +2287,10 @@ TEST_F(ResolverBuiltinTest, TextureBuiltinsMultisampled2DArray) {
     auto* numSamples = Call("textureNumSamples", "texture");
     auto* load = Call("textureLoad", "texture", Call<vec2<i32>>(1_i, 2_i), 3_i, 4_i);
 
-    WrapInFunction(Decl(Let("dimensions", dimensions)),  //
-                   Decl(Let("num_layers", numLayers)), Decl(Let("num_samples", numSamples)),
-                   Decl(Let("load", load)));
+    WrapInFunction(Decl(Let("dimensions", ast::Type{}, dimensions)),  //
+                   Decl(Let("num_layers", ast::Type{}, numLayers)),
+                   Decl(Let("num_samples", ast::Type{}, numSamples)),
+                   Decl(Let("load", ast::Type{}, load)));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 

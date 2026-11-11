@@ -1013,7 +1013,7 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastLaneArgMustBeConst) {
     Enable(wgsl::Extension::kSubgroups);
     Func("func", tint::Empty, ty.void_(),
          Vector{
-             Decl(Let("lane", Expr(1_u))),
+             Decl(Let("lane", ast::Type{}, Expr(1_u))),
              Ignore(Call("subgroupBroadcast", 1_f, Ident(Source{{12, 34}}, "lane"))),
          });
     EXPECT_FALSE(r()->Resolve());
@@ -1026,7 +1026,7 @@ TEST_F(ResolverBuiltinValidationTest, QuadBroadcastIdArgMustBeConst) {
     Enable(wgsl::Extension::kSubgroups);
     Func("func", tint::Empty, ty.void_(),
          Vector{
-             Decl(Let("id", Expr(1_u))),
+             Decl(Let("id", ast::Type{}, Expr(1_u))),
              Ignore(Call("quadBroadcast", 1_f, Ident(Source{{12, 34}}, "id"))),
          });
     EXPECT_FALSE(r()->Resolve());
