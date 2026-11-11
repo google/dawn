@@ -54,6 +54,7 @@ src:*gen{/,\\}src{/,\\}dawn{/,\\}native{/,\\}ProcTable.cpp
 src:*src{/,\\}dawn{/,\\}tests{/,\\}end2end{/,\\}EventTests.cpp
 src:*src{/,\\}dawn{/,\\}tests{/,\\}white_box{/,\\}GLGraphicsResetTests.cpp
 src:*src{/,\\}dawn{/,\\}tests{/,\\}unittests{/,\\}GetProcAddressTests.cpp
+src:*src{/,\\}dawn{/,\\}tests{/,\\}unittests{/,\\}validation{/,\\}StableInstanceValidationTests.cpp
 # For some unknown reason this one filepath can get a backslash on Windows.
 src:*gen{/,\\}src{/,\\}dawn{/,\\}wire{/,\\}client{/,\\}ApiProcs_autogen.cpp.inc
 # Needed to cast procs in Windows.

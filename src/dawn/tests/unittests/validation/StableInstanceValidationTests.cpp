@@ -349,7 +349,11 @@ TEST_F(StableInstanceValidationTest, AdapterHidesExperimentalFeatures) {
     wgpu::SupportedFeatures stableFeatures;
     adapter.GetFeatures(&stableFeatures);
     EXPECT_GT(stableFeatures.featureCount, 0u);
-    for (wgpu::FeatureName f : std::span(stableFeatures.features, stableFeatures.featureCount)) {
+
+    // SAFETY: features always points to at least featureCount entries.
+    std::span<const wgpu::FeatureName> DAWN_UNSAFE_BUFFERS(
+        stableFeaturesSpan(stableFeatures.features, stableFeatures.featureCount));
+    for (wgpu::FeatureName f : stableFeaturesSpan) {
         EXPECT_TRUE(IsStableFeature(f)) << dawn::to_underlying(f);
     }
 
@@ -659,15 +663,21 @@ TEST_F(StableInstanceValidationTest, StableInstanceFeatureQueries) {
     native::GetProcs().getInstanceFeatures(&allFeatures);
     EXPECT_LT(stableFeatures.featureCount, allFeatures.featureCount);
 
-    std::span<const WGPUInstanceFeatureName> stableSpan(stableFeatures.features,
-                                                        stableFeatures.featureCount);
-    for (WGPUInstanceFeatureName f : stableSpan) {
+    // SAFETY: features always points to at least featureCount entries.
+    std::span<const WGPUInstanceFeatureName> DAWN_UNSAFE_BUFFERS(
+        stableFeaturesSpan(stableFeatures.features, stableFeatures.featureCount));
+    for (WGPUInstanceFeatureName f : stableFeaturesSpan) {
         EXPECT_NE(f, WGPUInstanceFeatureName_ShaderSourceSPIRV);
         EXPECT_TRUE(mStableProcs.hasInstanceFeature(f));
         EXPECT_TRUE(native::GetProcs().hasInstanceFeature(f));
     }
-    for (WGPUInstanceFeatureName f : std::span(allFeatures.features, allFeatures.featureCount)) {
-        const bool inStableList = std::ranges::find(stableSpan, f) != stableSpan.end();
+
+    // SAFETY: features always points to at least featureCount entries.
+    std::span<const WGPUInstanceFeatureName> DAWN_UNSAFE_BUFFERS(
+        allFeaturesSpan(allFeatures.features, allFeatures.featureCount));
+    for (WGPUInstanceFeatureName f : allFeaturesSpan) {
+        const bool inStableList =
+            std::ranges::find(stableFeaturesSpan, f) != stableFeaturesSpan.end();
         EXPECT_EQ(inStableList, static_cast<bool>(mStableProcs.hasInstanceFeature(f)));
     }
     native::GetProcs().supportedInstanceFeaturesFreeMembers(stableFeatures);
