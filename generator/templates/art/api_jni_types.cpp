@@ -104,6 +104,7 @@
             for (int idx = 0; idx != {{ size }}; idx++) {
                 {{ convert_to_kotlin(input + '[idx]', 'element', None, {'type': member.type})  | indent(4) }}
                 env->SetObjectArrayElement({{ output }}, idx, element);
+                env->DeleteLocalRef(element);
             }
         {% elif member.type.category in ['bitmask', 'enum'] or member.type.name.get() in ['int', 'int32_t', 'uint32_t'] %}
             jintArray {{ output }} = env->NewIntArray({{ size }});
@@ -122,12 +123,10 @@
             {{ unreachable_code('Unsupported array type in convert_to_kotlin: ' ~ member.type.name.get()) }}
         {% endif %}
     {% elif member.type.category == 'object' %}
-        jobject {{ output }};
-        {
-            jclass clz = classes->{{ member.type.name.camelCase() }};
-            jmethodID init = env->GetMethodID(clz, "<init>", "(J)V");
-            {{ output }} = env->NewObject(clz, init, reinterpret_cast<jlong>({{ input }}));
-        }
+        jobject {{ output }} = env->NewObject(
+                classes->{{ member.type.name.camelCase() }},
+                classes->{{ member.type.name.camelCase() }}Ctor,
+                reinterpret_cast<jlong>({{ input }}));
     {% elif member.type.category == 'structure' %}
         jobject {{ output }} = ToKotlin(env, {{ '&' if member.annotation not in ['*', 'const*'] }}{{ input }});
     {% elif member.type.category in ['bitmask', 'enum', 'native'] %}
@@ -137,3 +136,4 @@
         {{ unreachable_code('Unsupported type: ' + member.type.name.get()) }}
     {% endif %}
 {% endmacro %}
+

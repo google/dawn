@@ -297,6 +297,7 @@ DEFAULT extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved)
                          static_cast<jint>(std::size(kGPUMethods)))) {
         return JNI_ERR;
     }
+    JNIClasses::getInstance(env);
     return JNI_VERSION_1_6;
 }
 

@@ -194,14 +194,7 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
             JNIClasses* classes = JNIClasses::getInstance(env);
             //* Make a new Kotlin object to receive a copy of the structure.
             jclass clz = classes->{{ structure.name.camelCase() }};
-            //* JNI signature needs to be built using the same logic used in the Kotlin structure spec.
-            jmethodID ctor = env->GetMethodID(clz, "<init>", "(
-            {%- for member in kotlin_record_members(structure.members) %}
-                {{- jni_signature(member) -}}
-            {%- endfor -%}
-            {%- for structure in chain_children[structure.name.get()] -%}
-                {{- jni_signature({'type': structure}) -}}
-            {%- endfor %})V");
+            jmethodID ctor = classes->{{ structure.name.camelCase() }}Ctor;
             //* Each field converted using the individual value converter.
             {% for member in kotlin_record_members(structure.members) %}
                 {{ convert_to_kotlin('input->' + member.name.camelCase(), member.name.camelCase(),
@@ -244,6 +237,14 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
                     {{ structure.name.camelCase() -}}
             {%- endfor -%}
             );
+            {% for member in kotlin_record_members(structure.members) %}
+                {% if member.type.category != 'kotlin type' and ((member.length and (member.length != 'constant' or member.constant_length != 1)) or member.type.category in ['object', 'structure']) %}
+                    env->DeleteLocalRef({{ member.name.camelCase() }});
+                {% endif %}
+            {% endfor %}
+            {% for structure in chain_children[structure.name.get()] %}
+                env->DeleteLocalRef({{ structure.name.camelCase() }});
+            {% endfor %}
             return converted;
         }
     {% endif %}
@@ -260,22 +261,25 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
         void ToNative(JNIContext* c, JNIEnv* env, jobject obj, {{ as_cType(structure.name) }}* converted) {
             {% if _kotlin_members or chain_children[structure.name.get()] %}
                 JNIClasses* classes = JNIClasses::getInstance(env);
-                jclass clz = classes->{{ structure.name.camelCase() }};
             {% endif %}
 
             {% if _kotlin_members %}
                 //* Use getters to fill in the Kotlin record that will get converted to our struct.
                 {{KotlinRecord}} kotlinRecord;
                 {% for member in _kotlin_members %}
-                    {
-                        {% set prefix = "is" if member.type.name.get() == "bool" else "get" %}
-                        jmethodID getter = env->GetMethodID(clz, "{{prefix}}{{member.name.CamelCase()}}", "(){{jni_signature(member)}}");
-                        CallGetter(env, getter, obj, &kotlinRecord.{{as_varName(member.name)}});
-                    }
+                    CallGetter(env, classes->{{ structure.name.camelCase() }}Get{{ member.name.CamelCase() }}, obj, &kotlinRecord.{{as_varName(member.name)}});
                 {% endfor %}
 
                 //* Fill all struct members from the Kotlin record.
                 ConvertInternal(c, kotlinRecord, converted);
+                //* `string view` (jstring) and jintArray local references are intentionally kept
+                //* alive here because JNIContext retains them until ~JNIContext() releases their
+                //* pinned buffers.
+                {% for member in _kotlin_members %}
+                    {% if member.type.name.get() != 'string view' and (member.type.category in ['object', 'structure', 'callback function', 'function pointer', 'kotlin type'] or (member.length and (member.length != 'constant' or member.constant_length != 1) and member.type.name.get() in ['char', 'float', 'void'])) %}
+                        env->DeleteLocalRef(kotlinRecord.{{as_varName(member.name)}});
+                    {% endif %}
+                {% endfor %}
             {% else %}
                 *converted = {};
             {% endif %}
@@ -285,13 +289,13 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
             {% endif %}
             {% for child in chain_children[structure.name.get()] %}
                 {
-                    jobject child = env->CallObjectMethod(obj,
-                            env->GetMethodID(clz, "get{{ child.name.CamelCase() }}", "()L{{ jni_name(child) }};"));
+                    jobject child = env->CallObjectMethod(obj, classes->{{ structure.name.camelCase() }}Get{{ child.name.CamelCase() }});
                     if (child) {
                         auto out = c->Alloc<{{ as_cType(child.name) }}>();
                         ToNative(c, env, child, out);
                         out->chain.next = converted->nextInChain;
                         converted->nextInChain = &out->chain;
+                        env->DeleteLocalRef(child);
                     }
                 }
             {% endfor %}

@@ -55,10 +55,27 @@ class JNIClasses {
          static JNIClasses* getInstance(JNIEnv* env);
          void DispatchPendingException(JNIEnv* env) const;
         {% for entity in has_kotlin_classes %}
-            jclass {{ entity.name.camelCase() }};
-            {%if entity.category == 'callback function' %}
+            {% if entity.category != 'structure' or entity.needs_n2k %}
+                jclass {{ entity.name.camelCase() }};
+            {% endif %}
+            {% if entity.category == 'callback function' %}
                 jclass {{ entity.name.camelCase() }}Runnable;
-            {%endif %}
+            {% elif entity.category == 'object' %}
+                jfieldID {{ entity.name.camelCase() }}Handle;
+                jmethodID {{ entity.name.camelCase() }}Ctor;
+            {% elif entity.category == 'structure' %}
+                {% if entity.needs_n2k %}
+                    jmethodID {{ entity.name.camelCase() }}Ctor;
+                {% endif %}
+                {% if entity.needs_k2n %}
+                    {% for member in kotlin_record_members(entity.members) %}
+                        jmethodID {{ entity.name.camelCase() }}Get{{ member.name.CamelCase() }};
+                    {% endfor %}
+                    {% for child in chain_children[entity.name.get()] %}
+                        jmethodID {{ entity.name.camelCase() }}Get{{ child.name.CamelCase() }};
+                    {% endfor %}
+                {% endif %}
+            {% endif %}
         {% endfor %}
         jclass gpuCallbackRunnable;
         jclass gpuCallbackErrorTypeRunnable;
@@ -66,16 +83,16 @@ class JNIClasses {
         jclass dawnException;
         jclass stringClass;
         jclass gpuHardwareBufferExternalTexture;
+        jmethodID gpuHardwareBufferExternalTextureCtor;
         jclass gpuHardwareBufferTexture;
+        jmethodID gpuHardwareBufferTextureCtor;
         jclass javaIllegalStateException;
         jclass javaUnsupportedOperationException;
         jclass javaThread;
         jmethodID threadCurrentThread;
         jmethodID threadGetUncaughtExceptionHandler;
         jmethodID uncaughtExceptionHandlerUncaughtException;
-        jclass parcelFileDescriptor;
         jmethodID pfdGetFd;
-        jmethodID pfdAdoptFd;
         // Special handling for GPUImportedHardwareBuffer, to prevent lookup on every frame.
         jfieldID originX;
         jfieldID originY;

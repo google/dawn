@@ -155,15 +155,8 @@ static wgpu::SharedTextureMemory createSharedTextureMemoryFromAhb(JNIEnv* env,
         return nullptr;
     }
 
-    jmethodID getHandle = env->GetMethodID(classes->device, "getHandle", "()J");
-    if (!getHandle || env->ExceptionCheck()) {
-        return nullptr;
-    }
-
-    WGPUDevice rawDevice = reinterpret_cast<WGPUDevice>(env->CallLongMethod(deviceObj, getHandle));
-    if (env->ExceptionCheck()) {
-        return nullptr;
-    }
+    WGPUDevice rawDevice =
+        reinterpret_cast<WGPUDevice>(env->GetLongField(deviceObj, classes->deviceHandle));
     if (!rawDevice) {
         env->ThrowNew(classes->javaIllegalStateException, "WGPUDevice handle is null.");
         return nullptr;
@@ -260,26 +253,12 @@ Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createTextureNative(JNI
         return nullptr;
     }
 
-    jclass texClz = classes->texture;
-    jmethodID texInit = env->GetMethodID(texClz, "<init>", "(J)V");
-    if (!texInit || env->ExceptionCheck()) {
-        ReleaseAHardwareBuffer(ahb);
-        return nullptr;
-    }
-    jclass wrapClz = classes->gpuHardwareBufferTexture;
-    const char* wrapSig = "(JLandroidx/webgpu/GPUTexture;)V";
-    jmethodID wrapInit = env->GetMethodID(wrapClz, "<init>", wrapSig);
-    if (!wrapInit || env->ExceptionCheck()) {
-        ReleaseAHardwareBuffer(ahb);
-        return nullptr;
-    }
-
     // Both GPUTexture and AhbTextureWrapper independently release a reference
     // on close(). Add GPUTexture's reference before constructing texture_kt so
     // texture_kt never holds an unowned handle.
     wgpuTextureAddRef(texture.Get());
     jlong texPtr = reinterpret_cast<jlong>(texture.Get());
-    jobject texture_kt = env->NewObject(texClz, texInit, texPtr);
+    jobject texture_kt = env->NewObject(classes->texture, classes->textureCtor, texPtr);
     if (!texture_kt || env->ExceptionCheck()) {
         wgpuTextureRelease(texture.Get());
         ReleaseAHardwareBuffer(ahb);
@@ -293,9 +272,10 @@ Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createTextureNative(JNI
     wrapper->device = std::move(device);
 
     jlong wrapPtr = reinterpret_cast<jlong>(wrapper.get());
-    jobject wrapperObj = env->NewObject(wrapClz, wrapInit, wrapPtr, texture_kt);
+    jobject wrapperObj = env->NewObject(classes->gpuHardwareBufferTexture,
+                                        classes->gpuHardwareBufferTextureCtor, wrapPtr, texture_kt);
+    env->DeleteLocalRef(texture_kt);
     if (!wrapperObj || env->ExceptionCheck()) {
-        env->DeleteLocalRef(texture_kt);
         wgpuTextureRelease(wrapper->texture.Get());
         ReleaseAHardwareBuffer(wrapper->ahb);
         return nullptr;
@@ -374,50 +354,16 @@ Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createExternalTextureNa
     wgpu::ExternalTextureDescriptor extDesc = {};
     extDesc.plane0 = view;
 
-    jclass descClass = env->GetObjectClass(descriptorObj);
-    if (!descClass || env->ExceptionCheck()) {
-        ReleaseAHardwareBuffer(ahb);
-        return nullptr;
-    }
-
-    auto callObj = [&](const char* name, const char* sig) -> jobject {
-        if (env->ExceptionCheck()) {
-            return nullptr;
-        }
-        jmethodID mid = env->GetMethodID(descClass, name, sig);
-        if (!mid || env->ExceptionCheck()) {
-            return nullptr;
-        }
-        return env->CallObjectMethod(descriptorObj, mid);
-    };
-
-    const char* csSig = "()Landroidx/webgpu/GPUColorSpaceDawn;";
-    jobject colorSpaceObj = callObj("getSrcColorSpace", csSig);
+    jobject colorSpaceObj =
+        env->CallObjectMethod(descriptorObj, classes->externalTextureDescriptorGetSrcColorSpace);
     if (!colorSpaceObj || env->ExceptionCheck()) {
-        env->DeleteLocalRef(descClass);
         ReleaseAHardwareBuffer(ahb);
         if (!env->ExceptionCheck()) {
-            const char* msg = "Missing ExternalTexture srcColorSpace.";
-            env->ThrowNew(classes->javaIllegalStateException, msg);
+            env->ThrowNew(classes->javaIllegalStateException,
+                          "Missing ExternalTexture srcColorSpace.");
         }
         return nullptr;
     }
-
-    jmethodID dstCsMid = env->GetMethodID(descClass, "getDstColorSpace", "()I");
-    if (!dstCsMid || env->ExceptionCheck()) {
-        env->DeleteLocalRef(colorSpaceObj);
-        env->DeleteLocalRef(descClass);
-        ReleaseAHardwareBuffer(ahb);
-        return nullptr;
-    }
-    jint dstColorSpaceInt = env->CallIntMethod(descriptorObj, dstCsMid);
-    if (env->ExceptionCheck()) {
-        env->DeleteLocalRef(colorSpaceObj);
-        env->DeleteLocalRef(descClass);
-        ReleaseAHardwareBuffer(ahb);
-        return nullptr;
-    }
-
     wgpu::ColorSpaceDawn srcColorSpace = {};
     srcColorSpace.primaries = static_cast<wgpu::ColorSpacePrimariesDawn>(
         env->GetIntField(colorSpaceObj, classes->colorSpacePrimaries));
@@ -429,6 +375,13 @@ Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createExternalTextureNa
         env->GetIntField(colorSpaceObj, classes->colorSpaceYCbCrMatrix));
     env->DeleteLocalRef(colorSpaceObj);
 
+    jint dstColorSpaceInt =
+        env->CallIntMethod(descriptorObj, classes->externalTextureDescriptorGetDstColorSpace);
+    if (env->ExceptionCheck()) {
+        ReleaseAHardwareBuffer(ahb);
+        return nullptr;
+    }
+
     wgpu::PredefinedColorSpace dstColorSpace =
         static_cast<wgpu::PredefinedColorSpace>(dstColorSpaceInt);
 
@@ -436,7 +389,6 @@ Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createExternalTextureNa
     wgpu::Status status = dawn::ComputeExternalTextureParams(srcColorSpace, dstColorSpace, &params);
 
     if (status != wgpu::Status::Success) {
-        env->DeleteLocalRef(descClass);
         ReleaseAHardwareBuffer(ahb);
         env->ThrowNew(classes->javaIllegalStateException,
                       "Failed to compute external texture params.");
@@ -448,17 +400,20 @@ Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createExternalTextureNa
     extDesc.dstTransferFunctionParameters = params.dstTransferFunction.data();
     extDesc.gamutConversionMatrix = params.gamutConversionMatrix.data();
 
-    const char* origSig = "()Landroidx/webgpu/GPUOrigin2D;";
-    jobject originObj = callObj("getCropOrigin", origSig);
-    if (originObj) {
+    jobject originObj =
+        env->CallObjectMethod(descriptorObj, classes->externalTextureDescriptorGetCropOrigin);
+    if (originObj && !env->ExceptionCheck()) {
         extDesc.cropOrigin.x = env->GetIntField(originObj, classes->originX);
         extDesc.cropOrigin.y = env->GetIntField(originObj, classes->originY);
         env->DeleteLocalRef(originObj);
     }
 
-    const char* extSig = "()Landroidx/webgpu/GPUExtent2D;";
-    jobject cropSizeObj = callObj("getCropSize", extSig);
-    if (cropSizeObj) {
+    jobject cropSizeObj = nullptr;
+    if (!env->ExceptionCheck()) {
+        cropSizeObj =
+            env->CallObjectMethod(descriptorObj, classes->externalTextureDescriptorGetCropSize);
+    }
+    if (cropSizeObj && !env->ExceptionCheck()) {
         extDesc.cropSize.width = env->GetIntField(cropSizeObj, classes->extentWidth);
         extDesc.cropSize.height = env->GetIntField(cropSizeObj, classes->extentHeight);
         env->DeleteLocalRef(cropSizeObj);
@@ -471,29 +426,19 @@ Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createExternalTextureNa
     }
 
     extDesc.apparentSize = extDesc.cropSize;
-    jmethodID mirrorMid = nullptr;
     if (!env->ExceptionCheck()) {
-        mirrorMid = env->GetMethodID(descClass, "isMirrored", "()Z");
-    }
-    if (mirrorMid && !env->ExceptionCheck()) {
-        jboolean mirrored = env->CallBooleanMethod(descriptorObj, mirrorMid);
-        extDesc.mirrored = static_cast<bool>(mirrored);
+        extDesc.mirrored = static_cast<bool>(
+            env->CallBooleanMethod(descriptorObj, classes->externalTextureDescriptorGetMirrored));
     }
 
-    jmethodID rotMid = nullptr;
-    if (!env->ExceptionCheck()) {
-        rotMid = env->GetMethodID(descClass, "getRotation", "()I");
-    }
     jint rotation = 0;
-    if (rotMid && !env->ExceptionCheck()) {
-        rotation = env->CallIntMethod(descriptorObj, rotMid);
+    if (!env->ExceptionCheck()) {
+        rotation = env->CallIntMethod(descriptorObj, classes->externalTextureDescriptorGetRotation);
     }
-    env->DeleteLocalRef(descClass);
-    if (!mirrorMid || !rotMid || env->ExceptionCheck()) {
+    if (env->ExceptionCheck()) {
         ReleaseAHardwareBuffer(ahb);
         return nullptr;
     }
-
     switch (rotation) {
         case 2:
             extDesc.rotation = wgpu::ExternalTextureRotation::Rotate90Degrees;
@@ -515,26 +460,13 @@ Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createExternalTextureNa
         return nullptr;
     }
 
-    jclass extClz = classes->externalTexture;
-    jmethodID extInit = env->GetMethodID(extClz, "<init>", "(J)V");
-    if (!extInit || env->ExceptionCheck()) {
-        ReleaseAHardwareBuffer(ahb);
-        return nullptr;
-    }
-    jclass wrapClz = classes->gpuHardwareBufferExternalTexture;
-    const char* wrapSig = "(JLandroidx/webgpu/GPUExternalTexture;)V";
-    jmethodID wrapInit = env->GetMethodID(wrapClz, "<init>", wrapSig);
-    if (!wrapInit || env->ExceptionCheck()) {
-        ReleaseAHardwareBuffer(ahb);
-        return nullptr;
-    }
-
     // Both GPUExternalTexture and AhbTextureWrapper independently release a
     // reference on close(). Add GPUExternalTexture's reference before
     // constructing extTex_kt so extTex_kt never holds an unowned handle.
     wgpuExternalTextureAddRef(externalTexture.Get());
     jlong extPtr = reinterpret_cast<jlong>(externalTexture.Get());
-    jobject extTex_kt = env->NewObject(extClz, extInit, extPtr);
+    jobject extTex_kt =
+        env->NewObject(classes->externalTexture, classes->externalTextureCtor, extPtr);
     if (!extTex_kt || env->ExceptionCheck()) {
         wgpuExternalTextureRelease(externalTexture.Get());
         ReleaseAHardwareBuffer(ahb);
@@ -550,9 +482,11 @@ Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createExternalTextureNa
     wrapper->device = std::move(device);
 
     jlong wrapPtr = reinterpret_cast<jlong>(wrapper.get());
-    jobject wrapperObj = env->NewObject(wrapClz, wrapInit, wrapPtr, extTex_kt);
+    jobject wrapperObj =
+        env->NewObject(classes->gpuHardwareBufferExternalTexture,
+                       classes->gpuHardwareBufferExternalTextureCtor, wrapPtr, extTex_kt);
+    env->DeleteLocalRef(extTex_kt);
     if (!wrapperObj || env->ExceptionCheck()) {
-        env->DeleteLocalRef(extTex_kt);
         wgpuExternalTextureRelease(wrapper->externalTexture.Get());
         ReleaseAHardwareBuffer(wrapper->ahb);
         return nullptr;

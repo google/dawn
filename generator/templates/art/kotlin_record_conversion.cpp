@@ -288,16 +288,18 @@
                             out = array;
 
                             {% if member.type.category == 'object' %}
-                                jclass memberClass = classes->{{ member.type.name.camelCase() }};
-                                jmethodID getHandle = env->GetMethodID(memberClass, "getHandle", "()J");
+                                jfieldID handleField = classes->{{ member.type.name.camelCase() }}Handle;
                                 for (int idx = 0; idx != outLength; idx++) {
                                     jobject element = env->GetObjectArrayElement(in, idx);
-                                    array[idx] = reinterpret_cast<{{ as_cType(member.type.name) }}>(
-                                            env->CallLongMethod(element, getHandle));
+                                    array[idx] = element ? reinterpret_cast<{{ as_cType(member.type.name) }}>(
+                                            env->GetLongField(element, handleField)) : nullptr;
+                                    env->DeleteLocalRef(element);
                                 }
                             {% elif member.type.category == 'structure' %}
                                 for (int idx = 0; idx != outLength; idx++) {
-                                    ToNative(c, env, env->GetObjectArrayElement(in, idx), &array[idx]);
+                                    jobject element = env->GetObjectArrayElement(in, idx);
+                                    ToNative(c, env, element, &array[idx]);
+                                    env->DeleteLocalRef(element);
                                 }
                             {% else %}
                                 {{ unreachable_code() }}
@@ -327,10 +329,8 @@
                         out = reinterpret_cast<{{as_cType(member.type.name)}}>(in);
                     {% else %}
                         if (in != nullptr) {
-                            jclass memberClass = classes->{{ member.type.name.camelCase() }};
-                            jmethodID getHandle = env->GetMethodID(memberClass, "getHandle", "()J");
                             out = reinterpret_cast<{{as_cType(member.type.name)}}>(
-                                    env->CallLongMethod(in, getHandle));
+                                    env->GetLongField(in, classes->{{ member.type.name.camelCase() }}Handle));
                         } else {
                             out = nullptr;
                         }

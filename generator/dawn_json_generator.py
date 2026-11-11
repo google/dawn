@@ -554,15 +554,13 @@ def compute_kotlin_params(loaded_json,
 
     check_jvm_overload_usage(params_kotlin['by_category']['function'])
 
-    params_kotlin['has_kotlin_classes'] = (
-        [
-            callback for callback in by_category['callback function'] +
-            by_category['function pointer'] if include_callback(callback)
-        ] + [enum for enum in by_category['enum'] if include_enum(enum)] +
-        by_category['object'] + [
-            structure for structure in by_category['structure']
-            if include_structure(structure)
-        ])
+    params_kotlin['has_kotlin_classes'] = ([
+        callback for callback in by_category['callback function'] +
+        by_category['function pointer'] if include_callback(callback)
+    ] + by_category['object'] + [
+        structure for structure in by_category['structure']
+        if include_structure(structure)
+    ])
 
     analyze_converter_usage(params_kotlin)
 
