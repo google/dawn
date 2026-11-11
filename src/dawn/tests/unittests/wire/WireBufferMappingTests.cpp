@@ -1026,5 +1026,22 @@ TEST_P(WireBufferMappingTests, MapInsideCallbackBeforeDestroy) {
     }
 }
 
+// Check that destroying the buffer before a spontaneous map completion aborts the map.
+TEST_P(WireBufferMappingTests, DestroyBeforeSpontaneousMapCompletion) {
+    if (!IsSpontaneous()) {
+        GTEST_SKIP() << "Spontaneous callbacks required for this test.";
+    }
+
+    wgpu::MapMode mapMode = GetMapMode();
+    MapAsync(mapMode, 0, kBufferSize);
+
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Aborted, _)).Times(1);
+
+        buffer.Destroy();
+        FlushCallbacks();
+    });
+}
+
 }  // anonymous namespace
 }  // namespace dawn::wire
