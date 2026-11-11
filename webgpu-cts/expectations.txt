@@ -100,7 +100,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-10-29 06:50:51AM
+# Last rolled: 2026-11-11 12:43:31PM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -599,7 +599,6 @@ crbug.com/408250017 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call
 crbug.com/408244895 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ Failure ] # CAT:Accuracy
 crbug.com/408244895 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:3d_coords:* [ Failure ] # CAT:Accuracy
 
-
 # textureLoad `texture_type="texture_multisampled_2d"` marked failing on all platforms
 crbug.com/407088846 [ amd angle-metal arch-x86_64 desktop graphite-enabled memory_ge_16gb no-asan no-clang-coverage release sonoma target-cpu-64 ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="*";texture_type="texture_multisampled_2d";* [ Failure ]
 crbug.com/407088846 [ angle-d3d11 arch-x86_64 desktop graphite-enabled intel-0x4680 memory_ge_16gb no-asan no-clang-coverage release-x64 target-cpu-64 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="*";texture_type="texture_multisampled_2d";* [ Failure ]
@@ -953,7 +952,6 @@ crbug.com/470115243 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.15.81
 crbug.com/542749864 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_32.0.16.1074 webgpu-dxc-enabled win11 ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:createRenderPipeline,at_over:*testValueName="atLimit";async=*;items=*primitive_index* [ Failure ]
 crbug.com/542749864 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 webgpu-dxc-disabled win11 ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:createRenderPipeline,at_over:*testValueName="atLimit";async=*;items=*primitive_index* [ Failure ]
 
-
 crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,bitcast:*_to_vec4h:* [ Failure ]
 crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,transpose:f16:inputSource="uniform";cols=3;rows=4 [ Failure ]
 crbug.com/542757110 [ nvidia-0x2184 nvidia_ge_32.0.16.1074 win11 ] webgpu:shader,execution,expression,call,builtin,transpose:f16:inputSource="uniform";cols=4;rows=3 [ Failure ]
@@ -986,7 +984,6 @@ crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,c
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_2d_coords:* [ Failure ]
 crbug.com/560293934 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:* [ Failure ]
 
-
 # Win/Snapdragon X Elite failures
 # TODO(crbug.com/452840618): Remove this disable block once the tests are actually running.
 # finder:disable-unused Unused removal disabled until tests are actually enabled
@@ -1003,7 +1000,6 @@ crbug.com/477643914 [ dawn-backend-validation qualcomm-0x36334330 webgpu-dxc-dis
 crbug.com/477643914 [ dawn-backend-validation qualcomm-0x36334330 webgpu-dxc-disabled win ] webgpu:api,validation,state,device_lost,destroy:createView,2d,* [ Failure ]
 
 # finder:enable-unused
-
 
 # WebGPU-WebGPU canvas copy crashes in D3D12 debug layer on Windows Nvidia with Graphite enabled
 crbug.com/412395829 [ dawn-backend-validation graphite-enabled nvidia release-x64 target-cpu-64 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;* [ RetryOnFailure ]
@@ -1561,7 +1557,6 @@ crbug.com/570624086 [ dawn-no-backend-validation intel-0x9bc5 release-x64 target
 
 crbug.com/570630415 [ android-pixel-4 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"compute-pass-encoder"};second={"op":"attachment-store","in":"command-encoder"} [ Failure ]
 
-
 crbug.com/570628710 [ intel win ] webgpu:shader,execution,expression,access,structure,index:buffer_align: [ Failure ]
 
 # Flaky timeouts on Windows Intel, even with these tests marked Slow.
@@ -1569,7 +1564,6 @@ crbug.com/565370020 [ intel win ] webgpu:api,validation,capability_checks,limits
 crbug.com/565370020 [ dawn-no-backend-validation intel release-x64 target-cpu-64 webgpu-dxc-disabled win ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersInVertexStage:createPipeline,at_over:* [ RetryOnFailure ]
 crbug.com/565370020 [ intel-0x4680 release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersInVertexStage:createPipeline,at_over:* [ RetryOnFailure ]
 crbug.com/565370020 [ intel win ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:* [ RetryOnFailure ]
-
 
 # bufferView struct_inner_align cases intermittently lose the device with FXC on Windows Intel UHD 770
 crbug.com/571547220 [ intel win ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersInFragmentStage:createPipeline,at_over:limitTest="underDefault";testValueName="overLimit";async=false [ Failure ]
@@ -1582,6 +1576,11 @@ crbug.com/571904613 [ unsafe-webgpu-disabled ] webgpu:shader,validation,parse,re
 # Autogenerated Failure expectations. Please triage.
 # ##ROLLER_AUTOGENERATED_FAILURES##
 ################################################################################
+crbug.com/0000 [ android-pixel-6 ] webgpu:api,operation,command_buffer,copyBufferToBuffer:single:newSig=false [ Failure ]
+crbug.com/0000 [ amd mac ] webgpu:api,operation,render_pass,resolve:render_pass_resolve:colorFormat="r16float";separateResolvePass=true;storeOperation="store" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:api,operation,render_pass,storeop2:storeOp_controls_whether_1x1_drawn_quad_is_stored:storeOp="store" [ Failure ]
+crbug.com/0000 [ android-pixel-4 ] webgpu:api,operation,render_pipeline,overrides:shared_shader_module:isAsync=true [ Failure ]
+crbug.com/0000 [ intel mac ] webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:format="depth24plus";unclippedDepth=false;writeDepth=true;multisampled=false [ Failure ]
 crbug.com/0000 [ android qualcomm ] webgpu:api,operation,storage_texture,read_only:basic:format="r16snorm";shaderStage="vertex";dimension="2d";depthOrArrayLayers=2 [ Failure ]
 crbug.com/0000 [ android qualcomm ] webgpu:api,operation,storage_texture,read_only:basic:format="rg16unorm";shaderStage="compute";dimension="3d";depthOrArrayLayers=1 [ Failure ]
 crbug.com/0000 [ android qualcomm ] webgpu:api,operation,storage_texture,read_only:basic:format="rg8snorm";shaderStage="compute";dimension="1d";depthOrArrayLayers=1 [ Failure ]
@@ -1592,8 +1591,41 @@ crbug.com/0000 [ android qualcomm ] webgpu:api,operation,storage_texture,read_on
 crbug.com/0000 [ android qualcomm ] webgpu:api,operation,storage_texture,read_only:basic:format="rgba8snorm";shaderStage="fragment";dimension="2d";depthOrArrayLayers=1 [ Failure ]
 crbug.com/0000 [ android qualcomm ] webgpu:api,operation,storage_texture,read_only:basic:format="rgba8unorm";shaderStage="vertex";dimension="2d";depthOrArrayLayers=2 [ Failure ]
 crbug.com/0000 [ android qualcomm ] webgpu:api,operation,texture_view,texture_component_swizzle:read_swizzle:format="depth24plus-stencil8";func="textureSampleCompare" [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,buffer,mapping:gc_behavior,mapAsync: [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,buffer,mapping:gc_behavior,mapAsync: [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,buffer,mapping:gc_behavior,mappedAtCreation: [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,buffer,mapping:gc_behavior,mappedAtCreation: [ Failure ]
+crbug.com/0000 [ intel win ] webgpu:api,validation,capability_checks,limits,maxBindGroupsPlusVertexBuffers:draw,at_over:limitTest="underDefault";testValueName="overLimit";encoderType="render" [ Failure ]
+crbug.com/0000 [ apple mac ] webgpu:api,validation,capability_checks,limits,maxColorAttachmentBytesPerSample:createRenderPipeline,at_over:limitTest="underDefault";testValueName="atLimit";async=false;sampleCount=4;interleaveFormat="rg8unorm" [ Failure ]
+crbug.com/0000 [ intel mac ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:createComputePipeline,at_over:limitTest="atDefault";testValueName="atLimit";async=false;wgslType="mat2x3%3Cf16%3E" [ Failure ]
+crbug.com/0000 [ intel mac ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:createComputePipeline,at_over:limitTest="atDefault";testValueName="atLimit";async=true;wgslType="mat2x3%3Cf16%3E" [ Failure ]
+crbug.com/0000 [ intel mac ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:createComputePipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=false;wgslType="mat2x3%3Cf16%3E" [ Failure ]
+crbug.com/0000 [ intel mac ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:createComputePipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=true;wgslType="mat2x3%3Cf16%3E" [ Failure ]
+crbug.com/0000 [ intel mac ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:createComputePipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="atLimit";async=false;wgslType="mat2x3%3Cf16%3E" [ Failure ]
+crbug.com/0000 [ intel mac ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:createComputePipeline,at_over:limitTest="betweenDefaultAndMaximum";testValueName="atLimit";async=true;wgslType="mat2x3%3Cf16%3E" [ Failure ]
+crbug.com/0000 [ intel mac ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:createComputePipeline,at_over:limitTest="underDefault";testValueName="atLimit";async=false;wgslType="mat2x3%3Cf16%3E" [ Failure ]
+crbug.com/0000 [ intel mac ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:createComputePipeline,at_over:limitTest="underDefault";testValueName="atLimit";async=true;wgslType="mat2x3%3Cf16%3E" [ Failure ]
+crbug.com/0000 [ intel mac ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:createComputePipeline,at_over:limitTest="underDefault";testValueName="overLimit";async=false;wgslType="mat2x3%3Cf16%3E" [ Failure ]
+crbug.com/0000 [ intel mac ] webgpu:api,validation,capability_checks,limits,maxComputeWorkgroupStorageSize:createComputePipeline,at_over:limitTest="underDefault";testValueName="overLimit";async=true;wgslType="mat2x3%3Cf16%3E" [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atDefault";testValueName="overLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow" [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="overLimit";async=false;bindingCombination="vertex" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="overLimit";async=true;bindingCombination="vertex" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="overLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="overLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow" [ Failure ]
+crbug.com/0000 [ microsoft win ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="overLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleFragmentStageOverflow" [ Failure ]
+crbug.com/0000 [ microsoft win ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="underDefault";testValueName="overLimit";async=true;bindingCombination="vertex" [ Failure ]
+crbug.com/0000 [ intel win ] webgpu:api,validation,compute_pipeline:limits,workgroup_storage_size:isAsync=false;type="mat4x4%3Cf32%3E" [ Failure ]
+crbug.com/0000 [ microsoft win ] webgpu:api,validation,compute_pipeline:limits,workgroup_storage_size:isAsync=false;type="mat4x4%3Cf32%3E" [ Failure ]
+crbug.com/0000 [ intel win ] webgpu:api,validation,compute_pipeline:limits,workgroup_storage_size:isAsync=false;type="vec4%3Cf32%3E" [ Failure ]
+crbug.com/0000 [ microsoft win ] webgpu:api,validation,compute_pipeline:limits,workgroup_storage_size:isAsync=false;type="vec4%3Cf32%3E" [ Failure ]
+crbug.com/0000 [ intel win ] webgpu:api,validation,compute_pipeline:limits,workgroup_storage_size:isAsync=true;type="mat4x4%3Cf32%3E" [ Failure ]
+crbug.com/0000 [ microsoft win ] webgpu:api,validation,compute_pipeline:limits,workgroup_storage_size:isAsync=true;type="mat4x4%3Cf32%3E" [ Failure ]
+crbug.com/0000 [ intel win ] webgpu:api,validation,compute_pipeline:limits,workgroup_storage_size:isAsync=true;type="vec4%3Cf32%3E" [ Failure ]
+crbug.com/0000 [ microsoft win ] webgpu:api,validation,compute_pipeline:limits,workgroup_storage_size:isAsync=true;type="vec4%3Cf32%3E" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:api,validation,render_pipeline,vertex_state:vertex_attribute_offset_alignment:format="unorm8x2";arrayStrideVariant={"mult":1,"add":0};offsetVariant={"mult":1,"add":-3} [ Failure ]
+crbug.com/0000 [ apple mac ] webgpu:api,validation,state,device_lost,destroy:command,copyTextureToBuffer:stage="submit";awaitLost=false [ Failure ]
+crbug.com/0000 [ android-pixel-4 ] webgpu:idl,javascript:device,EventTarget:test="canPassEventThroughDevice" [ Failure ]
+crbug.com/0000 [ intel win ] webgpu:shader,execution,expression,binary,af_matrix_addition:matrix:inputSource="const";cols=2;rows=2 [ Failure ]
 crbug.com/0000 [ android qualcomm ] webgpu:shader,execution,expression,call,builtin,bufferArrayView:mixed_types_aliasing:buffer="workgroup";pair="i32_paddedtf";overlap="offset";access="dynamic_base";aliased=true [ Failure ]
 crbug.com/0000 [ android qualcomm ] webgpu:shader,execution,expression,call,builtin,bufferArrayView:mixed_types_aliasing:buffer="workgroup";pair="i32_vec2f";overlap="same_start";access="dynamic_base";aliased=true [ Failure ]
 crbug.com/0000 [ android qualcomm ] webgpu:shader,execution,expression,call,builtin,bufferArrayView:mixed_types_aliasing:buffer="workgroup";pair="i32_vec4i";overlap="offset";access="dynamic_base";aliased=true [ Failure ]
@@ -1608,7 +1640,9 @@ crbug.com/0000 [ android qualcomm ] webgpu:shader,execution,expression,call,buil
 crbug.com/0000 [ android qualcomm ] webgpu:shader,execution,expression,call,builtin,bufferView:mixed_types_aliasing:buffer="workgroup";pair="vec2i_vec2f";overlap="same_start";offset="dynamic";aliased=true [ Failure ]
 crbug.com/0000 [ android qualcomm ] webgpu:shader,execution,expression,call,builtin,bufferView:mixed_types_aliasing:buffer="workgroup";pair="vec4i_vec4f";overlap="same_start";offset="dynamic";aliased=true [ Failure ]
 crbug.com/0000 [ android qualcomm ] webgpu:shader,execution,expression,call,builtin,bufferView:mixed_types_aliasing:buffer="workgroup";pair="vec4u_vec4f";overlap="same_start";offset="dynamic";aliased=true [ Failure ]
+crbug.com/0000 [ intel win ] webgpu:shader,execution,expression,call,builtin,bufferView:write_layout:case="struct_inner_align" [ Failure ]
 crbug.com/0000 [ android qualcomm ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_2d:stage="v";format="r16snorm" [ Failure ]
+crbug.com/0000 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_2d_array:stage="v";format="rg11b10ufloat" [ Failure ]
 crbug.com/0000 [ android qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:2d_coords:format="depth16unorm";filt="linear";modeU="r";modeV="c";offset=false [ Failure ]
 crbug.com/0000 [ android qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:2d_coords:format="depth24plus";filt="linear";modeU="r";modeV="c";offset=false [ Failure ]
 crbug.com/0000 [ android qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:2d_coords:format="depth24plus-stencil8";filt="linear";modeU="r";modeV="c";offset=false [ Failure ]
@@ -1675,6 +1709,12 @@ crbug.com/0000 [ android-pixel-4 ] webgpu:shader,execution,expression,call,user,
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:two_pointers:address_space="workgroup";target="scalar";aliased=false [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:two_pointers:address_space="workgroup";target="struct_member";aliased=false [ Failure ]
 crbug.com/0000 [ microsoft win ] webgpu:shader,execution,limits:struct_members: [ Failure ]
+crbug.com/0000 [ intel win ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="function";workgroupSize=[1,1,1];batch__=2 [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";workgroupSize=[64,1,1];batch__=21 [ Failure ]
+crbug.com/0000 [ android-pixel-4 ] webgpu:shader,validation,extension,dual_source_blending:blend_src_same_type:blendSrc0Type="f32";blendSrc1Type="vec4i" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,validation,extension,dual_source_blending:blend_src_same_type:blendSrc0Type="f32";blendSrc1Type="vec4u" [ Failure ]
+crbug.com/0000 [ android-pixel-4 ] webgpu:shader,validation,extension,dual_source_blending:blend_src_same_type:blendSrc0Type="i32";blendSrc1Type="vec2u" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,validation,extension,dual_source_blending:blend_src_same_type:blendSrc0Type="vec4i";blendSrc1Type="f32" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="onscreen" [ Failure ]
+crbug.com/0000 [ android-pixel-4 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="flipY";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="rg11b10ufloat";dstPremultiplied=true [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_fully_transparent_ImageData:dstPremultiplied=false [ Failure ]
