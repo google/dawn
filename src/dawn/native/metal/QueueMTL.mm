@@ -27,6 +27,8 @@
 
 #include "src/dawn/native/metal/QueueMTL.h"
 
+#include <tuple>
+
 #include "absl/strings/str_format.h"
 #include "dawn/native/MetalBackend.h"
 #include "dawn/platform/DawnPlatform.h"
@@ -163,7 +165,11 @@ void Queue::WaitForCommandsToBeScheduled() {
     if (!IsAlive()) {
         return;
     }
-    if (GetDevice()->ConsumedError(SubmitPendingCommandBuffer())) {
+    // Commands held while submissions are suspended (see SetSubmissionSuspended) are not
+    // committed, so not scheduled either: this waits for the command buffers committed so far.
+    // Waiting for the resume here would deadlock, since it needs the device lock the caller holds.
+    bool submitted;
+    if (GetDevice()->ConsumedError(TrySubmitPendingCommandBuffer(), &submitted)) {
         return;
     }
 
@@ -172,6 +178,37 @@ void Queue::WaitForCommandsToBeScheduled() {
     // finishing the waitUntilScheduled.
     NSPRef<id<MTLCommandBuffer>> lastSubmittedCommands = mLastSubmittedCommands->Get();
     [*lastSubmittedCommands waitUntilScheduled];
+}
+
+void Queue::SetSubmissionSuspended(bool suspended) {
+    if (mSubmissionSuspended.load(std::memory_order_acquire) == suspended) {
+        return;
+    }
+    if (suspended) {
+        // Commit what is pending while commits are still allowed, and make sure it is scheduled:
+        // iOS lets the command buffers scheduled by the time the application returns from
+        // applicationDidEnterBackground complete, and refuses the ones committed after that. No
+        // other thread commits meanwhile, since the caller holds the device lock.
+        WaitForCommandsToBeScheduled();
+        mHeldSubmissions.store(0, std::memory_order_relaxed);
+        mSubmissionSuspended.store(true, std::memory_order_release);
+        return;
+    }
+    mSubmissionSuspended.store(false, std::memory_order_release);
+    if (!IsAlive()) {
+        return;
+    }
+    // What was held goes out now, as one command buffer. Nothing suspends again meanwhile, since
+    // that needs the device lock the caller holds.
+    bool submitted;
+    if (GetDevice()->ConsumedError(TrySubmitPendingCommandBuffer(), &submitted)) {
+        return;
+    }
+    DAWN_CHECK(submitted);
+}
+
+bool Queue::IsSubmissionSuspended() const {
+    return mSubmissionSuspended.load(std::memory_order_acquire);
 }
 
 FutureID Queue::GetCommandsScheduledFuture() {
@@ -226,14 +263,20 @@ void Queue::SetExecutionError(std::string error) {
     });
 }
 
-MaybeError Queue::SubmitPendingCommandBuffer() {
+ResultOrError<bool> Queue::TrySubmitPendingCommandBuffer() {
     // Ensure that if there's been an error, we never try to submit anything. This is also where
     // we propagate the device loss and error message from a Metal command buffer execution error
     // (for example when this is called by Tick(), which happens even if nothing is pending).
     DAWN_TRY(CheckExecutionError());
 
     if (!mCommandContext.NeedsSubmit()) {
-        return {};
+        return true;
+    }
+
+    if (mSubmissionSuspended.load(std::memory_order_acquire)) [[unlikely]] {
+        // Held (see SetSubmissionSuspended): the commands stay encoded in the pending command
+        // buffer, which the resume commits. Whoever waits for their serial waits until then.
+        return false;
     }
 
     // Acquire the pending command buffer, which is retained. It must be released later.
@@ -335,7 +378,8 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
     [*pendingCommands commit];
     IncrementLastSubmittedCommandSerial();
 
-    return mCommandContext.PrepareNextCommandBuffer(*mCommandQueue);
+    DAWN_TRY(mCommandContext.PrepareNextCommandBuffer(*mCommandQueue));
+    return true;
 }
 
 id<MTLSharedEvent> Queue::GetMTLSharedEvent() const {
@@ -362,7 +406,24 @@ MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
             }
         }
 
-        DAWN_TRY(SubmitPendingCommandBuffer());
+        bool submitted;
+        DAWN_TRY_ASSIGN(submitted, TrySubmitPendingCommandBuffer());
+        if (!submitted) [[unlikely]] {
+            // Encoded, and committed once resumed (see SetSubmissionSuspended). Every submission
+            // held keeps what it uses alive until then, so a producer that keeps submitting while
+            // submissions are suspended is worth finding: say so, once per hold.
+            if (mHeldSubmissions.fetch_add(1, std::memory_order_relaxed) + 1 ==
+                kHeldSubmissionsWarning) {
+                GetDevice()->EmitLog(
+                    wgpu::LoggingType::Warning,
+                    absl::StrFormat(
+                        "%u submissions have been held since the submission of command buffers "
+                        "was suspended (SetSubmissionSuspended). They are committed once it is "
+                        "resumed, and each keeps the resources it uses alive until then: stop "
+                        "submitting GPU work while the application is in the background.",
+                        kHeldSubmissionsWarning));
+            }
+        }
 
         return {};
     }
@@ -373,7 +434,11 @@ bool Queue::HasPendingCommands() const {
 }
 
 MaybeError Queue::SubmitPendingCommandsImpl() {
-    return SubmitPendingCommandBuffer();
+    // A flush while submissions are suspended (see SetSubmissionSuspended) leaves the commands
+    // pending on purpose: ExecutionQueueBase::EnsureCommandsFlushed allows for it through
+    // IsSubmissionSuspended(), and whoever waits for their serial waits until the resume.
+    DAWN_TRY_ASSIGN(std::ignore, TrySubmitPendingCommandBuffer());
+    return {};
 }
 
 ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
