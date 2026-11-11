@@ -484,7 +484,7 @@ TEST_F(ConstEvalTest, StructAbstractSplat_to_StructDifferentTypes) {
     // }
     auto* expr_c = Call(core::BuiltinFn::kModf, 0_a);
     auto* materialized = Expr("c");
-    WrapInFunction(Decl(Const("c", expr_c)), Decl(Var("v", materialized)));
+    WrapInFunction(Decl(Const("c", ast::Type{}, expr_c)), Decl(Var("v", materialized)));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 

@@ -1573,13 +1573,13 @@ TEST_P(ClampPartialConst, Scalar) {
 
     const ast::Variable* lowDecl;
     if (firstConst) {
-        lowDecl = Const("low", low);
+        lowDecl = Const("low", ast::Type{}, low);
     } else {
         lowDecl = Var("low", low);
     }
     const ast::Variable* highDecl;
     if (secondConst) {
-        highDecl = Const("high", high);
+        highDecl = Const("high", ast::Type{}, high);
     } else {
         highDecl = Var("high", high);
     }
@@ -1607,13 +1607,13 @@ TEST_P(ClampPartialConst, Vector) {
 
     const ast::Variable* lowDecl;
     if (firstConst) {
-        lowDecl = Const("low", low);
+        lowDecl = Const("low", ast::Type{}, low);
     } else {
         lowDecl = Var("low", low);
     }
     const ast::Variable* highDecl;
     if (secondConst) {
-        highDecl = Const("high", high);
+        highDecl = Const("high", ast::Type{}, high);
     } else {
         highDecl = Var("high", high);
     }
@@ -1734,13 +1734,13 @@ TEST_P(SmoothstepPartialConst, Scalar) {
 
     const ast::Variable* lowDecl;
     if (firstConst) {
-        lowDecl = Const("low", low);
+        lowDecl = Const("low", ast::Type{}, low);
     } else {
         lowDecl = Var("low", low);
     }
     const ast::Variable* highDecl;
     if (secondConst) {
-        highDecl = Const("high", high);
+        highDecl = Const("high", ast::Type{}, high);
     } else {
         highDecl = Var("high", high);
     }
@@ -1768,13 +1768,13 @@ TEST_P(SmoothstepPartialConst, Vector) {
 
     const ast::Variable* lowDecl;
     if (firstConst) {
-        lowDecl = Const("low", low);
+        lowDecl = Const("low", ast::Type{}, low);
     } else {
         lowDecl = Var("low", low);
     }
     const ast::Variable* highDecl;
     if (secondConst) {
-        highDecl = Const("high", high);
+        highDecl = Const("high", ast::Type{}, high);
     } else {
         highDecl = Var("high", high);
     }
@@ -1886,13 +1886,13 @@ TEST_P(InsertBitsPartialConst, Scalar) {
     const ast::Expression* count = params.makeCount(this);
     const ast::Variable* offsetDecl;
     if (firstConst) {
-        offsetDecl = Const("offset", offset);
+        offsetDecl = Const("offset", ast::Type{}, offset);
     } else {
-        offsetDecl = Var("offset", offset);
+        offsetDecl = Var("offset", ast::Type{}, offset);
     }
     const ast::Variable* countDecl;
     if (secondConst) {
-        countDecl = Const("count", count);
+        countDecl = Const("count", ast::Type{}, count);
     } else {
         countDecl = Var("count", count);
     }
@@ -1918,13 +1918,13 @@ TEST_P(InsertBitsPartialConst, Vector) {
     const ast::Expression* count = params.makeCount(this);
     const ast::Variable* offsetDecl;
     if (firstConst) {
-        offsetDecl = Const("offset", offset);
+        offsetDecl = Const("offset", ast::Type{}, offset);
     } else {
-        offsetDecl = Var("offset", offset);
+        offsetDecl = Var("offset", ast::Type{}, offset);
     }
     const ast::Variable* countDecl;
     if (secondConst) {
-        countDecl = Const("count", count);
+        countDecl = Const("count", ast::Type{}, count);
     } else {
         countDecl = Var("count", count);
     }
@@ -2000,13 +2000,13 @@ TEST_P(ExtractBitsPartialConst, Scalar) {
     const ast::Expression* count = params.makeCount(this);
     const ast::Variable* offsetDecl;
     if (firstConst) {
-        offsetDecl = Const("offset", offset);
+        offsetDecl = Const("offset", ast::Type{}, offset);
     } else {
         offsetDecl = Var("offset", offset);
     }
     const ast::Variable* countDecl;
     if (secondConst) {
-        countDecl = Const("count", count);
+        countDecl = Const("count", ast::Type{}, count);
     } else {
         countDecl = Var("count", count);
     }
@@ -2032,13 +2032,13 @@ TEST_P(ExtractBitsPartialConst, Vector) {
     const ast::Expression* count = params.makeCount(this);
     const ast::Variable* offsetDecl;
     if (firstConst) {
-        offsetDecl = Const("offset", offset);
+        offsetDecl = Const("offset", ast::Type{}, offset);
     } else {
         offsetDecl = Var("offset", offset);
     }
     const ast::Variable* countDecl;
     if (secondConst) {
-        countDecl = Const("count", count);
+        countDecl = Const("count", ast::Type{}, count);
     } else {
         countDecl = Var("count", count);
     }

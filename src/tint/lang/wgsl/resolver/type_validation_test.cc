@@ -579,7 +579,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FunctionConst) {
     //   const size = 10;
     //   var a : array<f32, size>;
     // }
-    auto* size = Const("size", Expr(10_i));
+    auto* size = Const("size", ast::Type{}, Expr(10_i));
     auto* a = Var("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")));
     WrapInFunction(size, a);
     EXPECT_TRUE(r()->Resolve()) << r()->error();

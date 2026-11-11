@@ -344,22 +344,23 @@ TEST_F(ResolverVariableTest, LocalConst_ExplicitType_Decls) {
 TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
     Structure("S", Vector{Member("m", ty.u32())});
 
-    auto* c_i32 = Const("a", Expr(0_i));
-    auto* c_u32 = Const("b", Expr(0_u));
-    auto* c_f32 = Const("c", Expr(0_f));
-    auto* c_ai = Const("d", Expr(0_a));
-    auto* c_af = Const("e", Expr(0._a));
-    auto* c_vi32 = Const("f", Call<vec3<i32>>());
-    auto* c_vu32 = Const("g", Call<vec3<u32>>());
-    auto* c_vf32 = Const("h", Call<vec3<f32>>());
-    auto* c_vai = Const("i", Call<vec3<Infer>>(0_a));
-    auto* c_vaf = Const("j", Call<vec3<Infer>>(0._a));
-    auto* c_mf32 = Const("k", Call<mat3x3<f32>>());
-    auto* c_maf32 = Const("l", Call<mat3x3<Infer>>(          //
-                                   Call<vec3<Infer>>(0._a),  //
-                                   Call<vec3<Infer>>(0._a),  //
-                                   Call<vec3<Infer>>(0._a)));
-    auto* c_s = Const("m", Call("S"));
+    auto* c_i32 = Const("a", ast::Type{}, Expr(0_i));
+    auto* c_u32 = Const("b", ast::Type{}, Expr(0_u));
+    auto* c_f32 = Const("c", ast::Type{}, Expr(0_f));
+    auto* c_ai = Const("d", ast::Type{}, Expr(0_a));
+    auto* c_af = Const("e", ast::Type{}, Expr(0._a));
+    auto* c_vi32 = Const("f", ast::Type{}, Call<vec3<i32>>());
+    auto* c_vu32 = Const("g", ast::Type{}, Call<vec3<u32>>());
+    auto* c_vf32 = Const("h", ast::Type{}, Call<vec3<f32>>());
+    auto* c_vai = Const("i", ast::Type{}, Call<vec3<Infer>>(0_a));
+    auto* c_vaf = Const("j", ast::Type{}, Call<vec3<Infer>>(0._a));
+    auto* c_mf32 = Const("k", ast::Type{}, Call<mat3x3<f32>>());
+    auto* c_maf32 = Const("l", ast::Type{},
+                          Call<mat3x3<Infer>>(          //
+                              Call<vec3<Infer>>(0._a),  //
+                              Call<vec3<Infer>>(0._a),  //
+                              Call<vec3<Infer>>(0._a)));
+    auto* c_s = Const("m", ast::Type{}, Call("S"));
 
     WrapInFunction(c_i32, c_u32, c_f32, c_ai, c_af, c_vi32, c_vu32, c_vf32, c_vai, c_vaf, c_mf32,
                    c_maf32, c_s);
@@ -410,9 +411,9 @@ TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
 }
 
 TEST_F(ResolverVariableTest, LocalConst_PropagateConstValue) {
-    auto* a = Const("a", Expr(42_i));
-    auto* b = Const("b", Expr("a"));
-    auto* c = Const("c", Expr("b"));
+    auto* a = Const("a", ast::Type{}, Expr(42_i));
+    auto* b = Const("b", ast::Type{}, Expr("a"));
+    auto* c = Const("c", ast::Type{}, Expr("b"));
 
     WrapInFunction(a, b, c);
 
@@ -424,7 +425,7 @@ TEST_F(ResolverVariableTest, LocalConst_PropagateConstValue) {
 }
 
 TEST_F(ResolverVariableTest, LocalConst_ConstEval) {
-    auto* c = Const("c", Div(Mul(Add(1_i, 2_i), 3_i), 3_i));
+    auto* c = Const("c", ast::Type{}, Div(Mul(Add(1_i, 2_i), 3_i), 3_i));
 
     WrapInFunction(c);
 

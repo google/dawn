@@ -1016,7 +1016,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Const_AbstractVectorWithIndex) {
     // let i = 1;
     // var b = v[i];
 
-    auto* v = Const("v", Call<vec3<Infer>>(1_a, 2_a, 3_a));
+    auto* v = Const("v", ast::Type{}, Call<vec3<Infer>>(1_a, 2_a, 3_a));
     auto* i = Let("i", Expr(1_i));
     auto* b = Var("b", IndexAccessor("v", "i"));
     WrapInFunction(v, i, b);
@@ -1041,7 +1041,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Const_AbstractVectorWithSwizzleAndIndex
     // let i = 1;
     // var b = v.rg[i];
 
-    auto* v = Const("v", Call<vec3<Infer>>(1_a, 2_a, 3_a));
+    auto* v = Const("v", ast::Type{}, Call<vec3<Infer>>(1_a, 2_a, 3_a));
     auto* i = Let("i", Expr(1_i));
     auto* b = Var("b", IndexAccessor(MemberAccessor("v", "rg"), "i"));
     WrapInFunction(v, i, b);
@@ -1066,7 +1066,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Const_ExpressionIndex) {
     // let i = 1;
     // var b = v.rg[i + 2 - 3];
 
-    auto* v = Const("v", Call<vec3<Infer>>(1_a, 2_a, 3_a));
+    auto* v = Const("v", ast::Type{}, Call<vec3<Infer>>(1_a, 2_a, 3_a));
     auto* i = Let("i", Expr(1_i));
     auto* b = Var("b", IndexAccessor(MemberAccessor("v", "rg"), Sub(Add("i", 2_i), 3_i)));
     WrapInFunction(v, i, b);

@@ -144,7 +144,7 @@ TEST_F(WgslASTPrinterTest, EmitVariable_Const_Explicit) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitVariable_Const_Inferred) {
-    auto* v = Const("a", Expr(1_f));
+    auto* v = Const("a", ast::Type{}, Expr(1_f));
     WrapInFunction(v);
 
     ASTPrinter& gen = Build();

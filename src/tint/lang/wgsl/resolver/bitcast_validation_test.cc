@@ -357,7 +357,7 @@ TEST_F(ResolverBitcastValidationTestInvalidConst, ConstBitcastToF16NaN) {
     Enable(wgsl::Extension::kF16);
 
     // Lower 16 bits of const u32 0x7e10 is NaN in f16.
-    auto* a = Const("a", Expr(u32(0x00007e10)));
+    auto* a = Const("a", ast::Type{}, Expr(u32(0x00007e10)));
     auto* b = Let("b", Bitcast(Source{{12, 34}}, ty.Of<vec2<f16>>(), Expr("a")));
     WrapInFunction(a, b);
 
@@ -371,7 +371,7 @@ TEST_F(ResolverBitcastValidationTestInvalidConst, ConstBitcastToF16Inf) {
     Enable(wgsl::Extension::kF16);
 
     // 0xfc00 is -Inf in f16.
-    auto* a = Const("a", Call<vec2<u32>>(u32(0x00007010), u32(0xfc008000)));
+    auto* a = Const("a", ast::Type{}, Call<vec2<u32>>(u32(0x00007010), u32(0xfc008000)));
     auto* b = Let("b", Bitcast(Source{{12, 34}}, ty.Of<vec4<f16>>(), Expr("a")));
     WrapInFunction(a, b);
 
@@ -383,7 +383,7 @@ TEST_F(ResolverBitcastValidationTestInvalidConst, ConstBitcastToF16Inf) {
 
 TEST_F(ResolverBitcastValidationTestInvalidConst, ConstBitcastToF32NaN) {
     // 0xffc00000 is NaN in f32.
-    auto* a = Const("a", Expr(u32(0xffc00000)));
+    auto* a = Const("a", ast::Type{}, Expr(u32(0xffc00000)));
     auto* b = Let("b", Bitcast(Source{{12, 34}}, ty.Of<f32>(), Expr("a")));
     WrapInFunction(a, b);
 
@@ -395,7 +395,8 @@ TEST_F(ResolverBitcastValidationTestInvalidConst, ConstBitcastToF32Inf) {
     Enable(wgsl::Extension::kF16);
 
     // 0x7f800000 is Inf in f32.
-    auto* a = Const("a", Call<vec3<u32>>(u32(0xA0008000), u32(0x7f800000), u32(0x40000000)));
+    auto* a =
+        Const("a", ast::Type{}, Call<vec3<u32>>(u32(0xA0008000), u32(0x7f800000), u32(0x40000000)));
     auto* b = Let("b", Bitcast(Source{{12, 34}}, ty.Of<vec3<f32>>(), Expr("a")));
     WrapInFunction(a, b);
 

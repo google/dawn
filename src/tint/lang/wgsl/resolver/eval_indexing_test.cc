@@ -104,7 +104,7 @@ TEST_P(ConstEvalSwizzleTest, Test) {
     Enable(wgsl::Extension::kF16);
     auto& param = GetParam();
     auto* expr = MemberAccessor(param.input.Expr(*this), param.swizzle);
-    auto* a = Const("a", expr);
+    auto* a = Const("a", ast::Type{}, expr);
     WrapInFunction(a);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

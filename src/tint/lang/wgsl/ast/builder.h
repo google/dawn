@@ -1625,23 +1625,6 @@ class Builder {
     }
 
     /// @param name the name
-    /// @param expr the initializer expression
-    /// @returns an `Const` with the given name, and type
-    const ast::Const* Const(std::string_view name, const ast::Expression* expr) {
-        return Const(source_, name, expr);
-    }
-
-    /// @param source the source
-    /// @param name the name
-    /// @param expr the initializer expression
-    /// @returns an `Const` with the given name, and type
-    const ast::Const* Const(const Source& source,
-                            std::string_view name,
-                            const ast::Expression* expr) {
-        return Const(source, name, ast::Type{}, expr);
-    }
-
-    /// @param name the name
     /// @param type the type
     /// @param expr the initializer expression
     /// @returns an `Const` with the given name, and type
