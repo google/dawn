@@ -34,25 +34,46 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+#include "src/dawn/tests/unittests/validation/ValidationTest.h"
 #include "src/utils/numeric.h"
 
 namespace dawn {
 namespace {
 
 using ::testing::HasSubstr;
-using ::testing::Test;
 
-// Use testing::Test instead of DawnTest because DawnTest overrides RequestAdapter and
-// RequestDevice in the proc table to use its own instance and adapter.
-class StableInstanceTest : public Test {
+// The ValidationTest instance, adapter, and device are created with allow_experimental_apis (and
+// allow_unsafe_apis) disabled. A regular instance, adapter, and device are created next to them
+// for comparison.
+class StableInstanceValidationTest : public ValidationTest {
   protected:
-    void SetUp() override { dawnProcSetProcs(&native::GetProcs()); }
+    void SetUp() override {
+        ValidationTest::SetUp();
+        // The tests check dawn::native objects (toggles, feature info, error objects) directly.
+        DAWN_SKIP_TEST_IF(UsesWire());
 
-    void TearDown() override { dawnProcSetProcs(nullptr); }
+        mRegularInstance = wgpu::CreateInstance();
+        ASSERT_NE(mRegularInstance, nullptr);
+        mRegularAdapter = GetNullAdapter(mRegularInstance);
+        ASSERT_NE(mRegularAdapter, nullptr);
+
+        wgpu::DeviceDescriptor deviceDesc = {};
+        wgpu::Adapter regularDeviceAdapter = GetNullAdapter(mRegularInstance);
+        ASSERT_NE(regularDeviceAdapter, nullptr);
+        ASSERT_EQ(RequestDeviceMessage(regularDeviceAdapter, &deviceDesc, &mRegularDevice), "");
+        ASSERT_NE(mRegularDevice, nullptr);
+    }
+
+    void TearDown() override {
+        mRegularDevice = nullptr;
+        mRegularAdapter = nullptr;
+        mRegularInstance = nullptr;
+        ValidationTest::TearDown();
+    }
+
+    bool AllowUnsafeAPIs() override { return false; }
+    bool AllowExperimentalAPIs() override { return false; }
 
     static wgpu::Instance CreateStableModeInstance(
         const wgpu::InstanceDescriptor* baseDesc = nullptr) {
@@ -68,18 +89,17 @@ class StableInstanceTest : public Test {
         return wgpu::CreateInstance(&localDesc);
     }
 
-    static wgpu::Adapter GetNullAdapter(const wgpu::Instance& instance) {
+    static wgpu::Adapter GetNullAdapter(const wgpu::Instance& targetInstance) {
         wgpu::RequestAdapterOptions options = {};
         options.backendType = wgpu::BackendType::Null;
         wgpu::Adapter result;
-        wgpu::Future future = instance.RequestAdapter(
-            &options, wgpu::CallbackMode::WaitAnyOnly,
-            [&](wgpu::RequestAdapterStatus status, wgpu::Adapter adapter, wgpu::StringView) {
+        targetInstance.RequestAdapter(
+            &options, wgpu::CallbackMode::AllowSpontaneous,
+            [&](wgpu::RequestAdapterStatus status, wgpu::Adapter found, wgpu::StringView) {
                 if (status == wgpu::RequestAdapterStatus::Success) {
-                    result = std::move(adapter);
+                    result = std::move(found);
                 }
             });
-        EXPECT_EQ(instance.WaitAny(future, 0), wgpu::WaitStatus::Success);
         return result;
     }
 
@@ -92,40 +112,43 @@ class StableInstanceTest : public Test {
     static bool HasToggle(const std::vector<const char*>& toggles, std::string_view name) {
         return std::ranges::any_of(toggles, [name](const char* t) { return t == name; });
     }
-    static bool HasToggle(const wgpu::Instance& instance, std::string_view name) {
-        return HasToggle(native::GetTogglesUsed(instance), name);
+    static bool HasToggle(const wgpu::Instance& target, std::string_view name) {
+        return HasToggle(native::GetTogglesUsed(target), name);
     }
-    static bool HasToggle(const wgpu::Adapter& adapter, std::string_view name) {
-        return HasToggle(native::GetTogglesUsed(adapter), name);
+    static bool HasToggle(const wgpu::Adapter& target, std::string_view name) {
+        return HasToggle(native::GetTogglesUsed(target), name);
     }
-    static bool HasToggle(const wgpu::Device& device, std::string_view name) {
-        return HasToggle(native::GetTogglesUsed(device.Get()), name);
+    static bool HasToggle(const wgpu::Device& target, std::string_view name) {
+        return HasToggle(native::GetTogglesUsed(target.Get()), name);
     }
 
-    static std::string RequestDeviceMessage(const wgpu::Adapter& adapter,
+    static std::string RequestDeviceMessage(const wgpu::Adapter& target,
                                             const wgpu::DeviceDescriptor* desc,
                                             wgpu::Device* outDevice = nullptr) {
         std::string result;
         bool called = false;
-        wgpu::Future future = adapter.RequestDevice(
-            desc, wgpu::CallbackMode::WaitAnyOnly,
-            [&](wgpu::RequestDeviceStatus status, wgpu::Device device, wgpu::StringView message) {
+        target.RequestDevice(
+            desc, wgpu::CallbackMode::AllowSpontaneous,
+            [&](wgpu::RequestDeviceStatus status, wgpu::Device created, wgpu::StringView message) {
                 called = true;
                 if (status != wgpu::RequestDeviceStatus::Success) {
                     result = std::string(std::string_view(message));
                 } else if (outDevice != nullptr) {
-                    *outDevice = std::move(device);
+                    *outDevice = std::move(created);
                 }
             });
-        EXPECT_EQ(adapter.GetInstance().WaitAny(future, 0), wgpu::WaitStatus::Success);
         EXPECT_TRUE(called);
         return result;
     }
+
+    wgpu::Instance mRegularInstance;
+    wgpu::Adapter mRegularAdapter;
+    wgpu::Device mRegularDevice;
 };
 
 // The two feature classifications are independent and come from different sources: Safe/Unsafe
 // from Features.cpp, Stable/Experimental from the dawn_version.json stable_version annotations.
-TEST_F(StableInstanceTest, FeatureLabels) {
+TEST_F(StableInstanceValidationTest, FeatureLabels) {
     // Upstream feature: Safe and Stable.
     const native::FeatureInfo* timestampInfo =
         native::GetFeatureInfo(wgpu::FeatureName::TimestampQuery);
@@ -152,37 +175,26 @@ TEST_F(StableInstanceTest, FeatureLabels) {
 // A regular instance keeps allow_experimental_apis enabled by default and allow_unsafe_apis
 // disabled, whereas an instance with allow_experimental_apis disabled propagates that state to its
 // adapters and devices.
-TEST_F(StableInstanceTest, ToggleDefaults) {
-    // A stable-mode instance has both allow_experimental_apis and allow_unsafe_apis disabled.
-    wgpu::Instance stable = CreateStableModeInstance();
-    ASSERT_NE(stable, nullptr);
-    EXPECT_FALSE(HasToggle(stable, "allow_experimental_apis"));
-    EXPECT_FALSE(HasToggle(stable, "allow_unsafe_apis"));
+TEST_F(StableInstanceValidationTest, ToggleDefaults) {
+    // The stable-mode instance has both allow_experimental_apis and allow_unsafe_apis disabled.
+    EXPECT_FALSE(HasToggle(instance, "allow_experimental_apis"));
+    EXPECT_FALSE(HasToggle(instance, "allow_unsafe_apis"));
 
     // A regular instance enables allow_experimental_apis by default and keeps allow_unsafe_apis
     // disabled.
-    wgpu::Instance regular = wgpu::CreateInstance();
-    ASSERT_NE(regular, nullptr);
-    EXPECT_TRUE(HasToggle(regular, "allow_experimental_apis"));
-    EXPECT_FALSE(HasToggle(regular, "allow_unsafe_apis"));
+    EXPECT_TRUE(HasToggle(mRegularInstance, "allow_experimental_apis"));
+    EXPECT_FALSE(HasToggle(mRegularInstance, "allow_unsafe_apis"));
 
     // Adapters and devices inherit the disabled toggle state from the stable-mode instance.
-    wgpu::Adapter stableAdapter = GetNullAdapter(stable);
-    ASSERT_NE(stableAdapter, nullptr);
-    EXPECT_FALSE(HasToggle(stableAdapter, "allow_experimental_apis"));
-    EXPECT_FALSE(HasToggle(stableAdapter, "allow_unsafe_apis"));
-
-    wgpu::Device stableDevice;
-    wgpu::DeviceDescriptor deviceDesc = {};
-    EXPECT_EQ(RequestDeviceMessage(stableAdapter, &deviceDesc, &stableDevice), "");
-    ASSERT_NE(stableDevice, nullptr);
-    EXPECT_FALSE(HasToggle(stableDevice, "allow_experimental_apis"));
-    EXPECT_FALSE(HasToggle(stableDevice, "allow_unsafe_apis"));
+    EXPECT_FALSE(HasToggle(adapter, "allow_experimental_apis"));
+    EXPECT_FALSE(HasToggle(adapter, "allow_unsafe_apis"));
+    EXPECT_FALSE(HasToggle(device, "allow_experimental_apis"));
+    EXPECT_FALSE(HasToggle(device, "allow_unsafe_apis"));
 }
 
 // Instance features: unsupported values are rejected everywhere; Experimental ones
 // (ShaderSourceSPIRV) are rejected when allow_experimental_apis is disabled.
-TEST_F(StableInstanceTest, RequiredInstanceFeatures) {
+TEST_F(StableInstanceValidationTest, RequiredInstanceFeatures) {
     // Stable instance features (TimedWaitAny, MultipleDevicesPerAdapter) are accepted on both
     // stable-mode and regular instances.
     {
@@ -219,33 +231,23 @@ TEST_F(StableInstanceTest, RequiredInstanceFeatures) {
 
 // An adapter created from a stable-mode instance neither reports nor accepts Experimental
 // features, while an adapter on a regular instance continues reporting and accepting them.
-TEST_F(StableInstanceTest, AdapterHidesExperimentalFeatures) {
-    wgpu::Instance stable = CreateStableModeInstance();
-    ASSERT_NE(stable, nullptr);
-    wgpu::Adapter stableAdapter = GetNullAdapter(stable);
-    ASSERT_NE(stableAdapter, nullptr);
-
-    wgpu::Instance regular = wgpu::CreateInstance();
-    ASSERT_NE(regular, nullptr);
-    wgpu::Adapter regularAdapter = GetNullAdapter(regular);
-    ASSERT_NE(regularAdapter, nullptr);
-
+TEST_F(StableInstanceValidationTest, AdapterHidesExperimentalFeatures) {
     // DawnInternalUsages is enabled on every physical device but is Experimental, whereas
     // CoreFeaturesAndLimits is Stable.
-    EXPECT_TRUE(regularAdapter.HasFeature(wgpu::FeatureName::DawnInternalUsages));
-    EXPECT_FALSE(stableAdapter.HasFeature(wgpu::FeatureName::DawnInternalUsages));
-    EXPECT_TRUE(stableAdapter.HasFeature(wgpu::FeatureName::CoreFeaturesAndLimits));
+    EXPECT_TRUE(mRegularAdapter.HasFeature(wgpu::FeatureName::DawnInternalUsages));
+    EXPECT_FALSE(adapter.HasFeature(wgpu::FeatureName::DawnInternalUsages));
+    EXPECT_TRUE(adapter.HasFeature(wgpu::FeatureName::CoreFeaturesAndLimits));
 
     // GetFeatures on the stable adapter only returns Stable features.
     wgpu::SupportedFeatures stableFeatures;
-    stableAdapter.GetFeatures(&stableFeatures);
+    adapter.GetFeatures(&stableFeatures);
     EXPECT_GT(stableFeatures.featureCount, 0u);
     for (wgpu::FeatureName f : std::span(stableFeatures.features, stableFeatures.featureCount)) {
         EXPECT_TRUE(IsStableFeature(f)) << dawn::to_underlying(f);
     }
 
     wgpu::SupportedFeatures regularFeatures;
-    regularAdapter.GetFeatures(&regularFeatures);
+    mRegularAdapter.GetFeatures(&regularFeatures);
     EXPECT_GT(regularFeatures.featureCount, stableFeatures.featureCount);
 
     // Requesting an Experimental feature on the stable adapter fails with an explicit message
@@ -254,8 +256,8 @@ TEST_F(StableInstanceTest, AdapterHidesExperimentalFeatures) {
     wgpu::DeviceDescriptor desc = {};
     desc.requiredFeatureCount = 1;
     desc.requiredFeatures = &feature;
-    EXPECT_THAT(RequestDeviceMessage(stableAdapter, &desc), HasSubstr("allow_experimental_apis"));
-    EXPECT_EQ(RequestDeviceMessage(regularAdapter, &desc), "");
+    EXPECT_THAT(RequestDeviceMessage(adapter, &desc), HasSubstr("allow_experimental_apis"));
+    EXPECT_EQ(RequestDeviceMessage(mRegularAdapter, &desc), "");
 }
 
 }  // anonymous namespace

@@ -163,8 +163,6 @@ ValidationTest::ValidationTest() {
         // flags so that toggle flags will always take precedence. Note that disabling toggles also
         // take precedence.
         wgpu::DawnTogglesDescriptor deviceTogglesDesc;
-        deviceTogglesDesc.nextInChain = deviceDesc.nextInChain;
-        deviceDesc.nextInChain = &deviceTogglesDesc;
 
         auto enabledToggles = gCurrentTest->GetEnabledToggles();
         auto disabledToggles = gCurrentTest->GetDisabledToggles();
@@ -178,6 +176,12 @@ ValidationTest::ValidationTest() {
         deviceTogglesDesc.enabledToggleCount = enabledToggles.size();
         deviceTogglesDesc.disabledToggles = disabledToggles.data();
         deviceTogglesDesc.disabledToggleCount = disabledToggles.size();
+        // Only chain the toggles when there are some: an instance with allow_experimental_apis
+        // disabled rejects DawnTogglesDescriptor on the device.
+        if (!enabledToggles.empty() || !disabledToggles.empty()) {
+            deviceTogglesDesc.nextInChain = deviceDesc.nextInChain;
+            deviceDesc.nextInChain = &deviceTogglesDesc;
+        }
 
         return dawn::native::GetProcs().adapterRequestDevice(
             self, reinterpret_cast<WGPUDeviceDescriptor*>(&deviceDesc),
@@ -208,6 +212,11 @@ void ValidationTest::SetUp() {
         instanceToggles.enabledToggleCount = 1;
         instanceToggles.enabledToggles = &allowUnsafeApisToggle;
     }
+    if (!AllowExperimentalAPIs()) {
+        static const char* allowExperimentalApisToggle = "allow_experimental_apis";
+        instanceToggles.disabledToggleCount = 1;
+        instanceToggles.disabledToggles = &allowExperimentalApisToggle;
+    }
 
     std::vector<const char*> blocklistedFeatures = GetWGSLBlocklistedFeatures();
     dawn::native::DawnWGSLBlocklist blockList;
@@ -221,6 +230,11 @@ void ValidationTest::SetUp() {
                    wgpu::InstanceFeatureName::ShaderSourceSPIRV};
     instanceDesc.requiredFeatureCount = kRequiredFeatures.size();
     instanceDesc.requiredFeatures = kRequiredFeatures.data();
+    if (!AllowExperimentalAPIs()) {
+        // DawnWGSLBlocklist and ShaderSourceSPIRV are not part of the stable ABI.
+        instanceDesc.nextInChain = &instanceToggles;
+        instanceDesc.requiredFeatureCount = 1;
+    }
 
     SetUp(&instanceDesc);
 }
@@ -324,6 +338,10 @@ const dawn::utils::ComboLimits& ValidationTest::GetSupportedLimits() const {
 }
 
 bool ValidationTest::AllowUnsafeAPIs() {
+    return true;
+}
+
+bool ValidationTest::AllowExperimentalAPIs() {
     return true;
 }
 

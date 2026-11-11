@@ -205,6 +205,9 @@ class ValidationTest : public testing::Test {
     // Called during SetUp() to get the required features and toggles to be enabled for the tests.
     // Override these appropriately for different tests.
     virtual bool AllowUnsafeAPIs();
+    // Returning false disables allow_experimental_apis on the instance, so the device only accepts
+    // the parts of the API that are in Dawn's stable ABI.
+    virtual bool AllowExperimentalAPIs();
     virtual std::vector<wgpu::FeatureName> GetRequiredFeatures();
     // Note implementations of this can assume `required` starts as default-initialized.
     virtual void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
