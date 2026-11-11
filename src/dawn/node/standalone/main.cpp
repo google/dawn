@@ -353,25 +353,22 @@ class StandaloneRunner {
             v8::Local<v8::Context> context = v8::Context::New(isolate_);
             context->Enter();
 
-            napi_env c_env = dawn::napi_v8::CreateEnv(isolate_, context);
-            // `loop` must be destroyed before `DestroyEnv(c_env)` because queued tasks hold
-            // `Napi::Reference`s that unregister themselves from `c_env` on destruction.
-            {
-                Napi::Env env(c_env);
-                dawn::node::standalone::EventLoop loop(isolate_, platform_.get());
+            napi_env c_env = dawn::napi_v8::CreateEnv(isolate_, context, platform_.get());
+            Napi::Env env(c_env);
+            dawn::node::standalone::EventLoop& loop = dawn::napi_v8::GetEventLoop(c_env);
 
-                // `InitializePolyfills` requires `loop` to bind timers and `process.exit`, and
-                // must run before `InitializeWebGPU` which subclasses `Event` and `DOMException`.
-                InitializePolyfills(env, loop);
-                InitializeWebGPU(env);
+            // `InitializePolyfills` requires `loop` to bind timers and `process.exit`, and must run
+            // before `InitializeWebGPU` which subclasses `Event` and `DOMException`.
+            InitializePolyfills(env, loop);
+            InitializeWebGPU(env);
 
-                loop.PostTask([env] {
-                    Napi::Function require_fn = env.Global().Get("require").As<Napi::Function>();
-                    require_fn.Call({Napi::String::New(env, kCmdlineScript)});
-                });
-                loop.Run();
-                exit_code = loop.exit_code();
-            }
+            loop.PostTask([env] {
+                Napi::Function require_fn = env.Global().Get("require").As<Napi::Function>();
+                require_fn.Call({Napi::String::New(env, kCmdlineScript)});
+            });
+            loop.Run();
+            exit_code = loop.exit_code();
+
             dawn::napi_v8::DestroyEnv(c_env);
 
             context->Exit();

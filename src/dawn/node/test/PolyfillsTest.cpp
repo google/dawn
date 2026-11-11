@@ -140,21 +140,17 @@ class PolyfillsTest : public dawn::node::test::V8IsolateTest {
 
     void SetUp() override {
         V8IsolateTest::SetUp();
-        env_ = dawn::napi_v8::CreateEnv(isolate_, context());
-        loop_.emplace(isolate_, dawn::node::test::V8Platform());
+        env_ = dawn::napi_v8::CreateEnv(isolate_, context(), dawn::node::test::V8Platform());
     }
 
     void TearDown() override {
-        // Before the environment: a task still queued in the loop owns a reference to the
-        // JavaScript callback it was going to call.
-        loop_.reset();
         dawn::napi_v8::DestroyEnv(env_);
         V8IsolateTest::TearDown();
     }
 
     // The loop the timer polyfills schedule onto. A test drives it by hand with RunOneIteration()
     // rather than running it, so that nothing depends on how long anything takes.
-    dawn::node::standalone::EventLoop& loop() { return *loop_; }
+    dawn::node::standalone::EventLoop& loop() { return dawn::napi_v8::GetEventLoop(env_); }
 
     napi_value RunScript(const std::string& code) {
         napi_value script_src;
@@ -233,8 +229,6 @@ class PolyfillsTest : public dawn::node::test::V8IsolateTest {
     napi_env env_ = nullptr;
 
   private:
-    // Held by value once SetUp() has an isolate to give it.
-    std::optional<dawn::node::standalone::EventLoop> loop_;
     std::unique_ptr<dawn::node::standalone::FileBundle> bundle_;
 };
 

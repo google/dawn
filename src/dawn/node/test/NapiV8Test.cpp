@@ -40,6 +40,7 @@
 #include <vector>
 
 #include "src/dawn/node/napi_v8/napi_v8.h"
+#include "src/dawn/node/standalone/EventLoop.h"
 #include "src/dawn/node/test/V8TestEnvironment.h"
 
 #ifndef V8_ENABLE_SANDBOX
@@ -55,16 +56,7 @@ class NapiV8Test : public dawn::node::test::V8IsolateTest {
 
     void SetUp() override {
         V8IsolateTest::SetUp();
-        env_ = dawn::napi_v8::CreateEnv(isolate_, context());
-        napi_value setup_script = nullptr;
-        ASSERT_EQ(napi_create_string_utf8(
-                      env_,
-                      "globalThis._immediateQueue = [];"
-                      "globalThis.setImmediate = (fn) => { globalThis._immediateQueue.push(fn); };",
-                      NAPI_AUTO_LENGTH, &setup_script),
-                  napi_ok);
-        napi_value unused = nullptr;
-        ASSERT_EQ(napi_run_script(env_, setup_script, &unused), napi_ok);
+        env_ = dawn::napi_v8::CreateEnv(isolate_, context(), dawn::node::test::V8Platform());
     }
 
     void TearDown() override {
@@ -74,20 +66,18 @@ class NapiV8Test : public dawn::node::test::V8IsolateTest {
 
     napi_env env_ = nullptr;
 
-    napi_env CreateSubEnv() { return dawn::napi_v8::CreateEnv(isolate_, env_->GetContext()); }
+    napi_env CreateSubEnv() {
+        return dawn::napi_v8::CreateEnv(isolate_, env_->GetContext(),
+                                        dawn::node::test::V8Platform());
+    }
 
     void DestroySubEnv(napi_env sub_env) { dawn::napi_v8::DestroyEnv(sub_env); }
 
     void DrainImmediates() {
-        napi_value drain_script = nullptr;
-        ASSERT_EQ(napi_create_string_utf8(env_,
-                                          "while (globalThis._immediateQueue.length > 0) {"
-                                          "  globalThis._immediateQueue.shift()();"
-                                          "}",
-                                          NAPI_AUTO_LENGTH, &drain_script),
-                  napi_ok);
-        napi_value unused = nullptr;
-        ASSERT_EQ(napi_run_script(env_, drain_script, &unused), napi_ok);
+        dawn::node::standalone::EventLoop& loop = dawn::napi_v8::GetEventLoop(env_);
+        while (loop.RunOneIteration() ==
+               dawn::node::standalone::EventLoop::IterationResult::kRanTasks) {
+        }
     }
 
     void RequestGC() {
@@ -3465,9 +3455,9 @@ void RecordFinalizedFlag(napi_env, void* finalize_data, void*) {
     *static_cast<bool*>(finalize_data) = true;
 }
 
-// GC schedules `napi_finalize` callbacks onto `globalThis.setImmediate` rather than running them
-// during `CollectGarbage()`.
-TEST_F(NapiV8Test, FinalizerIsDeferredThroughSetImmediate) {
+// GC queues `napi_finalize` callbacks onto the event loop rather than running them during
+// `CollectGarbage()`.
+TEST_F(NapiV8Test, FinalizerIsDeferredToEventLoop) {
     bool finalized = false;
     {
         napi_handle_scope scope = nullptr;

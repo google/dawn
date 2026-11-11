@@ -109,6 +109,9 @@ class EventLoop {
     // overwrite the exit code. Backs process.exit().
     void Stop(int exit_code);
 
+    // Drops all queued tasks without running them.
+    void Clear();
+
     bool stopped() const { return stopped_; }
     int exit_code() const { return exit_code_; }
 

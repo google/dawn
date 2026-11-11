@@ -32,6 +32,7 @@
 #include <js_native_api_types.h>
 #include <node_api.h>
 #include <node_api_types.h>
+#include <v8.h>
 
 #include <algorithm>
 #include <bit>
@@ -44,8 +45,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/linked_hash_set.h"
-
-#include <v8.h>
+#include "src/dawn/node/standalone/EventLoop.h"
 
 // Internal structs representing handle scopes
 struct napi_handle_scope__ {
@@ -108,7 +108,6 @@ struct napi_ref__ {
     void ClearFinalizer();
 
     static void WeakCallback(const v8::WeakCallbackInfo<napi_ref__>& data);
-    static void PostGarbageCollectionCallback(const v8::WeakCallbackInfo<napi_ref__>& data);
 };
 
 // Internal struct representing a Node-API deferred promise (napi_deferred)
@@ -132,6 +131,7 @@ struct InstanceData {
 struct napi_env__ {
     v8::Isolate* isolate = nullptr;
     v8::Global<v8::Context> context;
+    dawn::node::standalone::EventLoop loop;
     v8::Global<v8::Value> last_exception;
     napi_extended_error_info last_error{};
     std::vector<std::unique_ptr<napi_handle_scope__>> open_handle_scopes;
@@ -147,7 +147,6 @@ struct napi_env__ {
     // References collected by V8 GC whose `napi_finalize` callbacks are waiting to run outside the
     // GC atomic pause, in FIFO order.
     absl::linked_hash_set<napi_ref__*> pending_finalizers;
-    bool post_gc_callback_scheduled = false;
     bool finalizer_drain_scheduled = false;
 
     std::vector<std::unique_ptr<napi_deferred__>> deferreds;
@@ -160,7 +159,8 @@ struct napi_env__ {
 
     void DrainFinalizers();
 
-    napi_env__(v8::Isolate* iso, v8::Local<v8::Context> ctx) : isolate(iso), context(iso, ctx) {
+    napi_env__(v8::Isolate* iso, v8::Local<v8::Context> ctx, v8::Platform* platform)
+        : isolate(iso), context(iso, ctx), loop(iso, platform) {
         ClearLastError();
     }
 
@@ -192,6 +192,11 @@ inline void napi_ref__::ClearFinalizer() {
 }
 
 inline napi_env__::~napi_env__() {
+    // Drop queued tasks while `references` is still intact so captured Napi::References can
+    // unregister themselves cleanly.
+    loop.Stop(0);
+    loop.Clear();
+
     if (instance_data.finalize_cb != nullptr) {
         instance_data.finalize_cb(this, instance_data.data, instance_data.finalize_hint);
         instance_data.finalize_cb = nullptr;
@@ -215,6 +220,7 @@ inline napi_env__::~napi_env__() {
         cb(this, native_object, finalize_hint);
     }
 
+    loop.Clear();
     references.clear();
 }
 
@@ -235,12 +241,18 @@ inline v8::Local<v8::Value> ToV8(napi_value val) {
 }
 
 // Environment factory helpers
-inline napi_env CreateEnv(v8::Isolate* isolate, v8::Local<v8::Context> context) {
-    return new napi_env__(isolate, context);
+inline napi_env CreateEnv(v8::Isolate* isolate,
+                          v8::Local<v8::Context> context,
+                          v8::Platform* platform) {
+    return new napi_env__(isolate, context, platform);
 }
 
 inline void DestroyEnv(napi_env env) {
     delete env;
+}
+
+inline dawn::node::standalone::EventLoop& GetEventLoop(napi_env env) {
+    return env->loop;
 }
 
 }  // namespace dawn::napi_v8

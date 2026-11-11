@@ -367,6 +367,22 @@ TEST_F(EventLoopTest, StopFromInsideATaskAbandonsTheRemainingImmediates) {
     EXPECT_EQ(Join(order), "first");
 }
 
+TEST_F(EventLoopTest, ClearDropsQueuedImmediatesAndTimers) {
+    TestEventLoop loop(isolate_, platform_);
+    bool ran = false;
+
+    loop.PostTask([&] { ran = true; });
+    loop.PostDelayedTask([&] { ran = true; }, milliseconds(10));
+    ASSERT_TRUE(loop.NextDueTime().has_value());
+
+    loop.Clear();
+    EXPECT_FALSE(loop.NextDueTime().has_value());
+
+    loop.AdvanceBy(milliseconds(10));
+    EXPECT_EQ(loop.RunOneIteration(), IterationResult::kIdle);
+    EXPECT_FALSE(ran);
+}
+
 // Run() sleeps against the real clock, so the tests below use a plain EventLoop with delays short
 // enough to be imperceptible. They assert only the order things happened in, never how long
 // anything took, so a loaded machine cannot fail them.
