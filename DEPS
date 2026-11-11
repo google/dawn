@@ -14,6 +14,7 @@ gclient_gn_args = [
 git_dependencies = 'SYNC'
 
 vars = {
+  'boringssl_git': 'https://boringssl.googlesource.com',
   'chromium_git': 'https://chromium.googlesource.com',
   'dawn_git': 'https://dawn.googlesource.com',
   'github_git': 'https://github.com',
@@ -860,6 +861,16 @@ deps = {
 
   'third_party/simdutf/src': {
     'url': '{chromium_git}/chromium/src/third_party/simdutf@f7356eed293f8208c40b3c1b344a50bd70971983',
+    'condition': 'dawn_standalone and checkout_v8',
+  },
+
+  'third_party/boringssl/src': {
+    'url': '{boringssl_git}/boringssl.git@0131ae9d78e42fcc2c1811315e62410ad96d8230',
+    'condition': 'dawn_standalone and checkout_v8',
+  },
+
+  'third_party/nasm/src': {
+    'url': '{chromium_git}/chromium/deps/nasm.git@525a09a813be0f75b646ee93fc2a31c27b87d722',
     'condition': 'dawn_standalone and checkout_v8',
   },
 

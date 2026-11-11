@@ -257,3 +257,11 @@
 	path = third_party/simdutf/src
 	url = https://chromium.googlesource.com/chromium/src/third_party/simdutf
 	gclient-condition = dawn_standalone and checkout_v8
+[submodule "third_party/boringssl/src"]
+	path = third_party/boringssl/src
+	url = https://boringssl.googlesource.com/boringssl.git
+	gclient-condition = dawn_standalone and checkout_v8
+[submodule "third_party/nasm/src"]
+	path = third_party/nasm/src
+	url = https://chromium.googlesource.com/chromium/deps/nasm.git
+	gclient-condition = dawn_standalone and checkout_v8

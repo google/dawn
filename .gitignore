@@ -17,6 +17,7 @@
 /third_party/android_toolchain/ndk
 /third_party/angle
 /third_party/binutils
+/third_party/boringssl/src
 /third_party/catapult
 /third_party/clang-format
 /third_party/cpplint
@@ -51,6 +52,7 @@
 /third_party/llvm-libclang
 /third_party/markupsafe
 /third_party/mesa/src
+/third_party/nasm/src
 /third_party/ninja
 /third_party/node
 /third_party/node-addon-api
