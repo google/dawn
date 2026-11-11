@@ -100,11 +100,24 @@ struct State {
     Vector<core::ir::Value*, 4> textures_to_convert_to_depth_{};
     /// Samplers used in dref calls which need to be comparison samplers
     Vector<core::ir::Value*, 4> samplers_to_convert_to_comparison_{};
+    /// Textures and samplers which have already been converted for dref calls.
+    Hashset<core::ir::Value*, 4> converted_to_depth_or_comparison_{};
 
     /// Process the module.
     Result<SuccessType> Process() {
         ReplacePointerToHandle();
+        ConvertModuleScopeHandleVars();
+        FindDepthTextureUses();
+        ConvertDepthTextures();
+        ConvertComparisonSamplers();
+        UpdateValues();
+        TINT_CHECK_RESULT(LowerImageBuiltins());
+        DestroySampledImages();
+        return Success;
+    }
 
+    /// Retypes module-scope image vars and their loads, and queues sampler lets for inlining.
+    void ConvertModuleScopeHandleVars() {
         for (auto* inst : *ir.root_block) {
             auto* var = inst->As<core::ir::Var>();
             if (!var) {
@@ -140,7 +153,11 @@ struct State {
                     });
             });
         }
+    }
 
+    /// Registers the OpSampledImage calls and records the textures and samplers used by dref
+    /// calls, which must become depth textures and comparison samplers.
+    void FindDepthTextureUses() {
         std::vector<std::function<void()>> worklist;
         worklist.reserve(128);
         for (auto* inst : ir.Instructions()) {
@@ -172,12 +189,13 @@ struct State {
         for (auto& cb : worklist) {
             cb();
         }
-        worklist.clear();
+    }
 
-        Hashset<core::ir::Value*, 4> converted{};
+    /// Converts the root var or parameter of each texture used in a dref call to a depth texture.
+    void ConvertDepthTextures() {
         while (!textures_to_convert_to_depth_.IsEmpty()) {
             auto tex = textures_to_convert_to_depth_.Pop();
-            if (!converted.Add(tex)) {
+            if (!converted_to_depth_or_comparison_.Add(tex)) {
                 continue;
             }
 
@@ -191,10 +209,14 @@ struct State {
                 [&](core::ir::FunctionParam* param) { ConvertTextureParam(param); },  //
                 TINT_ICE_ON_NO_MATCH);
         }
+    }
 
+    /// Converts the root var or parameter of each sampler used in a dref call to a comparison
+    /// sampler.
+    void ConvertComparisonSamplers() {
         while (!samplers_to_convert_to_comparison_.IsEmpty()) {
             auto samp = samplers_to_convert_to_comparison_.Pop();
-            if (!converted.Add(samp)) {
+            if (!converted_to_depth_or_comparison_.Add(samp)) {
                 continue;
             }
 
@@ -208,78 +230,71 @@ struct State {
                 [&](core::ir::FunctionParam* param) { ConvertSamplerParam(param); },  //
                 TINT_ICE_ON_NO_MATCH);
         }
-        UpdateValues();
+    }
 
-        Vector<spirv::ir::BuiltinCall*, 4> builtin_worklist;
-        std::vector<std::function<Result<SuccessType>()>> result_worklist;
+    /// Replaces every SPIR-V image builtin call with the equivalent core texture builtin.
+    Result<SuccessType> LowerImageBuiltins() {
+        // Collect the calls first, as lowering them mutates the instruction list.
+        std::vector<spirv::ir::BuiltinCall*> image_calls;
+        image_calls.reserve(128);
         for (auto* inst : ir.Instructions()) {
             if (auto* builtin = inst->As<spirv::ir::BuiltinCall>()) {
-                switch (builtin->Func()) {
-                    case spirv::BuiltinFn::kOpSampledImage:
-                        // Note, we _also_ do this here even though it was done above. The one above
-                        // registers for the depth functions, but, we may have forked functions in
-                        // the `UpdateValues` when it does the `ConvertUserCall`. This would then
-                        // generate new `SampledImage` objects which need to be registered. In the
-                        // worse case, we just write the same data twice.
-                        SampledImage(builtin);
-                        break;
-                    case spirv::BuiltinFn::kOpImage:
-                        worklist.push_back([this, builtin] { Image(builtin); });
-                        break;
-                    case spirv::BuiltinFn::kImageRead:
-                    case spirv::BuiltinFn::kImageFetch:
-                        result_worklist.push_back([this, builtin] { return ImageFetch(builtin); });
-                        break;
-                    case spirv::BuiltinFn::kImageGather:
-                        result_worklist.push_back([this, builtin] { return ImageGather(builtin); });
-                        break;
-                    case spirv::BuiltinFn::kImageQueryLevels:
-                        worklist.push_back([this, builtin] {
-                            ImageQuery(builtin, core::BuiltinFn::kTextureNumLevels);
-                        });
-                        break;
-                    case spirv::BuiltinFn::kImageQuerySamples:
-                        worklist.push_back([this, builtin] {
-                            ImageQuery(builtin, core::BuiltinFn::kTextureNumSamples);
-                        });
-                        break;
-                    case spirv::BuiltinFn::kImageQuerySize:
-                    case spirv::BuiltinFn::kImageQuerySizeLod:
-                        worklist.push_back([this, builtin] { ImageQuerySize(builtin); });
-                        break;
-                    case spirv::BuiltinFn::kImageSampleExplicitLod:
-                    case spirv::BuiltinFn::kImageSampleImplicitLod:
-                    case spirv::BuiltinFn::kImageSampleProjImplicitLod:
-                    case spirv::BuiltinFn::kImageSampleProjExplicitLod:
-                        result_worklist.push_back([this, builtin] { return ImageSample(builtin); });
-                        break;
-                    case spirv::BuiltinFn::kImageWrite:
-                        result_worklist.push_back([this, builtin] { return ImageWrite(builtin); });
-                        break;
-                    case spirv::BuiltinFn::kImageSampleDrefImplicitLod:
-                    case spirv::BuiltinFn::kImageSampleDrefExplicitLod:
-                    case spirv::BuiltinFn::kImageSampleProjDrefImplicitLod:
-                    case spirv::BuiltinFn::kImageSampleProjDrefExplicitLod:
-                        result_worklist.push_back(
-                            [this, builtin] { return ImageSampleDref(builtin); });
-                        break;
-                    case spirv::BuiltinFn::kImageDrefGather:
-                        result_worklist.push_back(
-                            [this, builtin] { return ImageGatherDref(builtin); });
-                        break;
-                    default:
-                        TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
+                if (builtin->Func() == spirv::BuiltinFn::kOpSampledImage) {
+                    // Registered again because `UpdateValues` may have forked functions, which
+                    // creates new OpSampledImage calls that `FindDepthTextureUses` did not see.
+                    SampledImage(builtin);
+                } else {
+                    image_calls.push_back(builtin);
                 }
             }
         }
-        for (auto& cb : worklist) {
-            cb();
+        for (auto* call : image_calls) {
+            TINT_CHECK_RESULT(LowerImageBuiltin(call));
         }
-        for (auto& cb : result_worklist) {
-            TINT_CHECK_RESULT(cb());
-        }
+        return Success;
+    }
 
-        // Destroy all the OpSampledImage instructions.
+    Result<SuccessType> LowerImageBuiltin(spirv::ir::BuiltinCall* call) {
+        switch (call->Func()) {
+            case spirv::BuiltinFn::kOpImage:
+                Image(call);
+                return Success;
+            case spirv::BuiltinFn::kImageRead:
+            case spirv::BuiltinFn::kImageFetch:
+                return ImageFetch(call);
+            case spirv::BuiltinFn::kImageGather:
+                return ImageGather(call);
+            case spirv::BuiltinFn::kImageQueryLevels:
+                ImageQuery(call, core::BuiltinFn::kTextureNumLevels);
+                return Success;
+            case spirv::BuiltinFn::kImageQuerySamples:
+                ImageQuery(call, core::BuiltinFn::kTextureNumSamples);
+                return Success;
+            case spirv::BuiltinFn::kImageQuerySize:
+            case spirv::BuiltinFn::kImageQuerySizeLod:
+                ImageQuerySize(call);
+                return Success;
+            case spirv::BuiltinFn::kImageSampleExplicitLod:
+            case spirv::BuiltinFn::kImageSampleImplicitLod:
+            case spirv::BuiltinFn::kImageSampleProjImplicitLod:
+            case spirv::BuiltinFn::kImageSampleProjExplicitLod:
+                return ImageSample(call);
+            case spirv::BuiltinFn::kImageWrite:
+                return ImageWrite(call);
+            case spirv::BuiltinFn::kImageSampleDrefImplicitLod:
+            case spirv::BuiltinFn::kImageSampleDrefExplicitLod:
+            case spirv::BuiltinFn::kImageSampleProjDrefImplicitLod:
+            case spirv::BuiltinFn::kImageSampleProjDrefExplicitLod:
+                return ImageSampleDref(call);
+            case spirv::BuiltinFn::kImageDrefGather:
+                return ImageGatherDref(call);
+            default:
+                TINT_UNREACHABLE() << "unknown spirv builtin: " << call->Func();
+        }
+    }
+
+    /// Destroys all the OpSampledImage instructions.
+    void DestroySampledImages() {
         for (auto res : sampled_images_) {
             // If the sampled image was in a user function which was forked and the original
             // destroyed then it will no longer be alive.
@@ -287,7 +302,6 @@ struct State {
                 res.value->Destroy();
             }
         }
-        return Success;
     }
 
     void ReplacePointerToHandle() {
