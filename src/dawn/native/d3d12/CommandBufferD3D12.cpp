@@ -481,7 +481,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
     // when pipelines enable different internal immediates. A different root signature invalidates
     // all bound descriptor tables and root constants, so the bindings cannot be inherited and must
     // be re-applied. Comparing handles is sufficient: equal handles imply the same pipeline layout.
-    bool AreLayoutsCompatible() override {
+    bool CanSkipDirtying() override {
         return mLastAppliedPipeline != nullptr &&
                LastAppliedPipeline()->GetPipelineLayoutHandle() ==
                    CurrentPipeline()->GetPipelineLayoutHandle();
@@ -677,7 +677,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
     }
 
     void UpdateRootSignatureIfNecessary(ID3D12GraphicsCommandList* commandList) {
-        if (!AreLayoutsCompatible()) {
+        if (!CanSkipDirtying()) {
             SetRootSignature(commandList);
             // Invalidate the root sampler tables previously set in the root signature.
             ResetRootSamplerTables();

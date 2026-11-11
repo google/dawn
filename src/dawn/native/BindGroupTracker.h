@@ -79,7 +79,7 @@ class BindGroupTrackerBase {
     void OnSetPipeline(PipelineBase* pipeline) { mPipeline = pipeline; }
 
   protected:
-    virtual bool AreLayoutsCompatible() {
+    virtual bool CanSkipDirtying() {
         return mLastAppliedPipeline != nullptr &&
                mLastAppliedPipeline->GetLayout() == mPipeline->GetLayout();
     }
@@ -91,7 +91,7 @@ class BindGroupTrackerBase {
 
     // The Derived class should call this before it applies bind groups.
     void BeforeApply() {
-        if (AreLayoutsCompatible()) {
+        if (CanSkipDirtying()) {
             return;
         }
 

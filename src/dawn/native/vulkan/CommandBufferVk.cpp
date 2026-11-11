@@ -237,7 +237,7 @@ VkRect2D GetAlignedRenderArea(VkExtent2D granularity, BeginRenderPassCmd* render
 
 class DescriptorSetTracker : public BindGroupTrackerBase<true> {
   public:
-    bool AreLayoutsCompatible() override {
+    bool CanSkipDirtying() override {
         return mLastAppliedPipeline != nullptr &&
                mLastAppliedPipeline->GetLayout() == mPipeline->GetLayout() &&
                mLastAppliedImmediateSize == mImmediateSize;

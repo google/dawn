@@ -1547,6 +1547,99 @@ TEST_P(BindGroupTests, DynamicAndNonDynamicBindingsDoNotConflictAfterRemapping) 
     RunTestWith(false);
 }
 
+// Regression test for https://crbug.com/584010533 where the OpenGL backend doesn't dirty
+// bindgroups when a pipeline is changed that use a different combination of texture/samplers.
+TEST_P(BindGroupTests, PipelineUsingDifferentTextureSamplerCombinationSameLayout) {
+    // Make the pipelines sharing a pipeline layout but using different textures.
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::UnfilterableFloat},
+                    {1, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::UnfilterableFloat},
+                    {2, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::UnfilterableFloat},
+                    {3, wgpu::ShaderStage::Compute, wgpu::SamplerBindingType::NonFiltering},
+                    {4, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage},
+                });
+    wgpu::PipelineLayout pl = utils::MakePipelineLayout(device, {bgl});
+
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var t0 : texture_2d<f32>;
+        @group(0) @binding(1) var t1 : texture_2d<f32>;
+        @group(0) @binding(2) var t2 : texture_2d<f32>;
+        @group(0) @binding(3) var s : sampler;
+        @group(0) @binding(4) var<storage, read_write> result : u32;
+
+        @compute @workgroup_size(1) fn sample_0_and_1() {
+            let value0 = textureSampleLevel(t0, s, vec2(0), 0).x;
+            let value1 = textureSampleLevel(t1, s, vec2(0), 0).x;
+            result = u32(value0 + value1);
+        }
+        @compute @workgroup_size(1) fn sample_1_and_2() {
+            let value1 = textureSampleLevel(t1, s, vec2(0), 0).x;
+            let value2 = textureSampleLevel(t2, s, vec2(0), 0).x;
+            result = u32(value1 + value2);
+        }
+    )");
+
+    wgpu::ComputePipelineDescriptor csDesc = {
+        .layout = pl,
+        .compute = {.module = module},
+    };
+
+    csDesc.compute.entryPoint = "sample_0_and_1";
+    wgpu::ComputePipeline pipeline01 = device.CreateComputePipeline(&csDesc);
+
+    csDesc.compute.entryPoint = "sample_1_and_2";
+    wgpu::ComputePipeline pipeline12 = device.CreateComputePipeline(&csDesc);
+
+    // Make test textures containing increasing u32 values.
+    std::array<wgpu::Texture, 3> textures;
+    for (uint32_t i = 0; i < 3; i++) {
+        wgpu::TextureDescriptor tDesc = {
+            .usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding,
+            .size = {1, 1},
+            .format = wgpu::TextureFormat::R32Float,
+        };
+        textures[i] = device.CreateTexture(&tDesc);
+
+        wgpu::TexelCopyTextureInfo dst = {.texture = textures[i]};
+        wgpu::TexelCopyBufferLayout srcLayout = {};
+        wgpu::Extent3D copyExtent = {1, 1};
+        float value = static_cast<float>(i);
+        queue.WriteTexture(&dst, &value, sizeof(value), &srcLayout, &copyExtent);
+    }
+
+    // Make the result buffer and bingroup.
+    wgpu::BufferDescriptor bDesc = {
+        .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
+        .size = sizeof(uint32_t),
+    };
+    wgpu::Buffer resultBuffer = device.CreateBuffer(&bDesc);
+
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl,
+                                              {
+                                                  {0, textures[0].CreateView()},
+                                                  {1, textures[1].CreateView()},
+                                                  {2, textures[2].CreateView()},
+                                                  {3, device.CreateSampler()},
+                                                  {4, resultBuffer},
+                                              });
+
+    // Run both pipelines one after the other, the result would have been incorrect for pipeline12
+    // because the texture units didn't get reconfigured in the OpenGL backend prior to the fix.
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetBindGroup(0, bg);
+    pass.SetPipeline(pipeline01);
+    pass.DispatchWorkgroups(1);
+    pass.SetPipeline(pipeline12);
+    pass.DispatchWorkgroups(1);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_EQ(3u, resultBuffer, 0u);
+}
+
 // Test that visibility of bindings in BindGroupLayout can be none
 // This test passes by not asserting or crashing.
 TEST_P(BindGroupTests, BindGroupLayoutVisibilityCanBeNone) {
