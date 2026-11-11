@@ -33,9 +33,7 @@
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/Buffer.h"
 #include "src/dawn/native/CommandAllocator.h"
-#include "src/dawn/native/Device.h"
 #include "src/dawn/native/Texture.h"
-#include "src/dawn/native/Toggles.h"
 
 namespace dawn::native {
 
@@ -46,11 +44,16 @@ namespace {
 // be checked independently: bytesPerRow == texelsPerRow * bytesPerBlock, so a format with a small
 // bytesPerBlock (e.g. R8Unorm, 1 byte/texel) can push texelsPerRow past 2^14 while bytesPerRow is
 // still nowhere near 2^18. See crbug.com/481934465.
-// These thresholds also cover the larger 256 MiB (2^28 bytes) row pitch overflow / wrap-around
-// limits on ARM Mali (crbug.com/569161611), ImgTec PowerVR (crbug.com/529867799),
-// and Qualcomm Adreno (crbug.com/380487895).
+// These thresholds also cover the larger row pitch overflow / wrap-around limits on ARM Mali
+// (2^28 bytes, crbug.com/569161611), ImgTec PowerVR (2^28 bytes, crbug.com/529867799),
+// Qualcomm Adreno (2^28 bytes, crbug.com/380487895), and NVIDIA (2^31 bytes, crbug.com/583083283).
 constexpr uint64_t kMaxBytesPerRow = 1u << 18;
 constexpr uint64_t kMaxTexelsPerRow = 1u << 14;
+
+// Multi-slice copies also step across images by `bytesPerImage = bytesPerRow * rowsPerImage`.
+// ARM Mali GLES wraps signed 32-bit bit strides at 2^28 bytes (256 MiB), and drivers that compute
+// byte strides in signed 32-bit integers (e.g. NVIDIA Vulkan, crbug.com/583083283) wrap at 2 GiB.
+constexpr uint64_t kMaxBytesPerImage = 1ull << 28;
 
 // Splits {bufferCopy, textureCopy, copySize} into one sub-copy per unpadded row, in row-major
 // order, invoking `func(bufferOffset, origin)` for each one. `bufferOffset` is the real
@@ -81,17 +84,17 @@ void SplitBufferTextureCopyByRow(const BufferCopy& bufferCopy,
 
 }  // namespace
 
-bool NeedsBufferTextureCopySplitForOversizedRow(const DeviceBase* device,
-                                                const BufferCopy& bufferCopy,
+bool NeedsBufferTextureCopySplitForOversizedRow(const BufferCopy& bufferCopy,
+                                                const BlockExtent3D& copySize,
                                                 const TypedTexelBlockInfo& blockInfo) {
-    if (!device->IsToggleEnabled(Toggle::SplitBufferTextureCopyForOversizedRow)) {
-        return false;
-    }
     const bool exceedsMaxBytesPerRow =
         blockInfo.ToBytes(bufferCopy.blocksPerRow) >= kMaxBytesPerRow;
     const bool exceedsMaxTexelsPerRow =
         static_cast<uint64_t>(blockInfo.ToTexelWidth(bufferCopy.blocksPerRow)) >= kMaxTexelsPerRow;
-    return exceedsMaxBytesPerRow || exceedsMaxTexelsPerRow;
+    const bool exceedsMaxBytesPerImage =
+        copySize.depthOrArrayLayers > BlockCount{1u} &&
+        blockInfo.ToBytes(bufferCopy.blocksPerRow * bufferCopy.rowsPerImage) >= kMaxBytesPerImage;
+    return exceedsMaxBytesPerRow || exceedsMaxTexelsPerRow || exceedsMaxBytesPerImage;
 }
 
 void SplitCopyTextureToBufferForOversizedRow(CommandAllocator* allocator,

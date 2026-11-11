@@ -538,13 +538,6 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "attachment's alpha channel unchanged, so the workaround is not observable to the "
       "application. Skipped for non-blendable formats.",
       "https://issues.chromium.org/issues/525294804", ToggleStage::Device}},
-    {Toggle::SplitBufferTextureCopyForOversizedRow,
-     {"split_buffer_texture_copy_for_oversized_row",
-      "Split a buffer-to-texture or texture-to-buffer copy into one copy command per row so its "
-      "row pitch (bytes) and row width (texels) never overflow hardware register fields or driver "
-      "stride calculations. Workaround for Intel, ARM, ImgTec, and Qualcomm GPU hardware/driver "
-      "limitations.",
-      "https://crbug.com/481934465", ToggleStage::Device}},
     {Toggle::GLUseArrayLengthFromImmediate,
      {"gl_use_array_length_from_immediate",
       "Use immediate data to replace arrayLength() function calls of dynamic storage buffers. "

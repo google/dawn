@@ -978,10 +978,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     }
 
     if (gpu_info::IsIntel(vendorId)) {
-        // Workaround an Intel GPU hardware limitation that corrupts buffer<->texture copies with
-        // a large row pitch. See https://crbug.com/481934465.
-        deviceToggles->Default(Toggle::SplitBufferTextureCopyForOversizedRow, true);
-
         // The workaround below is needed on old Intel drivers and newer version of Windows 11.
         // See http://crbug.com/dawn/2308 for more information.
         constexpr uint64_t kAffectedMinimumWindowsBuildNumber = 25957u;
@@ -1006,9 +1002,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // See https://crbug.com/411268750 for more information.
     if (gpu_info::IsQualcommACPI(vendorId)) {
         deviceToggles->Default(Toggle::UsePackedDepth24UnormStencil8Format, true);
-        // Workaround a Qualcomm GPU limitation that wraps row offsets at 256 MiB in
-        // buffer<->texture copies (crbug.com/380487895).
-        deviceToggles->Default(Toggle::SplitBufferTextureCopyForOversizedRow, true);
     }
 
     // Enable the integer range analysis for shader robustness by default if the corresponding

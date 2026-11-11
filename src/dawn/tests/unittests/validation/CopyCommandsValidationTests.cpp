@@ -330,15 +330,11 @@ TEST_F(CopyCommandTest_BlitForBufferToDepthStencil, EmptyCopy_Stencil) {
     device.GetQueue().Submit(1, &commands);
 }
 
-struct CopyCommandTest_SplitBufferTextureCopyForOversizedRow : CopyCommandTest {
-    std::vector<const char*> GetEnabledToggles() override {
-        return {"split_buffer_texture_copy_for_oversized_row"};
-    }
-};
+class CopyCommandTest_SplitBufferTextureCopyForOversizedRow : public CopyCommandTest {};
 // Regression test for crbug.com/571648522. Checks that an empty B2T/T2B copy doesn't crash during
-// submit after its buffer and texture have been released. The crash reproduced with
-// split_buffer_texture_copy_for_oversized_row enabled: encode a 0-height copy with oversized
-// bytesPerRow, drop all buffer and texture refs to force their deletion, then submit.
+// submit after its buffer and texture have been released. The crash reproduced when oversized-row
+// copy splitting is active: encode a 0-height copy with oversized bytesPerRow, drop all buffer and
+// texture refs to force their deletion, then submit.
 TEST_F(CopyCommandTest_SplitBufferTextureCopyForOversizedRow, EmptyCopy_B2T) {
     constexpr uint32_t kOversizedBytesPerRow = 1u << 18;
 
@@ -397,6 +393,64 @@ TEST_F(CopyCommandTest_SplitBufferTextureCopyForOversizedRow, EmptyCopy_T2B) {
 
     // This used to result in a UAF in QueueBase::ValidateSubmit accessing the deleted
     // buffer/texture.
+    device.GetQueue().Submit(1, &commands);
+}
+
+TEST_F(CopyCommandTest_SplitBufferTextureCopyForOversizedRow,
+       EmptyCopy_OversizedBytesPerImage_B2T) {
+    constexpr uint32_t kBytesPerRow = 256;
+    constexpr uint32_t kRowsPerImage = 0x0010'0000u;  // bytesPerImage == 256 MiB
+
+    wgpu::Buffer buffer;
+    wgpu::CommandBuffer commands;
+    {
+        buffer = CreateBuffer(uint64_t{kBytesPerRow} * kRowsPerImage, wgpu::BufferUsage::CopySrc);
+        wgpu::Texture texture = Create2DTexture(4, 4, 1, 2, wgpu::TextureFormat::RGBA8Unorm,
+                                                wgpu::TextureUsage::CopyDst);
+
+        wgpu::TexelCopyBufferInfo bufferInfo = {};
+        bufferInfo.buffer = buffer;
+        bufferInfo.layout.bytesPerRow = kBytesPerRow;
+        bufferInfo.layout.rowsPerImage = kRowsPerImage;
+        wgpu::TexelCopyTextureInfo textureInfo = utils::CreateTexelCopyTextureInfo(texture, 0);
+
+        wgpu::Extent3D copySize = {4, 0, 2};
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        commandEncoder.CopyBufferToTexture(&bufferInfo, &textureInfo, &copySize);
+        commands = commandEncoder.Finish();
+    }
+
+    buffer = nullptr;
+    device.GetQueue().Submit(1, &commands);
+}
+
+TEST_F(CopyCommandTest_SplitBufferTextureCopyForOversizedRow,
+       EmptyCopy_OversizedBytesPerImage_T2B) {
+    constexpr uint32_t kBytesPerRow = 256;
+    constexpr uint32_t kRowsPerImage = 0x0010'0000u;  // bytesPerImage == 256 MiB
+
+    wgpu::Buffer buffer;
+    wgpu::Texture texture;
+    wgpu::CommandBuffer commands;
+    {
+        texture = Create2DTexture(4, 4, 1, 2, wgpu::TextureFormat::RGBA8Unorm,
+                                  wgpu::TextureUsage::CopySrc);
+        buffer = CreateBuffer(uint64_t{kBytesPerRow} * kRowsPerImage, wgpu::BufferUsage::CopyDst);
+
+        wgpu::TexelCopyTextureInfo textureInfo = utils::CreateTexelCopyTextureInfo(texture, 0);
+        wgpu::TexelCopyBufferInfo bufferInfo = {};
+        bufferInfo.buffer = buffer;
+        bufferInfo.layout.bytesPerRow = kBytesPerRow;
+        bufferInfo.layout.rowsPerImage = kRowsPerImage;
+
+        wgpu::Extent3D copySize = {4, 0, 2};
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        commandEncoder.CopyTextureToBuffer(&textureInfo, &bufferInfo, &copySize);
+        commands = commandEncoder.Finish();
+    }
+
+    buffer = nullptr;
+    texture = nullptr;
     device.GetQueue().Submit(1, &commands);
 }
 

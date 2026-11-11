@@ -1945,7 +1945,7 @@ void CommandEncoder::APICopyBufferToTexture(const TexelCopyBufferInfo* source,
 
                 return {};
             }
-            if (NeedsBufferTextureCopySplitForOversizedRow(GetDevice(), src, blockInfo)) {
+            if (NeedsBufferTextureCopySplitForOversizedRow(src, blockCopySize, blockInfo)) {
                 SplitCopyBufferToTextureForOversizedRow(allocator, src, dst, blockCopySize,
                                                         blockInfo);
                 return {};
@@ -2052,7 +2052,7 @@ void CommandEncoder::APICopyTextureToBuffer(const TexelCopyTextureInfo* sourceOr
             }
 
             // Workaround to split copies with oversized rows into per-row copies.
-            if (NeedsBufferTextureCopySplitForOversizedRow(GetDevice(), dst, blockInfo)) {
+            if (NeedsBufferTextureCopySplitForOversizedRow(dst, blockCopySize, blockInfo)) {
                 SplitCopyTextureToBufferForOversizedRow(allocator, dst, src, blockCopySize,
                                                         blockInfo);
                 return {};

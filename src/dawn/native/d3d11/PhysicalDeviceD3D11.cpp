@@ -374,13 +374,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         }
     }
 
-    if (gpu_info::IsIntel(vendorId) || gpu_info::IsQualcommACPI(vendorId) ||
-        gpu_info::IsQualcommPCI(vendorId)) {
-        // Workaround Intel (crbug.com/481934465) and Qualcomm (crbug.com/380487895) GPU
-        // hardware/driver limitations that corrupt buffer<->texture copies with a large row pitch.
-        deviceToggles->Default(Toggle::SplitBufferTextureCopyForOversizedRow, true);
-    }
-
     // Enable the integer range analysis for shader robustness by default if the corresponding
     // platform feature is enabled.
     deviceToggles->Default(
