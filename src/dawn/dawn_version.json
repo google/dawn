@@ -399,6 +399,9 @@
             "get instance limits": {
                 "stable_version": 2026100200
             },
+            "get proc address": {
+                "stable_version": 2026102200
+            },
             "has instance feature": {
                 "stable_version": 2026100200
             },
@@ -458,6 +461,9 @@
             },
             "primitive state": {
                 "stable_version": 2026100200
+            },
+            "proc": {
+                "stable_version": 2026102200
             },
             "query set": {
                 "stable_version": 2026100200
@@ -693,9 +699,6 @@
             "shader module descriptor": {
                 "stable_version": 2026100200
             },
-            "shader source SPIRV": {
-                "stable_version": 2026100200
-            },
             "shader source WGSL": {
                 "stable_version": 2026100200
             },
@@ -704,6 +707,9 @@
             },
             "storage texture binding layout": {
                 "stable_version": 2026100200
+            },
+            "string view": {
+                "stable_version": 2026102200
             },
             "supported features": {
                 "stable_version": 2026100200
@@ -745,22 +751,28 @@
                 "stable_version": 2026100200
             },
             "surface source android native window": {
-                "stable_version": 2026100200
+                "stable_version": 2026100200,
+                "tags": ["art", "native"]
             },
             "surface source metal layer": {
-                "stable_version": 2026100200
+                "stable_version": 2026100200,
+                "tags": ["native"]
             },
             "surface source wayland surface": {
-                "stable_version": 2026100200
+                "stable_version": 2026100200,
+                "tags": ["native"]
             },
             "surface source windows HWND": {
-                "stable_version": 2026100200
+                "stable_version": 2026100200,
+                "tags": ["native"]
             },
             "surface source XCB window": {
-                "stable_version": 2026100200
+                "stable_version": 2026100200,
+                "tags": ["native"]
             },
             "surface source xlib window": {
-                "stable_version": 2026100200
+                "stable_version": 2026100200,
+                "tags": ["native"]
             },
             "surface texture": {
                 "stable_version": 2026100200
@@ -1389,9 +1401,6 @@
             "instance feature name::multiple devices per adapter": {
                 "stable_version": 2026101200
             },
-            "instance feature name::shader source SPIRV": {
-                "stable_version": 2026101200
-            },
             "instance feature name::timed wait any": {
                 "stable_version": 2026101200
             },
@@ -1594,9 +1603,6 @@
                 "stable_version": 2026101200
             },
             "s type::request adapter WebXR options": {
-                "stable_version": 2026101200
-            },
-            "s type::shader source SPIRV": {
                 "stable_version": 2026101200
             },
             "s type::shader source WGSL": {

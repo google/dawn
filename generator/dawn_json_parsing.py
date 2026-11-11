@@ -734,7 +734,7 @@ def _topo_sort_object(objects):
     return result
 
 
-def _apply_addins(types, addins):
+def _apply_addins(is_enabled, types, addins):
 
     def get_addin_target(search_map, path):
         while path:
@@ -748,10 +748,14 @@ def _apply_addins(types, addins):
         return None
 
     for key, prop_dict in addins.items():
+        if not is_enabled(prop_dict):
+            continue
         path = key.split('::')
         target = get_addin_target(types, path)
         assert target is not None, f'Addin instance "{key}" not found in dawn.json'
         for prop, val in prop_dict.items():
+            if prop == 'tags':
+                continue
             setattr(target, prop, val)
 
 
@@ -834,7 +838,7 @@ def parse_json(json, enabled_tags, disabled_tags=None, addins=None):
         struct.update_metadata()
 
     for addin in (addins or []):
-        _apply_addins(types, addin)
+        _apply_addins(is_enabled, types, addin)
 
     return {
         'metadata': Metadata(json['_metadata']),

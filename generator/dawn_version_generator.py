@@ -244,7 +244,7 @@ def run_check(args):
     for key, value in new_addins.items():
         if key in old_addins:
             old_value = old_addins.pop(key)
-            if value != old_value:
+            if value.get("stable_version") != old_value.get("stable_version"):
                 print(f"Stable API entry '{key}' in dawn_version.json was "
                       f"modified from {old_value} to {value}. Existing stable "
                       f"API entries cannot be changed.")
@@ -257,6 +257,17 @@ def run_check(args):
                     f"'stable_version' {new_version}, which is not greater "
                     f"than the previous maximum 'stable_version' ({old_max}).")
                 return 1
+
+    # TODO(crbug.com/577079442): Remove this allowlist once the SPIR-V removal
+    # lands; SPIR-V was marked experimental prior to Dawn's first stable ABI
+    # release.
+    pre_release_allowed_removals = {
+        "shader source SPIRV",
+        "instance feature name::shader source SPIRV",
+        "s type::shader source SPIRV",
+    }
+    for key in pre_release_allowed_removals:
+        old_addins.pop(key, None)
 
     if old_addins:
         removed_keys = ", ".join(f"'{k}'" for k in old_addins)

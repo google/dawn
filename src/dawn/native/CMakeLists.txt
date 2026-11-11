@@ -31,6 +31,7 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/../../../third_party/CopyWindowsSDKDLL.cmak
 DawnJSONGenerator(
     TARGET "native_utils"
     PRINT_NAME "Dawn native utilities"
+    ADDIN_JSONS "${Dawn_SOURCE_DIR}/src/dawn/dawn_version.json"
     OUTPUT_HEADERS DAWN_NATIVE_UTILS_GEN_HEADERS
     OUTPUT_SOURCES DAWN_NATIVE_UTILS_GEN_SOURCES
 )

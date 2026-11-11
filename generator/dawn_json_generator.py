@@ -689,6 +689,24 @@ def annotate(typ, arg, *, make_const_member=False, with_nullability=False):
     return result
 
 
+def is_stable(item, parent=None):
+    """Returns whether an item is part of Dawn's stable (ABI-frozen) API.
+
+    An item is stable iff it carries a "stable_version", which dawn_version.json
+    attaches through the addins mechanism (see _apply_addins). Methods are only
+    stable when their parent object or structure is stable too. AddRef, Release
+    and FreeMembers are synthesized by the generator with an empty json_data and
+    no version entry of their own: they inherit the stability of their parent.
+    """
+    if parent is not None and not is_stable(parent):
+        return False
+    if getattr(item, 'stable_version', None) is not None:
+        return True
+    json_data = getattr(item, 'json_data', None)
+    # Synthesized methods (empty json_data) inherit from the parent.
+    return parent is not None and json_data is not None and len(json_data) == 0
+
+
 def as_cppEnum(value_name):
     assert not value_name.native
     if value_name.concatcase()[0].isdigit():
@@ -813,7 +831,7 @@ def unreachable_code(msg="unreachable_code"):
     assert False, msg
 
 
-def make_base_render_params(metadata):
+def make_base_render_params(metadata, has_stability_info=False):
     c_prefix = metadata.c_prefix
 
     def as_cTypeEnumSpecialCase(typ):
@@ -846,6 +864,11 @@ def make_base_render_params(metadata):
         c_proc += method_name.CamelCase()
         return c_proc
 
+    def checked_is_stable(item, parent=None):
+        assert has_stability_info, (
+            'is_stable() requires dawn_version.json in --addin-jsons')
+        return is_stable(item, parent)
+
     return {
             'Name': lambda name: Name(name),
             'as_nullability_annotated_cType': \
@@ -875,6 +898,7 @@ def make_base_render_params(metadata):
             'print': print,
             'unreachable_code': unreachable_code,
             'is_enum_value_proxy': is_enum_value_proxy,
+            'is_stable': checked_is_stable,
         }
 
 
@@ -893,6 +917,13 @@ class MultiGeneratorFromDawnJSON(Generator):
                             required=True,
                             type=str,
                             help='The DAWN JSON definition to use.')
+        parser.add_argument(
+            '--addin-jsons',
+            default=None,
+            type=str,
+            nargs='+',
+            action='extend',
+            help='Additional JSON files with metadata.addins to apply.')
         parser.add_argument('--wire-json',
                             default=None,
                             type=str,
@@ -931,6 +962,11 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         targets = args.targets.split(',')
 
+        extra_addins = [parse_addin(p) for p in (args.addin_jsons or [])]
+        has_stability_info = any('stable_version' in props
+                                 for addin in extra_addins
+                                 for props in addin.values())
+
         wire_json = None
         wire_addins = []
         if args.wire_json:
@@ -959,14 +995,17 @@ class MultiGeneratorFromDawnJSON(Generator):
         imported_templates = []
 
         params_dawn = parse_json(loaded_json,
-                                 enabled_tags=['dawn', 'native', 'deprecated'])
+                                 enabled_tags=['dawn', 'native', 'deprecated'],
+                                 addins=extra_addins)
 
         params_all = parse_json(
             loaded_json,
-            enabled_tags=['dawn', 'emscripten', 'native', 'deprecated'])
+            enabled_tags=['dawn', 'emscripten', 'native', 'deprecated'],
+            addins=extra_addins)
 
         metadata = params_dawn['metadata']
-        RENDER_PARAMS_BASE = make_base_render_params(metadata)
+        RENDER_PARAMS_BASE = make_base_render_params(
+            metadata, has_stability_info=has_stability_info)
 
         api = metadata.api.lower()
         prefix = metadata.proc_table_prefix.lower()
@@ -1062,7 +1101,8 @@ class MultiGeneratorFromDawnJSON(Generator):
 
             params_upstream = parse_json(loaded_json,
                                          enabled_tags=['native'],
-                                         disabled_tags=['dawn'])
+                                         disabled_tags=['dawn'],
+                                         addins=extra_addins)
             renders.append(
                 FileRender('api.h', 'webgpu-headers/' + api + '.h',
                            [RENDER_PARAMS_BASE, params_upstream]))
@@ -1094,7 +1134,8 @@ class MultiGeneratorFromDawnJSON(Generator):
 
             assert api == 'webgpu'
             params_emscripten = parse_json(loaded_json,
-                                           enabled_tags=['emscripten'])
+                                           enabled_tags=['emscripten'],
+                                           addins=extra_addins)
             # system/include/webgpu
             imported_templates.append('BSD_LICENSE')
             renders.append(
@@ -1126,7 +1167,8 @@ class MultiGeneratorFromDawnJSON(Generator):
         if 'emdawnwebgpu_modules' in targets:
             assert api == 'webgpu'
             params_emscripten = parse_json(loaded_json,
-                                           enabled_tags=['emscripten'])
+                                           enabled_tags=['emscripten'],
+                                           addins=extra_addins)
             renders.append(
                 FileRender('api_cpp.ixx', 'include/dawn/' + api + '.ixx', [
                     RENDER_PARAMS_BASE, params_emscripten, {
@@ -1137,7 +1179,8 @@ class MultiGeneratorFromDawnJSON(Generator):
         if 'emdawnwebgpu_js' in targets:
             assert api == 'webgpu'
             params_emscripten = parse_json(loaded_json,
-                                           enabled_tags=['emscripten'])
+                                           enabled_tags=['emscripten'],
+                                           addins=extra_addins)
             renders.append(
                 FileRender('emdawnwebgpu/struct_info_webgpu.json',
                            'src/emdawnwebgpu/struct_info_webgpu.json',
@@ -1155,7 +1198,8 @@ class MultiGeneratorFromDawnJSON(Generator):
         if 'emdawnwebgpu_link_test_cpp' in targets:
             assert api == 'webgpu'
             params_emscripten = parse_json(loaded_json,
-                                           enabled_tags=['emscripten'])
+                                           enabled_tags=['emscripten'],
+                                           addins=extra_addins)
             renders.append(
                 FileRender('emdawnwebgpu/LinkTest.cpp',
                            'src/emdawnwebgpu/LinkTest.cpp',
@@ -1178,7 +1222,7 @@ class MultiGeneratorFromDawnJSON(Generator):
             params_dawn_native = parse_json(
                 loaded_json,
                 enabled_tags=['dawn', 'native', 'deprecated'],
-                addins=native_addins)
+                addins=native_addins + extra_addins)
             frontend_params = [
                 RENDER_PARAMS_BASE,
                 params_dawn_native,
@@ -1274,7 +1318,9 @@ class MultiGeneratorFromDawnJSON(Generator):
             # Generate ComboLimits without any extensions so it works on
             # all targets (and doesn't chain any experimental stuff like
             # extensions that are output only and produce warnings on input).
-            params = parse_json(loaded_json, enabled_tags=[])
+            params = parse_json(loaded_json,
+                                enabled_tags=[],
+                                addins=extra_addins)
             renders.append(
                 FileRender('dawn/utils/ComboLimits.h',
                            'src/dawn/utils/ComboLimits.h',
@@ -1288,7 +1334,7 @@ class MultiGeneratorFromDawnJSON(Generator):
             params_dawn_wire = parse_json(loaded_json,
                                           enabled_tags=['dawn', 'deprecated'],
                                           disabled_tags=['native'],
-                                          addins=wire_addins)
+                                          addins=wire_addins + extra_addins)
             additional_params = compute_wire_params(params_dawn_wire,
                                                     wire_json)
 
@@ -1388,10 +1434,9 @@ class MultiGeneratorFromDawnJSON(Generator):
                            'src/dawn/wire/server/WGPUTraits_autogen.h',
                            wire_params))
 
-
         if 'kotlin' in targets:
             params_kotlin = compute_kotlin_params(loaded_json, kotlin_json,
-                                                  kotlin_addins,
+                                                  kotlin_addins + extra_addins,
                                                   webgpu_kt_docs_data,
                                                   doc_warn_log_file_path)
             kt_file_path = params_kotlin['kotlin_package'].replace('.', '/')
@@ -1472,7 +1517,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if "jni" in targets:
             params_kotlin = compute_kotlin_params(loaded_json, kotlin_json,
-                                                  kotlin_addins,
+                                                  kotlin_addins + extra_addins,
                                                   webgpu_kt_docs_data,
                                                   doc_warn_log_file_path)
 
@@ -1501,6 +1546,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
     def get_dependencies(self, args):
         deps = [os.path.abspath(args.dawn_json)]
+        deps += [os.path.abspath(p) for p in (args.addin_jsons or [])]
         if args.wire_json != None:
             deps += [os.path.abspath(args.wire_json)]
         if args.native_json != None:

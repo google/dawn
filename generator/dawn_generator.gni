@@ -100,6 +100,12 @@ template("dawn_json_generator") {
       invoker.target,
     ]
 
+    if (defined(invoker.addin_jsons)) {
+      inputs += invoker.addin_jsons
+      args +=
+          [ "--addin-jsons" ] + rebase_path(invoker.addin_jsons, root_build_dir)
+    }
+
     # Automatically add generator arguments based on the presence of optional
     # JSON files in the inputs list. This avoids hardcoding target names in the
     # generator.
@@ -141,6 +147,7 @@ template("dawn_json_generator") {
                            [
                              "target",
                              "inputs",
+                             "addin_jsons",
                            ])
   }
 }
