@@ -47,6 +47,8 @@ tint_add_target(tint_lang_wgsl_writer_raise lib
   lang/wgsl/writer/raise/raise.h
   lang/wgsl/writer/raise/value_to_let.cc
   lang/wgsl/writer/raise/value_to_let.h
+  lang/wgsl/writer/raise/workgroup_uniform_load.cc
+  lang/wgsl/writer/raise/workgroup_uniform_load.h
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_writer_raise lib
@@ -89,6 +91,7 @@ tint_add_target(tint_lang_wgsl_writer_raise_test test
   lang/wgsl/writer/raise/ptr_to_ref_test.cc
   lang/wgsl/writer/raise/raise_test.cc
   lang/wgsl/writer/raise/value_to_let_test.cc
+  lang/wgsl/writer/raise/workgroup_uniform_load_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_writer_raise_test test
@@ -130,6 +133,7 @@ tint_add_target(tint_lang_wgsl_writer_raise_fuzz fuzz
   lang/wgsl/writer/raise/ptr_to_ref_fuzz.cc
   lang/wgsl/writer/raise/raise_fuzz.cc
   lang/wgsl/writer/raise/value_to_let_fuzz.cc
+  lang/wgsl/writer/raise/workgroup_uniform_load_fuzz.cc
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_writer_raise_fuzz fuzz
