@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/clone_context.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/traverse.h"
 #include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
@@ -547,14 +548,31 @@ struct State {
         if (target->IsEntryPoint()) {
             return;
         }
+        DestroyIfUncalled(target);
+    }
 
-        // Check if any of the usages are calls, if they aren't we can destroy the function.
-        for (auto& usage : target->UsagesUnsorted()) {
+    bool IsCalled(core::ir::Function* fn) {
+        for (auto& usage : fn->UsagesUnsorted()) {
             if (usage->instruction->Is<core::ir::Call>()) {
-                return;
+                return true;
             }
         }
-        ir.Destroy(target);
+        return false;
+    }
+
+    // Destroys `fn` and any callee left without callers once the calls in `fn` are gone.
+    void DestroyIfUncalled(core::ir::Function* fn) {
+        Vector<core::ir::Function*, 4> worklist;
+        worklist.Push(fn);
+        while (!worklist.IsEmpty()) {
+            auto* func = worklist.Pop();
+            if (!func->Alive() || func->IsEntryPoint() || IsCalled(func)) {
+                continue;
+            }
+            core::ir::Traverse(func->Block(),
+                               [&](core::ir::UserCall* call) { worklist.Push(call->Target()); });
+            ir.Destroy(func);
+        }
     }
 
     // Record the sampled image so we can extract the texture/sampler information as we process the

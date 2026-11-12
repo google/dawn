@@ -46,6 +46,12 @@ class SpirvReader_TextureTest : public core::ir::transform::TransformTest {
         mod.properties.Add(core::ir::Property::kAllowNonCoreTypes);
         mod.properties.Add(core::ir::Property::kAllowPointerToHandle);
     }
+
+    /// @returns a literal operand with the given value
+    core::ir::Value* Literal(uint32_t value) {
+        return b.Constant(mod.constant_values.Get<core::constant::Scalar<u32>>(
+            ty.Get<spirv::type::Literal>(), u32(value)));
+    }
 };
 
 using Dim = spirv::type::Dim;
@@ -660,6 +666,137 @@ $B1: {  # root
     ASSERT_EQ(expect, str());
 }
 
+// A sampling function is reached through a forwarding function that has two callers.
+TEST_F(SpirvReader_TextureTest, FunctionParamPtr_ForwardedTwice) {
+    auto* img_ty = ty.Get<spirv::type::Image>(
+        ty.f32(), Dim::kD2, Depth::kNotDepth, Arrayed::kNonArrayed, Multisampled::kSingleSampled,
+        Sampled::kSamplingCompatible, core::TexelFormat::kUndefined, core::Access::kRead);
+
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* samp = nullptr;
+    b.Append(mod.root_block, [&] {
+        tex = b.Var("tex", ty.ptr(handle, img_ty, read));
+        tex->SetBindingPoint(0, 0);
+        samp = b.Var("samp", ty.ptr(handle, ty.sampler(), read));
+        samp->SetBindingPoint(0, 1);
+    });
+
+    auto* f1 = b.Function("f1", ty.vec4f());
+    auto* f1_t = b.FunctionParam(ty.ptr(handle, img_ty, read));
+    auto* f1_s = b.FunctionParam(ty.ptr(handle, ty.sampler(), read));
+    f1->AppendParam(f1_t);
+    f1->AppendParam(f1_s);
+    b.Append(f1->Block(), [&] {
+        auto* t = b.Load(f1_t);
+        auto* s = b.Load(f1_s);
+        auto* sampled = b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.Get<spirv::type::SampledImage>(img_ty), spirv::BuiltinFn::kOpSampledImage,
+            Vector<core::ir::TemplateParameter, 1>{img_ty}, t, s);
+        auto* result =
+            b.Call<spirv::ir::BuiltinCall>(ty.vec4f(), spirv::BuiltinFn::kImageSampleExplicitLod,
+                                           sampled, b.Zero<vec2f>(), Literal(2u), 0_f);
+        b.Return(f1, result);
+    });
+
+    auto* f2 = b.Function("f2", ty.vec4f());
+    auto* f2_t = b.FunctionParam(ty.ptr(handle, img_ty, read));
+    auto* f2_s = b.FunctionParam(ty.ptr(handle, ty.sampler(), read));
+    f2->AppendParam(f2_t);
+    f2->AppendParam(f2_s);
+    b.Append(f2->Block(), [&] { b.Return(f2, b.Call(f1, f2_t, f2_s)); });
+
+    auto* f3 = b.Function("f3", ty.vec4f());
+    auto* f3_t = b.FunctionParam(ty.ptr(handle, img_ty, read));
+    auto* f3_s = b.FunctionParam(ty.ptr(handle, ty.sampler(), read));
+    f3->AppendParam(f3_t);
+    f3->AppendParam(f3_s);
+    b.Append(f3->Block(), [&] { b.Return(f3, b.Call(f2, f3_t, f3_s)); });
+
+    auto* main = b.Function("main", ty.void_());
+    b.Append(main->Block(), [&] {
+        b.Call(f2, tex, samp);
+        b.Call(f3, tex, samp);
+        b.Return(main);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %tex:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%f1 = func(%4:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read>, %5:ptr<handle, sampler, read>):vec4<f32> {
+  $B2: {
+    %6:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read> = load %4
+    %7:sampler = load %5
+    %8:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>> = spirv.op_sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>> %6, %7
+    %9:vec4<f32> = spirv.image_sample_explicit_lod %8, vec2<f32>(0.0f), 2u, 0.0f
+    ret %9
+  }
+}
+%f2 = func(%11:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read>, %12:ptr<handle, sampler, read>):vec4<f32> {
+  $B3: {
+    %13:vec4<f32> = call %f1, %11, %12
+    ret %13
+  }
+}
+%f3 = func(%15:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read>, read>, %16:ptr<handle, sampler, read>):vec4<f32> {
+  $B4: {
+    %17:vec4<f32> = call %f2, %15, %16
+    ret %17
+  }
+}
+%main = func():void {
+  $B5: {
+    %19:vec4<f32> = call %f2, %tex, %samp
+    %20:vec4<f32> = call %f3, %tex, %samp
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+    Run(Texture);
+
+    auto* expect = R"(
+$B1: {  # root
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%main = func():void {
+  $B2: {
+    %4:texture_2d<f32> = load %tex
+    %5:sampler = load %samp
+    %6:vec4<f32> = call %f2, %4, %5
+    %8:texture_2d<f32> = load %tex
+    %9:sampler = load %samp
+    %10:vec4<f32> = call %f3, %8, %9
+    ret
+  }
+}
+%f2 = func(%12:texture_2d<f32>, %13:sampler):vec4<f32> {
+  $B3: {
+    %14:vec4<f32> = call %f1, %12, %13
+    ret %14
+  }
+}
+%f3 = func(%16:texture_2d<f32>, %17:sampler):vec4<f32> {
+  $B4: {
+    %18:vec4<f32> = call %f2, %16, %17
+    ret %18
+  }
+}
+%f1 = func(%19:texture_2d<f32>, %20:sampler):vec4<f32> {
+  $B5: {
+    %21:vec4<f32> = textureSampleLevel %19, %20, vec2<f32>(0.0f), 0.0f
+    ret %21
+  }
+}
+)";
+    ASSERT_EQ(expect, str());
+}
+
 // Vulkan memory model image operands: the mask bits and the scope values they take.
 // https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html#Image_Operands
 constexpr uint32_t kMakeTexelAvailable = 0x100;
@@ -780,6 +917,5 @@ TEST_F(SpirvReader_TextureMemoryModelTest, VolatileTexel_Rejected) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason, "VolatileTexel image operand is not supported");
 }
-
 }  // namespace
 }  // namespace tint::spirv::reader::lower
