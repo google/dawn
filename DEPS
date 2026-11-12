@@ -25,7 +25,7 @@ vars = {
   'dawn_wasm': False, # Also fetches dependencies required for building WebAssembly.
   'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
-  'dawn_gn_version': 'git_revision:4df39f484f1f49f5c7f6264adc88d27811cb7b00',
+  'dawn_gn_version': 'git_revision:74c32399b100531b22184bd6ac38c4b26bc86ca5',
   # ninja CIPD package version.
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
   'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
@@ -78,7 +78,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': '9d94f63824e89f199c1e94220d71ffd8afda6c25',
+  'chromium_revision': '1eb2d9fcf0884be764909f0dc05fa07b28ba5c1e',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -109,7 +109,7 @@ vars = {
 
 deps = {
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@a9c58ac990557a29176bbaeef7577b196c38a950',
+    'url': '{chromium_git}/chromium/src/buildtools@d665f41b0ab65f098ee90a06b1678978c2d0028a',
     'condition': 'dawn_standalone',
   },
   'third_party/clang-format/script': {
@@ -142,12 +142,12 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@c4cdaeebba9b9ed92d041997317ffdbd042158ac',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@1afcf0756e47f3a6ee82d7736b9fcda2d57b268e',
     'condition': 'dawn_standalone',
   },
 
   'third_party/libc++/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@def01bd012f56d2fd8f5e2dc75dc28a846ab9cdb',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@d816ed0274edb2f8ae2a514584476dfa7acfbca1',
     'condition': 'dawn_standalone',
   },
 
@@ -158,7 +158,7 @@ deps = {
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@885e2a900ba002ef0ba7b4757da90b0f3aa309e8',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@8002d0374e1bbee4a64bd7cc54d65b4557eb6064',
     'condition': 'dawn_standalone',
   },
 
@@ -173,11 +173,11 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@b7873b4a4ebd2ef4fc86360629d29d195382927e',
+  'url': '{chromium_git}/chromium/src/build@6ee635e2e3106161764b27681234e7508ef36161',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-  'url': '{chromium_git}/chromium/src/tools/clang@de526b71081ccce1bc5fe0d8601d14487349d4a8',
+  'url': '{chromium_git}/chromium/src/tools/clang@b8732dcf0099299659b1a5d613532e234d1d38ad',
     'condition': 'dawn_standalone',
   },
   'tools/memory': {
@@ -199,7 +199,7 @@ deps = {
 
   # For run-tricium-clang-tidy.py
   'third_party/chromium-tools-build/src': {
-    'url': '{chromium_git}/chromium/tools/build@3e24ca20b7878d29a904c0fa0da602cfff5fb88b',
+    'url': '{chromium_git}/chromium/tools/build@1bc89f46fd97547c8e347663ebd44612fa5958c4',
     'condition': 'dawn_standalone and checkout_clang_tidy',
   },
 
@@ -287,13 +287,13 @@ deps = {
 
   # Used for Dawn-side GN arg definitions.
   'tools/mb': {
-    'url': '{chromium_git}/chromium/src/tools/mb@c7a91093bfa9c745ccd53c16b7789227967c7857',
+    'url': '{chromium_git}/chromium/src/tools/mb@bb310f7e7d00df06cd6610b25124afbc9bafe8d1',
     'condition': 'dawn_standalone',
   },
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@1bddaaaaf5f0a9c79cb02a82149bd5a514a740a7',
+    'url': '{chromium_git}/chromium/src/testing@799b33e2bcd410fa549da0faeca31e1cfc0a9402',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -301,12 +301,12 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'third_party/googletest/src': {
-    'url': '{chromium_git}/external/github.com/google/googletest@6450691fd7d07ef932582206fbafb1a513927e08',
+    'url': '{chromium_git}/external/github.com/google/googletest@24990589481d2ed05602a304bee5ca716273762a',
     'condition': 'dawn_standalone',
   },
   # This is a dependency of //testing
   'third_party/catapult': {
-    'url': '{chromium_git}/catapult.git@41561ed5d95bf57917114f37e1523b33c4e031f1',
+    'url': '{chromium_git}/catapult.git@8480c1b861182c18ebae6af35c007aa56d5dbd4a',
     'condition': 'dawn_standalone',
   },
   'third_party/google_benchmark/src': {
@@ -314,7 +314,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'third_party/perfetto': {
-    'url': '{chromium_git}/external/github.com/google/perfetto.git@b6533c5df1422eae58d2d3212510d47483d2631c',
+    'url': '{chromium_git}/external/github.com/google/perfetto.git@3c53ccda1eb2aa97c036554bd4d5a0fcbb7c2040',
     'condition': 'dawn_standalone',
   },
 
@@ -421,7 +421,7 @@ deps = {
   },
 
   'third_party/abseil-cpp': {
-    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@d8ad4495323e7b20443e7129fcbfd7ee78282818',
+    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@cc7c44411318a2e499e69ebd778cd22d82bd2860',
     'condition': 'dawn_standalone',
   },
 
@@ -678,7 +678,7 @@ deps = {
 
   # Misc dependencies inherited from Tint
   'third_party/protobuf': {
-    'url': '{chromium_git}/chromium/src/third_party/protobuf@1c9b6be005a5f855d1c8dd3c63a11f2ee78f956c',
+    'url': '{chromium_git}/chromium/src/third_party/protobuf@3813fd5b3029807583e5d2549a40d78fa499c3e8',
     'condition': 'dawn_standalone',
   },
 
@@ -695,7 +695,7 @@ deps = {
   # Dependencies for PartitionAlloc.
   # Doc: https://docs.google.com/document/d/1wz45t0alQthsIU9P7_rQcfQyqnrBMXzrOjSzdQo-V-A
   'third_party/partition_alloc': {
-    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@ed4dc364672b67eee2acf2618c72d73cb758ab2e',
+    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@b3eaf4c68361021b4a44d4fa5b669a0f29fc017d',
     'condition': 'dawn_standalone',
   },
 
@@ -880,31 +880,31 @@ deps = {
     'condition': 'dawn_standalone and checkout_v8',
     'objects': [
       {
-        'object_name': 'Linux_x64/rust-libclang-96a18bf5ffa2b24f9cf3d1c731a9eb121c1acad9-4-llvmorg-24-init-17044-gc3223914.tar.xz',
-        'sha256sum': 'a111564c0a12e67af48bfb093377671cc453a8d6a4308fc4822a37b44556c51a',
-        'size_bytes': 23178056,
-        'generation': 1793896096203442,
+        'object_name': 'Linux_x64/rust-libclang-96a18bf5ffa2b24f9cf3d1c731a9eb121c1acad9-5-llvmorg-24-init-17044-gc3223914.tar.xz',
+        'sha256sum': 'bdfa70274badca548d73b95f353ebc6451c96c6ada1e561c6da880f857f21bb6',
+        'size_bytes': 23186936,
+        'generation': 1794385350228067,
         'condition': 'host_os == "linux" and non_git_source',
       },
       {
-        'object_name': 'Mac/rust-libclang-96a18bf5ffa2b24f9cf3d1c731a9eb121c1acad9-4-llvmorg-24-init-17044-gc3223914.tar.xz',
-        'sha256sum': '5a8f21ec37ad3c6d7f8d0fd190f0be50aa3f6ff757535aa685bb6499a79c451d',
-        'size_bytes': 23331568,
-        'generation': 1793896100021022,
+        'object_name': 'Mac/rust-libclang-96a18bf5ffa2b24f9cf3d1c731a9eb121c1acad9-5-llvmorg-24-init-17044-gc3223914.tar.xz',
+        'sha256sum': 'daa332f90f0237bd1389cfa482957eee5f08cd341c42b3c0f7ec9ee96cf90544',
+        'size_bytes': 23333728,
+        'generation': 1794385354028288,
         'condition': 'host_os == "mac" and host_cpu == "x64"',
       },
       {
-        'object_name': 'Mac_arm64/rust-libclang-96a18bf5ffa2b24f9cf3d1c731a9eb121c1acad9-4-llvmorg-24-init-17044-gc3223914.tar.xz',
-        'sha256sum': '47e232e3e635f84d41ddaa5d949ae312b813c8dfaf64264ffc424e7f44763839',
-        'size_bytes': 20996496,
-        'generation': 1793896104170962,
+        'object_name': 'Mac_arm64/rust-libclang-96a18bf5ffa2b24f9cf3d1c731a9eb121c1acad9-5-llvmorg-24-init-17044-gc3223914.tar.xz',
+        'sha256sum': '4bfdfe46686aa3c1f8f6fd9447fac5e37e699bccf213138b279c99a71c732a03',
+        'size_bytes': 20988176,
+        'generation': 1794385358033896,
         'condition': 'host_os == "mac" and host_cpu == "arm64"',
       },
       {
-        'object_name': 'Win/rust-libclang-96a18bf5ffa2b24f9cf3d1c731a9eb121c1acad9-4-llvmorg-24-init-17044-gc3223914.tar.xz',
-        'sha256sum': '83e53bfa846e7f810ca7d96d0872ad5535163f9259c464d867de2cd97e8a7672',
-        'size_bytes': 21908536,
-        'generation': 1793896108514779,
+        'object_name': 'Win/rust-libclang-96a18bf5ffa2b24f9cf3d1c731a9eb121c1acad9-5-llvmorg-24-init-17044-gc3223914.tar.xz',
+        'sha256sum': '7b4dd46967b0a84b83ab6aa6f3999ca18b15926c5f05a481445e47aaed2558e2',
+        'size_bytes': 21906524,
+        'generation': 1794385361865408,
         'condition': 'host_os == "win"',
       },
     ],
