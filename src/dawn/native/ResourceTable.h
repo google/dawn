@@ -144,9 +144,8 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
                    const std::vector<ResourceDiff>& resourceDiffs,
                    const absl::flat_hash_set<raw_ptr<TextureBase>>& texturesToTransition);
 
-    // Wrapper for the code that handles dirty slot updates in the backend so we can run code right
-    // after it that ignores unnecessarily dirty textures added while transitioning them for this
-    // table.
+    // Computes all pending metadata, resource, and transition updates (hiding any textures in
+    // writableTextures) and invokes ApplyUpdate.
     MaybeError ApplyDirtySlotUpdatesWith(const absl::flat_hash_set<TextureBase*>& writableTextures,
                                          absl::FunctionRef<ApplyUpdateFn> ApplyUpdate);
 
@@ -163,18 +162,6 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     // Helper method that must be called when anything in the SlotState changes (except
     // `availableAfter`), so that the slot updates are included in the next batch of updates.
     void MarkStateDirty(ResourceTableSlot slot);
-
-    // Functions used to compute all the updates needed to apply the latest state for this table.
-    struct Updates {
-        std::vector<MetadataUpdate> metadataUpdates;
-        std::vector<ResourceDiff> resourceDiffs;
-        absl::flat_hash_set<raw_ptr<TextureBase>> texturesToTransition;
-        absl::flat_hash_set<raw_ptr<TextureBase>> texturesDirtyAfterUpdate;
-    };
-    // Fills only texturesToTransition and texturesDirtyAfterUpdate.
-    Updates MakeResourcesVisibleExcept(const absl::flat_hash_set<TextureBase*>& writableTextures);
-    // Fills the whole Updates structure.
-    Updates AcquireDirtySlotUpdates(const absl::flat_hash_set<TextureBase*>& writableTextures);
 
     ResourceTableSlot mAPISize = ResourceTableSlot(0u);
     bool mDestroyed = false;
@@ -215,8 +202,8 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     };
     absl::flat_hash_map<TextureBase*, TextureState> mTextureState;
 
-    // Textures that are "dirty" for some reason, e.g. destroyed, access change, r/w change. Handled
-    // by MakeResourcesVisibleExcept.
+    // Bound textures (`!slots.empty()`) whose visibility or backend state needs evaluation before
+    // the next draw/dispatch. Handled by ApplyDirtySlotUpdatesWith.
     absl::flat_hash_set<raw_ptr<TextureBase>> mDirtyStateTextures;
 };
 
