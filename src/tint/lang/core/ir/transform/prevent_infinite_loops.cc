@@ -99,6 +99,13 @@ struct State {
             });
         });
 
+        // Ensure the continuing block survives to the backend. Backend
+        // compilers must see the loop counter increment.
+        if (auto* unreachable = loop->Body()->Terminator()->As<Unreachable>()) {
+            b.InsertBefore(unreachable, [&] { b.Continue(loop); });
+            unreachable->Destroy();
+        }
+
         // Increment the index variable at the top of the continuing block.
         if (loop->Continuing()->IsEmpty()) {
             loop->Continuing()->Append(b.NextIteration(loop));
