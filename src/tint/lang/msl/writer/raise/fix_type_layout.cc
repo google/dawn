@@ -461,12 +461,13 @@ struct State {
                 operands.Push(b.Constant(u32(0)));
             }
 
-            // Update the object type.
-            if (auto* c = idx->As<core::ir::Constant>()) {
-                obj_type = obj_type->Element(c->Value()->ValueAs<uint32_t>());
+            // Update the object type. Types that support dynamic indexing have a uniform element
+            // type, so handle them directly even when the index is an out-of-bounds constant.
+            if (auto* el = obj_type->Elements().type) {
+                obj_type = el;
             } else {
-                // Types that support dynamic indexing only have one element type.
-                obj_type = obj_type->Elements().type;
+                auto* c = idx->As<core::ir::Constant>();
+                obj_type = obj_type->Element(c->Value()->ValueAs<uint32_t>());
             }
         }
 

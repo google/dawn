@@ -9594,6 +9594,77 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, SubgroupMatrixStore_OffsetAndS
     EXPECT_EQ(src, str());
 }
 
+TEST_F(IR_RobustnessDefaultTest, AccessArray_NestedConstOOBIndex) {
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* arr = b.Var("arr", ty.ptr<function, array<array<u32, 2>, 3>>());
+        auto* ptr = b.Access(ty.ptr<function, u32>(), arr, 10_u, 20_u);
+        b.Return(func, b.Load(ptr));
+    });
+
+    auto* src = R"(
+%foo = func():u32 {
+  $B1: {
+    %arr:ptr<function, array<array<u32, 2>, 3>, read_write> = var
+    %3:ptr<function, u32, read_write> = access %arr, 10u, 20u
+    %4:u32 = load %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func():u32 {
+  $B1: {
+    %arr:ptr<function, array<array<u32, 2>, 3>, read_write> = var
+    %3:ptr<function, u32, read_write> = access %arr, 2u, 1u
+    %4:u32 = load %3
+    ret %4
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_RobustnessDefaultTest, AccessVector_ConstNegativeIndex) {
+    auto* func = b.Function("foo", ty.i32());
+    auto* vec = b.FunctionParam("vec", ty.vec2i());
+    func->SetParams({vec});
+    b.Append(func->Block(), [&] {
+        auto* elem = b.Access(ty.i32(), vec, -1_i);
+        b.Return(func, elem);
+    });
+
+    auto* src = R"(
+%foo = func(%vec:vec2<i32>):i32 {
+  $B1: {
+    %3:i32 = access %vec, -1i
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%vec:vec2<i32>):i32 {
+  $B1: {
+    %3:i32 = access %vec, 1u
+    ret %3
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
 INSTANTIATE_TEST_SUITE_P(, IR_RobustnessTest, testing::Values(false, true));
 
 INSTANTIATE_TEST_SUITE_P(,

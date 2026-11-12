@@ -900,5 +900,64 @@ kernel void v(const constant tint_immediate_data_struct* tint_immediate_data [[b
 )");
 }
 
+TEST_F(MslWriterTest, AccessArray_ConstantOOBIndex_NoRobustness) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* arr = b.Var("arr", b.Zero<array<f32, 3>>());
+        auto* oob = b.Append(mod.CreateInstruction<core::ir::CoreBuiltinCall>(
+            b.InstructionResult(ty.u32()), core::BuiltinFn::kClamp,
+            Vector{b.Value(99_u), b.Value(99_u), b.Value(99_u)}));
+        b.Let("x", b.Load(b.Access(ty.ptr<function, f32>(), arr, oob->Result())));
+        b.Return(func);
+    });
+
+    Options options;
+    options.entry_point_name = "main";
+    options.disable_robustness = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure();
+    EXPECT_THAT(output_.msl, testing::HasSubstr("arr[2u]"));
+}
+
+TEST_F(MslWriterTest, AccessArray_ConstantNegativeIndex_NoRobustness) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* arr = b.Var("arr", b.Zero<array<f32, 3>>());
+        auto* neg = b.Append(mod.CreateInstruction<core::ir::CoreBuiltinCall>(
+            b.InstructionResult(ty.i32()), core::BuiltinFn::kClamp,
+            Vector{b.Value(-1_i), b.Value(-1_i), b.Value(-1_i)}));
+        b.Let("x", b.Load(b.Access(ty.ptr<function, f32>(), arr, neg->Result())));
+        b.Return(func);
+    });
+
+    Options options;
+    options.entry_point_name = "main";
+    options.disable_robustness = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure();
+    EXPECT_THAT(output_.msl, testing::HasSubstr("arr[2u]"));
+}
+
+TEST_F(MslWriterTest, AccessArray_BufferLengthOOBIndex_NoRobustness) {
+    mod.properties.Add(core::ir::Property::kAllowBufferTypes);
+    auto* buf = b.Var("buf", ty.ptr(workgroup, ty.buffer(64)));
+    mod.root_block->Append(buf);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* arr = b.Var("arr", b.Zero<array<f32, 3>>());
+        auto* oob = b.Call(ty.u32(), core::BuiltinFn::kBufferLength, buf);
+        b.Let("x", b.Load(b.Access(ty.ptr<function, f32>(), arr, oob)));
+        b.Return(func);
+    });
+
+    Options options;
+    options.entry_point_name = "main";
+    options.disable_robustness = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure();
+    EXPECT_THAT(output_.msl, testing::HasSubstr("arr[2u]"));
+}
+
 }  // namespace
 }  // namespace tint::msl::writer

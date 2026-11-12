@@ -294,7 +294,6 @@ struct State {
         auto indices = access->Indices();
         for (size_t i = 0; i < indices.size(); i++) {
             auto* idx = indices[i];
-            auto* const_idx = idx->As<ir::Constant>();
 
             // Determine the limit of the type being indexed into.
             auto maxAllowedIndex = tint::Switch(
@@ -345,9 +344,14 @@ struct State {
                 ClampOperand(access, ir::Access::kIndicesOperandOffset + i, maxAllowedIndex);
             }
 
-            // Get the type that this index produces.
-            type = const_idx ? type->Element(const_idx->Value()->ValueAs<u32>())
-                             : type->Elements().type;
+            // Get the type that this index produces. Prefer Elements().type for dynamically
+            // indexable types so constant out-of-bounds indices do not produce nullptr.
+            if (auto* el = type->Elements().type) {
+                type = el;
+            } else {
+                auto* const_idx = idx->As<ir::Constant>();
+                type = type->Element(const_idx->Value()->ValueAs<u32>());
+            }
         }
     }
 

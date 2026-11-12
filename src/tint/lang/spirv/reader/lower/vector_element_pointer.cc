@@ -77,11 +77,11 @@ struct State {
                     }
 
                     // Update the current source type based on the next index.
-                    if (auto* constant = idx->As<core::ir::Constant>()) {
-                        auto i = constant->Value()->ValueAs<u32>();
-                        source_ty = source_ty->Element(i);
+                    if (auto* el = source_ty->Elements().type) {
+                        source_ty = el;
                     } else {
-                        source_ty = source_ty->Elements().type;
+                        auto* constant = idx->As<core::ir::Constant>();
+                        source_ty = source_ty->Element(constant->Value()->ValueAs<u32>());
                     }
                 }
             }

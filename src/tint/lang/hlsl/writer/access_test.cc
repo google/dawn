@@ -2307,5 +2307,55 @@ void main() {
 )");
 }
 
+TEST_F(HlslWriterTest, AccessArray_ConstantOOBIndex_NoRobustness) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("v", b.Zero<array<f32, 3>>());
+        auto* oob = b.Append(mod.CreateInstruction<core::ir::CoreBuiltinCall>(
+            b.InstructionResult(ty.u32()), core::BuiltinFn::kClamp,
+            Vector{b.Value(99_u), b.Value(99_u), b.Value(99_u)}));
+        b.Let("x", b.Load(b.Access(ty.ptr<function, f32>(), v, oob->Result())));
+        b.Return(func);
+    });
+
+    Options options;
+    options.disable_robustness = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
+void main() {
+  float v[3] = (float[3])0;
+  float x = v[2u];
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, AccessMatrix_ConstantNegativeIndex_NoRobustness) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* m = b.Var("m", b.Zero<mat3x2<f32>>());
+        auto* neg = b.Append(mod.CreateInstruction<core::ir::CoreBuiltinCall>(
+            b.InstructionResult(ty.i32()), core::BuiltinFn::kClamp,
+            Vector{b.Value(-1_i), b.Value(-1_i), b.Value(-1_i)}));
+        b.Let("x", b.Load(b.Access(ty.ptr<function, vec2<f32>>(), m, neg->Result())));
+        b.Return(func);
+    });
+
+    Options options;
+    options.disable_robustness = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
+void main() {
+  float3x2 m = float3x2((0.0f).xx, (0.0f).xx, (0.0f).xx);
+  float2 x = m[2u];
+}
+
+)");
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer

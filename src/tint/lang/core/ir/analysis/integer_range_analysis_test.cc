@@ -19907,5 +19907,41 @@ TEST_F(IR_IntegerRangeAnalysisLoopStepTest, NestedDecreasingLoops_Failure_Underf
     ExpectNoRange(j);
 }
 
+TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationID_ConstOOBIndex) {
+    auto* func = b.ComputeFunction("my_func", 4_u, 3_u, 2_u);
+    auto* lid = b.FunctionParam("lid", mod.Types().vec3<u32>());
+    lid->SetBuiltin(tint::core::BuiltinValue::kLocalInvocationId);
+    func->SetParams({lid});
+
+    Value* access = nullptr;
+    b.Append(func->Block(), [&] {
+        access = b.Access(ty.u32(), lid, 5_u);
+        b.Return(func);
+    });
+
+    ASSERT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+    EXPECT_FALSE(analysis.GetInfo(access).IsValid());
+}
+
+TEST_F(IR_IntegerRangeAnalysisTest, LocalInvocationID_ConstNegativeIndex) {
+    auto* func = b.ComputeFunction("my_func", 4_u, 3_u, 2_u);
+    auto* lid = b.FunctionParam("lid", mod.Types().vec3<u32>());
+    lid->SetBuiltin(tint::core::BuiltinValue::kLocalInvocationId);
+    func->SetParams({lid});
+
+    Value* access = nullptr;
+    b.Append(func->Block(), [&] {
+        access = b.Access(ty.u32(), lid, -1_i);
+        b.Return(func);
+    });
+
+    ASSERT_EQ(Validate(mod), Success);
+
+    IntegerRangeAnalysis analysis(&mod);
+    EXPECT_FALSE(analysis.GetInfo(access).IsValid());
+}
+
 }  // namespace
 }  // namespace tint::core::ir::analysis

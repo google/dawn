@@ -147,10 +147,9 @@ struct IntegerRangeAnalysisImpl {
 
     IntegerRangeInfo GetInfo(const FunctionParam* param, uint32_t index) {
         const auto& range_info = integer_function_param_range_info_map_.Get(param);
-        if (!range_info) {
+        if (!range_info || index >= range_info.value->Length()) {
             return {};
         }
-        TINT_ASSERT(range_info.value->Length() > index);
         return (*range_info)[index];
     }
 
@@ -187,11 +186,15 @@ struct IntegerRangeAnalysisImpl {
         if (access->Indices().size() > 1) {
             return {};
         }
-        if (!access->Indices()[0]->As<Constant>()) {
+        auto* const_idx = access->Indices()[0]->As<Constant>();
+        if (!const_idx) {
             return {};
         }
-        uint32_t index =
-            static_cast<uint32_t>(GetValueFromConstant(access->Indices()[0]->As<Constant>()));
+        int64_t const_value = GetValueFromConstant(const_idx);
+        if (const_value < 0) {
+            return {};
+        }
+        uint32_t index = static_cast<uint32_t>(const_value);
         return GetInfo(function_param, index);
     }
 

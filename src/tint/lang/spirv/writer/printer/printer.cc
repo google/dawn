@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/spirv/writer/printer/printer.h"
 
+#include <algorithm>
 #include <deque>
 #include <string>
 #include <utility>
@@ -1232,8 +1233,12 @@ class Printer {
         auto* source_ty = access->Object()->Type();
         for (auto* idx : access->Indices()) {
             if (auto* constant = idx->As<core::ir::Constant>()) {
-                // Push the index to the chain and update the current type.
+                // Push the index to the chain and update the current type. Clamp non-struct
+                // indices so OpCompositeExtract stays in bounds when robustness is disabled.
                 auto i = constant->Value()->ValueAs<u32>();
+                if (auto el = source_ty->Elements(); el.type && el.count != 0) {
+                    i = std::min(i, u32(el.count - 1));
+                }
                 operands.push_back(i);
                 source_ty = source_ty->Element(i);
             } else {

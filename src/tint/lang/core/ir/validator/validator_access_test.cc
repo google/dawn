@@ -150,10 +150,46 @@ TEST_F(IR_ValidatorTest, Access_NegativeIndex) {
         b.Return(f);
     });
 
+    auto res = ir::Validate(mod, ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("error: access: constant index must be positive, got -1"))
+        << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Access_NegativeIndex_NonWGSL) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.vec3f());
+    f->SetParams({obj});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ty.f32(), obj, -1_i);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    EXPECT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Access_NegativeIndex_Struct) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.f32()},
+                                                              {mod.symbols.New("b"), ty.i32()},
+                                                          });
+
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam(str_ty);
+    f->SetParams({obj});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ty.f32(), obj, -1_i);
+        b.Return(f);
+    });
+
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:25 error: access: constant index must be positive, got -1
+                testing::HasSubstr(R"(:8:25 error: access: constant index must be positive, got -1
     %3:f32 = access %2, -1i
                         ^^^
 )")) << res.Failure();
@@ -169,13 +205,26 @@ TEST_F(IR_ValidatorTest, Access_OOB_Index_Value) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod);
+    auto res = ir::Validate(mod, ErrorSource::kWgsl);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:29 error: access: index out of bounds for type 'vec2<f32>'
-    %3:f32 = access %2, 1u, 3u
-                            ^^
-)")) << res.Failure();
+                testing::HasSubstr(R"(error: access: index out of bounds for type 'vec2<f32>'
+note: acceptable range: [0..1])"))
+        << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Access_OOB_Index_Value_NonWGSL) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.mat3x2<f32>());
+    f->SetParams({obj});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ty.f32(), obj, 1_u, 3_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    EXPECT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Access_OOB_Index_Ptr) {
@@ -188,22 +237,59 @@ TEST_F(IR_ValidatorTest, Access_OOB_Index_Ptr) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod);
+    auto res = ir::Validate(mod, ErrorSource::kWgsl);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:3:55 error: access: index out of bounds for type 'ptr<private, array<f32, 2>, read_write>'
-    %3:ptr<private, f32, read_write> = access %2, 1u, 3u
-                                                      ^^
+            R"(error: access: index out of bounds for type 'ptr<private, array<f32, 2>, read_write>'
+note: acceptable range: [0..1])"))
+        << res.Failure();
+}
 
-:2:3 note: in block
+TEST_F(IR_ValidatorTest, Access_OOB_Index_Ptr_NonWGSL) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.ptr<private_, array<array<f32, 2>, 3>>());
+    f->SetParams({obj});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ty.ptr<private_, f32>(), obj, 1_u, 3_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    EXPECT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Access_OOB_Index_Struct) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.f32()},
+                                                              {mod.symbols.New("b"), ty.i32()},
+                                                          });
+
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam(str_ty);
+    f->SetParams({obj});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ty.f32(), obj, 5_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:8:25 error: access: index out of bounds for type 'MyStruct'
+    %3:f32 = access %2, 5u
+                        ^^
+
+:7:3 note: in block
   $B1: {
   ^^^
 
-:3:55 note: acceptable range: [0..1]
-    %3:ptr<private, f32, read_write> = access %2, 1u, 3u
-                                                      ^^
+:8:25 note: acceptable range: [0..1]
+    %3:f32 = access %2, 5u
+                        ^^
 )")) << res.Failure();
 }
 

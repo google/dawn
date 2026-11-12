@@ -1157,31 +1157,35 @@ void Validator::CheckAccess(const Access* a) {
         }
 
         if (auto* const_index = index->As<ir::Constant>()) {
-            auto* value = const_index->Value();
-            if (value->Type()->IsSignedIntegerScalar()) {
-                // index is a signed integer scalar. Check that the index isn't negative.
-                // If the index is unsigned, we can skip this.
-                auto idx = value->ValueAs<AInt>();
-                if (DAWN_UNLIKELY(idx < 0)) {
-                    err() << "constant index must be positive, got " << idx;
-                    return;
+            if (IsWGSLValidation() || !ty->Elements().type) {
+                auto* value = const_index->Value();
+                if (value->Type()->IsSignedIntegerScalar()) {
+                    // index is a signed integer scalar. Check that the index isn't negative.
+                    // Skip this check when the index is unsigned.
+                    auto idx = value->ValueAs<AInt>();
+                    if (DAWN_UNLIKELY(idx < 0)) {
+                        err() << "constant index must be positive, got " << idx;
+                        return;
+                    }
                 }
-            }
 
-            auto idx = value->ValueAs<uint32_t>();
-            auto* el = ty->Element(idx);
-            if (DAWN_UNLIKELY(!el)) {
-                // Is index in bounds?
-                if (auto el_count = ty->Elements().count; el_count != 0 && idx >= el_count) {
-                    err() << "index out of bounds for type " << desc_of(in_kind, ty);
-                    AddNote(a, i + Access::kIndicesOperandOffset)
-                        << "acceptable range: [0.." << (el_count - 1) << "]";
+                auto idx = value->ValueAs<uint32_t>();
+                auto* el = ty->Element(idx);
+                if (DAWN_UNLIKELY(!el)) {
+                    // Is index in bounds?
+                    if (auto el_count = ty->Elements().count; el_count != 0 && idx >= el_count) {
+                        err() << "index out of bounds for type " << desc_of(in_kind, ty);
+                        AddNote(a, i + Access::kIndicesOperandOffset)
+                            << "acceptable range: [0.." << (el_count - 1) << "]";
+                        return;
+                    }
+                    err() << "type " << desc_of(in_kind, ty) << " cannot be indexed";
                     return;
                 }
-                err() << "type " << desc_of(in_kind, ty) << " cannot be indexed";
-                return;
+                ty = el;
+            } else {
+                ty = ty->Elements().type;
             }
-            ty = el;
         } else {
             auto* el = ty->Elements().type;
             if (DAWN_UNLIKELY(!el)) {
