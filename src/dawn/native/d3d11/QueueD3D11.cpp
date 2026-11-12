@@ -838,7 +838,23 @@ MaybeError DelayFlushQueue::BlockWaitForLastSubmittedSerial(
     DAWN_TRY_ASSIGN(receiver, GetSystemEventReceiver());
     commandContext->Flush1(D3D11_CONTEXT_TYPE_ALL, receiver.GetPrimitive().Get());
 
-    DWORD result = WaitForSingleObject(receiver.GetPrimitive().Get(), INFINITE);
+    // Flush1() does not return an HRESULT, so if the device is already removed (or becomes removed
+    // before the event is signaled), the event might never be signaled. Wait in intervals and
+    // check IsQueryCompleted() on timeout to avoid blocking indefinitely.
+    DAWN_CHECK(!mPendingQueries.empty());
+    DWORD result = WAIT_TIMEOUT;
+    do {
+        result = WaitForSingleObject(receiver.GetPrimitive().Get(), 1000);
+        if (result == WAIT_TIMEOUT) {
+            // If the device is lost, IsQueryCompleted() will return an error.
+            bool done = false;
+            DAWN_TRY_ASSIGN(done, IsQueryCompleted(commandContext, /*requireFlush=*/false,
+                                                   &mPendingQueries.back()));
+            if (done) {
+                return {};
+            }
+        }
+    } while (result == WAIT_TIMEOUT);
     DAWN_UNRECOVERABLE_ERROR_IF(result != WAIT_OBJECT_0, "WaitForSingleObject() failed");
 
     SystemEventReceiver returnedReceivers[] = {std::move(receiver)};
