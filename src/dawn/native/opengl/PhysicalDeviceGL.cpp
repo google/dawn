@@ -431,7 +431,12 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
 }
 
 void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platform,
-                                                TogglesState* adapterToggles) const {}
+                                                TogglesState* adapterToggles) const {
+    // (crbug.com/580872855): PowerVR drivers have memory safety issues with shaders using more
+    // than 13 texture image units.
+    adapterToggles->Default(Toggle::GLLimitTextureImageUnitsTo13,
+                            mVendorId == gpu_info::kVendorID_ImgTec);
+}
 
 void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platform,
                                                TogglesState* deviceToggles) const {

@@ -341,6 +341,11 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
         GetDefaultLimits(&mLimits, effectiveFeatureLevel);
     }
 
+    // The default limits are used even if the adapter supports less, so clamp them explicitly.
+    if (IsToggleEnabled(Toggle::GLLimitTextureImageUnitsTo13)) {
+        LimitGLTextureImageUnits(&mLimits);
+    }
+
     // Get texelCopyBufferRowAlignmentLimits from physical device
     mLimits.texelCopyBufferRowAlignmentLimits =
         GetPhysicalDevice()->GetLimits().texelCopyBufferRowAlignmentLimits;

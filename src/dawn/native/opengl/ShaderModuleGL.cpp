@@ -376,6 +376,20 @@ ResultOrUnknownError<std::string> ShaderModule::CompileShader(
         GenerateCombinedSamplerInfo(entryPointMetaData, bindings, layout, &combinedSamplers,
                                     &(req.tintOptions.sampler_texture_to_name),
                                     &(req.tintOptions.placeholder_sampler_bind_point));
+
+        // Each combined texture/sampler uses one GL texture unit per array element. Frontend
+        // validation can undercount them, since the GL backend may add additional combined
+        // samplers. This checks the final number prior to shader program linking to prevent
+        // creation of an invalid pipeline.
+        if (GetDevice()->IsToggleEnabled(Toggle::GLLimitTextureImageUnitsTo13)) {
+            uint32_t textureUnits = 0;
+            for (const CombinedSampler& combined : combinedSamplers) {
+                textureUnits += static_cast<uint32_t>(combined.textureLocation.shaderArraySize);
+            }
+            DAWN_INVALID_IF(textureUnits > kLimitedGLTextureImageUnits,
+                            "Stage (%s) uses %u texture units, more than the maximum of %u.", stage,
+                            textureUnits, kLimitedGLTextureImageUnits);
+        }
         *combinedSamplersOut = std::move(combinedSamplers);
     }
 

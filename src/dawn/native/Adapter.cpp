@@ -104,6 +104,11 @@ void AdapterBase::UpdateLimits() {
     if (mUseTieredLimits) {
         ApplyLimitTiers(&mLimits);
     }
+
+    // Applied after tiering as the clamped limits are below the lowest tier.
+    if (mTogglesState.IsEnabled(Toggle::GLLimitTextureImageUnitsTo13)) {
+        LimitGLTextureImageUnits(&mLimits);
+    }
 }
 
 const CombinedLimits& AdapterBase::GetLimits() const {

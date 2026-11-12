@@ -137,6 +137,13 @@ void UnpackLimitsIn(const Limits* chainedLimits, CombinedLimits* out);
 // Apply limit tiers to |limits|
 void ApplyLimitTiers(CombinedLimits* limits);
 
+// The number of texture image units allowed by Toggle::GLLimitTextureImageUnitsTo13.
+inline constexpr uint32_t kLimitedGLTextureImageUnits = 13;
+
+// Clamp the limits bounding the number of GL texture image units used per shader stage for
+// Toggle::GLLimitTextureImageUnitsTo13.
+void LimitGLTextureImageUnits(CombinedLimits* limits);
+
 // Returns a copy of |limits| where limit tiers are applied.
 CombinedLimits ApplyLimitTiers(const CombinedLimits& limits);
 

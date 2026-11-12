@@ -1004,6 +1004,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "block-compressed textures. Works around a device hang on some Intel GPUs when many "
       "buffer-texture copies of BC textures are recorded with unaligned buffer offsets.",
       "https://crbug.com/581018327", ToggleStage::Device}},
+    {Toggle::GLLimitTextureImageUnitsTo13,
+     {"gl_limit_texture_image_units_to_13",
+      "Limit maxSampledTexturesPerShaderStage and maxSamplersPerShaderStage to 13, and reject "
+      "shaders using more than 13 GL texture image units. Works around a PowerVR driver bug.",
+      "https://crbug.com/580872855", ToggleStage::Adapter}},
 
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
