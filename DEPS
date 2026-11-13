@@ -25,7 +25,7 @@ vars = {
   'dawn_wasm': False, # Also fetches dependencies required for building WebAssembly.
   'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
-  'dawn_gn_version': 'git_revision:74c32399b100531b22184bd6ac38c4b26bc86ca5',
+  'dawn_gn_version': 'git_revision:2f5f34aced5f9721cda3eef963f4f7d231a0ae99',
   # ninja CIPD package version.
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
   'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
@@ -78,7 +78,7 @@ vars = {
 
   # Version of Chromium the DEPS entries synced by scripts/roll_chromium_deps.py
   # were last synced to.
-  'chromium_revision': '1eb2d9fcf0884be764909f0dc05fa07b28ba5c1e',
+  'chromium_revision': '3f78e935a5cb816be9b60c9539dcb82d70f5de94',
   # We never want to actually checkout Chromium, but we need a fake DEPS entry
   # in order for the Chromium -> Dawn DEPS autoroller to work.
   'checkout_placeholder_chromium': False,
@@ -109,7 +109,7 @@ vars = {
 
 deps = {
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@d665f41b0ab65f098ee90a06b1678978c2d0028a',
+    'url': '{chromium_git}/chromium/src/buildtools@a0ce846ddb1eb609bd181377c43c419065b0fa47',
     'condition': 'dawn_standalone',
   },
   'third_party/clang-format/script': {
@@ -142,23 +142,23 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@1afcf0756e47f3a6ee82d7736b9fcda2d57b268e',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@97da8489e4b7e9dc78fa2efb846871a7b423d933',
     'condition': 'dawn_standalone',
   },
 
   'third_party/libc++/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@d816ed0274edb2f8ae2a514584476dfa7acfbca1',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@64f64c14ae2f4653af875bd172462a4c5e6afe18',
     'condition': 'dawn_standalone',
   },
 
   'third_party/libc++abi/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@de3f73284c8614bb9408e45d70649f8e7933172e',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@a1e7b02088dbe55c9f6f0d3390fc3dcdce1f4d94',
     'condition': 'dawn_standalone',
   },
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@8002d0374e1bbee4a64bd7cc54d65b4557eb6064',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@47668e30e8ce143f4508c069fe34e016eb29cf9d',
     'condition': 'dawn_standalone',
   },
 
@@ -173,11 +173,11 @@ deps = {
   # The //build and //tools/* deps should all be updated in unison, as
   #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@6ee635e2e3106161764b27681234e7508ef36161',
+  'url': '{chromium_git}/chromium/src/build@5fdc7cfcde823ff0d42d66f0384788f9f5f48c12',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-  'url': '{chromium_git}/chromium/src/tools/clang@b8732dcf0099299659b1a5d613532e234d1d38ad',
+  'url': '{chromium_git}/chromium/src/tools/clang@5509e6535d19139a8f55d2dc8f32c7f46247a8e6',
     'condition': 'dawn_standalone',
   },
   'tools/memory': {
@@ -199,7 +199,7 @@ deps = {
 
   # For run-tricium-clang-tidy.py
   'third_party/chromium-tools-build/src': {
-    'url': '{chromium_git}/chromium/tools/build@1bc89f46fd97547c8e347663ebd44612fa5958c4',
+    'url': '{chromium_git}/chromium/tools/build@7b7b68d5fdd85005058b371df09f0512500ec840',
     'condition': 'dawn_standalone and checkout_clang_tidy',
   },
 
@@ -287,13 +287,13 @@ deps = {
 
   # Used for Dawn-side GN arg definitions.
   'tools/mb': {
-    'url': '{chromium_git}/chromium/src/tools/mb@bb310f7e7d00df06cd6610b25124afbc9bafe8d1',
+    'url': '{chromium_git}/chromium/src/tools/mb@61979f7423d25a9ebb362bad9e6beb52b7d6353e',
     'condition': 'dawn_standalone',
   },
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@799b33e2bcd410fa549da0faeca31e1cfc0a9402',
+    'url': '{chromium_git}/chromium/src/testing@e543cdcebd92bb9f8f53116aff62e4a043af7198',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
@@ -301,12 +301,12 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'third_party/googletest/src': {
-    'url': '{chromium_git}/external/github.com/google/googletest@24990589481d2ed05602a304bee5ca716273762a',
+    'url': '{chromium_git}/external/github.com/google/googletest@1aa39fe721cf6e94a3fc4b502c9292e9e13d39e0',
     'condition': 'dawn_standalone',
   },
   # This is a dependency of //testing
   'third_party/catapult': {
-    'url': '{chromium_git}/catapult.git@8480c1b861182c18ebae6af35c007aa56d5dbd4a',
+    'url': '{chromium_git}/catapult.git@5b55574293bf116f1bd55505ece91d5c7f1edf4c',
     'condition': 'dawn_standalone',
   },
   'third_party/google_benchmark/src': {
@@ -314,7 +314,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'third_party/perfetto': {
-    'url': '{chromium_git}/external/github.com/google/perfetto.git@3c53ccda1eb2aa97c036554bd4d5a0fcbb7c2040',
+    'url': '{chromium_git}/external/github.com/google/perfetto.git@71eb77779c7650e911674b18f55423c546d051b3',
     'condition': 'dawn_standalone',
   },
 
@@ -421,7 +421,7 @@ deps = {
   },
 
   'third_party/abseil-cpp': {
-    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@cc7c44411318a2e499e69ebd778cd22d82bd2860',
+    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@ecb00cc74a6251b273c78789f947d3eb280dd093',
     'condition': 'dawn_standalone',
   },
 
@@ -695,7 +695,7 @@ deps = {
   # Dependencies for PartitionAlloc.
   # Doc: https://docs.google.com/document/d/1wz45t0alQthsIU9P7_rQcfQyqnrBMXzrOjSzdQo-V-A
   'third_party/partition_alloc': {
-    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@b3eaf4c68361021b4a44d4fa5b669a0f29fc017d',
+    'url': '{chromium_git}/chromium/src/base/allocator/partition_allocator.git@961b259d63fd9527e27b4c1aaf87294c3cb62d6d',
     'condition': 'dawn_standalone',
   },
 
