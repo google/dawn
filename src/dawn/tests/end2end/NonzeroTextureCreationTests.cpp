@@ -314,6 +314,8 @@ TEST_P(NonzeroDepthTextureCreationTests, TextureCreationClears) {
 TEST_P(NonzeroDepthStencilTextureCreationTests, TextureCreationClears) {
     // TODO(crbug.com/473870505): [Capture] support depth/stencil and multi-planar textures.
     DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
+    // TODO(crbug.com/477645284): Fails on Mac Intel with Metal Shader Validation.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsFullBackendValidationEnabled());
 
     DoRun();
 }

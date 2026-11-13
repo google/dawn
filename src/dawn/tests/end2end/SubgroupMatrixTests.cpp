@@ -1744,6 +1744,9 @@ TEST_P(SubgroupMatrix_TiledMatrixMultiplyTest, MatrixMultiply) {
     // CreateComputePipeline for tile dim 32
     DAWN_SUPPRESS_TEST_IF(IsAMD() && IsD3D12() && IsWindows() && kTileDim == 32);
 
+    // TODO(crbug.com/477645284): Fails on Mac with Metal Shader Validation.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsFullBackendValidationEnabled() && kTileDim >= 16);
+
     // Query the supported subgroup matrix configurations.
     wgpu::AdapterInfo info;
     wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
