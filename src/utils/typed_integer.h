@@ -83,27 +83,26 @@ class DAWN_TRIVIAL_ABI alignas(T) TypedIntegerImpl {
     static_assert(std::is_integral_v<T>, "TypedInteger must be integral");
 
   public:
-    // Note that |mValue| here needs to be public in order to satisfy requirements in dawn::Span to
-    // allow using TypedIntegers as NTTP template arguments for fixed extent Spans.
-    T mValue;
+    // **Do not access this directly, use a cast like uint32_t{x} instead.**
+    // (|mPrivate| here needs to be public in order to satisfy the 'structural type' requirement in
+    // dawn::Span to allow using TypedIntegers as NTTP template arguments for fixed-extent Spans.)
+    T mPrivate = 0;
 
-    constexpr TypedIntegerImpl() : mValue(0) {
+    constexpr TypedIntegerImpl() {
         static_assert(alignof(TypedIntegerImpl) == alignof(T));
         static_assert(sizeof(TypedIntegerImpl) == sizeof(T));
     }
 
     // Lossless conversion: primitive -> TypedInteger (constructor).
     // If you need a lossy (narrowing) conversion, use (d)checked_cast.
-    template <std::integral Src>
-        requires kIsCastAlwaysInRange<Src, T>
-    explicit constexpr TypedIntegerImpl(Src src) : mValue(static_cast<T>(src)) {}
+    explicit constexpr TypedIntegerImpl(T src) : mPrivate(src) {}
 
     // Lossless conversion: TypedInteger -> primitive (cast)
     // If you need a lossy (narrowing) conversion, use (d)checked_cast.
     template <std::integral Dst>
         requires kIsCastAlwaysInRange<T, Dst>
     explicit constexpr operator Dst() const {
-        return static_cast<Dst>(this->mValue);
+        return static_cast<Dst>(this->mPrivate);
     }
 
     // Same-tag TypedInteger comparison operators
@@ -111,30 +110,30 @@ class DAWN_TRIVIAL_ABI alignas(T) TypedIntegerImpl {
 
     // Increment / decrement operators for for-loop iteration
     constexpr TypedIntegerImpl& operator++() {
-        DAWN_ASSERT(this->mValue < std::numeric_limits<T>::max());
-        ++this->mValue;
+        DAWN_ASSERT(this->mPrivate < std::numeric_limits<T>::max());
+        ++this->mPrivate;
         return *this;
     }
 
     constexpr TypedIntegerImpl operator++(int) {
         TypedIntegerImpl ret = *this;
 
-        DAWN_ASSERT(this->mValue < std::numeric_limits<T>::max());
-        ++this->mValue;
+        DAWN_ASSERT(this->mPrivate < std::numeric_limits<T>::max());
+        ++this->mPrivate;
         return ret;
     }
 
     constexpr TypedIntegerImpl& operator--() {
-        DAWN_ASSERT(this->mValue > std::numeric_limits<T>::min());
-        --this->mValue;
+        DAWN_ASSERT(this->mPrivate > std::numeric_limits<T>::min());
+        --this->mPrivate;
         return *this;
     }
 
     constexpr TypedIntegerImpl operator--(int) {
         TypedIntegerImpl ret = *this;
 
-        DAWN_ASSERT(this->mValue > std::numeric_limits<T>::min());
-        --this->mValue;
+        DAWN_ASSERT(this->mPrivate > std::numeric_limits<T>::min());
+        --this->mPrivate;
         return ret;
     }
 
@@ -142,32 +141,32 @@ class DAWN_TRIVIAL_ABI alignas(T) TypedIntegerImpl {
         requires(std::signed_integral<T>)
     {
         // The negation of the most negative value cannot be represented.
-        DAWN_ASSERT(this->mValue != std::numeric_limits<T>::min());
-        return TypedIntegerImpl(-this->mValue);
+        DAWN_ASSERT(this->mPrivate != std::numeric_limits<T>::min());
+        return TypedIntegerImpl(-this->mPrivate);
     }
 
     constexpr TypedIntegerImpl operator+(TypedIntegerImpl rhs) const
         requires(std::unsigned_integral<T>)
     {
         // Overflow would wrap around
-        DAWN_ASSERT(mValue + rhs.mValue >= mValue);
-        T result = mValue + rhs.mValue;
+        DAWN_ASSERT(mPrivate + rhs.mPrivate >= mPrivate);
+        T result = mPrivate + rhs.mPrivate;
         return TypedIntegerImpl{result};
     }
     constexpr TypedIntegerImpl operator+(TypedIntegerImpl rhs) const
         requires(std::signed_integral<T>)
     {
-        if (mValue > 0) {
+        if (mPrivate > 0) {
             // rhs is positive: |rhs| is at most the distance between max and |lhs|.
             // rhs is negative: (positive + negative) won't overflow
-            DAWN_ASSERT(rhs.mValue <= std::numeric_limits<T>::max() - mValue);
+            DAWN_ASSERT(rhs.mPrivate <= std::numeric_limits<T>::max() - mPrivate);
         } else {
             // rhs is positive: (negative + positive) won't underflow
             // rhs is negative: |rhs| isn't less than the (negative) distance between min
             // and |lhs|
-            DAWN_ASSERT(rhs.mValue >= std::numeric_limits<T>::min() - mValue);
+            DAWN_ASSERT(rhs.mPrivate >= std::numeric_limits<T>::min() - mPrivate);
         }
-        T result = mValue + rhs.mValue;
+        T result = mPrivate + rhs.mPrivate;
         return TypedIntegerImpl{result};
     }
 
@@ -175,88 +174,88 @@ class DAWN_TRIVIAL_ABI alignas(T) TypedIntegerImpl {
         requires(std::unsigned_integral<T>)
     {
         // Overflow would wrap around
-        DAWN_ASSERT(mValue - rhs.mValue <= mValue);
-        T result = mValue - rhs.mValue;
+        DAWN_ASSERT(mPrivate - rhs.mPrivate <= mPrivate);
+        T result = mPrivate - rhs.mPrivate;
         return TypedIntegerImpl{result};
     }
     constexpr TypedIntegerImpl operator-(TypedIntegerImpl rhs) const
         requires(std::signed_integral<T>)
     {
-        if (mValue > 0) {
+        if (mPrivate > 0) {
             // rhs is positive: positive minus positive won't overflow
             // rhs is negative: |rhs| isn't less than the (negative) distance between |lhs|
             // and max.
-            DAWN_ASSERT(rhs.mValue >= mValue - std::numeric_limits<T>::max());
+            DAWN_ASSERT(rhs.mPrivate >= mPrivate - std::numeric_limits<T>::max());
         } else {
             // rhs is positive: |rhs| is at most the distance between min and |lhs|
             // rhs is negative: negative minus negative won't overflow
-            DAWN_ASSERT(rhs.mValue <= mValue - std::numeric_limits<T>::min());
+            DAWN_ASSERT(rhs.mPrivate <= mPrivate - std::numeric_limits<T>::min());
         }
-        T result = mValue - rhs.mValue;
+        T result = mPrivate - rhs.mPrivate;
         return TypedIntegerImpl{result};
     }
 
     constexpr TypedIntegerImpl operator*(TypedIntegerImpl rhs) const
         requires(std::unsigned_integral<T>)
     {
-        DAWN_ASSERT(mValue == 0 || rhs.mValue == 0 ||
-                    mValue <= (std::numeric_limits<T>::max() / rhs.mValue));
-        T result = mValue * rhs.mValue;
+        DAWN_ASSERT(mPrivate == 0 || rhs.mPrivate == 0 ||
+                    mPrivate <= (std::numeric_limits<T>::max() / rhs.mPrivate));
+        T result = mPrivate * rhs.mPrivate;
         return TypedIntegerImpl{result};
     }
     constexpr TypedIntegerImpl operator*(TypedIntegerImpl rhs) const
         requires(std::signed_integral<T>)
     {
         // https://wiki.sei.cmu.edu/confluence/display/c/INT32-C.+Ensure+that+operations+on+signed+integers+do+not+result+in+overflow
-        if (mValue > 0) {
-            if (rhs.mValue > 0) {
-                DAWN_ASSERT(mValue <= (std::numeric_limits<T>::max() / rhs.mValue));
+        if (mPrivate > 0) {
+            if (rhs.mPrivate > 0) {
+                DAWN_ASSERT(mPrivate <= (std::numeric_limits<T>::max() / rhs.mPrivate));
             } else {
-                DAWN_ASSERT(rhs.mValue >= (std::numeric_limits<T>::min() / mValue));
+                DAWN_ASSERT(rhs.mPrivate >= (std::numeric_limits<T>::min() / mPrivate));
             }
         } else {
-            if (rhs.mValue > 0) {
-                DAWN_ASSERT(mValue >= (std::numeric_limits<T>::min() / rhs.mValue));
+            if (rhs.mPrivate > 0) {
+                DAWN_ASSERT(mPrivate >= (std::numeric_limits<T>::min() / rhs.mPrivate));
             } else {
-                DAWN_ASSERT((mValue == 0) ||
-                            (rhs.mValue >= (std::numeric_limits<T>::max() / mValue)));
+                DAWN_ASSERT((mPrivate == 0) ||
+                            (rhs.mPrivate >= (std::numeric_limits<T>::max() / mPrivate)));
             }
         }
-        T result = mValue * rhs.mValue;
+        T result = mPrivate * rhs.mPrivate;
         return TypedIntegerImpl{result};
     }
 
     constexpr TypedIntegerImpl operator/(TypedIntegerImpl rhs) const
         requires(std::unsigned_integral<T>)
     {
-        DAWN_ASSERT(rhs.mValue != 0);
-        T result = mValue / rhs.mValue;
+        DAWN_ASSERT(rhs.mPrivate != 0);
+        T result = mPrivate / rhs.mPrivate;
         return TypedIntegerImpl{result};
     }
     constexpr TypedIntegerImpl operator/(TypedIntegerImpl rhs) const
         requires(std::signed_integral<T>)
     {
         // https://wiki.sei.cmu.edu/confluence/display/c/INT33-C.+Ensure+that+division+and+remainder+operations+do+not+result+in+divide-by-zero+errors
-        DAWN_ASSERT(
-            !(rhs.mValue == 0 || (rhs.mValue == -1 && mValue == std::numeric_limits<T>::min())));
-        T result = mValue / rhs.mValue;
+        DAWN_ASSERT(!(rhs.mPrivate == 0 ||
+                      (rhs.mPrivate == -1 && mPrivate == std::numeric_limits<T>::min())));
+        T result = mPrivate / rhs.mPrivate;
         return TypedIntegerImpl{result};
     }
 
     constexpr TypedIntegerImpl operator%(TypedIntegerImpl rhs) const
         requires(std::unsigned_integral<T>)
     {
-        DAWN_ASSERT(rhs.mValue != 0);
-        T result = mValue % rhs.mValue;
+        DAWN_ASSERT(rhs.mPrivate != 0);
+        T result = mPrivate % rhs.mPrivate;
         return TypedIntegerImpl{result};
     }
     constexpr TypedIntegerImpl operator%(TypedIntegerImpl rhs) const
         requires(std::signed_integral<T>)
     {
         // https://wiki.sei.cmu.edu/confluence/display/c/INT33-C.+Ensure+that+division+and+remainder+operations+do+not+result+in+divide-by-zero+errors
-        DAWN_ASSERT(
-            !(rhs.mValue == 0 || (rhs.mValue == -1 && mValue == std::numeric_limits<T>::min())));
-        T result = mValue % rhs.mValue;
+        DAWN_ASSERT(!(rhs.mPrivate == 0 ||
+                      (rhs.mPrivate == -1 && mPrivate == std::numeric_limits<T>::min())));
+        T result = mPrivate % rhs.mPrivate;
         return TypedIntegerImpl{result};
     }
 
@@ -292,7 +291,7 @@ class DAWN_TRIVIAL_ABI alignas(T) TypedIntegerImpl {
 
     template <typename H>
     friend H AbslHashValue(H state, const TypedIntegerImpl& value) {
-        return H::combine(std::move(state), value.mValue);
+        return H::combine(std::move(state), value.mPrivate);
     }
 };
 
