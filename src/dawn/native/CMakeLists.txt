@@ -44,7 +44,7 @@ set(headers
 set(private_headers
     "${DAWN_NATIVE_UTILS_GEN_HEADERS}"
     "Adapter.h"
-    "ApplyClearColorValueWithDrawHelper.h"
+    "ApplyClearWithDrawHelper.h"
     "AsyncTask.h"
     "AttachmentState.h"
     "BackendConnection.h"
@@ -172,7 +172,7 @@ set(private_headers
 set(sources
     ${DAWN_NATIVE_UTILS_GEN_SOURCES}
     "Adapter.cpp"
-    "ApplyClearColorValueWithDrawHelper.cpp"
+    "ApplyClearWithDrawHelper.cpp"
     "AsyncTask.cpp"
     "AttachmentState.cpp"
     "BackendConnection.cpp"

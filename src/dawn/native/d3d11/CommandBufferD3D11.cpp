@@ -36,7 +36,7 @@
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/BitSetRangeIterator.h"
 #include "src/dawn/common/WindowsUtils.h"
-#include "src/dawn/native/ApplyClearColorValueWithDrawHelper.h"
+#include "src/dawn/native/ApplyClearWithDrawHelper.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/CommandEncoder.h"
 #include "src/dawn/native/CommandValidation.h"

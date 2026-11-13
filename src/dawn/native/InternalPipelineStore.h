@@ -32,7 +32,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "src/dawn/common/HashUtils.h"
-#include "src/dawn/native/ApplyClearColorValueWithDrawHelper.h"
+#include "src/dawn/native/ApplyClearWithDrawHelper.h"
 #include "src/dawn/native/BlitColorToColorWithDraw.h"
 #include "src/dawn/native/ObjectBase.h"
 #include "src/dawn/native/ScratchBuffer.h"
@@ -60,7 +60,7 @@ struct InternalPipelineStore {
     Ref<ComputePipelineBase> timestampComputePipeline;
     Ref<ShaderModuleBase> timestampCS;
 
-    ApplyClearColorValueWithDrawPipelinesCache applyClearColorValueWithDrawPipelines;
+    ApplyClearWithDrawPipelinesCache applyClearWithDrawPipelines;
 
     Ref<ShaderModuleBase> placeholderFragmentShader;
 

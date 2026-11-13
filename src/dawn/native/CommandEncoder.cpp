@@ -39,7 +39,7 @@
 #include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/Math.h"
 #include "src/dawn/native/Adapter.h"
-#include "src/dawn/native/ApplyClearColorValueWithDrawHelper.h"
+#include "src/dawn/native/ApplyClearWithDrawHelper.h"
 #include "src/dawn/native/BindGroup.h"
 #include "src/dawn/native/BlitBufferToDepthStencil.h"
 #include "src/dawn/native/BlitBufferToTexture.h"
