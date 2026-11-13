@@ -551,7 +551,6 @@ if (DAWN_ENABLE_METAL)
         "metal/SwapChainMTL.h"
         "metal/TextureMTL.h"
         "metal/UtilsMetal.h"
-        "metal/VertexBufferTrackerMTL.h"
     )
     list(APPEND sources
         "metal/BackendMTL.mm"

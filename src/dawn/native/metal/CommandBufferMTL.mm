@@ -55,7 +55,6 @@
 #include "src/dawn/native/metal/StorageBufferLengthTrackerMTL.h"
 #include "src/dawn/native/metal/TextureMTL.h"
 #include "src/dawn/native/metal/UtilsMetal.h"
-#include "src/dawn/native/metal/VertexBufferTrackerMTL.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
@@ -984,7 +983,6 @@ MaybeError CommandBuffer::RecordRenderPass(
     IndirectDrawIndex indirectDrawIndex{0u};
 
     StorageBufferLengthTracker storageBufferLengths{GetDevice()};
-    VertexBufferTracker vertexBuffers(&storageBufferLengths);
     BindGroupTracker bindGroups(&storageBufferLengths,
                                 GetDevice()->IsToggleEnabled(Toggle::MetalUseArgumentBuffers));
 
@@ -1014,7 +1012,6 @@ MaybeError CommandBuffer::RecordRenderPass(
             case Command::Draw: {
                 DrawCmd* draw = iter->NextCommand<DrawCmd>();
 
-                vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
                 storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
@@ -1043,7 +1040,6 @@ MaybeError CommandBuffer::RecordRenderPass(
             case Command::DrawIndexed: {
                 DrawIndexedCmd* draw = iter->NextCommand<DrawIndexedCmd>();
 
-                vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
                 storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
@@ -1080,7 +1076,6 @@ MaybeError CommandBuffer::RecordRenderPass(
             case Command::DrawIndirect: {
                 DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
 
-                vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
                 storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
@@ -1103,7 +1098,6 @@ MaybeError CommandBuffer::RecordRenderPass(
             case Command::DrawIndexedIndirect: {
                 DrawIndexedIndirectCmd* draw = iter->NextCommand<DrawIndexedIndirectCmd>();
 
-                vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
                 storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
@@ -1129,7 +1123,6 @@ MaybeError CommandBuffer::RecordRenderPass(
             case Command::MultiDrawIndirect: {
                 iter->NextCommand<MultiDrawIndirectCmd>();
 
-                vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
                 storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
@@ -1141,7 +1134,6 @@ MaybeError CommandBuffer::RecordRenderPass(
             case Command::MultiDrawIndexedIndirect: {
                 iter->NextCommand<MultiDrawIndexedIndirectCmd>();
 
-                vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
                 storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
@@ -1179,7 +1171,6 @@ MaybeError CommandBuffer::RecordRenderPass(
                     break;
                 }
 
-                vertexBuffers.OnSetPipeline(lastPipeline, newPipeline);
                 bindGroups.OnSetPipeline(newPipeline);
                 immediates.OnSetPipeline(newPipeline);
                 storageBufferLengths.OnSetPipeline(newPipeline);
@@ -1236,9 +1227,29 @@ MaybeError CommandBuffer::RecordRenderPass(
 
             case Command::SetVertexBuffer: {
                 SetVertexBufferCmd* cmd = iter->NextCommand<SetVertexBufferCmd>();
+                auto buffer = ToBackend(cmd->buffer.Get());
+                buffer->TrackUsage();
+                uint32_t mtlIndex = VertexBufferSlotToMetalBufferIndex(cmd->slot);
+                id<MTLBuffer> mtlBuffer = buffer->GetMTLBuffer();
 
-                vertexBuffers.OnSetVertexBuffer(cmd->slot, ToBackend(cmd->buffer.Get()),
-                                                cmd->offset);
+                if (enableVertexPulling) {
+                    // The binding size for a vertex buffer must always be at least 4 so we can do
+                    // clamping.
+                    uint64_t bindingSize = std::max(4ull, cmd->buffer->GetSize() - cmd->offset);
+                    // (BufferMTL reserves an extra 4 bytes for us in case we're at the very end of
+                    // the buffer.)
+                    DAWN_ASSERT(cmd->offset + bindingSize <= cmd->buffer->GetAllocatedSize());
+
+                    // Insert lengths for vertex buffers bound as storage buffers
+                    storageBufferLengths.data[SingleShaderStage::Vertex][mtlIndex] =
+                        checked_cast<uint32_t>(bindingSize);
+                    storageBufferLengths.dirtyStages |= wgpu::ShaderStage::Vertex;
+                }
+
+                NSUInteger offset = dchecked_cast<NSUInteger>(cmd->offset);
+                [encoder setVertexBuffers:&mtlBuffer
+                                  offsets:&offset
+                                withRange:NSMakeRange(mtlIndex, 1)];
                 break;
             }
 
