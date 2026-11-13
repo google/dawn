@@ -29,6 +29,7 @@
 
 #include "src/dawn/common/MatchVariant.h"
 #include "src/dawn/native/BindGroupLayoutInternal.h"
+#include "src/dawn/native/Toggles.h"
 #include "src/dawn/native/metal/DeviceMTL.h"
 
 namespace dawn::native::metal {
@@ -44,10 +45,11 @@ PipelineLayout::PipelineLayout(Device* device,
                                const UnpackedPtr<PipelineLayoutDescriptor>& descriptor)
     : PipelineLayoutBase(device, descriptor) {
     // Each stage has its own numbering namespace in CompilerMSL.
-    // TODO(crbug.com/363031535): This should become unnecessary once we switch to argument buffers.
+    // TODO(https://crbug.com/363031535): Simplify when removing non-argument-buffers code.
     for (auto stage : IterateStages(kAllStages)) {
-        // First kMaxVertexBuffers slots are reserved for vertex buffers (unused in other stages).
-        uint32_t bufferIndex = kMaxVertexBuffers;
+        // First kMaxVertexBuffers slots are reserved for vertex buffers (unused in other
+        // stages).
+        PerStageBufferIndex bufferIndex{kMaxVertexBuffers};
         uint32_t samplerIndex = 0;
         uint32_t textureIndex = 0;
 
@@ -65,7 +67,7 @@ PipelineLayout::PipelineLayout(Device* device,
                 MatchVariant(
                     bindingInfo.bindingLayout,
                     [&](const BufferBindingInfo&) {
-                        mIndexInfo[stage][group][bindingIndex] = bufferIndex;
+                        mIndexInfo[stage][group][bindingIndex] = uint32_t{bufferIndex};
                         bufferIndex++;
                     },
                     [&](const SamplerBindingInfo&) {
@@ -107,7 +109,7 @@ const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo(
     return mIndexInfo[stage];
 }
 
-uint32_t PipelineLayout::GetBufferBindingCount(SingleShaderStage stage) const {
+PerStageBufferIndex PipelineLayout::GetBufferBindingCount(SingleShaderStage stage) const {
     return mBufferBindingCount[stage];
 }
 

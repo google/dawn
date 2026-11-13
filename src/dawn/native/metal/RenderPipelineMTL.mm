@@ -30,6 +30,7 @@
 #include "src/dawn/native/Adapter.h"
 #include "src/dawn/native/CreatePipelineAsyncEvent.h"
 #include "src/dawn/native/Instance.h"
+#include "src/dawn/native/Toggles.h"
 #include "src/dawn/native/metal/BackendMTL.h"
 #include "src/dawn/native/metal/DeviceMTL.h"
 #include "src/dawn/native/metal/ImmediatesLayoutMTL.h"
@@ -351,12 +352,12 @@ MaybeUnknownError RenderPipeline::InitializeImpl() {
 
     if (GetDevice()->HasFeature(Feature::ChromiumExperimentalSamplingResourceTable) &&
         !GetDevice()->IsToggleEnabled(Toggle::MetalUseArgumentBuffers)) {
-        uint32_t bufferBindingCount =
+        PerStageBufferIndex bufferBindingCount =
             ToBackend(GetLayout())->GetBufferBindingCount(SingleShaderStage::Vertex);
         if (bufferBindingCount > kMaxVertexStageBufferCountWithResourceTableWithoutArgBufs) {
             return DAWN_UNRECOVERABLE_ERROR(
                 "Vertex stage slot [[buffer(%d)]] overlaps with a required ResourceTable slot",
-                bufferBindingCount - 1);
+                uint32_t{bufferBindingCount} - 1);
         }
     }
 
@@ -546,7 +547,8 @@ NSRef<MTLVertexDescriptor> RenderPipeline::MakeVertexDesc() const {
             layoutDesc.stride = info.arrayStride;
         }
 
-        mtlVertexDescriptor.layouts[VertexBufferSlotToMetalBufferIndex(slot)] = layoutDesc;
+        mtlVertexDescriptor.layouts[uint32_t{VertexBufferSlotToMetalBufferIndex(slot)}] =
+            layoutDesc;
         [layoutDesc release];
     }
 
@@ -556,7 +558,8 @@ NSRef<MTLVertexDescriptor> RenderPipeline::MakeVertexDesc() const {
         auto attribDesc = [MTLVertexAttributeDescriptor new];
         attribDesc.format = VertexFormatType(info.format);
         attribDesc.offset = info.offset;
-        attribDesc.bufferIndex = VertexBufferSlotToMetalBufferIndex(info.vertexBufferSlot);
+        attribDesc.bufferIndex =
+            uint32_t{VertexBufferSlotToMetalBufferIndex(info.vertexBufferSlot)};
         mtlVertexDescriptor.attributes[static_cast<uint8_t>(loc)] = attribDesc;
         [attribDesc release];
     }

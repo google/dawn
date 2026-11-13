@@ -1230,7 +1230,6 @@ MaybeError CommandBuffer::RecordRenderPass(
                 SetVertexBufferCmd* cmd = iter->NextCommand<SetVertexBufferCmd>();
                 auto buffer = ToBackend(cmd->buffer.Get());
                 buffer->TrackUsage();
-                uint32_t mtlIndex = VertexBufferSlotToMetalBufferIndex(cmd->slot);
                 id<MTLBuffer> mtlBuffer = buffer->GetMTLBuffer();
 
                 if (enableVertexPulling) {
@@ -1242,12 +1241,14 @@ MaybeError CommandBuffer::RecordRenderPass(
                     DAWN_ASSERT(cmd->offset + bindingSize <= cmd->buffer->GetAllocatedSize());
 
                     // Insert lengths for vertex buffers bound as storage buffers
-                    storageBufferLengths.data[SingleShaderStage::Vertex][mtlIndex] =
-                        checked_cast<uint32_t>(bindingSize);
+                    storageBufferLengths.data[SingleShaderStage::Vertex]
+                                             [VertexBufferSlotToLengthArrayIndex(cmd->slot)] =
+                        checked_cast<BufferBindingSize32>(bindingSize);
                     storageBufferLengths.dirtyStages |= wgpu::ShaderStage::Vertex;
                 }
 
                 NSUInteger offset = dchecked_cast<NSUInteger>(cmd->offset);
+                NSUInteger mtlIndex = uint32_t{VertexBufferSlotToMetalBufferIndex(cmd->slot)};
                 [encoder setVertexBuffers:&mtlBuffer
                                   offsets:&offset
                                 withRange:NSMakeRange(mtlIndex, 1)];

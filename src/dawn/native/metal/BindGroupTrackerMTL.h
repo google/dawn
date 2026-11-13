@@ -35,6 +35,7 @@
 #include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/metal/BindGroupMTL.h"
 #include "src/dawn/native/metal/BufferMTL.h"
+#include "src/dawn/native/metal/PipelineLayoutMTL.h"
 #include "src/dawn/native/metal/ResourceTableMTL.h"
 #include "src/dawn/native/metal/SamplerMTL.h"
 #include "src/dawn/native/metal/StorageBufferLengthTrackerMTL.h"
@@ -143,18 +144,21 @@ class BindGroupTracker : public BindGroupTrackerBase<true> {
                     ToBackend(binding.buffer)->TrackUsage();
 
                     if (hasVertStage) {
-                        mLengthTracker->data[SingleShaderStage::Vertex][vertIndex] =
-                            checked_cast<uint32_t>(binding.size);
+                        mLengthTracker
+                            ->data[SingleShaderStage::Vertex][PerStageBufferIndex{vertIndex}] =
+                            checked_cast<BufferBindingSize32>(binding.size);
                         mLengthTracker->dirtyStages |= wgpu::ShaderStage::Vertex;
                     }
                     if (hasFragStage) {
-                        mLengthTracker->data[SingleShaderStage::Fragment][fragIndex] =
-                            checked_cast<uint32_t>(binding.size);
+                        mLengthTracker
+                            ->data[SingleShaderStage::Fragment][PerStageBufferIndex{fragIndex}] =
+                            checked_cast<BufferBindingSize32>(binding.size);
                         mLengthTracker->dirtyStages |= wgpu::ShaderStage::Fragment;
                     }
                     if (hasComputeStage) {
-                        mLengthTracker->data[SingleShaderStage::Compute][computeIndex] =
-                            checked_cast<uint32_t>(binding.size);
+                        mLengthTracker
+                            ->data[SingleShaderStage::Compute][PerStageBufferIndex{computeIndex}] =
+                            checked_cast<BufferBindingSize32>(binding.size);
                         mLengthTracker->dirtyStages |= wgpu::ShaderStage::Compute;
                     }
 
@@ -196,20 +200,21 @@ class BindGroupTracker : public BindGroupTrackerBase<true> {
                         if (hasVertStage &&
                             mBoundSamplers[SingleShaderStage::Vertex][vertIndex] != samplerState) {
                             mBoundSamplers[SingleShaderStage::Vertex][vertIndex] = samplerState;
-                            [render setVertexSamplerState:samplerState atIndex:vertIndex];
+                            [render setVertexSamplerState:samplerState atIndex:uint32_t{vertIndex}];
                         }
                         if (hasFragStage &&
                             mBoundSamplers[SingleShaderStage::Fragment][fragIndex] !=
                                 samplerState) {
                             mBoundSamplers[SingleShaderStage::Fragment][fragIndex] = samplerState;
-                            [render setFragmentSamplerState:samplerState atIndex:fragIndex];
+                            [render setFragmentSamplerState:samplerState
+                                                    atIndex:uint32_t{fragIndex}];
                         }
                         if (hasComputeStage &&
                             mBoundSamplers[SingleShaderStage::Compute][computeIndex] !=
                                 samplerState) {
                             mBoundSamplers[SingleShaderStage::Compute][computeIndex] = samplerState;
                             [compute setSamplerState:sampler->GetMTLSamplerState()
-                                             atIndex:computeIndex];
+                                             atIndex:uint32_t{computeIndex}];
                         }
                     }
                 },
@@ -235,39 +240,39 @@ class BindGroupTracker : public BindGroupTrackerBase<true> {
 
             // TODO(crbug.com/363031535): The dynamic offsets should all be in a single grouping
             // which is in the immediates buffer.
-            uint32_t argumentBufferIdx, dynamicOffsetsBufferIdx;
+            MetalBufferIndex argumentBufferIdx, dynamicOffsetsBufferIdx;
             std::tie(argumentBufferIdx, dynamicOffsetsBufferIdx) =
-                BindGroupSlotToArgumentBufferID(index);
+                BindGroupIndexToArgumentBufferIndex(index);
 
             if (render) {
                 [render setVertexBuffer:*(group->GetArgumentBuffer())
                                  offset:0
-                                atIndex:argumentBufferIdx];
+                                atIndex:uint32_t{argumentBufferIdx}];
 
                 [render setFragmentBuffer:*(group->GetArgumentBuffer())
                                    offset:0
-                                  atIndex:argumentBufferIdx];
+                                  atIndex:uint32_t{argumentBufferIdx}];
 
                 if (dynamicOffsetsCount > 0) {
                     [render setVertexBytes:dynamicOffsets.data()
                                     length:dynamicOffsetsCount * sizeof(uint32_t)
-                                   atIndex:dynamicOffsetsBufferIdx];
+                                   atIndex:uint32_t{dynamicOffsetsBufferIdx}];
 
                     [render setFragmentBytes:dynamicOffsets.data()
                                       length:dynamicOffsetsCount * sizeof(uint32_t)
-                                     atIndex:dynamicOffsetsBufferIdx];
+                                     atIndex:uint32_t{dynamicOffsetsBufferIdx}];
                 }
             } else {
                 DAWN_ASSERT(compute != nullptr);
 
                 [compute setBuffer:*(group->GetArgumentBuffer())
                             offset:0
-                           atIndex:argumentBufferIdx];
+                           atIndex:uint32_t{argumentBufferIdx}];
 
                 if (dynamicOffsetsCount > 0) {
                     [compute setBytes:dynamicOffsets.data()
                                length:dynamicOffsetsCount * sizeof(uint32_t)
-                              atIndex:dynamicOffsetsBufferIdx];
+                              atIndex:uint32_t{dynamicOffsetsBufferIdx}];
                 }
             }
         }
@@ -293,14 +298,24 @@ class BindGroupTracker : public BindGroupTrackerBase<true> {
         id<MTLBuffer> mtlArgBuffer = mResourceTable->GetArgBuffer();
 
         if (render != nullptr) {
-            [render setVertexBuffer:mtlArgBuffer offset:0 atIndex:kResourceTableBindingSlot];
-            [render setFragmentBuffer:mtlArgBuffer offset:0 atIndex:kResourceTableBindingSlot];
+            [render setVertexBuffer:mtlArgBuffer
+                             offset:0
+                            atIndex:uint32_t{kResourceTableBindingSlot}];
+            [render setFragmentBuffer:mtlArgBuffer
+                               offset:0
+                              atIndex:uint32_t{kResourceTableBindingSlot}];
 
-            [render setVertexBuffer:mtlMetadataBuffer offset:0 atIndex:kResourceTableStorageSlot];
-            [render setFragmentBuffer:mtlMetadataBuffer offset:0 atIndex:kResourceTableStorageSlot];
+            [render setVertexBuffer:mtlMetadataBuffer
+                             offset:0
+                            atIndex:uint32_t{kResourceTableStorageSlot}];
+            [render setFragmentBuffer:mtlMetadataBuffer
+                               offset:0
+                              atIndex:uint32_t{kResourceTableStorageSlot}];
         } else if (compute != nullptr) {
-            [compute setBuffer:mtlArgBuffer offset:0 atIndex:kResourceTableBindingSlot];
-            [compute setBuffer:mtlMetadataBuffer offset:0 atIndex:kResourceTableStorageSlot];
+            [compute setBuffer:mtlArgBuffer offset:0 atIndex:uint32_t{kResourceTableBindingSlot}];
+            [compute setBuffer:mtlMetadataBuffer
+                        offset:0
+                       atIndex:uint32_t{kResourceTableStorageSlot}];
         } else {
             DAWN_UNREACHABLE();
         }
@@ -317,8 +332,8 @@ class BindGroupTracker : public BindGroupTrackerBase<true> {
     raw_ptr<StorageBufferLengthTracker> mLengthTracker;
 
     // Keep track of current texture and sampler bindings to minimize state changes even when bind
-    // groups are dirtied. It's safe to keep raw pointers here since if an entry is set here, the
-    // texture/sampler is bound in Metal and the Metal runtime will keep them alive.
+    // groups are dirtied. If an entry is set here, it will be kept alive by refcounting, but it's
+    // also still bound in Metal so will be kept alive for that as well.
     PerStage<absl::flat_hash_map<uint32_t, id<MTLTexture>>> mBoundTextures;
     PerStage<absl::flat_hash_map<uint32_t, id<MTLSamplerState>>> mBoundSamplers;
 
