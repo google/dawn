@@ -28,6 +28,7 @@
 #include "src/dawn/native/CommandBuffer.h"
 
 #include "dawn/native/ObjectType_autogen.h"
+#include "src/dawn/native/ApplyClearWithDrawHelper.h"
 #include "src/dawn/native/Buffer.h"
 #include "src/dawn/native/CommandEncoder.h"
 #include "src/dawn/native/CommandValidation.h"
@@ -264,6 +265,11 @@ MaybeError LazyClearRenderPassAttachments(DeviceBase* device,
 
         SubresourceRange stencilRange = range;
         stencilRange.aspects = range.aspects & Aspect::Stencil;
+
+        if (ClearWithDrawHelper::IsDepthApplied(device, renderPass)) {
+            attachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
+            view->GetTexture()->SetIsSubresourceContentInitialized(true, depthRange);
+        }
 
         // If the depth stencil texture has not been initialized, we want to use loadop
         // clear to init the contents to 0's

@@ -1009,6 +1009,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Limit maxSampledTexturesPerShaderStage and maxSamplersPerShaderStage to 13, and reject "
       "shaders using more than 13 GL texture image units. Works around a PowerVR driver bug.",
       "https://crbug.com/580872855", ToggleStage::Adapter}},
+    {Toggle::ClearDepthWithDraw,
+     {"clear_depth_with_draw",
+      "Use Draw instead of backend clear to clear depth attachments. Works around flickering "
+      "bugs on D3D11.",
+      "https://crbug.com/568041933", ToggleStage::Device}},
 
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};

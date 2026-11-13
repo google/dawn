@@ -51,6 +51,7 @@ struct KeyOfApplyClearWithDrawPipelines {
     ColorAttachmentMask colorTargetsToApplyClearColorValue;
     uint32_t sampleCount = 0;
     wgpu::TextureFormat depthStencilFormat = wgpu::TextureFormat::Undefined;
+    bool shouldClearDepth = false;
     bool hasPLS = false;
     uint64_t totalPixelLocalStorageSize = 0;
     std::vector<wgpu::PipelineLayoutStorageAttachment> plsAttachments;
@@ -81,6 +82,7 @@ class ClearWithDrawHelper {
     // Get the mask indicating the color attachments in the render pass that the workaround applies.
     static ColorAttachmentMask GetAppliedColorAttachments(const DeviceBase* device,
                                                           BeginRenderPassCmd* renderPass);
+    static bool IsDepthApplied(const DeviceBase* device, BeginRenderPassCmd* renderPass);
 
   private:
     bool mShouldRun = false;

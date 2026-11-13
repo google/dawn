@@ -240,6 +240,7 @@ enum class Toggle {
     VulkanUseDescriptorUpdateTemplate,
     D3D12DisableRelaxedBufferTextureCopyAlignmentForCompressedFormats,
     GLLimitTextureImageUnitsTo13,
+    ClearDepthWithDraw,
 
     EnumCount,
     InvalidEnum = EnumCount,

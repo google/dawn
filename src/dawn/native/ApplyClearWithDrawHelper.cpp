@@ -56,12 +56,12 @@ namespace {
 // General helper functions and data structures for applying clear values with draw
 static const char kVSSource[] = DAWN_MULTILINE(
     @vertex
-    fn main(@builtin(vertex_index) vertexIndex : u32) -> @builtin(position) vec4f {
+    fn vs_main(@builtin(vertex_index) vertexIndex : u32) -> @builtin(position) vec4f {
         var pos = array(
             vec2f(-1.0, -1.0),
             vec2f( 3.0, -1.0),
             vec2f(-1.0,  3.0));
-        return vec4f(pos[vertexIndex], 0.0, 1.0);
+        return vec4f(pos[vertexIndex], clearValues.depth, 1.0);
     }
 );
 
@@ -80,9 +80,9 @@ const char* GetTextureComponentTypeString(DeviceBase* device, wgpu::TextureForma
     DAWN_UNREACHABLE();
 }
 
-// Construct the fragment shader to apply the input clear values to the corresponding
+// Construct the vertex and fragment shaders to apply the input clear values to the corresponding
 // attachments of KeyOfApplyClearWithDrawPipelines.
-// The fragment shader will look like:
+// The shader will look like:
 //
 // enable chromium_experimental_pixel_local;
 // struct PLS {
@@ -98,25 +98,36 @@ const char* GetTextureComponentTypeString(DeviceBase* device, wgpu::TextureForma
 // }
 // struct ClearValues {
 //     color0 : vec4<f32>,
+//     depth : f32,
 // }
 //
 // @group(0) @binding(0) var<uniform> clearValues : ClearValues;
 //
+// @vertex
+// fn vs_main(@builtin(vertex_index) vertexIndex : u32) -> @builtin(position) vec4f {
+//     var pos = array(
+//         vec2f(-1.0, -1.0),
+//         vec2f( 3.0, -1.0),
+//         vec2f(-1.0,  3.0));
+//     return vec4f(pos[vertexIndex], clearValues.depth, 1.0);
+// }
+//
 // @fragment
-// fn main() -> Output {
+// fn fs_main() -> Output {
 //     var output : Output;
 //     output.output0 = clearValues.color0;
 //     _ = pls.a0;
 //
 //     return output;
 // }
-std::string ConstructFragmentShader(DeviceBase* device,
-                                    const KeyOfApplyClearWithDrawPipelines& key) {
+std::string ConstructShader(DeviceBase* device, const KeyOfApplyClearWithDrawPipelines& key) {
     std::ostringstream outputDeclarationStream;
     std::ostringstream clearValueUniformBufferDeclarationStream;
     std::ostringstream assignOutputStream;
 
-    outputDeclarationStream << "struct Output {\n";
+    if (key.colorTargetsToApplyClearColorValue.any()) {
+        outputDeclarationStream << "struct Output {\n";
+    }
     clearValueUniformBufferDeclarationStream << "struct ClearValues {\n";
 
     // Only generate the assignments we need.
@@ -132,10 +143,13 @@ std::string ConstructFragmentShader(DeviceBase* device,
             << absl::StrFormat("    color%u : vec4<%s>,\n", i, type);
         assignOutputStream << absl::StrFormat("    output.output%u = clearValues.color%u;\n", i, i);
     }
-    outputDeclarationStream << "}\n";
+    clearValueUniformBufferDeclarationStream << "    depth : f32,\n";
+    if (key.colorTargetsToApplyClearColorValue.any()) {
+        outputDeclarationStream << "}\n";
+    }
     clearValueUniformBufferDeclarationStream << "}\n";
 
-    std::ostringstream fragmentShaderStream;
+    std::ostringstream shaderStream;
     if (key.hasPLS) {
         std::vector<const char*> plsTypes;
         const size_t plsSlotCount =
@@ -157,7 +171,7 @@ std::string ConstructFragmentShader(DeviceBase* device,
             }
         }
 
-        fragmentShaderStream << "enable chromium_experimental_pixel_local;";
+        shaderStream << "enable chromium_experimental_pixel_local;";
         std::ostringstream plsDeclarationStream;
         plsDeclarationStream << "struct PLS {\n";
         for (size_t i = 0; i < plsSlotCount; ++i) {
@@ -170,24 +184,31 @@ std::string ConstructFragmentShader(DeviceBase* device,
             assignOutputStream << "_ = pls.a0;";
         }
 
-        fragmentShaderStream << plsDeclarationStream.str() << "var<pixel_local> pls : PLS;";
+        shaderStream << plsDeclarationStream.str() << "var<pixel_local> pls : PLS;";
     }
 
-    fragmentShaderStream << outputDeclarationStream.str()
-                         << clearValueUniformBufferDeclarationStream.str();
-    fragmentShaderStream << DAWN_MULTILINE(
-        @group(0) @binding(0) var<uniform> clearValues : ClearValues;
+    shaderStream << outputDeclarationStream.str() << clearValueUniformBufferDeclarationStream.str();
+    shaderStream << "@group(0) @binding(0) var<uniform> clearValues : ClearValues;\n";
+    shaderStream << kVSSource;
 
-        @fragment
-        fn main() -> Output {
-            var output : Output;
-    );
-    fragmentShaderStream << assignOutputStream.str();
-    fragmentShaderStream << DAWN_MULTILINE(
-            return output;
-        }
-    );
-    return fragmentShaderStream.str();
+    if (key.colorTargetsToApplyClearColorValue.any()) {
+        shaderStream << DAWN_MULTILINE(
+            @fragment
+            fn fs_main() -> Output {
+                var output : Output;
+        );
+        shaderStream << assignOutputStream.str();
+        shaderStream << DAWN_MULTILINE(
+                return output;
+            }
+        );
+    } else {
+        // When only clearing depth, depth is written via the vertex shader's @builtin(position).z
+        // and all color targets have ColorWriteMask::None, so the fragment shader does not need to
+        // write any outputs (it only needs to touch PLS if PLS is active in the render pass).
+        shaderStream << "@fragment\nfn fs_main() {\n" << assignOutputStream.str() << "}\n";
+    }
+    return shaderStream.str();
 }
 
 RenderPipelineBase* GetCachedPipeline(InternalPipelineStore* store,
@@ -208,12 +229,14 @@ ResultOrError<RenderPipelineBase*> GetOrCreateApplyClearWithDrawPipeline(
         return cachedPipeline;
     }
 
+    std::string shader = ConstructShader(device, key);
+    Ref<ShaderModuleBase> shaderModule;
+    DAWN_TRY_ASSIGN(shaderModule, utils::CreateShaderModule(device, shader.c_str()));
+
     // Prepare the vertex stage
-    Ref<ShaderModuleBase> vertexModule;
-    DAWN_TRY_ASSIGN(vertexModule, utils::CreateShaderModule(device, kVSSource));
     VertexState vertex = {};
-    vertex.module = vertexModule.Get();
-    vertex.entryPoint = "main";
+    vertex.module = shaderModule.Get();
+    vertex.entryPoint = "vs_main";
 
     // Prepare the color states
     PerColorAttachment<ColorTargetState> colorTargets = {};
@@ -226,12 +249,9 @@ ResultOrError<RenderPipelineBase*> GetOrCreateApplyClearWithDrawPipeline(
     }
 
     // Prepare the fragment stage
-    std::string fragmentShader = ConstructFragmentShader(device, key);
-    Ref<ShaderModuleBase> fragmentModule;
-    DAWN_TRY_ASSIGN(fragmentModule, utils::CreateShaderModule(device, fragmentShader.c_str()));
     FragmentState fragment = {};
-    fragment.module = fragmentModule.Get();
-    fragment.entryPoint = "main";
+    fragment.module = shaderModule.Get();
+    fragment.entryPoint = "fs_main";
     fragment.targets = colorTargets;
 
     // Create RenderPipeline
@@ -241,16 +261,24 @@ ResultOrError<RenderPipelineBase*> GetOrCreateApplyClearWithDrawPipeline(
     renderPipelineDesc.fragment = &fragment;
     renderPipelineDesc.multisample.count = key.sampleCount;
     DepthStencilState depthStencilState = {};
-    depthStencilState.depthWriteEnabled = false;
+    depthStencilState.depthWriteEnabled =
+        key.shouldClearDepth ? wgpu::OptionalBool::True : wgpu::OptionalBool::False;
+    if (key.shouldClearDepth) {
+        depthStencilState.depthCompare = wgpu::CompareFunction::Always;
+    }
     if (key.depthStencilFormat != wgpu::TextureFormat::Undefined) {
         depthStencilState.format = key.depthStencilFormat;
         renderPipelineDesc.depthStencil = &depthStencilState;
     }
 
     // Build the pipeline layout explicitly as we might need to add PLS information to it.
+    wgpu::ShaderStage stages = wgpu::ShaderStage::Vertex;
+    if (key.colorTargetsToApplyClearColorValue.any()) {
+        stages |= wgpu::ShaderStage::Fragment;
+    }
     Ref<BindGroupLayoutBase> bgl;
-    DAWN_TRY_ASSIGN(bgl, utils::MakeBindGroupLayout(device, {{0, wgpu::ShaderStage::Fragment,
-                                                              wgpu::BufferBindingType::Uniform}}));
+    DAWN_TRY_ASSIGN(
+        bgl, utils::MakeBindGroupLayout(device, {{0, stages, wgpu::BufferBindingType::Uniform}}));
 
     PipelineLayoutDescriptor pipelineLayoutDesc{};
     pipelineLayoutDesc.bindGroupLayouts = SpanFromRef<BindGroupIndex>(bgl.Get());
@@ -278,7 +306,8 @@ ResultOrError<Ref<BufferBase>> CreateUniformBufferWithClearValues(
     CommandEncoder* encoder,
     const RenderPassDescriptor* renderPassDescriptor,
     const KeyOfApplyClearWithDrawPipelines& key) {
-    std::array<std::byte, sizeof(uint32_t) * 4 * kMaxColorAttachments> clearValues = {};
+    std::array<std::byte, sizeof(uint32_t) * 4 * kMaxColorAttachments + sizeof(float) * 4>
+        clearValues = {};
     Span<std::byte> clearValueBuffer = clearValues;
     for (auto i : key.colorTargetsToApplyClearColorValue) {
         const RenderPassColorAttachment& colorAttachment =
@@ -317,6 +346,12 @@ ResultOrError<Ref<BufferBase>> CreateUniformBufferWithClearValues(
                 break;
             }
         }
+    }
+
+    Span<float> clearDepthSubBuffer =
+        ReinterpretSpan<float>(clearValueBuffer.TakeFirst(sizeof(float) * 4));
+    if (key.shouldClearDepth) {
+        clearDepthSubBuffer[0] = renderPassDescriptor->depthStencilAttachment->depthClearValue;
     }
 
     size_t clearValuesSize = clearValues.size() - clearValueBuffer.size();
@@ -399,6 +434,22 @@ bool ShouldApplyClearColorWithDraw(const DeviceBase* device,
     return true;
 }
 
+bool ShouldApplyClearDepthWithDraw(const DeviceBase* device,
+                                   const TextureViewBase* view,
+                                   bool depthReadOnly,
+                                   wgpu::LoadOp depthLoadOp) {
+    if (!device->IsToggleEnabled(Toggle::ClearDepthWithDraw)) {
+        return false;
+    }
+    if (view == nullptr || !view->GetFormat().HasDepth() || depthReadOnly) {
+        return false;
+    }
+    if (depthLoadOp != wgpu::LoadOp::Clear) {
+        return false;
+    }
+    return true;
+}
+
 bool GetKeyOfApplyClearWithDrawPipelines(
     const DeviceBase* device,
     const UnpackedPtr<RenderPassDescriptor>& renderPassDescriptor,
@@ -406,8 +457,9 @@ bool GetKeyOfApplyClearWithDrawPipelines(
     bool clearWithDraw = device->IsToggleEnabled(Toggle::ClearColorWithDraw);
     bool clearWithDrawForBigInt =
         device->IsToggleEnabled(Toggle::ApplyClearBigIntegerColorValueWithDraw);
+    bool clearDepthWithDraw = device->IsToggleEnabled(Toggle::ClearDepthWithDraw);
 
-    if (!clearWithDraw && !clearWithDrawForBigInt) {
+    if (!clearWithDraw && !clearWithDrawForBigInt && !clearDepthWithDraw) {
         return false;
     }
 
@@ -438,11 +490,19 @@ bool GetKeyOfApplyClearWithDrawPipelines(
 
     if (renderPassDescriptor->depthStencilAttachment &&
         renderPassDescriptor->depthStencilAttachment->view != nullptr) {
-        key->depthStencilFormat =
-            renderPassDescriptor->depthStencilAttachment->view->GetFormat().format;
+        const auto* depthStencilAttachment = renderPassDescriptor->depthStencilAttachment;
+        key->depthStencilFormat = depthStencilAttachment->view->GetFormat().format;
+        if (key->sampleCount == 0) {
+            key->sampleCount = depthStencilAttachment->view->GetTexture()->GetSampleCount();
+        }
+        if (ShouldApplyClearDepthWithDraw(device, depthStencilAttachment->view,
+                                          depthStencilAttachment->depthReadOnly,
+                                          depthStencilAttachment->depthLoadOp)) {
+            key->shouldClearDepth = true;
+        }
     }
 
-    if (key->colorTargetsToApplyClearColorValue.none()) {
+    if (key->colorTargetsToApplyClearColorValue.none() && !key->shouldClearDepth) {
         return false;
     }
 
@@ -488,6 +548,15 @@ ColorAttachmentMask ClearWithDrawHelper::GetAppliedColorAttachments(
     return mask;
 }
 
+bool ClearWithDrawHelper::IsDepthApplied(const DeviceBase* device, BeginRenderPassCmd* renderPass) {
+    if (!renderPass->attachmentState->HasDepthStencilAttachment()) {
+        return false;
+    }
+    const auto& attachment = renderPass->depthStencilAttachment;
+    return ShouldApplyClearDepthWithDraw(device, attachment.view.Get(), attachment.depthReadOnly,
+                                         attachment.depthLoadOp);
+}
+
 size_t KeyOfApplyClearWithDrawPipelinesHashFunc::operator()(
     KeyOfApplyClearWithDrawPipelines key) const {
     size_t hash = 0;
@@ -503,6 +572,7 @@ size_t KeyOfApplyClearWithDrawPipelinesHashFunc::operator()(
     HashCombine(&hash, key.sampleCount);
 
     HashCombine(&hash, key.depthStencilFormat);
+    HashCombine(&hash, key.shouldClearDepth);
 
     HashCombine(&hash, key.hasPLS);
     HashCombine(&hash, key.totalPixelLocalStorageSize);
@@ -545,7 +615,8 @@ bool KeyOfApplyClearWithDrawPipelinesEqualityFunc::operator()(
     }
 
     return key1.sampleCount == key2.sampleCount &&
-           key1.depthStencilFormat == key2.depthStencilFormat;
+           key1.depthStencilFormat == key2.depthStencilFormat &&
+           key1.shouldClearDepth == key2.shouldClearDepth;
 }
 
 ClearWithDrawHelper::ClearWithDrawHelper() = default;
