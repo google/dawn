@@ -2560,7 +2560,7 @@ void DeviceBase::APISetLabel(StringView label) {
 
 void DeviceBase::SetLabelImpl() {}
 
-bool DeviceBase::ReduceMemoryUsageImpl() {
+ResultOrError<bool> DeviceBase::ReduceMemoryUsageImpl() {
     return false;
 }
 
@@ -2743,9 +2743,14 @@ bool DeviceBase::ReduceMemoryUsage() {
 
     mErrorScopeStacks.Use([](auto errorScopeStacks) { TrimErrorScopeStacks(*errorScopeStacks); });
 
+    bool hasPendingWork = false;
+    if (ConsumedError(ReduceMemoryUsageImpl(), &hasPendingWork)) {
+        return false;
+    }
+
     // TODO(crbug.com/398193014): This could return a future to wait on instead of just a bool
     // saying there is work to wait on.
-    return ReduceMemoryUsageImpl();
+    return hasPendingWork;
 }
 
 void DeviceBase::PerformIdleTasks() {

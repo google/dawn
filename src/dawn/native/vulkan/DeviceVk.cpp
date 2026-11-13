@@ -1355,7 +1355,7 @@ void Device::SetLabelImpl() {
     SetDebugName(this, VK_OBJECT_TYPE_DEVICE, mVkDevice, "Dawn_Device", GetLabel());
 }
 
-bool Device::ReduceMemoryUsageImpl() {
+ResultOrError<bool> Device::ReduceMemoryUsageImpl() {
     GetResourceMemoryAllocator()->FreeRecycledMemory();
 
     GetFramebufferCache()->Clear();
@@ -1385,9 +1385,7 @@ bool Device::ReduceMemoryUsageImpl() {
         queue->GetPendingRecordingContext();
     }
 
-    if (ConsumedError(TickImpl())) {
-        return false;
-    }
+    DAWN_TRY(TickImpl());
     DAWN_ASSERT(deletionSerial <= queue->GetLastSubmittedCommandSerial());
 
     // Check again if there is anything left to delete as tick might have deleted objects.

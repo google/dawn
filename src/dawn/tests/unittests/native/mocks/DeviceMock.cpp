@@ -122,6 +122,10 @@ DeviceMock::DeviceMock(AdapterBase* adapter,
             return RenderPipelineMock::Create(this, descriptor);
         }));
 
+    ON_CALL(*this, ReduceMemoryUsageImpl).WillByDefault([]() -> ResultOrError<bool> {
+        return false;
+    });
+
     // By default, the mock's TickImpl will succeed.
     ON_CALL(*this, TickImpl).WillByDefault([]() -> MaybeError { return {}; });
 

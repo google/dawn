@@ -138,6 +138,7 @@ class DeviceMock : public DeviceBase {
                 (TextureBase*, const UnpackedPtr<TextureViewDescriptor>&),
                 (override));
 
+    MOCK_METHOD(ResultOrError<bool>, ReduceMemoryUsageImpl, (), (override));
     MOCK_METHOD(MaybeError, TickImpl, (), (override));
 
     MOCK_METHOD(void, DestroyImpl, (DestroyReason), (override));

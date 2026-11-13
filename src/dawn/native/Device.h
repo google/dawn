@@ -575,7 +575,8 @@ class DeviceBase : public ErrorSink,
         UnpackedPtr<SharedFenceDescriptor> unpacked);
 
     virtual void SetLabelImpl();
-    virtual bool ReduceMemoryUsageImpl();
+    // Returns true if there is still pending work.
+    virtual ResultOrError<bool> ReduceMemoryUsageImpl();
     virtual void PerformIdleTasksImpl();
 
     // TODO(crbug.com/475520968): Remove this once all backends' Create*Impl methods are

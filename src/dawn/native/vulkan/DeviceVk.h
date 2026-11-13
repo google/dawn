@@ -143,7 +143,7 @@ class Device final : public DeviceBase {
     AllocatorMemoryInfo GetAllocatorMemoryInfo() const override;
 
     void SetLabelImpl() override;
-    bool ReduceMemoryUsageImpl() override;
+    ResultOrError<bool> ReduceMemoryUsageImpl() override;
     void PerformIdleTasksImpl() override;
 
     std::optional<DeviceGuard> UseGuardForCreateBindGroup() override;
