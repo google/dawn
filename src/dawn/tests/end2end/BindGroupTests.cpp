@@ -2319,6 +2319,69 @@ TEST_P(BindGroupTests, MaxBindingsPerBindGroupVisibility_Sampler) {
     }
 }
 
+// Regression test for vertex pulling buffer binding points colliding with @group(0) argument buffer
+// binding indices on Metal when argument buffers and vertex pulling are both enabled.
+TEST_P(BindGroupTests, VertexPullingDoesNotCollideWithGroup0ArgumentBuffer) {
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    // @binding(0) (BindingIndex 0) is fragment-only and @binding(1) (BindingIndex 1) is
+    // vertex-visible, so GetBufferBindingCount(Vertex) == 1. Vertex buffer slot 0 must not
+    // collide with @group(0) BindingIndex 1.
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var<uniform> fragColor : vec4f;
+        @group(0) @binding(1) var<uniform> vertOffset : vec4f;
+
+        @vertex
+        fn vsMain(@location(0) pos : vec4f) -> @builtin(position) vec4f {
+            return pos + vertOffset;
+        }
+
+        @fragment
+        fn fsMain() -> @location(0) vec4f {
+            return fragColor;
+        }
+    )");
+
+    utils::ComboRenderPipelineDescriptor pipelineDesc;
+    pipelineDesc.vertex.module = module;
+    pipelineDesc.cFragment.module = module;
+    pipelineDesc.cTargets[0].format = renderPass.colorFormat;
+    pipelineDesc.vertex.bufferCount = 1;
+    pipelineDesc.cBuffers[0].arrayStride = 4 * sizeof(float);
+    pipelineDesc.cBuffers[0].attributeCount = 1;
+    pipelineDesc.cAttributes[0].shaderLocation = 0;
+    pipelineDesc.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
+
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
+
+    wgpu::Buffer vertBuffer = utils::CreateBufferFromData<float>(
+        device, wgpu::BufferUsage::Vertex,
+        {-1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 1.0f});
+    wgpu::Buffer fragUniform = utils::CreateBufferFromData<float>(
+        device, wgpu::BufferUsage::Uniform, {0.0f, 1.0f, 0.0f, 1.0f});
+    wgpu::Buffer vertUniform = utils::CreateBufferFromData<float>(
+        device, wgpu::BufferUsage::Uniform, {0.0f, 0.0f, 0.0f, 0.0f});
+
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                              {
+                                                  {0, fragUniform},
+                                                  {1, vertUniform},
+                                              });
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bg);
+    pass.SetVertexBuffer(0, vertBuffer);
+    pass.Draw(3);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 1, 1);
+}
+
 DAWN_INSTANTIATE_TEST(BindGroupTests,
                       D3D11Backend(),
                       D3D12Backend(),

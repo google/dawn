@@ -78,7 +78,7 @@ class VertexBufferTracker {
         const auto& vertexBuffersToApply = mDirtyVertexBuffers & pipeline->GetVertexBuffersUsed();
 
         for (VertexBufferSlot slot : vertexBuffersToApply) {
-            uint32_t metalIndex = pipeline->GetMtlVertexBufferIndex(slot);
+            uint32_t metalIndex = VertexBufferSlotToMetalBufferIndex(slot);
 
             if (enableVertexPulling) {
                 // Insert lengths for vertex buffers bound as storage buffers

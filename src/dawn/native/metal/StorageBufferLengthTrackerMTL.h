@@ -76,15 +76,10 @@ struct StorageBufferLengthTracker {
 
     // TODO(crbug.com/366291600): Remove unused storage buffer size in immediate block
     // to avoid uploading unused data.
-    void Apply(RenderPipeline* pipeline, bool enableVertexPulling) {
+    void Apply(RenderPipeline* pipeline) {
         if (dirtyStages & wgpu::ShaderStage::Vertex) {
             uint32_t bufferCount =
                 ToBackend(pipeline->GetLayout())->GetBufferBindingCount(SingleShaderStage::Vertex);
-
-            if (enableVertexPulling) {
-                bufferCount += uint32_t{pipeline->GetVertexBufferCount()};
-            }
-
             DAWN_ASSERT(bufferCount <= data[SingleShaderStage::Vertex].size());
             dataSize[SingleShaderStage::Vertex] = sizeof(uint32_t) * bufferCount;
         }

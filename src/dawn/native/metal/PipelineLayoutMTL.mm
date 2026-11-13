@@ -46,7 +46,8 @@ PipelineLayout::PipelineLayout(Device* device,
     // Each stage has its own numbering namespace in CompilerMSL.
     // TODO(crbug.com/363031535): This should become unnecessary once we switch to argument buffers.
     for (auto stage : IterateStages(kAllStages)) {
-        uint32_t bufferIndex = 0;
+        // First kMaxVertexBuffers slots are reserved for vertex buffers (unused in other stages).
+        uint32_t bufferIndex = kMaxVertexBuffers;
         uint32_t samplerIndex = 0;
         uint32_t textureIndex = 0;
 

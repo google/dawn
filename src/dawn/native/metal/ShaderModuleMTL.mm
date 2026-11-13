@@ -224,27 +224,13 @@ ResultOrUnknownError<CacheResult<MslCompilation>> TranslateToMSL(
     if (stage == SingleShaderStage::Vertex &&
         device->IsToggleEnabled(Toggle::MetalEnableVertexPulling)) {
         vertexPullingTransformConfig =
-            BuildVertexPullingTransformConfig(*renderPipeline, kPullingBufferBindingSet);
+            BuildVertexPullingTransformConfig(*renderPipeline, kPullingBufferBindGroupID);
 
         for (VertexBufferSlot slot : renderPipeline->GetVertexBuffersUsed()) {
-            uint32_t metalIndex = renderPipeline->GetMtlVertexBufferIndex(slot);
-
-            // Tell Tint to map (kPullingBufferBindingSet, slot) to this MSL buffer index.
-            tint::BindingPoint srcBindingPoint{
-                .group = uint32_t{kPullingBufferBindingSet},
-                .binding = uint8_t{slot},
-            };
-            tint::BindingPoint dstBindingPoint{
-                .group = 0,
-                .binding = metalIndex,
-            };
-            if (srcBindingPoint != dstBindingPoint) {
-                bindings.storage.emplace(srcBindingPoint, dstBindingPoint);
-            }
-
-            // Use the ShaderIndex as the indices for buffer size lookups in immediate data.
-            arrayLengthFromConstants.bindpoint_to_size_index.emplace(srcBindingPoint,
-                                                                     dstBindingPoint.binding);
+            arrayLengthFromConstants.bindpoint_to_size_index.emplace(
+                tint::BindingPoint{kPullingBufferBindGroupID,
+                                   VertexBufferSlotToMetalBufferIndex(slot)},
+                VertexBufferSlotToLengthArrayIndex(slot));
         }
     }
 
@@ -271,8 +257,8 @@ ResultOrUnknownError<CacheResult<MslCompilation>> TranslateToMSL(
     if (layout->UsesResourceTable()) {
         auto bindingTypeOrder = ResourceTableDefaultResources::GetOrder();
         resourceTableConfig = tint::ResourceTableConfig{
-            .resource_table_binding = tint::BindingPoint(0, kResourceTableBindingSlot),
-            .storage_buffer_binding = tint::BindingPoint(0, kResourceTableStorageSlot),
+            .resource_table_binding{kPlaceholderBindGroupID, kResourceTableBindingSlot},
+            .storage_buffer_binding{kPlaceholderBindGroupID, kResourceTableStorageSlot},
             .default_binding_type_order = {bindingTypeOrder.begin(), bindingTypeOrder.end()},
             .binding_to_resource_type = GenerateBindingToResourceType(layout, ToMSLBindPoint),
         };

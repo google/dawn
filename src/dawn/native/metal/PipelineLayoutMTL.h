@@ -59,13 +59,17 @@ inline constexpr size_t kResourceTableStorageSlot = kResourceTableBindingSlot - 
 // Note, this needs to match the value in PhysicalDeviceMTL for maxBuffersPerStage.
 inline constexpr size_t kGenericMetalBufferSlots = kImmediateBlockBufferSlot;
 
+// TODO(crbug.com/363031535): Remove when the non-argbufs path is removed.
+inline constexpr uint32_t kMaxVertexStageBufferCountWithResourceTableWithoutArgBufs =
+    kResourceTableStorageSlot;
+
 // Get the [[buffer()]] number for an argument buffer and its dynamic offset buffer,
 // from the SetBindGroup() slot number.
 // TODO(crbug.com/363031535): The dynamic offsets should all be in a single grouping
 // which is in the immediates buffer. Then this will just return a single uint32_t.
 inline std::pair<uint32_t, uint32_t> BindGroupSlotToArgumentBufferID(BindGroupIndex slot) {
     // The last buffer slot to be used by argument buffers
-    constexpr uint32_t kArgumentBufferSlotMax = kResourceTableBindingSlot - 1;
+    constexpr uint32_t kArgumentBufferSlotMax = kResourceTableStorageSlot - 1;
 
     // Maps slots as follows (AB = Argument Buffer, DOB = Dynamic Offset Buffer):
     // AB3 DOB3 AB2 DOB2 AB1 DOB1 AB0 DOB0
@@ -75,11 +79,31 @@ inline std::pair<uint32_t, uint32_t> BindGroupSlotToArgumentBufferID(BindGroupIn
     return {index - 1, index};
 }
 
+// Get the [[buffer()]] number for a vertex buffer from the SetVertexBuffer() slot number.
+inline uint32_t VertexBufferSlotToMetalBufferIndex(VertexBufferSlot slot) {
+    DAWN_ASSERT(slot < kMaxVertexBuffersTyped);
+    return uint32_t{slot};
+}
+
+inline uint32_t VertexBufferSlotToLengthArrayIndex(VertexBufferSlot slot) {
+    DAWN_ASSERT(slot < kMaxVertexBuffersTyped);
+    return uint32_t{slot};
+}
+
 inline uint32_t GetImmediateBufferSizesByteOffset(ImmediateMask pipelineImmediateMask) {
     return static_cast<uint32_t>(pipelineImmediateMask.count()) * kImmediateElementByteSize;
 }
 
-inline constexpr BindGroupIndex kPullingBufferBindingSet = BindGroupIndex(kMaxBindGroups);
+// Placeholder values where we need to pass in a bind group index to Tint but won't actually use it.
+// Used to bind vertex buffers for vertex pulling, and for the resource table, both of which are
+// passed as [[buffer()]] arguments directly to the vertex shader. (These two IDs don't strictly
+// have to be different, but it's clearer that way.)
+// - Used for any place we need to pass a bind group ID that Tint won't actually use for MSL.
+inline constexpr uint32_t kPlaceholderBindGroupID{0xFFFF'FFFF};
+// - The vertex pulling transform moves vertex buffers to a binding point in this bind group. In MSL
+//   this becomes a toplevel [[buffer()]] slot, so we also pass this to the pulling_group option so
+//   it knows which bind points to collect those from.
+inline constexpr uint32_t kPullingBufferBindGroupID{0xFFFF'FFFE};
 
 class PipelineLayout final : public PipelineLayoutBase {
   public:

@@ -1016,7 +1016,7 @@ MaybeError CommandBuffer::RecordRenderPass(
 
                 vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
 
                 // The instance count must be non-zero, otherwise no-op
@@ -1045,7 +1045,7 @@ MaybeError CommandBuffer::RecordRenderPass(
 
                 vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
 
                 // The index and instance count must be non-zero, otherwise no-op
@@ -1082,7 +1082,7 @@ MaybeError CommandBuffer::RecordRenderPass(
 
                 vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
 
                 IndirectDrawMetadata::ValidatedIndirectDraw validatedDraw =
@@ -1105,7 +1105,7 @@ MaybeError CommandBuffer::RecordRenderPass(
 
                 vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
 
                 IndirectDrawMetadata::ValidatedIndirectDraw validatedDraw =
@@ -1131,7 +1131,7 @@ MaybeError CommandBuffer::RecordRenderPass(
 
                 vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
 
                 ExecuteMultiDraw(multiDrawExecutions[multiDrawIndex], encoder);
@@ -1143,7 +1143,7 @@ MaybeError CommandBuffer::RecordRenderPass(
 
                 vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
 
                 ExecuteMultiDraw(multiDrawExecutions[multiDrawIndex], encoder);
