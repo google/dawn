@@ -651,7 +651,7 @@ TEST_F(ResolverValueConstructorValidationTest, ArrayU32_AIAIAI) {
 TEST_F(ResolverValueConstructorValidationTest, InferredArray_AIAIAI) {
     // const c = array(0, 10, 20);
     auto* tc = Call<array<Infer>>(Source{{12, 34}}, 0_a, 10_a, 20_a);
-    WrapInFunction(Decl(Const("C", tc)));
+    WrapInFunction(Decl(Const("C", ast::Type{}, tc)));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 

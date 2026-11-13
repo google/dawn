@@ -229,7 +229,7 @@ ResultOrValError<ShaderModuleEntryPoint> ValidateProgrammableStage(
     if (numUninitializedConstants > 0) [[unlikely]] {
         std::string uninitializedConstantsArray;
         bool isFirst = true;
-        for (std::string identifier : metadata.uninitializedOverrides) {
+        for (const std::string& identifier : metadata.uninitializedOverrides) {
             if (stageInitializedConstantIdentifiers.contains(identifier)) {
                 continue;
             }

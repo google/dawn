@@ -103,6 +103,9 @@ class CommandEncoder final : public ApiObjectBase {
                             uint64_t destinationOffset);
     void APIWriteBuffer(BufferBase* buffer, uint64_t bufferOffset, Span<const std::byte> data);
     void APIWriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex);
+    void APISetResourceUsage(ResourceTableBase* table,
+                             const UsageBindingResource* resource,
+                             wgpu::ResourceTableUsage usage);
 
     CommandBufferBase* APIFinish(const CommandBufferDescriptor* descriptor = nullptr);
 
@@ -144,6 +147,7 @@ class CommandEncoder final : public ApiObjectBase {
     RAW_PTR_EXCLUSION absl::flat_hash_set<BufferBase*> mTopLevelBuffers;
     RAW_PTR_EXCLUSION absl::flat_hash_set<TextureBase*> mTopLevelTextures;
     RAW_PTR_EXCLUSION absl::flat_hash_set<QuerySetBase*> mUsedQuerySets;
+    RAW_PTR_EXCLUSION absl::flat_hash_set<ResourceTableBase*> mTopLevelResourceTables;
 
     uint64_t mDebugGroupStackSize = 0;
 

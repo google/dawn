@@ -132,10 +132,10 @@ TEST_F(GlslWriter_ShaderIOTest, Parameters_NonStruct) {
 
     auto* expect = R"(
 $B1: {  # root
-  %foo_front_facing:ptr<__in, bool, read> = var undef @builtin(front_facing)
-  %foo_position:ptr<__in, vec4<f32>, read> = var undef @invariant @builtin(position)
-  %foo_loc0_Input:ptr<__in, f32, read> = var undef @location(0)
-  %foo_loc1_Input:ptr<__in, f32, read> = var undef @location(1) @interpolate(linear, sample)
+  %foo_front_facing:ptr<__in, bool, read> = var @builtin(front_facing)
+  %foo_position:ptr<__in, vec4<f32>, read> = var @invariant @builtin(position)
+  %foo_loc0_Input:ptr<__in, f32, read> = var @location(0)
+  %foo_loc1_Input:ptr<__in, f32, read> = var @location(1) @interpolate(linear, sample)
 }
 
 %foo_inner = func(%front_facing:bool, %position:vec4<f32>, %color1:f32, %color2:f32):void {
@@ -260,10 +260,10 @@ Inputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %foo_front_facing:ptr<__in, bool, read> = var undef @builtin(front_facing)
-  %foo_position:ptr<__in, vec4<f32>, read> = var undef @invariant @builtin(position)
-  %foo_loc0_Input:ptr<__in, f32, read> = var undef @location(0)
-  %foo_loc1_Input:ptr<__in, f32, read> = var undef @location(1) @interpolate(linear, sample)
+  %foo_front_facing:ptr<__in, bool, read> = var @builtin(front_facing)
+  %foo_position:ptr<__in, vec4<f32>, read> = var @invariant @builtin(position)
+  %foo_loc0_Input:ptr<__in, f32, read> = var @location(0)
+  %foo_loc1_Input:ptr<__in, f32, read> = var @location(1) @interpolate(linear, sample)
 }
 
 %foo_inner = func(%inputs:Inputs):void {
@@ -375,10 +375,10 @@ Inputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %foo_front_facing:ptr<__in, bool, read> = var undef @builtin(front_facing)
-  %foo_position:ptr<__in, vec4<f32>, read> = var undef @invariant @builtin(position)
-  %foo_loc0_Input:ptr<__in, f32, read> = var undef @location(0)
-  %foo_loc1_Input:ptr<__in, f32, read> = var undef @location(1) @interpolate(linear, sample)
+  %foo_front_facing:ptr<__in, bool, read> = var @builtin(front_facing)
+  %foo_position:ptr<__in, vec4<f32>, read> = var @invariant @builtin(position)
+  %foo_loc0_Input:ptr<__in, f32, read> = var @location(0)
+  %foo_loc1_Input:ptr<__in, f32, read> = var @location(1) @interpolate(linear, sample)
 }
 
 %foo_inner = func(%front_facing:bool, %inputs:Inputs, %color2:f32):void {
@@ -436,8 +436,8 @@ TEST_F(GlslWriter_ShaderIOTest, ReturnValue_NonStructBuiltin) {
 
     auto* expect = R"(
 $B1: {  # root
-  %foo_position:ptr<__out, vec4<f32>, write> = var undef @invariant @builtin(position)
-  %foo___point_size:ptr<__out, f32, write> = var undef @builtin(__point_size)
+  %foo_position:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
+  %foo___point_size:ptr<__out, f32, write> = var @builtin(__point_size)
 }
 
 %foo_inner = func():vec4<f32> {
@@ -490,7 +490,7 @@ TEST_F(GlslWriter_ShaderIOTest, ReturnValue_NonStructLocation) {
 
     auto* expect = R"(
 $B1: {  # root
-  %foo_loc1_Output:ptr<__out, vec4<f32>, write> = var undef @location(1)
+  %foo_loc1_Output:ptr<__out, vec4<f32>, write> = var @location(1)
 }
 
 %foo_inner = func():vec4<f32> {
@@ -576,10 +576,10 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %foo_position:ptr<__out, vec4<f32>, write> = var undef @invariant @builtin(position)
-  %foo_loc0_Output:ptr<__out, f32, write> = var undef @location(0)
-  %foo_loc1_Output:ptr<__out, f32, write> = var undef @location(1) @interpolate(linear, sample)
-  %foo___point_size:ptr<__out, f32, write> = var undef @builtin(__point_size)
+  %foo_position:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
+  %foo_loc0_Output:ptr<__out, f32, write> = var @location(0)
+  %foo_loc1_Output:ptr<__out, f32, write> = var @location(1) @interpolate(linear, sample)
+  %foo___point_size:ptr<__out, f32, write> = var @builtin(__point_size)
 }
 
 %foo_inner = func():Outputs {
@@ -665,8 +665,8 @@ Output = struct @align(4) {
 }
 
 $B1: {  # root
-  %foo_loc0_idx0_Output:ptr<__out, f32, write> = var undef @location(0) @blend_src(0)
-  %foo_loc0_idx1_Output:ptr<__out, f32, write> = var undef @location(0) @blend_src(1)
+  %foo_loc0_idx0_Output:ptr<__out, f32, write> = var @location(0) @blend_src(0)
+  %foo_loc0_idx1_Output:ptr<__out, f32, write> = var @location(0) @blend_src(1)
 }
 
 %foo_inner = func():Output {
@@ -731,7 +731,7 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read> = var undef @binding_point(0, 0)
+  %1:ptr<storage, Outputs, read> = var @binding_point(0, 0)
 }
 
 %vert = @vertex func():Outputs {
@@ -750,10 +750,10 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read> = var undef @binding_point(0, 0)
-  %vert_position:ptr<__out, vec4<f32>, write> = var undef @builtin(position)
-  %vert_loc0_Output:ptr<__out, vec4<f32>, write> = var undef @location(0)
-  %vert___point_size:ptr<__out, f32, write> = var undef @builtin(__point_size)
+  %1:ptr<storage, Outputs, read> = var @binding_point(0, 0)
+  %vert_position:ptr<__out, vec4<f32>, write> = var @builtin(position)
+  %vert_loc0_Output:ptr<__out, vec4<f32>, write> = var @location(0)
+  %vert___point_size:ptr<__out, f32, write> = var @builtin(__point_size)
 }
 
 %vert_inner = func():Outputs {
@@ -843,9 +843,9 @@ Outputs = struct @align(4) {
 }
 
 $B1: {  # root
-  %foo_sample_mask:ptr<__in, array<i32, 1>, read> = var undef @builtin(sample_mask)
-  %foo_loc0_Output:ptr<__out, f32, write> = var undef @location(0)
-  %foo_sample_mask_1:ptr<__out, array<i32, 1>, write> = var undef @builtin(sample_mask)  # %foo_sample_mask_1: 'foo_sample_mask'
+  %foo_sample_mask:ptr<__in, array<i32, 1>, read> = var @builtin(sample_mask)
+  %foo_loc0_Output:ptr<__out, f32, write> = var @location(0)
+  %foo_sample_mask_1:ptr<__out, array<i32, 1>, write> = var @builtin(sample_mask)  # %foo_sample_mask_1: 'foo_sample_mask'
 }
 
 %foo_inner = func(%mask_in:u32):Outputs {
@@ -930,10 +930,10 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %vert_loc1_Input:ptr<__in, f32, read> = var undef @location(1)
-  %vert_loc2_Input:ptr<__in, i32, read> = var undef @location(2)
-  %vert_position:ptr<__out, vec4<f32>, write> = var undef @invariant @builtin(position)
-  %vert___point_size:ptr<__out, f32, write> = var undef @builtin(__point_size)
+  %vert_loc1_Input:ptr<__in, f32, read> = var @location(1)
+  %vert_loc2_Input:ptr<__in, i32, read> = var @location(2)
+  %vert_position:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
+  %vert___point_size:ptr<__out, f32, write> = var @builtin(__point_size)
 }
 
 %vert_inner = func(%input:MyStruct, %ival:i32):vec4<f32> {
@@ -1013,7 +1013,7 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %frag1_loc1_Output:ptr<__out, f32, write> = var undef @location(1)
+  %frag1_loc1_Output:ptr<__out, f32, write> = var @location(1)
 }
 
 %frag1_inner = func():MyStruct {
@@ -1060,7 +1060,7 @@ TEST_F(GlslWriter_ShaderIOTest, InterpolationOnFragmentOutput_NonStruct) {
 
     auto* expect = R"(
 $B1: {  # root
-  %frag2_loc0_Output:ptr<__out, i32, write> = var undef @location(0)
+  %frag2_loc0_Output:ptr<__out, i32, write> = var @location(0)
 }
 
 %frag2_inner = func():i32 {
@@ -1136,9 +1136,9 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
-  %foo_loc0_Output:ptr<__out, f32, write> = var undef @location(0)
-  %foo_frag_depth:ptr<__out, f32, write> = var undef @builtin(frag_depth)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
+  %foo_loc0_Output:ptr<__out, f32, write> = var @location(0)
+  %foo_frag_depth:ptr<__out, f32, write> = var @builtin(frag_depth)
 }
 
 %foo_inner = func():Outputs {
@@ -1205,9 +1205,9 @@ TEST_F(GlslWriter_ShaderIOTest, BGRASwizzleSingleValue) {
 
     auto* expect = R"(
 $B1: {  # root
-  %vert_loc0_Input:ptr<__in, vec4<f32>, read> = var undef @location(0)
-  %vert_position:ptr<__out, vec4<f32>, write> = var undef @invariant @builtin(position)
-  %vert___point_size:ptr<__out, f32, write> = var undef @builtin(__point_size)
+  %vert_loc0_Input:ptr<__in, vec4<f32>, read> = var @location(0)
+  %vert_position:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
+  %vert___point_size:ptr<__out, f32, write> = var @builtin(__point_size)
 }
 
 %vert_inner = func(%val:vec4<f32>):vec4<f32> {
@@ -1288,13 +1288,13 @@ TEST_F(GlslWriter_ShaderIOTest, BGRASwizzleMultipleValueMixedTypes) {
 
     auto* expect = R"(
 $B1: {  # root
-  %vert_loc5_Input:ptr<__in, vec4<f32>, read> = var undef @location(5)
-  %vert_loc0_Input:ptr<__in, vec4<f32>, read> = var undef @location(0)
-  %vert_loc4_Input:ptr<__in, vec4<f32>, read> = var undef @location(4)
-  %vert_loc3_Input:ptr<__in, vec4<f32>, read> = var undef @location(3)
-  %vert_loc7_Input:ptr<__in, vec4<f32>, read> = var undef @location(7)
-  %vert_position:ptr<__out, vec4<f32>, write> = var undef @invariant @builtin(position)
-  %vert___point_size:ptr<__out, f32, write> = var undef @builtin(__point_size)
+  %vert_loc5_Input:ptr<__in, vec4<f32>, read> = var @location(5)
+  %vert_loc0_Input:ptr<__in, vec4<f32>, read> = var @location(0)
+  %vert_loc4_Input:ptr<__in, vec4<f32>, read> = var @location(4)
+  %vert_loc3_Input:ptr<__in, vec4<f32>, read> = var @location(3)
+  %vert_loc7_Input:ptr<__in, vec4<f32>, read> = var @location(7)
+  %vert_position:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
+  %vert___point_size:ptr<__out, f32, write> = var @builtin(__point_size)
 }
 
 %vert_inner = func(%val1:f32, %val2:vec2<f32>, %sentinel:vec4<f32>, %val3:vec3<f32>, %val4:vec4<f32>):vec4<f32> {
@@ -1367,8 +1367,8 @@ TEST_F(GlslWriter_ShaderIOTest, WorkgroupIndex_ReuseExistingBuiltins) {
 
     auto* expect = R"(
 $B1: {  # root
-  %foo_workgroup_id:ptr<__in, vec3<u32>, read> = var undef @builtin(workgroup_id)
-  %foo_num_workgroups:ptr<__in, vec3<u32>, read> = var undef @builtin(num_workgroups)
+  %foo_workgroup_id:ptr<__in, vec3<u32>, read> = var @builtin(workgroup_id)
+  %foo_num_workgroups:ptr<__in, vec3<u32>, read> = var @builtin(num_workgroups)
 }
 
 %foo_inner = func(%wgid:vec3<u32>, %numwgs:vec3<u32>, %wgindex:u32):void {
@@ -1431,8 +1431,8 @@ TEST_F(GlslWriter_ShaderIOTest, WorkgroupIndex_AddMissingBuiltins) {
 
     auto* expect = R"(
 $B1: {  # root
-  %foo_workgroup_id:ptr<__in, vec3<u32>, read> = var undef @builtin(workgroup_id)
-  %foo_num_workgroups:ptr<__in, vec3<u32>, read> = var undef @builtin(num_workgroups)
+  %foo_workgroup_id:ptr<__in, vec3<u32>, read> = var @builtin(workgroup_id)
+  %foo_num_workgroups:ptr<__in, vec3<u32>, read> = var @builtin(num_workgroups)
 }
 
 %foo_inner = func(%wgindex:u32):void {
@@ -1496,8 +1496,8 @@ TEST_F(GlslWriter_ShaderIOTest, GlobalInvocationIndex_ReuseExistingBuiltins) {
 
     auto* expect = R"(
 $B1: {  # root
-  %foo_num_workgroups:ptr<__in, vec3<u32>, read> = var undef @builtin(num_workgroups)
-  %foo_global_invocation_id:ptr<__in, vec3<u32>, read> = var undef @builtin(global_invocation_id)
+  %foo_num_workgroups:ptr<__in, vec3<u32>, read> = var @builtin(num_workgroups)
+  %foo_global_invocation_id:ptr<__in, vec3<u32>, read> = var @builtin(global_invocation_id)
 }
 
 %foo_inner = func(%numwgs:vec3<u32>, %gindex:u32):void {
@@ -1561,8 +1561,8 @@ TEST_F(GlslWriter_ShaderIOTest, GlobalInvocationIndex_AddMissingBuiltins) {
 
     auto* expect = R"(
 $B1: {  # root
-  %foo_num_workgroups:ptr<__in, vec3<u32>, read> = var undef @builtin(num_workgroups)
-  %foo_global_invocation_id:ptr<__in, vec3<u32>, read> = var undef @builtin(global_invocation_id)
+  %foo_num_workgroups:ptr<__in, vec3<u32>, read> = var @builtin(num_workgroups)
+  %foo_global_invocation_id:ptr<__in, vec3<u32>, read> = var @builtin(global_invocation_id)
 }
 
 %foo_inner = func(%gindex:u32):void {

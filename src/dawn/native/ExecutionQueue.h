@@ -82,13 +82,11 @@ class ExecutionQueueBase : public ApiObjectBase {
     class SerialProcessor : public RefCounted {
       public:
         // This is the entry point that's fired whenever the queue's internal completed serial is
-        // updated.
+        // updated. The serials passed here are generally non-decreasing, but we don't need to
+        // guarantee this. Implementations can track the last completedSerial to do special handling
+        // (like processing tasks immediately instead of deferring them if their serial has already
+        // been completed, or if on shutdown the serial has been set to kMaxExecutionSerial).
         virtual void UpdateCompletedSerialTo(ExecutionSerial completedSerial) = 0;
-
-        // Implementations need to implement this shut down function to set some internal state such
-        // that any further tracking on the processor is processed immediately since the
-        // |UpdateCompletedSerialTo| entry point will no longer be called after this point.
-        virtual void AssumeCommandsComplete() = 0;
     };
 
     // The latest serial known to have completed execution on the queue.
@@ -163,7 +161,7 @@ class ExecutionQueueBase : public ApiObjectBase {
 
   private:
     // Each backend should implement to check their passed fences if there are any and return a
-    // completed serial. Return 0 should indicate no fences to check.
+    // completed serial.
     virtual ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() = 0;
 
     // Backend specific wait function, returns kWaitSerialTimeout if we did not successfully wait

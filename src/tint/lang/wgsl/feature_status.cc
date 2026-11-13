@@ -40,6 +40,7 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
         case LanguageFeature::kTexelBuffers:
         case LanguageFeature::kMultisampledArrayTextures:
         case LanguageFeature::kFragmentDepth:
+        case LanguageFeature::kUnrestrictedAliasing:
             return FeatureStatus::kUnsafeExperimental;
 
             ////////////////////////////////////////////////////////////////////

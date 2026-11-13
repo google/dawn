@@ -27,7 +27,12 @@ void main() {
               i = asint((asuint(i) * 2u));
               break;
             }
-            /* unreachable */
+            {
+              uint tint_low_inc_1 = (tint_loop_idx_1.x - 1u);
+              tint_loop_idx_1.x = tint_low_inc_1;
+              uint tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
+              tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
+            }
           }
         }
         if ((i > int(10))) { break; }

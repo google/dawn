@@ -105,7 +105,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, array<SB, 4>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<SB, 4>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -133,7 +133,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -185,7 +185,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -214,7 +214,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -256,7 +256,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -280,7 +280,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -320,7 +320,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -340,7 +340,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -374,7 +374,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, AccessStorageVector) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, vec4<f32>, read> = var undef @binding_point(0, 0)
+  %v:ptr<storage, vec4<f32>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -397,7 +397,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -442,7 +442,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, AccessStorageVectorF16) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, vec4<f16>, read> = var undef @binding_point(0, 0)
+  %v:ptr<storage, vec4<f16>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -465,7 +465,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -504,7 +504,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, AccessStorageMatrix) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, mat4x4<f32>, read> = var undef @binding_point(0, 0)
+  %v:ptr<storage, mat4x4<f32>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -525,7 +525,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -578,7 +578,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, AccessStorageArray) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<vec3<f32>, 5>, read> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<vec3<f32>, 5>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -596,7 +596,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -663,7 +663,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, AccessStorageArrayWhichCanHaveSizes
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<vec3<f32>, 42>, read> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<vec3<f32>, 42>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -681,7 +681,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -758,7 +758,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -781,7 +781,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -857,7 +857,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -890,7 +890,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1040,7 +1040,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %sb:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1080,7 +1080,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %sb:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %sb:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1149,7 +1149,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %sb:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1188,7 +1188,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %sb:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %sb:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1269,7 +1269,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %sb:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1304,7 +1304,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %sb:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %sb:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1351,7 +1351,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1372,7 +1372,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1424,7 +1424,7 @@ S2 = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, S2, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, S2, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
@@ -1448,7 +1448,7 @@ S2 = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
@@ -1481,7 +1481,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicStoreDirect) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<i32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1495,7 +1495,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1537,7 +1537,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1559,7 +1559,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1613,7 +1613,7 @@ S2 = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, S2, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, S2, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
@@ -1638,7 +1638,7 @@ S2 = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
@@ -1673,7 +1673,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicLoadDirect) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<i32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1688,7 +1688,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1726,7 +1726,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoad) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1741,7 +1741,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1780,7 +1780,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoad_SignedOff
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:i32, %stride:i32):void {
@@ -1795,7 +1795,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:i32, %stride:i32):void {
@@ -1836,7 +1836,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoadColMajor) 
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1851,7 +1851,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1887,7 +1887,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoadColMajorTe
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1902,7 +1902,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1938,7 +1938,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoadColMajorTe
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1953,7 +1953,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1989,7 +1989,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoadRowMajorTe
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -2004,7 +2004,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -2043,7 +2043,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixLoadDynamicStr
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%stride:u32):void {
@@ -2058,7 +2058,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%stride:u32):void {
@@ -2096,7 +2096,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixStore) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f32, 100>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f32, 100>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
@@ -2110,7 +2110,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
@@ -2148,7 +2148,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixStore_SignedOf
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f32, 100>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f32, 100>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>, %offset:i32, %stride:i32):void {
@@ -2162,7 +2162,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>, %offset:i32, %stride:i32):void {
@@ -2203,7 +2203,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixStoreColMajor)
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f32, 100>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f32, 100>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
@@ -2217,7 +2217,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
@@ -2253,7 +2253,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixStoreColMajorT
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f32, 100>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f32, 100>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
@@ -2267,7 +2267,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
@@ -2303,7 +2303,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixStoreColMajorT
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<u32, 100>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<u32, 100>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%mat:subgroup_matrix_left<u8, 8, 8>):void {
@@ -2317,7 +2317,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%mat:subgroup_matrix_left<u8, 8, 8>):void {
@@ -2353,7 +2353,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixStoreRowMajorT
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f32, 100>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f32, 100>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
@@ -2367,7 +2367,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>):void {
@@ -2404,7 +2404,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageSubgroupMatrixStoreDynamicSt
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f32, 100>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f32, 100>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>, %stride:u32):void {
@@ -2418,7 +2418,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 8, 8>, %stride:u32):void {
@@ -2460,7 +2460,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -2482,7 +2482,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -2536,7 +2536,7 @@ S2 = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, S2, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, S2, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
@@ -2561,7 +2561,7 @@ S2 = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
@@ -2596,7 +2596,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicSubDirect) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<i32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -2611,7 +2611,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -2662,7 +2662,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -2689,7 +2689,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -2751,7 +2751,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, S2, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, S2, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
@@ -2781,7 +2781,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
@@ -2824,7 +2824,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, atomic<i32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -2844,7 +2844,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -2903,7 +2903,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -2926,7 +2926,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -2960,7 +2960,7 @@ TEST_P(DecomposeBuiltinAtomic, DirectAccess) {
 
     auto src = R"(
 $B1: {  # root
-  %v:ptr<storage, atomic<u32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, atomic<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -2976,7 +2976,7 @@ $B1: {  # root
 
     auto expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3031,7 +3031,7 @@ S2 = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, S2, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, S2, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
@@ -3056,7 +3056,7 @@ S2 = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func(%3:u32 [@location(0), @interpolate(flat)]):void {
@@ -3112,7 +3112,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVecF32) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, vec4<f32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, vec4<f32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val0:f32, %val1:f32, %val2:f32, %val3:f32):void {
@@ -3129,7 +3129,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val0:f32, %val1:f32, %val2:f32, %val3:f32):void {
@@ -3166,7 +3166,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreScalar) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, f32, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, f32, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val:f32):void {
@@ -3180,7 +3180,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val:f32):void {
@@ -3208,7 +3208,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreScalarF16) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, f16, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, f16, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3222,7 +3222,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3251,7 +3251,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVectorElement) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, vec3<f32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, vec3<f32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val:f32):void {
@@ -3265,7 +3265,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val:f32):void {
@@ -3293,7 +3293,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVectorElementF16) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, vec3<f16>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, vec3<f16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3307,7 +3307,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3336,7 +3336,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVector) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, vec3<f32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, vec3<f32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val:vec3<f32>):void {
@@ -3350,7 +3350,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val:vec3<f32>):void {
@@ -3379,7 +3379,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVectorF16) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, vec3<f16>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, vec3<f16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3393,7 +3393,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3423,7 +3423,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreMatrixElement) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, mat2x3<f32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, mat2x3<f32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val:f32):void {
@@ -3438,7 +3438,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val:f32):void {
@@ -3467,7 +3467,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreMatrixElementF16) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, mat2x3<f16>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, mat2x3<f16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3482,7 +3482,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3511,7 +3511,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreMatrixColumn) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, mat2x3<f32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, mat2x3<f32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val:vec3<f32>):void {
@@ -3526,7 +3526,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val:vec3<f32>):void {
@@ -3555,7 +3555,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreMatrixColumnF16) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, mat2x3<f16>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, mat2x3<f16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3570,7 +3570,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3597,7 +3597,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreMatrix) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, mat2x3<f32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, mat2x3<f32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3611,7 +3611,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3651,7 +3651,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreMatrixF16) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, mat2x3<f16>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, mat2x3<f16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3665,7 +3665,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3705,7 +3705,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreArrayElement) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f32, 5>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f32, 5>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val:f32):void {
@@ -3720,7 +3720,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val:f32):void {
@@ -3748,7 +3748,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreArrayElementF16) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f16, 5>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f16, 5>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3763,7 +3763,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3791,7 +3791,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreArray) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<vec3<f32>, 5>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<vec3<f32>, 5>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3806,7 +3806,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3878,7 +3878,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val:f32):void {
@@ -3898,7 +3898,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val:f32):void {
@@ -3936,7 +3936,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -3956,7 +3956,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -4015,7 +4015,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val:f32):void {
@@ -4045,7 +4045,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%val:f32):void {
@@ -4103,7 +4103,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -4133,7 +4133,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -4229,7 +4229,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -4259,7 +4259,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -4371,7 +4371,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, ArrayLengthDirect) {
 
     auto* src = R"(
 $B1: {  # root
-  %sb:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
+  %sb:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -4386,12 +4386,12 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %sb:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %sb:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<function, u32, read_write> = var undef
+    %3:ptr<function, u32, read_write> = var
     %4:void = %sb.GetDimensions %3
     %5:u32 = load %3
     %6:u32 = div %5, 4u
@@ -4429,7 +4429,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %sb:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -4450,12 +4450,12 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %sb:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<function, u32, read_write> = var undef
+    %3:ptr<function, u32, read_write> = var
     %4:void = %sb.GetDimensions %3
     %5:u32 = load %3
     %6:u32 = sub %5, 4u
@@ -4490,7 +4490,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, array<SB>, read> = var undef @binding_point(0, 0)
+  %sb:ptr<storage, array<SB>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -4509,12 +4509,12 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %sb:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<function, u32, read_write> = var undef
+    %3:ptr<function, u32, read_write> = var
     %4:void = %sb.GetDimensions %3
     %5:u32 = load %3
     %6:u32 = div %5, 4u
@@ -4547,7 +4547,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:ptr<storage, array<array<SB, 4>>, read_write> = var undef @binding_point(0, 0)
+  %sb:ptr<storage, array<array<SB, 4>>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -4566,12 +4566,12 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %sb:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %sb:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<function, u32, read_write> = var undef
+    %3:ptr<function, u32, read_write> = var
     %4:void = %sb.GetDimensions %3
     %5:u32 = load %3
     %6:u32 = div %5, 16u
@@ -4599,7 +4599,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, ArrayLengthMultiple) {
 
     auto* src = R"(
 $B1: {  # root
-  %sb:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
+  %sb:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -4618,22 +4618,22 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %sb:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %sb:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<function, u32, read_write> = var undef
+    %3:ptr<function, u32, read_write> = var
     %4:void = %sb.GetDimensions %3
     %5:u32 = load %3
     %6:u32 = div %5, 4u
     %a:u32 = let %6
-    %8:ptr<function, u32, read_write> = var undef
+    %8:ptr<function, u32, read_write> = var
     %9:void = %sb.GetDimensions %8
     %10:u32 = load %8
     %11:u32 = div %10, 4u
     %b:u32 = let %11
-    %13:ptr<function, u32, read_write> = var undef
+    %13:ptr<function, u32, read_write> = var
     %14:void = %sb.GetDimensions %13
     %15:u32 = load %13
     %16:u32 = div %15, 4u
@@ -4691,9 +4691,9 @@ SB2 = struct @align(16) {
 }
 
 $B1: {  # root
-  %sb1:ptr<storage, SB1, read_write> = var undef @binding_point(0, 0)
-  %sb2:ptr<storage, SB2, read_write> = var undef @binding_point(0, 1)
-  %sb3:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 2)
+  %sb1:ptr<storage, SB1, read_write> = var @binding_point(0, 0)
+  %sb2:ptr<storage, SB2, read_write> = var @binding_point(0, 1)
+  %sb3:ptr<storage, array<i32>, read_write> = var @binding_point(0, 2)
 }
 
 %foo = @fragment func():void {
@@ -4724,26 +4724,26 @@ SB2 = struct @align(16) {
 }
 
 $B1: {  # root
-  %sb1:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
-  %sb2:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 1)
-  %sb3:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 2)
+  %sb1:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+  %sb2:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 1)
+  %sb3:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 2)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %5:ptr<function, u32, read_write> = var undef
+    %5:ptr<function, u32, read_write> = var
     %6:void = %sb1.GetDimensions %5
     %7:u32 = load %5
     %8:u32 = sub %7, 4u
     %9:u32 = div %8, 4u
     %len1:u32 = let %9
-    %11:ptr<function, u32, read_write> = var undef
+    %11:ptr<function, u32, read_write> = var
     %12:void = %sb2.GetDimensions %11
     %13:u32 = load %11
     %14:u32 = sub %13, 16u
     %15:u32 = div %14, 16u
     %len2:u32 = let %15
-    %17:ptr<function, u32, read_write> = var undef
+    %17:ptr<function, u32, read_write> = var
     %18:void = %sb3.GetDimensions %17
     %19:u32 = load %17
     %20:u32 = div %19, 4u
@@ -4781,7 +4781,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -4804,7 +4804,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -4854,7 +4854,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -4879,7 +4879,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -4997,7 +4997,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, array<SB, 2>, read> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<SB, 2>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -5023,7 +5023,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -5141,7 +5141,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, array<SB, 2>, read> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<SB, 2>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -5166,7 +5166,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -5268,7 +5268,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferLength_Runtime) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -5284,12 +5284,12 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
-    %3:ptr<function, u32, read_write> = var undef
+    %3:ptr<function, u32, read_write> = var
     %4:void = %v.GetDimensions %3
     %5:u32 = load %3
     %len:u32 = let %5
@@ -5316,7 +5316,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferLength_Operand) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -5332,7 +5332,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -5361,7 +5361,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferLength_SizedBuffer) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer<256>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer<256>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -5377,7 +5377,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -5407,7 +5407,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferView_LoadU32) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -5423,7 +5423,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -5454,7 +5454,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferView_LoadU32_ConstOffset) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -5470,7 +5470,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -5503,7 +5503,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferView_LoadU32_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32):void {
@@ -5519,7 +5519,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32):void {
@@ -5556,7 +5556,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferView_LoadU32_AccumulatedOffse
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32):void {
@@ -5573,7 +5573,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32):void {
@@ -5608,7 +5608,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferArrayView_LoadU32) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -5625,7 +5625,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -5658,7 +5658,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferArrayView_LoadU32_ConstOffset
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -5675,7 +5675,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -5710,7 +5710,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferArrayView_LoadU32_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32):void {
@@ -5727,7 +5727,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32):void {
@@ -5764,7 +5764,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, BufferArrayView_LoadU32_Accumulated
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32):void {
@@ -5781,7 +5781,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32):void {
@@ -5820,7 +5820,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, ArrayLength_BufferView_Length) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32, %length:u32):void {
@@ -5837,7 +5837,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32, %length:u32):void {
@@ -5875,7 +5875,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, ArrayLength_BufferView) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32):void {
@@ -5892,13 +5892,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32):void {
   $B2: {
     %4:u32 = mul %offset, 1u
-    %5:ptr<function, u32, read_write> = var undef
+    %5:ptr<function, u32, read_write> = var
     %6:void = %v.GetDimensions %5
     %7:u32 = load %5
     %8:u32 = add 0u, %4
@@ -5943,7 +5943,7 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32):void {
@@ -5966,13 +5966,13 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var undef @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32):void {
   $B2: {
     %4:u32 = mul %offset, 1u
-    %5:ptr<function, u32, read_write> = var undef
+    %5:ptr<function, u32, read_write> = var
     %6:void = %v.GetDimensions %5
     %7:u32 = load %5
     %8:u32 = add 16u, %4

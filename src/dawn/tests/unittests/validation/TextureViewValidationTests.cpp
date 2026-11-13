@@ -34,6 +34,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::HasSubstr;
+
 class TextureViewValidationTest : public ValidationTest {};
 
 constexpr uint32_t kWidth = 32u;
@@ -626,7 +628,7 @@ TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaultsInvalidAspect) {
 
     // Validation should catch the invalid aspect.
     ASSERT_DEVICE_ERROR(texture.CreateView(&viewDesc),
-                        testing::HasSubstr("is invalid for WGPUTextureAspect"));
+                        HasSubstr("is invalid for WGPUTextureAspect"));
 }
 
 // Test creating cube map texture view
@@ -1107,7 +1109,7 @@ TEST_F(ComponentSwizzleTextureViewValidationTests, StorageBindingRequiresIdentit
         swizzleDesc = GetIdenticalButOneSwizzleDesc(changedChannel);
         ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, cp.GetBindGroupLayout(0),
                                                  {{0, texture.CreateView(&viewDesc)}}),
-                            testing::HasSubstr("must be identity"));
+                            HasSubstr("must be identity"));
     }
 }
 
@@ -1137,7 +1139,7 @@ TEST_F(ComponentSwizzleTextureViewValidationTests, ColorAttachmentRequiresIdenti
         wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPassDesc);
         renderPassEncoder.End();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish(),
-                            testing::HasSubstr("The color attachment swizzle must be identity"));
+                            HasSubstr("The color attachment swizzle must be identity"));
     }
 }
 
@@ -1176,7 +1178,7 @@ TEST_F(ComponentSwizzleTextureViewValidationTests, ResolveTargetRequiresIdentity
         wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPassDesc);
         renderPassEncoder.End();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish(),
-                            testing::HasSubstr("The resolve target swizzle must be identity"));
+                            HasSubstr("The resolve target swizzle must be identity"));
     }
 }
 
@@ -1216,9 +1218,8 @@ TEST_F(ComponentSwizzleTextureViewValidationTests, DepthStencilAttachmentRequire
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPassDesc);
         renderPassEncoder.End();
-        ASSERT_DEVICE_ERROR(
-            commandEncoder.Finish(),
-            testing::HasSubstr("The depth stencil attachment swizzle must be identity"));
+        ASSERT_DEVICE_ERROR(commandEncoder.Finish(),
+                            HasSubstr("The depth stencil attachment swizzle must be identity"));
     }
 }
 

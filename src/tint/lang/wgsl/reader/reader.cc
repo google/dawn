@@ -52,17 +52,16 @@ Program Parse(const Source::File* file, const Options& options) {
     return resolver::Resolve(parser.builder(), options.allowed_features);
 }
 
-Result<core::ir::Module> WgslToIR(const Source::File* file, const Options& options) {
+Result<core::ir::Module> WgslToIR(const Source::File* file,
+                                  const Options& options,
+                                  const IROptions& ir_options) {
     Program program = Parse(file, options);
-    auto ir = ProgramToLoweredIR(program);
-    if (ir == Success) {
-        TINT_CHECK_RESULT(core::ir::Validate(ir.Get(), core::ir::ErrorSource::kWgsl));
-    }
-    return ir;
+    return ProgramToLoweredIR(program, ir_options);
 }
 
 Result<core::ir::Module> ProgramToLoweredIR(const Program& program, const IROptions& options) {
     TINT_CHECK_RESULT_UNWRAP(ir, ProgramToIR(program));
+    TINT_CHECK_RESULT(core::ir::Validate(ir, core::ir::ErrorSource::kWgsl));
     ir.ice_callback = options.ice_callback;
     ir.dump_ir_when_validating = options.dump_ir_when_validating;
     ir.enable_validation_asserts = options.enable_validation_asserts;

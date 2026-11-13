@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_COMMANDBUFFERD3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_COMMANDBUFFERD3D12_H_
 
+#include <vector>
+
 #include "src/dawn/native/CommandBuffer.h"
 #include "src/dawn/native/Error.h"
 
@@ -52,7 +54,19 @@ class CommandBuffer final : public CommandBufferBase {
 
     MaybeError RecordCommands(CommandRecordingContext* commandContext);
 
+    // Opt-in recording of this command buffer's batched indirect draw submissions.
+    void EnableIndirectDrawBatchRecordingForTesting() {
+        mRecordIndirectDrawBatches = true;
+        mIndirectDrawBatchCounts.clear();
+    }
+    const std::vector<uint32_t>& GetIndirectDrawBatchCountsForTesting() const {
+        return mIndirectDrawBatchCounts;
+    }
+
   private:
+    bool mRecordIndirectDrawBatches = false;
+    std::vector<uint32_t> mIndirectDrawBatchCounts;
+
     CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
 
     MaybeError RecordComputePass(CommandRecordingContext* commandContext,

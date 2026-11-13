@@ -101,7 +101,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, AllFormats) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {
@@ -186,7 +186,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, Compute) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {
@@ -229,7 +229,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, Compute_ExistingBuiltin) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func(%id:vec3<u32> [@global_invocation_id]):void {
@@ -289,7 +289,7 @@ Inputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func(%inputs:Inputs):void {
@@ -330,7 +330,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, Fragment) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec3<f32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec3<f32>, read_write> = var
 }
 
 %foo = @fragment func(%tint_symbol:vec4<f32> [@position]):void {
@@ -374,7 +374,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, Fragment_ExistingBuiltin) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec3<f32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec3<f32>, read_write> = var
 }
 
 %foo = @fragment func(%position:vec4<f32> [@position]):void {
@@ -435,7 +435,7 @@ Inputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec3<f32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec3<f32>, read_write> = var
 }
 
 %foo = @fragment func(%inputs:Inputs):void {
@@ -478,7 +478,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, Vertex) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec2<u32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec2<u32>, read_write> = var
 }
 
 %foo = @vertex func(%tint_symbol:u32 [@instance_index], %tint_symbol_1:u32 [@vertex_index]):vec4<f32> [@position] {
@@ -528,7 +528,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, Vertex_ExistingBuiltin) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec2<u32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec2<u32>, read_write> = var
 }
 
 %foo = @vertex func(%instance:u32 [@instance_index], %vertex:u32 [@vertex_index]):vec4<f32> [@position] {
@@ -598,7 +598,7 @@ Inputs = struct @align(4) {
 }
 
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec2<u32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec2<u32>, read_write> = var
 }
 
 %foo = @vertex func(%inputs:Inputs):vec4<f32> [@position] {
@@ -652,7 +652,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, HelperFunction) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var
 }
 
 %foo = func():void {
@@ -698,7 +698,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, StringLiteral) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {
@@ -738,7 +738,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, StringLiteral_Empty) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {
@@ -778,7 +778,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, StringLiteral_PercentEscaped) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {
@@ -820,7 +820,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, InterpolateString_Single) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {
@@ -863,7 +863,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, InterpolateString_Multiple) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {
@@ -905,7 +905,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, InterpolateString_Vector) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {
@@ -947,7 +947,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, InterpolateString_Bool) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {
@@ -991,7 +991,7 @@ TEST_F(MslWriter_ConvertPrintToLogTest, InterpolateString_Nested) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var undef
+  %tint_print_invocation_id:ptr<private, vec3<u32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func(%tint_symbol:vec3<u32> [@global_invocation_id]):void {

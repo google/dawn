@@ -64,13 +64,13 @@ function(DawnGenerator)
     set(BASE_ARGS
         ${Python3_EXECUTABLE}
         ${arg_SCRIPT}
+        ${arg_EXTRA_PARAMETERS}
         --template-dir
         "${DAWN_TEMPLATE_DIR}"
         --root-dir
         "${Dawn_SOURCE_DIR}"
         --output-dir
         "${DAWN_BUILD_GEN_DIR}"
-        ${arg_EXTRA_PARAMETERS}
     )
     if (DAWN_JINJA2_DIR)
         list(APPEND BASE_ARGS --jinja2-path ${DAWN_JINJA2_DIR})
@@ -160,13 +160,18 @@ endfunction()
 
 # Helper function to call dawn_generator.py:
 #  - TARGET is the generator target to build
+#  - ADDIN_JSONS are additional JSON files with metadata.addins to apply
 #  - OUTPUT_HEADERS, OUTPUT_SOURCES, and PRINT_NAME are like for DawnGenerator
 function(DawnJSONGenerator)
     cmake_parse_arguments(PARSE_ARGV 0 arg
         ""
         "TARGET;OUTPUT_SOURCES;OUTPUT_HEADERS;OUTPUT_JSONS;OUTPUT_JS;PRINT_NAME"
-        ""
+        "ADDIN_JSONS"
     )
+    set(addin_args)
+    if (arg_ADDIN_JSONS)
+        set(addin_args --addin-jsons ${arg_ADDIN_JSONS})
+    endif()
     DawnGenerator(
         SCRIPT "${Dawn_SOURCE_DIR}/generator/dawn_json_generator.py"
         PRINT_NAME "${arg_PRINT_NAME}"
@@ -183,6 +188,7 @@ function(DawnJSONGenerator)
              "${Dawn_SOURCE_DIR}/src/dawn/dawn_native.json"
              --kotlin-json
              "${Dawn_SOURCE_DIR}/src/dawn/dawn_kotlin.json"
+             ${addin_args}
              --targets
              ${arg_TARGET}
              ${arg_UNPARSED_ARGUMENTS}

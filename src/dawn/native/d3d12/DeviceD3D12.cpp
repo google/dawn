@@ -597,7 +597,6 @@ MaybeError Device::CopyFromStagingToTextureImpl(BufferBase* source,
         ToBackend(GetQueue())->GetPendingCommandContext(QueueBase::SubmitMode::Passive);
 
     Texture* texture = ToBackend(dst.texture.Get());
-    DAWN_TRY(texture->SynchronizeTextureBeforeUse(commandContext));
 
     SubresourceRange range = GetSubresourcesAffectedByCopy(dst, copySizePixels);
     if (IsCompleteSubresourceCopiedTo(texture, copySizePixels, dst.mipLevel, dst.aspect)) {

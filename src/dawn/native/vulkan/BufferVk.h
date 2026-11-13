@@ -59,6 +59,7 @@ class Buffer final : public BufferBase {
                                              const UnpackedPtr<BufferDescriptor>& descriptor);
 
     VkBuffer GetHandle() const;
+    VkBuffer GetHandleOrPlaceholder() const;
 
     // Transitions the buffer to be used as `usage`, recording any necessary barrier in
     // `commands`.
@@ -136,6 +137,8 @@ class Buffer final : public BufferBase {
 
     bool mHostVisible : 1 = false;
     bool mHostCoherent : 1 = false;
+    // True if mHandle is owned by this object rather than a shared Device placeholder.
+    bool mOwnsHandle : 1 = false;
 };
 
 }  // namespace dawn::native::vulkan

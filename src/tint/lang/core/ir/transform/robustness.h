@@ -44,6 +44,8 @@ namespace tint::core::ir::transform {
 /// Configuration options that control when to clamp accesses.
 struct RobustnessConfig {
     /// Should texture accesses be clamped?
+    /// Note that the `sample_index` parameter of `textureLoad` will still be clamped if clamping is
+    /// disabled.
     bool clamp_texture = true;
 
     /// Should accesses to pointers with the 'immediate' address space be clamped?
@@ -63,7 +65,8 @@ struct RobustnessConfig {
     std::unordered_set<tint::BindingPoint> bindings_ignored;
 
     /// Should the transform skip index clamping on runtime-sized arrays?
-    bool disable_runtime_sized_array_index_clamping = false;
+    bool disable_storage_runtime_sized_array_index_clamping = false;
+    bool disable_uniform_runtime_sized_array_index_clamping = false;
 
     /// Should the integer range analysis be used before doing index clamping?
     bool use_integer_range_analysis = false;
@@ -77,7 +80,8 @@ struct RobustnessConfig {
                  clamp_subgroup_matrix,
                  clamp_storage_subgroup_matrix,
                  bindings_ignored,
-                 disable_runtime_sized_array_index_clamping,
+                 disable_storage_runtime_sized_array_index_clamping,
+                 disable_uniform_runtime_sized_array_index_clamping,
                  use_integer_range_analysis);
 };
 

@@ -105,4 +105,23 @@ cc_library(
   copts = COPTS,
   visibility = ["//visibility:public"],
 )
+cc_library(
+  name = "bench",
+  alwayslink = True,
+  srcs = [
+    "hashset_bench.cc",
+  ],
+  deps = [
+    "//src/tint/utils/containers",
+    "//src/tint/utils/ice",
+    "//src/tint/utils/macros",
+    "//src/tint/utils/math",
+    "//src/tint/utils/memory",
+    "//src/tint/utils/rtti",
+    "@benchmark",
+    "//src/utils",
+  ],
+  copts = COPTS,
+  visibility = ["//visibility:public"],
+)
 

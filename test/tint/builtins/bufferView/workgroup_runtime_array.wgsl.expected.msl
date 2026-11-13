@@ -1,0 +1,81 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_immediate_data_struct {
+  /* 0x0000 */ uint tint_non_constant_zero;
+  /* 0x0004 */ array<int8_t, 2044> tint_pad;
+  /* 0x0800 */ array<uint, 2> tint_storage_buffer_sizes;
+};
+
+struct tint_module_vars_struct {
+  const device array<uint, 1>* in;
+  device array<uint, 1>* out;
+  threadgroup array<uchar, 256>* b;
+  const constant tint_immediate_data_struct* tint_immediate_data;
+};
+
+struct tint_array_lengths_struct {
+  uint tint_array_length_0_0;
+  uint tint_array_length_0_1;
+};
+typedef array<uint, 1> __attribute__((__may_alias__)) tint_aliased_array_u32;
+typedef uint __attribute__((__may_alias__)) tint_aliased_u32;
+
+struct tint_symbol_1 {
+  array<uchar, 256> tint_symbol;
+};
+
+void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  {
+    uint idx = tint_local_index;
+    while(true) {
+      uint const v = idx;
+      if ((v >= 256u)) {
+        break;
+      }
+      (*tint_module_vars.b)[v] = 0u;
+      {
+        idx = (idx + 1u);
+      }
+    }
+  }
+  (threadgroup_barrier(mem_flags::mem_threadgroup));
+  tint_array_lengths_struct const v_1 = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u] / 4u), .tint_array_length_0_1=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[1u] / 4u)};
+  threadgroup tint_aliased_array_u32* const v_2 = reinterpret_cast<threadgroup array<uint, 1>*>(reinterpret_cast<threadgroup char*>(tint_module_vars.b) + 0u);
+  threadgroup tint_aliased_array_u32* const view = v_2;
+  {
+    int i = 0;
+    while(true) {
+      if ((i < 64)) {
+      } else {
+        break;
+      }
+      threadgroup tint_aliased_u32* const v_3 = (&(*view)[min(uint(i), (64u - 1u))]);
+      (*v_3) = (*tint_module_vars.in)[min(uint(i), (v_1.tint_array_length_0_0 - 1u))];
+      {
+        i = as_type<int>((as_type<uint>(i) + 1u));
+      }
+    }
+  }
+  (threadgroup_barrier(mem_flags::mem_threadgroup));
+  {
+    int i = 0;
+    while(true) {
+      if ((i < 64)) {
+      } else {
+        break;
+      }
+      device uint* const v_4 = (&(*tint_module_vars.out)[min(uint(i), (v_1.tint_array_length_0_1 - 1u))]);
+      (*v_4) = (*view)[min(uint(i), (64u - 1u))];
+      {
+        i = as_type<int>((as_type<uint>(i) + 1u));
+      }
+    }
+  }
+}
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void v_5(uint tint_local_index [[thread_index_in_threadgroup]], const device array<uint, 1>* in [[buffer(0)]], device array<uint, 1>* out [[buffer(1)]], threadgroup tint_symbol_1* v_6 [[threadgroup(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.in=in, .out=out, .b=(&(*v_6).tint_symbol), .tint_immediate_data=tint_immediate_data};
+  (main_inner(tint_local_index, tint_module_vars));
+}

@@ -261,17 +261,24 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
                 // it points to at least `size` valid bytes.
                 Span<const std::byte> DAWN_UNSAFE_BUFFERS(mappedRange{mappedData, data->size});
 
+                auto* memoryHandle = mapState->memoryHandle.get();
+                if (!memoryHandle) {
+                    cmd.status = wgpu::MapAsyncStatus::Aborted;
+                    SerializeCommand(std::move(cmd));
+                    return;
+                }
+
                 size_t dataUpdateInfoLength =
-                    mapState->memoryHandle->GetSerializeDataUpdateSize(data->offset, data->size);
+                    memoryHandle->GetSerializeDataUpdateSize(data->offset, data->size);
                 SerializeCommand(
                     std::move(cmd),
                     // Extensions to replace fields skipped by skip_serialize.
                     CommandExtension<&ReturnBufferMapAsyncCallbackCmd::readDataUpdateInfo>{
-                        dataUpdateInfoLength, [&](Span<volatile std::byte> serializeBuffer) {
-                            // The in-flight map request returned
-                            // successfully.
-                            mapState->memoryHandle->SerializeDataUpdate(
-                                serializeBuffer, data->offset, data->size, mappedRange);
+                        dataUpdateInfoLength, [memoryHandle, data, mappedRange](
+                                                  Span<volatile std::byte> serializeBuffer) {
+                            // The in-flight map request returned successfully.
+                            memoryHandle->SerializeDataUpdate(serializeBuffer, data->offset,
+                                                              data->size, mappedRange);
                         }});
             });
             break;

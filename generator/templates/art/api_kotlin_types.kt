@@ -25,10 +25,13 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+{%- macro kotlin_is_nullable(arg, strip_optional = False) -%}
+    {{- 'true' if ((arg.optional and not strip_optional) or arg.default_value == 'nullptr') else '' -}}
+{%- endmacro %}
+
 {%- macro kotlin_declaration(arg, strip_optional = False) -%}
     {%- set type = arg.type %}
     {%- set optional = arg.optional and not strip_optional %}
-    {%- set default_value = arg.default_value %}
     {%- if type.category == 'kotlin type' -%}
         {{ type.name.get() }}{{ '?' if optional }}  {#- The name *is* the type #}
     {%- elif arg.type.name.get() == 'string view' -%}
@@ -51,7 +54,7 @@
         {% endif %}
     {%- elif type.category in ['callback function', 'function pointer', 'object'] %}
         {{- kotlin_name(type) }}
-        {%- if optional or default_value %}?{% endif %}
+        {%- if kotlin_is_nullable(arg, strip_optional) %}?{% endif %}
     {%- elif type.category == 'structure' or type.category == 'callback info' %}
         {{- kotlin_name(type) }}{{ '?' if optional }}
     {%- elif type.category in ['bitmask', 'enum'] -%}

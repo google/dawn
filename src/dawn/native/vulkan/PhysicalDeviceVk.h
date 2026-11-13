@@ -31,7 +31,6 @@
 #include <memory>
 #include <vector>
 
-#include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/Ref.h"
 #include "src/dawn/common/vulkan_platform.h"
 #include "src/dawn/native/PhysicalDevice.h"
@@ -54,8 +53,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
     // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
-    bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
-                              InstanceBase* instance) const override;
+    bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel) const override;
 
     const VulkanDeviceInfo& GetDeviceInfo() const;
     VkPhysicalDevice GetVkPhysicalDevice() const;
@@ -91,7 +89,6 @@ class PhysicalDevice : public PhysicalDeviceBase {
         const TogglesState& toggles) const;
 
     ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
-        InstanceBase* instance,
         const Surface* surface) const override;
     const AHBFunctions* GetOrLoadAHBFunctions();
 
@@ -132,7 +129,6 @@ class PhysicalDevice : public PhysicalDeviceBase {
     void SetCoreNotSupported(std::unique_ptr<UnrecoverableError> error);
 
     VkPhysicalDevice mVkPhysicalDevice;
-    raw_ptr<InstanceBase> mInstance;
     Ref<VulkanInstance> mVulkanInstance;
     VulkanDeviceInfo mDeviceInfo = {};
 

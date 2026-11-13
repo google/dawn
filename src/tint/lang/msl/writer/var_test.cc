@@ -352,5 +352,23 @@ kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadg
 )");
 }
 
+TEST_F(MslWriterTest, Var_UndefInitializer) {
+    auto* func = b.ComputeFunction("entry");
+    b.Append(func->Block(), [&] {
+        auto* var = b.Var("a", ty.ptr<core::AddressSpace::kFunction, f32>());
+        var->SetInitializer(b.Undef(ty.f32()));
+        b.Return(func);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
+kernel void entry() {
+  float a;
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::msl::writer

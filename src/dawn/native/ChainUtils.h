@@ -118,6 +118,7 @@ class UnpackedPtr {
     ResultOrValError<wgpu::SType> ValidateBranches() const;
     template <typename... Allowed>
     MaybeValError ValidateSubset() const;
+    MaybeValError ValidateStable() const;
 
   private:
     friend UnpackedPtr<T> Unpack<T>(PtrType chain);
@@ -340,6 +341,33 @@ template <typename T>
 template <typename... Allowed>
 MaybeValError UnpackedPtr<T>::ValidateSubset() const {
     return detail::SubsetValidator<UnpackedPtr<T>, Allowed...>::Validate(*this, mBitset);
+}
+
+namespace detail {
+template <typename UnpackedPtrT, typename StableExtensions>
+struct StableSubsetValidator;
+template <typename UnpackedPtrT, typename... Stable>
+struct StableSubsetValidator<UnpackedPtrT, std::tuple<Stable...>> {
+    static MaybeValError Validate(const UnpackedPtrT& unpacked) {
+        return unpacked.template ValidateSubset<Stable...>();
+    }
+};
+}  // namespace detail
+
+// Validates that an unpacked chain only contains chained structs that are part of Dawn's stable
+// C header and ABI (detail::StableExtensionsFor<T>). Any other chained struct, including C++-only
+// extensions registered through AdditionalExtensions, produces a validation error.
+//
+// Example usage:
+//     UnpackedPtr<T> u;
+//     DAWN_TRY_ASSIGN(u, ValidateAndUnpack(desc));
+//     if (!toggles.IsEnabled(Toggle::AllowExperimentalAPIs)) {
+//         DAWN_TRY(u.ValidateStable());
+//     }
+template <typename T>
+MaybeValError UnpackedPtr<T>::ValidateStable() const {
+    return detail::StableSubsetValidator<
+        UnpackedPtr<T>, typename detail::StableExtensionsFor<T>::Types>::Validate(*this);
 }
 
 }  // namespace dawn::native

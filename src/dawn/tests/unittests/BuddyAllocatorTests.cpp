@@ -31,6 +31,7 @@
 #include "src/dawn/native/BuddyAllocator.h"
 
 namespace dawn::native {
+namespace {
 
 // Verify the buddy allocator with a basic test.
 TEST(BuddyAllocatorTests, SingleBlock) {
@@ -262,6 +263,7 @@ TEST(BuddyAllocatorTests, MultipleSplitBlocksInterleaved) {
     // Allocate leaf blocks
     constexpr uint64_t minBlockSizeInBytes = 32;
     std::vector<uint64_t> blockOffsets;
+    blockOffsets.reserve(maxBlockSize / minBlockSizeInBytes);
     for (uint64_t i = 0; i < maxBlockSize / minBlockSizeInBytes; i++) {
         blockOffsets.push_back(allocator.Allocate(minBlockSizeInBytes));
     }
@@ -339,4 +341,5 @@ TEST(BuddyAllocatorTests, VariousSizeSameAlignment) {
     ASSERT_EQ(allocator.ComputeTotalNumOfFreeBlocksForTesting(), 0u);
 }
 
+}  // anonymous namespace
 }  // namespace dawn::native

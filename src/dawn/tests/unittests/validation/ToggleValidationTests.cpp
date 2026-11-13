@@ -28,10 +28,13 @@
 #include <vector>
 
 #include "src/dawn/tests/unittests/validation/ValidationTest.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
+
+using ::testing::Contains;
+using ::testing::Not;
+using ::testing::StrEq;
 
 class ToggleValidationTest : public ValidationTest {
     void SetUp() override {
@@ -74,13 +77,7 @@ TEST_F(ToggleValidationTest, OverrideToggleUsage) {
         wgpu::Device deviceWithToggle =
             wgpu::Device::Acquire(GetBackendAdapter().CreateDevice(&descriptor));
         std::vector<const char*> toggleNames = native::GetTogglesUsed(deviceWithToggle.Get());
-        bool validToggleExists = false;
-        for (const char* toggle : toggleNames) {
-            if (DAWN_UNSAFE_TODO(strcmp(toggle, kValidToggleName)) == 0) {
-                validToggleExists = true;
-            }
-        }
-        ASSERT_EQ(validToggleExists, true);
+        ASSERT_THAT(toggleNames, Contains(StrEq(kValidToggleName)));
     }
 
     // Create device with an invalid toggle name
@@ -95,13 +92,7 @@ TEST_F(ToggleValidationTest, OverrideToggleUsage) {
         wgpu::Device deviceWithToggle =
             wgpu::Device::Acquire(GetBackendAdapter().CreateDevice(&descriptor));
         std::vector<const char*> toggleNames = native::GetTogglesUsed(deviceWithToggle.Get());
-        bool InvalidToggleExists = false;
-        for (const char* toggle : toggleNames) {
-            if (DAWN_UNSAFE_TODO(strcmp(toggle, kInvalidToggleName)) == 0) {
-                InvalidToggleExists = true;
-            }
-        }
-        ASSERT_EQ(InvalidToggleExists, false);
+        ASSERT_THAT(toggleNames, Not(Contains(StrEq(kInvalidToggleName))));
     }
 }
 
@@ -116,13 +107,7 @@ TEST_F(ToggleValidationTest, TurnOffVsyncWithToggle) {
     wgpu::Device deviceWithToggle =
         wgpu::Device::Acquire(GetBackendAdapter().CreateDevice(&descriptor));
     std::vector<const char*> toggleNames = native::GetTogglesUsed(deviceWithToggle.Get());
-    bool validToggleExists = false;
-    for (const char* toggle : toggleNames) {
-        if (DAWN_UNSAFE_TODO(strcmp(toggle, kValidToggleName)) == 0) {
-            validToggleExists = true;
-        }
-    }
-    ASSERT_EQ(validToggleExists, true);
+    ASSERT_THAT(toggleNames, Contains(StrEq(kValidToggleName)));
 }
 
 }  // anonymous namespace

@@ -2610,5 +2610,78 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, AccessArray_ConstantOOBIndex_NoRobustness) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("v", b.Zero<array<f32, 3>>());
+        auto* oob = b.Append(mod.CreateInstruction<core::ir::CoreBuiltinCall>(
+            b.InstructionResult(ty.u32()), core::BuiltinFn::kClamp,
+            Vector{b.Value(99_u), b.Value(99_u), b.Value(99_u)}));
+        b.Let("x", b.Load(b.Access(ty.ptr<function, f32>(), v, oob->Result())));
+        b.Return(func);
+    });
+
+    Options options;
+    options.disable_robustness = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  float v[3] = float[3](0.0f, 0.0f, 0.0f);
+  float x = v[2u];
+}
+)");
+}
+
+TEST_F(GlslWriterTest, AccessArray_ConstantNegativeIndex_NoRobustness) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("v", b.Zero<array<f32, 3>>());
+        auto* neg = b.Append(mod.CreateInstruction<core::ir::CoreBuiltinCall>(
+            b.InstructionResult(ty.i32()), core::BuiltinFn::kClamp,
+            Vector{b.Value(-1_i), b.Value(-1_i), b.Value(-1_i)}));
+        b.Let("x", b.Load(b.Access(ty.ptr<function, f32>(), v, neg->Result())));
+        b.Return(func);
+    });
+
+    Options options;
+    options.disable_robustness = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  float v[3] = float[3](0.0f, 0.0f, 0.0f);
+  float x = v[2u];
+}
+)");
+}
+
+TEST_F(GlslWriterTest, AccessRuntimeArray_ConstantNegativeIndex_NoRobustness) {
+    auto* SB =
+        ty.Struct(mod.symbols.New("SB"), {
+                                             {mod.symbols.New("a"), ty.runtime_array(ty.f32())},
+                                         });
+    auto* var = b.Var("sb", storage, SB, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* neg = b.Append(mod.CreateInstruction<core::ir::CoreBuiltinCall>(
+            b.InstructionResult(ty.i32()), core::BuiltinFn::kClamp,
+            Vector{b.Value(-1_i), b.Value(-1_i), b.Value(-1_i)}));
+        b.Let("x", b.Load(b.Access(ty.ptr<storage, f32, read_write>(), var, 0_u, neg->Result())));
+        b.Return(func);
+    });
+
+    Options options;
+    options.disable_robustness = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
+    EXPECT_THAT(output_.glsl, testing::HasSubstr("sb.a[0u]"));
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

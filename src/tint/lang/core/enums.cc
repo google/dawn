@@ -547,6 +547,9 @@ BuiltinType ParseBuiltinType(std::string_view str) {
     if (str == "atomic") {
         return BuiltinType::kAtomic;
     }
+    if (str == "bf16") {
+        return BuiltinType::kBf16;
+    }
     if (str == "binding_array") {
         return BuiltinType::kBindingArray;
     }
@@ -843,6 +846,8 @@ std::string_view ToString(BuiltinType value) {
             return "array";
         case BuiltinType::kAtomic:
             return "atomic";
+        case BuiltinType::kBf16:
+            return "bf16";
         case BuiltinType::kBindingArray:
             return "binding_array";
         case BuiltinType::kBool:

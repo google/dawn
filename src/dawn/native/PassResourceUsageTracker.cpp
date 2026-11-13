@@ -286,6 +286,10 @@ void ComputePassResourceUsageTracker::AddReferencedBuffer(BufferBase* buffer) {
     mUsage.referencedBuffers.insert(buffer);
 }
 
+void ComputePassResourceUsageTracker::AddReferencedTexture(TextureBase* texture) {
+    mUsage.referencedTextures.insert(texture);
+}
+
 void ComputePassResourceUsageTracker::AddReferencedResourceTable(ResourceTableBase* table) {
     mUsage.referencedResourceTables.insert(table);
 }

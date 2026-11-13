@@ -31,6 +31,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::HasSubstr;
+
 class InternalResourceUsageTests : public DawnTest {
   protected:
     wgpu::Buffer CreateBuffer(wgpu::BufferUsage usage) {
@@ -86,7 +88,7 @@ TEST_P(InternalBindingTypeTests, ErrorUseInternalResolveAttachmentSampleTypeExte
     bglDesc.entryCount = 1;
     bglDesc.entries = &bglEntry;
     ASSERT_DEVICE_ERROR_MSG(device.CreateBindGroupLayout(&bglDesc),
-                            testing::HasSubstr("invalid for WGPUTextureSampleType"));
+                            HasSubstr("invalid for WGPUTextureSampleType"));
 }
 
 DAWN_INSTANTIATE_TEST(InternalBindingTypeTests, NullBackend());

@@ -34,11 +34,15 @@
 #include "src/dawn/tests/unittests/validation/ValidationTest.h"
 #include "src/utils/platform.h"
 
-using testing::_;
-using testing::HasSubstr;
-using testing::MockCppCallback;
-using testing::TestParamInfo;
-using testing::WithParamInterface;
+namespace dawn {
+namespace {
+
+using ::testing::_;
+using ::testing::HasSubstr;
+using ::testing::MockCppCallback;
+using ::testing::TestParamInfo;
+using ::testing::Values;
+using ::testing::WithParamInterface;
 
 using MockMapAsyncCallback = MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)>;
 
@@ -211,7 +215,7 @@ class BufferMappingValidationTest : public BufferValidationTest,
 
 INSTANTIATE_TEST_SUITE_P(,
                          BufferMappingValidationTest,
-                         testing::Values(wgpu::MapMode::Read, wgpu::MapMode::Write),
+                         Values(wgpu::MapMode::Read, wgpu::MapMode::Write),
                          [](const TestParamInfo<BufferMappingValidationTest::ParamType>& info) {
                              switch (info.param) {
                                  case wgpu::MapMode::Read:
@@ -982,7 +986,7 @@ TEST_F(BufferValidationTest, GetMappedRange_NonConstOnMappedForReading) {
     WaitForAllOperations();
 
     ASSERT_DEVICE_LOG(ASSERT_EQ(nullptr, buf.GetMappedRange()), wgpu::LoggingType::Error,
-                      testing::HasSubstr("Use GetConstMappedRange instead"));
+                      HasSubstr("Use GetConstMappedRange instead"));
 
     ASSERT_NO_DEVICE_LOG(ASSERT_NE(nullptr, buf.GetConstMappedRange()));
 }
@@ -1486,3 +1490,6 @@ TEST_F(BufferMapExtendedAndWriteExtendedUsagesValidationTest,
         }
     }
 }
+
+}  // anonymous namespace
+}  // namespace dawn

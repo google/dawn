@@ -33,6 +33,10 @@
 namespace dawn::wire {
 namespace {
 
+using ::testing::PrintToStringParamName;
+using ::testing::Values;
+using ::testing::WithParamInterface;
+
 enum class TestState {
     // Mix the two wires while both clients are connected.
     Alive,
@@ -68,7 +72,7 @@ class WireTwo : public WireTest {};
 // Name "*DeathTest" per https://google.github.io/googletest/advanced.html#death-test-naming
 class WireConfusionDeathTest : public WireOne,
                                public WireTwo,
-                               public ::testing::WithParamInterface<TestState> {
+                               public WithParamInterface<TestState> {
   protected:
     void SetUp() override {
         WireOne::SetUp();
@@ -132,10 +136,10 @@ TEST_P(WireConfusionDeathTest, OldBindGroupFromNewLayout) {
 
 INSTANTIATE_TEST_SUITE_P(,
                          WireConfusionDeathTest,
-                         ::testing::Values(TestState::Alive,
-                                           TestState::DisconnectBefore,
-                                           TestState::DisconnectMid),
-                         testing::PrintToStringParamName());
+                         Values(TestState::Alive,
+                                TestState::DisconnectBefore,
+                                TestState::DisconnectMid),
+                         PrintToStringParamName());
 
 }  // anonymous namespace
 }  // namespace dawn::wire

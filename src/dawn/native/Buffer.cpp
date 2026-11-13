@@ -438,6 +438,11 @@ ResultOrValError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
     const BufferDescriptor* descriptor) {
     UnpackedPtr<BufferDescriptor> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
+    if (!device->IsToggleEnabled(Toggle::AllowExperimentalAPIs)) {
+        // Only the chained structs that are part of the stable ABI may be used.
+        DAWN_TRY_CONTEXT(unpacked.ValidateStable(),
+                         "validating %s with allow_experimental_apis disabled", descriptor);
+    }
 
     DAWN_TRY(ValidateBufferUsage(descriptor->usage));
 

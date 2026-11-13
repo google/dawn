@@ -1204,7 +1204,7 @@ __modf_result_f32 = struct @align(4) {
 
 %foo = func(%x:f32):void {
   $B1: {
-    %3:ptr<function, tint_symbol_2, read_write> = var undef
+    %3:ptr<function, tint_symbol_2, read_write> = var
     %4:__modf_result_f32 = modf %x
     %5:f32 = access %4, 0u
     %6:f32 = access %4, 1u
@@ -1332,7 +1332,7 @@ __frexp_result_f32 = struct @align(4) {
 
 %foo = func(%x:f32):void {
   $B1: {
-    %3:ptr<function, tint_symbol_2, read_write> = var undef
+    %3:ptr<function, tint_symbol_2, read_write> = var
     %4:__frexp_result_f32 = frexp %x
     %5:f32 = access %4, 0u
     %6:i32 = access %4, 1u

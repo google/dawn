@@ -38,6 +38,7 @@
 #include "src/dawn/native/ShaderModule.h"
 #include "src/dawn/native/dawn_platform.h"
 #include "src/dawn/native/metal/BufferMTL.h"
+#include "src/dawn/native/metal/ResourceTableMTL.h"
 #include "src/utils/assert.h"
 #include "src/utils/numeric.h"
 
@@ -405,7 +406,8 @@ MTLPixelFormat MetalPixelFormat(const DeviceBase* device, wgpu::TextureFormat fo
             }
             return MTLPixelFormatStencil8;
 
-#if DAWN_PLATFORM_IS(MACOS)
+#if DAWN_PLATFORM_IS(MACOS) || \
+    (defined(__IPHONE_16_4) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_16_4)
         case wgpu::TextureFormat::BC1RGBAUnorm:
             return MTLPixelFormatBC1_RGBA;
         case wgpu::TextureFormat::BC1RGBAUnormSrgb:
@@ -936,9 +938,11 @@ MaybeError EncodeMetalRenderPass(Device* device,
 
         // If we found a store + MSAA resolve we need to resolve in a different render pass.
         if (hasStoreAndMSAAResolve) {
-            DAWN_TRY(EncodeMetalRenderPass(device, commandContext, nullptr, mtlRenderPass, width,
-                                           height, std::move(encodeInside), renderPassCmd));
+            // First run the regular render pass to store without resolving.
+            DAWN_TRY(EncodeMetalRenderPass(device, commandContext, resourceUsage, mtlRenderPass,
+                                           width, height, std::move(encodeInside), renderPassCmd));
 
+            // Then run an extra render pass to do the resolve.
             ResolveInAnotherRenderPass(commandContext, mtlRenderPass, resolveTextures);
             return {};
         }
@@ -947,9 +951,15 @@ MaybeError EncodeMetalRenderPass(Device* device,
     // No (more) workarounds needed! We can finally encode the actual render pass.
     commandContext->EndBlit();
     auto renderCommandEncoder = commandContext->BeginRender(mtlRenderPass);
-    if (resourceUsage != nullptr && device->IsToggleEnabled(Toggle::MetalUseArgumentBuffers)) {
-        MakeResourcesResident(renderCommandEncoder, *resourceUsage);
+    if (resourceUsage != nullptr) {
+        if (device->IsToggleEnabled(Toggle::MetalUseArgumentBuffers)) {
+            MakeResourcesResident(renderCommandEncoder, *resourceUsage);
+        }
+        if (resourceUsage->resourceTable != nullptr) {
+            ToBackend(resourceUsage->resourceTable)->UseResources(renderCommandEncoder);
+        }
     }
+
     DAWN_TRY(encodeInside(renderCommandEncoder, renderPassCmd));
     commandContext->EndRender();
     return {};
@@ -960,6 +970,9 @@ void MetalComputePassMakeResourcesResident(DeviceBase* device,
                                            const SyncScopeResourceUsage& resourceUsage) {
     if (device->IsToggleEnabled(Toggle::MetalUseArgumentBuffers)) {
         MakeResourcesResident(encoder, resourceUsage);
+    }
+    if (resourceUsage.resourceTable != nullptr) {
+        ToBackend(resourceUsage.resourceTable)->UseResources(encoder);
     }
 }
 

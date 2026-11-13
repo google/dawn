@@ -4,7 +4,7 @@
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int2 subgroupInclusiveAdd_fabbde() {
-  int2 res = (WavePrefixSum((int(1)).xx) + (int(1)).xx);
+  int2 res = asint((asuint(WavePrefixSum((int(1)).xx)) + (1u).xx));
   return res;
 }
 
@@ -18,7 +18,7 @@ void fragment_main() {
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int2 subgroupInclusiveAdd_fabbde() {
-  int2 res = (WavePrefixSum((int(1)).xx) + (int(1)).xx);
+  int2 res = asint((asuint(WavePrefixSum((int(1)).xx)) + (1u).xx));
   return res;
 }
 

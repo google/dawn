@@ -34,25 +34,26 @@
 #include "src/dawn/tests/MockCallback.h"
 #include "src/dawn/utils/TerribleCommandBuffer.h"
 
-using testing::_;
-using testing::AtMost;
-using testing::Mock;
-using testing::MockCallback;
-using testing::NotNull;
-using testing::Return;
-using testing::SaveArg;
-using testing::StrEq;
-using testing::WithArg;
-using testing::WithArgs;
-
-namespace dawn {
-
+namespace dawn::wire {
 namespace {
+
+using ::testing::_;
+using ::testing::AtMost;
+using ::testing::Mock;
+using ::testing::MockCallback;
+using ::testing::NotNull;
+using ::testing::Return;
+using ::testing::SaveArg;
+using ::testing::StrEq;
+using ::testing::WithArg;
+using ::testing::WithArgs;
+
 // WireTest sets the wire proc table as the global proc table.
 // Tests that use multiple wires may inherit WireTest multiple times (see
 // WireConfusionDeathTest). Refcount how many WireTest instances are running
 // to make sure we don't unset the proc table until the test is done.
 uint32_t sWireProcTableRefCount = 0;
+
 }  // namespace
 
 WireTest::WireTest() {
@@ -63,16 +64,16 @@ WireTest::WireTest() {
 
 WireTest::~WireTest() {
     // Verify that all devices had Destroy called on them.
-    for (auto& [_, destroyed] : mDeviceDestroyed) {
+    for (auto& [unused, destroyed] : mDeviceDestroyed) {
         EXPECT_TRUE(destroyed);
     }
 }
 
-wire::client::MemoryTransferService* WireTest::GetClientMemoryTransferService() {
+client::MemoryTransferService* WireTest::GetClientMemoryTransferService() {
     return nullptr;
 }
 
-wire::server::MemoryTransferService* WireTest::GetServerMemoryTransferService() {
+server::MemoryTransferService* WireTest::GetServerMemoryTransferService() {
     return nullptr;
 }
 
@@ -87,23 +88,23 @@ void WireTest::SetUp() {
     mS2cBuf = std::make_unique<utils::TerribleCommandBuffer>();
     mC2sBuf = std::make_unique<utils::TerribleCommandBuffer>(mWireServer.get());
 
-    wire::WireServerDescriptor serverDesc = {};
+    WireServerDescriptor serverDesc = {};
     serverDesc.procs = &mockProcs;
     serverDesc.serializer = mS2cBuf.get();
     serverDesc.memoryTransferService = GetServerMemoryTransferService();
 
-    mWireServer.reset(new wire::WireServer(serverDesc));
+    mWireServer = std::make_unique<WireServer>(serverDesc);
     mC2sBuf->SetHandler(mWireServer.get());
 
-    wire::WireClientDescriptor clientDesc = {};
+    WireClientDescriptor clientDesc = {};
     clientDesc.serializer = mC2sBuf.get();
     clientDesc.memoryTransferService = GetClientMemoryTransferService();
 
-    mWireClient.reset(new wire::WireClient(clientDesc));
+    mWireClient = std::make_unique<WireClient>(clientDesc);
     mS2cBuf->SetHandler(mWireClient.get());
 
     if (sWireProcTableRefCount == 0) {
-        dawnProcSetProcs(&wire::client::GetProcs());
+        dawnProcSetProcs(&client::GetProcs());
     }
     ++sWireProcTableRefCount;
 
@@ -239,19 +240,19 @@ void WireTest::FlushServer(bool success) {
     ASSERT_EQ(mS2cBuf->Flush(), success);
 }
 
-wire::WireServer* WireTest::GetWireServer() {
+WireServer* WireTest::GetWireServer() {
     return mWireServer.get();
 }
 
-wire::WireClient* WireTest::GetWireClient() {
+WireClient* WireTest::GetWireClient() {
     return mWireClient.get();
 }
 
-wire::CommandSerializer* WireTest::GetC2SSerializer() {
+CommandSerializer* WireTest::GetC2SSerializer() {
     return mC2sBuf.get();
 }
 
-wire::CommandSerializer* WireTest::GetS2CSerializer() {
+CommandSerializer* WireTest::GetS2CSerializer() {
     return mS2cBuf.get();
 }
 
@@ -269,4 +270,4 @@ void WireTest::DeleteClient() {
     mWireClient = nullptr;
 }
 
-}  // namespace dawn
+}  // namespace dawn::wire

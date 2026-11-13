@@ -39,12 +39,14 @@
 namespace dawn {
 namespace {
 
-class PerThreadProcTests : public testing::Test {
+using ::testing::Test;
+
+class PerThreadProcTests : public Test {
   public:
     PerThreadProcTests()
         : mNativeInstance(native::APICreateInstance(nullptr)),
           mAdapterBase(mNativeInstance.Get(),
-                       native::null::PhysicalDevice::Create(),
+                       native::null::PhysicalDevice::Create(mNativeInstance.Get()),
                        wgpu::FeatureLevel::Core,
                        native::TogglesState(native::ToggleStage::Adapter),
                        wgpu::PowerPreference::Undefined) {}

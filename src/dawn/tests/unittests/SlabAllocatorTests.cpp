@@ -129,7 +129,7 @@ TEST(SlabAllocatorTests, ReusesFreedMemory) {
     for (uint32_t i = 0; i < 17; ++i) {
         Foo* ptr = allocator.Allocate(i);
         EXPECT_TRUE(reallocatedObjects.insert(ptr).second);
-        EXPECT_TRUE(std::find(objects.begin(), objects.end(), ptr) != objects.end());
+        EXPECT_TRUE(objects.find(ptr) != objects.end());
     }
 
     // Deallocate all of the objects.

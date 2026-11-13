@@ -41,6 +41,7 @@ enum class MslVersion {
     kMsl_2_4,
     kMsl_3_2,
     kMsl_4_0,
+    kMsl_4_1,
 };
 
 /// MslVersion less-than operator

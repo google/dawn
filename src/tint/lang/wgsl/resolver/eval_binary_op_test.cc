@@ -2380,7 +2380,7 @@ TEST_F(ConstEvalTest, ShortCircuit_And_RHSLetDecl) {
     //   let result = false && b;
     // }
     auto* binary = LogicalAnd(false, "b");
-    WrapInFunction(Decl(Let("b", Expr(false))), binary);
+    WrapInFunction(Decl(Let("b", ast::Type{}, Expr(false))), binary);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     ValidateAnd(Sem(), binary);
@@ -2392,7 +2392,7 @@ TEST_F(ConstEvalTest, ShortCircuit_Or_RHSLetDecl) {
     //   let result = true || b;
     // }
     auto* binary = LogicalOr(true, "b");
-    WrapInFunction(Decl(Let("b", Expr(false))), binary);
+    WrapInFunction(Decl(Let("b", ast::Type{}, Expr(false))), binary);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     ValidateOr(Sem(), binary);
@@ -2500,7 +2500,7 @@ TEST_F(ConstEvalTest, ShortCircuit_And_MixedConstantAndRuntime) {
     // let result = false && j < (0 - 8);
     auto* j = Decl(Var("j", ty.i32()));
     auto* binary = LogicalAnd(Expr(false), LessThan("j", Sub(0_a, 8_a)));
-    auto* result = Let("result", binary);
+    auto* result = Let("result", ast::Type{}, binary);
     WrapInFunction(j, result);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     ValidateAnd(Sem(), binary);
@@ -2511,7 +2511,7 @@ TEST_F(ConstEvalTest, ShortCircuit_Or_MixedConstantAndRuntime) {
     // let result = true || j < (0 - 8);
     auto* j = Decl(Var("j", ty.i32()));
     auto* binary = LogicalOr(Expr(true), LessThan("j", Sub(0_a, 8_a)));
-    auto* result = Let("result", binary);
+    auto* result = Let("result", ast::Type{}, binary);
     WrapInFunction(j, result);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     ValidateOr(Sem(), binary);

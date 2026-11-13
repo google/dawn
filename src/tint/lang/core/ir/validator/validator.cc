@@ -34,6 +34,7 @@
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/referenced_functions.h"
+#include "src/tint/lang/core/ir/undef.h"
 #include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
@@ -99,7 +100,13 @@ Source Validator::SourceOf(const Instruction* inst) {
 
 Source Validator::SourceOf(const Instruction* inst, size_t idx) {
     if (IsWGSLValidation()) {
-        return ir_.SourceOf(inst->Operands()[idx]);
+        // TODO(crbug.com/576354155): Make this better by tracking operand sources for constants.
+        // If the operand is constant it has no source, so fallback to the instruction's source.
+        auto src = ir_.SourceOf(inst->Operands()[idx]);
+        if (src.file) {
+            return src;
+        }
+        return ir_.SourceOf(inst);
     }
     return Disassemble().OperandSource(
         Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
@@ -177,12 +184,15 @@ diag::Diagnostic& Validator::AddError(Source src) {
 }
 
 diag::Diagnostic& Validator::AddResultError(const Instruction* inst, size_t idx) {
-    TINT_IR_ASSERT(ir_, IsIRValidation());
+    if (IsWGSLValidation()) {
+        return AddError(ir_.SourceOf(inst));
+    }
+
     auto src =
         Disassemble().ResultSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
-    if (IsIRValidation() && !block_stack_.IsEmpty()) {
+    if (!block_stack_.IsEmpty()) {
         AddNote(block_stack_.Back()) << "in block";
 
         // Adding the note may trigger a resize and invalidate the error diagnostic reference, so we
@@ -368,9 +378,9 @@ bool Validator::CheckResult(const Instruction* inst, size_t idx) {
 
     if (check_size) {
         if (ty->Size() > tint::internal_limits::kMaxTemporaryStorageSize) {
-            AddError(inst, idx) << "result type size (" << ty->Size()
-                                << ") exceeds maximum allowed ("
-                                << tint::internal_limits::kMaxTemporaryStorageSize << ")";
+            AddResultError(inst, idx)
+                << "result type size (" << ty->Size() << ") exceeds maximum allowed ("
+                << tint::internal_limits::kMaxTemporaryStorageSize << ")";
             return false;
         }
     }
@@ -425,8 +435,13 @@ bool Validator::CheckOperand(const Instruction* inst, size_t idx) {
     auto* operand = inst->Operand(idx);
 
     if (DAWN_UNLIKELY(operand == nullptr)) {
-        // var and override instructions are allowed to have a nullptr initializers.
-        // terminator instructions use nullptr operands to signal 'undef'.
+        AddError(inst, idx) << "operand is nullptr";
+        return false;
+    }
+
+    if (DAWN_UNLIKELY(operand->Is<ir::Undef>())) {
+        // var instructions are allowed to have a undef initializers.
+        // terminator instructions can also undef when they are dynamically unreachable.
         if (inst->IsAnyOf<Terminator, Var, Override>()) {
             return true;
         }
@@ -876,7 +891,7 @@ void Validator::CheckRootBlock(const Block* blk) {
             if (!op) {
                 continue;
             }
-            if (op->Is<Constant>()) {
+            if (op->IsAnyOf<Constant, Undef>()) {
                 continue;
             }
             if (pipeline_evaluatable.Contains(op)) {

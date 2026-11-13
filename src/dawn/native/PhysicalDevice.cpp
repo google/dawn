@@ -44,7 +44,8 @@ FeatureValidationResult::FeatureValidationResult() : success(true) {}
 FeatureValidationResult::FeatureValidationResult(std::string errorMsg)
     : success(false), errorMessage(errorMsg) {}
 
-PhysicalDeviceBase::PhysicalDeviceBase(wgpu::BackendType backend) : mBackend(backend) {}
+PhysicalDeviceBase::PhysicalDeviceBase(InstanceBase* instance, wgpu::BackendType backend)
+    : mInstance(instance), mBackend(backend) {}
 
 PhysicalDeviceBase::~PhysicalDeviceBase() = default;
 
@@ -52,7 +53,7 @@ MaybeError PhysicalDeviceBase::Initialize() {
     DAWN_TRY_CONTEXT(InitializeImpl(), "initializing adapter (backend=%s)", mBackend);
     InitializeVendorArchitectureImpl();
 
-    if (SupportsFeatureLevel(wgpu::FeatureLevel::Core, nullptr)) {
+    if (SupportsFeatureLevel(wgpu::FeatureLevel::Core)) {
         EnableFeature(Feature::CoreFeaturesAndLimits);
     }
 
@@ -85,6 +86,10 @@ ResultOrError<Ref<DeviceBase>> PhysicalDeviceBase::CreateDevice(
 void PhysicalDeviceBase::InitializeVendorArchitectureImpl() {
     mVendorName = gpu_info::GetVendorName(mVendorId);
     mArchitectureName = gpu_info::GetArchitectureName(mVendorId, mDeviceId);
+}
+
+InstanceBase* PhysicalDeviceBase::GetInstance() const {
+    return mInstance;
 }
 
 uint32_t PhysicalDeviceBase::GetVendorId() const {
@@ -138,7 +143,7 @@ bool PhysicalDeviceBase::IsFeatureSupportedWithToggles(wgpu::FeatureName feature
 
 void PhysicalDeviceBase::GetDefaultLimitsForSupportedFeatureLevel(CombinedLimits* limits) const {
     // If the physical device does not support core then the defaults are compat defaults.
-    GetDefaultLimits(limits, SupportsFeatureLevel(wgpu::FeatureLevel::Core, nullptr)
+    GetDefaultLimits(limits, SupportsFeatureLevel(wgpu::FeatureLevel::Core)
                                  ? wgpu::FeatureLevel::Core
                                  : wgpu::FeatureLevel::Compatibility);
 }
@@ -188,8 +193,15 @@ FeatureValidationResult PhysicalDeviceBase::ValidateFeatureSupportedWithToggles(
     }
 
     const FeatureInfo* featureInfo = GetFeatureInfo(feature);
-    // Experimental features are guarded by the AllowUnsafeAPIs toggle.
-    if (featureInfo->featureState == FeatureInfo::FeatureState::Experimental) {
+    // Experimental (ABI-unstable) features are guarded by the AllowExperimentalAPIs toggle.
+    if (featureInfo->featureStability == FeatureInfo::FeatureStability::Experimental) {
+        if (!toggles.IsEnabled(Toggle::AllowExperimentalAPIs)) {
+            return FeatureValidationResult(absl::StrFormat(
+                "Feature %s is guarded by toggle allow_experimental_apis.", featureInfo->name));
+        }
+    }
+    // Unsafe features are guarded by the AllowUnsafeAPIs toggle.
+    if (featureInfo->featureSafety == FeatureInfo::FeatureSafety::Unsafe) {
         // AllowUnsafeAPIs toggle is by default disabled if not explicitly enabled.
         if (!toggles.IsEnabled(Toggle::AllowUnsafeAPIs)) {
             return FeatureValidationResult(absl::StrFormat(

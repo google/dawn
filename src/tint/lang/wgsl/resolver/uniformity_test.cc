@@ -394,7 +394,7 @@ class BasicTest : public UniformityAnalysisTestBase,
             case kEndOfConditionRange:
                 break;
         }
-        name += "_";
+        name += '_';
         switch (f) {
             CASE(kUserNoRestriction);
             CASE(kMin);
@@ -834,7 +834,7 @@ TEST_P(FragmentBuiltin, AsParam) {
         src += "enable chromium_experimental_barycentric_coord;\n";
         asScalar = "vec3(b).x";
     } else {
-        src += "\n";
+        src += '\n';
     }
 
     src += R"(
@@ -882,7 +882,7 @@ TEST_P(FragmentBuiltin, InStruct) {
         src += "enable chromium_experimental_barycentric_coord;\n";
         asScalar = "vec3(s.b).x";
     } else {
-        src += "\n";
+        src += '\n';
     }
 
     src += R"(
@@ -4020,12 +4020,12 @@ struct Role {
                     ss << "  ";
                     break;
             }
-            if (remaining.starts_with(" ")) {
+            if (remaining.starts_with(' ')) {
                 remaining.remove_prefix(1);
                 ss << ";/* empty statement */\n";
                 continue;
             }
-            if (remaining.starts_with("_")) {
+            if (remaining.starts_with('_')) {
                 remaining.remove_prefix(1);
                 if (enable_detect) {
                     ss << "workgroupBarrier();\n";
@@ -4034,7 +4034,7 @@ struct Role {
                 }
                 continue;
             }
-            if (remaining.starts_with("#")) {
+            if (remaining.starts_with('#')) {
                 remaining.remove_prefix(1);
                 if (enable_attack) {
                     switch (part) {
@@ -7701,7 +7701,7 @@ TEST_F(UniformityAnalysisTest, MaximumNumberOfPointerParameters) {
     for (int i = 1; i < 255; i++) {
         rhs_init = b.Add(rhs_init, b.Deref("p" + std::to_string(i)));
     }
-    foo_body.Push(b.Decl(b.Let("rhs", rhs_init)));
+    foo_body.Push(b.Decl(b.Let("rhs", ast::Type{}, rhs_init)));
     for (int i = 0; i < 255; i++) {
         params.Push(b.Param("p" + std::to_string(i), ty.ptr<function, i32>()));
         if (i > 0) {
@@ -13803,6 +13803,284 @@ INSTANTIATE_TEST_SUITE_P(UniformityAnalysisTest,
                          SubgroupUniformityTest,
                          ::testing::Range<int>(0, SubgroupUniformityTest::kEndOfFunctionRange),
                          SubgroupUniformityTest::ParamsToName);
+
+TEST_F(UniformityAnalysisTest, AliasedPointerParameters_DirectContentsRequirement) {
+    std::string src = R"(
+fn callee(p1 : ptr<function, i32>, p2 : ptr<function, i32>) {
+  *p2 = 42;
+  if (*p1 == 0) {
+    workgroupBarrier();
+  }
+}
+
+fn caller() {
+  var v = 0;
+  callee(&v, &v);
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:5:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:4:3 note: control flow depends on possibly non-uniform value
+  if (*p1 == 0) {
+  ^^
+
+test:2:11 note: parameter 'p1' of 'callee' may point to a non-uniform value
+fn callee(p1 : ptr<function, i32>, p2 : ptr<function, i32>) {
+          ^^
+
+test:11:10 note: possibly non-uniform value passed via pointer here
+  callee(&v, &v);
+         ^^
+
+test:11:3 note: possibly non-uniform value due to aliased parameters (p1 and p2)
+  callee(&v, &v);
+  ^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, AliasedPointerParameters_DirectValueRequirement) {
+    std::string src = R"(
+fn callee(p1 : ptr<function, i32>, p2 : ptr<function, i32>) {
+  *p1 = 0;
+  *p2 = 42;
+  if (*p1 == 0) {
+    workgroupBarrier();
+  }
+}
+
+fn caller() {
+  var v = 0;
+  callee(&v, &v);
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:6:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on possibly non-uniform value
+  if (*p1 == 0) {
+  ^^
+
+test:2:11 note: parameter 'p1' of 'callee' may be non-uniform
+fn callee(p1 : ptr<function, i32>, p2 : ptr<function, i32>) {
+          ^^
+
+test:12:10 note: possibly non-uniform value passed here
+  callee(&v, &v);
+         ^^
+
+test:12:3 note: possibly non-uniform value due to aliased parameters (p1 and p2)
+  callee(&v, &v);
+  ^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, AliasedPointerParameters_ReturnValueRequirement) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo(p1 : ptr<function, i32>, p2 : ptr<function, i32>) -> i32 {
+  *p1 = 0;
+  if (non_uniform == 1) {
+    *p2 = 1;
+  }
+  return *p1;
+}
+
+fn caller() {
+  var v = 0;
+  let x = foo(&v, &v);
+  if (x == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:16:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:15:3 note: control flow depends on possibly non-uniform value
+  if (x == 0) {
+  ^^
+
+test:14:11 note: possibly non-uniform value due to aliased parameters (p1 and p2)
+  let x = foo(&v, &v);
+          ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, AliasedPointerParameters_PointerOutputRequirement) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn bar(p2 : ptr<function, i32>, p1 : ptr<function, i32>) {
+  *p1 = 0;
+  *p2 = non_uniform;
+}
+
+fn caller() {
+  var v = 0;
+  bar(&v, &v);
+  if (v == 0) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:13:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:12:3 note: control flow depends on possibly non-uniform value
+  if (v == 0) {
+  ^^
+
+test:11:3 note: possibly non-uniform value due to aliased parameters (p2 and p1)
+  bar(&v, &v);
+  ^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, AliasedPointerParameters_TransitiveCall) {
+    std::string src = R"(
+fn inner(p1 : ptr<function, i32>, p2 : ptr<function, i32>) {
+  *p2 = 42;
+  if (*p1 == 0) {
+    workgroupBarrier();
+  }
+}
+
+fn middle(q1 : ptr<function, i32>, q2 : ptr<function, i32>) {
+  inner(q1, q2);
+}
+
+fn caller() {
+  var v = 0;
+  middle(&v, &v);
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:5:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:4:3 note: control flow depends on possibly non-uniform value
+  if (*p1 == 0) {
+  ^^
+
+test:2:10 note: parameter 'p1' of 'inner' may point to a non-uniform value
+fn inner(p1 : ptr<function, i32>, p2 : ptr<function, i32>) {
+         ^^
+
+test:10:9 note: possibly non-uniform value passed via pointer here
+  inner(q1, q2);
+        ^^
+
+test:9:11 note: reading from 'q1' may result in a non-uniform value
+fn middle(q1 : ptr<function, i32>, q2 : ptr<function, i32>) {
+          ^^
+
+test:15:10 note: possibly non-uniform value passed via pointer here
+  middle(&v, &v);
+         ^^
+
+test:15:3 note: possibly non-uniform value due to aliased parameters (q1 and q2)
+  middle(&v, &v);
+  ^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, AliasedPointerParameters_WarningSeverity) {
+    std::string src = R"(
+diagnostic(warning, derivative_uniformity);
+
+fn callee(p1 : ptr<function, f32>, p2 : ptr<function, f32>) -> f32 {
+  *p2 = 1.0;
+  if (*p1 == 0.0) {
+    return dpdx(1.0);
+  }
+  return 0.0;
+}
+
+fn caller() {
+  var v = 0.0;
+  _ = callee(&v, &v);
+}
+)";
+
+    RunTest(src, true);
+    EXPECT_EQ(error_,
+              R"(test:7:12 warning: 'dpdx' must only be called from uniform control flow
+    return dpdx(1.0);
+           ^^^^^^^^^
+
+test:6:3 note: control flow depends on possibly non-uniform value
+  if (*p1 == 0.0) {
+  ^^
+
+test:4:11 note: parameter 'p1' of 'callee' may point to a non-uniform value
+fn callee(p1 : ptr<function, f32>, p2 : ptr<function, f32>) -> f32 {
+          ^^
+
+test:14:14 note: possibly non-uniform value passed via pointer here
+  _ = callee(&v, &v);
+             ^^
+
+test:14:7 note: possibly non-uniform value due to aliased parameters (p1 and p2)
+  _ = callee(&v, &v);
+      ^^^^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, AliasedPointerParameters_ReadRead_Pass) {
+    std::string src = R"(
+fn callee(p1 : ptr<function, i32>, p2 : ptr<function, i32>) {
+  if (*p1 + *p2 == 0) {
+    workgroupBarrier();
+  }
+}
+
+fn caller() {
+  var v = 0;
+  callee(&v, &v);
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, AliasedPointerParameters_NoUniformityRequirement_Pass) {
+    std::string src = R"(
+fn callee(p1 : ptr<function, i32>, p2 : ptr<function, i32>) -> i32 {
+  *p1 = 1;
+  *p2 = 2;
+  return *p1 + *p2;
+}
+
+fn caller() {
+  var v = 0;
+  let x = callee(&v, &v);
+  _ = x;
+}
+)";
+
+    RunTest(src, true);
+}
 
 }  // namespace
 }  // namespace tint::resolver

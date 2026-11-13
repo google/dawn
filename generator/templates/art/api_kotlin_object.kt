@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-{% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition, check_if_doc_present, generate_kdoc, generate_simple_kdoc, add_kdoc_disclaimer, kotlin_member_optin, kotlin_class_optin, item_requires_optin with context %}
+{% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition, kotlin_is_nullable, check_if_doc_present, generate_kdoc, generate_simple_kdoc, add_kdoc_disclaimer, kotlin_member_optin, kotlin_class_optin, item_requires_optin with context %}
 {% from 'art/api_kotlin_async_helpers.kt' import async_wrapper, analyze_callback with context %}
 {{ add_kdoc_disclaimer() }}
 package {{ kotlin_package }}
@@ -58,7 +58,6 @@ public class {{ kotlin_name(obj) }} private constructor(public val handle: Long)
             //* Requires opt-in if the method, its return type, or any of its arguments require experimental opt-in.
             {{ experimental }}
         {% endif %}
-        @FastNative
         @JvmName("{{ method.name.camelCase() }}")
         {% for arg in kotlin_record_members(method.arguments) %}
             {% if kotlin_default(arg) is not none %}
@@ -68,18 +67,30 @@ public class {{ kotlin_name(obj) }} private constructor(public val handle: Long)
         {% if method.returns and method.returns.type.name.canonical_case() == 'status' %}
             @Throws({{"WebGpuException::class"}})
         {% endif %}
-        {{ kotlin_annotation(_kotlin_return) if _kotlin_return else '' }} public external fun {{ method.name.camelCase() }}(
+        {{ kotlin_annotation(_kotlin_return) if _kotlin_return else '' }} public fun {{ method.name.camelCase() }}(
         //* TODO(b/341923892): rework async methods to use futures.
         {%- for arg in kotlin_record_members(method.arguments) %}
             {%- if arg.type.category == 'callback function' -%}
                 {% set ns = namespace() %}
                 {{ analyze_callback(arg, ns) }}
                 {% set generic_T = kotlin_declaration(ns.payload_arg, true) if ns.payload_arg else 'Unit' %}
-                callback: GPURequestCallback<{{kotlin_annotation(ns.payload_arg)}} {{ generic_T }}>,{{ ' ' }}
+                {{ as_varName(arg.name) }}: GPURequestCallback<{{kotlin_annotation(ns.payload_arg)}} {{ generic_T }}>,{{ ' ' }}
             {%- else -%}
                 {{- kotlin_annotation(arg) }} {{ as_varName(arg.name) }}: {{ kotlin_definition(arg) }},{{ ' ' }}
             {%- endif -%}
-        {%- endfor -%}): {{ kotlin_declaration(_kotlin_return) if _kotlin_return else 'Unit' }}
+        {%- endfor -%}): {{ kotlin_declaration(_kotlin_return) if _kotlin_return else 'Unit' }} =
+            //* Unwrap object handles here so the native side receives plain jlong values.
+            //* Object lifetime is strictly close()-driven (no Cleaner or finalizer), so passing
+            //* raw jlong handles cannot race with GC collection.
+            {{ obj.name.camelCase() }}Native{{ method.name.CamelCase() }}(this.handle
+            {%- for arg in kotlin_record_members(method.arguments) -%}
+                {{- ', ' -}}
+                {%- if arg.type.category == 'callback function' -%}
+                    {{- as_varName(arg.name) -}}
+                {%- else -%}
+                    {{- as_varName(arg.name) }}{{- ('?.handle ?: 0L' if kotlin_is_nullable(arg) else '.handle') if (arg.type.category == 'object' and not arg.length) else '' -}}
+                {%- endif -%}
+            {%- endfor -%})
 
         {% if method.name.chunks[0] == 'get' and not method.arguments %}
             //* For the Kotlin getter, strip word 'get' from name and convert the remainder to
@@ -109,7 +120,7 @@ public class {{ kotlin_name(obj) }} private constructor(public val handle: Long)
      * This is the standard way to manage object lifetimes and should be used in `use` blocks.
      * After calling this, the object is no longer usable.
      */
-    external override fun close()
+    override fun close(): Unit = {{ obj.name.camelCase() }}NativeClose(this.handle)
 
     //* By default, the equals() function implements referential equality.
     //* see: https://kotlinlang.org/docs/equality.html#structural-equality
@@ -119,3 +130,36 @@ public class {{ kotlin_name(obj) }} private constructor(public val handle: Long)
         other is {{ kotlin_name(obj) }} && other.handle == handle
     override fun hashCode(): Int = handle.hashCode()
 }
+
+//* No @FastNative: the last Release can destroy the object, fire callbacks and block.
+@JvmName("nativeClose")
+internal external fun {{ obj.name.camelCase() }}NativeClose(handle: Long)
+{% for method in obj.methods if include_method(method) %}
+    {% set _kotlin_return = kotlin_return(method) %}
+
+    {% set experimental = kotlin_member_optin(method) -%}
+    {% if experimental %}
+        {{ experimental }}
+    {% endif %}
+    @FastNative
+    @JvmName("native{{ method.name.CamelCase() }}")
+    {% if method.returns and method.returns.type.name.canonical_case() == 'status' %}
+        @Throws({{"WebGpuException::class"}})
+    {% endif %}
+    internal external fun {{ obj.name.camelCase() }}Native{{ method.name.CamelCase() }}(
+        handle: Long
+        {%- for arg in kotlin_record_members(method.arguments) -%}
+            {{- ', ' -}}
+            {%- if arg.type.category == 'callback function' -%}
+                {% set ns = namespace() %}
+                {{ analyze_callback(arg, ns) }}
+                {% set generic_T = kotlin_declaration(ns.payload_arg, true) if ns.payload_arg else 'Unit' %}
+                {{ as_varName(arg.name) }}: GPURequestCallback<{{kotlin_annotation(ns.payload_arg)}} {{ generic_T }}>
+            {%- elif arg.type.category == 'object' and not arg.length -%}
+                {{- as_varName(arg.name) }}: Long
+            {%- else -%}
+                {{- as_varName(arg.name) }}: {{ kotlin_declaration(arg) }}
+            {%- endif -%}
+        {%- endfor -%}
+    ): {{ kotlin_declaration(_kotlin_return) if _kotlin_return else 'Unit' }}
+{% endfor %}

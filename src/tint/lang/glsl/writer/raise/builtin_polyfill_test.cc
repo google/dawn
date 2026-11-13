@@ -228,7 +228,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %v:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%cmp:i32, %val:i32):void {
@@ -248,7 +248,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %v:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%cmp:i32, %val:i32):void {
@@ -280,7 +280,7 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, AtomicSub) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %v:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -295,7 +295,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %v:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -323,7 +323,7 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, AtomicSub_u32) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %v:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -338,7 +338,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %v:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -366,7 +366,7 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, AtomicLoad) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %v:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -381,7 +381,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %v:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -611,7 +611,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -631,7 +631,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -936,7 +936,7 @@ __modf_result_f32 = struct @align(4) {
 
 %foo = func(%value:f32):f32 {
   $B1: {
-    %3:ptr<function, __modf_result_f32, read_write> = var undef
+    %3:ptr<function, __modf_result_f32, read_write> = var
     %4:ptr<function, f32, read_write> = access %3, 1u
     %5:f32 = glsl.modf %value, %4
     %6:ptr<function, f32, read_write> = access %3, 0u
@@ -992,7 +992,7 @@ __modf_result_vec4_f32 = struct @align(16) {
 
 %foo = func(%value:vec4<f32>):vec4<f32> {
   $B1: {
-    %3:ptr<function, __modf_result_vec4_f32, read_write> = var undef
+    %3:ptr<function, __modf_result_vec4_f32, read_write> = var
     %4:ptr<function, vec4<f32>, read_write> = access %3, 1u
     %5:vec4<f32> = glsl.modf %value, %4
     %6:ptr<function, vec4<f32>, read_write> = access %3, 0u
@@ -1049,7 +1049,7 @@ __frexp_result_f32 = struct @align(4) {
 
 %foo = func(%value:f32):f32 {
   $B1: {
-    %3:ptr<function, __frexp_result_f32, read_write> = var undef
+    %3:ptr<function, __frexp_result_f32, read_write> = var
     %4:ptr<function, i32, read_write> = access %3, 1u
     %5:f32 = glsl.frexp %value, %4
     %6:ptr<function, f32, read_write> = access %3, 0u
@@ -1107,7 +1107,7 @@ __frexp_result_vec4_f32 = struct @align(16) {
 
 %foo = func(%value:vec4<f32>):vec4<f32> {
   $B1: {
-    %3:ptr<function, __frexp_result_vec4_f32, read_write> = var undef
+    %3:ptr<function, __frexp_result_vec4_f32, read_write> = var
     %4:ptr<function, vec4<i32>, read_write> = access %3, 1u
     %5:vec4<f32> = glsl.frexp %value, %4
     %6:ptr<function, vec4<f32>, read_write> = access %3, 0u
@@ -1261,7 +1261,7 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, AddSat_Scalar) {
     auto* expect = R"(
 %foo = func(%a:u32, %b:u32):void {
   $B1: {
-    %4:ptr<function, u32, read_write> = var undef
+    %4:ptr<function, u32, read_write> = var
     %5:u32 = glsl.uaddCarry %a, %b, %4
     %6:u32 = load %4
     %7:bool = eq %6, 0u
@@ -1304,7 +1304,7 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, AddSat_Vector) {
     auto* expect = R"(
 %foo = func(%a:vec2<u32>, %b:vec2<u32>):void {
   $B1: {
-    %4:ptr<function, vec2<u32>, read_write> = var undef
+    %4:ptr<function, vec2<u32>, read_write> = var
     %5:vec2<u32> = glsl.uaddCarry %a, %b, %4
     %6:vec2<u32> = load %4
     %7:vec2<bool> = eq %6, vec2<u32>(0u)
@@ -1346,8 +1346,8 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, MulSat_Scalar) {
     auto* expect = R"(
 %foo = func(%a:u32, %b:u32):void {
   $B1: {
-    %4:ptr<function, u32, read_write> = var undef
-    %5:ptr<function, u32, read_write> = var undef
+    %4:ptr<function, u32, read_write> = var
+    %5:ptr<function, u32, read_write> = var
     %6:void = glsl.umulExtended %a, %b, %4, %5
     %7:u32 = load %4
     %8:bool = eq %7, 0u
@@ -1391,8 +1391,8 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, MulSat_Vector) {
     auto* expect = R"(
 %foo = func(%a:vec2<u32>, %b:vec2<u32>):void {
   $B1: {
-    %4:ptr<function, vec2<u32>, read_write> = var undef
-    %5:ptr<function, vec2<u32>, read_write> = var undef
+    %4:ptr<function, vec2<u32>, read_write> = var
+    %5:ptr<function, vec2<u32>, read_write> = var
     %6:void = glsl.umulExtended %a, %b, %4, %5
     %7:vec2<u32> = load %4
     %8:vec2<bool> = eq %7, vec2<u32>(0u)

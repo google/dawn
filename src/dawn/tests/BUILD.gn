@@ -34,6 +34,7 @@ import("../../../scripts/tint_overrides_with_defaults.gni")
 import("//testing/test.gni")
 import("${dawn_root}/generator/dawn_generator.gni")
 import("${dawn_root}/scripts/dawn_features.gni")
+import("${dawn_root}/scripts/dawn_nocompile.gni")
 
 # When embedded by Chrome, partition_alloc and the dangling pointer detector
 # are already initialized. Dawn shouldn't attempt to initialize them again. This
@@ -219,10 +220,22 @@ source_set("native_mocks_sources") {
   ]
 }
 
+# Negative compile tests. See dawn_nocompile_source_set for how to write these.
+dawn_nocompile_source_set("nocompile_sources") {
+  configs = [ "${dawn_root}/src/dawn/native:internal" ]
+  deps = [
+    "${dawn_root}/include/dawn:cpp_headers",
+    "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/dawn/native:sources",
+  ]
+  sources = [ "unittests/ErrorTests_nocompile.nc" ]
+}
+
 dawn_test("dawn_unittests") {
   deps = [
     ":mock_webgpu_gen",
     ":native_mocks_sources",
+    ":nocompile_sources",
     ":partition_alloc_support",
     ":platform_mocks_sources",
     ":test_infra_sources",
@@ -371,6 +384,7 @@ dawn_test("dawn_unittests") {
     "unittests/validation/ResourceUsageTrackingTests.cpp",
     "unittests/validation/SamplerValidationTests.cpp",
     "unittests/validation/ShaderModuleValidationTests.cpp",
+    "unittests/validation/StableInstanceValidationTests.cpp",
     "unittests/validation/StorageTextureValidationTests.cpp",
     "unittests/validation/TexelBufferValidationTests.cpp",
     "unittests/validation/TextureSubresourceTests.cpp",
@@ -457,17 +471,22 @@ dawn_test("dawn_unittests") {
   if (checkout_v8 && dawn_node && is_clang) {
     sources += [
       "${dawn_root}/src/dawn/node/test/EventLoopTest.cpp",
+      "${dawn_root}/src/dawn/node/test/FileBundleTest.cpp",
       "${dawn_root}/src/dawn/node/test/NapiV8Test.cpp",
       "${dawn_root}/src/dawn/node/test/PolyfillsTest.cpp",
+      "${dawn_root}/src/dawn/node/test/TestZip.cpp",
+      "${dawn_root}/src/dawn/node/test/TestZip.h",
       "${dawn_root}/src/dawn/node/test/V8TestEnvironment.cpp",
       "${dawn_root}/src/dawn/node/test/V8TestEnvironment.h",
     ]
     deps += [
       "${dawn_root}/src/dawn/node/napi_v8",
       "${dawn_root}/src/dawn/node/standalone:event_loop",
+      "${dawn_root}/src/dawn/node/standalone:file_bundle",
       "${dawn_root}/src/dawn/node/standalone:polyfills",
       "//third_party/v8/src:v8",
       "//third_party/v8/src:v8_libplatform",
+      "//third_party/zlib:minizip",
     ]
   }
 
@@ -703,6 +722,7 @@ source_set("end2end_tests_sources") {
     "end2end/SupportedFeatureArch.cpp",
     "end2end/TexelBufferTests.cpp",
     "end2end/Texture3DTests.cpp",
+    "end2end/TextureAllocationTests.cpp",
     "end2end/TextureComponentSwizzleTests.cpp",
     "end2end/TextureCorruptionTests.cpp",
     "end2end/TextureFormatTests.cpp",
@@ -895,6 +915,7 @@ source_set("white_box_tests_sources") {
   if (dawn_enable_d3d12) {
     sources += [
       "white_box/D3D12DescriptorHeapTests.cpp",
+      "white_box/D3D12IndirectDrawBatchingTests.cpp",
       "white_box/D3D12ResidencyTests.cpp",
       "white_box/D3D12ResourceHeapTests.cpp",
       "white_box/GPUTimestampCalibrationTests.cpp",
@@ -910,6 +931,7 @@ source_set("white_box_tests_sources") {
       "white_box/GPUTimestampCalibrationTests_Metal.mm",
       "white_box/MetalAutoreleasePoolTests.mm",
       "white_box/MetalBackendTests.cpp",
+      "white_box/MetalFencedReferencerTests.mm",
     ]
 
     # If a "build with ARC" config is present, remove it.
@@ -924,8 +946,11 @@ source_set("white_box_tests_sources") {
     sources += [
       "white_box/EGLImageWrappingTests.cpp",
       "white_box/GLBufferTests.cpp",
+      "white_box/GLDeferredWorkTests.cpp",
       "white_box/GLFramebufferCompletenessTests.cpp",
+      "white_box/GLGraphicsResetTests.cpp",
       "white_box/GLTextureWrappingTests.cpp",
+      "white_box/GLUncheckedErrorTests.cpp",
     ]
     include_dirs = [ "${dawn_root}/third_party/EGL-Registry" ]
   }

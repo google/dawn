@@ -53,7 +53,7 @@ TEST_F(WgslASTPrinterTest, EmitExpression_MemberAccessor_OfDref) {
     auto* s = Structure("Data", Vector{Member("mem", ty.f32())});
     GlobalVar("str", ty.Of(s), core::AddressSpace::kPrivate);
 
-    auto* p = Let("p", AddressOf("str"));
+    auto* p = Let("p", ast::Type{}, AddressOf("str"));
     auto* expr = MemberAccessor(Deref("p"), "mem");
     WrapInFunction(p, expr);
 

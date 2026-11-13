@@ -42,6 +42,9 @@
 namespace dawn::native::d3d12 {
 namespace {
 
+using ::testing::TestWithParam;
+using ::testing::Values;
+
 // Suffix operator for TexelCount
 constexpr TexelCount operator""_tc(uint64_t v) {
     return TexelCount{v};
@@ -428,7 +431,7 @@ struct CopySplitTestParam {
     bool relaxed;
 };
 
-class CopySplitTest : public testing::TestWithParam<CopySplitTestParam> {
+class CopySplitTest : public TestWithParam<CopySplitTestParam> {
   protected:
     void DoTest(const TextureSpec& textureSpec,
                 const BufferSpec& bufferSpec,
@@ -679,12 +682,12 @@ TEST_P(CopySplitTest, ImageHeight) {
 INSTANTIATE_TEST_SUITE_P(
     ,
     CopySplitTest,
-    testing::Values(CopySplitTestParam{.dimension = wgpu::TextureDimension::e1D, .relaxed = false},
-                    CopySplitTestParam{.dimension = wgpu::TextureDimension::e1D, .relaxed = true},
-                    CopySplitTestParam{.dimension = wgpu::TextureDimension::e2D, .relaxed = false},
-                    CopySplitTestParam{.dimension = wgpu::TextureDimension::e2D, .relaxed = true},
-                    CopySplitTestParam{.dimension = wgpu::TextureDimension::e3D, .relaxed = false},
-                    CopySplitTestParam{.dimension = wgpu::TextureDimension::e3D, .relaxed = true}));
+    Values(CopySplitTestParam{.dimension = wgpu::TextureDimension::e1D, .relaxed = false},
+           CopySplitTestParam{.dimension = wgpu::TextureDimension::e1D, .relaxed = true},
+           CopySplitTestParam{.dimension = wgpu::TextureDimension::e2D, .relaxed = false},
+           CopySplitTestParam{.dimension = wgpu::TextureDimension::e2D, .relaxed = true},
+           CopySplitTestParam{.dimension = wgpu::TextureDimension::e3D, .relaxed = false},
+           CopySplitTestParam{.dimension = wgpu::TextureDimension::e3D, .relaxed = true}));
 
 // Test for specific case that failed CTS for BCSliced3D formats (4x4 block) when the copy height
 // is 1 block row, and we have a buffer offset that results in the copy region straddling

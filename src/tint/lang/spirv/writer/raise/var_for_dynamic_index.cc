@@ -27,6 +27,9 @@
 
 #include "src/tint/lang/spirv/writer/raise/var_for_dynamic_index.h"
 
+#include <algorithm>
+#include <cstddef>
+
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -95,9 +98,12 @@ struct State {
             if (callback(i, indices[i], type) == Action::kStop) {
                 break;
             }
-            auto* const_idx = indices[i]->As<core::ir::Constant>();
-            type = const_idx ? type->Element(const_idx->Value()->ValueAs<u32>())
-                             : type->Elements().type;
+            if (auto* el = type->Elements().type) {
+                type = el;
+            } else {
+                auto* const_idx = indices[i]->As<core::ir::Constant>();
+                type = type->Element(const_idx->Value()->ValueAs<u32>());
+            }
         }
     }
 
@@ -168,10 +174,11 @@ struct State {
                         // object.
                         if (source_object->Is<core::ir::Constant>()) {
                             for (const auto& i : partial_access.indices) {
-                                auto idx =
-                                    i->As<core::ir::Constant>()->Value()->ValueAs<uint32_t>();
-                                source_object = b.Constant(
-                                    source_object->As<core::ir::Constant>()->Value()->Index(idx));
+                                auto* cnst_val = source_object->As<core::ir::Constant>()->Value();
+                                auto idx = std::min<size_t>(
+                                    i->As<core::ir::Constant>()->Value()->ValueAs<uint32_t>(),
+                                    cnst_val->NumElements() - 1);
+                                source_object = b.Constant(cnst_val->Index(idx));
                             }
                             return source_object;
                         }

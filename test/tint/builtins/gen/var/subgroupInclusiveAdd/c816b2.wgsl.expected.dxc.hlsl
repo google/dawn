@@ -6,7 +6,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 int3 subgroupInclusiveAdd_c816b2() {
   int3 arg_0 = (int(1)).xxx;
   int3 v = arg_0;
-  int3 res = (WavePrefixSum(v) + v);
+  int3 res = asint((asuint(WavePrefixSum(v)) + asuint(v)));
   return res;
 }
 
@@ -22,7 +22,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 int3 subgroupInclusiveAdd_c816b2() {
   int3 arg_0 = (int(1)).xxx;
   int3 v = arg_0;
-  int3 res = (WavePrefixSum(v) + v);
+  int3 res = asint((asuint(WavePrefixSum(v)) + asuint(v)));
   return res;
 }
 

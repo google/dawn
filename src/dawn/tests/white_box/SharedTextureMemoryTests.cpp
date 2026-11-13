@@ -43,8 +43,6 @@
 #include "src/dawn/utils/TextureUtils.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 
-using testing::SizedStringMatches;
-
 namespace dawn {
 
 namespace {
@@ -148,7 +146,7 @@ std::vector<wgpu::FeatureName> SharedTextureMemoryTests::GetRequiredFeatures() {
     }
 
     return features;
-}  // namespace dawn
+}
 
 void SharedTextureMemoryTests::SetUp() {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
@@ -487,8 +485,8 @@ void SharedTextureMemoryTests::WriteFourColorsToRGBA8Texture(wgpu::Device& devic
 
     for (uint32_t layer = 0; layer < texture.GetDepthOrArrayLayers(); ++layer) {
         dest.origin.z = layer;
-        device.GetQueue().WriteTexture(&dest, pixels.data(), pixels.size(), &dataLayout,
-                                       &writeSize);
+        deviceObj.GetQueue().WriteTexture(&dest, pixels.data(), pixels.size(), &dataLayout,
+                                          &writeSize);
     }
 }
 
@@ -743,6 +741,33 @@ void SharedTextureMemoryTests::CheckFourColors(wgpu::Device& deviceObj,
     EXPECT_TEXTURE_EQ(deviceObj, &expectedColors[3], colorTarget, br, {1, 1});
 }
 
+// Check that the contents of colorTarget are RGBA8Unorm texels that match those produced by
+// MakeCheckBySamplingCommandBuffer when sampling a texture of |format| that was cleared to zero.
+void SharedTextureMemoryTests::CheckCleared(wgpu::Device& deviceObj,
+                                            wgpu::TextureFormat format,
+                                            wgpu::Texture& colorTarget) {
+    uint8_t expectedAlpha;
+    switch (format) {
+        case wgpu::TextureFormat::RGBA8Unorm:
+        case wgpu::TextureFormat::BGRA8Unorm:
+        case wgpu::TextureFormat::RGB10A2Unorm:
+        case wgpu::TextureFormat::RGBA16Float:
+            expectedAlpha = 0;
+            break;
+        default:
+            // The test checks by sampling. Formats that don't have alpha return 1 for alpha when
+            // sampled in a shader.
+            expectedAlpha = 255;
+            break;
+    }
+    std::vector<utils::RGBA8> expected(
+        static_cast<size_t>(colorTarget.GetWidth()) * colorTarget.GetHeight(),
+        utils::RGBA8{0, 0, 0, expectedAlpha});
+    EXPECT_TEXTURE_EQ(deviceObj, expected.data(), colorTarget, {0, 0},
+                      {colorTarget.GetWidth(), colorTarget.GetHeight()})
+        << "format: " << static_cast<uint32_t>(format);
+}
+
 // Allow tests to be uninstantiated since it's possible no backends are available.
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(SharedTextureMemoryNoFeatureTests);
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(SharedTextureMemoryTests);
@@ -885,8 +910,9 @@ void SharedTextureMemoryTests::TestTableHasResource(wgpu::ResourceTable table,
 
 namespace {
 
-using testing::HasSubstr;
-using testing::MockCppCallback;
+using ::testing::HasSubstr;
+using ::testing::MockCppCallback;
+using ::testing::SizedStringMatches;
 
 template <typename T>
 T& AsNonConst(const T& rhs) {
@@ -1059,6 +1085,158 @@ TEST_P(SharedTextureMemoryTests, ImportSharedFenceDeviceDestroyed) {
     // Begin access should fail.
     EXPECT_NE(memory.BeginAccess(texture, &beginDesc), wgpu::Status::Success);
 }
+
+// Test that if the device is destroyed or lost before EndAccess, initialization done during the
+// access isn't trusted since the commands may have been dropped without being executed
+// (crbug.com/577360270). The texture is exported as initialized only if it was already
+// initialized on BeginAccess and wasn't used by any GPU commands during the access.
+TEST_P(SharedTextureMemoryTests, InitializedStateOnEndAccessAfterDeviceDestroyedOrLost) {
+    // TODO(crbug.com/555876250): "Failed to create GBM buffer object" crashes the tests.
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia() &&
+                          GetParam().mBackend->Name().find("dma buf") != std::string::npos);
+
+    auto DoTest = [&](bool beginInitialized, bool doWrite, auto DestroyOrLoseDevice) {
+        // Always create a new device, bypassing SharedTextureMemoryTests::CreateDevice() which
+        // returns the shared test device for backends where UseSameDevice() is true. That is only
+        // needed when sharing memory across devices, but this test creates, uses and destroys or
+        // loses all of its memories on a single device, so it can use a new device for each case.
+        wgpu::Device testDevice = DawnTestBase::CreateDevice();
+
+        // Skip multiplanar formats: they must always be initialized on BeginAccess and can't be
+        // written with queue.writeTexture, so they don't exercise anything meaningful here. When
+        // writing, also skip memories that can't be written with WriteFourColorsToRGBA8Texture.
+        std::vector<wgpu::SharedTextureMemory> memories;
+        for (wgpu::SharedTextureMemory memory :
+             GetParam().mBackend->CreateSharedTextureMemories(testDevice, GetParam().mLayerCount)) {
+            wgpu::SharedTextureMemoryProperties properties;
+            memory.GetProperties(&properties);
+            if (utils::IsMultiPlanarFormat(properties.format)) {
+                continue;
+            }
+            if (doWrite && (properties.format != wgpu::TextureFormat::RGBA8Unorm ||
+                            !(properties.usage & wgpu::TextureUsage::CopyDst))) {
+                continue;
+            }
+            memories.push_back(std::move(memory));
+        }
+
+        std::vector<wgpu::Texture> textures;
+        for (wgpu::SharedTextureMemory memory : memories) {
+            wgpu::Texture texture = memory.CreateTexture();
+            wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+            beginDesc.concurrentRead = false;
+            beginDesc.initialized = beginInitialized;
+            auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+            EXPECT_EQ(memory.BeginAccess(texture, &beginDesc), wgpu::Status::Success);
+
+            // Fully write the texture with queue.writeTexture without submitting anything, so that
+            // the write is still pending when the device is destroyed or lost. Otherwise, the
+            // texture is left unused during the access.
+            if (doWrite) {
+                WriteFourColorsToRGBA8Texture(testDevice, texture);
+            }
+            textures.push_back(texture);
+        }
+
+        // Destroy or lose the device before performing EndAccess.
+        DestroyOrLoseDevice(testDevice);
+
+        // The texture is only initialized if it was initialized on BeginAccess and wasn't written
+        // to, since the writes may have been dropped when the device was lost.
+        bool expectedInitialized = beginInitialized && !doWrite;
+        for (size_t i = 0; i < memories.size(); ++i) {
+            wgpu::SharedTextureMemoryEndAccessState endState = {};
+            AsNonConst(endState.initialized) = !expectedInitialized;  // should be overwritten
+            auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
+            memories[i].EndAccess(textures[i], &endState);
+            EXPECT_EQ(endState.initialized, expectedInitialized);
+        }
+    };
+
+    auto Destroy = [](wgpu::Device d) { d.Destroy(); };
+    auto Lose = [this](wgpu::Device d) { LoseDeviceForTesting(d); };
+
+    for (bool beginInitialized : {false, true}) {
+        for (bool doWrite : {false, true}) {
+            DoTest(beginInitialized, doWrite, Destroy);
+            DoTest(beginInitialized, doWrite, Lose);
+        }
+    }
+}
+
+#if defined(DAWN_ENABLE_ERROR_INJECTION)
+// Regression test for crbug.com/577377985: if the first submit using a shared texture fails (which
+// loses the device) and the device is then destroyed while the access is still open, EndAccess
+// must not try to record and submit commands on the destroyed queue.
+TEST_P(SharedTextureMemoryTests, EndAccessAfterFailedSubmitThenDeviceDestroyed) {
+    // TODO(crbug.com/555876250): "Failed to create GBM buffer object" crashes the tests.
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia() &&
+                          GetParam().mBackend->Name().find("dma buf") != std::string::npos);
+
+    wgpu::Device testDevice = CreateDevice();
+    // Only use memories that can be rendered to so that the submit uses them. Skip multiplanar
+    // formats since they must be initialized on BeginAccess and rendering to them requires
+    // per-plane views.
+    std::vector<wgpu::SharedTextureMemory> memories;
+    for (wgpu::SharedTextureMemory memory :
+         GetParam().mBackend->CreateSharedTextureMemories(testDevice, GetParam().mLayerCount)) {
+        wgpu::SharedTextureMemoryProperties properties;
+        memory.GetProperties(&properties);
+        if ((properties.usage & wgpu::TextureUsage::RenderAttachment) &&
+            !utils::IsMultiPlanarFormat(properties.format)) {
+            memories.push_back(std::move(memory));
+        }
+    }
+    DAWN_TEST_UNSUPPORTED_IF(memories.empty());
+
+    std::vector<wgpu::Texture> textures;
+    std::vector<wgpu::CommandBuffer> commandBuffers;
+    for (wgpu::SharedTextureMemory memory : memories) {
+        wgpu::Texture texture = memory.CreateTexture();
+
+        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+        beginDesc.concurrentRead = false;
+        beginDesc.initialized = false;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+        EXPECT_EQ(memory.BeginAccess(texture, &beginDesc), wgpu::Status::Success);
+
+        wgpu::CommandEncoder encoder = testDevice.CreateCommandEncoder();
+        for (int layer = 0; layer < GetParam().mLayerCount; ++layer) {
+            wgpu::TextureViewDescriptor viewDesc;
+            viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            viewDesc.baseArrayLayer = layer;
+            viewDesc.arrayLayerCount = 1;
+            utils::ComboRenderPassDescriptor passDescriptor({texture.CreateView(&viewDesc)});
+            encoder.BeginRenderPass(&passDescriptor).End();
+        }
+        commandBuffers.push_back(encoder.Finish());
+        textures.push_back(texture);
+    }
+
+    // Make the first submit using the textures fail, which loses the device. The textures were
+    // used by the failed submit, but never had an export semaphore/fence created for them.
+    native::EnableErrorInjector();
+    native::InjectErrorAt(0u);
+    EXPECT_DEVICE_LOSS_ON(
+        testDevice, testDevice.GetQueue().Submit(commandBuffers.size(), commandBuffers.data()));
+    native::DisableErrorInjector();
+    native::ClearErrorInjector();
+    EXPECT_TRUE(memories[0].IsDeviceLost());
+
+    // Destroy the device while the accesses are still open.
+    testDevice.Destroy();
+
+    // EndAccess must not crash or touch freed backend objects, and must report the textures as
+    // uninitialized since the device is lost.
+    for (size_t i = 0; i < memories.size(); ++i) {
+        wgpu::SharedTextureMemoryEndAccessState endState = {};
+        AsNonConst(endState.initialized) = true;  // should be overwritten
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
+        memories[i].EndAccess(textures[i], &endState);
+        EXPECT_FALSE(endState.initialized);
+    }
+}
+#endif  // defined(DAWN_ENABLE_ERROR_INJECTION)
 
 // Test calling GetProperties with an error memory. The properties are filled with 0/None/Undefined.
 TEST_P(SharedTextureMemoryTests, GetPropertiesErrorMemory) {
@@ -1822,26 +2000,7 @@ TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
                 device.GetQueue().Submit(1, &commandBuffer);
                 memory.EndAccess(texture, &endState);
 
-                uint8_t alphaVal;
-                switch (properties.format) {
-                    case wgpu::TextureFormat::RGBA8Unorm:
-                    case wgpu::TextureFormat::BGRA8Unorm:
-                    case wgpu::TextureFormat::RGB10A2Unorm:
-                    case wgpu::TextureFormat::RGBA16Float:
-                        alphaVal = 0;
-                        break;
-                    default:
-                        // The test checks by sampling. Formats that don't
-                        // have alpha return 1 for alpha when sampled in a shader.
-                        alphaVal = 255;
-                        break;
-                }
-                std::vector<utils::RGBA8> expected(
-                    static_cast<size_t>(texture.GetWidth()) * texture.GetHeight(),
-                    utils::RGBA8{0, 0, 0, alphaVal});
-                EXPECT_TEXTURE_EQ(device, expected.data(), colorTarget, {0, 0},
-                                  {colorTarget.GetWidth(), colorTarget.GetHeight()})
-                    << "format: " << static_cast<uint32_t>(properties.format);
+                CheckCleared(device, properties.format, colorTarget);
             }
         };
 
@@ -2420,6 +2579,172 @@ TEST_P(SharedTextureMemoryTests, RenderThenSampleSameReadOnlyTextureAcrossAccess
     }
 }
 
+// Test that binding an acquired SharedTexture in a BindGroup whose layout entry has
+// wgpu::ShaderStage::None visibility is a no-op for the texture and does not interfere with
+// acquiring and sampling the texture in a subsequent pass. On Vulkan, this ensures
+// TransitionUsageForPassImpl does not call TweakTransition when no barrier is emitted.
+TEST_P(SharedTextureMemoryTests, BoundWithShaderStageNoneBeforeSampling) {
+    // TODO(crbug.com/523272965): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
+    // crbug.com/475503907
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsImgTec());
+
+    wgpu::ShaderModule noopModule = utils::CreateShaderModule(device, R"(
+      @vertex fn vert_main() -> @builtin(position) vec4f {
+          return vec4f(0.0, 0.0, 0.0, 1.0);
+      }
+      @fragment fn frag_main() -> @location(0) vec4f {
+          return vec4f(0.0, 0.0, 0.0, 1.0);
+      }
+    )");
+
+    wgpu::BindGroupLayout noneBgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::None, wgpu::TextureSampleType::UnfilterableFloat}});
+
+    utils::ComboRenderPipelineDescriptor noopPipelineDesc;
+    noopPipelineDesc.layout = utils::MakePipelineLayout(device, {noneBgl});
+    noopPipelineDesc.vertex.module = noopModule;
+    noopPipelineDesc.cFragment.module = noopModule;
+    noopPipelineDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    wgpu::RenderPipeline noopPipeline = device.CreateRenderPipeline(&noopPipelineDesc);
+
+    for (const auto& memories :
+         GetParam().mBackend->CreatePerDeviceSharedTextureMemoriesFilterByUsage(
+             {device}, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding,
+             GetParam().mLayerCount)) {
+        auto memory = memories[0];
+        wgpu::SharedTextureMemoryProperties properties;
+        memory.GetProperties(&properties);
+
+        wgpu::Texture writeTexture = memory.CreateTexture();
+
+        wgpu::TextureDescriptor readTextureDesc = {};
+        readTextureDesc.format = properties.format;
+        readTextureDesc.size = properties.size;
+        readTextureDesc.usage = wgpu::TextureUsage::TextureBinding;
+        readTextureDesc.label = "read texture";
+        wgpu::Texture readTexture = memory.CreateTexture(&readTextureDesc);
+
+        // Clear the texture.
+        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+        beginDesc.concurrentRead = false;
+        beginDesc.initialized = false;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+        memory.BeginAccess(writeTexture, &beginDesc);
+
+        wgpu::CommandBuffer commandBuffer = MakeFourColorsClearCommandBuffer(device, writeTexture);
+        device.GetQueue().Submit(1, &commandBuffer);
+
+        wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
+        memory.EndAccess(writeTexture, &endState);
+        EXPECT_TRUE(endState.initialized);
+
+        // Begin access on readTexture, bind it in a pass with ShaderStage::None visibility, then
+        // sample it in a subsequent pass before ending access.
+        std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
+        for (size_t j = 0; j < endState.fenceCount; ++j) {
+            sharedFences[j] = utils::ImportFenceTo(device, endState.fences[j]);
+        }
+        beginDesc.fenceCount = endState.fenceCount;
+        beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValueCount = endState.signaledValueCount;
+        beginDesc.signaledValues = endState.signaledValues;
+        beginDesc.concurrentRead = false;
+        beginDesc.initialized = endState.initialized;
+        backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
+
+        memory.BeginAccess(readTexture, &beginDesc);
+
+        wgpu::TextureViewDescriptor viewDesc;
+        viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+        viewDesc.baseArrayLayer = 0;
+        viewDesc.arrayLayerCount = 1;
+        wgpu::BindGroup noneBindGroup =
+            utils::MakeBindGroup(device, noneBgl, {{0, readTexture.CreateView(&viewDesc)}});
+
+        utils::BasicRenderPass placeholderRenderPass = utils::CreateBasicRenderPass(device, 1, 1);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass =
+            encoder.BeginRenderPass(&placeholderRenderPass.renderPassInfo);
+        pass.SetPipeline(noopPipeline);
+        pass.SetBindGroup(0, noneBindGroup);
+        pass.Draw(1);
+        pass.End();
+        wgpu::CommandBuffer noopCommandBuffer = encoder.Finish();
+
+        wgpu::Texture colorTarget;
+        std::tie(commandBuffer, colorTarget) =
+            MakeCheckBySamplingCommandBuffer(device, readTexture);
+        wgpu::CommandBuffer commands[] = {noopCommandBuffer, commandBuffer};
+        device.GetQueue().Submit(2, commands);
+
+        memory.EndAccess(readTexture, &endState);
+        EXPECT_TRUE(endState.initialized);
+
+        CheckFourColors(device, readTexture.GetFormat(), colorTarget);
+    }
+}
+
+// Test copying from the same SharedTexture to a buffer twice in a single command buffer. The
+// first copy acquires the texture and transitions it to CopySrc, and the second copy reuses the
+// read-only CopySrc usage without needing a barrier.
+TEST_P(SharedTextureMemoryTests, CopyTextureToBufferTwiceInSameCommandBuffer) {
+    // TODO(crbug.com/523272965): Produces incorrect result on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
+    // crbug.com/475503907
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsImgTec());
+
+    for (wgpu::SharedTextureMemory memory :
+         GetParam().mBackend->CreateSinglePlanarSharedTextureMemories(device,
+                                                                      GetParam().mLayerCount)) {
+        wgpu::SharedTextureMemoryProperties properties;
+        memory.GetProperties(&properties);
+        if (!(properties.usage & wgpu::TextureUsage::CopySrc)) {
+            continue;
+        }
+
+        wgpu::Texture texture = memory.CreateTexture();
+
+        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+        beginDesc.concurrentRead = false;
+        beginDesc.initialized = true;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+        memory.BeginAccess(texture, &beginDesc);
+
+        wgpu::BufferDescriptor bufferDesc = {};
+        bufferDesc.size = 128;
+        bufferDesc.usage = wgpu::BufferUsage::CopyDst;
+        wgpu::Buffer destinationBuffer = device.CreateBuffer(&bufferDesc);
+
+        wgpu::TexelCopyTextureInfo source = {};
+        source.texture = texture;
+        wgpu::TexelCopyBufferInfo destination = {};
+        destination.buffer = destinationBuffer;
+        wgpu::Extent3D size = {1, 1, 1};
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyTextureToBuffer(&source, &destination, &size);
+        encoder.CopyTextureToBuffer(&source, &destination, &size);
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
+        device.GetQueue().Submit(1, &commandBuffer);
+
+        wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
+        memory.EndAccess(texture, &endState);
+        EXPECT_TRUE(endState.initialized);
+    }
+}
+
 // Test rendering to a texture memory on one device, then sampling it using another device.
 // Destroy the texture from the first device after submitting the commands, but before performing
 // EndAccess. The second device should still be able to wait on the first device and see the
@@ -2546,9 +2871,10 @@ TEST_P(SharedTextureMemoryTests, RenderThenDropAllMemoriesThenSample) {
 }
 
 // Test rendering to a texture memory on one device, then sampling it using another device.
-// Destroy or destroy the first device after submitting the commands, but before performing
-// EndAccess. The second device should still be able to wait on the first device and see the
-// results.
+// Destroy or lose the first device after submitting the commands, but before performing
+// EndAccess. Since the device was lost before EndAccess, Dawn doesn't guarantee that the rendering
+// completed, so the texture must be exported as uninitialized and the second device should see
+// lazily cleared contents instead of the results of the rendering.
 // This tests both cases where the device is destroyed, and where the device is lost.
 TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThenSample) {
     // TODO(crbug.com/523272965): Produces incorrect result on Pixel 10.
@@ -2556,10 +2882,6 @@ TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThe
 
     // Not supported if using the same device. Not possible to lose one without losing the other.
     DAWN_TEST_UNSUPPORTED_IF(GetParam().mBackend->UseSameDevice());
-
-    // This test expects a fence returned from EndAccess, which is not possible if fences are
-    // disabled in D3D11.
-    DAWN_TEST_UNSUPPORTED_IF(IsD3D11() && HasToggleEnabled("d3d11_disable_fence"));
 
     // crbug.com/358166479
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
@@ -2600,15 +2922,13 @@ TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThe
         wgpu::SharedTextureMemoryEndAccessState endState = {};
         auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
         memories[0].EndAccess(textures[0], &endState);
-        EXPECT_GT(endState.fenceCount, 0u);
-        EXPECT_GT(endState.signaledValueCount, 0u);
+        // The device is lost, so no new fence is exported for the work done during the access,
+        // and the texture is reported as uninitialized since it was used during the access.
+        EXPECT_EQ(endState.fenceCount, 0u);
+        EXPECT_FALSE(endState.initialized);
 
-        std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
-        for (size_t i = 0; i < endState.fenceCount; ++i) {
-            sharedFences[i] = utils::ImportFenceTo(devices[1], endState.fences[i]);
-        }
         beginDesc.fenceCount = endState.fenceCount;
-        beginDesc.fences = sharedFences.data();
+        beginDesc.fences = endState.fences;
         beginDesc.signaledValueCount = endState.signaledValueCount;
         beginDesc.signaledValues = endState.signaledValues;
         beginDesc.concurrentRead = false;
@@ -2619,7 +2939,8 @@ TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThe
         devices[1].GetQueue().Submit(1, &commandBuffer1);
         memories[1].EndAccess(textures[1], &endState);
 
-        CheckFourColors(devices[1], textures[1].GetFormat(), colorTarget);
+        // The texture should have been lazily cleared on the second device.
+        CheckCleared(devices[1], textures[1].GetFormat(), colorTarget);
     };
 
     DoTest([](wgpu::Device d) { d.Destroy(); });
@@ -3035,6 +3356,10 @@ TEST_P(SharedTextureMemoryTests, WriteStorageThenReadSample) {
     // crbug.com/475503907
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsImgTec());
 
+    // crbug.com/578756716
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsIntelXe2OrLater() &&
+                          GetDriverVersion() >= gpu_info::DriverVersion({26, 0, 8}));
+
     std::vector<wgpu::Device> devices = {device, CreateDevice()};
 
     for (const auto& memories :
@@ -3160,6 +3485,12 @@ TEST_P(SharedTextureMemoryTests, WriteTextureThenReadSample) {
 
 // Test that calling memory.EndAccess() implicitly hides the texture, and BeginAccess() unhides it.
 TEST_P(SharedTextureMemoryTests, HasResourceOneTextureEndAccess) {
+    // TODO(473444514): Re-enable when compute shaders support ResourceTable on metal
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
+
+    // WebGPUOnWebGPU doesn't support ResourceTable
+    DAWN_TEST_UNSUPPORTED_IF(IsWebGPUOnWebGPU());
+
     DAWN_TEST_UNSUPPORTED_IF(
         !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable}));
     // Swiftshader doesn't support variable count descriptor sets used in draw operations.
@@ -3195,6 +3526,12 @@ TEST_P(SharedTextureMemoryTests, HasResourceOneTextureEndAccess) {
 // Test that updating a table with a texture whose access has ended works, but doesn't show that
 // entry as available until BeginAccess is called.
 TEST_P(SharedTextureMemoryTests, HasResourceUpdateWithTextureAlreadyEndedAccess) {
+    // TODO(473444514): Re-enable when compute shaders support ResourceTable on metal
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
+
+    // WebGPUOnWebGPU doesn't support ResourceTable
+    DAWN_TEST_UNSUPPORTED_IF(IsWebGPUOnWebGPU());
+
     DAWN_TEST_UNSUPPORTED_IF(
         !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable}));
     // Swiftshader doesn't support variable count descriptor sets used in draw operations.
@@ -3228,6 +3565,12 @@ TEST_P(SharedTextureMemoryTests, HasResourceUpdateWithTextureAlreadyEndedAccess)
 // Test that a texture used in multiple resource tables has its availability correctly updated on
 // EndAccess and BeginAccess.
 TEST_P(SharedTextureMemoryTests, HasResourceSameTextureMultipleTablesEndAccess) {
+    // TODO(473444514): Re-enable when compute shaders support ResourceTable on metal
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
+
+    // WebGPUOnWebGPU doesn't support ResourceTable
+    DAWN_TEST_UNSUPPORTED_IF(IsWebGPUOnWebGPU());
+
     DAWN_TEST_UNSUPPORTED_IF(
         !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable}));
     // Swiftshader doesn't support variable count descriptor sets used in draw operations.
@@ -3269,6 +3612,9 @@ TEST_P(SharedTextureMemoryTests, HasResourceSameTextureMultipleTablesEndAccess) 
 // where one device interacts via a bindful render attachment and the other via a bindless resource
 // table.
 TEST_P(SharedTextureMemoryTests, InterDeviceRenderAttachmentAndBindlessTexture) {
+    // WebGPUOnWebGPU doesn't support ResourceTable
+    DAWN_TEST_UNSUPPORTED_IF(IsWebGPUOnWebGPU());
+
     DAWN_TEST_UNSUPPORTED_IF(
         !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSamplingResourceTable}));
     // Swiftshader doesn't support variable count descriptor sets used in draw operations.

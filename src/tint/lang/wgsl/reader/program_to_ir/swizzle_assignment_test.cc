@@ -47,7 +47,7 @@ TEST_F(ProgramToIRSwizzleAssignmentTest, Assignment_SingleElementSwizzle) {
 
     EXPECT_EQ(Dis(m.Get()), R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     store_vector_element %v, 1u, 1.0f
     ret
   }
@@ -67,7 +67,7 @@ TEST_F(ProgramToIRSwizzleAssignmentTest, Assignment_MultiElementSwizzle) {
 
     EXPECT_EQ(Dis(m.Get()), R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %3:vec4<f32> = load %v
     %4:f32 = access %3, 2u
     %5:vec4<f32> = construct 3.0f, 1.0f, %4, 2.0f
@@ -90,7 +90,7 @@ TEST_F(ProgramToIRSwizzleAssignmentTest, Assignment_ChainedSwizzle) {
 
     EXPECT_EQ(Dis(m.Get()), R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     store_vector_element %v, 2u, 1.0f
     ret
   }
@@ -111,7 +111,7 @@ TEST_F(ProgramToIRSwizzleAssignmentTest, Assignment_ChainedMultiElementSwizzle) 
 
     EXPECT_EQ(Dis(m.Get()), R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %3:vec4<f32> = load %v
     %4:f32 = access %3, 1u
     %5:f32 = access %3, 3u
@@ -135,7 +135,7 @@ TEST_F(ProgramToIRSwizzleAssignmentTest, CompoundAssignment_SingleElementSwizzle
 
     EXPECT_EQ(Dis(m.Get()), R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %3:f32 = load_vector_element %v, 1u
     %4:f32 = add %3, 1.0f
     store_vector_element %v, 1u, %4
@@ -158,7 +158,7 @@ TEST_F(ProgramToIRSwizzleAssignmentTest, CompoundAssignment_MultiElementSwizzle)
 
     EXPECT_EQ(Dis(m.Get()), R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %3:vec4<f32> = load %v
     %4:vec3<f32> = swizzle %3, ywx
     %5:vec3<f32> = mul %4, vec3<f32>(1.0f, 2.0f, 3.0f)
@@ -188,7 +188,7 @@ TEST_F(ProgramToIRSwizzleAssignmentTest, CompoundAssignment_ChainedSwizzle) {
 
     EXPECT_EQ(Dis(m.Get()), R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %3:vec4<f32> = load %v
     %4:vec2<f32> = swizzle %3, zx
     %5:vec2<f32> = add %4, vec2<f32>(1.0f, 2.0f)
@@ -217,7 +217,7 @@ TEST_F(ProgramToIRSwizzleAssignmentTest, Assignment_SwizzleIndexedConstant) {
 
     EXPECT_EQ(Dis(m.Get()), R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     store_vector_element %v, 2u, 1.0f
     ret
   }
@@ -239,8 +239,8 @@ TEST_F(ProgramToIRSwizzleAssignmentTest, Assignment_SwizzleIndexedDynamic) {
 
     EXPECT_EQ(Dis(m.Get()), R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
-    %i:ptr<function, i32, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
+    %i:ptr<function, i32, read_write> = var
     %4:i32 = load %i
     %5:u32 = access array<u32, 3>(2u, 1u, 0u), %4
     store_vector_element %v, %5, 1.0f
@@ -263,7 +263,7 @@ TEST_F(ProgramToIRSwizzleAssignmentTest, CompoundAssignment_SwizzleIndexedConsta
 
     EXPECT_EQ(Dis(m.Get()), R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %3:f32 = load_vector_element %v, 0u
     %4:f32 = add %3, 1.0f
     store_vector_element %v, 0u, %4
@@ -288,8 +288,8 @@ TEST_F(ProgramToIRSwizzleAssignmentTest, CompoundAssignment_SwizzleIndexedDynami
 
     EXPECT_EQ(Dis(m.Get()), R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
-    %i:ptr<function, i32, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
+    %i:ptr<function, i32, read_write> = var
     %4:i32 = load %i
     %5:u32 = access array<u32, 3>(0u, 1u, 2u), %4
     %6:f32 = load_vector_element %v, %5

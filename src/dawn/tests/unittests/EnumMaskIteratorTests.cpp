@@ -29,15 +29,17 @@
 
 #include "gtest/gtest.h"
 #include "src/dawn/native/EnumMaskIterator.h"
-#include "src/utils/compiler.h"
 
 namespace dawn::native {
+namespace {
 
 enum class TestAspect : uint8_t {
     Color = 1,
     Depth = 2,
     Stencil = 4,
 };
+
+}  // anonymous namespace
 
 template <>
 struct EnumBitmaskSize<TestAspect> {
@@ -52,6 +54,7 @@ struct wgpu::IsWGPUBitmask<dawn::native::TestAspect> {
 };
 
 namespace dawn::native {
+namespace {
 
 static_assert(EnumBitmaskSize<TestAspect>::value == 3);
 
@@ -74,7 +77,7 @@ TEST(EnumMaskIteratorTests, All) {
     uint32_t i = 0;
     TestAspect aspects = TestAspect::Color | TestAspect::Depth | TestAspect::Stencil;
     for (TestAspect aspect : IterateEnumMask(aspects)) {
-        DAWN_UNSAFE_TODO(EXPECT_EQ(aspect, expected[i++]));
+        EXPECT_EQ(aspect, expected[i++]);
     }
 }
 
@@ -83,8 +86,9 @@ TEST(EnumMaskIteratorTests, Partial) {
     uint32_t i = 0;
     TestAspect aspects = TestAspect::Stencil | TestAspect::Color;
     for (TestAspect aspect : IterateEnumMask(aspects)) {
-        DAWN_UNSAFE_TODO(EXPECT_EQ(aspect, expected[i++]));
+        EXPECT_EQ(aspect, expected[i++]);
     }
 }
 
+}  // anonymous namespace
 }  // namespace dawn::native

@@ -213,13 +213,19 @@ CombinedLimits ReifyDefaultLimits(const CombinedLimits& limits, wgpu::FeatureLev
 MaybeValError ValidateAndUnpackLimitsIn(
     const Limits* chainedLimits,
     const std::unordered_set<wgpu::FeatureName>& supportedFeatures,
-    CombinedLimits* out) {
+    CombinedLimits* out,
+    bool allowExperimentalChains) {
     DAWN_ASSERT(chainedLimits != nullptr);
     DAWN_ASSERT(out != nullptr);
 
     Limits* chainedLimitsPtr = const_cast<Limits*>(chainedLimits);
     UnpackedPtr<Limits> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(chainedLimitsPtr));
+    if (!allowExperimentalChains) {
+        DAWN_TRY_CONTEXT(unpacked.ValidateStable(),
+                         "validating the required limits chain with allow_experimental_apis "
+                         "disabled");
+    }
 
     // copy required v1 limits.
     out->v1 = **unpacked;
@@ -349,7 +355,26 @@ LimitsForShaderModuleParseRequest LimitsForShaderModuleParseRequest::Create(cons
 #undef DAWN_INTERNAL_LIMITS_FOREACH_MEMBER_ASSIGNMENT
 #undef DAWN_INTERNAL_LIMITS_MEMBER_ASSIGNMENT
 
+void LimitGLTextureImageUnits(CombinedLimits* limits) {
+    limits->v1.maxSampledTexturesPerShaderStage =
+        std::min(limits->v1.maxSampledTexturesPerShaderStage, kLimitedGLTextureImageUnits);
+    limits->v1.maxSamplersPerShaderStage =
+        std::min(limits->v1.maxSamplersPerShaderStage, kLimitedGLTextureImageUnits);
+}
+
 void NormalizeLimits(CombinedLimits* limits) {
+    // Reserve kLimitU32Undefined / kLimitU64Undefined for unrequested requiredLimits only.
+#define X(Scope, Class, limitName, ...)                                       \
+    if constexpr (detail::LimitClass::Class == detail::LimitClass::Maximum) { \
+        if (detail::IsLimitUndefined(limits->Scope.limitName)) {              \
+            limits->Scope.limitName -= 1;                                     \
+        }                                                                     \
+    } else {                                                                  \
+        DAWN_ASSERT(!detail::IsLimitUndefined(limits->Scope.limitName));      \
+    }
+    LIMITS(X)
+#undef X
+
     // Enforce internal Dawn constants for some limits to ensure they don't go over fixed limits
     // in Dawn's internal code.
     limits->v1.maxVertexBufferArrayStride =
@@ -459,12 +484,17 @@ void EnforceLimitSpecInvariants(CombinedLimits* limits, wgpu::FeatureLevel featu
     }
 }
 
-MaybeError FillLimits(Limits* outputLimits,
-                      const FeaturesSet& supportedFeatures,
-                      const CombinedLimits& combinedLimits) {
+MaybeValError ValidateAndFillLimits(Limits* outputLimits,
+                                    const FeaturesSet& supportedFeatures,
+                                    const CombinedLimits& combinedLimits,
+                                    bool allowExperimentalChains) {
     DAWN_ASSERT(outputLimits != nullptr);
     UnpackedPtr<Limits> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(outputLimits));
+    if (!allowExperimentalChains) {
+        DAWN_TRY_CONTEXT(unpacked.ValidateStable(),
+                         "validating the limits chain with allow_experimental_apis disabled");
+    }
     {
         wgpu::ChainedStructOut* originalChain = unpacked->nextInChain;
         **unpacked = combinedLimits.v1;

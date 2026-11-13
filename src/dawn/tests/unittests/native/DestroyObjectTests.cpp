@@ -62,7 +62,7 @@ using ::testing::_;
 using ::testing::ByMove;
 using ::testing::InSequence;
 using ::testing::Mock;
-using testing::MockCppCallback;
+using ::testing::MockCppCallback;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::StrictMock;

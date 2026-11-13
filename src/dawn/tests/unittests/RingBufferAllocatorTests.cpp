@@ -31,6 +31,7 @@
 #include "src/dawn/native/RingBufferAllocator.h"
 
 namespace dawn::native {
+namespace {
 
 // Number of basic tests for Ringbuffer
 TEST(RingBufferAllocatorTests, BasicTest) {
@@ -185,4 +186,5 @@ TEST(RingBufferAllocatorTests, RingBufferOverflow) {
               RingBufferAllocator::kInvalidOffset);
 }
 
+}  // anonymous namespace
 }  // namespace dawn::native

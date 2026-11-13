@@ -2213,7 +2213,7 @@ TEST_F(ResolverTest, MaxExpressionDepth_Pass) {
     for (size_t i = 0; i < kMaxExpressionDepth; ++i) {
         chain = Add(chain ? chain : Expr("b"), Expr("b"));
     }
-    auto* a = Let("a", chain);
+    auto* a = Let("a", ast::Type{}, chain);
     WrapInFunction(b, a);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -2225,7 +2225,7 @@ TEST_F(ResolverTest, MaxExpressionDepth_Fail) {
     for (size_t i = 0; i < kMaxExpressionDepth + 1; ++i) {
         chain = Add(chain ? chain : Expr("b"), Expr("b"));
     }
-    auto* a = Let("a", chain);
+    auto* a = Let("a", ast::Type{}, chain);
     WrapInFunction(b, a);
 
     EXPECT_FALSE(r()->Resolve());

@@ -48,6 +48,7 @@ constexpr uint32_t kVertexNum = 3;
 
 std::vector<uint16_t> Float32ToFloat16(std::vector<float> data) {
     std::vector<uint16_t> expectedData;
+    expectedData.reserve(data.size());
     for (auto& element : data) {
         expectedData.push_back(dawn::Float32ToFloat16(element));
     }

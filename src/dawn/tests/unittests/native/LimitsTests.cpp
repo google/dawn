@@ -34,8 +34,8 @@
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Limits.h"
 
-namespace dawn {
-namespace native {
+namespace dawn::native {
+namespace {
 
 // Test |GetDefaultLimits| returns the default for FeatureLeveL::Core.
 TEST(Limits, GetDefaultLimits) {
@@ -185,9 +185,58 @@ TEST(Limits, ValidateAndUnpackLimitsIn) {
         Limits required{.nextInChain = &requiredCompat};
 
         CombinedLimits combined{};
-        EXPECT_TRUE(ValidateAndUnpackLimitsIn(&required, {}, &combined).IsSuccess());
+        EXPECT_TRUE(ValidateAndUnpackLimitsIn(&required, {}, &combined,
+                                              /*allowExperimentalChains=*/true)
+                        .IsSuccess());
         EXPECT_EQ(combined.v1.maxStorageBuffersPerShaderStage, wgpu::kLimitU32Undefined);
         EXPECT_EQ(combined.compat.maxStorageBuffersInFragmentStage, 1234u);
+    }
+    // CompatibilityModeLimits is part of the stable ABI, whereas Dawn-only limits extensions are
+    // rejected when allowExperimentalChains is false.
+    {
+        CompatibilityModeLimits requiredCompat{};
+        Limits required{.nextInChain = &requiredCompat};
+        CombinedLimits combined{};
+        EXPECT_TRUE(ValidateAndUnpackLimitsIn(&required, {}, &combined,
+                                              /*allowExperimentalChains=*/false)
+                        .IsSuccess());
+
+        DawnTexelCopyBufferRowAlignmentLimits dawnLimits{};
+        Limits experimentalRequired{.nextInChain = &dawnLimits};
+        MaybeValError err = ValidateAndUnpackLimitsIn(&experimentalRequired, {}, &combined,
+                                                      /*allowExperimentalChains=*/false);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+    }
+}
+
+// Basic test of |ValidateAndFillLimits|.
+TEST(Limits, ValidateAndFillLimits) {
+    CombinedLimits defaults;
+    GetDefaultLimits(&defaults, wgpu::FeatureLevel::Core);
+    FeaturesSet noFeatures;
+
+    {
+        CompatibilityModeLimits outCompat{};
+        Limits out{.nextInChain = &outCompat};
+        EXPECT_TRUE(
+            ValidateAndFillLimits(&out, noFeatures, defaults, /*allowExperimentalChains=*/false)
+                .IsSuccess());
+        EXPECT_EQ(out.maxBindGroups, defaults.v1.maxBindGroups);
+        EXPECT_EQ(outCompat.maxStorageBuffersInFragmentStage,
+                  defaults.compat.maxStorageBuffersInFragmentStage);
+    }
+    {
+        DawnTexelCopyBufferRowAlignmentLimits outDawn{};
+        Limits out{.nextInChain = &outDawn};
+        EXPECT_TRUE(
+            ValidateAndFillLimits(&out, noFeatures, defaults, /*allowExperimentalChains=*/true)
+                .IsSuccess());
+
+        MaybeValError err =
+            ValidateAndFillLimits(&out, noFeatures, defaults, /*allowExperimentalChains=*/false);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
     }
 }
 
@@ -529,6 +578,26 @@ TEST(Limits, NormalizeLimits) {
         EXPECT_EQ(limits.v1.maxBufferSize, reportedMaxBufferSize);
         EXPECT_EQ(limits.v1.maxUniformBufferBindingSize, reportedMaxBufferSize);
     }
+
+    // Clamp Maximum limits below kLimitU32Undefined / kLimitU64Undefined so adapters never expose
+    // the undefined sentinel values.
+    {
+        CombinedLimits limits = defaults;
+        limits.v1.maxComputeWorkgroupsPerDimension = wgpu::kLimitU32Undefined;
+        limits.v1.maxComputeWorkgroupSizeX = wgpu::kLimitU32Undefined;
+        limits.v1.maxBufferSize = wgpu::kLimitU64Undefined;
+        limits.v1.maxStorageBufferBindingSize = wgpu::kLimitU64Undefined;
+        limits.v1.maxUniformBufferBindingSize = wgpu::kLimitU64Undefined;
+
+        NormalizeLimits(&limits);
+
+        EXPECT_EQ(limits.v1.maxComputeWorkgroupsPerDimension, wgpu::kLimitU32Undefined - 1);
+        EXPECT_EQ(limits.v1.maxComputeWorkgroupSizeX, wgpu::kLimitU32Undefined - 1);
+        EXPECT_EQ(limits.v1.maxBufferSize, wgpu::kLimitU64Undefined - 1);
+        EXPECT_EQ(limits.v1.maxStorageBufferBindingSize,
+                  AlignDown(wgpu::kLimitU64Undefined - 1, 4));
+        EXPECT_EQ(limits.v1.maxUniformBufferBindingSize, wgpu::kLimitU64Undefined - 1);
+    }
 }
 
 // Test |FixupDeviceLimits| works fix up the limits
@@ -658,5 +727,5 @@ TEST(Limits, FixupDeviceLimits) {
     }
 }
 
-}  // namespace native
-}  // namespace dawn
+}  // anonymous namespace
+}  // namespace dawn::native

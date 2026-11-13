@@ -96,7 +96,7 @@ class Device final : public d3d::Device {
 
     void DisposeKeyedMutex(ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex) override;
 
-    bool ReduceMemoryUsageImpl() override;
+    ResultOrError<bool> ReduceMemoryUsageImpl() override;
 
     std::optional<DeviceGuard> UseGuardForCreateBindGroup() override;
     std::optional<DeviceGuard> UseGuardForCreateBindGroupLayout() override;

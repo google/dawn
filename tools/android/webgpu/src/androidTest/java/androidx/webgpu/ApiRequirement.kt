@@ -21,6 +21,7 @@ import kotlin.annotation.Target
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class ApiRequirement(
-  val minApi: Int,
+  val minApi: Int = 0,
+  val maxApi: Int = Int.MAX_VALUE,
   val onlySkipOnEmulator: Boolean = false,
 )

@@ -18,6 +18,7 @@
 /third_party/android_toolchain/ndk
 /third_party/angle
 /third_party/binutils
+/third_party/boringssl/src
 /third_party/catapult
 /third_party/clang-format
 /third_party/cpplint
@@ -45,13 +46,14 @@
 /third_party/libc++abi/src
 /third_party/libprotobuf-mutator/src
 /third_party/litert-lm/data
+/third_party/litert-lm/models
 /third_party/litert-lm/src
 /third_party/llvm-build
 /third_party/llvm-dev
 /third_party/llvm-libclang
 /third_party/markupsafe
 /third_party/mesa/src
-/third_party/meson/src
+/third_party/nasm/src
 /third_party/ninja
 /third_party/node
 /third_party/node-addon-api
@@ -73,6 +75,7 @@
 /third_party/vulkan_memory_allocator
 /third_party/webgpu-cts
 /third_party/zlib
+/third_party/zstd
 /tools/bazelisk
 /tools/bin
 /tools/clang
@@ -82,6 +85,9 @@
 
 # Tint test validation cache file
 /test/tint/validation.cache
+
+# Claude code
+.claude/*
 
 # Modified from https://www.gitignore.io/api/vim,macos,linux,emacs,windows,sublimetext,visualstudio,visualstudiocode,intellij
 

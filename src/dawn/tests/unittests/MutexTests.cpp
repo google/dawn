@@ -34,13 +34,15 @@
 namespace dawn {
 namespace {
 
+using ::testing::Test;
+
 #if defined(DAWN_ENABLE_ASSERTS)
 constexpr bool kAssertEnabled = true;
 #else
 constexpr bool kAssertEnabled = false;
 #endif
 
-class MutexTest : public ::testing::Test {
+class MutexTest : public Test {
   protected:
     void SetUp() override {
         // IsLockedByCurrentThread() requires DAWN_ENABLE_ASSERTS flag enabled.
@@ -153,7 +155,7 @@ TEST_F(MutexDeathTest, DoubleLockCalls) {
     DAWN_ASSERT_DEATH_IF_SUPPORTED({ Mutex::AutoLock autoLock2(&mMutex); }, "");
 }
 
-class RecursiveMutexTest : public ::testing::Test {
+class RecursiveMutexTest : public Test {
   protected:
     void SetUp() override {
         // IsLockedByCurrentThread() requires DAWN_ENABLE_ASSERTS flag enabled.

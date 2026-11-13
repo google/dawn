@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "src/dawn/common/Enumerator.h"
+#include "src/dawn/native/BufferTextureCopyOversizedRow.h"
 #include "src/dawn/native/CommandBuffer.h"
 #include "src/dawn/native/Commands.h"
 #include "src/dawn/native/ComputePassEncoder.h"
@@ -408,6 +409,112 @@ TEST_F(CommandBufferEncodingTests, DanglingDestroyedBufferPointerT2B) {
     device.GetQueue().Submit(1, &commands);
     device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents,
                          [](wgpu::PopErrorScopeStatus, wgpu::ErrorType, wgpu::StringView) {});
+}
+
+// Verify that multi-slice CopyBufferToTexture and CopyTextureToBuffer with oversized bytesPerRow
+// (>= 256 KiB) are split into per-slice, per-row copy commands with 64-bit buffer offsets.
+TEST_F(CommandBufferEncodingTests, OversizedBytesPerRowSplitsCopyCommands) {
+    constexpr uint32_t kBytesPerRow = 1u << 18;  // 256 KiB
+    constexpr uint32_t kRowsPerImage = 3;
+    constexpr uint64_t kBytesPerImage = uint64_t{kBytesPerRow} * kRowsPerImage;
+    constexpr wgpu::Extent3D kCopySize = {2, 2, 2};
+
+    wgpu::BufferDescriptor bufferDesc = {};
+    bufferDesc.size = utils::RequiredBytesInCopy(kBytesPerRow, kRowsPerImage, kCopySize,
+                                                 wgpu::TextureFormat::RGBA8Unorm);
+    bufferDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+
+    wgpu::TextureDescriptor textureDesc = {};
+    textureDesc.size = kCopySize;
+    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+    wgpu::TexelCopyBufferInfo bufferInfo =
+        utils::CreateTexelCopyBufferInfo(buffer, 0, kBytesPerRow, kRowsPerImage);
+    wgpu::TexelCopyTextureInfo textureInfo =
+        utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyBufferToTexture(&bufferInfo, &textureInfo, &kCopySize);
+    encoder.CopyTextureToBuffer(&textureInfo, &bufferInfo, &kCopySize);
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+
+    CommandIterator* commands = FromAPI(commandBuffer.Get())->GetCommandIteratorForTesting();
+    Command commandId;
+    for (uint32_t z = 0; z < kCopySize.depthOrArrayLayers; ++z) {
+        for (uint32_t y = 0; y < kCopySize.height; ++y) {
+            ASSERT_TRUE(commands->NextCommandId(&commandId));
+            ASSERT_EQ(commandId, Command::CopyBufferToTexture);
+            auto* cmd = commands->NextCommand<CopyBufferToTextureCmd>();
+            EXPECT_EQ(cmd->source.offset, z * kBytesPerImage + uint64_t{y} * kBytesPerRow);
+            EXPECT_EQ(cmd->source.blocksPerRow, BlockCount{64u});
+            EXPECT_EQ(cmd->source.rowsPerImage, BlockCount{1u});
+            EXPECT_EQ(cmd->destination.origin,
+                      (TexelOrigin3D{TexelCount{0u}, TexelCount{y}, TexelCount{z}}));
+            EXPECT_EQ(cmd->copySize,
+                      (TexelExtent3D{TexelCount{2u}, TexelCount{1u}, TexelCount{1u}}));
+        }
+    }
+    for (uint32_t z = 0; z < kCopySize.depthOrArrayLayers; ++z) {
+        for (uint32_t y = 0; y < kCopySize.height; ++y) {
+            ASSERT_TRUE(commands->NextCommandId(&commandId));
+            ASSERT_EQ(commandId, Command::CopyTextureToBuffer);
+            auto* cmd = commands->NextCommand<CopyTextureToBufferCmd>();
+            EXPECT_EQ(cmd->destination.offset, z * kBytesPerImage + uint64_t{y} * kBytesPerRow);
+            EXPECT_EQ(cmd->destination.blocksPerRow, BlockCount{64u});
+            EXPECT_EQ(cmd->destination.rowsPerImage, BlockCount{1u});
+            EXPECT_EQ(cmd->source.origin,
+                      (TexelOrigin3D{TexelCount{0u}, TexelCount{y}, TexelCount{z}}));
+            EXPECT_EQ(cmd->copySize,
+                      (TexelExtent3D{TexelCount{2u}, TexelCount{1u}, TexelCount{1u}}));
+        }
+    }
+    EXPECT_FALSE(commands->NextCommandId(&commandId));
+}
+
+// Directly test `NeedsBufferTextureCopySplitForOversizedRow` thresholds without command mocking.
+TEST(BufferTextureCopyOversizedRowTests, NeedsSplit) {
+    constexpr TypedTexelBlockInfo kBlock32B{32, TexelCount{1u}, TexelCount{1u}};
+    constexpr TypedTexelBlockInfo kRGBA32{16, TexelCount{1u}, TexelCount{1u}};
+    constexpr TypedTexelBlockInfo kRGBA8{4, TexelCount{1u}, TexelCount{1u}};
+    constexpr TypedTexelBlockInfo kR8{1, TexelCount{1u}, TexelCount{1u}};
+    constexpr BlockExtent3D kSingleSlice{BlockCount{2u}, BlockCount{2u}, BlockCount{1u}};
+    constexpr BlockExtent3D kMultiSlice{BlockCount{2u}, BlockCount{2u}, BlockCount{2u}};
+
+    auto MakeCopy = [](uint32_t blocksPerRow, uint32_t rowsPerImage) {
+        BufferCopy copy;
+        copy.blocksPerRow = BlockCount{blocksPerRow};
+        copy.rowsPerImage = BlockCount{rowsPerImage};
+        return copy;
+    };
+
+    // bytesPerRow threshold (256 KiB == 16384 RGBA32 blocks, or 8192 32-byte blocks where
+    // texelsPerRow == 8192 < 16384).
+    EXPECT_FALSE(
+        NeedsBufferTextureCopySplitForOversizedRow(MakeCopy(16383, 2), kSingleSlice, kRGBA32));
+    EXPECT_TRUE(
+        NeedsBufferTextureCopySplitForOversizedRow(MakeCopy(16384, 2), kSingleSlice, kRGBA32));
+    EXPECT_FALSE(
+        NeedsBufferTextureCopySplitForOversizedRow(MakeCopy(8191, 2), kSingleSlice, kBlock32B));
+    EXPECT_TRUE(
+        NeedsBufferTextureCopySplitForOversizedRow(MakeCopy(8192, 2), kSingleSlice, kBlock32B));
+
+    // texelsPerRow threshold (16384 R8 blocks, even though bytesPerRow == 16 KiB < 256 KiB).
+    EXPECT_FALSE(NeedsBufferTextureCopySplitForOversizedRow(MakeCopy(16383, 2), kSingleSlice, kR8));
+    EXPECT_TRUE(NeedsBufferTextureCopySplitForOversizedRow(MakeCopy(16384, 2), kSingleSlice, kR8));
+
+    // bytesPerImage threshold (256 MiB == 64 RGBA8 blocks/row * 2^20 rows/image) applies only to
+    // multi-slice copies, and handles max `uint32_t` layout strides without `uint64_t` overflow.
+    EXPECT_FALSE(NeedsBufferTextureCopySplitForOversizedRow(MakeCopy(64, 0x0010'0000), kSingleSlice,
+                                                            kRGBA8));
+    EXPECT_FALSE(
+        NeedsBufferTextureCopySplitForOversizedRow(MakeCopy(64, 0x000F'FFFF), kMultiSlice, kRGBA8));
+    EXPECT_TRUE(
+        NeedsBufferTextureCopySplitForOversizedRow(MakeCopy(64, 0x0010'0000), kMultiSlice, kRGBA8));
+    EXPECT_TRUE(NeedsBufferTextureCopySplitForOversizedRow(MakeCopy(0xFFFF'FFFFu / 4, 0xFFFF'FFFFu),
+                                                           kMultiSlice, kRGBA8));
 }
 
 }  // anonymous namespace

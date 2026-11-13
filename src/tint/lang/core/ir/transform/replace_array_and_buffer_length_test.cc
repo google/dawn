@@ -75,7 +75,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, NoModify_UserFunction) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %arrayLength = func(%arr:ptr<storage, array<i32>, read_write>):u32 {
@@ -94,7 +94,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %arrayLength = func(%arr:ptr<storage, array<i32>, read_write>):u32 {
@@ -139,7 +139,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, DirectUse) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -162,8 +162,8 @@ tint_array_lengths_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -215,7 +215,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, DirectUse_NonZeroIndex) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -238,8 +238,8 @@ tint_array_lengths_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -291,7 +291,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, DirectUse_NotInMap) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 1)
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 1)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -306,7 +306,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 1)
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 1)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -344,7 +344,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, DirectUse_NoEntryPoint) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func():u32 {
@@ -362,7 +362,7 @@ tint_array_lengths_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%tint_array_lengths:tint_array_lengths_struct):u32 {
@@ -406,7 +406,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, DirectUse_CalledByEntryPoint) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func():u32 {
@@ -435,8 +435,8 @@ tint_array_lengths_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %bar = func(%tint_array_lengths:tint_array_lengths_struct):u32 {
@@ -502,7 +502,7 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -530,8 +530,8 @@ tint_array_lengths_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -603,7 +603,7 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -636,8 +636,8 @@ tint_array_lengths_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -691,7 +691,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, ViaLet) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -715,8 +715,8 @@ tint_array_lengths_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -777,7 +777,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, ViaParameter) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%param:ptr<storage, array<i32>, read_write>):u32 {
@@ -806,8 +806,8 @@ tint_array_lengths_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %bar = func(%param:ptr<storage, array<i32>, read_write>, %tint_array_length:u32):u32 {
@@ -881,7 +881,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, ViaParameterChain) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%param_zoo:ptr<storage, array<i32>, read_write>):u32 {
@@ -916,8 +916,8 @@ tint_array_lengths_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = func(%param_zoo:ptr<storage, array<i32>, read_write>, %tint_array_length:u32):u32 {
@@ -992,7 +992,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, ViaParameter_NotInMap) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%param:ptr<storage, array<i32>, read_write>):u32 {
@@ -1013,7 +1013,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%param:ptr<storage, array<i32>, read_write>, %tint_array_length:u32):u32 {
@@ -1068,7 +1068,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, ViaParameter_MultipleCallsSameParamet
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%param:ptr<storage, array<i32>, read_write>):u32 {
@@ -1101,8 +1101,8 @@ tint_array_lengths_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %bar = func(%param:ptr<storage, array<i32>, read_write>, %tint_array_length:u32):u32 {
@@ -1174,7 +1174,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, ViaParameter_MultipleCallsDifferentPa
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%param_a:ptr<storage, array<i32>, read_write>, %param_b:ptr<storage, array<i32>, read_write>, %param_c:ptr<storage, array<i32>, read_write>):u32 {
@@ -1207,8 +1207,8 @@ tint_array_lengths_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %bar = func(%param_a:ptr<storage, array<i32>, read_write>, %param_b:ptr<storage, array<i32>, read_write>, %param_c:ptr<storage, array<i32>, read_write>, %tint_array_length:u32, %tint_array_length_1:u32, %tint_array_length_2:u32):u32 {  # %tint_array_length_1: 'tint_array_length', %tint_array_length_2: 'tint_array_length'
@@ -1291,7 +1291,7 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%param:ptr<storage, array<i32>, read_write>):u32 {
@@ -1329,8 +1329,8 @@ tint_array_lengths_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %bar = func(%param:ptr<storage, array<i32>, read_write>, %tint_array_length:u32):u32 {
@@ -1392,7 +1392,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, ElementStrideLargerThanSize) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<vec3<i32>>, read_write> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, array<vec3<i32>>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1415,8 +1415,8 @@ tint_array_lengths_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, array<vec3<i32>>, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer:ptr<storage, array<vec3<i32>>, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1482,11 +1482,11 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, MultipleVars) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer_a:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
-  %buffer_b:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 1)
-  %buffer_c:ptr<storage, array<i32>, read_write> = var undef @binding_point(1, 0)
-  %buffer_d:ptr<storage, array<i32>, read_write> = var undef @binding_point(1, 1)
-  %buffer_e:ptr<storage, array<i32>, read_write> = var undef @binding_point(2, 3)
+  %buffer_a:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
+  %buffer_b:ptr<storage, array<i32>, read_write> = var @binding_point(0, 1)
+  %buffer_c:ptr<storage, array<i32>, read_write> = var @binding_point(1, 0)
+  %buffer_d:ptr<storage, array<i32>, read_write> = var @binding_point(1, 1)
+  %buffer_e:ptr<storage, array<i32>, read_write> = var @binding_point(2, 3)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1516,12 +1516,12 @@ tint_array_lengths_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %buffer_a:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 0)
-  %buffer_b:ptr<storage, array<i32>, read_write> = var undef @binding_point(0, 1)
-  %buffer_c:ptr<storage, array<i32>, read_write> = var undef @binding_point(1, 0)
-  %buffer_d:ptr<storage, array<i32>, read_write> = var undef @binding_point(1, 1)
-  %buffer_e:ptr<storage, array<i32>, read_write> = var undef @binding_point(2, 3)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %buffer_a:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
+  %buffer_b:ptr<storage, array<i32>, read_write> = var @binding_point(0, 1)
+  %buffer_c:ptr<storage, array<i32>, read_write> = var @binding_point(1, 0)
+  %buffer_d:ptr<storage, array<i32>, read_write> = var @binding_point(1, 1)
+  %buffer_e:ptr<storage, array<i32>, read_write> = var @binding_point(2, 3)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1592,7 +1592,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, BufferLength_Operand_Const) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1612,8 +1612,8 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1658,7 +1658,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, BufferLength_Operand_NonConst) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1679,8 +1679,8 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1734,7 +1734,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, BufferLength_Operand_NonConst_Through
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%p:u32):void {
@@ -1761,8 +1761,8 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %bar = func(%p:u32):void {
@@ -1812,7 +1812,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, BufferLength_Count_Const) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer<16>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer<16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1832,8 +1832,8 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %v:ptr<storage, buffer<16>, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %v:ptr<storage, buffer<16>, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1897,7 +1897,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %gv:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %gv:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1928,8 +1928,8 @@ tint_array_lengths_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %gv:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %gv:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1988,7 +1988,7 @@ TEST_F(IR_ReplaceArrayAndBufferLengthTest, BufferArrayView_Sized_Direct) {
 
     auto* src = R"(
 $B1: {  # root
-  %gv:ptr<storage, buffer<128>, read_write> = var undef @binding_point(0, 0)
+  %gv:ptr<storage, buffer<128>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2008,8 +2008,8 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %gv:ptr<storage, buffer<128>, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %gv:ptr<storage, buffer<128>, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -2092,7 +2092,7 @@ buffer_bundle_0 = struct @align(4) {
 }
 
 $B1: {  # root
-  %gv:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %gv:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%param:buffer_bundle_0):void {
@@ -2137,8 +2137,8 @@ tint_array_lengths_struct = struct @align(4) {
 }
 
 $B1: {  # root
-  %gv:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %gv:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %bar = func(%param:buffer_bundle_0, %tint_array_length:u32):void {

@@ -30,10 +30,10 @@
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 
-using testing::HasSubstr;
-
 namespace dawn {
 namespace {
+
+using ::testing::HasSubstr;
 
 class DebugMarkerTests : public DawnTest {};
 

@@ -86,24 +86,23 @@ def main() -> int:
     with open(output_json_path, 'w', encoding='utf-8') as f:
         json.dump(merged_results, f, indent=2)
 
-    # Locate litert_lm_metrics.pb from the single shard output.
-    metric_file = None
+    # Locate the <workload>.pb metrics files of the benchmarks from the single
+    # shard output.
+    metric_files = {}
     if args.jsons_to_merge:
         json_file = Path(args.jsons_to_merge[0])
         isolated_outdir = json_file.parent
-        pb_path = isolated_outdir / 'litert_lm_metrics.pb'
-        if pb_path.exists():
-            metric_file = pb_path
+        for pb_path in sorted(isolated_outdir.glob('*.pb')):
+            metric_files[pb_path.name] = pb_path
 
-    if not metric_file:
-        print("Error: No litert_lm_metrics.pb file found to upload.",
-              file=sys.stderr)
+    if not metric_files:
+        print("Error: No metrics files found to upload.", file=sys.stderr)
         return 1
 
     # Upload metrics and generated metadata to GCS.
     perf_results_common.upload_perf_results(
         test_suite='litert_lm_benchmark',
-        artifacts={'litert_lm_metrics.pb': metric_file},
+        artifacts=metric_files,
         build_properties_str=getattr(args, 'build_properties', None),
     )
 

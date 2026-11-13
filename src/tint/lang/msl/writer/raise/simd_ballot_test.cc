@@ -66,7 +66,7 @@ TEST_F(MslWriter_SimdBallotTest, SimdBallot_WithUserDeclaredSubgroupSize) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_size_mask:ptr<private, vec2<u32>, read_write> = var undef
+  %tint_subgroup_size_mask:ptr<private, vec2<u32>, read_write> = var
 }
 
 %foo = @fragment func(%user_subgroup_size:u32 [@location(0), @interpolate(flat)], %tint_subgroup_size:u32 [@subgroup_size]):void {
@@ -119,7 +119,7 @@ TEST_F(MslWriter_SimdBallotTest, SimdBallot_WithoutUserDeclaredSubgroupSize) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_size_mask:ptr<private, vec2<u32>, read_write> = var undef
+  %tint_subgroup_size_mask:ptr<private, vec2<u32>, read_write> = var
 }
 
 %foo = @fragment func(%tint_subgroup_size:u32 [@subgroup_size]):void {
@@ -186,7 +186,7 @@ TEST_F(MslWriter_SimdBallotTest, SimdBallot_InHelperFunction) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_size_mask:ptr<private, vec2<u32>, read_write> = var undef
+  %tint_subgroup_size_mask:ptr<private, vec2<u32>, read_write> = var
 }
 
 %foo = func(%pred:bool):vec4<u32> {
@@ -251,7 +251,7 @@ TEST_F(MslWriter_SimdBallotTest, SimdBallot_MultipleCalls) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_size_mask:ptr<private, vec2<u32>, read_write> = var undef
+  %tint_subgroup_size_mask:ptr<private, vec2<u32>, read_write> = var
 }
 
 %foo = @fragment func(%tint_subgroup_size:u32 [@subgroup_size]):void {

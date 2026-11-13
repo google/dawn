@@ -86,7 +86,7 @@ void PrepareResourcesForSyncScope(const SyncScopeResourceUsage& scope) {
     }
 }
 
-void EncodeComputePass(const DawnProcTable& wgpu,
+void RecordComputePass(const DawnProcTable& wgpu,
                        WGPUCommandEncoder innerEncoder,
                        CommandIterator& commands,
                        BeginComputePassCmd* computePassCmd,
@@ -205,7 +205,7 @@ void EncodeComputePass(const DawnProcTable& wgpu,
     DAWN_UNREACHABLE();
 }
 
-void EncodeRenderPass(const Device* device,
+void RecordRenderPass(const Device* device,
                       WGPUCommandEncoder innerEncoder,
                       CommandIterator& commands,
                       BeginRenderPassCmd* renderPassCmd) {
@@ -1006,7 +1006,7 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
     return {};
 }
 
-ResultOrError<WGPUCommandBuffer> CommandBuffer::Encode() {
+ResultOrError<WGPUCommandBuffer> CommandBuffer::RecordCommands() {
     auto& wgpu = ToBackend(GetDevice())->wgpu.get();
 
     // TODO(crbug.com/413053623): Use stored command encoder descriptor
@@ -1021,7 +1021,7 @@ ResultOrError<WGPUCommandBuffer> CommandBuffer::Encode() {
         switch (type) {
             case Command::BeginComputePass: {
                 BeginComputePassCmd* cmd = mCommands.NextCommand<BeginComputePassCmd>();
-                EncodeComputePass(wgpu, innerEncoder, mCommands, cmd,
+                RecordComputePass(wgpu, innerEncoder, mCommands, cmd,
                                   GetResourceUsages().computePasses[nextComputePassNumber]);
                 ++nextComputePassNumber;
                 break;
@@ -1043,7 +1043,7 @@ ResultOrError<WGPUCommandBuffer> CommandBuffer::Encode() {
                         ToBackend(texture)->SetIsSubresourceContentInitialized(true, range);
                         return {};
                     }));
-                EncodeRenderPass(ToBackend(GetDevice()), innerEncoder, mCommands, cmd);
+                RecordRenderPass(ToBackend(GetDevice()), innerEncoder, mCommands, cmd);
 
                 ++nextRenderPassNumber;
                 break;

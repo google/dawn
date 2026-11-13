@@ -44,8 +44,8 @@ Var::Var(Id id, InstructionResult* result) : Base(id) {
         TINT_ASSERT(result->Type()->Is<core::type::MemoryView>());
     }
 
-    // Default to no initializer.
-    AddOperand(Var::kInitializerOperandOffset, nullptr);
+    // Default to no initializer operand, which implies zero initialization.
+
     AddResult(result);
 }
 
@@ -69,7 +69,11 @@ Var* Var::Clone(CloneContext& ctx) {
 }
 
 void Var::SetInitializer(Value* initializer) {
-    SetOperand(Var::kInitializerOperandOffset, initializer);
+    if (Operands().Length() > Var::kInitializerOperandOffset) {
+        SetOperand(Var::kInitializerOperandOffset, initializer);
+    } else {
+        AddOperand(Var::kInitializerOperandOffset, initializer);
+    }
 }
 
 void Var::DestroyIfOnlyAssigned() {

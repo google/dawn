@@ -57,6 +57,8 @@ libtint_source_set("type") {
     "array_count.h",
     "atomic.cc",
     "atomic.h",
+    "bf16.cc",
+    "bf16.h",
     "binding_array.cc",
     "binding_array.h",
     "bool.cc",
@@ -169,6 +171,7 @@ if (tint_build_unittests) {
     sources = [
       "array_test.cc",
       "atomic_test.cc",
+      "bf16_test.cc",
       "binding_array_test.cc",
       "bool_test.cc",
       "buffer_test.cc",

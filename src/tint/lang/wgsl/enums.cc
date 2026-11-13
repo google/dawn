@@ -251,6 +251,9 @@ LanguageFeature ParseLanguageFeature(std::string_view str) {
     if (str == "uniform_buffer_standard_layout") {
         return LanguageFeature::kUniformBufferStandardLayout;
     }
+    if (str == "unrestricted_aliasing") {
+        return LanguageFeature::kUnrestrictedAliasing;
+    }
     if (str == "unrestricted_pointer_parameters") {
         return LanguageFeature::kUnrestrictedPointerParameters;
     }
@@ -304,6 +307,8 @@ std::string_view ToString(LanguageFeature value) {
             return "texture_formats_tier1";
         case LanguageFeature::kUniformBufferStandardLayout:
             return "uniform_buffer_standard_layout";
+        case LanguageFeature::kUnrestrictedAliasing:
+            return "unrestricted_aliasing";
         case LanguageFeature::kUnrestrictedPointerParameters:
             return "unrestricted_pointer_parameters";
     }

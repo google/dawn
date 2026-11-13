@@ -458,6 +458,13 @@ func TestParseFlagsSubcommands(t *testing.T) {
 		require.Equal(t, FuzzModeIr, cfg.fuzzMode)
 		require.True(t, cfg.mesaMode)
 		require.Equal(t, "/my/corpus", cfg.out)
+		require.Equal(t, runtime.NumCPU(), cfg.numProcesses)
+
+		// Explicit -j flag
+		cfg = newDefaultMainConfig()
+		err = parseFlags([]string{"generate", "-out", "/my/corpus", "-j", "4"}, &cfg, &stdout, &stderr)
+		require.NoError(t, err)
+		require.Equal(t, 4, cfg.numProcesses)
 
 		// Missing -out (error)
 		cfg = newDefaultMainConfig()
@@ -594,5 +601,104 @@ func TestParseFlagsSubcommands(t *testing.T) {
 		err = parseFlags([]string{"analyze", "d1", "d2"}, &cfg, &stdout, &stderr)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "analyze accepts only one experiment root directory")
+	}
+}
+
+func TestCalcBatchSize(t *testing.T) {
+	tests := []struct {
+		name         string
+		numFiles     int
+		numProcesses int
+		want         int
+	}{
+		{
+			name:         "Zero files returns 1",
+			numFiles:     0,
+			numProcesses: 8,
+			want:         1,
+		},
+		{
+			name:         "Negative processes defaults to 1",
+			numFiles:     40,
+			numProcesses: 0,
+			want:         10,
+		},
+		{
+			name:         "Small file count stays at 1 per batch",
+			numFiles:     10,
+			numProcesses: 8,
+			want:         1,
+		},
+		{
+			name:         "Medium file count scales across 4*numProcesses batches",
+			numFiles:     320,
+			numProcesses: 16,
+			want:         5,
+		},
+		{
+			name:         "Large file count caps at maxBatchSize",
+			numFiles:     11700,
+			numProcesses: 16,
+			want:         maxBatchSize,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, tc.want, calcBatchSize(tc.numFiles, tc.numProcesses))
+		})
+	}
+}
+
+func TestBatchFiles(t *testing.T) {
+	require.Nil(t, batchFiles(nil, 10))
+	require.Nil(t, batchFiles([]string{}, 10))
+
+	files := []string{"f1", "f2", "f3", "f4", "f5"}
+	require.Equal(t, [][]string{{"f1", "f2"}, {"f3", "f4"}, {"f5"}}, batchFiles(files, 2))
+	require.Equal(t, [][]string{{"f1"}, {"f2"}, {"f3"}, {"f4"}, {"f5"}}, batchFiles(files, 0))
+	require.Equal(t, [][]string{{"f1", "f2", "f3", "f4", "f5"}}, batchFiles(files, 10))
+}
+
+func TestFindLastRunningFileIndex(t *testing.T) {
+	batch := []string{"/tmp/a.tirb", "/tmp/b.tirb", "/tmp/c.tirb"}
+
+	tests := []struct {
+		name   string
+		output string
+		want   int
+	}{
+		{
+			name: "First file fails",
+			output: `INFO: Seed: 123
+Running: /tmp/a.tirb
+==123== ERROR: libFuzzer: deadly signal`,
+			want: 0,
+		},
+		{
+			name: "Middle file fails",
+			output: `INFO: Seed: 123
+Running: /tmp/a.tirb
+Executed /tmp/a.tirb in 10 ms
+Running: /tmp/b.tirb
+==123== ERROR: libFuzzer: deadly signal`,
+			want: 1,
+		},
+		{
+			name:   "No Running line present",
+			output: "error loading shared libraries",
+			want:   -1,
+		},
+		{
+			name:   "Running line for unknown file",
+			output: "Running: /tmp/other.tirb\n",
+			want:   -1,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, tc.want, findLastRunningFileIndex(tc.output, batch))
+		})
 	}
 }

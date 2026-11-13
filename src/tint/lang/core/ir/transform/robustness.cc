@@ -104,11 +104,9 @@ struct State {
                 },
                 [&](ir::CoreBuiltinCall* call) {
                     // Check if this is a texture builtin that needs to be clamped.
-                    if (config.clamp_texture) {
-                        if (call->Func() == core::BuiltinFn::kTextureDimensions ||
-                            call->Func() == core::BuiltinFn::kTextureLoad) {
-                            texture_calls.Push(call);
-                        }
+                    if (call->Func() == core::BuiltinFn::kTextureDimensions ||
+                        call->Func() == core::BuiltinFn::kTextureLoad) {
+                        texture_calls.Push(call);
                     }
                     // Check if this is a subgroup matrix builtin that needs to be clamped.
                     if (call->Func() == core::BuiltinFn::kSubgroupMatrixLoad ||
@@ -296,7 +294,6 @@ struct State {
         auto indices = access->Indices();
         for (size_t i = 0; i < indices.size(); i++) {
             auto* idx = indices[i];
-            auto* const_idx = idx->As<ir::Constant>();
 
             // Determine the limit of the type being indexed into.
             auto maxAllowedIndex = tint::Switch(
@@ -313,16 +310,23 @@ struct State {
                     }
                     TINT_IR_ASSERT(ir, arr->Count()->Is<core::type::RuntimeArrayCount>());
 
-                    // Skip clamping runtime-sized array indices if requested.
-                    if (config.disable_runtime_sized_array_index_clamping) {
+                    // Skip clamping runtime-sized array indices if requested, but not for the
+                    // workgroup address space. No platform has bounds checking on workgroup address
+                    // space and buffer_view can introduce runtime array accesses there.
+                    // Note: possible address spaces with runtime arrays: storage, uniform, and
+                    // workgroup.
+                    auto* object = access->Object();
+                    auto* base_ptr = object->Type()->As<core::type::Pointer>();
+                    if ((config.disable_storage_runtime_sized_array_index_clamping &&
+                         base_ptr->AddressSpace() == AddressSpace::kStorage) ||
+                        (config.disable_uniform_runtime_sized_array_index_clamping &&
+                         base_ptr->AddressSpace() == AddressSpace::kUniform)) {
                         return nullptr;
                     }
 
-                    auto* object = access->Object();
                     if (i > 0) {
                         // Generate a pointer to the runtime-sized array if it isn't the base of
                         // this access instruction.
-                        auto* base_ptr = object->Type()->As<core::type::Pointer>();
                         TINT_IR_ASSERT(ir, base_ptr != nullptr);
                         TINT_IR_ASSERT(ir, i == 1);
                         auto* arr_ptr = ty.ptr(base_ptr->AddressSpace(), arr, base_ptr->Access());
@@ -340,9 +344,14 @@ struct State {
                 ClampOperand(access, ir::Access::kIndicesOperandOffset + i, maxAllowedIndex);
             }
 
-            // Get the type that this index produces.
-            type = const_idx ? type->Element(const_idx->Value()->ValueAs<u32>())
-                             : type->Elements().type;
+            // Get the type that this index produces. Prefer Elements().type for dynamically
+            // indexable types so constant out-of-bounds indices do not produce nullptr.
+            if (auto* el = type->Elements().type) {
+                type = el;
+            } else {
+                auto* const_idx = idx->As<ir::Constant>();
+                type = type->Element(const_idx->Value()->ValueAs<u32>());
+            }
         }
     }
 
@@ -395,7 +404,7 @@ struct State {
         // Select which arguments to clamp based on the function overload.
         switch (call->Func()) {
             case core::BuiltinFn::kTextureDimensions: {
-                if (args.size() > 1) {
+                if (config.clamp_texture && args.size() > 1) {
                     clamp_level(1u);
                 }
                 break;
@@ -403,16 +412,26 @@ struct State {
             case core::BuiltinFn::kTextureLoad: {
                 uint32_t next_arg = 2u;
                 if (core::type::IsTextureArray(texture->Dim())) {
-                    clamp_array_index(next_arg++);
+                    if (config.clamp_texture) {
+                        clamp_array_index(next_arg);
+                    }
+                    next_arg++;
                 }
                 if (texture->IsAnyOf<core::type::SampledTexture, core::type::DepthTexture>()) {
-                    clamp_level(next_arg++);
+                    if (config.clamp_texture) {
+                        clamp_level(next_arg);
+                    }
+                    next_arg++;
                 }
                 if (texture->IsAnyOf<core::type::MultisampledTexture,
                                      core::type::DepthMultisampledTexture>()) {
+                    // Always clamp the sample index, even when `clamp_texture` is false, as
+                    // underlying APIs do not guarantee robustness for out-of-bounds sample indices.
                     clamp_sample_index(next_arg++);
                 }
-                clamp_coords(1u);  // Must run after clamp_level
+                if (config.clamp_texture) {
+                    clamp_coords(1u);  // Must run after clamp_level
+                }
                 break;
             }
             default:

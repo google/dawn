@@ -56,7 +56,7 @@ class BindGroupLayout final : public BindGroupLayoutInternalBase {
     void DeallocateBindGroup(BindGroup* bindGroup);
     void ReduceMemoryUsage() override;
 
-    NSPRef<id<MTLArgumentEncoder>> GetArgumentEncoder() const;
+    MutexProtected<NSPRef<id<MTLArgumentEncoder>>>& GetArgumentEncoder();
     void FillTintArgumentBufferInfo(tint::msl::writer::ArgumentBufferInfo& info) const;
 
   private:
@@ -65,7 +65,8 @@ class BindGroupLayout final : public BindGroupLayoutInternalBase {
 
     MutexProtected<SlabAllocator<BindGroup>> mBindGroupAllocator;
 
-    NSPRef<id<MTLArgumentEncoder>> mArgumentEncoder;
+    // MTLArgumentEncoder is stateful, mutex prevents multiple CreateBindGroups from conflicting.
+    MutexProtected<NSPRef<id<MTLArgumentEncoder>>> mArgumentEncoder;
 };
 
 }  // namespace dawn::native::metal

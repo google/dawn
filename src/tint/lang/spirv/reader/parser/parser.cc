@@ -64,6 +64,7 @@ TINT_END_DISABLE_WARNING(NEWLINE_EOF);
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/referenced_module_vars.h"
+#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/spirv/builtin_fn.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
@@ -158,10 +159,11 @@ class Parser {
         for (const auto& ext : spirv_context_->extensions()) {
             auto name = ext.GetOperand(0).AsString();
             if (name != "SPV_KHR_storage_buffer_storage_class" &&
-                name != "SPV_KHR_non_semantic_info" &&     //
-                name != "SPV_KHR_16bit_storage" &&         //
-                name != "SPV_KHR_terminate_invocation" &&  //
-                name != "SPV_KHR_multiview" &&             //
+                name != "SPV_KHR_non_semantic_info" &&            //
+                name != "SPV_KHR_16bit_storage" &&                //
+                name != "SPV_KHR_terminate_invocation" &&         //
+                name != "SPV_EXT_demote_to_helper_invocation" &&  //
+                name != "SPV_KHR_multiview" &&                    //
                 // TODO(423644565): We assume the barriers are correct. We should check for any
                 // operation that makes barrier assumptions that aren't consistent with WGSL and
                 // generate the needed barriers.
@@ -176,6 +178,7 @@ class Parser {
             auto capability = static_cast<spv::Capability>(it->GetSingleWordInOperand(0));
             switch (capability) {
                 case spv::Capability::ClipDistance:
+                case spv::Capability::DemoteToHelperInvocation:
                 case spv::Capability::DerivativeControl:
                 case spv::Capability::Float16:
                 case spv::Capability::Geometry:
@@ -228,6 +231,7 @@ class Parser {
 
         // Set properties that are supported by the SPIR-V parser.
         ir_.properties.Add(core::ir::Property::kAllowLocationForNumericComposites);
+        ir_.properties.Add(core::ir::Property::kAllowMissingVertexPosition);
         ir_.properties.Add(core::ir::Property::kAllowMultipleEntryPoints);
         ir_.properties.Add(core::ir::Property::kAllowNonCoreTypes);
         ir_.properties.Add(core::ir::Property::kAllowOverrides);
@@ -255,6 +259,10 @@ class Parser {
         RemapSamplers();
         RemapBufferBlockAddressSpace();
         AddRefToOutputsIfNeeded();
+
+        ir_.dump_ir_when_validating = options_.dump_ir_when_validating;
+        ir_.enable_validation_asserts = options_.enable_validation_asserts;
+        TINT_CHECK_RESULT(core::ir::Validate(ir_, "after spirv::Parse"));
 
         return std::move(ir_);
     }
@@ -2233,7 +2241,9 @@ class Parser {
         auto phis = continue_blk_phis_.find(continue_id);
         if (phis != continue_blk_phis_.end()) {
             for (auto value_id : phis->second) {
-                auto* value = skipped_continue ? nullptr : Value(value_id, false);
+                auto* def = spirv_context_->get_def_use_mgr()->GetDef(value_id);
+                auto* value =
+                    skipped_continue ? b_.Undef(Type(def->type_id())) : Value(value_id, false);
 
                 tint::Switch(
                     loop->Continuing()->Terminator(),  //
@@ -2462,6 +2472,13 @@ class Parser {
                 case spv::Op::OpTerminateInvocation:
                     EmitKill(inst);
                     break;
+                case spv::Op::OpDemoteToHelperInvocation:
+                    EmitWithoutResult(b_.Discard());
+                    break;
+                case spv::Op::OpIsHelperInvocationEXT:
+                    return Failure(
+                        "OpIsHelperInvocationEXT is not supported: WGSL has no way to "
+                        "query whether an invocation is a helper");
                 case spv::Op::OpDot:
                     EmitBuiltinCall(inst, core::BuiltinFn::kDot);
                     break;
@@ -2651,16 +2668,20 @@ class Parser {
                     EmitImageQuerySizeLod(inst);
                     break;
                 case spv::Op::OpImageSampleExplicitLod:
-                    EmitImageSample(inst, spirv::BuiltinFn::kImageSampleExplicitLod);
+                    TINT_CHECK_RESULT(
+                        EmitImageSample(inst, spirv::BuiltinFn::kImageSampleExplicitLod));
                     break;
                 case spv::Op::OpImageSampleImplicitLod:
-                    EmitImageSample(inst, spirv::BuiltinFn::kImageSampleImplicitLod);
+                    TINT_CHECK_RESULT(
+                        EmitImageSample(inst, spirv::BuiltinFn::kImageSampleImplicitLod));
                     break;
                 case spv::Op::OpImageSampleProjImplicitLod:
-                    EmitImageSample(inst, spirv::BuiltinFn::kImageSampleProjImplicitLod);
+                    TINT_CHECK_RESULT(
+                        EmitImageSample(inst, spirv::BuiltinFn::kImageSampleProjImplicitLod));
                     break;
                 case spv::Op::OpImageSampleProjExplicitLod:
-                    EmitImageSample(inst, spirv::BuiltinFn::kImageSampleProjExplicitLod);
+                    TINT_CHECK_RESULT(
+                        EmitImageSample(inst, spirv::BuiltinFn::kImageSampleProjExplicitLod));
                     break;
                 case spv::Op::OpImageWrite:
                     EmitImageWrite(inst);
@@ -2685,15 +2706,16 @@ class Parser {
                     break;
 
                 case spv::Op::OpGroupNonUniformBroadcast:
-                    EmitSubgroupBuiltinConstantId(inst,
-                                                  spirv::BuiltinFn::kGroupNonUniformBroadcast);
+                    TINT_CHECK_RESULT(EmitSubgroupBuiltinConstantId(
+                        inst, spirv::BuiltinFn::kGroupNonUniformBroadcast));
                     break;
                 case spv::Op::OpGroupNonUniformQuadBroadcast:
-                    EmitSubgroupBuiltinConstantId(inst,
-                                                  spirv::BuiltinFn::kGroupNonUniformQuadBroadcast);
+                    TINT_CHECK_RESULT(EmitSubgroupBuiltinConstantId(
+                        inst, spirv::BuiltinFn::kGroupNonUniformQuadBroadcast));
                     break;
                 case spv::Op::OpGroupNonUniformQuadSwap:
-                    EmitSubgroupBuiltinConstantId(inst, spirv::BuiltinFn::kGroupNonUniformQuadSwap);
+                    TINT_CHECK_RESULT(EmitSubgroupBuiltinConstantId(
+                        inst, spirv::BuiltinFn::kGroupNonUniformQuadSwap));
                     break;
                 case spv::Op::OpGroupNonUniformAll:
                     EmitSubgroupBuiltin(inst, core::BuiltinFn::kSubgroupAll);
@@ -2875,7 +2897,8 @@ class Parser {
         return Success;
     }
 
-    void EmitSubgroupBuiltinConstantId(spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
+    Result<SuccessType> EmitSubgroupBuiltinConstantId(spvtools::opt::Instruction& inst,
+                                                      spirv::BuiltinFn fn) {
         auto id = Value(inst.GetSingleWordInOperand(2));
 
         // TODO(431054356): Convert core::BuiltinFn::kSubgroupBroadcast non-constant values into a
@@ -2883,12 +2906,16 @@ class Parser {
         //
         // For QuadBroadcast this will remain an error as there is no WGSL equivalent.
         // For QuadSwap this will remain an error as there is no WGSL equivalent.
-        TINT_ASSERT(id->Is<core::ir::Constant>())
-            << "non-constant GroupNonUniform `Invocation Id` not supported";
+        //
+        // Spec constants pass SPIR-V validation here but are not `core::ir::Constant`s.
+        if (!id->Is<core::ir::Constant>()) {
+            return Failure("non-constant GroupNonUniform `Invocation Id` not supported");
+        }
 
         AssertSubgroupScope(inst);
         Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, Args(inst, 2)),
              inst.result_id());
+        return Success;
     }
 
     void EmitSubgroupBuiltin(spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
@@ -3525,12 +3552,11 @@ class Parser {
         auto sampled_image = Value(inst.GetSingleWordInOperand(0));
         auto* coord = Value(inst.GetSingleWordInOperand(1));
 
-        Vector<core::ir::Value*, 4> args = {sampled_image, coord};
-
         uint32_t literal_mask = inst.NumInOperands() > 2 ? inst.GetSingleWordInOperand(2) : 0u;
-        args.Push(Literal(literal_mask));
-        if (literal_mask != 0) {
-            args.Push(Value(inst.GetSingleWordInOperand(3)));
+        Vector<core::ir::Value*, 4> args = {sampled_image, coord, Literal(literal_mask)};
+        // The ids after the mask are the operands of each set mask bit, in increasing bit order.
+        for (uint32_t i = 3; i < inst.NumInOperands(); ++i) {
+            args.Push(Value(inst.GetSingleWordInOperand(i)));
         }
 
         Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, args), inst.result_id());
@@ -3545,11 +3571,8 @@ class Parser {
 
         uint32_t literal_mask = inst.NumInOperands() > 3 ? inst.GetSingleWordInOperand(3) : 0u;
         args.Push(Literal(literal_mask));
-        if (literal_mask != 0) {
-            TINT_ASSERT(static_cast<spv::ImageOperandsMask>(literal_mask) ==
-                        spv::ImageOperandsMask::ConstOffset);
-            TINT_ASSERT(inst.NumInOperands() > 4);
-            args.Push(Value(inst.GetSingleWordInOperand(4)));
+        for (uint32_t i = 4; i < inst.NumInOperands(); ++i) {
+            args.Push(Value(inst.GetSingleWordInOperand(i)));
         }
 
         Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()),
@@ -3566,11 +3589,8 @@ class Parser {
 
         uint32_t literal_mask = inst.NumInOperands() > 3 ? inst.GetSingleWordInOperand(3) : 0u;
         args.Push(Literal(literal_mask));
-        if (literal_mask != 0) {
-            TINT_ASSERT(static_cast<spv::ImageOperandsMask>(literal_mask) ==
-                        spv::ImageOperandsMask::ConstOffset);
-            TINT_ASSERT(inst.NumInOperands() > 4);
-            args.Push(Value(inst.GetSingleWordInOperand(4)));
+        for (uint32_t i = 4; i < inst.NumInOperands(); ++i) {
+            args.Push(Value(inst.GetSingleWordInOperand(i)));
         }
 
         Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), spirv::BuiltinFn::kImageGather,
@@ -3578,7 +3598,17 @@ class Parser {
              inst.result_id());
     }
 
-    void EmitImageSample(const spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
+    Result<SuccessType> EmitImageSample(const spvtools::opt::Instruction& inst,
+                                        spirv::BuiltinFn fn) {
+        // WGSL only samples f32 textures (https://www.w3.org/TR/WGSL/#texturesample). Integer
+        // textures can only be read with textureLoad or textureGather.
+        const core::type::Type* elem = Type(inst.type_id())->DeepestElement();
+        if (!elem->Is<core::type::F32>()) {
+            return Failure(std::string(spv::OpToString(inst.opcode())) +
+                           " on a texture with sampled type " + elem->FriendlyName() +
+                           " is not supported");
+        }
+
         auto sampled_image = Value(inst.GetSingleWordInOperand(0));
         auto* coord = Value(inst.GetSingleWordInOperand(1));
 
@@ -3586,12 +3616,12 @@ class Parser {
 
         uint32_t literal_mask = inst.NumInOperands() > 2 ? inst.GetSingleWordInOperand(2) : 0u;
         args.Push(Literal(literal_mask));
-        TINT_ASSERT(literal_mask == 0 || inst.NumInOperands() > 3);
         for (uint32_t i = 3; i < inst.NumInOperands(); ++i) {
             args.Push(Value(inst.GetSingleWordInOperand(i)));
         }
 
         Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, args), inst.result_id());
+        return Success;
     }
 
     bool HasLod(uint32_t mask) {
@@ -3607,7 +3637,6 @@ class Parser {
 
         uint32_t literal_mask = inst.NumInOperands() > 3 ? inst.GetSingleWordInOperand(3) : 0u;
         args.Push(Literal(literal_mask));
-        TINT_ASSERT(literal_mask == 0 || inst.NumInOperands() > 4);
         for (uint32_t i = 4; i < inst.NumInOperands(); ++i) {
             args.Push(Value(inst.GetSingleWordInOperand(i)));
         }
@@ -3653,8 +3682,10 @@ class Parser {
         }
 
         uint32_t literal_mask = inst.NumInOperands() > 3 ? inst.GetSingleWordInOperand(3) : 0u;
-        TINT_ASSERT(literal_mask == 0);
         Vector<core::ir::Value*, 4> args = {image, coord, texel, Literal(literal_mask)};
+        for (uint32_t i = 4; i < inst.NumInOperands(); ++i) {
+            args.Push(Value(inst.GetSingleWordInOperand(i)));
+        }
         Emit(b_.Call<spirv::ir::BuiltinCall>(ty_.void_(), spirv::BuiltinFn::kImageWrite, args),
              inst.result_id());
     }

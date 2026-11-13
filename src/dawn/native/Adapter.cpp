@@ -61,7 +61,7 @@ AdapterBase::AdapterBase(InstanceBase* instance,
       mFeatureLevel(featureLevel),
       mTogglesState(requiredAdapterToggles),
       mPowerPreference(powerPreference) {
-    DAWN_CHECK(mPhysicalDevice->SupportsFeatureLevel(featureLevel, mInstance.Get()));
+    DAWN_CHECK(mPhysicalDevice->SupportsFeatureLevel(featureLevel));
     DAWN_CHECK(mTogglesState.GetStage() == ToggleStage::Adapter);
     // Cache the supported features of this adapter. Note that with device toggles overriding, a
     // device created by this adapter may support features not in this set and vice versa.
@@ -104,6 +104,11 @@ void AdapterBase::UpdateLimits() {
     if (mUseTieredLimits) {
         ApplyLimitTiers(&mLimits);
     }
+
+    // Applied after tiering as the clamped limits are below the lowest tier.
+    if (mTogglesState.IsEnabled(Toggle::GLLimitTextureImageUnitsTo13)) {
+        LimitGLTextureImageUnits(&mLimits);
+    }
 }
 
 const CombinedLimits& AdapterBase::GetLimits() const {
@@ -111,7 +116,9 @@ const CombinedLimits& AdapterBase::GetLimits() const {
 }
 
 wgpu::Status AdapterBase::APIGetLimits(Limits* limits) const {
-    if (mInstance->ConsumedError(FillLimits(limits, mSupportedFeatures, mLimits))) {
+    if (mInstance->ConsumedError(
+            ValidateAndFillLimits(limits, mSupportedFeatures, mLimits,
+                                  mTogglesState.IsEnabled(Toggle::AllowExperimentalAPIs)))) {
         return wgpu::Status::Error;
     }
     return wgpu::Status::Success;
@@ -161,6 +168,11 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
 ResultOrValError<UnpackedPtr<AdapterInfo>> AdapterBase::ValidateGetInfo(AdapterInfo* info) const {
     UnpackedPtr<AdapterInfo> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(info));
+    if (!mTogglesState.IsEnabled(Toggle::AllowExperimentalAPIs)) {
+        // Only the chained structs that are part of the stable ABI may be requested.
+        DAWN_TRY_CONTEXT(unpacked.ValidateStable(),
+                         "validating AdapterInfo chain with allow_experimental_apis disabled");
+    }
 
     DAWN_INVALID_IF(
         unpacked.Has<AdapterPropertiesMemoryHeaps>() &&
@@ -238,18 +250,8 @@ DeviceBase* AdapterBase::APICreateDevice(const DeviceDescriptor* descriptor) {
     return ReturnToAPI(std::move(device));
 }
 
-ResultOrUnknownError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
-    const DeviceDescriptor* rawDescriptor,
-    Ref<DeviceBase::DeviceLostEvent> lostEvent) {
-    DAWN_CHECK(rawDescriptor != nullptr);
-
-    // Create device toggles state from required toggles descriptor and inherited adapter toggles
-    // state.
-    UnpackedPtr<DeviceDescriptor> descriptor;
-    DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
-    auto* deviceTogglesDesc = descriptor.Get<DawnTogglesDescriptor>();
-
-    // Create device toggles state.
+TogglesState AdapterBase::CreateDeviceToggles(
+    const DawnTogglesDescriptor* deviceTogglesDesc) const {
     TogglesState deviceToggles =
         TogglesState::CreateFromTogglesDescriptor(deviceTogglesDesc, ToggleStage::Device);
     deviceToggles.InheritFrom(mTogglesState);
@@ -270,6 +272,28 @@ ResultOrUnknownError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
 
     // Backend-specific forced and default device toggles
     mPhysicalDevice->SetupBackendDeviceToggles(mInstance->GetPlatform(), &deviceToggles);
+    return deviceToggles;
+}
+
+ResultOrUnknownError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
+    const DeviceDescriptor* rawDescriptor,
+    Ref<DeviceBase::DeviceLostEvent> lostEvent) {
+    DAWN_CHECK(rawDescriptor != nullptr);
+
+    // Create device toggles state from required toggles descriptor and inherited adapter toggles
+    // state.
+    UnpackedPtr<DeviceDescriptor> descriptor;
+    DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
+    if (!mTogglesState.IsEnabled(Toggle::AllowExperimentalAPIs)) {
+        // Only the chained structs that are part of the stable ABI may be used. This also rejects
+        // DawnTogglesDescriptor, so allow_experimental_apis cannot be turned back on here.
+        DAWN_TRY_CONTEXT(descriptor.ValidateStable(),
+                         "validating %s with allow_experimental_apis disabled", rawDescriptor);
+    }
+    auto* deviceTogglesDesc = descriptor.Get<DawnTogglesDescriptor>();
+
+    // Create device toggles state.
+    TogglesState deviceToggles = CreateDeviceToggles(deviceTogglesDesc);
 
     std::unordered_set<wgpu::FeatureName> requiredFeatureSet{descriptor->requiredFeatures.begin(),
                                                              descriptor->requiredFeatures.end()};
@@ -289,8 +313,9 @@ ResultOrUnknownError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
 
     if (descriptor->requiredLimits != nullptr) {
         CombinedLimits requiredLimits;
-        DAWN_TRY_CONTEXT(ValidateAndUnpackLimitsIn(descriptor->requiredLimits, requiredFeatureSet,
-                                                   &requiredLimits),
+        DAWN_TRY_CONTEXT(ValidateAndUnpackLimitsIn(
+                             descriptor->requiredLimits, requiredFeatureSet, &requiredLimits,
+                             deviceToggles.IsEnabled(Toggle::AllowExperimentalAPIs)),
                          "Validating and unpacking descriptor->requiredLimits");
 
         DAWN_TRY_CONTEXT(ValidateLimits(GetLimits(), requiredLimits), "validating required limits");
@@ -441,6 +466,15 @@ const TogglesState& AdapterBase::GetTogglesState() const {
 
 std::vector<const char*> AdapterBase::GetTogglesUsed() const {
     return mTogglesState.GetEnabledToggleNames();
+}
+
+std::vector<const char*> AdapterBase::GetDeviceTogglesUsed(
+    const DeviceDescriptor* rawDescriptor) const {
+    const DawnTogglesDescriptor* deviceTogglesDesc = nullptr;
+    if (rawDescriptor != nullptr) {
+        deviceTogglesDesc = Unpack(rawDescriptor).Get<DawnTogglesDescriptor>();
+    }
+    return CreateDeviceToggles(deviceTogglesDesc).GetEnabledToggleNames();
 }
 
 wgpu::FeatureLevel AdapterBase::GetFeatureLevel() const {

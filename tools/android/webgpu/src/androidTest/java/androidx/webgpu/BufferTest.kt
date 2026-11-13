@@ -16,7 +16,6 @@
 package androidx.webgpu
 
 import androidx.test.filters.MediumTest
-import androidx.test.filters.SdkSuppress
 import androidx.test.filters.SmallTest
 import androidx.webgpu.WebGpuTestConstants.EMULATOR_TESTS_MIN_API_LEVEL
 import androidx.webgpu.helper.WebGpu
@@ -62,7 +61,10 @@ class BufferTest {
 
   @After
   fun teardown() {
-    runCatching { device.destroy() }
+    // Destroy on the WebGPU dispatcher: processEventsLoop() ticks the device on that thread and a
+    // Dawn device must not be used from two threads at once (unless ImplicitDeviceSynchronization is
+    // enabled); destroying it from the test thread raced with the loop.
+    runCatching { runBlocking { webGpu.execute { device.destroy() } } }
     webGpu.close()
     testScope.cancel()
     (dispatcher as? ExecutorCoroutineDispatcher)?.close()
@@ -167,8 +169,8 @@ class BufferTest {
    */
   @MediumTest
   @Test
-    @SdkSuppress(maxSdkVersion = 36) // b/537525245
-  @ApiRequirement(minApi = EMULATOR_TESTS_MIN_API_LEVEL, onlySkipOnEmulator = true)
+  // b/537525245: API 37 emulator software rendering uses the Null backend (emulator-only).
+  @ApiRequirement(minApi = EMULATOR_TESTS_MIN_API_LEVEL, maxApi = 36, onlySkipOnEmulator = true)
   fun testWriteAndReadBuffer() {
     runBlocking {
       val unused = webGpu.execute {

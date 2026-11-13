@@ -28,6 +28,7 @@
 package common
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -50,10 +51,14 @@ type Flags struct {
 	Log              string
 	ResultsPath      string
 	ExpectationsPath string
-	CTS              string // Path to the CTS directory
+	CTS              string // Path to the CTS directory or CTS zip
 	Node             string // Path to the Node executable
 	Npx              string // Path to the npx executable
 }
+
+// ErrNodeNotFound is the error for a command that runs node when Flags.Node is
+// not set.
+var ErrNodeNotFound = errors.New("cannot find path to node. Specify with --node")
 
 func (f *Flags) Register(fsReader oswrapper.FilesystemReader) {
 	flag.BoolVar(&f.Verbose, "verbose", false, "print extra information while testing")
@@ -63,9 +68,9 @@ func (f *Flags) Register(fsReader oswrapper.FilesystemReader) {
 	flag.StringVar(&f.Log, "log", "", "path to log file of tests run and result")
 	flag.StringVar(&f.ResultsPath, "output", "", "path to write test results file")
 	flag.StringVar(&f.ExpectationsPath, "expect", "", "path to expectations file")
-	flag.StringVar(&f.CTS, "cts", defaultCtsPath(fsReader), "root directory of WebGPU CTS")
+	flag.StringVar(&f.CTS, "cts", DefaultCtsPath(fsReader), "root directory of WebGPU CTS")
 	flag.StringVar(&f.Node, "node", fileutils.NodePath(fsReader), "path to node executable")
-	flag.StringVar(&f.Npx, "npx", defaultNpxPath(), "path to npx executable")
+	flag.StringVar(&f.Npx, "npx", DefaultNpxPath(), "path to npx executable")
 }
 
 // Process processes the flags, returning a State.
@@ -83,8 +88,8 @@ func (f *Flags) Process(fsReaderWriter oswrapper.FilesystemReaderWriter) (*State
 	if f.CTS == "" {
 		return nil, subcmd.InvalidCLA()
 	}
-	if !fileutils.IsDir(f.CTS, fsReaderWriter) {
-		return nil, fmt.Errorf("'%v' is not a directory", f.CTS)
+	if _, err := fsReaderWriter.Stat(f.CTS); err != nil {
+		return nil, fmt.Errorf("'%v' does not exist", f.CTS)
 	}
 	absCTS, err := filepath.Abs(f.CTS)
 	if err != nil {
@@ -107,11 +112,6 @@ func (f *Flags) Process(fsReaderWriter oswrapper.FilesystemReaderWriter) (*State
 		if err := s.Expectations.Load(f.ExpectationsPath); err != nil {
 			return nil, err
 		}
-	}
-
-	// Find node
-	if f.Node == "" {
-		return nil, fmt.Errorf("cannot find path to node. Specify with --node")
 	}
 
 	s.CTS = NewCTS(f.CTS, f.Npx, f.Node)
@@ -140,7 +140,7 @@ func (s *State) Close(results Results) error {
 	if s.resultsPath != "" {
 		expectations := Expectations{}
 		for testCase, result := range results {
-			if !s.failuresOnly || result.Status == Fail {
+			if !s.failuresOnly || result.Status.isFailure() {
 				expectations[testCase] = result.Status
 			}
 		}
@@ -159,9 +159,9 @@ func (s *State) Close(results Results) error {
 	return nil
 }
 
-// defaultCtsPath looks for the webgpu-cts directory in dawn's third_party
+// DefaultCtsPath looks for the webgpu-cts directory in dawn's third_party
 // directory. This is used as the default for the --cts command line flag.
-func defaultCtsPath(fsReader oswrapper.FilesystemReader) string {
+func DefaultCtsPath(fsReader oswrapper.FilesystemReader) string {
 	if dawnRoot := fileutils.DawnRoot(fsReader); dawnRoot != "" {
 		cts := filepath.Join(dawnRoot, "third_party", "webgpu-cts")
 		if info, err := fsReader.Stat(cts); err == nil && info.IsDir() {
@@ -171,8 +171,9 @@ func defaultCtsPath(fsReader oswrapper.FilesystemReader) string {
 	return ""
 }
 
-// defaultNpxPath looks for the npx executable on PATH
-func defaultNpxPath() string {
+// DefaultNpxPath looks for the npx executable on PATH. This is used as the
+// default for the --npx command line flag.
+func DefaultNpxPath() string {
 	if p, err := exec.LookPath("npx"); err == nil {
 		return p
 	}

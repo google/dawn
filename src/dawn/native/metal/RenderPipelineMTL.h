@@ -54,10 +54,6 @@ class RenderPipeline final : public RenderPipelineBase {
 
     id<MTLDepthStencilState> GetMTLDepthStencilState();
 
-    // For each Dawn vertex buffer, give the index in which it will be positioned in the Metal
-    // vertex buffer table.
-    uint32_t GetMtlVertexBufferIndex(VertexBufferSlot slot) const;
-
     MaybeUnknownError InitializeImpl() override;
 
   private:
@@ -71,7 +67,6 @@ class RenderPipeline final : public RenderPipelineBase {
     MTLCullMode mMtlCullMode{};
     NSPRef<id<MTLRenderPipelineState>> mMtlRenderPipelineState;
     NSPRef<id<MTLDepthStencilState>> mMtlDepthStencilState;
-    PerVertexBuffer<uint32_t> mMtlVertexBufferIndices{};
 };
 
 }  // namespace dawn::native::metal

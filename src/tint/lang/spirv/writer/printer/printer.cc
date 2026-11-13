@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/spirv/writer/printer/printer.h"
 
+#include <algorithm>
 #include <deque>
 #include <string>
 #include <utility>
@@ -65,6 +66,7 @@
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
 #include "src/tint/lang/core/ir/terminator.h"
+#include "src/tint/lang/core/ir/undef.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator/validate.h"
@@ -697,6 +699,7 @@ class Printer {
         return Switch(
             value,  //
             [&](const core::ir::Constant* constant) { return Constant(constant); },
+            [&](const core::ir::Undef* undef) { return Undef(undef->Type()); },
             [&](const core::ir::Value*) {
                 return values_.GetOrAdd(value, [&] { return module_.NextId(); });
             });
@@ -1230,8 +1233,12 @@ class Printer {
         auto* source_ty = access->Object()->Type();
         for (auto* idx : access->Indices()) {
             if (auto* constant = idx->As<core::ir::Constant>()) {
-                // Push the index to the chain and update the current type.
+                // Push the index to the chain and update the current type. Clamp non-struct
+                // indices so OpCompositeExtract stays in bounds when robustness is disabled.
                 auto i = constant->Value()->ValueAs<u32>();
+                if (auto el = source_ty->Elements(); el.type && el.count != 0) {
+                    i = std::min(i, u32(el.count - 1));
+                }
                 operands.push_back(i);
                 source_ty = source_ty->Element(i);
             } else {
@@ -1826,6 +1833,10 @@ class Printer {
                 break;
             case BuiltinFn::kGroupNonUniformSMax:
                 op = spv::Op::OpGroupNonUniformSMax;
+                break;
+            case BuiltinFn::kGroupNonUniformBallotFindMsb:
+                module_.PushCapability(SpvCapabilityGroupNonUniformBallot);
+                op = spv::Op::OpGroupNonUniformBallotFindMSB;
                 break;
             case BuiltinFn::kUConvert:
                 op = spv::Op::OpUConvert;
@@ -2970,7 +2981,7 @@ class Printer {
             }
             OperandList ops{Type(ty), Value(result)};
             for (auto& branch : branches) {
-                if (branch.value == nullptr) {
+                if (branch.value == nullptr || branch.value->Is<core::ir::Undef>()) {
                     ops.push_back(Undef(ty));
                 } else {
                     ops.push_back(Value(branch.value));

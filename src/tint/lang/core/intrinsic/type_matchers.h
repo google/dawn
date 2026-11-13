@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/type/abstract_numeric.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
@@ -127,6 +128,14 @@ inline const type::U8* BuildU8(intrinsic::MatchState& state, const type::Type*) 
 
 inline bool MatchU8(intrinsic::MatchState&, const type::Type* ty) {
     return ty->IsAnyOf<intrinsic::Any, type::U8, type::AbstractInt>();
+}
+
+inline const type::BF16* BuildBf16(intrinsic::MatchState& state, const type::Type*) {
+    return state.types.bf16();
+}
+
+inline bool MatchBf16(intrinsic::MatchState&, const type::Type* ty) {
+    return ty->IsAnyOf<intrinsic::Any, type::BF16, type::AbstractNumeric>();
 }
 
 inline const type::U16* BuildU16(intrinsic::MatchState& state, const type::Type*) {

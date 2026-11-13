@@ -100,7 +100,6 @@ SYNCED_VARIABLES = {
 SYNCED_CIPD_DEPS = {
     'buildtools/linux64',
     'buildtools/mac',
-    'buildtools/reclient',
     'buildtools/win',
     'third_party/ninja',
     'third_party/siso/cipd',

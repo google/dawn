@@ -31,27 +31,28 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/dawn/common/MatchVariant.h"
 #include "src/dawn/common/Range.h"
-#include "src/dawn/native/BindGroupTracker.h"
 #include "src/dawn/native/CommandEncoder.h"
 #include "src/dawn/native/Commands.h"
 #include "src/dawn/native/DynamicUploader.h"
 #include "src/dawn/native/ExternalTexture.h"
-#include "src/dawn/native/ImmediatesTracker.h"
 #include "src/dawn/native/PassResourceUsage.h"
 #include "src/dawn/native/Queue.h"
 #include "src/dawn/native/RenderBundle.h"
 #include "src/dawn/native/metal/BindGroupLayoutMTL.h"
 #include "src/dawn/native/metal/BindGroupMTL.h"
+#include "src/dawn/native/metal/BindGroupTrackerMTL.h"
 #include "src/dawn/native/metal/BufferMTL.h"
 #include "src/dawn/native/metal/ComputePipelineMTL.h"
 #include "src/dawn/native/metal/DeviceMTL.h"
 #include "src/dawn/native/metal/ImmediatesLayoutMTL.h"
+#include "src/dawn/native/metal/ImmediatesTrackerMTL.h"
 #include "src/dawn/native/metal/PipelineLayoutMTL.h"
 #include "src/dawn/native/metal/QuerySetMTL.h"
 #include "src/dawn/native/metal/RenderPipelineMTL.h"
+#include "src/dawn/native/metal/ResourceTableMTL.h"
 #include "src/dawn/native/metal/SamplerMTL.h"
+#include "src/dawn/native/metal/StorageBufferLengthTrackerMTL.h"
 #include "src/dawn/native/metal/TextureMTL.h"
 #include "src/dawn/native/metal/UtilsMetal.h"
 #include "src/utils/assert.h"
@@ -438,9 +439,12 @@ void EncodeEmptyBlitEncoderForWriteTimestamp(Device* device,
     if (cmd->querySet.Get() != nullptr) {
         QuerySet* querySet = ToBackend(cmd->querySet.Get());
         descriptor.sampleBufferAttachments[0].sampleBuffer = querySet->GetCounterSampleBuffer();
-        descriptor.sampleBufferAttachments[0].startOfEncoderSampleIndex = MTLCounterDontSample;
-        descriptor.sampleBufferAttachments[0].endOfEncoderSampleIndex =
+        // A macOS 26 Apple GPU driver bug causes kIOGPUCommandBufferCallbackErrorOutOfMemory
+        // when doing a blit pass with no timestamps followed by a blit pass with only an end
+        // timestamp (crbug.com/448394568). Use a start timestamp here to avoid that.
+        descriptor.sampleBufferAttachments[0].startOfEncoderSampleIndex =
             NSUInteger(querySet->GetSampleIndex(cmd->queryIndex));
+        descriptor.sampleBufferAttachments[0].endOfEncoderSampleIndex = MTLCounterDontSample;
 
         id<MTLBlitCommandEncoder> blit = commandContext->BeginBlit(descriptor);
         if (device->IsToggleEnabled(Toggle::MetalUseMockBlitEncoderForWriteTimestamp)) {
@@ -449,553 +453,6 @@ void EncodeEmptyBlitEncoderForWriteTimestamp(Device* device,
         commandContext->EndBlit();
     }
 }
-
-// Metal buffer pointers do not expose their length, so Tint receives storage buffer lengths
-// through immediate data for arrayLength().
-struct StorageBufferLengthTracker {
-    StorageBufferLengthTracker() = delete;
-    explicit StorageBufferLengthTracker(DeviceBase* device) {
-        // Lengths are stored as uint32_t. Make sure that's OK for the device.
-        DAWN_ASSERT(device->GetLimits().v1.maxBufferSize <= std::numeric_limits<uint32_t>::max());
-    }
-
-    wgpu::ShaderStage dirtyStages = wgpu::ShaderStage::None;
-
-    // Tint expects one uint32_t length per possible buffer binding.
-    static constexpr size_t MaxBufferCount = kGenericMetalBufferSlots;
-    PerStage<std::array<uint32_t, MaxBufferCount>> data;
-    // Number of bytes to upload for each shader stage.
-    PerStage<uint32_t> dataSize{0u};
-
-    // TODO(crbug.com/366291600): Remove this logic when merging
-    // StorageBufferLengthTracker in ImmediateTracker.
-    void OnSetPipeline(RenderPipelineBase* pipeline) {
-        size_t immediateCount = pipeline->GetImmediateMask().count();
-        if (immediateCount != mLastImmediateCounts) {
-            mLastImmediateCounts = immediateCount;
-            dirtyStages |= (wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment);
-        }
-    }
-
-    void OnSetPipeline(ComputePipelineBase* pipeline) {
-        size_t immediateCount = pipeline->GetImmediateMask().count();
-        if (immediateCount != mLastImmediateCounts) {
-            mLastImmediateCounts = immediateCount;
-            dirtyStages |= wgpu::ShaderStage::Compute;
-        }
-    }
-
-    // TODO(crbug.com/366291600): Remove unused storage buffer size in immediate block
-    // to avoid uploading unused data.
-    void Apply(RenderPipeline* pipeline, bool enableVertexPulling) {
-        if (dirtyStages & wgpu::ShaderStage::Vertex) {
-            uint32_t bufferCount =
-                ToBackend(pipeline->GetLayout())->GetBufferBindingCount(SingleShaderStage::Vertex);
-
-            if (enableVertexPulling) {
-                bufferCount += uint32_t{pipeline->GetVertexBufferCount()};
-            }
-
-            DAWN_ASSERT(bufferCount <= data[SingleShaderStage::Vertex].size());
-            dataSize[SingleShaderStage::Vertex] = sizeof(uint32_t) * bufferCount;
-        }
-
-        if (dirtyStages & wgpu::ShaderStage::Fragment) {
-            uint32_t bufferCount = ToBackend(pipeline->GetLayout())
-                                       ->GetBufferBindingCount(SingleShaderStage::Fragment);
-            DAWN_ASSERT(bufferCount <= data[SingleShaderStage::Fragment].size());
-            dataSize[SingleShaderStage::Fragment] = sizeof(uint32_t) * bufferCount;
-        }
-    }
-
-    // TODO(crbug.com/366291600): Remove unused storage buffer size in immediate block
-    // to avoid uploading unused data.
-    void Apply(ComputePipeline* pipeline) {
-        if (!(dirtyStages & wgpu::ShaderStage::Compute)) {
-            return;
-        }
-
-        uint32_t bufferCount =
-            ToBackend(pipeline->GetLayout())->GetBufferBindingCount(SingleShaderStage::Compute);
-        DAWN_ASSERT(bufferCount <= data[SingleShaderStage::Compute].size());
-        dataSize[SingleShaderStage::Compute] = sizeof(uint32_t) * bufferCount;
-    }
-
-    size_t mLastImmediateCounts = 0;
-};
-
-class RenderImmediatesTracker
-    : public UserImmediatesTrackerBase<RenderImmediates, RenderPipelineBase> {
-  public:
-    RenderImmediatesTracker() = default;
-
-    void SetClampFragDepth(float minClampFragDepth, float maxClampFragDepth) {
-        ClampFragDepthArgs fragDepthArgs;
-        fragDepthArgs.minClampFragDepth = minClampFragDepth;
-        fragDepthArgs.maxClampFragDepth = maxClampFragDepth;
-
-        UpdateImmediates(offsetof(RenderImmediates, clampFragDepth), fragDepthArgs);
-    }
-};
-
-using ComputeImmediatesTracker = UserImmediatesTrackerBase<ComputeImmediates, ComputePipelineBase>;
-
-// Uploads immediates, both external and internal (including storage buffer lengths) through one
-// Metal setBytes call per stage.
-// TODO(crbug.com/366291600): Merge StorageBufferLength in ImmediateTracker
-template <typename T, typename EncoderType>
-class ImmediateTracker : public T {
-  public:
-    ImmediateTracker() = default;
-
-    // Applies immediates and buffer length data to the Metal command encoder.
-    // This method uploads both immediate values and storage buffer lengths
-    // to a single buffer, with buffer lengths appended after immediates.
-    // The data is uploaded using setVertexBytes/setFragmentBytes for render passes
-    // or setBytes for compute passes.
-    void Apply(EncoderType encoder, StorageBufferLengthTracker* lengthTracker) {
-        DAWN_ASSERT(this->mLastPipeline != nullptr);
-
-        // Update the stored immediates that have changed
-        ImmediateMask pipelineMask = this->mLastPipeline->GetImmediateMask();
-        ImmediateMask uploadBits = this->mDirty & pipelineMask;
-        constexpr wgpu::ShaderStage stages =
-            kIsRenderImmediates ? wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment
-                                : wgpu::ShaderStage::Compute;
-        for (auto [offset, size] : IterateRanges(uploadBits)) {
-            uint32_t immediateContentStartOffset =
-                static_cast<uint32_t>(offset) * kImmediateElementByteSize;
-            size_t immediateRangeStartOffset =
-                GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask);
-            WriteImmediateBlocks(stages, immediateRangeStartOffset * kImmediateElementByteSize,
-                                 this->mContent.GetDataBytes(immediateContentStartOffset,
-                                                             size * kImmediateElementByteSize));
-        }
-
-        uint32_t bufferSizeByteOffset = GetImmediateBufferSizesByteOffset(pipelineMask);
-
-        // Update storage buffer length data that are needed and changed.
-        for (auto stage : IterateStages(lengthTracker->dirtyStages)) {
-            // Sizes must be > 0, otherwise we'll do min(index, bufferSize - 1) and underflow.
-            // TODO(crbug.com/488400770): Should be able to assert that, but Graphite violates it.
-
-            WriteImmediateBlocks(
-                StageBit(stage), bufferSizeByteOffset,
-                ByteSpanFromRef(lengthTracker->data[stage]).first(lengthTracker->dataSize[stage]));
-        }
-
-        for (auto stage : IterateStages(stages)) {
-            dirtySize[stage] =
-                Align(bufferSizeByteOffset + lengthTracker->dataSize[stage], kSetBytesAlignment);
-        }
-
-        // Reset StorageBufferLengthTracker dirty stages
-        lengthTracker->dirtyStages = wgpu::ShaderStage::None;
-
-        UploadImmediates(encoder);
-
-        // Reset all dirty bits after uploading.
-        this->mDirty.reset();
-    }
-
-  private:
-    static constexpr bool kIsRenderImmediates = std::is_same_v<T, RenderImmediatesTracker>;
-    static constexpr bool kIsComputeImmediates = std::is_same_v<T, ComputeImmediatesTracker>;
-
-    // Round up to 16 bytes so the setBytes length covers the size of the constant-buffer struct
-    // argument, whose size is rounded up to its largest member alignment (at most 16 bytes, for
-    // vec4-class members).
-    static constexpr size_t kSetBytesAlignment = 16;
-
-    static constexpr size_t MaxBufferCount = StorageBufferLengthTracker::MaxBufferCount;
-    static constexpr size_t kImmediateStructU32 = kIsRenderImmediates
-                                                      ? sizeof(RenderImmediates) / sizeof(uint32_t)
-                                                      : sizeof(UserImmediates) / sizeof(uint32_t);
-    static constexpr size_t kMaxImmediateBlockSize =
-        Align(kImmediateStructU32 + MaxBufferCount, kSetBytesAlignment / kImmediateElementByteSize);
-
-    // Writes data to the immediate block content for the specified shader stages.
-    // This is used for both immediates and storage buffer length data.
-    void WriteImmediateBlocks(wgpu::ShaderStage stages,
-                              size_t byteOffset,
-                              Span<const std::byte> data) {
-        // Copy data to all affected shader stages.
-        for (auto stage : IterateStages(stages)) {
-            ByteSpanFromRef(mImmediateBlockContent[stage])
-                .subspan(byteOffset, data.size())
-                .CopyFrom(data);
-        }
-        dirtyStages |= stages;
-    }
-
-    // Uploads the immediate block content to the Metal render encoder.
-    void UploadImmediates(id<MTLRenderCommandEncoder> renderEncoder) {
-        if (dirtyStages & wgpu::ShaderStage::Vertex) {
-            [renderEncoder setVertexBytes:mImmediateBlockContent[SingleShaderStage::Vertex].data()
-                                   length:dirtySize[SingleShaderStage::Vertex]
-                                  atIndex:kImmediateBlockBufferSlot];
-        }
-
-        if (dirtyStages & wgpu::ShaderStage::Fragment) {
-            [renderEncoder
-                setFragmentBytes:mImmediateBlockContent[SingleShaderStage::Fragment].data()
-                          length:dirtySize[SingleShaderStage::Fragment]
-                         atIndex:kImmediateBlockBufferSlot];
-        }
-
-        // Reset dirty stage.
-        dirtyStages = wgpu::ShaderStage::None;
-    }
-
-    // Uploads the immediate block content to the Metal compute encoder.
-    void UploadImmediates(id<MTLComputeCommandEncoder> computeEncoder) {
-        if (dirtyStages == wgpu::ShaderStage::None) {
-            return;
-        }
-
-        [computeEncoder setBytes:mImmediateBlockContent[SingleShaderStage::Compute].data()
-                          length:dirtySize[SingleShaderStage::Compute]
-                         atIndex:kImmediateBlockBufferSlot];
-
-        // Reset dirty stage.
-        dirtyStages = wgpu::ShaderStage::None;
-    }
-
-    // Per-stage storage for the immediate block content.
-    // Each stage maintains its own copy of the data combining immediates
-    // and buffer length information in a single contiguous block.
-    PerStage<std::array<uint32_t, kMaxImmediateBlockSize>> mImmediateBlockContent;
-    // Size of data to upload for each shader stage (in bytes)
-    PerStage<size_t> dirtySize;
-    // Tracks which shader stages have dirty data that needs to be uploaded
-    wgpu::ShaderStage dirtyStages = wgpu::ShaderStage::None;
-};
-
-// Keeps track of the dirty bind groups so they can be lazily applied when we know the
-// pipeline state.
-// Bind groups may be inherited because bind groups are packed in the buffer /
-// texture tables in contiguous order.
-class BindGroupTracker : public BindGroupTrackerBase<true> {
-  public:
-    BindGroupTracker(StorageBufferLengthTracker* lengthTracker, bool useArgumentBuffers)
-        : BindGroupTrackerBase(),
-          mLengthTracker(lengthTracker),
-          mUseArgumentBuffers(useArgumentBuffers) {}
-
-    template <typename Encoder>
-    void Apply(Encoder encoder) {
-        BeforeApply();
-
-        uint32_t curBufferIdx = kArgumentBufferSlotMax;
-        for (BindGroupIndex index : mDirtyBindGroupsObjectChangedOrIsDynamic) {
-            BindGroup* group = ToBackend(mBindGroups[index]);
-            auto* layout = ToBackend(mPipeline->GetLayout()->GetBindGroupLayout(index));
-
-            // Note, both of these buffer index values need to match up to the value set in the
-            // ShaderModuleMTL #argument-buffer-and-dynamic-offsets-buffer-indices
-            uint32_t argumentBufferIdx = curBufferIdx--;
-            // TODO(crbug.com/363031535): The dynamic offsets should all be in a single grouping
-            // which is in the immediates buffer.
-            std::optional<uint32_t> dynamicOffsetsBufferIdx = std::nullopt;
-            if (uint32_t(layout->GetDynamicBufferCount()) > 0u) {
-                dynamicOffsetsBufferIdx = curBufferIdx--;
-            }
-
-            ApplyBindGroup(encoder, index, group, GetDynamicOffsets(index),
-                           ToBackend(mPipeline->GetLayout()), argumentBufferIdx,
-                           dynamicOffsetsBufferIdx);
-        }
-
-        AfterApply();
-    }
-
-  private:
-    // Handles a call to SetBindGroup, directing the commands to the correct encoder.
-    // There is a single function that takes both encoders to factor code. Other approaches
-    // like templates wouldn't work because the name of methods are different between the
-    // two encoder types.
-    void ApplyBindGroupImpl(id<MTLRenderCommandEncoder> render,
-                            id<MTLComputeCommandEncoder> compute,
-                            BindGroupIndex index,
-                            BindGroup* group,
-                            const ityp::span<BindingIndex, uint32_t>& dynamicOffsets,
-                            PipelineLayout* pipelineLayout,
-                            uint32_t argumentBufferIdx,
-                            std::optional<uint32_t> dynamicBufferIdx) {
-        // TODO(crbug.com/dawn/854): Maintain buffers and offsets arrays in BindGroup
-        // so that we only have to do one setVertexBuffers and one setFragmentBuffers
-        // call here.
-        for (BindingIndex bindingIndex : Range(group->GetLayout()->GetBindingCount())) {
-            const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
-
-            bool hasVertStage =
-                bindingInfo.visibility & wgpu::ShaderStage::Vertex && render != nullptr;
-            bool hasFragStage =
-                bindingInfo.visibility & wgpu::ShaderStage::Fragment && render != nullptr;
-            bool hasComputeStage =
-                bindingInfo.visibility & wgpu::ShaderStage::Compute && compute != nullptr;
-
-            uint32_t vertIndex = 0;
-            uint32_t fragIndex = 0;
-            uint32_t computeIndex = 0;
-
-            if (hasVertStage) {
-                vertIndex = pipelineLayout->GetBindingIndexInfo(
-                    SingleShaderStage::Vertex)[index][bindingIndex];
-            }
-            if (hasFragStage) {
-                fragIndex = pipelineLayout->GetBindingIndexInfo(
-                    SingleShaderStage::Fragment)[index][bindingIndex];
-            }
-            if (hasComputeStage) {
-                computeIndex = pipelineLayout->GetBindingIndexInfo(
-                    SingleShaderStage::Compute)[index][bindingIndex];
-            }
-
-            auto HandleTextureBinding = [&]() {
-                auto textureView = ToBackend(group->GetBindingAsTextureView(bindingIndex));
-                id<MTLTexture> texture = textureView->GetMTLTexture();
-                if (!mUseArgumentBuffers) {
-                    if (hasVertStage &&
-                        mBoundTextures[SingleShaderStage::Vertex][vertIndex] != texture) {
-                        mBoundTextures[SingleShaderStage::Vertex][vertIndex] = texture;
-                        [render setVertexTexture:texture atIndex:vertIndex];
-                    }
-                    if (hasFragStage &&
-                        mBoundTextures[SingleShaderStage::Fragment][fragIndex] != texture) {
-                        mBoundTextures[SingleShaderStage::Fragment][fragIndex] = texture;
-                        [render setFragmentTexture:texture atIndex:fragIndex];
-                    }
-                    if (hasComputeStage &&
-                        mBoundTextures[SingleShaderStage::Compute][computeIndex] != texture) {
-                        mBoundTextures[SingleShaderStage::Compute][computeIndex] = texture;
-                        [compute setTexture:texture atIndex:computeIndex];
-                    }
-                }
-            };
-
-            MatchVariant(
-                bindingInfo.bindingLayout,
-                [&](const BufferBindingInfo& layout) {
-                    const BufferBinding& binding = group->GetBindingAsBufferBinding(bindingIndex);
-                    ToBackend(binding.buffer)->TrackUsage();
-
-                    if (hasVertStage) {
-                        mLengthTracker->data[SingleShaderStage::Vertex][vertIndex] =
-                            checked_cast<uint32_t>(binding.size);
-                        mLengthTracker->dirtyStages |= wgpu::ShaderStage::Vertex;
-                    }
-                    if (hasFragStage) {
-                        mLengthTracker->data[SingleShaderStage::Fragment][fragIndex] =
-                            checked_cast<uint32_t>(binding.size);
-                        mLengthTracker->dirtyStages |= wgpu::ShaderStage::Fragment;
-                    }
-                    if (hasComputeStage) {
-                        mLengthTracker->data[SingleShaderStage::Compute][computeIndex] =
-                            checked_cast<uint32_t>(binding.size);
-                        mLengthTracker->dirtyStages |= wgpu::ShaderStage::Compute;
-                    }
-
-                    const id<MTLBuffer> buffer = ToBackend(binding.buffer)->GetMTLBuffer();
-                    if (!mUseArgumentBuffers) {
-                        NSUInteger offset = binding.offset;
-
-                        // TODO(crbug.com/dawn/854): Record bound buffer status to use
-                        // setBufferOffset to achieve better performance.
-
-                        // TODO(crbug.com/363031535): The dynamic offsets should come from the
-                        // immediate buffer.
-                        if (layout.hasDynamicOffset) {
-                            // Dynamic buffers are packed at the front of BindingIndices.
-                            offset += dynamicOffsets[bindingIndex];
-                        }
-
-                        if (hasVertStage) {
-                            [render setVertexBuffers:&buffer
-                                             offsets:&offset
-                                           withRange:NSMakeRange(vertIndex, 1)];
-                        }
-                        if (hasFragStage) {
-                            [render setFragmentBuffers:&buffer
-                                               offsets:&offset
-                                             withRange:NSMakeRange(fragIndex, 1)];
-                        }
-                        if (hasComputeStage) {
-                            [compute setBuffers:&buffer
-                                        offsets:&offset
-                                      withRange:NSMakeRange(computeIndex, 1)];
-                        }
-                    }
-                },
-                [&](const SamplerBindingInfo&) {
-                    auto sampler = ToBackend(group->GetBindingAsSampler(bindingIndex));
-                    id<MTLSamplerState> samplerState = sampler->GetMTLSamplerState();
-                    if (!mUseArgumentBuffers) {
-                        if (hasVertStage &&
-                            mBoundSamplers[SingleShaderStage::Vertex][vertIndex] != samplerState) {
-                            mBoundSamplers[SingleShaderStage::Vertex][vertIndex] = samplerState;
-                            [render setVertexSamplerState:samplerState atIndex:vertIndex];
-                        }
-                        if (hasFragStage &&
-                            mBoundSamplers[SingleShaderStage::Fragment][fragIndex] !=
-                                samplerState) {
-                            mBoundSamplers[SingleShaderStage::Fragment][fragIndex] = samplerState;
-                            [render setFragmentSamplerState:samplerState atIndex:fragIndex];
-                        }
-                        if (hasComputeStage &&
-                            mBoundSamplers[SingleShaderStage::Compute][computeIndex] !=
-                                samplerState) {
-                            mBoundSamplers[SingleShaderStage::Compute][computeIndex] = samplerState;
-                            [compute setSamplerState:sampler->GetMTLSamplerState()
-                                             atIndex:computeIndex];
-                        }
-                    }
-                },
-                [&](const StaticSamplerBindingInfo&) {
-                    // Static samplers are handled in the frontend.
-                    // TODO(crbug.com/dawn/2482): Implement static samplers in the
-                    // Metal backend.
-                    DAWN_UNREACHABLE();
-                },
-                [&](const TextureBindingInfo&) { HandleTextureBinding(); },
-                [&](const StorageTextureBindingInfo& info) { HandleTextureBinding(); },
-                [&](const TexelBufferBindingInfo&) {
-                    // Metal does not support texel buffers.
-                    // TODO(crbug/382544164): Prototype texel buffer feature
-                    DAWN_UNREACHABLE();
-                },
-                [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); },
-                [](const ExternalTextureBindingInfo&) { DAWN_UNREACHABLE(); });
-        }
-
-        if (mUseArgumentBuffers) {
-            const uint32_t dynamicOffsetsCount = uint32_t(dynamicOffsets.size());
-
-            if (render) {
-                [render setVertexBuffer:*(group->GetArgumentBuffer())
-                                 offset:0
-                                atIndex:argumentBufferIdx];
-
-                [render setFragmentBuffer:*(group->GetArgumentBuffer())
-                                   offset:0
-                                  atIndex:argumentBufferIdx];
-
-                if (dynamicOffsetsCount > 0) {
-                    DAWN_ASSERT(dynamicBufferIdx.has_value());
-                    [render setVertexBytes:dynamicOffsets.data()
-                                    length:dynamicOffsetsCount * sizeof(uint32_t)
-                                   atIndex:dynamicBufferIdx.value()];
-
-                    [render setFragmentBytes:dynamicOffsets.data()
-                                      length:dynamicOffsetsCount * sizeof(uint32_t)
-                                     atIndex:dynamicBufferIdx.value()];
-                }
-            } else {
-                DAWN_ASSERT(compute != nullptr);
-
-                [compute setBuffer:*(group->GetArgumentBuffer())
-                            offset:0
-                           atIndex:argumentBufferIdx];
-
-                if (dynamicOffsetsCount > 0) {
-                    DAWN_ASSERT(dynamicBufferIdx.has_value());
-                    [compute setBytes:dynamicOffsets.data()
-                               length:dynamicOffsetsCount * sizeof(uint32_t)
-                              atIndex:dynamicBufferIdx.value()];
-                }
-            }
-        }
-    }
-
-    template <typename... Args>
-    void ApplyBindGroup(id<MTLRenderCommandEncoder> encoder, Args&&... args) {
-        ApplyBindGroupImpl(encoder, nullptr, std::forward<Args&&>(args)...);
-    }
-
-    template <typename... Args>
-    void ApplyBindGroup(id<MTLComputeCommandEncoder> encoder, Args&&... args) {
-        ApplyBindGroupImpl(nullptr, encoder, std::forward<Args&&>(args)...);
-    }
-
-    raw_ptr<StorageBufferLengthTracker> mLengthTracker;
-
-    // Keep track of current texture and sampler bindings to minimize state changes even when bind
-    // groups are dirtied. It's safe to keep raw pointers here since if an entry is set here, the
-    // texture/sampler is bound in Metal and the Metal runtime will keep them alive.
-    PerStage<absl::flat_hash_map<uint32_t, id<MTLTexture>>> mBoundTextures;
-    PerStage<absl::flat_hash_map<uint32_t, id<MTLSamplerState>>> mBoundSamplers;
-
-    bool mUseArgumentBuffers = false;
-};
-
-// Keeps track of the dirty vertex buffer values so they can be lazily applied when we know
-// all the relevant state.
-class VertexBufferTracker {
-  public:
-    explicit VertexBufferTracker(StorageBufferLengthTracker* lengthTracker)
-        : mLengthTracker(lengthTracker) {}
-
-    void OnSetVertexBuffer(VertexBufferSlot slot, Buffer* buffer, uint64_t offset) {
-        id<MTLBuffer> mtlBuffer = buffer->GetMTLBuffer();
-        if (mVertexBuffers[slot] == mtlBuffer && mVertexBufferOffsets[slot] == offset) {
-            return;
-        }
-        buffer->TrackUsage();
-        mVertexBuffers[slot] = mtlBuffer;
-        mVertexBufferOffsets[slot] = offset;
-
-        DAWN_ASSERT(buffer->GetSize() >= offset);
-        // The binding size for a vertex buffer must always be at least 4 so we can do clamping.
-        uint64_t bindingSize = std::max(4ull, buffer->GetSize() - offset);
-        // (BufferMTL reserves an extra 4 bytes for us in case we're at the very end of the buffer.)
-        DAWN_ASSERT(offset + bindingSize <= buffer->GetAllocatedSize());
-
-        // Check to make sure sizes will fit into uint32_t for the shader.
-        DAWN_CHECK(bindingSize <= std::numeric_limits<uint32_t>::max());
-        mVertexBufferBindingSizes[slot] = static_cast<uint32_t>(bindingSize);
-
-        mDirtyVertexBuffers.set(slot);
-    }
-
-    void OnSetPipeline(RenderPipeline* lastPipeline, RenderPipeline* pipeline) {
-        // When a new pipeline is bound we must set all the vertex buffers again because
-        // they might have been offset by the pipeline layout, and they might be packed
-        // differently from the previous pipeline.
-        mDirtyVertexBuffers |= pipeline->GetVertexBuffersUsed();
-    }
-
-    void Apply(id<MTLRenderCommandEncoder> encoder,
-               RenderPipeline* pipeline,
-               bool enableVertexPulling) {
-        const auto& vertexBuffersToApply = mDirtyVertexBuffers & pipeline->GetVertexBuffersUsed();
-
-        for (VertexBufferSlot slot : vertexBuffersToApply) {
-            uint32_t metalIndex = pipeline->GetMtlVertexBufferIndex(slot);
-
-            if (enableVertexPulling) {
-                // Insert lengths for vertex buffers bound as storage buffers
-                mLengthTracker->data[SingleShaderStage::Vertex][metalIndex] =
-                    mVertexBufferBindingSizes[slot];
-                mLengthTracker->dirtyStages |= wgpu::ShaderStage::Vertex;
-            }
-
-            [encoder setVertexBuffers:&mVertexBuffers[slot]
-                              offsets:&mVertexBufferOffsets[slot]
-                            withRange:NSMakeRange(metalIndex, 1)];
-        }
-
-        mDirtyVertexBuffers.reset();
-    }
-
-  private:
-    // All the indices in these arrays are Dawn vertex buffer indices
-    VertexBufferMask mDirtyVertexBuffers;
-    PerVertexBuffer<id<MTLBuffer>> mVertexBuffers{};
-    PerVertexBuffer<NSUInteger> mVertexBufferOffsets{};
-    PerVertexBuffer<uint32_t> mVertexBufferBindingSizes{};
-
-    raw_ptr<StorageBufferLengthTracker> mLengthTracker;
-};
 
 }  // anonymous namespace
 
@@ -1084,484 +541,114 @@ CommandBuffer::CommandBuffer(CommandEncoder* enc, const CommandBufferDescriptor*
 
 CommandBuffer::~CommandBuffer() = default;
 
-MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) {
+MaybeError CommandBuffer::LazyClearSyncScope(const SyncScopeResourceUsage& scope,
+                                             CommandRecordingContext* commandContext) {
+    for (size_t i = 0; i < scope.textures.size(); ++i) {
+        Texture* texture = ToBackend(scope.textures[i]);
+
+        // Clear subresources that are not attachments. Attachments will be cleared in
+        // RecordBeginRenderPass by setting the loadop to clear when the texture subresource
+        // has not been initialized before the render pass.
+        DAWN_TRY(scope.textureSyncInfos[i].Iterate(
+            [&](const SubresourceRange& range, const TextureSyncInfo& syncInfo) -> MaybeError {
+                if (syncInfo.usage & ~(wgpu::TextureUsage::RenderAttachment |
+                                       wgpu::TextureUsage::StorageAttachment)) {
+                    DAWN_TRY(texture->EnsureSubresourceContentInitialized(commandContext, range));
+                }
+                return {};
+            }));
+    }
+    for (BufferBase* bufferBase : scope.buffers) {
+        ToBackend(bufferBase)->EnsureDataInitialized(commandContext);
+    }
+    return {};
+}
+
+MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext) {
     PassIndex nextComputePassNumber{0u};
     PassIndex nextRenderPassNumber{0u};
-
-    auto LazyClearSyncScope = [](const SyncScopeResourceUsage& scope,
-                                 CommandRecordingContext* commandContext) -> MaybeError {
-        for (size_t i = 0; i < scope.textures.size(); ++i) {
-            Texture* texture = ToBackend(scope.textures[i]);
-
-            // Clear subresources that are not attachments. Attachments will be cleared in
-            // RecordBeginRenderPass by setting the loadop to clear when the texture subresource
-            // has not been initialized before the render pass.
-            DAWN_TRY(scope.textureSyncInfos[i].Iterate(
-                [&](const SubresourceRange& range, const TextureSyncInfo& syncInfo) -> MaybeError {
-                    if (syncInfo.usage & ~(wgpu::TextureUsage::RenderAttachment |
-                                           wgpu::TextureUsage::StorageAttachment)) {
-                        DAWN_TRY(
-                            texture->EnsureSubresourceContentInitialized(commandContext, range));
-                    }
-                    return {};
-                }));
-        }
-        for (BufferBase* bufferBase : scope.buffers) {
-            ToBackend(bufferBase)->EnsureDataInitialized(commandContext);
-        }
-        return {};
-    };
 
     Command type;
     while (mCommands.NextCommandId(&type)) {
         switch (type) {
             case Command::BeginComputePass: {
-                BeginComputePassCmd* cmd = mCommands.NextCommand<BeginComputePassCmd>();
-
-                const ComputePassResourceUsage& resourceUsage =
-                    GetResourceUsages().computePasses[nextComputePassNumber];
-                for (TextureBase* texture : resourceUsage.referencedTextures) {
-                    ToBackend(texture)->SynchronizeTextureBeforeUse(commandContext);
-                }
-                for (const SyncScopeResourceUsage& scope : resourceUsage.dispatchUsages) {
-                    DAWN_TRY(LazyClearSyncScope(scope, commandContext));
-                }
-                commandContext->EndBlit();
-
-                DAWN_TRY(EncodeComputePass(commandContext, cmd, resourceUsage));
-
-                nextComputePassNumber++;
+                DAWN_TRY(RecordBeginComputePass(commandContext,
+                                                mCommands.NextCommand<BeginComputePassCmd>(),
+                                                &nextComputePassNumber));
                 break;
             }
-
             case Command::BeginRenderPass: {
-                BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
-
-                const RenderPassResourceUsage& resourceUsage =
-                    GetResourceUsages().renderPasses[nextRenderPassNumber];
-                for (TextureBase* texture : resourceUsage.textures) {
-                    ToBackend(texture)->SynchronizeTextureBeforeUse(commandContext);
-                }
-                for (ExternalTextureBase* externalTexture : resourceUsage.externalTextures) {
-                    for (auto& view : externalTexture->GetTextureViews()) {
-                        if (view.Get()) {
-                            Texture* texture = ToBackend(view->GetTexture());
-                            texture->SynchronizeTextureBeforeUse(commandContext);
-                        }
-                    }
-                }
-                DAWN_TRY(LazyClearSyncScope(resourceUsage, commandContext));
-                commandContext->EndBlit();
-
-                // Before beginning, we encode a compute pass that converts multi draws into an ICB
-                // if they exist.
-                auto& indirectMetadata = GetIndirectDrawMetadata();
-                const IndirectDrawMetadata& metadata = indirectMetadata[nextRenderPassNumber];
-                const auto& multiDraws = metadata.GetIndirectMultiDraws();
-
-                std::vector<MultiDrawExecutionData> multiDrawExecutions;
-
-                if (!multiDraws.empty()) {
-                    id<MTLComputeCommandEncoder> computeEnc = commandContext->BeginCompute();
-
-                    DAWN_TRY_ASSIGN(multiDrawExecutions,
-                                    PrepareMultiDraws(GetDevice(), computeEnc, multiDraws));
-
-                    commandContext->EndCompute();
-                }
-
-                Device* device = ToBackend(GetDevice());
-                DAWN_TRY(LazyClearRenderPassAttachments(
-                    device, cmd, [&](TextureBase* texture, const SubresourceRange& range) {
-                        return ToBackend(texture)->EnsureSubresourceContentInitialized(
-                            commandContext, range);
-                    }));
-
-                if (cmd->attachmentState->HasDepthStencilAttachment() &&
-                    ToBackend(cmd->depthStencilAttachment.view->GetTexture())
-                        ->ShouldKeepInitialized()) {
-                    // Ensure that depth and stencil never become uninitialized again if
-                    // the attachment must stay initialized.
-                    // For Toggle MetalKeepMultisubresourceDepthStencilTexturesInitialized.
-                    cmd->depthStencilAttachment.depthStoreOp = wgpu::StoreOp::Store;
-                    cmd->depthStencilAttachment.stencilStoreOp = wgpu::StoreOp::Store;
-                }
-                NSRef<MTLRenderPassDescriptor> descriptor = CreateMTLRenderPassDescriptor(
-                    device, cmd, device->UseCounterSamplingAtStageBoundary());
-
-                EmptyOcclusionQueries emptyOcclusionQueries;
-                DAWN_TRY(EncodeMetalRenderPass(
-                    device, commandContext, &resourceUsage, descriptor.Get(), cmd->width,
-                    cmd->height,
-                    [&](id<MTLRenderCommandEncoder> encoder,
-                        BeginRenderPassCmd* cmd) -> MaybeError {
-                        return this->EncodeRenderPass(
-                            encoder, cmd,
-                            device->IsToggleEnabled(Toggle::MetalFillEmptyOcclusionQueriesWithZero)
-                                ? &emptyOcclusionQueries
-                                : nullptr,
-                            multiDrawExecutions, nextRenderPassNumber);
-                    },
-                    cmd));
-                for (const auto& [querySet, queryIndex] : emptyOcclusionQueries) {
-                    [commandContext->EnsureBlit()
-                        fillBuffer:querySet->GetVisibilityBuffer()
-                             range:NSMakeRange(ToQueryStorageSize(queryIndex),
-                                               kSingleQueryStorageSize)
-                             value:0u];
-                }
-                nextRenderPassNumber++;
+                DAWN_TRY(RecordBeginRenderPass(commandContext,
+                                               mCommands.NextCommand<BeginRenderPassCmd>(),
+                                               &nextRenderPassNumber));
                 break;
             }
-
             case Command::CopyBufferToBuffer: {
-                CopyBufferToBufferCmd* copy = mCommands.NextCommand<CopyBufferToBufferCmd>();
-                if (copy->size == 0) {
-                    // Skip no-op copies.
-                    break;
-                }
-
-                auto srcBuffer = ToBackend(copy->source);
-                srcBuffer->EnsureDataInitialized(commandContext);
-                srcBuffer->TrackUsage();
-                auto dstBuffer = ToBackend(copy->destination);
-                dstBuffer->EnsureDataInitializedAsDestination(commandContext,
-                                                              copy->destinationOffset, copy->size);
-                dstBuffer->TrackUsage();
-
-                [commandContext->EnsureBlit()
-                       copyFromBuffer:ToBackend(copy->source)->GetMTLBuffer()
-                         sourceOffset:copy->sourceOffset
-                             toBuffer:ToBackend(copy->destination)->GetMTLBuffer()
-                    destinationOffset:copy->destinationOffset
-                                 size:copy->size];
+                RecordCopyBufferToBuffer(commandContext,
+                                         mCommands.NextCommand<CopyBufferToBufferCmd>());
                 break;
             }
-
             case Command::CopyBufferToTexture: {
-                CopyBufferToTextureCmd* copy = mCommands.NextCommand<CopyBufferToTextureCmd>();
-                if (copy->copySize.IsEmpty()) {
-                    // Skip no-op copies.
-                    continue;
-                }
-                auto& src = copy->source;
-                auto& dst = copy->destination;
-                auto& copySize = copy->copySize;
-                Buffer* buffer = ToBackend(src.buffer.Get());
-                Texture* texture = ToBackend(dst.texture.Get());
-                const TypedTexelBlockInfo& blockInfo = GetBlockInfo(dst);
-
-                buffer->EnsureDataInitialized(commandContext);
-                DAWN_TRY(EnsureDestinationTextureInitialized(commandContext, texture, dst,
-                                                             copySize.ToExtent3D()));
-
-                buffer->TrackUsage();
-                texture->SynchronizeTextureBeforeUse(commandContext);
-                RecordCopyBufferToTexture(commandContext, buffer->GetMTLBuffer(), buffer->GetSize(),
-                                          src.offset, src.blocksPerRow, src.rowsPerImage, texture,
-                                          dst.mipLevel, blockInfo.ToBlock(dst.origin), dst.aspect,
-                                          blockInfo.ToBlock(copySize));
+                DAWN_TRY(RecordCopyBufferToTexture(
+                    commandContext, mCommands.NextCommand<CopyBufferToTextureCmd>()));
                 break;
             }
-
             case Command::CopyTextureToBuffer: {
-                CopyTextureToBufferCmd* copy = mCommands.NextCommand<CopyTextureToBufferCmd>();
-                if (copy->copySize.IsEmpty()) {
-                    // Skip no-op copies.
-                    continue;
-                }
-                auto& src = copy->source;
-                auto& dst = copy->destination;
-                auto& copySize = copy->copySize;
-                Texture* texture = ToBackend(src.texture.Get());
-                Buffer* buffer = ToBackend(dst.buffer.Get());
-                const TypedTexelBlockInfo& blockInfo = GetBlockInfo(src);
-
-                buffer->EnsureDataInitializedAsDestination(commandContext, copy);
-
-                texture->SynchronizeTextureBeforeUse(commandContext);
-                DAWN_TRY(texture->EnsureSubresourceContentInitialized(
-                    commandContext, GetSubresourcesAffectedByCopy(src, copySize)));
-                buffer->TrackUsage();
-
-                TextureBufferCopySplit splitCopies = ComputeTextureBufferCopySplit(
-                    texture, src.mipLevel, blockInfo.ToBlock(src.origin),
-                    blockInfo.ToBlock(copySize), buffer->GetSize(), dst.offset, dst.blocksPerRow,
-                    dst.rowsPerImage, src.aspect);
-
-                for (const auto& copyInfo : splitCopies) {
-                    MTLBlitOption blitOption = texture->ComputeMTLBlitOption(src.aspect);
-                    uint64_t bufferOffset = copyInfo.bufferOffset;
-
-                    switch (texture->GetDimension()) {
-                        case wgpu::TextureDimension::Undefined:
-                            DAWN_UNREACHABLE();
-                        case wgpu::TextureDimension::e1D: {
-                            [commandContext->EnsureBlit()
-                                         copyFromTexture:texture->GetMTLTexture(src.aspect)
-                                             sourceSlice:0
-                                             sourceLevel:src.mipLevel
-                                            sourceOrigin:ToMTLOrigin(copyInfo.textureOrigin)
-                                              sourceSize:ToMTLSize(copyInfo.copyExtent.width)
-                                                toBuffer:buffer->GetMTLBuffer()
-                                       destinationOffset:bufferOffset
-                                  destinationBytesPerRow:copyInfo.bytesPerRow
-                                destinationBytesPerImage:copyInfo.bytesPerImage
-                                                 options:blitOption];
-                            break;
-                        }
-
-                        case wgpu::TextureDimension::e2D: {
-                            const MTLOrigin textureOrigin =
-                                ToMTLOrigin({copyInfo.textureOrigin.x, copyInfo.textureOrigin.y,
-                                             TexelCount(0u)});
-                            const MTLSize copyExtent =
-                                ToMTLSize({copyInfo.copyExtent.width, copyInfo.copyExtent.height,
-                                           TexelCount(1u)});
-
-                            for (TexelCount z = copyInfo.textureOrigin.z;
-                                 z <
-                                 copyInfo.textureOrigin.z + copyInfo.copyExtent.depthOrArrayLayers;
-                                 ++z) {
-                                [commandContext->EnsureBlit()
-                                             copyFromTexture:texture->GetMTLTexture(src.aspect)
-                                                 sourceSlice:dchecked_cast<uint32_t>(z)
-                                                 sourceLevel:src.mipLevel
-                                                sourceOrigin:textureOrigin
-                                                  sourceSize:copyExtent
-                                                    toBuffer:buffer->GetMTLBuffer()
-                                           destinationOffset:bufferOffset
-                                      destinationBytesPerRow:copyInfo.bytesPerRow
-                                    destinationBytesPerImage:copyInfo.bytesPerImage
-                                                     options:blitOption];
-                                bufferOffset += copyInfo.bytesPerImage;
-                            }
-                            break;
-                        }
-                        case wgpu::TextureDimension::e3D: {
-                            [commandContext->EnsureBlit()
-                                         copyFromTexture:texture->GetMTLTexture(src.aspect)
-                                             sourceSlice:0
-                                             sourceLevel:src.mipLevel
-                                            sourceOrigin:ToMTLOrigin(copyInfo.textureOrigin)
-                                              sourceSize:ToMTLSize(copyInfo.copyExtent)
-                                                toBuffer:buffer->GetMTLBuffer()
-                                       destinationOffset:bufferOffset
-                                  destinationBytesPerRow:copyInfo.bytesPerRow
-                                destinationBytesPerImage:copyInfo.bytesPerImage
-                                                 options:blitOption];
-                            break;
-                        }
-                    }
-                }
+                DAWN_TRY(RecordCopyTextureToBuffer(
+                    commandContext, mCommands.NextCommand<CopyTextureToBufferCmd>()));
                 break;
             }
-
             case Command::CopyTextureToTexture: {
-                CopyTextureToTextureCmd* copy = mCommands.NextCommand<CopyTextureToTextureCmd>();
-                if (copy->copySize.IsEmpty()) {
-                    // Skip no-op copies.
-                    continue;
-                }
-                Texture* srcTexture = ToBackend(copy->source.texture.Get());
-                Texture* dstTexture = ToBackend(copy->destination.texture.Get());
-
-                srcTexture->SynchronizeTextureBeforeUse(commandContext);
-                dstTexture->SynchronizeTextureBeforeUse(commandContext);
-                DAWN_TRY(srcTexture->EnsureSubresourceContentInitialized(
-                    commandContext, GetSubresourcesAffectedByCopy(copy->source, copy->copySize)));
-                DAWN_TRY(EnsureDestinationTextureInitialized(
-                    commandContext, dstTexture, copy->destination, copy->copySize.ToExtent3D()));
-
-                const MTLSize sizeOneSlice =
-                    MTLSizeMake(dchecked_cast<uint32_t>(copy->copySize.width),
-                                dchecked_cast<uint32_t>(copy->copySize.height), 1);
-
-                uint32_t sourceLayer = 0;
-                uint32_t sourceOriginZ = 0;
-
-                uint32_t destinationLayer = 0;
-                uint32_t destinationOriginZ = 0;
-
-                uint32_t* sourceZPtr;
-                if (srcTexture->GetDimension() == wgpu::TextureDimension::e2D) {
-                    sourceZPtr = &sourceLayer;
-                } else {
-                    sourceZPtr = &sourceOriginZ;
-                }
-
-                uint32_t* destinationZPtr;
-                if (dstTexture->GetDimension() == wgpu::TextureDimension::e2D) {
-                    destinationZPtr = &destinationLayer;
-                } else {
-                    destinationZPtr = &destinationOriginZ;
-                }
-
-                // TODO(crbug.com/dawn/782): Do a single T2T copy if both are 1D or 3D.
-                for (TexelCount z{0u}; z < copy->copySize.depthOrArrayLayers; ++z) {
-                    *sourceZPtr = dchecked_cast<uint32_t>(copy->source.origin.z + z);
-                    *destinationZPtr = dchecked_cast<uint32_t>(copy->destination.origin.z + z);
-
-                    // Hold the ref until out of scope
-                    NSPRef<id<MTLTexture>> dstTextureView =
-                        dstTexture->CreateFormatView(srcTexture->GetFormat().format);
-
-                    [commandContext->EnsureBlit()
-                          copyFromTexture:srcTexture->GetMTLTexture(copy->source.aspect)
-                              sourceSlice:sourceLayer
-                              sourceLevel:copy->source.mipLevel
-                             sourceOrigin:MTLOriginMake(
-                                              dchecked_cast<uint32_t>(copy->source.origin.x),
-                                              dchecked_cast<uint32_t>(copy->source.origin.y),
-                                              sourceOriginZ)
-                               sourceSize:sizeOneSlice
-                                toTexture:dstTextureView.Get()
-                         destinationSlice:destinationLayer
-                         destinationLevel:copy->destination.mipLevel
-                        destinationOrigin:MTLOriginMake(
-                                              dchecked_cast<uint32_t>(copy->destination.origin.x),
-                                              dchecked_cast<uint32_t>(copy->destination.origin.y),
-                                              destinationOriginZ)];
-                }
+                DAWN_TRY(RecordCopyTextureToTexture(
+                    commandContext, mCommands.NextCommand<CopyTextureToTextureCmd>()));
                 break;
             }
-
             case Command::ClearBuffer: {
-                ClearBufferCmd* cmd = mCommands.NextCommand<ClearBufferCmd>();
-                if (cmd->size == 0) {
-                    // Skip no-op copies.
-                    break;
-                }
-                Buffer* dstBuffer = ToBackend(cmd->buffer.Get());
-
-                bool clearedToZero = dstBuffer->EnsureDataInitializedAsDestination(
-                    commandContext, cmd->offset, cmd->size);
-
-                if (!clearedToZero) {
-                    dstBuffer->TrackUsage();
-                    [commandContext->EnsureBlit() fillBuffer:dstBuffer->GetMTLBuffer()
-                                                       range:NSMakeRange(cmd->offset, cmd->size)
-                                                       value:0u];
-                }
-
+                RecordClearBuffer(commandContext, mCommands.NextCommand<ClearBufferCmd>());
                 break;
             }
-
             case Command::ResolveQuerySet: {
-                ResolveQuerySetCmd* cmd = mCommands.NextCommand<ResolveQuerySetCmd>();
-                if (cmd->queryCount == QueryIndex{0u}) {
-                    continue;
-                }
-
-                QuerySet* querySet = ToBackend(cmd->querySet.Get());
-                Buffer* destination = ToBackend(cmd->destination.Get());
-
-                destination->EnsureDataInitializedAsDestination(
-                    commandContext, cmd->destinationOffset, ToQueryStorageSize(cmd->queryCount));
-
-                if (querySet->GetQueryType() == wgpu::QueryType::Occlusion) {
-                    destination->TrackUsage();
-                    [commandContext->EnsureBlit()
-                           copyFromBuffer:querySet->GetVisibilityBuffer()
-                             sourceOffset:NSUInteger(ToQueryStorageSize(cmd->firstQuery))
-                                 toBuffer:destination->GetMTLBuffer()
-                        destinationOffset:NSUInteger(cmd->destinationOffset)
-                                     size:NSUInteger(ToQueryStorageSize(cmd->queryCount))];
-                } else {
-                    destination->TrackUsage();
-                    if (GetDevice()->IsToggleEnabled(
-                            Toggle::MetalSerializeTimestampGenerationAndResolution)) {
-                        DAWN_TRY(commandContext->EncodeSharedEventWorkaround());
-                    }
-                    [commandContext->EnsureBlit()
-                          resolveCounters:querySet->GetCounterSampleBuffer()
-                                  inRange:NSMakeRange(querySet->GetSampleIndex(cmd->firstQuery),
-                                                      uint32_t{cmd->queryCount})
-                        destinationBuffer:destination->GetMTLBuffer()
-                        destinationOffset:NSUInteger(cmd->destinationOffset)];
-                }
+                DAWN_TRY(RecordResolveQuerySet(commandContext,
+                                               mCommands.NextCommand<ResolveQuerySetCmd>()));
                 break;
             }
-
             case Command::WriteTimestamp: {
-                WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
-
-                if (ToBackend(GetDevice())->UseCounterSamplingAtStageBoundary()) {
-                    // Simulate writeTimestamp cmd between blit commands on the devices which
-                    // supports counter sampling at stage boundary.
-                    EncodeEmptyBlitEncoderForWriteTimestamp(ToBackend(GetDevice()), commandContext,
-                                                            cmd);
-
-                } else {
-                    DAWN_ASSERT(ToBackend(GetDevice())->UseCounterSamplingAtCommandBoundary());
-                    QuerySet* querySet = ToBackend(cmd->querySet.Get());
-                    [commandContext->EnsureBlit()
-                        sampleCountersInBuffer:querySet->GetCounterSampleBuffer()
-                                 atSampleIndex:NSUInteger(querySet->GetSampleIndex(cmd->queryIndex))
-                                   withBarrier:YES];
-                }
-
-                UpdateQueryAvailability(cmd);
+                RecordWriteTimestamp(commandContext, mCommands.NextCommand<WriteTimestampCmd>());
                 break;
             }
-
             case Command::InsertDebugMarker: {
-                // MTLCommandBuffer does not implement insertDebugSignpost
+                // MTLCommandBuffer does not implement InsertDebugMarker
                 SkipCommand(&mCommands, type);
                 break;
             }
-
             case Command::PopDebugGroup: {
                 mCommands.NextCommand<PopDebugGroupCmd>();
                 [commandContext->GetCommands() popDebugGroup];
                 break;
             }
-
             case Command::PushDebugGroup: {
                 PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
                 NSRef<NSString> label = NextNSString(&mCommands, cmd->length);
                 [commandContext->GetCommands() pushDebugGroup:label.Get()];
                 break;
             }
-
             case Command::WriteBuffer: {
-                WriteBufferCmd* write = mCommands.NextCommand<WriteBufferCmd>();
-                const uint64_t offset = write->offset;
-                Span<const std::byte> data = mCommands.NextData<std::byte>(write->size);
-
-                if (data.empty()) {
-                    continue;
-                }
-
-                Buffer* dstBuffer = ToBackend(write->buffer.Get());
-                Device* device = ToBackend(GetDevice());
-
-                DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
-                    data.size(), kCopyBufferToBufferOffsetAlignment,
-                    [&](UploadReservation reservation) -> MaybeError {
-                        reservation.mappedData.CopyFrom(data);
-                        dstBuffer->EnsureDataInitializedAsDestination(commandContext, offset,
-                                                                      data.size());
-
-                        dstBuffer->TrackUsage();
-                        [commandContext->EnsureBlit()
-                               copyFromBuffer:ToBackend(reservation.buffer)->GetMTLBuffer()
-                                 sourceOffset:reservation.offsetInBuffer
-                                     toBuffer:dstBuffer->GetMTLBuffer()
-                            destinationOffset:offset
-                                         size:data.size()];
-                        return {};
-                    }));
+                DAWN_TRY(
+                    RecordWriteBuffer(commandContext, mCommands.NextCommand<WriteBufferCmd>()));
                 break;
             }
-
-            case Command::SetResourceTable: {
-                // TODO(https://issues.chromium.org/473444514): Add support for resource tables.
-                return DAWN_UNIMPLEMENTED_ERROR("SetResourceTable unimplemented.");
+            case Command::SetResourceUsage: {
+                SetResourceUsageCmd* cmd = mCommands.NextCommand<SetResourceUsageCmd>();
+                UsageBindingResource resource{
+                    .buffer = cmd->buffer.Get(),
+                    .texture = cmd->texture.Get(),
+                };
+                cmd->table->SetResourceUsage(&resource, cmd->usage);
+                break;
             }
-
-            default:
+            default: {
                 DAWN_UNREACHABLE();
+            }
         }
     }
 
@@ -1570,7 +657,36 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
     return {};
 }
 
-MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandContext,
+MaybeError CommandBuffer::RecordBeginComputePass(CommandRecordingContext* commandContext,
+                                                 BeginComputePassCmd* cmd,
+                                                 PassIndex* nextComputePassNumber) {
+    const ComputePassResourceUsage& resourceUsage =
+        GetResourceUsages().computePasses[*nextComputePassNumber];
+    for (TextureBase* texture : resourceUsage.referencedTextures) {
+        ToBackend(texture)->SynchronizeTextureBeforeUse(commandContext);
+    }
+
+    for (const SyncScopeResourceUsage& scope : resourceUsage.dispatchUsages) {
+        DAWN_TRY(LazyClearSyncScope(scope, commandContext));
+    }
+    // A macOS 26 Apple GPU driver bug causes kIOGPUCommandBufferCallbackErrorOutOfMemory
+    // when doing a compute pass with no timestamps followed by a compute pass with only an end
+    // timestamp (crbug.com/448394568). Insert an empty blit encoder here so that can't happen.
+    if (ToBackend(GetDevice())->UseCounterSamplingAtStageBoundary() &&
+        cmd->timestampWrites.querySet.Get() != nullptr &&
+        cmd->timestampWrites.beginningOfPassWriteIndex == kQuerySetIndexUndefinedTyped &&
+        cmd->timestampWrites.endOfPassWriteIndex != kQuerySetIndexUndefinedTyped) {
+        commandContext->EnsureBlit();
+    }
+    commandContext->EndBlit();
+
+    DAWN_TRY(RecordComputePass(commandContext, cmd, resourceUsage));
+
+    (*nextComputePassNumber)++;
+    return {};
+}
+
+MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandContext,
                                             BeginComputePassCmd* computePassCmd,
                                             const ComputePassResourceUsage& resourceUsage) {
     uint64_t currentDispatch = 0;
@@ -1580,10 +696,12 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
                                 GetDevice()->IsToggleEnabled(Toggle::MetalUseArgumentBuffers));
 
     id<MTLComputeCommandEncoder> encoder;
+
     // When counter sampling is supported at stage boundary, begin a configurable compute pass
     // encoder which is supported since macOS 11.0+ and iOS 14.0+ and set timestamp writes to
     // compute pass descriptor, otherwise begin a default compute pass encoder, and simulate
-    // timestamp writes using sampleCountersInBuffer API at the beginning and end of compute pass.
+    // timestamp writes using sampleCountersInBuffer API at the beginning and end of compute
+    // pass.
     if (ToBackend(GetDevice())->UseCounterSamplingAtStageBoundary()) {
         NSRef<MTLComputePassDescriptor> descriptor = CreateMTLComputePassDescriptor(computePassCmd);
         encoder = commandContext->BeginCompute(descriptor.Get());
@@ -1737,6 +855,21 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
                 break;
             }
 
+            case Command::SetResourceTable: {
+                return DAWN_UNRECOVERABLE_ERROR(
+                    "ResourceTable currently not supported in Compute passes on Metal.");
+            }
+
+            case Command::SetResourceUsage: {
+                SetResourceUsageCmd* cmd = mCommands.NextCommand<SetResourceUsageCmd>();
+                UsageBindingResource resource{
+                    .buffer = cmd->buffer.Get(),
+                    .texture = cmd->texture.Get(),
+                };
+                cmd->table->SetResourceUsage(&resource, cmd->usage);
+                break;
+            }
+
             default: {
                 DAWN_UNREACHABLE();
                 break;
@@ -1748,7 +881,89 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
     DAWN_UNREACHABLE();
 }
 
-MaybeError CommandBuffer::EncodeRenderPass(
+MaybeError CommandBuffer::RecordBeginRenderPass(CommandRecordingContext* commandContext,
+                                                BeginRenderPassCmd* cmd,
+                                                PassIndex* nextRenderPassNumber) {
+    const RenderPassResourceUsage& resourceUsage =
+        GetResourceUsages().renderPasses[*nextRenderPassNumber];
+    for (TextureBase* texture : resourceUsage.textures) {
+        ToBackend(texture)->SynchronizeTextureBeforeUse(commandContext);
+    }
+    for (ExternalTextureBase* externalTexture : resourceUsage.externalTextures) {
+        for (auto& view : externalTexture->GetTextureViews()) {
+            if (view.Get()) {
+                Texture* texture = ToBackend(view->GetTexture());
+                texture->SynchronizeTextureBeforeUse(commandContext);
+            }
+        }
+    }
+    DAWN_TRY(LazyClearSyncScope(resourceUsage, commandContext));
+
+    // Apply the resource table usages
+    if (auto table = resourceUsage.resourceTable) {
+        auto writables = GatherWritableTextures(resourceUsage);
+        DAWN_TRY(ToBackend(table)->ApplyPendingUpdates(commandContext, writables));
+    }
+
+    commandContext->EndBlit();
+
+    // Before beginning, we encode a compute pass that converts multi draws into an ICB
+    // if they exist.
+    auto& indirectMetadata = GetIndirectDrawMetadata();
+    const IndirectDrawMetadata& metadata = indirectMetadata[*nextRenderPassNumber];
+    const auto& multiDraws = metadata.GetIndirectMultiDraws();
+
+    std::vector<MultiDrawExecutionData> multiDrawExecutions;
+
+    if (!multiDraws.empty()) {
+        id<MTLComputeCommandEncoder> computeEnc = commandContext->BeginCompute();
+
+        DAWN_TRY_ASSIGN(multiDrawExecutions,
+                        PrepareMultiDraws(GetDevice(), computeEnc, multiDraws));
+
+        commandContext->EndCompute();
+    }
+
+    Device* device = ToBackend(GetDevice());
+    DAWN_TRY(LazyClearRenderPassAttachments(
+        device, cmd, [&](TextureBase* texture, const SubresourceRange& range) {
+            return ToBackend(texture)->EnsureSubresourceContentInitialized(commandContext, range);
+        }));
+
+    if (cmd->attachmentState->HasDepthStencilAttachment() &&
+        ToBackend(cmd->depthStencilAttachment.view->GetTexture())->ShouldKeepInitialized()) {
+        // Ensure that depth and stencil never become uninitialized again if
+        // the attachment must stay initialized.
+        // For Toggle MetalKeepMultisubresourceDepthStencilTexturesInitialized.
+        cmd->depthStencilAttachment.depthStoreOp = wgpu::StoreOp::Store;
+        cmd->depthStencilAttachment.stencilStoreOp = wgpu::StoreOp::Store;
+    }
+    NSRef<MTLRenderPassDescriptor> descriptor =
+        CreateMTLRenderPassDescriptor(device, cmd, device->UseCounterSamplingAtStageBoundary());
+
+    EmptyOcclusionQueries emptyOcclusionQueries;
+    DAWN_TRY(EncodeMetalRenderPass(
+        device, commandContext, &resourceUsage, descriptor.Get(), cmd->width, cmd->height,
+        [&](id<MTLRenderCommandEncoder> encoder, BeginRenderPassCmd* cmd) -> MaybeError {
+            return this->RecordRenderPass(
+                encoder, cmd,
+                device->IsToggleEnabled(Toggle::MetalFillEmptyOcclusionQueriesWithZero)
+                    ? &emptyOcclusionQueries
+                    : nullptr,
+                multiDrawExecutions, *nextRenderPassNumber);
+        },
+        cmd));
+    for (const auto& [querySet, queryIndex] : emptyOcclusionQueries) {
+        [commandContext->EnsureBlit()
+            fillBuffer:querySet->GetVisibilityBuffer()
+                 range:NSMakeRange(ToQueryStorageSize(queryIndex), kSingleQueryStorageSize)
+                 value:0u];
+    }
+    (*nextRenderPassNumber)++;
+    return {};
+}
+
+MaybeError CommandBuffer::RecordRenderPass(
     id<MTLRenderCommandEncoder> encoder,
     BeginRenderPassCmd* renderPassCmd,
     EmptyOcclusionQueries* emptyOcclusionQueries,
@@ -1768,7 +983,6 @@ MaybeError CommandBuffer::EncodeRenderPass(
     IndirectDrawIndex indirectDrawIndex{0u};
 
     StorageBufferLengthTracker storageBufferLengths{GetDevice()};
-    VertexBufferTracker vertexBuffers(&storageBufferLengths);
     BindGroupTracker bindGroups(&storageBufferLengths,
                                 GetDevice()->IsToggleEnabled(Toggle::MetalUseArgumentBuffers));
 
@@ -1798,9 +1012,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
             case Command::Draw: {
                 DrawCmd* draw = iter->NextCommand<DrawCmd>();
 
-                vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
 
                 // The instance count must be non-zero, otherwise no-op
@@ -1827,9 +1040,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
             case Command::DrawIndexed: {
                 DrawIndexedCmd* draw = iter->NextCommand<DrawIndexedCmd>();
 
-                vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
 
                 // The index and instance count must be non-zero, otherwise no-op
@@ -1864,9 +1076,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
             case Command::DrawIndirect: {
                 DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
 
-                vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
 
                 IndirectDrawMetadata::ValidatedIndirectDraw validatedDraw =
@@ -1887,9 +1098,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
             case Command::DrawIndexedIndirect: {
                 DrawIndexedIndirectCmd* draw = iter->NextCommand<DrawIndexedIndirectCmd>();
 
-                vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
 
                 IndirectDrawMetadata::ValidatedIndirectDraw validatedDraw =
@@ -1913,9 +1123,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
             case Command::MultiDrawIndirect: {
                 iter->NextCommand<MultiDrawIndirectCmd>();
 
-                vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
 
                 ExecuteMultiDraw(multiDrawExecutions[multiDrawIndex], encoder);
@@ -1925,9 +1134,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
             case Command::MultiDrawIndexedIndirect: {
                 iter->NextCommand<MultiDrawIndexedIndirectCmd>();
 
-                vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline);
                 immediates.Apply(encoder, &storageBufferLengths);
 
                 ExecuteMultiDraw(multiDrawExecutions[multiDrawIndex], encoder);
@@ -1963,7 +1171,6 @@ MaybeError CommandBuffer::EncodeRenderPass(
                     break;
                 }
 
-                vertexBuffers.OnSetPipeline(lastPipeline, newPipeline);
                 bindGroups.OnSetPipeline(newPipeline);
                 immediates.OnSetPipeline(newPipeline);
                 storageBufferLengths.OnSetPipeline(newPipeline);
@@ -2020,9 +1227,35 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
             case Command::SetVertexBuffer: {
                 SetVertexBufferCmd* cmd = iter->NextCommand<SetVertexBufferCmd>();
+                auto buffer = ToBackend(cmd->buffer.Get());
+                buffer->TrackUsage();
+                uint32_t mtlIndex = VertexBufferSlotToMetalBufferIndex(cmd->slot);
+                id<MTLBuffer> mtlBuffer = buffer->GetMTLBuffer();
 
-                vertexBuffers.OnSetVertexBuffer(cmd->slot, ToBackend(cmd->buffer.Get()),
-                                                cmd->offset);
+                if (enableVertexPulling) {
+                    // The binding size for a vertex buffer must always be at least 4 so we can do
+                    // clamping.
+                    uint64_t bindingSize = std::max(4ull, cmd->buffer->GetSize() - cmd->offset);
+                    // (BufferMTL reserves an extra 4 bytes for us in case we're at the very end of
+                    // the buffer.)
+                    DAWN_ASSERT(cmd->offset + bindingSize <= cmd->buffer->GetAllocatedSize());
+
+                    // Insert lengths for vertex buffers bound as storage buffers
+                    storageBufferLengths.data[SingleShaderStage::Vertex][mtlIndex] =
+                        checked_cast<uint32_t>(bindingSize);
+                    storageBufferLengths.dirtyStages |= wgpu::ShaderStage::Vertex;
+                }
+
+                NSUInteger offset = dchecked_cast<NSUInteger>(cmd->offset);
+                [encoder setVertexBuffers:&mtlBuffer
+                                  offsets:&offset
+                                withRange:NSMakeRange(mtlIndex, 1)];
+                break;
+            }
+
+            case Command::SetResourceTable: {
+                SetResourceTableCmd* cmd = iter->NextCommand<SetResourceTableCmd>();
+                bindGroups.SetResourceTable(ToBackend(cmd->table.Get()));
                 break;
             }
 
@@ -2171,6 +1404,312 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
     // EndRenderPass should have been called
     DAWN_UNREACHABLE();
+}
+
+void CommandBuffer::RecordCopyBufferToBuffer(CommandRecordingContext* commandContext,
+                                             CopyBufferToBufferCmd* cmd) {
+    if (cmd->size == 0) {
+        // Skip no-op copies.
+        return;
+    }
+
+    auto srcBuffer = ToBackend(cmd->source);
+    srcBuffer->EnsureDataInitialized(commandContext);
+    srcBuffer->TrackUsage();
+    auto dstBuffer = ToBackend(cmd->destination);
+    dstBuffer->EnsureDataInitializedAsDestination(commandContext, cmd->destinationOffset,
+                                                  cmd->size);
+    dstBuffer->TrackUsage();
+
+    [commandContext->EnsureBlit() copyFromBuffer:ToBackend(cmd->source)->GetMTLBuffer()
+                                    sourceOffset:cmd->sourceOffset
+                                        toBuffer:ToBackend(cmd->destination)->GetMTLBuffer()
+                               destinationOffset:cmd->destinationOffset
+                                            size:cmd->size];
+}
+
+MaybeError CommandBuffer::RecordCopyBufferToTexture(CommandRecordingContext* commandContext,
+                                                    CopyBufferToTextureCmd* cmd) {
+    if (cmd->copySize.IsEmpty()) {
+        // Skip no-op copies.
+        return {};
+    }
+
+    auto& src = cmd->source;
+    auto& dst = cmd->destination;
+    auto& copySize = cmd->copySize;
+    Buffer* buffer = ToBackend(src.buffer.Get());
+    Texture* texture = ToBackend(dst.texture.Get());
+    const TypedTexelBlockInfo& blockInfo = GetBlockInfo(dst);
+
+    buffer->EnsureDataInitialized(commandContext);
+    DAWN_TRY(
+        EnsureDestinationTextureInitialized(commandContext, texture, dst, copySize.ToExtent3D()));
+
+    buffer->TrackUsage();
+    texture->SynchronizeTextureBeforeUse(commandContext);
+    metal::RecordCopyBufferToTexture(commandContext, buffer->GetMTLBuffer(), buffer->GetSize(),
+                                     src.offset, src.blocksPerRow, src.rowsPerImage, texture,
+                                     dst.mipLevel, blockInfo.ToBlock(dst.origin), dst.aspect,
+                                     blockInfo.ToBlock(copySize));
+    return {};
+}
+
+MaybeError CommandBuffer::RecordCopyTextureToBuffer(CommandRecordingContext* commandContext,
+                                                    CopyTextureToBufferCmd* cmd) {
+    if (cmd->copySize.IsEmpty()) {
+        // Skip no-op copies.
+        return {};
+    }
+
+    auto& src = cmd->source;
+    auto& dst = cmd->destination;
+    auto& copySize = cmd->copySize;
+    Texture* texture = ToBackend(src.texture.Get());
+    Buffer* buffer = ToBackend(dst.buffer.Get());
+    const TypedTexelBlockInfo& blockInfo = GetBlockInfo(src);
+
+    buffer->EnsureDataInitializedAsDestination(commandContext, cmd);
+
+    texture->SynchronizeTextureBeforeUse(commandContext);
+    DAWN_TRY(texture->EnsureSubresourceContentInitialized(
+        commandContext, GetSubresourcesAffectedByCopy(src, copySize)));
+    buffer->TrackUsage();
+
+    TextureBufferCopySplit splitCopies = ComputeTextureBufferCopySplit(
+        texture, src.mipLevel, blockInfo.ToBlock(src.origin), blockInfo.ToBlock(copySize),
+        buffer->GetSize(), dst.offset, dst.blocksPerRow, dst.rowsPerImage, src.aspect);
+
+    for (const auto& copyInfo : splitCopies) {
+        MTLBlitOption blitOption = texture->ComputeMTLBlitOption(src.aspect);
+        uint64_t bufferOffset = copyInfo.bufferOffset;
+
+        switch (texture->GetDimension()) {
+            case wgpu::TextureDimension::Undefined:
+                DAWN_UNREACHABLE();
+            case wgpu::TextureDimension::e1D: {
+                [commandContext->EnsureBlit() copyFromTexture:texture->GetMTLTexture(src.aspect)
+                                                  sourceSlice:0
+                                                  sourceLevel:src.mipLevel
+                                                 sourceOrigin:ToMTLOrigin(copyInfo.textureOrigin)
+                                                   sourceSize:ToMTLSize(copyInfo.copyExtent.width)
+                                                     toBuffer:buffer->GetMTLBuffer()
+                                            destinationOffset:bufferOffset
+                                       destinationBytesPerRow:copyInfo.bytesPerRow
+                                     destinationBytesPerImage:copyInfo.bytesPerImage
+                                                      options:blitOption];
+                break;
+            }
+
+            case wgpu::TextureDimension::e2D: {
+                const MTLOrigin textureOrigin = ToMTLOrigin(
+                    {copyInfo.textureOrigin.x, copyInfo.textureOrigin.y, TexelCount(0u)});
+                const MTLSize copyExtent = ToMTLSize(
+                    {copyInfo.copyExtent.width, copyInfo.copyExtent.height, TexelCount(1u)});
+
+                for (TexelCount z = copyInfo.textureOrigin.z;
+                     z < copyInfo.textureOrigin.z + copyInfo.copyExtent.depthOrArrayLayers; ++z) {
+                    [commandContext->EnsureBlit() copyFromTexture:texture->GetMTLTexture(src.aspect)
+                                                      sourceSlice:dchecked_cast<uint32_t>(z)
+                                                      sourceLevel:src.mipLevel
+                                                     sourceOrigin:textureOrigin
+                                                       sourceSize:copyExtent
+                                                         toBuffer:buffer->GetMTLBuffer()
+                                                destinationOffset:bufferOffset
+                                           destinationBytesPerRow:copyInfo.bytesPerRow
+                                         destinationBytesPerImage:copyInfo.bytesPerImage
+                                                          options:blitOption];
+                    bufferOffset += copyInfo.bytesPerImage;
+                }
+                break;
+            }
+            case wgpu::TextureDimension::e3D: {
+                [commandContext->EnsureBlit() copyFromTexture:texture->GetMTLTexture(src.aspect)
+                                                  sourceSlice:0
+                                                  sourceLevel:src.mipLevel
+                                                 sourceOrigin:ToMTLOrigin(copyInfo.textureOrigin)
+                                                   sourceSize:ToMTLSize(copyInfo.copyExtent)
+                                                     toBuffer:buffer->GetMTLBuffer()
+                                            destinationOffset:bufferOffset
+                                       destinationBytesPerRow:copyInfo.bytesPerRow
+                                     destinationBytesPerImage:copyInfo.bytesPerImage
+                                                      options:blitOption];
+                break;
+            }
+        }
+    }
+    return {};
+}
+
+MaybeError CommandBuffer::RecordCopyTextureToTexture(CommandRecordingContext* commandContext,
+                                                     CopyTextureToTextureCmd* cmd) {
+    if (cmd->copySize.IsEmpty()) {
+        // Skip no-op copies.
+        return {};
+    }
+
+    Texture* srcTexture = ToBackend(cmd->source.texture.Get());
+    Texture* dstTexture = ToBackend(cmd->destination.texture.Get());
+
+    srcTexture->SynchronizeTextureBeforeUse(commandContext);
+    dstTexture->SynchronizeTextureBeforeUse(commandContext);
+    DAWN_TRY(srcTexture->EnsureSubresourceContentInitialized(
+        commandContext, GetSubresourcesAffectedByCopy(cmd->source, cmd->copySize)));
+    DAWN_TRY(EnsureDestinationTextureInitialized(commandContext, dstTexture, cmd->destination,
+                                                 cmd->copySize.ToExtent3D()));
+
+    const MTLSize sizeOneSlice = MTLSizeMake(dchecked_cast<uint32_t>(cmd->copySize.width),
+                                             dchecked_cast<uint32_t>(cmd->copySize.height), 1);
+
+    uint32_t sourceLayer = 0;
+    uint32_t sourceOriginZ = 0;
+
+    uint32_t destinationLayer = 0;
+    uint32_t destinationOriginZ = 0;
+
+    uint32_t* sourceZPtr;
+    if (srcTexture->GetDimension() == wgpu::TextureDimension::e2D) {
+        sourceZPtr = &sourceLayer;
+    } else {
+        sourceZPtr = &sourceOriginZ;
+    }
+
+    uint32_t* destinationZPtr;
+    if (dstTexture->GetDimension() == wgpu::TextureDimension::e2D) {
+        destinationZPtr = &destinationLayer;
+    } else {
+        destinationZPtr = &destinationOriginZ;
+    }
+
+    // TODO(crbug.com/dawn/782): Do a single T2T copy if both are 1D or 3D.
+    for (TexelCount z{0u}; z < cmd->copySize.depthOrArrayLayers; ++z) {
+        *sourceZPtr = dchecked_cast<uint32_t>(cmd->source.origin.z + z);
+        *destinationZPtr = dchecked_cast<uint32_t>(cmd->destination.origin.z + z);
+
+        // Hold the ref until out of scope
+        NSPRef<id<MTLTexture>> dstTextureView =
+            dstTexture->CreateFormatView(srcTexture->GetFormat().format);
+
+        [commandContext->EnsureBlit()
+              copyFromTexture:srcTexture->GetMTLTexture(cmd->source.aspect)
+                  sourceSlice:sourceLayer
+                  sourceLevel:cmd->source.mipLevel
+                 sourceOrigin:MTLOriginMake(dchecked_cast<uint32_t>(cmd->source.origin.x),
+                                            dchecked_cast<uint32_t>(cmd->source.origin.y),
+                                            sourceOriginZ)
+                   sourceSize:sizeOneSlice
+                    toTexture:dstTextureView.Get()
+             destinationSlice:destinationLayer
+             destinationLevel:cmd->destination.mipLevel
+            destinationOrigin:MTLOriginMake(dchecked_cast<uint32_t>(cmd->destination.origin.x),
+                                            dchecked_cast<uint32_t>(cmd->destination.origin.y),
+                                            destinationOriginZ)];
+    }
+    return {};
+}
+
+void CommandBuffer::RecordClearBuffer(CommandRecordingContext* commandContext,
+                                      ClearBufferCmd* cmd) {
+    if (cmd->size == 0) {
+        // Skip no-op copies.
+        return;
+    }
+
+    Buffer* dstBuffer = ToBackend(cmd->buffer.Get());
+
+    bool clearedToZero =
+        dstBuffer->EnsureDataInitializedAsDestination(commandContext, cmd->offset, cmd->size);
+
+    if (!clearedToZero) {
+        dstBuffer->TrackUsage();
+        [commandContext->EnsureBlit() fillBuffer:dstBuffer->GetMTLBuffer()
+                                           range:NSMakeRange(cmd->offset, cmd->size)
+                                           value:0u];
+    }
+}
+
+MaybeError CommandBuffer::RecordResolveQuerySet(CommandRecordingContext* commandContext,
+                                                ResolveQuerySetCmd* cmd) {
+    if (cmd->queryCount == QueryIndex{0u}) {
+        return {};
+    }
+
+    QuerySet* querySet = ToBackend(cmd->querySet.Get());
+    Buffer* destination = ToBackend(cmd->destination.Get());
+
+    destination->EnsureDataInitializedAsDestination(commandContext, cmd->destinationOffset,
+                                                    ToQueryStorageSize(cmd->queryCount));
+
+    if (querySet->GetQueryType() == wgpu::QueryType::Occlusion) {
+        destination->TrackUsage();
+        [commandContext->EnsureBlit()
+               copyFromBuffer:querySet->GetVisibilityBuffer()
+                 sourceOffset:NSUInteger(ToQueryStorageSize(cmd->firstQuery))
+                     toBuffer:destination->GetMTLBuffer()
+            destinationOffset:NSUInteger(cmd->destinationOffset)
+                         size:NSUInteger(ToQueryStorageSize(cmd->queryCount))];
+    } else {
+        destination->TrackUsage();
+        if (GetDevice()->IsToggleEnabled(Toggle::MetalSerializeTimestampGenerationAndResolution)) {
+            DAWN_TRY(commandContext->EncodeSharedEventWorkaround());
+        }
+        [commandContext->EnsureBlit()
+              resolveCounters:querySet->GetCounterSampleBuffer()
+                      inRange:NSMakeRange(querySet->GetSampleIndex(cmd->firstQuery),
+                                          uint32_t{cmd->queryCount})
+            destinationBuffer:destination->GetMTLBuffer()
+            destinationOffset:NSUInteger(cmd->destinationOffset)];
+    }
+    return {};
+}
+
+void CommandBuffer::RecordWriteTimestamp(CommandRecordingContext* commandContext,
+                                         WriteTimestampCmd* cmd) {
+    if (ToBackend(GetDevice())->UseCounterSamplingAtStageBoundary()) {
+        // Simulate writeTimestamp cmd between blit commands on the devices which
+        // supports counter sampling at stage boundary.
+        EncodeEmptyBlitEncoderForWriteTimestamp(ToBackend(GetDevice()), commandContext, cmd);
+
+    } else {
+        DAWN_ASSERT(ToBackend(GetDevice())->UseCounterSamplingAtCommandBoundary());
+        QuerySet* querySet = ToBackend(cmd->querySet.Get());
+        [commandContext->EnsureBlit()
+            sampleCountersInBuffer:querySet->GetCounterSampleBuffer()
+                     atSampleIndex:NSUInteger(querySet->GetSampleIndex(cmd->queryIndex))
+                       withBarrier:YES];
+    }
+
+    UpdateQueryAvailability(cmd);
+}
+
+MaybeError CommandBuffer::RecordWriteBuffer(CommandRecordingContext* commandContext,
+                                            WriteBufferCmd* cmd) {
+    const uint64_t offset = cmd->offset;
+    Span<const std::byte> data = mCommands.NextData<std::byte>(cmd->size);
+
+    if (data.empty()) {
+        return {};
+    }
+
+    Buffer* dstBuffer = ToBackend(cmd->buffer.Get());
+    Device* device = ToBackend(GetDevice());
+
+    DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
+        data.size(), kCopyBufferToBufferOffsetAlignment,
+        [&](UploadReservation reservation) -> MaybeError {
+            reservation.mappedData.CopyFrom(data);
+            dstBuffer->EnsureDataInitializedAsDestination(commandContext, offset, data.size());
+
+            dstBuffer->TrackUsage();
+            [commandContext->EnsureBlit()
+                   copyFromBuffer:ToBackend(reservation.buffer)->GetMTLBuffer()
+                     sourceOffset:reservation.offsetInBuffer
+                         toBuffer:dstBuffer->GetMTLBuffer()
+                destinationOffset:offset
+                             size:data.size()];
+            return {};
+        }));
+    return {};
 }
 
 }  // namespace dawn::native::metal

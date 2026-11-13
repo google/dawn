@@ -281,7 +281,8 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
       mCallbackInfos(ToAPI(*descriptor)),
       mAdapter(adapter),
       mToggles(deviceToggles),
-      mNextPipelineCompatibilityToken(1) {
+      mNextPipelineCompatibilityToken(1),
+      mTemporaryUniformBuffers(4) {
     DAWN_CHECK(descriptor);
 
     DAWN_CHECK(mLostEvent);
@@ -339,6 +340,11 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
         mLimits = ReifyDefaultLimits(mLimits, effectiveFeatureLevel);
     } else {
         GetDefaultLimits(&mLimits, effectiveFeatureLevel);
+    }
+
+    // The default limits are used even if the adapter supports less, so clamp them explicitly.
+    if (IsToggleEnabled(Toggle::GLLimitTextureImageUnitsTo13)) {
+        LimitGLTextureImageUnits(&mLimits);
     }
 
     // Get texelCopyBufferRowAlignmentLimits from physical device
@@ -597,7 +603,7 @@ void DeviceBase::Destroy(DestroyReason reason) {
     mPlaceholderSampler = nullptr;
     mInternalPipelineStore = nullptr;
     mExternalTexturePlaceholderView = nullptr;
-    mTemporaryUniformBuffer = nullptr;
+    mTemporaryUniformBuffers.Clear();
     mMemoryBlockAllocator = nullptr;
 
     // Note: mQueue is not released here since the application may still get it after calling
@@ -623,19 +629,19 @@ void DeviceBase::HandleDeviceLost(wgpu::DeviceLostReason reason, std::string_vie
     }
 }
 
-void DeviceBase::HandleError(std::unique_ptr<ErrorData> data,
+void DeviceBase::HandleError(std::unique_ptr<UnknownError> error,
                              InternalErrorType additionalAllowedErrors,
                              wgpu::DeviceLostReason lostReason,
                              ForwardToErrorScope forwardToErrorScope) {
     auto deviceGuard = GetGuard();
-    AppendDebugLayerMessages(data.get());
+    AppendDebugLayerMessages(error->GetData());
 
-    InternalErrorType type = data->GetType();
+    InternalErrorType type = error->GetType();
     if (type != InternalErrorType::Validation) {
         // D3D device can provide additional device removed reason. We would
         // like to query and log the device removed reason if the error is
         // not validation error.
-        AppendDeviceLostMessage(data.get());
+        AppendDeviceLostMessage(error->GetData());
     }
 
     InternalErrorType allowedErrors = InternalErrorType::Validation | additionalAllowedErrors;
@@ -644,8 +650,8 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> data,
         // If we receive an error which we did not explicitly allow, assume the backend can't
         // recover and lose the device now. Cleanup for the device will be deferred until the
         // last external reference of the device is dropped, or an explicit call to Destroy.
-        data->AppendContext("handling unexpected error type %s when allowed errors are %s.", type,
-                            allowedErrors);
+        error->AppendContext("handling unexpected error type %s when allowed errors are %s.", type,
+                             allowedErrors);
 
         // Handle the remainder of this error as if it caused a device lost.
         type = InternalErrorType::BackendDeviceLost;
@@ -660,7 +666,7 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> data,
         mIsValidationEnabled = true;
     }
 
-    const std::string messageStr = data->GetFormattedMessage();
+    const std::string messageStr = error->GetFormattedMessage();
     if (type == InternalErrorType::BackendDeviceLost) {
         HandleDeviceLost(lostReason, messageStr);
 
@@ -707,14 +713,14 @@ void DeviceBase::HandleErrorGeneratingAsyncTask(Ref<ErrorGeneratingAsyncTask> ta
         // representable as wgpu::ErrorType. Forward it to HandleError but disable error scope
         // capturing. This will handle device loss and call the uncaptured error callback if one is
         // set.
-        HandleError(task->AcquireError()->ReleaseData(), InternalErrorType::None,
-                    wgpu::DeviceLostReason::Unknown, ForwardToErrorScope::No);
+        HandleError(task->AcquireError(), InternalErrorType::None, wgpu::DeviceLostReason::Unknown,
+                    ForwardToErrorScope::No);
     });
 }
 
 void DeviceBase::ConsumeErrorImpl(std::unique_ptr<UnknownError> err,
                                   InternalErrorType additionalAllowedErrors) {
-    HandleError(err->ReleaseData(), additionalAllowedErrors);
+    HandleError(std::move(err), additionalAllowedErrors);
 }
 
 void DeviceBase::APISetLoggingCallback(const WGPULoggingCallbackInfo& callbackInfo) {
@@ -897,8 +903,8 @@ void DeviceBase::APIForceLoss(wgpu::DeviceLostReason reason, StringView messageI
     // Note that since we are passing None as the allowedErrors, an additional message will be
     // appended noting that the error was unexpected. Since this call is for testing only it is not
     // too important, but useful for users to understand where the extra message is coming from.
-    HandleError(DAWN_MAKE_UNRECOVERABLE_ERROR(std::string(message)).ReleaseData(),
-                InternalErrorType::None, reason);
+    HandleError(DAWN_MAKE_UNRECOVERABLE_ERROR(std::string(message)), InternalErrorType::None,
+                reason);
 }
 
 DeviceBase::State DeviceBase::GetState() const {
@@ -1324,9 +1330,10 @@ Future DeviceBase::APICreateComputePipelineAsync(
     };
 
     if (IsLost()) {
-        // Device lost error: create an async event that completes when created.
+        // Async pipeline creation must succeed with an invalid pipeline on a lost device.
         return GetFuture(AcquireRef(new CreateComputePipelineAsyncEvent(
-            this, callbackInfo, DAWN_BACKEND_DEVICE_LOST_ERROR("Device lost"), descriptor->label)));
+            this, callbackInfo, ComputePipelineBase::MakeError(this, descriptor->label),
+            /*readyAtCreation=*/true)));
     }
 
     ResultOrUnknownError<Ref<ComputePipelineBase>> resultOrError =
@@ -1402,9 +1409,10 @@ Future DeviceBase::APICreateRenderPipelineAsync(
     };
 
     if (IsLost()) {
-        // Device lost error: create an async event that completes when created.
+        // Async pipeline creation must succeed with an invalid pipeline on a lost device.
         return GetFuture(AcquireRef(new CreateRenderPipelineAsyncEvent(
-            this, callbackInfo, DAWN_BACKEND_DEVICE_LOST_ERROR("Device lost"), descriptor->label)));
+            this, callbackInfo, RenderPipelineBase::MakeError(this, descriptor->label),
+            /*readyAtCreation=*/true)));
     }
 
     auto resultOrError = CreateUninitializedRenderPipeline(descriptor);
@@ -1539,8 +1547,7 @@ BufferBase* DeviceBase::APICreateErrorBuffer(const BufferDescriptor* desc) {
                        desc)) {
         auto* clientErrorInfo = unpacked.Get<DawnBufferDescriptorErrorInfoFromWireClient>();
         if (clientErrorInfo != nullptr && clientErrorInfo->outOfMemory) {
-            HandleError(DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate memory for buffer mapping")
-                            .ReleaseData(),
+            HandleError(DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate memory for buffer mapping"),
                         InternalErrorType::OutOfMemory);
         }
     }
@@ -1918,7 +1925,8 @@ wgpu::Status DeviceBase::APIGetAHardwareBufferProperties(void* handle,
 }
 
 wgpu::Status DeviceBase::APIGetLimits(Limits* limits) const {
-    if (GetAdapter()->GetInstance()->ConsumedError(FillLimits(limits, mEnabledFeatures, mLimits))) {
+    if (GetAdapter()->GetInstance()->ConsumedError(ValidateAndFillLimits(
+            limits, mEnabledFeatures, mLimits, IsToggleEnabled(Toggle::AllowExperimentalAPIs)))) {
         return wgpu::Status::Error;
     }
     return wgpu::Status::Success;
@@ -1960,8 +1968,7 @@ void DeviceBase::APIInjectError(wgpu::ErrorType type, StringView message) {
     // the LoseForTesting function that can be used instead.
     if (type != wgpu::ErrorType::Validation && type != wgpu::ErrorType::OutOfMemory) {
         HandleError(
-            DAWN_VALIDATION_ERROR("Invalid injected error, must be Validation or OutOfMemory")
-                .ReleaseData());
+            DAWN_VALIDATION_ERROR("Invalid injected error, must be Validation or OutOfMemory"));
         return;
     }
 
@@ -1969,9 +1976,9 @@ void DeviceBase::APIInjectError(wgpu::ErrorType type, StringView message) {
 
     InternalErrorType errorType = FromWGPUErrorType(type);
     if (errorType == InternalErrorType::Validation) {
-        HandleError(DAWN_MAKE_VALIDATION_ERROR(std::string(message)).ReleaseData());
+        HandleError(DAWN_MAKE_VALIDATION_ERROR(std::string(message)));
     } else {
-        HandleError(DAWN_MAKE_ERROR(errorType, std::string(message)).ReleaseData(),
+        HandleError(DAWN_MAKE_ERROR(errorType, std::string(message)),
                     InternalErrorType::OutOfMemory);
     }
 }
@@ -2311,6 +2318,12 @@ ResultOrUnknownError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
     UnpackedPtr<ShaderModuleDescriptor> unpacked;
     DAWN_TRY_ASSIGN_CONTEXT(unpacked, ValidateAndUnpack(descriptor), "validating and unpacking %s",
                             descriptor);
+    if (!IsToggleEnabled(Toggle::AllowExperimentalAPIs)) {
+        // Only the chained structs that are part of the stable ABI may be used (this excludes the
+        // Dawn-only SPIR-V structs).
+        DAWN_TRY_CONTEXT(unpacked.ValidateStable(),
+                         "validating %s with allow_experimental_apis disabled", descriptor);
+    }
 
     // A WGSL (xor SPIR-V, if enabled) subdescriptor is required, and a Dawn-specific SPIR-V
     // options descriptor is allowed when using SPIR-V.
@@ -2395,6 +2408,9 @@ ResultOrUnknownError<Ref<TextureBase>> DeviceBase::CreateTexture(
                          "validating %s.", descriptor);
     } else {
         descriptor = Unpack(&rawDescriptor);
+    }
+    if (IsToggleEnabled(Toggle::LimitMaxTextureBytesTo1MB)) {
+        DAWN_TRY(ValidateTextureAllocationSizeForTesting(this, *descriptor));
     }
     return CreateTextureImpl(descriptor);
 }
@@ -2544,7 +2560,7 @@ void DeviceBase::APISetLabel(StringView label) {
 
 void DeviceBase::SetLabelImpl() {}
 
-bool DeviceBase::ReduceMemoryUsageImpl() {
+ResultOrError<bool> DeviceBase::ReduceMemoryUsageImpl() {
     return false;
 }
 
@@ -2719,7 +2735,7 @@ bool DeviceBase::ReduceMemoryUsage() {
     GetDynamicUploader()->Deallocate(GetQueue()->GetCompletedCommandSerial(), /*freeAll=*/true);
     mMemoryBlockAllocator->TrimMemory();
     mInternalPipelineStore->ResetScratchBuffers();
-    mTemporaryUniformBuffer = nullptr;
+    mTemporaryUniformBuffers.Clear();
 
     GetObjectTrackingList(ObjectType::BindGroupLayoutInternal)->ForEach([](ApiObjectBase* object) {
         static_cast<BindGroupLayoutInternalBase*>(object)->ReduceMemoryUsage();
@@ -2727,9 +2743,14 @@ bool DeviceBase::ReduceMemoryUsage() {
 
     mErrorScopeStacks.Use([](auto errorScopeStacks) { TrimErrorScopeStacks(*errorScopeStacks); });
 
+    bool hasPendingWork = false;
+    if (ConsumedError(ReduceMemoryUsageImpl(), &hasPendingWork)) {
+        return false;
+    }
+
     // TODO(crbug.com/398193014): This could return a future to wait on instead of just a bool
     // saying there is work to wait on.
-    return ReduceMemoryUsageImpl();
+    return hasPendingWork;
 }
 
 void DeviceBase::PerformIdleTasks() {
@@ -2738,15 +2759,17 @@ void DeviceBase::PerformIdleTasks() {
 }
 
 ResultOrError<Ref<BufferBase>> DeviceBase::GetOrCreateTemporaryUniformBuffer(size_t size) {
-    if (!mTemporaryUniformBuffer || mTemporaryUniformBuffer->GetSize() != size) {
-        BufferDescriptor desc;
-        desc.label = "Internal_TemporaryUniform";
-        desc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
-        desc.size = size;
-        DAWN_TRY_ASSIGN(mTemporaryUniformBuffer, CreateBuffer(&desc));
-    }
-
-    return mTemporaryUniformBuffer;
+    // Cache temporary uniform buffers by exact size instead of reusing a single larger buffer.
+    // Some backends (such as D3D11) do not natively support partial uniform buffer updates, so
+    // allocating an exact-sized buffer allows full-buffer updates and performs better.
+    return mTemporaryUniformBuffers.GetOrCreate(
+        size, [this](size_t size) -> ResultOrError<Ref<BufferBase>> {
+            BufferDescriptor desc;
+            desc.label = "Internal_TemporaryUniform";
+            desc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
+            desc.size = size;
+            return CreateBuffer(&desc);
+        });
 }
 
 bool DeviceBase::HasFlexibleTextureViews() const {
@@ -2806,8 +2829,7 @@ std::pair<std::string, bool> DeviceBase::GetTraceInfo() {
 
 tint::InternalCompilerErrorCallbackInfo DeviceBase::GetTintInternalCompilerErrorCallback() {
     static auto tintInternalCompilerErrorCallback = [](std::string err, void* userdata) {
-        static_cast<DeviceBase*>(userdata)->HandleError(
-            DAWN_MAKE_UNRECOVERABLE_ERROR(err).ReleaseData());
+        static_cast<DeviceBase*>(userdata)->HandleError(DAWN_MAKE_UNRECOVERABLE_ERROR(err));
     };
     return tint::InternalCompilerErrorCallbackInfo{
         .callback = tintInternalCompilerErrorCallback,

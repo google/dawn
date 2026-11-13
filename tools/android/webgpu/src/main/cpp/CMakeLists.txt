@@ -61,7 +61,7 @@ target_sources(webgpu_c_bundled PRIVATE
 )
 
 target_include_directories(webgpu_c_bundled PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${DAWN_BUILD_GEN_DIR}/cpp)
-target_link_libraries(webgpu_c_bundled PRIVATE android sync webgpu_dawn dawn_common dawn_internal_config)
+target_link_libraries(webgpu_c_bundled PRIVATE android webgpu_dawn dawn_common dawn_internal_config)
 target_link_options(webgpu_c_bundled PRIVATE "-Wl,-z,max-page-size=16384")
 
 # Stage webgpu.h for the Prefab module of the AAR: build.gradle publishes

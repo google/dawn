@@ -46,11 +46,13 @@ cc_library(
     "ptr_to_ref.cc",
     "raise.cc",
     "value_to_let.cc",
+    "workgroup_uniform_load.cc",
   ],
   hdrs = [
     "ptr_to_ref.h",
     "raise.h",
     "value_to_let.h",
+    "workgroup_uniform_load.h",
   ],
   deps = [
     "//src/tint/api/common",
@@ -87,6 +89,7 @@ cc_library(
     "ptr_to_ref_test.cc",
     "raise_test.cc",
     "value_to_let_test.cc",
+    "workgroup_uniform_load_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

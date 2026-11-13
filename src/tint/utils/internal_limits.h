@@ -54,10 +54,10 @@ constexpr int64_t kQuadSize = 4;
 constexpr int64_t kMaxStructMemberPadding = 10LL * 1024 * 1024;
 
 // Limits the size of result types instructions that will be transiently created, i.e. not buffers.
-// Specifically prevents unreasonably large initializers when printing in the backend. The related
-// minimum maximums from the spec are 8kB, so this 64kB limit should be significantly beyond what a
-// user can expect to work.
-constexpr int64_t kMaxTemporaryStorageSize = 64LL * 1024;
+// Specifically prevents unreasonably large initializers when printing in the backend, as well as
+// mitigating some issues in downstream shader compilers. The related minimum maximums from the spec
+// are 8kB, so this 32kB limit should be significantly beyond what a user can expect to work.
+constexpr int64_t kMaxTemporaryStorageSize = 32LL * 1024;
 
 // Limits the combined size of all private variables in the shader.
 // The WGSL spec has a min-max for a single variable of 8KB, so this 8MB limit is well above that.

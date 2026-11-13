@@ -85,6 +85,7 @@ template("dawn_json_generator") {
     # templates) must be listed individually in the target's inputs in BUILD.gn.
     inputs = [
       "${dawn_root}/src/dawn/dawn.json",
+      "${dawn_root}/generator/dawn_json_parsing.py",
       "${dawn_root}/generator/webgpu_docs_utility.py",
     ]
     if (defined(invoker.inputs)) {
@@ -98,6 +99,12 @@ template("dawn_json_generator") {
       "--targets",
       invoker.target,
     ]
+
+    if (defined(invoker.addin_jsons)) {
+      inputs += invoker.addin_jsons
+      args +=
+          [ "--addin-jsons" ] + rebase_path(invoker.addin_jsons, root_build_dir)
+    }
 
     # Automatically add generator arguments based on the presence of optional
     # JSON files in the inputs list. This avoids hardcoding target names in the
@@ -140,6 +147,7 @@ template("dawn_json_generator") {
                            [
                              "target",
                              "inputs",
+                             "addin_jsons",
                            ])
   }
 }

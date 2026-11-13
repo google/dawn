@@ -46,8 +46,9 @@ if (abiFiltersProp != null && !abiFiltersProp.toString().trim().isEmpty()) {
 android {
     namespace 'net.android.webgpu'
     defaultConfig {
-        minSdkVersion 26
+        minSdkVersion 24
         compileSdk 34
+        consumerProguardFiles 'proguard-rules.pro'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         if (!abiFiltersList.isEmpty()) {
             ndk {

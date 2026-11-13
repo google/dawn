@@ -64,7 +64,7 @@ TEST_F(GlslWriter_TextureBuiltinsFromUniformTest, MissingConfig) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -101,7 +101,7 @@ TEST_F(GlslWriter_TextureBuiltinsFromUniformTest, BindingArray_CountTooSmall) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -142,7 +142,7 @@ TEST_F(GlslWriter_TextureBuiltinsFromUniformTest, TextureNumLevels) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -163,7 +163,7 @@ TintTextureUniformData = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<uniform, TintTextureUniformData, read> = var undef @binding_point(0, 30)
+  %1:ptr<uniform, TintTextureUniformData, read> = var @binding_point(0, 30)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -199,7 +199,7 @@ TEST_F(GlslWriter_TextureBuiltinsFromUniformTest, TextureNumSamples) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_multisampled_2d, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, texture_depth_multisampled_2d, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -220,7 +220,7 @@ TintTextureUniformData = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<uniform, TintTextureUniformData, read> = var undef @binding_point(0, 30)
+  %1:ptr<uniform, TintTextureUniformData, read> = var @binding_point(0, 30)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -256,7 +256,7 @@ TEST_F(GlslWriter_TextureBuiltinsFromUniformTest, TextureNumLevelsNonZeroMetadat
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -277,7 +277,7 @@ TintTextureUniformData = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<uniform, TintTextureUniformData, read> = var undef @binding_point(0, 30)
+  %1:ptr<uniform, TintTextureUniformData, read> = var @binding_point(0, 30)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -315,7 +315,7 @@ TEST_F(GlslWriter_TextureBuiltinsFromUniformTest,
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -337,8 +337,8 @@ TintTextureUniformData = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
-  %2:ptr<uniform, TintTextureUniformData, read> = var undef @binding_point(0, 30)
+  %1:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var @binding_point(0, 0)
+  %2:ptr<uniform, TintTextureUniformData, read> = var @binding_point(0, 30)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -375,7 +375,7 @@ TEST_F(GlslWriter_TextureBuiltinsFromUniformTest, TextureNumLevelsBindindArrayAc
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -397,8 +397,8 @@ TintTextureUniformData = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
-  %2:ptr<uniform, TintTextureUniformData, read> = var undef @binding_point(0, 30)
+  %1:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var @binding_point(0, 0)
+  %2:ptr<uniform, TintTextureUniformData, read> = var @binding_point(0, 30)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -438,7 +438,7 @@ TEST_F(GlslWriter_TextureBuiltinsFromUniformTest,
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -460,8 +460,8 @@ TintTextureUniformData = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
-  %2:ptr<uniform, TintTextureUniformData, read> = var undef @binding_point(0, 30)
+  %1:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var @binding_point(0, 0)
+  %2:ptr<uniform, TintTextureUniformData, read> = var @binding_point(0, 30)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -500,7 +500,7 @@ TEST_F(GlslWriter_TextureBuiltinsFromUniformTest, SameBuiltinCalledMultipleTimes
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -523,7 +523,7 @@ TintTextureUniformData = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<uniform, TintTextureUniformData, read> = var undef @binding_point(0, 30)
+  %1:ptr<uniform, TintTextureUniformData, read> = var @binding_point(0, 30)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -564,7 +564,7 @@ TEST_F(GlslWriter_TextureBuiltinsFromUniformTest, SameBuiltinCalledMultipleTimes
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_multisampled_2d, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, texture_depth_multisampled_2d, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -587,7 +587,7 @@ TintTextureUniformData = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<uniform, TintTextureUniformData, read> = var undef @binding_point(0, 30)
+  %1:ptr<uniform, TintTextureUniformData, read> = var @binding_point(0, 30)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {

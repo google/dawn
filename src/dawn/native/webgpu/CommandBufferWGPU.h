@@ -40,7 +40,7 @@ class CommandBuffer final : public CommandBufferBase, public RecordableObject {
     static Ref<CommandBuffer> Create(CommandEncoder* encoder,
                                      const CommandBufferDescriptor* descriptor);
 
-    ResultOrError<WGPUCommandBuffer> Encode();
+    ResultOrError<WGPUCommandBuffer> RecordCommands();
     MaybeError Capture(CaptureContext& captureContext);
 
     MaybeError AddReferenced(CaptureContext& captureContext) override;

@@ -44,6 +44,7 @@
 namespace dawn {
 namespace {
 
+using ::testing::_;
 
 wgpu::Device CreateExtraDevice(utils::WireHelper* wireHelper, wgpu::Instance instance) {
     // IMPORTANT: DawnTest overrides RequestAdapter and RequestDevice and mixes
@@ -175,7 +176,7 @@ class EventCompletionTests : public DawnTestWithParams<EventCompletionTestParams
 
     void LoseTestDevice() {
         EXPECT_CALL(mDeviceLostCallback,
-                    Call(CHandleIs(testDevice.Get()), wgpu::DeviceLostReason::Unknown, testing::_))
+                    Call(CHandleIs(testDevice.Get()), wgpu::DeviceLostReason::Unknown, _))
             .Times(1);
         testDevice.ForceLoss(wgpu::DeviceLostReason::Unknown, "Device lost for testing");
         testInstance.ProcessEvents();
@@ -394,7 +395,6 @@ TEST_P(EventCompletionTests, WorkDoneTwice) {
                           GetParam().mWaitTypeAndCallbackMode ==
                               WaitTypeAndCallbackMode::Spin_AllowSpontaneous);
 
-
     TrivialSubmit();
     TrackForTest(OnSubmittedWorkDone(wgpu::QueueWorkDoneStatus::Success));
     TrackForTest(OnSubmittedWorkDone(wgpu::QueueWorkDoneStatus::Success));
@@ -511,6 +511,7 @@ TEST_P(WaitAnyTests, UnsupportedCount) {
         // you still get 64. DawnTest doesn't request anything (so requests 0) so gets 64.
         for (size_t count : {kTimedWaitAnyMaxCountDefault, kTimedWaitAnyMaxCountDefault + 1}) {
             std::vector<wgpu::FutureWaitInfo> infos;
+            infos.reserve(count);
             for (size_t i = 0; i < count; ++i) {
                 infos.push_back({queue.OnSubmittedWorkDone(
                     wgpu::CallbackMode::WaitAnyOnly,

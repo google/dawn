@@ -67,7 +67,7 @@ tint_symbol = struct @align(4) {
 }
 
 $B1: {  # root
-  %myvar:ptr<storage, tint_symbol, read_write> = var undef @binding_point(0, 0)
+  %myvar:ptr<storage, tint_symbol, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -118,7 +118,7 @@ tint_symbol = struct @align(4) {
 }
 
 $B1: {  # root
-  %myvar:ptr<storage, tint_symbol, read_write> = var undef @binding_point(0, 0)
+  %myvar:ptr<storage, tint_symbol, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -170,7 +170,7 @@ tint_symbol = struct @align(4) {
 }
 
 $B1: {  # root
-  %myvar:ptr<storage, tint_symbol, read_write> = var undef @binding_point(0, 0)
+  %myvar:ptr<storage, tint_symbol, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -203,7 +203,7 @@ TEST_F(SpirvParserTest, Load_Scalar) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, u32, read_write> = var undef
+    %2:ptr<function, u32, read_write> = var
     %3:u32 = load %2
     ret
   }
@@ -231,7 +231,7 @@ TEST_F(SpirvParserTest, Load_Vector) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %2:ptr<function, vec4<u32>, read_write> = var
     %3:vec4<u32> = load %2
     ret
   }
@@ -262,7 +262,7 @@ TEST_F(SpirvParserTest, Load_VectorComponent) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %2:ptr<function, vec4<u32>, read_write> = var
     %3:ptr<function, u32, read_write> = access %2, 2u
     %4:u32 = load %3
     ret
@@ -293,7 +293,7 @@ TEST_F(SpirvParserTest, Load_Matrix) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, mat3x4<f32>, read_write> = var undef
+    %2:ptr<function, mat3x4<f32>, read_write> = var
     %3:mat3x4<f32> = load %2
     ret
   }
@@ -326,7 +326,7 @@ TEST_F(SpirvParserTest, Load_MatrixColumn) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, mat3x4<f32>, read_write> = var undef
+    %2:ptr<function, mat3x4<f32>, read_write> = var
     %3:ptr<function, vec4<f32>, read_write> = access %2, 2u
     %4:vec4<f32> = load %3
     ret
@@ -356,7 +356,7 @@ TEST_F(SpirvParserTest, Load_Array) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, array<u32, 4>, read_write> = var undef
+    %2:ptr<function, array<u32, 4>, read_write> = var
     %3:array<u32, 4> = load %2
     ret
   }
@@ -388,7 +388,7 @@ TEST_F(SpirvParserTest, Load_ArrayElement) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, array<u32, 4>, read_write> = var undef
+    %2:ptr<function, array<u32, 4>, read_write> = var
     %3:ptr<function, u32, read_write> = access %2, 2u
     %4:u32 = load %3
     ret
@@ -436,7 +436,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %sg:ptr<storage, S, read_write> = var undef @binding_point(0, 1)
+  %sg:ptr<storage, S, read_write> = var @binding_point(0, 1)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -475,7 +475,7 @@ tint_symbol_2 = struct @align(4) {
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, tint_symbol_2, read_write> = var undef
+    %2:ptr<function, tint_symbol_2, read_write> = var
     %3:tint_symbol_2 = load %2
     ret
   }
@@ -511,7 +511,7 @@ tint_symbol_2 = struct @align(4) {
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, tint_symbol_2, read_write> = var undef
+    %2:ptr<function, tint_symbol_2, read_write> = var
     %3:ptr<function, u32, read_write> = access %2, 1u
     %4:u32 = load %3
     ret
@@ -540,7 +540,7 @@ TEST_F(SpirvParserTest, Store_Scalar) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, u32, read_write> = var undef
+    %2:ptr<function, u32, read_write> = var
     store %2, 42u
     ret
   }
@@ -569,7 +569,7 @@ TEST_F(SpirvParserTest, Store_Vector) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %2:ptr<function, vec4<u32>, read_write> = var
     store %2, vec4<u32>(0u)
     ret
   }
@@ -601,7 +601,7 @@ TEST_F(SpirvParserTest, Store_VectorComponent) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %2:ptr<function, vec4<u32>, read_write> = var
     %3:ptr<function, u32, read_write> = access %2, 2u
     store %3, 42u
     ret
@@ -633,7 +633,7 @@ TEST_F(SpirvParserTest, Store_Matrix) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, mat3x4<f32>, read_write> = var undef
+    %2:ptr<function, mat3x4<f32>, read_write> = var
     store %2, mat3x4<f32>(vec4<f32>(0.0f))
     ret
   }
@@ -667,7 +667,7 @@ TEST_F(SpirvParserTest, Store_MatrixColumn) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, mat3x4<f32>, read_write> = var undef
+    %2:ptr<function, mat3x4<f32>, read_write> = var
     %3:ptr<function, vec4<f32>, read_write> = access %2, 2u
     store %3, vec4<f32>(0.0f)
     ret
@@ -698,7 +698,7 @@ TEST_F(SpirvParserTest, Store_Array) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, array<u32, 4>, read_write> = var undef
+    %2:ptr<function, array<u32, 4>, read_write> = var
     store %2, array<u32, 4>(0u)
     ret
   }
@@ -731,7 +731,7 @@ TEST_F(SpirvParserTest, Store_ArrayElement) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, array<u32, 4>, read_write> = var undef
+    %2:ptr<function, array<u32, 4>, read_write> = var
     %3:ptr<function, u32, read_write> = access %2, 2u
     store %3, 42u
     ret
@@ -766,7 +766,7 @@ tint_symbol_2 = struct @align(4) {
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, tint_symbol_2, read_write> = var undef
+    %2:ptr<function, tint_symbol_2, read_write> = var
     store %2, tint_symbol_2(0u)
     ret
   }
@@ -803,7 +803,7 @@ tint_symbol_2 = struct @align(4) {
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, tint_symbol_2, read_write> = var undef
+    %2:ptr<function, tint_symbol_2, read_write> = var
     %3:ptr<function, u32, read_write> = access %2, 1u
     store %3, 42u
     ret
@@ -834,8 +834,8 @@ TEST_F(SpirvParserTest, CopyMemory_Scalar) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %src_var:ptr<function, u32, read_write> = var undef
-    %dst_var:ptr<function, u32, read_write> = var undef
+    %src_var:ptr<function, u32, read_write> = var
+    %dst_var:ptr<function, u32, read_write> = var
     %4:u32 = load %src_var
     store %dst_var, %4
     ret
@@ -868,8 +868,8 @@ TEST_F(SpirvParserTest, CopyMemory_Vector) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %src_vec:ptr<function, vec4<u32>, read_write> = var undef
-    %dst_vec:ptr<function, vec4<u32>, read_write> = var undef
+    %src_vec:ptr<function, vec4<u32>, read_write> = var
+    %dst_vec:ptr<function, vec4<u32>, read_write> = var
     %4:vec4<u32> = load %src_vec
     store %dst_vec, %4
     ret
@@ -908,8 +908,8 @@ TEST_F(SpirvParserTest, CopyMemory_VectorComponent) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %src_vec:ptr<function, vec4<u32>, read_write> = var undef
-    %dst_vec:ptr<function, vec4<u32>, read_write> = var undef
+    %src_vec:ptr<function, vec4<u32>, read_write> = var
+    %dst_vec:ptr<function, vec4<u32>, read_write> = var
     %src:ptr<function, u32, read_write> = access %src_vec, 2u
     %dst:ptr<function, u32, read_write> = access %dst_vec, 2u
     %6:u32 = load %src
@@ -945,8 +945,8 @@ TEST_F(SpirvParserTest, CopyMemory_Matrix) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %src_mat:ptr<function, mat3x4<f32>, read_write> = var undef
-    %dst_mat:ptr<function, mat3x4<f32>, read_write> = var undef
+    %src_mat:ptr<function, mat3x4<f32>, read_write> = var
+    %dst_mat:ptr<function, mat3x4<f32>, read_write> = var
     %4:mat3x4<f32> = load %src_mat
     store %dst_mat, %4
     ret
@@ -987,8 +987,8 @@ TEST_F(SpirvParserTest, CopyMemory_MatrixColumn) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %src_mat:ptr<function, mat3x4<f32>, read_write> = var undef
-    %mat_dst:ptr<function, mat3x4<f32>, read_write> = var undef
+    %src_mat:ptr<function, mat3x4<f32>, read_write> = var
+    %mat_dst:ptr<function, mat3x4<f32>, read_write> = var
     %src:ptr<function, vec4<f32>, read_write> = access %src_mat, 2u
     %dst:ptr<function, vec4<f32>, read_write> = access %mat_dst, 2u
     %6:vec4<f32> = load %src
@@ -1024,8 +1024,8 @@ TEST_F(SpirvParserTest, CopyMemory_Array) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %src_arr:ptr<function, array<u32, 4>, read_write> = var undef
-    %dst_arr:ptr<function, array<u32, 4>, read_write> = var undef
+    %src_arr:ptr<function, array<u32, 4>, read_write> = var
+    %dst_arr:ptr<function, array<u32, 4>, read_write> = var
     %4:array<u32, 4> = load %src_arr
     store %dst_arr, %4
     ret
@@ -1065,8 +1065,8 @@ TEST_F(SpirvParserTest, CopyMemory_ArrayElement) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %src_arr:ptr<function, array<u32, 4>, read_write> = var undef
-    %dst_arr:ptr<function, array<u32, 4>, read_write> = var undef
+    %src_arr:ptr<function, array<u32, 4>, read_write> = var
+    %dst_arr:ptr<function, array<u32, 4>, read_write> = var
     %src:ptr<function, u32, read_write> = access %src_arr, 2u
     %dst:ptr<function, u32, read_write> = access %dst_arr, 2u
     %6:u32 = load %src
@@ -1106,8 +1106,8 @@ tint_symbol_2 = struct @align(4) {
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %src_str:ptr<function, tint_symbol_2, read_write> = var undef
-    %dst_str:ptr<function, tint_symbol_2, read_write> = var undef
+    %src_str:ptr<function, tint_symbol_2, read_write> = var
+    %dst_str:ptr<function, tint_symbol_2, read_write> = var
     %4:tint_symbol_2 = load %src_str
     store %dst_str, %4
     ret
@@ -1151,8 +1151,8 @@ tint_symbol_2 = struct @align(4) {
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %src_str:ptr<function, tint_symbol_2, read_write> = var undef
-    %dst_str:ptr<function, tint_symbol_2, read_write> = var undef
+    %src_str:ptr<function, tint_symbol_2, read_write> = var
+    %dst_str:ptr<function, tint_symbol_2, read_write> = var
     %src:ptr<function, u32, read_write> = access %src_str, 1u
     %dst:ptr<function, u32, read_write> = access %dst_str, 1u
     %6:u32 = load %src
@@ -1200,7 +1200,7 @@ TEST_F(SpirvParserTest, Access_Nested_SingleAccessInstruction) {
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, array<tint_symbol_4, 4>, read_write> = var undef
+    %2:ptr<function, array<tint_symbol_4, 4>, read_write> = var
     %3:ptr<function, u32, read_write> = access %2, 1u, 2u, 3u
     %4:u32 = load %3
     store %3, 42u
@@ -1250,7 +1250,7 @@ TEST_F(SpirvParserTest, Access_Nested_SeparateAccessInstructions) {
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, array<tint_symbol_4, 4>, read_write> = var undef
+    %2:ptr<function, array<tint_symbol_4, 4>, read_write> = var
     %3:ptr<function, tint_symbol_4, read_write> = access %2, 1u
     %4:ptr<function, array<u32, 4>, read_write> = access %3, 2u
     %5:ptr<function, u32, read_write> = access %4, 3u
@@ -1283,7 +1283,7 @@ TEST_F(SpirvParserTest, Access_NoIndices) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, u32, read_write> = var undef
+    %2:ptr<function, u32, read_write> = var
     %3:u32 = load %2
     ret
   }
@@ -1328,7 +1328,7 @@ TEST_F(SpirvParserTest, Access_SignedIndices) {
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, array<tint_symbol_4, 4>, read_write> = var undef
+    %2:ptr<function, array<tint_symbol_4, 4>, read_write> = var
     %3:ptr<function, u32, read_write> = access %2, 1i, 2u, 3i
     %4:u32 = load %3
     store %3, 42u
@@ -1374,7 +1374,7 @@ TEST_F(SpirvParserTest, InBoundsAccessChain) {
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, array<tint_symbol_4, 4>, read_write> = var undef
+    %2:ptr<function, array<tint_symbol_4, 4>, read_write> = var
     %3:ptr<function, u32, read_write> = access %2, 1u, 2u, 3u
     %4:u32 = load %3
     store %3, 42u
@@ -1421,8 +1421,8 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read> = var undef @binding_point(1, 2)
-  %2:ptr<storage, tint_symbol_1, read_write> = var undef @binding_point(1, 3)
+  %1:ptr<storage, tint_symbol_1, read> = var @binding_point(1, 2)
+  %2:ptr<storage, tint_symbol_1, read_write> = var @binding_point(1, 3)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1474,7 +1474,7 @@ tint_symbol = struct @align(4) {
 }
 
 $B1: {  # root
-  %myvar:ptr<storage, tint_symbol, read_write> = var undef @binding_point(0, 0)
+  %myvar:ptr<storage, tint_symbol, read_write> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {

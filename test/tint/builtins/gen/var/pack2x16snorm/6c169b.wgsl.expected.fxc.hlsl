@@ -6,7 +6,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 uint pack2x16snorm_6c169b() {
   float2 arg_0 = (1.0f).xx;
   int2 v = (int2(round((clamp(arg_0, (-1.0f).xx, (1.0f).xx) * 32767.0f))) & (int(65535)).xx);
-  uint res = asuint((v.x | (v.y << 16u)));
+  uint res = asuint((v.x | asint((asuint(v.y) << 16u))));
   return res;
 }
 
@@ -22,7 +22,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 uint pack2x16snorm_6c169b() {
   float2 arg_0 = (1.0f).xx;
   int2 v = (int2(round((clamp(arg_0, (-1.0f).xx, (1.0f).xx) * 32767.0f))) & (int(65535)).xx);
-  uint res = asuint((v.x | (v.y << 16u)));
+  uint res = asuint((v.x | asint((asuint(v.y) << 16u))));
   return res;
 }
 
@@ -48,7 +48,7 @@ struct vertex_main_outputs {
 uint pack2x16snorm_6c169b() {
   float2 arg_0 = (1.0f).xx;
   int2 v = (int2(round((clamp(arg_0, (-1.0f).xx, (1.0f).xx) * 32767.0f))) & (int(65535)).xx);
-  uint res = asuint((v.x | (v.y << 16u)));
+  uint res = asuint((v.x | asint((asuint(v.y) << 16u))));
   return res;
 }
 

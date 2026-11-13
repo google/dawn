@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <optional>
@@ -34,13 +35,24 @@
 #include <utility>
 #include <vector>
 
+#include "libplatform/libplatform.h"
 #include "src/dawn/node/Module.h"
 #include "src/dawn/node/napi_v8/napi_v8.h"
 #include "src/dawn/node/standalone/EventLoop.h"
+#include "src/dawn/node/standalone/FileBundle.h"
 #include "src/dawn/node/standalone/Polyfills.h"
 #include "src/dawn/utils/CommandLineParser.h"
 
-#include "libplatform/libplatform.h"
+#if defined(DAWN_ENABLE_PARTITION_ALLOC)
+#include "partition_alloc/buildflags.h"  // nogncheck
+#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)
+#include "partition_alloc/partition_alloc_constants.h"                                // nogncheck
+#include "partition_alloc/partition_root.h"                                           // nogncheck
+#include "partition_alloc/shim/allocator_shim.h"                                      // nogncheck
+#include "partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h"  // nogncheck
+#include "partition_alloc/thread_cache.h"                                             // nogncheck
+#endif  // PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)
+#endif  // defined(DAWN_ENABLE_PARTITION_ALLOC)
 
 namespace {
 
@@ -49,6 +61,19 @@ namespace {
 // as a bare package name.
 constexpr const char* kCmdlineScript = "./out-node/common/runtime/cmdline.js";
 
+// Appends each non-empty line of `in` to `queries`, without a trailing '\r'.
+void AppendQueryLines(std::istream& in, std::vector<std::string>* queries) {
+    std::string line;
+    while (std::getline(in, line)) {
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
+        if (!line.empty()) {
+            queries->push_back(std::move(line));
+        }
+    }
+}
+
 class StandaloneRunner {
   public:
     int Run(int argc, const char* argv[]) {
@@ -56,6 +81,7 @@ class StandaloneRunner {
             return *exit_code;
         }
 
+        ConfigurePartitionAlloc();
         InitializeV8();
         int exit_code = RunCts();
         DisposeV8();
@@ -63,9 +89,9 @@ class StandaloneRunner {
     }
 
   private:
-    // Parses command-line flags and switches the working directory to `--cts-dir`. Returns an exit
-    // code if the process should terminate early (0 for `--help`, 1 on error), or `std::nullopt`
-    // to continue running the CTS.
+    // Parses command-line flags, then opens `--cts-zip` or switches the working directory to
+    // `--cts-dir`. Returns an exit code if the process should terminate early (0 for `--help`, 1 on
+    // error), or `std::nullopt` to continue running the CTS.
     std::optional<int> ParseCommandLine(int argc, const char* argv[]) {
         auto parse_result = parser_.Parse(argc, argv);
         if (!parse_result.success) {
@@ -79,11 +105,37 @@ class StandaloneRunner {
             return 0;
         }
 
-        if (!query_opt_.IsSet()) {
-            std::cerr << "Error: --query (-q) must be specified.\n\n";
+        queries_.assign(query_opt_.GetValue().begin(), query_opt_.GetValue().end());
+        if (query_file_opt_.IsSet()) {
+            const std::string& path = query_file_opt_.GetValue();
+            if (path == "-") {
+                AppendQueryLines(std::cin, &queries_);
+            } else {
+                std::ifstream file(path);
+                if (!file) {
+                    std::cerr << "Error: failed to open --query-file '" << path << "'.\n";
+                    return 1;
+                }
+                AppendQueryLines(file, &queries_);
+            }
+        }
+
+        if (queries_.empty()) {
+            std::cerr << "Error: --query (-q) or --query-file must be specified.\n\n";
             std::cerr << "Usage: " << argv[0] << " [options] --query <query>\n\nOptions:\n";
             parser_.PrintHelp(std::cerr);
             return 1;
+        }
+
+        if (cts_zip_opt_.IsSet()) {
+            if (cts_dir_opt_.IsSet()) {
+                std::cerr << "Error: --cts-zip and --cts-dir cannot be used together.\n";
+                return 1;
+            }
+            if (!OpenCtsZip(cts_zip_opt_.GetValue())) {
+                return 1;
+            }
+            return std::nullopt;
         }
 
         // The CTS `cmdline.js` script requires the process working directory to be the root of the
@@ -117,6 +169,39 @@ class StandaloneRunner {
         }
 
         return std::nullopt;
+    }
+
+    // Opens the zip at `path` as the JavaScript's working directory, the CTS that cmdline.js runs.
+    // Returns false on failure.
+    bool OpenCtsZip(const std::string& path) {
+        dawn::Result<std::unique_ptr<dawn::node::standalone::FileBundle>, std::string> bundle =
+            dawn::node::standalone::FileBundle::OpenZip(path);
+        if (bundle.IsError()) {
+            std::cerr << "Error: failed to open --cts-zip '" << path
+                      << "': " << *bundle.AcquireError() << ".\n";
+            return false;
+        }
+        bundle_ = bundle.AcquireSuccess();
+        std::error_code ec;
+        bundle_root_ = std::filesystem::absolute(path, ec).string();
+        if (ec) {
+            std::cerr << "Error: failed to resolve --cts-zip '" << path << "': " << ec.message()
+                      << "\n";
+            return false;
+        }
+        if (bundle_->Stat("src/common/runtime/cmdline.ts") ==
+                dawn::node::standalone::FileBundle::Kind::kNotFound ||
+            bundle_->Stat("out-node/common/runtime/cmdline.js") ==
+                dawn::node::standalone::FileBundle::Kind::kNotFound ||
+            bundle_->Stat("out-node/resources") ==
+                dawn::node::standalone::FileBundle::Kind::kNotFound) {
+            std::cerr << "Error: '" << path
+                      << "' does not hold a built WebGPU CTS (it needs "
+                         "'src/common/runtime/cmdline.ts', 'out-node/common/runtime/cmdline.js' "
+                         "and 'out-node/resources').\n";
+            return false;
+        }
+        return true;
     }
 
     // Builds the `process.argv` array expected by the CTS `cmdline.js` script from the parsed
@@ -160,8 +245,47 @@ class StandaloneRunner {
             js_args.push_back(flag);
         }
 
-        js_args.push_back(query_opt_.GetValue());
+        for (const std::string& query : queries_) {
+            js_args.push_back(query);
+        }
         return js_args;
+    }
+
+    // Configures PartitionAlloc's malloc partition for a command-line test runner. For background
+    // on buckets, slot spans, the empty slot span ring, and the thread cache, see:
+    // https://chromium.googlesource.com/chromium/src/+/main/base/allocator/partition_allocator/PartitionAlloc.md
+    void ConfigurePartitionAlloc() {
+#if defined(DAWN_ENABLE_PARTITION_ALLOC)
+#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)
+        // Use denser buckets (8 per power-of-two order instead of 4) to reduce internal
+        // fragmentation, and disable security features (BackupRefPtr, MTE, quarantine, and zeroing
+        // on free) that add per-free overhead.
+        allocator_shim::ConfigurePartitions(
+            allocator_shim::EnableBrp(false), /*brp_extra_extras_size=*/0,
+            allocator_shim::EnableMemoryTagging(false),
+            partition_alloc::TagViolationReportingMode::kDisabled,
+            allocator_shim::BucketDistribution::kDenser,
+            partition_alloc::internal::SchedulerLoopQuarantineConfig(),
+            partition_alloc::internal::SchedulerLoopQuarantineConfig(),
+            partition_alloc::internal::SchedulerLoopQuarantineConfig(),
+            allocator_shim::EventuallyZeroFreedMemory(false));
+
+        // Enable the per-thread cache and raise its size limit from 512 B to 32 KiB
+        // (`kThreadCacheLargeSizeThreshold`) so more allocations use the thread-local freelists.
+        // This avoids acquiring a lock.
+        partition_alloc::PartitionRoot* root =
+            allocator_shim::internal::PartitionAllocMalloc::Allocator();
+        root->EnableThreadCacheIfSupported();
+        partition_alloc::ThreadCache::SetLargestCachedSize(
+            partition_alloc::kThreadCacheLargeSizeThreshold);
+
+        // Keep the maximum number of empty slot spans in the ring buffer before returning them to
+        // the OS.
+        root->AdjustSlotSpanRing(
+            static_cast<int16_t>(partition_alloc::internal::kMaxEmptySlotSpanRingSize),
+            /*dirty_bytes_shift=*/0);
+#endif  // PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)
+#endif  // defined(DAWN_ENABLE_PARTITION_ALLOC)
     }
 
     void InitializeV8() {
@@ -188,6 +312,10 @@ class StandaloneRunner {
     void InitializePolyfills(Napi::Env env, dawn::node::standalone::EventLoop& loop) {
         dawn::node::standalone::PolyfillOptions polyfill_options;
         polyfill_options.argv = BuildJsArgs();
+        if (bundle_) {
+            polyfill_options.bundle = bundle_.get();
+            polyfill_options.bundle_root = bundle_root_;
+        }
         dawn::node::standalone::RegisterPolyfills(env, loop, polyfill_options);
     }
 
@@ -225,25 +353,22 @@ class StandaloneRunner {
             v8::Local<v8::Context> context = v8::Context::New(isolate_);
             context->Enter();
 
-            napi_env c_env = dawn::napi_v8::CreateEnv(isolate_, context);
-            // `loop` must be destroyed before `DestroyEnv(c_env)` because queued tasks hold
-            // `Napi::Reference`s that unregister themselves from `c_env` on destruction.
-            {
-                Napi::Env env(c_env);
-                dawn::node::standalone::EventLoop loop(isolate_, platform_.get());
+            napi_env c_env = dawn::napi_v8::CreateEnv(isolate_, context, platform_.get());
+            Napi::Env env(c_env);
+            dawn::node::standalone::EventLoop& loop = dawn::napi_v8::GetEventLoop(c_env);
 
-                // `InitializePolyfills` requires `loop` to bind timers and `process.exit`, and
-                // must run before `InitializeWebGPU` which subclasses `Event` and `DOMException`.
-                InitializePolyfills(env, loop);
-                InitializeWebGPU(env);
+            // `InitializePolyfills` requires `loop` to bind timers and `process.exit`, and must run
+            // before `InitializeWebGPU` which subclasses `Event` and `DOMException`.
+            InitializePolyfills(env, loop);
+            InitializeWebGPU(env);
 
-                loop.PostTask([env] {
-                    Napi::Function require_fn = env.Global().Get("require").As<Napi::Function>();
-                    require_fn.Call({Napi::String::New(env, kCmdlineScript)});
-                });
-                loop.Run();
-                exit_code = loop.exit_code();
-            }
+            loop.PostTask([env] {
+                Napi::Function require_fn = env.Global().Get("require").As<Napi::Function>();
+                require_fn.Call({Napi::String::New(env, kCmdlineScript)});
+            });
+            loop.Run();
+            exit_code = loop.exit_code();
+
             dawn::napi_v8::DestroyEnv(c_env);
 
             context->Exit();
@@ -252,6 +377,10 @@ class StandaloneRunner {
         return exit_code;
     }
 
+    // The contents of --cts-zip, and the absolute path that stands for it in JavaScript.
+    std::unique_ptr<dawn::node::standalone::FileBundle> bundle_;
+    std::string bundle_root_;
+
     dawn::utils::CommandLineParser parser_;
     dawn::utils::CommandLineParser::BoolOption& help_opt_ = parser_.AddHelp();
     dawn::utils::CommandLineParser::StringOption& cts_dir_opt_ =
@@ -259,10 +388,20 @@ class StandaloneRunner {
             .AddString("cts-dir",
                        "Directory containing the WebGPU CTS (default: third_party/webgpu-cts)")
             .Parameter("dir");
-    dawn::utils::CommandLineParser::StringOption& query_opt_ =
-        parser_.AddString("query", "CTS test query to run (e.g. 'webgpu:*')")
+    dawn::utils::CommandLineParser::StringOption& cts_zip_opt_ =
+        parser_
+            .AddString("cts-zip",
+                       "Zip of the WebGPU CTS to run from without extracting it; cannot be used "
+                       "with --cts-dir")
+            .Parameter("file.zip");
+    dawn::utils::CommandLineParser::StringListOption& query_opt_ =
+        parser_.AddStringList("query", "CTS test query to run (e.g. 'webgpu:*'); may be repeated")
             .ShortName('q')
-            .Parameter("query");
+            .Parameter("query")
+            .SplitOnComma(false);
+    dawn::utils::CommandLineParser::StringOption& query_file_opt_ =
+        parser_.AddString("query-file", "File of queries or test cases, one per line; '-' is stdin")
+            .Parameter("path");
     dawn::utils::CommandLineParser::BoolOption& verbose_opt_ =
         parser_.AddBool("verbose", "Print result/log of every test as it runs").ShortName('v');
     dawn::utils::CommandLineParser::BoolOption& quiet_opt_ =
@@ -285,6 +424,8 @@ class StandaloneRunner {
         parser_.AddStringList("dawn-flag", "Flag to set on dawn.node as <flag>=<value>")
             .Parameter("flag=value");
 
+    // The `--query` values followed by the lines of `--query-file`.
+    std::vector<std::string> queries_;
     std::unique_ptr<v8::Platform> platform_;
     std::unique_ptr<v8::ArrayBuffer::Allocator> allocator_;
     v8::Isolate* isolate_ = nullptr;

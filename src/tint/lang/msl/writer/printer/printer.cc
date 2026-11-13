@@ -68,6 +68,7 @@
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
 #include "src/tint/lang/core/ir/traverse.h"
+#include "src/tint/lang/core/ir/undef.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/ir/user_call.h"
@@ -284,10 +285,10 @@ class Printer : public tint::TextGenerator {
     /// Find all structures that are used in host-shareable address spaces and mark them as such so
     /// that we know to pad the properly when we emit them.
     void FindHostShareableStructs() {
-        auto RecordSubTypes = [&](const core::type::Pointer* ptr) {
+        auto RecordSubTypes = [&](const core::type::Pointer* param_ptr) {
             // Look for structures at any nesting depth of this parameter's type.
             Vector<const core::type::Type*, 8> type_queue;
-            type_queue.Push(ptr->StoreType());
+            type_queue.Push(param_ptr->StoreType());
             while (!type_queue.IsEmpty()) {
                 auto* next = type_queue.Pop();
                 if (auto* str = next->As<core::type::Struct>()) {
@@ -298,6 +299,13 @@ class Printer : public tint::TextGenerator {
                     }
                 } else if (auto* arr = next->As<core::type::Array>()) {
                     type_queue.Push(arr->ElemType());
+                } else if (auto* ptr = next->As<core::type::Pointer>()) {
+                    // In normal WGSL, host-shareable structs don't contain pointers, but argument
+                    // buffer structs (produced by the argument buffers transform) do.
+                    // In that case, we need to recurse into the pointer.
+                    if (core::IsHostShareable(ptr->AddressSpace())) {
+                        type_queue.Push(ptr->StoreType());
+                    }
                 }
             }
         };
@@ -746,15 +754,16 @@ class Printer : public tint::TextGenerator {
         EmitType(out, ptr->UnwrapPtr());
         out << " " << NameOf(v->Result());
 
-        if (v->Initializer()) {
-            out << " = ";
-            EmitValue(out, v->Initializer());
-        } else if (space == core::AddressSpace::kPrivate ||
-                   space == core::AddressSpace::kFunction) {
-            if (!ptr->StoreType()->Is<type::CooperativeTensor>()) {
+        auto* init = v->Initializer();
+        if (!init) {
+            // No initializer means implicit zero-initialization.
+            if (space == core::AddressSpace::kPrivate || space == core::AddressSpace::kFunction) {
                 out << " = ";
                 EmitZeroValue(out, ptr->StoreType());
             }
+        } else if (!init->Is<core::ir::Undef>()) {
+            out << " = ";
+            EmitValue(out, init);
         }
         out << ";";
     }
@@ -911,6 +920,26 @@ class Printer : public tint::TextGenerator {
         }
     }
 
+    void EmitIndexAccess(StringStream& out, const core::ir::Value* index, uint32_t count) {
+        out << "[";
+        if (auto* cnst = index->As<core::ir::Constant>()) {
+            // Clamping for when robustness is disabled
+            bool is_neg =
+                cnst->Type()->IsSignedIntegerScalar() && cnst->Value()->ValueAs<core::AInt>() < 0;
+            uint32_t uval = cnst->Value()->ValueAs<uint32_t>();
+            if (count > 0 && (is_neg || uval >= count)) {
+                out << std::min(uval, count - 1) << "u";
+            } else if (count == 0 && is_neg) {
+                out << "0u";
+            } else {
+                EmitValue(out, index);
+            }
+        } else {
+            EmitValue(out, index);
+        }
+        out << "]";
+    }
+
     void EmitStoreVectorElement(const core::ir::StoreVectorElement* s) {
         auto out = Line();
 
@@ -1032,10 +1061,9 @@ class Printer : public tint::TextGenerator {
                     EmitVectorAccess(out, index, vec->Width() - 1);
                 },
                 [&](Default) {
-                    out << "[";
-                    EmitValue(out, index);
-                    out << "]";
-                    current_type = current_type->Element(0);
+                    auto elements = current_type->Elements();
+                    EmitIndexAccess(out, index, elements.count);
+                    current_type = elements.type;
                 });
         }
     }
@@ -1193,27 +1221,6 @@ class Printer : public tint::TextGenerator {
             EmitAndTakeAddressIfNeeded(out, c->Args()[0]);
             out << ", ";
             EmitValue(out, c->Args()[1]);
-            out << ")";
-            return;
-        }
-        if (c->Func() == BuiltinFn::kCopyCooperativeTensor) {
-            if (copy_cooperative_tensor_.empty()) {
-                TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
-
-                copy_cooperative_tensor_ = UniqueIdentifier("tint_copy_cooperative_tensor");
-                Line();
-                Line() << "template<typename T>";
-                Line() << "void " << copy_cooperative_tensor_
-                       << "(thread T* dst, const thread T* src) {";
-                Line() << "  for (uint i = 0; i < dst->get_capacity(); i++) {";
-                Line() << "    dst->set(i, src->get(i));";
-                Line() << "  }";
-                Line() << "}";
-            }
-            out << copy_cooperative_tensor_ << "(";
-            EmitAndTakeAddressIfNeeded(out, c->Args()[0]);
-            out << ", ";
-            EmitAndTakeAddressIfNeeded(out, c->Args()[1]);
             out << ")";
             return;
         }
@@ -1930,14 +1937,14 @@ class Printer : public tint::TextGenerator {
 
         str_buf.IncrementIndent();
 
-        bool explicit_layout = str->StructFlags().Contains(core::type::kExplicitLayout);
+        bool is_argument_buffer = str->StructFlags().Contains(core::type::kExplicitLayout);
         uint32_t msl_offset = 0;
         for (auto* mem : str->Members()) {
             auto out = Line(&str_buf);
             auto mem_name = NameOf(mem);
             auto ir_offset = mem->Offset();
 
-            if (!explicit_layout && is_host_shareable) {
+            if (!is_argument_buffer && is_host_shareable) {
                 if (DAWN_UNLIKELY(ir_offset < msl_offset)) {
                     // Unimplementable layout
                     TINT_IR_ICE(ir_) << "Structure member offset (" << ir_offset
@@ -2042,7 +2049,7 @@ class Printer : public tint::TextGenerator {
 
             out << ";";
 
-            if (!explicit_layout && is_host_shareable) {
+            if (!is_argument_buffer && is_host_shareable) {
                 // Calculate new MSL offset
                 auto size_align = MslPackedTypeSizeAndAlign(ty);
                 if (DAWN_UNLIKELY(msl_offset % size_align.align)) {
@@ -2054,7 +2061,7 @@ class Printer : public tint::TextGenerator {
             }
         }
 
-        if (!explicit_layout && is_host_shareable && str->Size() != msl_offset) {
+        if (!is_argument_buffer && is_host_shareable && str->Size() != msl_offset) {
             add_padding(str->Size() - msl_offset, msl_offset);
         }
 
@@ -2120,7 +2127,7 @@ class Printer : public tint::TextGenerator {
                             << result_type.str();
                 auto name = UniqueIdentifier(name_stream.str());
                 Line() << "using " << name << " =";
-                Line() << "  decltype(declval<" << operation << "<" << tensor->M() << ", "
+                Line() << "  decltype(declval<thread " << operation << "<" << tensor->M() << ", "
                        << tensor->N() << ", " << tensor->K() << ">>()";
                 Line() << "             .get_" << tensor_kind << "_cooperative_tensor<" << left_type
                        << ", " << right_type << ", " << result_type.str() << ">());";

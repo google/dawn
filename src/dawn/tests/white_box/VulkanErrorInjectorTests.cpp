@@ -135,6 +135,19 @@ TEST_P(VulkanErrorInjectorTests, InjectErrorOnCreateBuffer) {
     }
 }
 
+TEST_P(VulkanErrorInjectorTests, InjectErrorOnCreateDevice) {
+    wgpu::DeviceDescriptor deviceDesc = {};
+
+    ExhaustiveErrorInjection([&](ErrorInjectionPhase phase) {
+        wgpu::Device testDevice = adapter.CreateDevice(&deviceDesc);
+        if (phase == ErrorInjectionPhase::InjectError) {
+            EXPECT_EQ(testDevice, nullptr);
+        } else {
+            EXPECT_NE(testDevice, nullptr);
+        }
+    });
+}
+
 DAWN_INSTANTIATE_TEST(VulkanErrorInjectorTests, VulkanBackend());
 
 }  // anonymous namespace

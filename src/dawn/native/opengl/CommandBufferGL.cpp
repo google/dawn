@@ -327,14 +327,22 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
     void OnSetPipeline(RenderPipeline* pipeline) {
         BindGroupTrackerBase::OnSetPipeline(pipeline);
         mPipelineGL = pipeline;
-        ResetInternalUniformDataBindgroupAndDirtyRange();
+        ResetInternalUniformDataDirtyRange();
     }
 
     void OnSetPipeline(ComputePipeline* pipeline) {
         BindGroupTrackerBase::OnSetPipeline(pipeline);
         mPipelineGL = pipeline;
-        ResetInternalUniformDataBindgroupAndDirtyRange();
+        ResetInternalUniformDataDirtyRange();
     }
+
+    // Multiple parts of the BindGroup state depend on the pipeline and not just the pipeline
+    // layout: texture units, builtin metadata, etc. The only case where it is safe to not dirty
+    // is when the pipeline is the same as the previous one.
+    // TODO(crbug.com/408065421): This forces more dirtying than strictly necessary for the
+    // parts that don't depend on the pipeline like buffer bindings. In the future we'll want to
+    // optimize to only dirty the texture units but not the rest.
+    bool CanSkipDirtying() override { return mLastAppliedPipeline == mPipeline; }
 
     template <typename Immediates>
     MaybeError Apply(const OpenGLFunctions& gl, Immediates& immediates) {
@@ -619,19 +627,6 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
         return {};
     }
 
-    void ResetInternalUniformDataBindgroupAndDirtyRange() {
-        // Mark bind groups that need emulated builtin uniforms dirty so that they can be updated
-        // properly, even if the bind group is not updated.
-        // TODO(crbug.com/408065421): This forces bindgroups with metadata to be completely set
-        // again each pipeline change. In the future we will want to optimize that to only recompute
-        // the metadata as needed, not force a rebind of all resources.
-        const auto& builtinInfo = mPipelineGL->GetEmulatedTextureBuiltinInfo();
-        for (const auto& entry : builtinInfo) {
-            mDirtyBindGroupsObjectChangedOrIsDynamic.set(BindGroupIndex(entry.second.group));
-        }
-        ResetInternalUniformDataDirtyRange();
-    }
-
     raw_ptr<PipelineGL> mPipelineGL = nullptr;
 
     // The data used for mPipelineGL's internal uniform buffer from current bind group.
@@ -777,7 +772,7 @@ class ImmediateTracker : public T {
 CommandBuffer::CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor)
     : CommandBufferBase(encoder, descriptor) {}
 
-MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
+MaybeError CommandBuffer::RecordCommands(const OpenGLFunctions& gl) {
     auto LazyClearSyncScope = [gl](const SyncScopeResourceUsage& scope) -> MaybeError {
         for (size_t i = 0; i < scope.textures.size(); i++) {
             Texture* texture = ToBackend(scope.textures[i]);
@@ -816,7 +811,7 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                      GetResourceUsages().computePasses[nextComputePassNumber].dispatchUsages) {
                     DAWN_TRY(LazyClearSyncScope(scope));
                 }
-                DAWN_TRY(ExecuteComputePass(gl));
+                DAWN_TRY(RecordComputePass(gl));
 
                 nextComputePassNumber++;
                 break;
@@ -834,7 +829,7 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                     GetDevice(), cmd, [&](TextureBase* texture, const SubresourceRange& range) {
                         return ToBackend(texture)->EnsureSubresourceContentInitialized(gl, range);
                     }));
-                DAWN_TRY(ExecuteRenderPass(cmd, gl, nextRenderPassNumber));
+                DAWN_TRY(RecordRenderPass(cmd, gl, nextRenderPassNumber));
 
                 nextRenderPassNumber++;
                 break;
@@ -1234,7 +1229,7 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
     return {};
 }
 
-MaybeError CommandBuffer::ExecuteComputePass(const OpenGLFunctions& gl) {
+MaybeError CommandBuffer::RecordComputePass(const OpenGLFunctions& gl) {
     ComputePipeline* lastPipeline = nullptr;
     BindGroupTracker bindGroupTracker = {};
 
@@ -1325,9 +1320,9 @@ MaybeError CommandBuffer::ExecuteComputePass(const OpenGLFunctions& gl) {
     DAWN_UNREACHABLE();
 }
 
-MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
-                                            const OpenGLFunctions& gl,
-                                            PassIndex renderPassIndex) {
+MaybeError CommandBuffer::RecordRenderPass(BeginRenderPassCmd* renderPass,
+                                           const OpenGLFunctions& gl,
+                                           PassIndex renderPassIndex) {
     GLuint fbo = 0;
 
     const IndirectDrawMetadata& metadata = GetIndirectDrawMetadata()[renderPassIndex];

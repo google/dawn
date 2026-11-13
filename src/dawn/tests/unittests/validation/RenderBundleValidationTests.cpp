@@ -36,6 +36,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::HasSubstr;
+
 class RenderBundleValidationTest : public ValidationTest {
   protected:
     void SetUp() override {
@@ -666,8 +668,7 @@ TEST_F(RenderBundleValidationTest, SparseColorFormats) {
         desc.depthStencilFormat = wgpu::TextureFormat::Undefined;
         ASSERT_DEVICE_ERROR(
             device.CreateRenderBundleEncoder(&desc),
-            testing::HasSubstr(
-                "No color or depthStencil attachments specified. At least one is required."));
+            HasSubstr("No color or depthStencil attachments specified. At least one is required."));
     }
     {
         utils::ComboRenderBundleEncoderDescriptor desc = {};

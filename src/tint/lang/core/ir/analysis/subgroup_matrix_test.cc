@@ -113,7 +113,7 @@ TEST_P(IR_SubgroupMatrixAnalysisTypeTest, Config_Type_Left) {
   $B1: {
     %v:ptr<function, subgroup_matrix_left<)" +
                std::string(p.type_name) + ", " + std::to_string(p.K) + ", " + std::to_string(p.M) +
-               R"(>, read_write> = var undef
+               R"(>, read_write> = var
     ret
   }
 }
@@ -164,7 +164,7 @@ TEST_P(IR_SubgroupMatrixAnalysisTypeTest, Config_Type_Right) {
   $B1: {
     %v:ptr<function, subgroup_matrix_right<)" +
                std::string(p.type_name) + ", " + std::to_string(p.N) + ", " + std::to_string(p.K) +
-               R"(>, read_write> = var undef
+               R"(>, read_write> = var
     ret
   }
 }
@@ -216,7 +216,7 @@ TEST_P(IR_SubgroupMatrixAnalysisTypeTest, Config_Type_Result) {
   $B1: {
     %v:ptr<function, subgroup_matrix_result<)" +
                std::string(p.type_name) + ", " + std::to_string(p.N) + ", " + std::to_string(p.M) +
-               R"(>, read_write> = var undef
+               R"(>, read_write> = var
     ret
   }
 }
@@ -297,11 +297,11 @@ TEST_F(IR_SubgroupMatrixAnalysis, Config_Multiple) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v1:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var undef
-    %v2:ptr<function, subgroup_matrix_result<f16, 32, 64>, read_write> = var undef
-    %v3:ptr<function, subgroup_matrix_right<f32, 8, 8>, read_write> = var undef
-    %v4:ptr<function, subgroup_matrix_right<i8, 8, 8>, read_write> = var undef
-    %v1_dup:ptr<function, subgroup_matrix_left<i8, 2, 8>, read_write> = var undef
+    %v1:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var
+    %v2:ptr<function, subgroup_matrix_result<f16, 32, 64>, read_write> = var
+    %v3:ptr<function, subgroup_matrix_right<f32, 8, 8>, read_write> = var
+    %v4:ptr<function, subgroup_matrix_right<i8, 8, 8>, read_write> = var
+    %v1_dup:ptr<function, subgroup_matrix_left<i8, 2, 8>, read_write> = var
     ret
   }
 }
@@ -358,7 +358,7 @@ TEST_F(IR_SubgroupMatrixAnalysis, Config_InControlFlow) {
   $B1: {
     if true [t: $B2] {  # if_1
       $B2: {  # true
-        %v:ptr<function, subgroup_matrix_result<f16, 8, 8>, read_write> = var undef
+        %v:ptr<function, subgroup_matrix_result<f16, 8, 8>, read_write> = var
         exit_if  # if_1
       }
     }
@@ -403,7 +403,7 @@ TEST_F(IR_SubgroupMatrixAnalysis, Config_FunctionParam) {
 }
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %v:ptr<function, subgroup_matrix_left<f32, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_left<f32, 8, 8>, read_write> = var
     %5:subgroup_matrix_left<f32, 8, 8> = load %v
     %6:void = call %f, %5
     ret
@@ -488,7 +488,7 @@ S = struct @align(4) {
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, S, read_write> = var undef
+    %v:ptr<function, S, read_write> = var
     ret
   }
 }
@@ -519,7 +519,7 @@ TEST_F(IR_SubgroupMatrixAnalysis, Config_InArray) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, array<subgroup_matrix_left<f32, 8, 8>, 4>, read_write> = var undef
+    %v:ptr<function, array<subgroup_matrix_left<f32, 8, 8>, 4>, read_write> = var
     ret
   }
 }
@@ -558,9 +558,9 @@ TEST_F(IR_SubgroupMatrixAnalysis, Multiply) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %left:ptr<function, subgroup_matrix_left<f32, 2, 8>, read_write> = var undef
+    %left:ptr<function, subgroup_matrix_left<f32, 2, 8>, read_write> = var
     %3:subgroup_matrix_left<f32, 2, 8> = load %left
-    %right:ptr<function, subgroup_matrix_right<f32, 8, 2>, read_write> = var undef
+    %right:ptr<function, subgroup_matrix_right<f32, 8, 2>, read_write> = var
     %5:subgroup_matrix_right<f32, 8, 2> = load %right
     %6:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixMultiply<f32> %3, %5
     %result:subgroup_matrix_result<f32, 8, 8> = let %6
@@ -624,11 +624,11 @@ TEST_F(IR_SubgroupMatrixAnalysis, MultiplyAccumulate) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %left:ptr<function, subgroup_matrix_left<f32, 2, 8>, read_write> = var undef
+    %left:ptr<function, subgroup_matrix_left<f32, 2, 8>, read_write> = var
     %3:subgroup_matrix_left<f32, 2, 8> = load %left
-    %right:ptr<function, subgroup_matrix_right<f32, 8, 2>, read_write> = var undef
+    %right:ptr<function, subgroup_matrix_right<f32, 8, 2>, read_write> = var
     %5:subgroup_matrix_right<f32, 8, 2> = load %right
-    %acc:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %acc:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %7:subgroup_matrix_result<f32, 8, 8> = load %acc
     %8:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixMultiplyAccumulate %3, %5, %7
     %result:subgroup_matrix_result<f32, 8, 8> = let %8
@@ -690,9 +690,9 @@ TEST_F(IR_SubgroupMatrixAnalysis, Multiply_DifferentResultType) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %left:ptr<function, subgroup_matrix_left<i8, 2, 8>, read_write> = var undef
+    %left:ptr<function, subgroup_matrix_left<i8, 2, 8>, read_write> = var
     %3:subgroup_matrix_left<i8, 2, 8> = load %left
-    %right:ptr<function, subgroup_matrix_right<i8, 8, 2>, read_write> = var undef
+    %right:ptr<function, subgroup_matrix_right<i8, 8, 2>, read_write> = var
     %5:subgroup_matrix_right<i8, 8, 2> = load %right
     %6:subgroup_matrix_result<i32, 8, 8> = subgroupMatrixMultiply<i32> %3, %5
     %result:subgroup_matrix_result<i32, 8, 8> = let %6
@@ -768,17 +768,17 @@ TEST_F(IR_SubgroupMatrixAnalysis, Multiply_Multiple) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %left:ptr<function, subgroup_matrix_left<f32, 2, 8>, read_write> = var undef
+    %left:ptr<function, subgroup_matrix_left<f32, 2, 8>, read_write> = var
     %3:subgroup_matrix_left<f32, 2, 8> = load %left
-    %right:ptr<function, subgroup_matrix_right<f32, 8, 2>, read_write> = var undef
+    %right:ptr<function, subgroup_matrix_right<f32, 8, 2>, read_write> = var
     %5:subgroup_matrix_right<f32, 8, 2> = load %right
     %6:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixMultiply<f32> %3, %5
     %result:subgroup_matrix_result<f32, 8, 8> = let %6
     if true [t: $B2] {  # if_1
       $B2: {  # true
-        %left2:ptr<function, subgroup_matrix_left<u32, 2, 8>, read_write> = var undef
+        %left2:ptr<function, subgroup_matrix_left<u32, 2, 8>, read_write> = var
         %9:subgroup_matrix_left<u32, 2, 8> = load %left2
-        %right2:ptr<function, subgroup_matrix_right<u32, 8, 2>, read_write> = var undef
+        %right2:ptr<function, subgroup_matrix_right<u32, 8, 2>, read_write> = var
         %11:subgroup_matrix_right<u32, 8, 2> = load %right2
         %12:subgroup_matrix_result<u32, 8, 8> = subgroupMatrixMultiply<u32> %9, %11
         %result2:subgroup_matrix_result<u32, 8, 8> = let %12

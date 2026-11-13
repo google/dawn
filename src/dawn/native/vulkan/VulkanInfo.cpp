@@ -309,6 +309,16 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_4_PROPERTIES);
     }
 
+    if (info.extensions[DeviceExt::Maintenance5]) {
+        propertiesChain.Add(&info.maintenance5Properties,
+                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_5_PROPERTIES);
+    }
+
+    if (info.extensions[DeviceExt::Maintenance9]) {
+        propertiesChain.Add(&info.maintenance9Features,
+                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_9_FEATURES_KHR);
+    }
+
     if (info.extensions[DeviceExt::ZeroInitializeWorkgroupMemory]) {
         featuresChain.Add(
             &info.zeroInitializeWorkgroupMemoryFeatures,
@@ -324,6 +334,8 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
     if (info.extensions[DeviceExt::Robustness2]) {
         featuresChain.Add(&info.robustness2Features,
                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT);
+        propertiesChain.Add(&info.robustness2Properties,
+                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_PROPERTIES_EXT);
     }
 
     // Check subgroup features and properties
@@ -376,11 +388,6 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_ROBUSTNESS_FEATURES);
         propertiesChain.Add(&info.pipelineRobustnessProperties,
                             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_ROBUSTNESS_PROPERTIES);
-    }
-
-    if (info.extensions[DeviceExt::Maintenance5]) {
-        propertiesChain.Add(&info.maintenance5Properties,
-                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_5_PROPERTIES);
     }
 
     if (info.extensions[DeviceExt::RasterizationOrderAttachmentAccess]) {

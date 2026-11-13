@@ -40,7 +40,43 @@ using namespace tint::core::fluent_types;     // NOLINT
 namespace tint::core::ir::eval::compile_time {
 namespace {
 
-using IR_EvaluatorTest = ir::IRTestHelper;
+class IR_EvaluatorTest : public ir::IRTestHelper {
+  protected:
+    ir::Value* NonConstI32() {
+        auto* dpdx = b.Call(ty.f32(), core::BuiltinFn::kDpdx, 2.0_f);
+        return b.Bitcast(ty.i32(), dpdx);
+    }
+
+    ir::Value* FailingDivByZeroI32() {
+        auto* zero = b.Override("zero", 0_i);
+        return b.Divide(1_i, zero);
+    }
+
+    ir::InstructionResult* RawAdd(ir::Value* lhs, ir::Value* rhs) {
+        return b
+            .Append(mod.CreateInstruction<core::ir::CoreBinary>(b.InstructionResult(ty.i32()),
+                                                                BinaryOp::kAdd, lhs, rhs))
+            ->Result();
+    }
+
+    ir::InstructionResult* RawAddChain(uint32_t depth) {
+        auto* cur = RawAdd(b.Constant(1_i), b.Constant(1_i));
+        for (uint32_t i = 1; i < depth; ++i) {
+            cur = RawAdd(cur, b.Constant(1_i));
+        }
+        return cur;
+    }
+
+    ir::InstructionResult* RawBalancedAddTree7() {
+        auto* l0 = RawAdd(b.Constant(1_i), b.Constant(1_i));
+        auto* l1 = RawAdd(b.Constant(1_i), b.Constant(1_i));
+        auto* l2 = RawAdd(b.Constant(1_i), b.Constant(1_i));
+        auto* l3 = RawAdd(b.Constant(1_i), b.Constant(1_i));
+        auto* m0 = RawAdd(l0, l1);
+        auto* m1 = RawAdd(l2, l3);
+        return RawAdd(m0, m1);
+    }
+};
 
 TEST_F(IR_EvaluatorTest, InvalidExpression) {
     auto* inst = b.Negation(4_u);
@@ -499,6 +535,128 @@ TEST_F(IR_EvaluatorTest, NonConstCallInsideAccessObject) {
 
     auto* val = res.Get();
     ASSERT_EQ(val, nullptr);
+}
+
+TEST_F(IR_EvaluatorTest, DeepOverrideDAG) {
+    auto* o = b.Override("o", 0_i);
+    ir::Value* v = o->Result();
+    for (int i = 0; i < 512; ++i) {
+        v = b.Add(v, v);
+    }
+
+    auto res = Eval(b, v);
+    ASSERT_EQ(res, Success) << res.Failure();
+
+    auto* val = res.Get();
+    ASSERT_NE(val, nullptr);
+    auto* c = val->As<core::ir::Constant>();
+    ASSERT_NE(c, nullptr);
+    EXPECT_EQ(0, c->Value()->ValueAs<int32_t>());
+}
+
+TEST_F(IR_EvaluatorTest, DeepMixedExpressionChain) {
+    auto* o = b.Override("o", 1_i);
+    ir::Value* v = o->Result();
+    for (int i = 0; i < 256; ++i) {
+        auto* neg = b.Negation(v);
+        auto* abs = b.Call(ty.i32(), core::BuiltinFn::kAbs, neg);
+        auto* lhs_u = b.Convert(ty.u32(), abs);
+        auto* rhs_u = b.Convert(ty.u32(), o);
+        auto* sum = b.Add(lhs_u, rhs_u);
+        auto* one_u = b.Divide(sum, 2_u);
+        auto* vec = b.Construct(ty.vec2u(), 0_u, one_u);
+        auto* swz = b.Swizzle(ty.u32(), vec, {1});
+        auto* zero_idx = b.Subtract(one_u, 1_u);
+        auto* arr = b.Construct(ty.array<u32, 2>(), swz, 9_u);
+        auto* acc = b.Access(ty.u32(), arr, zero_idx);
+        auto* cond = b.Equal(acc, 1_u);
+
+        auto* cif = b.ConstExprIf(cond);
+        cif->SetResult(b.InstructionResult(ty.bool_()));
+        b.Append(cif->True(), [&] {
+            auto* inner = b.Equal(acc, 1_u);
+            b.ExitIf(cif, inner);
+        });
+        b.Append(cif->False(), [&] { b.ExitIf(cif, false); });
+
+        v = b.Convert(ty.i32(), cif->Result());
+    }
+
+    auto res = Eval(b, v);
+    ASSERT_EQ(res, Success) << res.Failure();
+
+    auto* val = res.Get();
+    ASSERT_NE(val, nullptr);
+    auto* c = val->As<core::ir::Constant>();
+    ASSERT_NE(c, nullptr);
+    EXPECT_EQ(1, c->Value()->ValueAs<int32_t>());
+}
+
+TEST_F(IR_EvaluatorTest, OverrideDivideByZeroFails) {
+    auto* inst = FailingDivByZeroI32();
+    auto res = Eval(b, inst);
+    ASSERT_NE(res, Success);
+}
+
+TEST_F(IR_EvaluatorTest, NonConstShortCircuitsBinaryRHS) {
+    auto* non_const = NonConstI32();
+    auto* div_zero = FailingDivByZeroI32();
+    auto* inst = b.Add(non_const, div_zero);
+    auto res = Eval(b, inst);
+    ASSERT_EQ(res, Success) << res.Failure();
+    EXPECT_EQ(res.Get(), nullptr);
+}
+
+TEST_F(IR_EvaluatorTest, NonConstShortCircuitsConstructArg) {
+    auto* non_const = NonConstI32();
+    auto* div_zero = FailingDivByZeroI32();
+    auto* inst = b.Construct(ty.vec2i(), non_const, div_zero);
+    auto res = Eval(b, inst);
+    ASSERT_EQ(res, Success) << res.Failure();
+    EXPECT_EQ(res.Get(), nullptr);
+}
+
+TEST_F(IR_EvaluatorTest, NonConstShortCircuitsBuiltinCallArg) {
+    auto* non_const = NonConstI32();
+    auto* div_zero = FailingDivByZeroI32();
+    auto* inst = b.Call(ty.i32(), core::BuiltinFn::kMax, non_const, div_zero);
+    auto res = Eval(b, inst);
+    ASSERT_EQ(res, Success) << res.Failure();
+    EXPECT_EQ(res.Get(), nullptr);
+}
+
+TEST_F(IR_EvaluatorTest, BuilderEvalWithinDepthLimit) {
+    auto* d4 = RawAddChain(4);  // 4 nested instructions (kMaxBuilderEvalDepth == 4), evaluates to 5
+    auto res = Evaluator{b, false}.EvalCoreBinary(BinaryOp::kAdd, ty.i32(), d4, b.Constant(1_i));
+    ASSERT_EQ(res, Success);
+    ASSERT_NE(res.Get(), nullptr);
+    EXPECT_EQ(6, res.Get()->ValueAs<int32_t>());
+}
+
+TEST_F(IR_EvaluatorTest, BuilderEvalExceedDepthLimit) {
+    auto* d5 = RawAddChain(5);  // 5 nested instructions (exceeds kMaxBuilderEvalDepth == 4)
+    auto res = Evaluator{b, false}.EvalCoreBinary(BinaryOp::kAdd, ty.i32(), d5, b.Constant(1_i));
+    ASSERT_EQ(res, Success);
+    EXPECT_EQ(res.Get(), nullptr);
+}
+
+TEST_F(IR_EvaluatorTest, BuilderEvalWithinCountLimit) {
+    auto* root7 = RawBalancedAddTree7();  // 7 instructions (depth 3), evaluates to 8
+    auto* extra8 = RawAdd(b.Constant(1_i), b.Constant(1_i));  // 8th instruction, evaluates to 2
+    auto res = Evaluator{b, false}.EvalCoreBinary(BinaryOp::kAdd, ty.i32(), root7, extra8);
+    ASSERT_EQ(res, Success);
+    ASSERT_NE(res.Get(), nullptr);
+    EXPECT_EQ(10, res.Get()->ValueAs<int32_t>());
+}
+
+TEST_F(IR_EvaluatorTest, BuilderEvalExceedCountLimit) {
+    auto* root7 = RawBalancedAddTree7();                      // 7 instructions (depth 3)
+    auto* extra8 = RawAdd(b.Constant(1_i), b.Constant(1_i));  // 8th instruction
+    auto* extra9 = RawAdd(b.Constant(1_i), b.Constant(1_i));  // 9th instruction (exceeds 8)
+    auto res = Evaluator{b, false}.EvalConstruct(
+        ty.vec3i(), Vector<core::ir::Value*, 3>{root7, extra8, extra9});
+    ASSERT_EQ(res, Success);
+    EXPECT_EQ(res.Get(), nullptr);
 }
 
 }  // namespace

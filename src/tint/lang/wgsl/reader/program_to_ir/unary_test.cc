@@ -133,14 +133,14 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Negation) {
 TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_AddressOf) {
     GlobalVar("v1", core::AddressSpace::kPrivate, ty.i32());
 
-    auto* expr = Decl(Let("v2", AddressOf("v1")));
+    auto* expr = Decl(Let("v2", ast::Type{}, AddressOf("v1")));
     WrapInFunction(expr);
 
     auto m = Build();
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Dis(m.Get()), R"($B1: {  # root
-  %v1:ptr<private, i32, read_write> = var undef
+  %v1:ptr<private, i32, read_write> = var
 }
 
 %test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -155,7 +155,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_AddressOf) {
 TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Indirection) {
     GlobalVar("v1", core::AddressSpace::kPrivate, ty.i32());
     Vector stmts = {
-        Decl(Let("v3", AddressOf("v1"))),
+        Decl(Let("v3", ast::Type{}, AddressOf("v1"))),
         Assign(Deref("v3"), 42_i),
     };
     WrapInFunction(stmts);
@@ -164,7 +164,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Indirection) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Dis(m.Get()), R"($B1: {  # root
-  %v1:ptr<private, i32, read_write> = var undef
+  %v1:ptr<private, i32, read_write> = var
 }
 
 %test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {

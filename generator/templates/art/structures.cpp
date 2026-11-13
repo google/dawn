@@ -28,12 +28,17 @@
 {% from 'art/kotlin_record_conversion.cpp' import define_kotlin_record_structure, define_kotlin_to_struct_conversion with context %}
 #include "structures.h"
 
-#include <string>
+#include <cstring>
 #include <mutex>
+#include <string>
 #include <unordered_map>
 
 #include <jni.h>
 #include <webgpu/webgpu.h>
+
+#if defined(__ANDROID__) || defined(__linux__)
+#include <sys/prctl.h>
+#endif
 
 #include "src/utils/assert.h"
 #include "src/utils/log.h"
@@ -48,29 +53,59 @@ namespace dawn::kotlin_api {
 static std::mutex gDeviceCallbacksMutex;
 static std::unordered_map<WGPUDevice, std::vector<std::shared_ptr<UserData>>> gDeviceCallbacks;
 
-UserData::~UserData() {
-    if (jvm) {
-        JNIEnv* env = nullptr;
-        bool needsDetach = false;
-        if (jvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) == JNI_EDETACHED) {
-#ifdef _JAVASOFT_JNI_H_
-            if (jvm->AttachCurrentThread(reinterpret_cast<void**>(&env), nullptr) == JNI_OK) {
-                needsDetach = true;
-            }
-#else
-            if (jvm->AttachCurrentThread(&env, nullptr) == JNI_OK) {
-                needsDetach = true;
-            }
-#endif
-        }
-        if (env) {
-            if (callback) env->DeleteGlobalRef(callback);
-            if (executor) env->DeleteGlobalRef(executor);
-        }
-        if (needsDetach) {
-            jvm->DetachCurrentThread();
-        }
+ScopedJVMAttachment::ScopedJVMAttachment(JavaVM* jvm) : mJvm(jvm) {
+    if (!mJvm) {
+        return;
     }
+    jint getEnvResult = mJvm->GetEnv(reinterpret_cast<void**>(&mEnv), JNI_VERSION_1_6);
+    if (getEnvResult == JNI_OK) {
+        return;
+    }
+    if (getEnvResult != JNI_EDETACHED) {
+        mEnv = nullptr;
+        return;
+    }
+
+    // Attach under the kernel thread name (for example "DawnWorker" on Dawn's async worker pool)
+    // so the JVM does not overwrite it with a generic "Thread-N" name.
+    char threadName[16] = "DawnCallback";
+#if defined(__ANDROID__) || defined(__linux__)
+    char kernelName[16] = {};
+    if (prctl(PR_GET_NAME, kernelName, 0, 0, 0) == 0 && kernelName[0] != '\0') {
+        std::memcpy(threadName, kernelName, sizeof(threadName));
+        threadName[sizeof(threadName) - 1] = '\0';
+    }
+#endif
+    JavaVMAttachArgs attachArgs = {JNI_VERSION_1_6, threadName, nullptr};
+#ifdef _JAVASOFT_JNI_H_
+    jint attachResult = mJvm->AttachCurrentThread(reinterpret_cast<void**>(&mEnv), &attachArgs);
+#else
+    jint attachResult = mJvm->AttachCurrentThread(&mEnv, &attachArgs);
+#endif
+    if (attachResult == JNI_OK) {
+        mNeedsDetach = true;
+    } else {
+        mEnv = nullptr;
+    }
+}
+
+ScopedJVMAttachment::~ScopedJVMAttachment() {
+    if (mNeedsDetach) {
+        if (mEnv && mEnv->ExceptionCheck()) {
+            mEnv->ExceptionDescribe();
+            mEnv->ExceptionClear();
+        }
+        mJvm->DetachCurrentThread();
+    }
+}
+
+UserData::~UserData() {
+    ScopedJVMAttachment attachment(jvm);
+    if (JNIEnv* env = attachment.GetEnv()) {
+        if (callback) env->DeleteGlobalRef(callback);
+        if (executor) env->DeleteGlobalRef(executor);
+    }
+    recurringCallbacks.clear();
 }
 
 void RegisterDeviceCallbacks(WGPUDevice device, const std::vector<std::shared_ptr<UserData>>& callbacks) {
@@ -89,6 +124,11 @@ void FreeDeviceCallbacks(WGPUDevice device) {
             callbacksToFree = std::move(it->second);
             gDeviceCallbacks.erase(it);
         }
+    }
+    if (!callbacksToFree.empty()) {
+        ScopedJVMAttachment attachment(
+            callbacksToFree.front() ? callbacksToFree.front()->jvm : nullptr);
+        callbacksToFree.clear();
     }
 }
 
@@ -154,14 +194,7 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
             JNIClasses* classes = JNIClasses::getInstance(env);
             //* Make a new Kotlin object to receive a copy of the structure.
             jclass clz = classes->{{ structure.name.camelCase() }};
-            //* JNI signature needs to be built using the same logic used in the Kotlin structure spec.
-            jmethodID ctor = env->GetMethodID(clz, "<init>", "(
-            {%- for member in kotlin_record_members(structure.members) %}
-                {{- jni_signature(member) -}}
-            {%- endfor -%}
-            {%- for structure in chain_children[structure.name.get()] -%}
-                {{- jni_signature({'type': structure}) -}}
-            {%- endfor %})V");
+            jmethodID ctor = classes->{{ structure.name.camelCase() }}Ctor;
             //* Each field converted using the individual value converter.
             {% for member in kotlin_record_members(structure.members) %}
                 {{ convert_to_kotlin('input->' + member.name.camelCase(), member.name.camelCase(),
@@ -204,47 +237,65 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
                     {{ structure.name.camelCase() -}}
             {%- endfor -%}
             );
+            {% for member in kotlin_record_members(structure.members) %}
+                {% if member.type.category != 'kotlin type' and ((member.length and (member.length != 'constant' or member.constant_length != 1)) or member.type.category in ['object', 'structure']) %}
+                    env->DeleteLocalRef({{ member.name.camelCase() }});
+                {% endif %}
+            {% endfor %}
+            {% for structure in chain_children[structure.name.get()] %}
+                env->DeleteLocalRef({{ structure.name.camelCase() }});
+            {% endfor %}
             return converted;
         }
     {% endif %}
     {% if structure.needs_k2n %}
 
+        {% set _kotlin_members = kotlin_record_members(structure.members) | rejectattr('kotlin_only') | list %}
         {% set Struct = as_cType(structure.name) %}
-        {% set KotlinRecord = "KotlinRecord" + structure.name.CamelCase() %}
-        {{ define_kotlin_record_structure(KotlinRecord, structure.members)}}
+        {% if _kotlin_members %}
+            {% set KotlinRecord = "KotlinRecord" + structure.name.CamelCase() %}
+            {{ define_kotlin_record_structure(KotlinRecord, structure.members)}}
 
-        {{ define_kotlin_to_struct_conversion("ConvertInternal", KotlinRecord, Struct, structure.members, is_structure_converter=True)}}
+            {{ define_kotlin_to_struct_conversion("ConvertInternal", KotlinRecord, Struct, structure.members, is_structure_converter=True)}}
+        {% endif %}
         void ToNative(JNIContext* c, JNIEnv* env, jobject obj, {{ as_cType(structure.name) }}* converted) {
-            JNIClasses* classes = JNIClasses::getInstance(env);
-            jclass clz = classes->{{ structure.name.camelCase() }};
+            {% if _kotlin_members or chain_children[structure.name.get()] %}
+                JNIClasses* classes = JNIClasses::getInstance(env);
+            {% endif %}
 
-            //* Use getters to fill in the Kotlin record that will get converted to our struct.
-            {{KotlinRecord}} kotlinRecord;
-            {% for member in kotlin_record_members(structure.members) %}
-                {% if not member.kotlin_only %}
-                    {
-                        {% set prefix = "is" if member.type.name.get() == "bool" else "get" %}
-                        jmethodID getter = env->GetMethodID(clz, "{{prefix}}{{member.name.CamelCase()}}", "(){{jni_signature(member)}}");
-                        CallGetter(env, getter, obj, &kotlinRecord.{{as_varName(member.name)}});
-                    }
-                {% endif %}
-            {% endfor %}
+            {% if _kotlin_members %}
+                //* Use getters to fill in the Kotlin record that will get converted to our struct.
+                {{KotlinRecord}} kotlinRecord;
+                {% for member in _kotlin_members %}
+                    CallGetter(env, classes->{{ structure.name.camelCase() }}Get{{ member.name.CamelCase() }}, obj, &kotlinRecord.{{as_varName(member.name)}});
+                {% endfor %}
 
-            //* Fill all struct members from the Kotlin record.
-            ConvertInternal(c, kotlinRecord, converted);
+                //* Fill all struct members from the Kotlin record.
+                ConvertInternal(c, kotlinRecord, converted);
+                //* `string view` (jstring) and jintArray local references are intentionally kept
+                //* alive here because JNIContext retains them until ~JNIContext() releases their
+                //* pinned buffers.
+                {% for member in _kotlin_members %}
+                    {% if member.type.name.get() != 'string view' and (member.type.category in ['object', 'structure', 'callback function', 'function pointer', 'kotlin type'] or (member.length and (member.length != 'constant' or member.constant_length != 1) and member.type.name.get() in ['char', 'float', 'void'])) %}
+                        env->DeleteLocalRef(kotlinRecord.{{as_varName(member.name)}});
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                *converted = {};
+            {% endif %}
             //* Set up the chain type and links for child objects.
             {% if structure.chained %}
                 converted->chain = {.sType = WGPUSType_{{ structure.name.CamelCase() }}};
             {% endif %}
             {% for child in chain_children[structure.name.get()] %}
                 {
-                    jobject child = env->CallObjectMethod(obj,
-                            env->GetMethodID(clz, "get{{ child.name.CamelCase() }}", "()L{{ jni_name(child) }};"));
+                    jobject child = env->CallObjectMethod(obj, classes->{{ structure.name.camelCase() }}Get{{ child.name.CamelCase() }});
                     if (child) {
                         auto out = c->Alloc<{{ as_cType(child.name) }}>();
                         ToNative(c, env, child, out);
                         out->chain.next = converted->nextInChain;
                         converted->nextInChain = &out->chain;
+                        env->DeleteLocalRef(child);
                     }
                 }
             {% endfor %}

@@ -67,7 +67,7 @@ TEST_F(WgslWriter_RaiseTest, BuiltinConversion) {
   $B1: {
     %l:i32 = let 1i
     %3:i32 = wgsl.max %l, 2i
-    undef = phony %3
+    phony %3
     ret
   }
 }
@@ -91,7 +91,7 @@ TEST_F(WgslWriter_RaiseTest, WorkgroupBarrier) {
 
     auto* src = R"(
 $B1: {  # root
-  %W:ptr<workgroup, i32, read_write> = var undef
+  %W:ptr<workgroup, i32, read_write> = var
 }
 
 %f = func():i32 {
@@ -107,7 +107,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %W:ref<workgroup, i32, read_write> = var undef
+  %W:ref<workgroup, i32, read_write> = var
 }
 
 %f = func():i32 {
@@ -138,7 +138,7 @@ TEST_F(WgslWriter_RaiseTest, WorkgroupBarrier_NoMatch) {
 
     auto* src = R"(
 $B1: {  # root
-  %W:ptr<workgroup, i32, read_write> = var undef
+  %W:ptr<workgroup, i32, read_write> = var
 }
 
 %f = func():i32 {
@@ -155,7 +155,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %W:ref<workgroup, i32, read_write> = var undef
+  %W:ref<workgroup, i32, read_write> = var
 }
 
 %f = func():i32 {
@@ -218,7 +218,7 @@ TEST_F(WgslWriter_RaiseTest, BuiltinShadowedByUserFunction) {
   $B2: {
     %l:u32 = let 1u
     %7:u32 = wgsl.min %l, 2u
-    undef = phony %7
+    phony %7
     ret
   }
 }

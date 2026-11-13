@@ -29,6 +29,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
@@ -117,6 +118,10 @@ TEST_F(ManagerTest, CppToType) {
     const Type* h1 = tm.Get<f16>();
     const Type* h2 = tm.Get<F16>();
     ASSERT_EQ(h1, h2);
+
+    const Type* bf1 = tm.Get<bf16>();
+    const Type* bf2 = tm.Get<BF16>();
+    ASSERT_EQ(bf1, bf2);
 }
 
 TEST_F(ManagerTest, Find) {

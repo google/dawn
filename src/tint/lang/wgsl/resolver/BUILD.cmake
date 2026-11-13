@@ -41,6 +41,7 @@ if(TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER)
 # Condition: TINT_BUILD_WGSL_READER OR TINT_BUILD_WGSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_wgsl_resolver lib
+  lang/wgsl/resolver/alias_analysis_info.h
   lang/wgsl/resolver/dependency_graph.cc
   lang/wgsl/resolver/dependency_graph.h
   lang/wgsl/resolver/incomplete_type.cc

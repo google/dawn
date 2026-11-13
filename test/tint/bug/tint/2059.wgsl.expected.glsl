@@ -49,12 +49,12 @@ layout(binding = 7, std430)
 buffer buffer7_block_1_ssbo {
   S2 inner[1];
 } v_7;
-void tint_store_and_preserve_padding_1(uint target_indices[2], mat3 value_param) {
+void tint_store_and_preserve_padding_7(uint target_indices[2], mat3 value_param) {
   v_7.inner[target_indices[0u]].m[target_indices[1u]][0u] = value_param[0u];
   v_7.inner[target_indices[0u]].m[target_indices[1u]][1u] = value_param[1u];
   v_7.inner[target_indices[0u]].m[target_indices[1u]][2u] = value_param[2u];
 }
-void tint_store_and_preserve_padding_15(uint target_indices[1], mat3 value_param[1]) {
+void tint_store_and_preserve_padding_16(uint target_indices[1], mat3 value_param[1]) {
   {
     uint idx = 0u;
     while(true) {
@@ -62,7 +62,7 @@ void tint_store_and_preserve_padding_15(uint target_indices[1], mat3 value_param
       if ((v_8 >= 1u)) {
         break;
       }
-      tint_store_and_preserve_padding_1(uint[2](target_indices[0u], v_8), value_param[v_8]);
+      tint_store_and_preserve_padding_7(uint[2](target_indices[0u], v_8), value_param[v_8]);
       {
         idx = (idx + 1u);
       }
@@ -70,7 +70,7 @@ void tint_store_and_preserve_padding_15(uint target_indices[1], mat3 value_param
   }
 }
 void tint_store_and_preserve_padding_13(uint target_indices[1], S2 value_param) {
-  tint_store_and_preserve_padding_15(uint[1](target_indices[0u]), value_param.m);
+  tint_store_and_preserve_padding_16(uint[1](target_indices[0u]), value_param.m);
 }
 void tint_store_and_preserve_padding_21(S2 value_param[1]) {
   {
@@ -87,13 +87,13 @@ void tint_store_and_preserve_padding_21(S2 value_param[1]) {
     }
   }
 }
-void tint_store_and_preserve_padding_2(uint target_indices[1], mat3 value_param) {
+void tint_store_and_preserve_padding_3(uint target_indices[1], mat3 value_param) {
   v_6.inner[target_indices[0u]].m[0u] = value_param[0u];
   v_6.inner[target_indices[0u]].m[1u] = value_param[1u];
   v_6.inner[target_indices[0u]].m[2u] = value_param[2u];
 }
-void tint_store_and_preserve_padding_9(uint target_indices[1], S value_param) {
-  tint_store_and_preserve_padding_2(uint[1](target_indices[0u]), value_param.m);
+void tint_store_and_preserve_padding_10(uint target_indices[1], S value_param) {
+  tint_store_and_preserve_padding_3(uint[1](target_indices[0u]), value_param.m);
 }
 void tint_store_and_preserve_padding_19(S value_param[1]) {
   {
@@ -103,14 +103,14 @@ void tint_store_and_preserve_padding_19(S value_param[1]) {
       if ((v_10 >= 1u)) {
         break;
       }
-      tint_store_and_preserve_padding_9(uint[1](v_10), value_param[v_10]);
+      tint_store_and_preserve_padding_10(uint[1](v_10), value_param[v_10]);
       {
         idx = (idx + 1u);
       }
     }
   }
 }
-void tint_store_and_preserve_padding_3(uint target_indices[1], mat3 value_param) {
+void tint_store_and_preserve_padding_5(uint target_indices[1], mat3 value_param) {
   v_5.inner[target_indices[0u]][0u] = value_param[0u];
   v_5.inner[target_indices[0u]][1u] = value_param[1u];
   v_5.inner[target_indices[0u]][2u] = value_param[2u];
@@ -123,7 +123,7 @@ void tint_store_and_preserve_padding_14(mat3 value_param[1]) {
       if ((v_11 >= 1u)) {
         break;
       }
-      tint_store_and_preserve_padding_3(uint[1](v_11), value_param[v_11]);
+      tint_store_and_preserve_padding_5(uint[1](v_11), value_param[v_11]);
       {
         idx = (idx + 1u);
       }
@@ -135,7 +135,7 @@ void tint_store_and_preserve_padding_4(uint target_indices[1], mat3 value_param)
   v_4.inner.s[target_indices[0u]].m[1u] = value_param[1u];
   v_4.inner.s[target_indices[0u]].m[2u] = value_param[2u];
 }
-void tint_store_and_preserve_padding_10(uint target_indices[1], S value_param) {
+void tint_store_and_preserve_padding_11(uint target_indices[1], S value_param) {
   tint_store_and_preserve_padding_4(uint[1](target_indices[0u]), value_param.m);
 }
 void tint_store_and_preserve_padding_20(S value_param[1]) {
@@ -146,7 +146,7 @@ void tint_store_and_preserve_padding_20(S value_param[1]) {
       if ((v_12 >= 1u)) {
         break;
       }
-      tint_store_and_preserve_padding_10(uint[1](v_12), value_param[v_12]);
+      tint_store_and_preserve_padding_11(uint[1](v_12), value_param[v_12]);
       {
         idx = (idx + 1u);
       }
@@ -156,23 +156,23 @@ void tint_store_and_preserve_padding_20(S value_param[1]) {
 void tint_store_and_preserve_padding_18(S4 value_param) {
   tint_store_and_preserve_padding_20(value_param.s);
 }
-void tint_store_and_preserve_padding_5(mat3 value_param) {
+void tint_store_and_preserve_padding_2(mat3 value_param) {
   v_3.inner.s.m[0u] = value_param[0u];
   v_3.inner.s.m[1u] = value_param[1u];
   v_3.inner.s.m[2u] = value_param[2u];
 }
-void tint_store_and_preserve_padding_11(S value_param) {
-  tint_store_and_preserve_padding_5(value_param.m);
+void tint_store_and_preserve_padding_9(S value_param) {
+  tint_store_and_preserve_padding_2(value_param.m);
 }
 void tint_store_and_preserve_padding_17(S3 value_param) {
-  tint_store_and_preserve_padding_11(value_param.s);
+  tint_store_and_preserve_padding_9(value_param.s);
 }
 void tint_store_and_preserve_padding_6(uint target_indices[1], mat3 value_param) {
   v_2.inner.m[target_indices[0u]][0u] = value_param[0u];
   v_2.inner.m[target_indices[0u]][1u] = value_param[1u];
   v_2.inner.m[target_indices[0u]][2u] = value_param[2u];
 }
-void tint_store_and_preserve_padding_16(mat3 value_param[1]) {
+void tint_store_and_preserve_padding_15(mat3 value_param[1]) {
   {
     uint idx = 0u;
     while(true) {
@@ -188,15 +188,15 @@ void tint_store_and_preserve_padding_16(mat3 value_param[1]) {
   }
 }
 void tint_store_and_preserve_padding_12(S2 value_param) {
-  tint_store_and_preserve_padding_16(value_param.m);
+  tint_store_and_preserve_padding_15(value_param.m);
 }
-void tint_store_and_preserve_padding_7(mat3 value_param) {
+void tint_store_and_preserve_padding_1(mat3 value_param) {
   v_1.inner.m[0u] = value_param[0u];
   v_1.inner.m[1u] = value_param[1u];
   v_1.inner.m[2u] = value_param[2u];
 }
 void tint_store_and_preserve_padding_8(S value_param) {
-  tint_store_and_preserve_padding_7(value_param.m);
+  tint_store_and_preserve_padding_1(value_param.m);
 }
 void tint_store_and_preserve_padding(mat3 value_param) {
   v.inner[0u] = value_param[0u];

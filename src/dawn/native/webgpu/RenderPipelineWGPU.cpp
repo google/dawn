@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 
+#include "src/dawn/common/Range.h"
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/native/webgpu/BindGroupLayoutWGPU.h"
 #include "src/dawn/native/webgpu/CaptureContext.h"
@@ -223,7 +224,19 @@ schema::StencilFaceState ToSchema(const StencilFaceState& state) {
 
 MaybeError RenderPipeline::CaptureCreationParameters(CaptureContext& captureContext) {
     std::vector<schema::VertexBufferLayout> buffers;
-    for (VertexBufferSlot slot : GetVertexBuffersUsed()) {
+    for (VertexBufferSlot slot : Range(GetVertexBufferCount())) {
+        if (!GetVertexBuffersUsed()[slot]) {
+            // Unused slot: record an empty layout to keep the position of later slots so they
+            // don't shift down on replay. An Undefined step mode with no attributes is treated
+            // as an unused slot.
+            buffers.push_back({{
+                .arrayStride = 0,
+                .stepMode = wgpu::VertexStepMode::Undefined,
+                .attributes = {},
+            }});
+            continue;
+        }
+
         const auto& info = GetVertexBuffer(slot);
 
         std::vector<schema::VertexAttribute> attributes;

@@ -42,7 +42,6 @@
 #include "src/dawn/native/opengl/DisplayEGL.h"
 #include "src/dawn/native/opengl/SwapChainEGL.h"
 #include "src/dawn/native/opengl/UtilsGL.h"
-#include "src/utils/compiler.h"
 
 namespace dawn::native::opengl {
 
@@ -61,11 +60,11 @@ const Vendor kVendors[] = {{"ATI", gpu_info::kVendorID_AMD},
                            {"Qualcomm", gpu_info::kVendorID_QualcommPCI},
                            {"Samsung", gpu_info::kVendorID_Samsung}};
 
-uint32_t GetVendorIdFromVendors(const char* vendor) {
+uint32_t GetVendorIdFromVendors(std::string_view vendor) {
     uint32_t vendorId = 0;
     for (const auto& it : kVendors) {
         // Matching vendor name with vendor string
-        if (DAWN_UNSAFE_TODO(strstr(vendor, it.vendorName)) != nullptr) {
+        if (vendor.find(it.vendorName) != std::string_view::npos) {
             vendorId = it.vendorId;
             break;
         }
@@ -106,7 +105,8 @@ bool IsSwiftShader(std::string_view renderer) {
 }  // anonymous namespace
 
 // static
-ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType backendType,
+ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(InstanceBase* instance,
+                                                          wgpu::BackendType backendType,
                                                           Ref<DisplayEGL> display,
                                                           bool forceES31AndMinExtensions,
                                                           EGLint angleVirtualizationGroup) {
@@ -126,8 +126,8 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType back
     // Needed to request extensions here to initialize supported gl extensions set
     context->RequestRequiredExtensionsExplicitly();
 
-    Ref<PhysicalDevice> physicalDevice =
-        AcquireRef(new PhysicalDevice(backendType, std::move(display), angleVirtualizationGroup));
+    Ref<PhysicalDevice> physicalDevice = AcquireRef(
+        new PhysicalDevice(instance, backendType, std::move(display), angleVirtualizationGroup));
     DAWN_TRY(physicalDevice->Initialize());
 
     DAWN_TRY(scopedCurrentContext.End());
@@ -135,10 +135,11 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType back
     return physicalDevice;
 }
 
-PhysicalDevice::PhysicalDevice(wgpu::BackendType backendType,
+PhysicalDevice::PhysicalDevice(InstanceBase* instance,
+                               wgpu::BackendType backendType,
                                Ref<DisplayEGL> display,
                                EGLint angleVirtualizationGroup)
-    : PhysicalDeviceBase(backendType),
+    : PhysicalDeviceBase(instance, backendType),
       mDisplay(std::move(display)),
       mAngleVirtualizationGroup(angleVirtualizationGroup) {}
 
@@ -169,6 +170,10 @@ MaybeError PhysicalDevice::InitializeImpl() {
         default:
             DAWN_UNREACHABLE();
     }
+    // Needed to detect GPU resets, which can discard GPU work without generating GL errors.
+    DAWN_INVALID_IF(mFunctions.GetGraphicsResetStatus == nullptr,
+                    "glGetGraphicsResetStatus (OpenGL ES 3.2, OpenGL 4.5, GL_KHR_robustness, "
+                    "GL_EXT_robustness or GL_ARB_robustness) is required.");
 
     if (mFunctions.GetVersion().IsES()) {
         DAWN_ASSERT(GetBackendType() == wgpu::BackendType::OpenGLES);
@@ -180,14 +185,15 @@ MaybeError PhysicalDevice::InitializeImpl() {
 
     // Workaroud to find vendor id from vendor name
     const char* vendor = reinterpret_cast<const char*>(mFunctions.GetString(GL_VENDOR));
-    mVendorId = GetVendorIdFromVendors(vendor);
+    mVendorId = vendor != nullptr ? GetVendorIdFromVendors(vendor) : 0;
     // Workaround to find device id from ANGLE render string
     if (mName.find("ANGLE") == 0) {
         mDeviceId = GetDeviceIdFromRender(mName);
     }
 
-    mDriverDescription = std::string("OpenGL version ") +
-                         reinterpret_cast<const char*>(mFunctions.GetString(GL_VERSION));
+    mDriverDescription = absl::StrFormat(
+        "OpenGL version %s on %s", reinterpret_cast<const char*>(mFunctions.GetString(GL_VERSION)),
+        reinterpret_cast<const char*>(mFunctions.GetString(GL_RENDERER)));
 
     if (mName.find("SwiftShader") != std::string::npos) {
         mAdapterType = wgpu::AdapterType::CPU;
@@ -425,7 +431,12 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
 }
 
 void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platform,
-                                                TogglesState* adapterToggles) const {}
+                                                TogglesState* adapterToggles) const {
+    // (crbug.com/580872855): PowerVR drivers have memory safety issues with shaders using more
+    // than 13 texture image units.
+    adapterToggles->Default(Toggle::GLLimitTextureImageUnitsTo13,
+                            mVendorId == gpu_info::kVendorID_ImgTec);
+}
 
 void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platform,
                                                TogglesState* deviceToggles) const {
@@ -513,6 +524,20 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         Toggle::GLUseArrayLengthFromImmediate,
         mVendorId == gpu_info::kVendorID_ImgTec || mVendorId == gpu_info::kVendorID_Nvidia);
 
+    // (crbug.com/497202432): Driver bug when POT-rounded 3D texture footprint is >= 4 GiB.
+    deviceToggles->Default(Toggle::Limit3DTexturePotFootprintTo4GB,
+                           mVendorId == gpu_info::kVendorID_ImgTec);
+
+    // (crbug.com/569195060): Driver crash evaluating structure constructors containing arrays.
+    deviceToggles->Default(Toggle::GLHoistConstantArrayInitializers,
+                           mVendorId == gpu_info::kVendorID_ImgTec);
+
+    // (crbug.com/379551588): The ARM Mali shader compiler has memory safety issues when
+    // compiling pack4x8snorm/pack4x8unorm/unpack4x8snorm/unpack4x8unorm. The Vulkan backend
+    // polyfills them on every ARM proprietary driver; do the same for the GL(ES) backend, which
+    // is the default WebGPU compat adapter on Android 10/11 Mali devices.
+    deviceToggles->Default(Toggle::PolyfillPackUnpack4x8Norm, gpu_info::IsARM(mVendorId));
+
     // Enable the integer range analysis for shader robustness by default if the corresponding
     // platform feature is enabled.
     deviceToggles->Default(
@@ -551,13 +576,11 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
                           std::move(lostEvent));
 }
 
-bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
-                                          InstanceBase* instance) const {
+bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel) const {
     return featureLevel == wgpu::FeatureLevel::Compatibility;
 }
 
 ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(
-    InstanceBase*,
     const Surface*) const {
     PhysicalDeviceSurfaceCapabilities capabilities;
 

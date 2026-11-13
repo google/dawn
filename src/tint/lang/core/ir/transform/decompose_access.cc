@@ -249,6 +249,12 @@ struct State {
             error << "required array size (" << num_elements << ") is too large";
             return diag::Failure(error);
         }
+        uint64_t array_bytes = num_elements * BaseEleType()->Size();
+        if (array_bytes > std::numeric_limits<uint32_t>::max()) {
+            diag::Diagnostic error = MakeError(ir.SourceOf(source_inst));
+            error << "required array bytes (" << array_bytes << ") is too large";
+            return diag::Failure(error);
+        }
         return static_cast<uint32_t>(num_elements);
     }
 

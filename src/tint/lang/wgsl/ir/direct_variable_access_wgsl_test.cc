@@ -177,7 +177,9 @@ fn f(pre : i32, p : ptr<private, i32>, post : i32) -> i32 {
 }
 )";
 
-    auto* expect = src;
+    auto* expect = R"(
+var<private> keep_me : i32 = 42i;
+)";
 
     auto got = Run(src);
 
@@ -211,7 +213,9 @@ fn f(pre : i32, p : ptr<function, i32>, post : i32) -> i32 {
 }
 )";
 
-    auto* expect = src;
+    auto* expect = R"(
+var<private> keep_me : i32 = 42i;
+)";
 
     auto got = Run(src);
 
@@ -269,7 +273,9 @@ fn c(p : ptr<uniform, array<array<array<vec4<i32>, 8>, 8>, 8>>) {
   a(10, p3, 20);
 }
 
+@fragment
 fn d() {
+  b();
   c(&U);
 }
 )";
@@ -290,7 +296,9 @@ fn c() {
   a(10i, array<u32, 3u>(1u, 2u, 3u), 20i);
 }
 
+@fragment
 fn d() {
+  b();
   c();
 }
 )";
@@ -336,7 +344,9 @@ fn c(p : ptr<uniform, array<array<array<vec4<i32>, 8>, 8>, 8>>) {
   a(10, p2, 20);
 }
 
+@fragment
 fn d() {
+  b();
   c(&U);
 }
 )";
@@ -377,7 +387,9 @@ fn c() {
   a(10i, array<u32, 3u>(u32(v_2), u32(v_3), u32(third())), 20i);
 }
 
+@fragment
 fn d() {
+  b();
   c();
 }
 )";
@@ -417,7 +429,9 @@ fn c(p : ptr<uniform, array<array<vec4<i32>, 8>, 8>>) {
   }
 }
 
+@fragment
 fn d() {
+  b();
   c(&U);
 }
 )";
@@ -453,7 +467,9 @@ fn c() {
   }
 }
 
+@fragment
 fn d() {
+  b();
   c();
 }
 )";
@@ -495,7 +511,9 @@ fn c(p : ptr<uniform, array<array<vec4<i32>, 8>, 8>>) {
   }
 }
 
+@fragment
 fn d() {
+  b();
   c(&U);
 }
 )";
@@ -535,7 +553,9 @@ fn c() {
   }
 }
 
+@fragment
 fn d() {
+  b();
   c();
 }
 )";
@@ -577,7 +597,9 @@ fn c(p : ptr<uniform, array<array<vec4<i32>, 8>, 8>>) {
   }
 }
 
+@fragment
 fn d() {
+  b();
   c(&U);
 }
 )";
@@ -617,7 +639,9 @@ fn c() {
   }
 }
 
+@fragment
 fn d() {
+  b();
   c();
 }
 )";
@@ -659,7 +683,9 @@ fn c(p : ptr<uniform, array<array<vec4<i32>, 8>, 8>>) {
   }
 }
 
+@fragment
 fn d() {
+  b();
   c(&U);
 }
 )";
@@ -699,7 +725,9 @@ fn c() {
   }
 }
 
+@fragment
 fn d() {
+  b();
   c();
 }
 )";
@@ -725,6 +753,7 @@ fn a(pre : i32, p : ptr<uniform, i32>, post : i32) -> i32 {
   return *p;
 }
 
+@fragment
 fn b() {
   a(10, &U, 20);
 }
@@ -737,6 +766,7 @@ fn a(pre : i32, post : i32) -> i32 {
   return U;
 }
 
+@fragment
 fn b() {
   a(10i, 20i);
 }
@@ -755,6 +785,7 @@ fn a(pre : i32, p : ptr<uniform, vec4<i32>>, post : i32) -> vec4<i32> {
   return *p;
 }
 
+@fragment
 fn b() {
   let I = 3;
   a(10, &U[I], 20);
@@ -768,6 +799,7 @@ fn a(pre : i32, p_indices : array<u32, 1u>, post : i32) -> vec4<i32> {
   return U[p_indices[0u]];
 }
 
+@fragment
 fn b() {
   let I = 3i;
   a(10i, array<u32, 1u>(u32(I)), 20i);
@@ -838,6 +870,7 @@ fn f4(p : ptr<uniform, Outer>) -> f32 {
   return f3(&(*p).arr, &U.mat);
 }
 
+@fragment
 fn b() {
   f4(&U);
 }
@@ -899,6 +932,7 @@ fn f4() -> f32 {
   return f3();
 }
 
+@fragment
 fn b() {
   f4();
 }
@@ -930,6 +964,7 @@ fn a(pre : i32, p : ptr<storage, i32>, post : i32) -> i32 {
   return *p;
 }
 
+@fragment
 fn b() {
   a(10, &S.i, 20);
 }
@@ -946,6 +981,7 @@ fn a(pre : i32, post : i32) -> i32 {
   return S.i;
 }
 
+@fragment
 fn b() {
   a(10i, 20i);
 }
@@ -968,6 +1004,7 @@ fn a(pre : i32, p : ptr<storage, array<i32, 4>, read_write>, post : i32) {
   *p = array<i32, 4>();
 }
 
+@fragment
 fn b() {
   a(10, &S.arr, 20);
 }
@@ -984,6 +1021,7 @@ fn a(pre : i32, post : i32) {
   S.arr = array<i32, 4u>();
 }
 
+@fragment
 fn b() {
   a(10i, 20i);
 }
@@ -1002,6 +1040,7 @@ fn a(pre : i32, p : ptr<storage, vec4<i32>, read_write>, post : i32) {
   *p = vec4<i32>();
 }
 
+@fragment
 fn b() {
   let I = 3;
   a(10, &S[I], 20);
@@ -1015,6 +1054,7 @@ fn a(pre : i32, p_indices : array<u32, 1u>, post : i32) {
   S[p_indices[0u]] = vec4<i32>();
 }
 
+@fragment
 fn b() {
   let I = 3i;
   a(10i, array<u32, 1u>(u32(I)), 20i);
@@ -1085,6 +1125,7 @@ fn f4(p : ptr<storage, Outer>) -> f32 {
   return f3(&(*p).arr, &S.mat);
 }
 
+@fragment
 fn b() {
   f4(&S);
 }
@@ -1146,6 +1187,7 @@ fn f4() -> f32 {
   return f3();
 }
 
+@fragment
 fn b() {
   f4();
 }
@@ -1173,6 +1215,7 @@ fn a(pre : i32, p : ptr<workgroup, vec4<i32>>, post : i32) -> vec4<i32> {
   return *p;
 }
 
+@compute @workgroup_size(1u, 1u, 1u)
 fn b() {
   let three = 3i;
   a(10, &W[three], 20);
@@ -1186,6 +1229,7 @@ fn a(pre : i32, p_indices : array<u32, 1u>, post : i32) -> vec4<i32> {
   return W[p_indices[0u]];
 }
 
+@compute @workgroup_size(1u, 1u, 1u)
 fn b() {
   let three = 3i;
   a(10i, array<u32, 1u>(u32(three)), 20i);
@@ -1205,6 +1249,7 @@ fn a(pre : i32, p : ptr<workgroup, vec4<i32>>, post : i32) {
   *p = vec4<i32>();
 }
 
+@compute @workgroup_size(1u, 1u, 1u)
 fn b() {
   let three = 3i;
   a(10, &W[three], 20);
@@ -1218,6 +1263,7 @@ fn a(pre : i32, p_indices : array<u32, 1u>, post : i32) {
   W[p_indices[0u]] = vec4<i32>();
 }
 
+@compute @workgroup_size(1u, 1u, 1u)
 fn b() {
   let three = 3i;
   a(10i, array<u32, 1u>(u32(three)), 20i);
@@ -1288,6 +1334,7 @@ fn f4(p : ptr<workgroup, Outer>) -> f32 {
   return f3(&(*p).arr, &W.mat);
 }
 
+@compute @workgroup_size(1u, 1u, 1u)
 fn b() {
   f4(&W);
 }
@@ -1349,6 +1396,7 @@ fn f4() -> f32 {
   return f3();
 }
 
+@compute @workgroup_size(1u, 1u, 1u)
 fn b() {
   f4();
 }
@@ -1376,6 +1424,7 @@ fn a(pre : i32, p : ptr<private, i32>, post : i32) -> i32 {
 
 var<private> P : i32;
 
+@fragment
 fn b() {
   a(10, &(P), 20);
 }
@@ -1388,6 +1437,7 @@ fn a(pre : i32, post : i32) -> i32 {
   return P;
 }
 
+@fragment
 fn b() {
   a(10i, 20i);
 }
@@ -1406,6 +1456,7 @@ fn a(pre : i32, p : ptr<private, i32>, post : i32) {
 
 var<private> P : i32;
 
+@fragment
 fn b() {
   a(10, &(P), 20);
 }
@@ -1418,6 +1469,7 @@ fn a(pre : i32, post : i32) {
   P = 42i;
 }
 
+@fragment
 fn b() {
   a(10i, 20i);
 }
@@ -1440,6 +1492,7 @@ fn a(pre : i32, p : ptr<private, i32>, post : i32) -> i32 {
 
 var<private> P : str;
 
+@fragment
 fn b() {
   a(10, &P.i, 20);
 }
@@ -1456,6 +1509,7 @@ fn a(pre : i32, post : i32) -> i32 {
   return P.i;
 }
 
+@fragment
 fn b() {
   a(10i, 20i);
 }
@@ -1478,6 +1532,7 @@ fn a(pre : i32, p : ptr<private, i32>, post : i32) -> i32 {
   return *(p);
 }
 
+@fragment
 fn b() {
   a(10i, &(P.i), 20i);
 }
@@ -1502,6 +1557,7 @@ fn a(pre : i32, p : ptr<private, array<i32, 4>>, post : i32) {
 
 var<private> P : str;
 
+@fragment
 fn b() {
   a(10, &P.arr, 20);
 }
@@ -1518,6 +1574,7 @@ fn a(pre : i32, post : i32) {
   P.arr = array<i32, 4u>();
 }
 
+@fragment
 fn b() {
   a(10i, 20i);
 }
@@ -1540,6 +1597,7 @@ fn a(pre : i32, p : ptr<private, array<i32, 4u>>, post : i32) {
   *(p) = array<i32, 4u>();
 }
 
+@fragment
 fn b() {
   a(10i, &(P.arr), 20i);
 }
@@ -1566,6 +1624,7 @@ var<private> Pi : i32;
 var<private> Ps : str;
 var<private> Pa : array<i32, 4>;
 
+@fragment
 fn b() {
   let two = 2i;
   a(10, &Pi, 20);
@@ -1597,6 +1656,7 @@ fn a_2(pre : i32, p_indices : array<u32, 1u>, post : i32) -> i32 {
   return Pa[p_indices[0u]];
 }
 
+@fragment
 fn b() {
   let two = 2i;
   a(10i, 20i);
@@ -1626,6 +1686,7 @@ fn a(pre : i32, p : ptr<private, i32>, post : i32) -> i32 {
   return *(p);
 }
 
+@fragment
 fn b() {
   a(10i, &(Pi), 20i);
   a(30i, &(Ps.i), 40i);
@@ -1699,6 +1760,7 @@ fn f4(p : ptr<private, Outer>) -> f32 {
   return f3(&(*p).arr, &P.mat);
 }
 
+@fragment
 fn b() {
   f4(&P);
 }
@@ -1760,6 +1822,7 @@ fn f4() -> f32 {
   return f3();
 }
 
+@fragment
 fn b() {
   f4();
 }
@@ -1816,6 +1879,7 @@ fn f4(p : ptr<private, Outer>) -> f32 {
   return f3(&((*(p)).arr), &(P.mat));
 }
 
+@fragment
 fn b() {
   f4(&(P));
 }
@@ -1839,6 +1903,7 @@ using IR_DirectVariableAccessWgslTest_FunctionAS = DirectVariableAccessTest;
 
 TEST_F(IR_DirectVariableAccessWgslTest_FunctionAS, Enabled_LocalPtr) {
     auto* src = R"(
+@fragment
 fn f() {
   var v : i32;
   let p = &(v);
@@ -1859,6 +1924,7 @@ fn a(pre : i32, p : ptr<function, i32>, post : i32) -> i32 {
   return *(p);
 }
 
+@fragment
 fn b() {
   var F : i32;
   a(10, &(F), 20);
@@ -1870,6 +1936,7 @@ fn a(pre : i32, p_root : ptr<function, i32>, post : i32) -> i32 {
   return *(p_root);
 }
 
+@fragment
 fn b() {
   var F : i32;
   a(10i, &(F), 20i);
@@ -1887,6 +1954,7 @@ fn a(pre : i32, p : ptr<function, i32>, post : i32) {
   *(p) = 42;
 }
 
+@fragment
 fn b() {
   var F : i32;
   a(10, &(F), 20);
@@ -1898,6 +1966,7 @@ fn a(pre : i32, p_root : ptr<function, i32>, post : i32) {
   *(p_root) = 42i;
 }
 
+@fragment
 fn b() {
   var F : i32;
   a(10i, &(F), 20i);
@@ -1919,6 +1988,7 @@ fn a(pre : i32, p : ptr<function, i32>, post : i32) -> i32 {
   return *p;
 }
 
+@fragment
 fn b() {
   var F : str;
   a(10, &F.i, 20);
@@ -1934,6 +2004,7 @@ fn a(pre : i32, p_root : ptr<function, str>, post : i32) -> i32 {
   return (*(p_root)).i;
 }
 
+@fragment
 fn b() {
   var F : str;
   a(10i, &(F), 20i);
@@ -1955,6 +2026,7 @@ fn a(pre : i32, p : ptr<function, array<i32, 4>>, post : i32) {
   *p = array<i32, 4>();
 }
 
+@fragment
 fn b() {
   var F : str;
   a(10, &F.arr, 20);
@@ -1970,6 +2042,7 @@ fn a(pre : i32, p_root : ptr<function, str>, post : i32) {
   (*(p_root)).arr = array<i32, 4u>();
 }
 
+@fragment
 fn b() {
   var F : str;
   a(10i, &(F), 20i);
@@ -1991,6 +2064,7 @@ fn a(pre : i32, p : ptr<function, i32>, post : i32) -> i32 {
   return *p;
 }
 
+@fragment
 fn b() {
   var Fi : i32;
   var Fs : str;
@@ -2020,6 +2094,7 @@ fn a_2(pre : i32, p_root : ptr<function, array<i32, 4u>>, p_indices : array<u32,
   return (*(p_root))[p_indices[0u]];
 }
 
+@fragment
 fn b() {
   var Fi : i32;
   var Fs : str;
@@ -2046,6 +2121,7 @@ struct str {
   i : i32,
 }
 
+@fragment
 fn b() {
   var F : str;
   a(10i, &(F.i), 20i);
@@ -2069,6 +2145,7 @@ struct str {
   arr : array<i32, 4u>,
 }
 
+@fragment
 fn b() {
   var F : str;
   a(10i, &(F.arr), 20i);
@@ -2099,6 +2176,7 @@ fn len(p : ptr<storage, array<f32>>) -> u32 {
   return arrayLength(p);
 }
 
+@fragment
 fn f() {
   let n = len(&S);
 }
@@ -2111,6 +2189,7 @@ fn len() -> u32 {
   return arrayLength(&(S));
 }
 
+@fragment
 fn f() {
   let n = len();
 }
@@ -2129,6 +2208,7 @@ fn load(p : ptr<workgroup, f32>) -> f32 {
   return workgroupUniformLoad(p);
 }
 
+@compute @workgroup_size(1u, 1u, 1u)
 fn f() {
   let v = load(&W);
 }
@@ -2141,6 +2221,7 @@ fn load() -> f32 {
   return workgroupUniformLoad(&(W));
 }
 
+@compute @workgroup_size(1u, 1u, 1u)
 fn f() {
   let v = load();
 }
@@ -2193,6 +2274,7 @@ fn fn_w(p : ptr<workgroup, vec4<i32>>) -> vec4<i32> {
   return *p;
 }
 
+@compute @workgroup_size(1u, 1u, 1u)
 fn b() {
   let zero = 0;
   let one = 1;
@@ -2309,6 +2391,7 @@ fn fn_w_3(p_indices : array<u32, 2u>) -> vec4<i32> {
   return W_arr_arr[p_indices[0u]][p_indices[1u]];
 }
 
+@compute @workgroup_size(1u, 1u, 1u)
 fn b() {
   let zero = 0i;
   let one = 1i;
@@ -2362,6 +2445,7 @@ fn b(p : ptr<storage, array<array<array<i32, 9>, 9>, 9>>) -> i32 {
               [ a( (*p)[6][a(7)][8] )];
 }
 
+@fragment
 fn c() {
   let fortytwo = 42i;
   let v = b(&S[fortytwo]);
@@ -2380,6 +2464,7 @@ fn b(p_indices : array<u32, 1u>) -> i32 {
   return (*(v_1))[a((*(v_1))[0i][1i][2i])][a((*(v_1))[a(3i)][4i][5i])][a((*(v_1))[6i][a(7i)][8i])];
 }
 
+@fragment
 fn c() {
   let fortytwo = 42i;
   let v = b(array<u32, 1u>(u32(fortytwo)));
@@ -2405,6 +2490,7 @@ fn b(p : ptr<storage, array<array<array<i32, 9>, 9>, 9>>) -> i32 {
                     [ a( 60, &(*p)[6][7][8], 70 )], 80);
 }
 
+@fragment
 fn c() {
   let fortytwo = 42i;
   let v = b(&S[fortytwo]);
@@ -2425,6 +2511,7 @@ fn b(p_indices : array<u32, 1u>) -> i32 {
   return a(10i, array<u32, 4u>(v_1, u32(v_2), u32(v_3), u32(a(60i, array<u32, 4u>(v_1, 6u, 7u, 8u), 70i))), 80i);
 }
 
+@fragment
 fn c() {
   let fortytwo = 42i;
   let v = b(array<u32, 1u>(u32(fortytwo)));
@@ -2439,7 +2526,7 @@ fn c() {
 TEST_F(IR_DirectVariableAccessWgslTest_Complex, IndexingDualPointers) {
     auto* src = R"(
 @group(0) @binding(0) var<storage> S : array<array<array<i32, 9>, 9>, 50>;
-@group(0) @binding(0) var<uniform> U : array<array<array<vec4<i32>, 9>, 9>, 50>;
+@group(0) @binding(1) var<uniform> U : array<array<array<vec4<i32>, 9>, 9>, 50>;
 
 fn a(i : i32) -> i32 { return i; }
 
@@ -2449,6 +2536,7 @@ fn b(s : ptr<storage, array<array<i32, 9>, 9>>,
               [ a( (*u)[a(3)][4].y )];
 }
 
+@fragment
 fn c() {
   let fortytwo = 42i;
   let twentyfour = 24i;
@@ -2459,7 +2547,7 @@ fn c() {
     auto* expect = R"(
 @group(0u) @binding(0u) var<storage, read> S : array<array<array<i32, 9u>, 9u>, 50u>;
 
-@group(0u) @binding(0u) var<uniform> U : array<array<array<vec4<i32>, 9u>, 9u>, 50u>;
+@group(0u) @binding(1u) var<uniform> U : array<array<array<vec4<i32>, 9u>, 9u>, 50u>;
 
 fn a(i : i32) -> i32 {
   return i;
@@ -2470,6 +2558,7 @@ fn b(s_indices : array<u32, 1u>, u_indices : array<u32, 1u>) -> i32 {
   return S[s_indices[0u]][a((*(v_1))[0i][1i].x)][a((*(v_1))[a(3i)][4i].y)];
 }
 
+@fragment
 fn c() {
   let fortytwo = 42i;
   let twentyfour = 24i;

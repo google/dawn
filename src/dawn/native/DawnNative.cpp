@@ -54,8 +54,19 @@ const DawnProcTable& GetProcsAutogen();
 const DawnProcTable& GetProcs() {
     return GetProcsAutogen();
 }
+
+std::vector<const char*> GetTogglesUsed(const wgpu::Instance& instance) {
+    return FromAPI(instance.Get())->GetTogglesUsed();
+}
+
 std::vector<const char*> GetTogglesUsed(const wgpu::Adapter& adapter) {
     return FromAPI(adapter.Get())->GetTogglesUsed();
+}
+
+std::vector<const char*> GetDeviceTogglesUsed(const wgpu::Adapter& adapter,
+                                              const wgpu::DeviceDescriptor* descriptor) {
+    return FromAPI(adapter.Get())
+        ->GetDeviceTogglesUsed(FromAPI(reinterpret_cast<const WGPUDeviceDescriptor*>(descriptor)));
 }
 
 std::vector<const char*> GetTogglesUsed(WGPUDevice device) {
@@ -116,6 +127,10 @@ WGPUDevice Adapter::CreateDevice(const wgpu::DeviceDescriptor* deviceDescriptor)
 
 WGPUDevice Adapter::CreateDevice(const WGPUDeviceDescriptor* deviceDescriptor) {
     return ToAPI(mImpl->APICreateDevice(FromAPI(deviceDescriptor)));
+}
+
+const gpu_info::DriverVersion& Adapter::GetDriverVersion() const {
+    return mImpl->GetPhysicalDevice()->GetDriverVersion();
 }
 
 void Adapter::ResetInternalDeviceForTesting() {
@@ -223,6 +238,18 @@ bool IsTextureSubresourceInitialized(WGPUTexture texture,
         ConvertAspect(textureBase->GetFormat(), static_cast<wgpu::TextureAspect>(cAspect));
     SubresourceRange range(aspect, {baseArrayLayer, layerCount}, {baseMipLevel, levelCount});
     return textureBase->IsSubresourceContentInitialized(range);
+}
+
+// Generated in ProcTable.cpp for entry points in Dawn's stable C ABI.
+WGPUProc NativeStableGetProcAddress(WGPUStringView procName);
+std::vector<std::string_view> GetStableProcMapNamesForTestingAutogen();
+
+WGPUProc GetStableProcAddress(WGPUStringView procName) {
+    return NativeStableGetProcAddress(procName);
+}
+
+std::vector<std::string_view> GetStableProcMapNamesForTesting() {
+    return GetStableProcMapNamesForTestingAutogen();
 }
 
 DAWN_NATIVE_EXPORT bool DeviceTick(WGPUDevice device) {

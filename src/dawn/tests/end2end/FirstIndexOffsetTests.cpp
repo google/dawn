@@ -62,10 +62,6 @@ bool IsIndirectDraw(DrawMode mode) {
     return mode == DrawMode::NonIndexedIndirect || mode == DrawMode::IndexedIndirect;
 }
 
-}  // anonymous namespace
-
-namespace {
-
 struct FirstIndexOffset {
     DrawMode mode = DrawMode::NonIndexed;
     uint32_t firstVertex = 0;
@@ -370,7 +366,8 @@ TEST_P(FirstIndexOffsetTests, NonIndexedIndirectVertexOffset) {
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsFullBackendValidationEnabled());
 
     // TODO(crbug.com/459864802): Fails on Win/Snapdragon X Elite w/ D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11());
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm() &&
+                          GetDriverVersion() < gpu_info::DriverVersion({31, 0, 170, 0}));
 
     // Draw once: vertex_index starts at 9
     {
@@ -402,7 +399,8 @@ TEST_P(FirstIndexOffsetTests, NonIndexedIndirectInstanceOffset) {
 // DrawIndirect()
 TEST_P(FirstIndexOffsetTests, NonIndexedIndirectBothOffset) {
     // TODO(crbug.com/459864802): Fails on Win/Snapdragon X Elite w/ D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11());
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm() &&
+                          GetDriverVersion() < gpu_info::DriverVersion({31, 0, 170, 0}));
 
     // Draw once: vertex_index starts at 7 and instance_index starts at 13
     {
@@ -421,7 +419,8 @@ TEST_P(FirstIndexOffsetTests, IndexedIndirectVertex) {
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsFullBackendValidationEnabled());
 
     // TODO(crbug.com/459864802): Fails on Win/Snapdragon X Elite w/ D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11());
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm() &&
+                          GetDriverVersion() < gpu_info::DriverVersion({31, 0, 170, 0}));
 
     // Draw once: vertex_index starts at 9
     {

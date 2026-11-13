@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
 #include <bit>
 #include <utility>
 #include <vector>
@@ -38,6 +39,10 @@
 
 namespace dawn {
 namespace {
+
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
 
 using TextureFormat = wgpu::TextureFormat;
 DAWN_TEST_PARAM_STRUCT(DepthStencilSamplingTestParams, TextureFormat);
@@ -466,24 +471,22 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
 
         ~ExtraStencilComponentsExpectation() override = default;
 
-        testing::AssertionResult Check(const void* rawData, size_t size) override {
-            DAWN_ASSERT(size == sizeof(StencilData));
-            const uint32_t* data = static_cast<const uint32_t*>(rawData);
+        AssertionResult Check(Span<const std::byte> data) override {
+            DAWN_ASSERT(data.size() == sizeof(StencilData));
+            auto actual = ReinterpretSpan<const uint32_t>(data);
 
             StencilData ssss = {mExpected, mExpected, mExpected, mExpected};
             StencilData s001 = {mExpected, 0, 0, 1};
 
-            if (DAWN_UNSAFE_TODO(memcmp(data, ssss.data(), size)) == 0 ||
-                DAWN_UNSAFE_TODO(memcmp(data, s001.data(), size)) == 0) {
-                return testing::AssertionSuccess();
+            if (std::ranges::equal(actual, ssss) || std::ranges::equal(actual, s001)) {
+                return AssertionSuccess();
             }
 
-            return testing::AssertionFailure()
+            return AssertionFailure()
                    << "Expected stencil data to be " << "(" << ssss[0] << ", " << ssss[1] << ", "
                    << ssss[2] << ", " << ssss[3] << ") or " << "(" << s001[0] << ", " << s001[1]
-                   << ", " << s001[2] << ", " << s001[3] << "). Got " << "(" << data[0] << ", "
-                   << DAWN_UNSAFE_TODO(data[1]) << ", " << DAWN_UNSAFE_TODO(data[2]) << ", "
-                   << DAWN_UNSAFE_TODO(data[3]) << ").";
+                   << ", " << s001[2] << ", " << s001[3] << "). Got " << "(" << actual[0] << ", "
+                   << actual[1] << ", " << actual[2] << ", " << actual[3] << ").";
         }
 
       private:
@@ -868,17 +871,12 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
         wgpu::CommandBuffer commands = commandEncoder.Finish();
         queue.Submit(1, &commands);
 
-        float expectedDepth = 0.0f;
-        DAWN_UNSAFE_TODO(memcpy(&expectedDepth,
-                                &passDescriptor.cDepthStencilAttachmentInfo.depthClearValue,
-                                sizeof(float)));
+        float expectedDepth = passDescriptor.cDepthStencilAttachmentInfo.depthClearValue;
         EXPECT_BUFFER(depthOutput, 0, sizeof(float),
                       new ::dawn::detail::ExpectEq<float>(expectedDepth, tolerance));
 
-        uint8_t expectedStencil = 0;
-        DAWN_UNSAFE_TODO(memcpy(&expectedStencil,
-                                &passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue,
-                                sizeof(uint8_t)));
+        uint8_t expectedStencil =
+            static_cast<uint8_t>(passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue);
         EXPECT_BUFFER_U32_EQ(expectedStencil, stencilOutput, 0);
     }
 
@@ -920,17 +918,12 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
         wgpu::CommandBuffer commands = commandEncoder.Finish();
         queue.Submit(1, &commands);
 
-        float expectedDepth = 0.0f;
-        DAWN_UNSAFE_TODO(memcpy(&expectedDepth,
-                                &passDescriptor.cDepthStencilAttachmentInfo.depthClearValue,
-                                sizeof(float)));
+        float expectedDepth = passDescriptor.cDepthStencilAttachmentInfo.depthClearValue;
         EXPECT_BUFFER(depthOutput, 0, sizeof(float),
                       new ::dawn::detail::ExpectEq<float>(expectedDepth, tolerance));
 
-        uint8_t expectedStencil = 0;
-        DAWN_UNSAFE_TODO(memcpy(&expectedStencil,
-                                &passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue,
-                                sizeof(uint8_t)));
+        uint8_t expectedStencil =
+            static_cast<uint8_t>(passDescriptor.cDepthStencilAttachmentInfo.stencilClearValue);
         EXPECT_BUFFER_U32_EQ(expectedStencil, stencilOutput, 0);
     }
 }

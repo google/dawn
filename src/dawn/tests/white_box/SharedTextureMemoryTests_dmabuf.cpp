@@ -216,26 +216,15 @@ TEST_P(SharedTextureMemoryDmaBufImportTest, ImportErrors) {
     backend->CreateSharedTextureMemoryHelper(
         16, GBM_FORMAT_ABGR8888, GBM_BO_USE_LINEAR,
         [&](const wgpu::SharedTextureMemoryDescriptor& desc) {
-            native::ClearErrorInjector();
-            native::EnableErrorInjector();
-            device.ImportSharedTextureMemory(&desc);
-            native::DisableErrorInjector();
-            const uint64_t failureCount = native::AcquireErrorInjectorCallCount();
-            EXPECT_GT(failureCount, 0u);
-            WaitForAllOperations();
-
-            for (uint64_t failureIndex = 0; failureIndex < failureCount; ++failureIndex) {
-                SCOPED_TRACE(failureIndex);
-                wgpu::Device importDevice = CreateDevice();
-                EXPECT_DEVICE_LOSS_ON(importDevice, {
-                    native::ClearErrorInjector();
-                    native::EnableErrorInjector();
-                    native::InjectErrorAt(failureIndex);
-                    importDevice.ImportSharedTextureMemory(&desc);
-                    native::DisableErrorInjector();
-                });
-                EXPECT_EQ(native::AcquireErrorInjectorCallCount(), failureIndex + 1);
-            }
+            ExhaustiveErrorInjection([&](ErrorInjectionPhase phase) {
+                if (phase == ErrorInjectionPhase::InjectError) {
+                    wgpu::Device importDevice = CreateDevice();
+                    EXPECT_DEVICE_LOSS_ON(importDevice,
+                                          importDevice.ImportSharedTextureMemory(&desc));
+                } else {
+                    device.ImportSharedTextureMemory(&desc);
+                }
+            });
 
             wgpu::SharedTextureMemory memory = device.ImportSharedTextureMemory(&desc);
             wgpu::SharedTextureMemoryProperties properties;

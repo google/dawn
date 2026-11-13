@@ -55,7 +55,7 @@ TEST_F(SpirvWriter_KeepBindingArrayAsPointer, SkippedForPtrToBindingArray) {
 
     auto* src = R"(
 $B1: {  # root
-  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var @binding_point(0, 0)
 }
 
 %f = func():void {
@@ -90,7 +90,7 @@ TEST_F(SpirvWriter_KeepBindingArrayAsPointer, LoadOfBindingArrayIsReplaced) {
 
     auto* src = R"(
 $B1: {  # root
-  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var @binding_point(0, 0)
 }
 
 %f = func():void {
@@ -107,7 +107,7 @@ $B1: {  # root
 
     auto* expected = R"(
 $B1: {  # root
-  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var @binding_point(0, 0)
 }
 
 %f = func():void {

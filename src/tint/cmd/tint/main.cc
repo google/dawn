@@ -440,6 +440,20 @@ violations that may be produced)",
         }
     });
 
+    // The subgroups counterpart of --allow-non-uniform-derivatives (HLSL's wave operations act on
+    // the active lanes wherever they are called; UE's desktop shaders call them in divergent
+    // control flow)
+    auto& allow_nus = options.Add<BoolOption>(
+        "allow-non-uniform-subgroups",
+        R"(Allow non-uniform subgroup operations by inserting a module-scope directive to suppress any
+subgroup uniformity violations that may be produced)",
+        Default{false});
+    TINT_DEFER({
+        if (allow_nus.value.value_or(false)) {
+            opts->wgsl_writer_options.allow_non_uniform_subgroup_operations = true;
+        }
+    });
+
     auto& ignore_unreachable = options.Add<BoolOption>(
         "disable-unreachable-code-warning",
         R"(Disable the warning for unreachable code when converting to WGSL)", Default{false});
@@ -533,7 +547,7 @@ When specified, automatically enables MSL validation)",
 
     auto& arg_buffer_binding = options.Add<StringOption>(
         "argument-buffer-binding",
-        R"(Mapping for argument buffer struct members, format is GROUP.BINDING[=PLACEHOLDER_TYPE], comma separated)",
+        R"(Mapping for argument buffer struct members, format is GROUP.BINDING[:ARRAY_SIZE][=PLACEHOLDER_TYPE], comma separated)",
         Alias{"argument-buffer-member"});
 
     auto& dynamic_buffer = options.Add<StringOption>(
@@ -554,6 +568,7 @@ When specified, automatically enables MSL validation)",
         EnumName(tint::msl::validate::MslVersion::kMsl_2_4, "2.4"),
         EnumName(tint::msl::validate::MslVersion::kMsl_3_2, "3.2"),
         EnumName(tint::msl::validate::MslVersion::kMsl_4_0, "4.0"),
+        EnumName(tint::msl::validate::MslVersion::kMsl_4_1, "4.1"),
     };
     auto& msl_version = options.Add<EnumOption<tint::msl::validate::MslVersion>>(
         "msl-version", R"(Specify the MSL version.
@@ -817,10 +832,23 @@ Options:
                 placeholder_type = res.Get();
             }
 
+            uint32_t array_size = 1;
+            if (auto colon_idx = bp_str.find(":"); colon_idx != std::string_view::npos) {
+                auto size_str = bp_str.substr(colon_idx + 1);
+                bp_str = bp_str.substr(0, colon_idx);
+                auto size_res = tint::strconv::ParseUint32(size_str);
+                if (size_res != tint::Success) {
+                    std::cerr << "Invalid array size for " << arg_buffer_binding.Name() << ": "
+                              << size_str << "\n";
+                    return false;
+                }
+                array_size = size_res.Get();
+            }
+
             auto bind_point = tint::Split(bp_str, ".");
             if (bind_point.Length() != 2) {
                 std::cerr << "argument-buffer-binding values must be of the form "
-                             "GROUP.BINDING[=PLACEHOLDER_TYPE]\n";
+                             "GROUP.BINDING[:ARRAY_SIZE][=PLACEHOLDER_TYPE]\n";
                 return false;
             }
 
@@ -844,7 +872,11 @@ Options:
                 opts->group_to_argument_buffer_info.insert({group, {}});
             }
             opts->group_to_argument_buffer_info[group].struct_members.push_back(
-                tint::msl::writer::ArgumentBufferInfo::MemberInfo{binding, placeholder_type});
+                tint::msl::writer::ArgumentBufferInfo::MemberInfo{
+                    .id = binding,
+                    .array_size = array_size,
+                    .placeholder_type = placeholder_type,
+                });
         }
     }
 
@@ -1322,7 +1354,7 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
         ir, options.ep_name, !options.use_argument_buffers, !options.use_argument_buffers);
     gen_options.resource_table = tint::core::ir::transform::GenerateResourceTableConfig(
         ir, options.treat_samplers_as_filtering, options.treat_textures_as_unfilterable);
-    gen_options.immediate_binding_point = tint::BindingPoint{.group = 0u, .binding = 30u};
+    gen_options.immediate_binding_point = 30u;
     gen_options.extensions.disable_demote_to_helper = options.disable_demote_to_helper;
     gen_options.use_argument_buffers = options.use_argument_buffers;
     gen_options.group_to_argument_buffer_info = options.group_to_argument_buffer_info;
@@ -1642,7 +1674,11 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
 bool DumpIR([[maybe_unused]] const tint::Program& program,
             [[maybe_unused]] const Options& options) {
 #if TINT_BUILD_WGSL_READER
-    auto result = tint::wgsl::reader::ProgramToLoweredIR(program);
+    tint::wgsl::reader::IROptions ir_options{
+        .dump_ir_when_validating = options.dump_ir,
+        .enable_validation_asserts = options.enable_ir_validation_asserts,
+    };
+    auto result = tint::wgsl::reader::ProgramToLoweredIR(program, std::move(ir_options));
     if (result != tint::Success) {
         std::cerr << "Failed to build IR from program: " << result.Failure() << "\n";
         return false;

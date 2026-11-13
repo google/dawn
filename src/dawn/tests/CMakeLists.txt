@@ -205,6 +205,7 @@ set(end2end_sources
     "end2end/SupportedFeatureArch.cpp"
     "end2end/TexelBufferTests.cpp"
     "end2end/Texture3DTests.cpp"
+    "end2end/TextureAllocationTests.cpp"
     "end2end/TextureComponentSwizzleTests.cpp"
     "end2end/TextureCorruptionTests.cpp"
     "end2end/TextureFormatTests.cpp"
@@ -378,6 +379,7 @@ endif()
 if (DAWN_ENABLE_D3D12)
     list(APPEND whitebox_sources
         "white_box/D3D12DescriptorHeapTests.cpp"
+        "white_box/D3D12IndirectDrawBatchingTests.cpp"
         "white_box/D3D12ResidencyTests.cpp"
         "white_box/D3D12ResourceHeapTests.cpp"
         "white_box/GPUTimestampCalibrationTests.cpp"
@@ -395,6 +397,7 @@ if (DAWN_ENABLE_METAL)
       "white_box/GPUTimestampCalibrationTests_Metal.mm"
       "white_box/MetalAutoreleasePoolTests.mm"
       "white_box/MetalBackendTests.cpp"
+      "white_box/MetalFencedReferencerTests.mm"
     )
 endif()
 
@@ -403,8 +406,11 @@ if (DAWN_ENABLE_OPENGLES)
     list(APPEND whitebox_sources
         "white_box/EGLImageWrappingTests.cpp"
         "white_box/GLBufferTests.cpp"
+        "white_box/GLDeferredWorkTests.cpp"
         "white_box/GLFramebufferCompletenessTests.cpp"
+        "white_box/GLGraphicsResetTests.cpp"
         "white_box/GLTextureWrappingTests.cpp"
+        "white_box/GLUncheckedErrorTests.cpp"
     )
 endif()
 
@@ -664,6 +670,7 @@ set(unittest_sources
     "unittests/validation/ResourceUsageTrackingTests.cpp"
     "unittests/validation/SamplerValidationTests.cpp"
     "unittests/validation/ShaderModuleValidationTests.cpp"
+    "unittests/validation/StableInstanceValidationTests.cpp"
     "unittests/validation/StorageTextureValidationTests.cpp"
     "unittests/validation/TexelBufferValidationTests.cpp"
     "unittests/validation/TextureSubresourceTests.cpp"

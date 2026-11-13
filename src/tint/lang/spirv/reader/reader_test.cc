@@ -84,7 +84,7 @@ TEST_F(SpirvReaderTest, Load_VectorComponent) {
     EXPECT_EQ(got, R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %2:ptr<function, vec4<u32>, read_write> = var
     %3:u32 = load_vector_element %2, 2u
     ret
   }
@@ -118,7 +118,7 @@ TEST_F(SpirvReaderTest, Store_VectorComponent) {
     EXPECT_EQ(got, R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %2:ptr<function, vec4<u32>, read_write> = var
     store_vector_element %2, 2u, 42u
     ret
   }
@@ -235,8 +235,8 @@ tint_symbol_4 = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<private, f32, read_write> = var undef
-  %2:ptr<private, tint_symbol_2, read_write> = var undef
+  %1:ptr<private, f32, read_write> = var
+  %2:ptr<private, tint_symbol_2, read_write> = var
 }
 
 %main_inner = func():void {
@@ -329,8 +329,8 @@ tint_symbol = struct @align(16) {
 }
 
 $B1: {  # root
-  %main_position_Output:ptr<private, vec4<f32>, read_write> = var undef
-  %main_clip_distances_Output:ptr<private, array<f32, 1>, read_write> = var undef
+  %main_position_Output:ptr<private, vec4<f32>, read_write> = var
+  %main_clip_distances_Output:ptr<private, array<f32, 1>, read_write> = var
   %main___point_size_Output:ptr<private, f32, read_write> = var 1.0f
 }
 
@@ -419,7 +419,7 @@ tint_symbol = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<private, gl_PerVertex, read_write> = var undef
+  %1:ptr<private, gl_PerVertex, read_write> = var
 }
 
 %main_inner = func():void {
@@ -482,7 +482,7 @@ TEST_F(SpirvReaderTest, SampleMask) {
     ASSERT_EQ(got, Success);
     EXPECT_EQ(got, R"(
 $B1: {  # root
-  %1:ptr<private, array<u32, 1>, read_write> = var undef
+  %1:ptr<private, array<u32, 1>, read_write> = var
 }
 
 %main_inner = func(%3:array<u32, 1>):void {
@@ -578,8 +578,8 @@ tint_symbol = struct @align(16) {
 }
 
 $B1: {  # root
-  %frag_main_loc0_idx0_Output:ptr<private, vec4<f32>, read_write> = var undef
-  %frag_main_loc0_idx1_Output:ptr<private, vec4<f32>, read_write> = var undef
+  %frag_main_loc0_idx0_Output:ptr<private, vec4<f32>, read_write> = var
+  %frag_main_loc0_idx1_Output:ptr<private, vec4<f32>, read_write> = var
 }
 
 %frag_main_inner = func():FragOutput {
@@ -785,10 +785,10 @@ type.constants_ = struct @align(16) {
 }
 
 $B1: {  # root
-  %constants_:ptr<uniform, type.constants_, read> = var undef @binding_point(0, 0)
-  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 1)
-  %samplerTex:ptr<handle, sampler, read> = var undef @binding_point(0, 2)
-  %out.var.SV_Target:ptr<private, vec4<f32>, read_write> = var undef
+  %constants_:ptr<uniform, type.constants_, read> = var @binding_point(0, 0)
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 1)
+  %samplerTex:ptr<handle, sampler, read> = var @binding_point(0, 2)
+  %out.var.SV_Target:ptr<private, vec4<f32>, read_write> = var
 }
 
 %PS_Viewport_inner = func(%in.var.TEXCOORD0:vec2<f32>):void {
@@ -885,8 +885,8 @@ inputs_block = struct @align(4) {
 }
 
 $B1: {  # root
-  %inputs:ptr<uniform, inputs_block, read> = var undef @binding_point(0, 0)
-  %outputs:ptr<storage, inputs_block, read_write> = var undef @binding_point(0, 1)
+  %inputs:ptr<uniform, inputs_block, read> = var @binding_point(0, 0)
+  %outputs:ptr<storage, inputs_block, read_write> = var @binding_point(0, 1)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func(%global_invocation_id:vec3<u32> [@global_invocation_id]):void {
@@ -897,6 +897,287 @@ $B1: {  # root
     %8:u32 = load %7
     store %6, %8
     ret
+  }
+}
+)");
+}
+
+// Image operands are dropped only when WGSL guarantees the same behaviour, and rejected otherwise.
+// https://www.w3.org/TR/WGSL/#private-vs-non-private
+// https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html#Image_Operands
+std::string ImageOperandsModule(std::string body) {
+    return R"(
+               OpCapability Shader
+               OpCapability VulkanMemoryModel
+               OpCapability VulkanMemoryModelDeviceScope
+               OpExtension "SPV_KHR_vulkan_memory_model"
+               OpMemoryModel Logical Vulkan
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %fimg DescriptorSet 0
+               OpDecorate %fimg Binding 0
+               OpDecorate %tex DescriptorSet 0
+               OpDecorate %tex Binding 1
+               OpDecorate %smp DescriptorSet 0
+               OpDecorate %smp Binding 2
+       %void = OpTypeVoid
+         %fn = OpTypeFunction %void
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+        %f32 = OpTypeFloat 32
+      %vec2i = OpTypeVector %i32 2
+      %vec2f = OpTypeVector %f32 2
+      %vec4f = OpTypeVector %f32 4
+      %vec4i = OpTypeVector %i32 4
+      %i32_0 = OpConstant %i32 0
+    %vec4f_0 = OpConstantNull %vec4f
+    %coord_i = OpConstantNull %vec2i
+    %coord_f = OpConstantNull %vec2f
+     %device = OpConstant %u32 1
+  %workgroup = OpConstant %u32 2
+%queue_family = OpConstant %u32 5
+   %subgroup = OpConstant %u32 3
+ %invocation = OpConstant %u32 4
+    %fimg_ty = OpTypeImage %f32 2D 0 0 0 2 Rgba32f
+     %tex_ty = OpTypeImage %i32 2D 0 0 0 1 Unknown
+     %smp_ty = OpTypeSampler
+      %si_ty = OpTypeSampledImage %tex_ty
+   %fimg_ptr = OpTypePointer UniformConstant %fimg_ty
+    %tex_ptr = OpTypePointer UniformConstant %tex_ty
+    %smp_ptr = OpTypePointer UniformConstant %smp_ty
+       %fimg = OpVariable %fimg_ptr UniformConstant
+        %tex = OpVariable %tex_ptr UniformConstant
+        %smp = OpVariable %smp_ptr UniformConstant
+       %main = OpFunction %void None %fn
+      %start = OpLabel
+         %fi = OpLoad %fimg_ty %fimg
+          %t = OpLoad %tex_ty %tex
+          %s = OpLoad %smp_ty %smp
+         %si = OpSampledImage %si_ty %t %s
+)" + body +
+           R"(
+               OpReturn
+               OpFunctionEnd
+)";
+}
+
+constexpr const char* kImageOperandsRoot = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_storage_2d<rgba32float, read_write>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, texture_2d<i32>, read> = var @binding_point(0, 1)
+  %3:ptr<handle, sampler, read> = var @binding_point(0, 2)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %5:texture_storage_2d<rgba32float, read_write> = load %1
+    %6:texture_2d<i32> = load %2
+    %7:sampler = load %3
+)";
+
+// NonPrivateTexel and Workgroup scope MakeTexelVisible/MakeTexelAvailable are dropped.
+TEST_F(SpirvReaderTest, ImageOperands_NonPrivateTexel_WorkgroupScope) {
+    auto got = Run(ImageOperandsModule(R"(
+          %1 = OpImageRead %vec4f %fi %coord_i MakeTexelVisible|NonPrivateTexel %workgroup
+               OpImageWrite %fi %coord_i %1 MakeTexelAvailable|NonPrivateTexel %workgroup
+          %2 = OpImageFetch %vec4i %t %coord_i Lod|NonPrivateTexel %i32_0
+          %3 = OpImageGather %vec4i %si %coord_f %i32_0 ConstOffset|NonPrivateTexel %coord_i
+)"),
+                   SPV_ENV_VULKAN_1_1);
+    ASSERT_EQ(got, Success);
+    EXPECT_EQ(got,
+              std::string(kImageOperandsRoot) + R"(    %8:vec4<f32> = textureLoad %5, vec2<i32>(0i)
+    %9:void = textureStore %5, vec2<i32>(0i), %8
+    %10:vec4<i32> = textureLoad %6, vec2<i32>(0i), 0i
+    %11:vec4<i32> = textureGather 0i, %6, %7, vec2<f32>(0.0f), vec2<i32>(0i)
+    ret
+  }
+}
+)");
+}
+
+// Subgroup and Invocation scope MakeTexelVisible/MakeTexelAvailable are narrower than the
+// Workgroup scope WGSL implies, so they are dropped.
+TEST_F(SpirvReaderTest, ImageOperands_MakeTexel_NarrowerScopes) {
+    auto got = Run(ImageOperandsModule(R"(
+          %1 = OpImageRead %vec4f %fi %coord_i MakeTexelVisible|NonPrivateTexel %subgroup
+               OpImageWrite %fi %coord_i %1 MakeTexelAvailable|NonPrivateTexel %invocation
+)"),
+                   SPV_ENV_VULKAN_1_1);
+    ASSERT_EQ(got, Success);
+    EXPECT_EQ(got,
+              std::string(kImageOperandsRoot) + R"(    %8:vec4<f32> = textureLoad %5, vec2<i32>(0i)
+    %9:void = textureStore %5, vec2<i32>(0i), %8
+    ret
+  }
+}
+)");
+}
+
+// MakeTexelVisible with a scope wider than Workgroup is rejected.
+TEST_F(SpirvReaderTest, ImageOperands_MakeTexelVisible_QueueFamilyScope) {
+    auto got = Run(ImageOperandsModule(R"(
+          %1 = OpImageRead %vec4f %fi %coord_i MakeTexelVisible|NonPrivateTexel %queue_family
+)"),
+                   SPV_ENV_VULKAN_1_1);
+    ASSERT_NE(got, Success);
+    EXPECT_THAT(got.Failure().reason,
+                testing::HasSubstr(
+                    "MakeTexelVisible image operand with QueueFamily scope is not supported"));
+}
+
+// MakeTexelAvailable with a scope wider than Workgroup is rejected.
+TEST_F(SpirvReaderTest, ImageOperands_MakeTexelAvailable_DeviceScope) {
+    auto got = Run(ImageOperandsModule(R"(
+               OpImageWrite %fi %coord_i %vec4f_0 MakeTexelAvailable|NonPrivateTexel %device
+)"),
+                   SPV_ENV_VULKAN_1_1);
+    ASSERT_NE(got, Success);
+    EXPECT_THAT(
+        got.Failure().reason,
+        testing::HasSubstr("MakeTexelAvailable image operand with Device scope is not supported"));
+}
+
+// VolatileTexel is rejected on reads.
+TEST_F(SpirvReaderTest, ImageOperands_VolatileTexel_Read) {
+    auto got = Run(ImageOperandsModule(R"(
+          %1 = OpImageRead %vec4f %fi %coord_i VolatileTexel
+)"),
+                   SPV_ENV_VULKAN_1_1);
+    ASSERT_NE(got, Success);
+    EXPECT_THAT(got.Failure().reason,
+                testing::HasSubstr("VolatileTexel image operand is not supported"));
+}
+
+// VolatileTexel is rejected on writes.
+TEST_F(SpirvReaderTest, ImageOperands_VolatileTexel_Write) {
+    auto got = Run(ImageOperandsModule(R"(
+               OpImageWrite %fi %coord_i %vec4f_0 VolatileTexel
+)"),
+                   SPV_ENV_VULKAN_1_1);
+    ASSERT_NE(got, Success);
+    EXPECT_THAT(got.Failure().reason,
+                testing::HasSubstr("VolatileTexel image operand is not supported"));
+}
+
+// VolatileTexel is rejected on sampled image operations.
+TEST_F(SpirvReaderTest, ImageOperands_VolatileTexel_Gather) {
+    auto got = Run(ImageOperandsModule(R"(
+          %1 = OpImageGather %vec4i %si %coord_f %i32_0 VolatileTexel
+)"),
+                   SPV_ENV_VULKAN_1_1);
+    ASSERT_NE(got, Success);
+    EXPECT_THAT(got.Failure().reason,
+                testing::HasSubstr("VolatileTexel image operand is not supported"));
+}
+
+// A vertex shader with no BuiltIn Position output synthesizes a zero @position return value.
+TEST_F(SpirvReaderTest, Vertex_MissingPosition_NoOutputs) {
+    auto got = Run(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %vertex_index
+               OpName %block "S"
+               OpMemberName %block 0 "v"
+               OpName %out_buf "out_buf"
+               OpName %vertex_index "vertex_index"
+               OpName %main "main"
+               OpMemberDecorate %block 0 Offset 0
+               OpDecorate %block Block
+               OpDecorate %out_buf DescriptorSet 0
+               OpDecorate %out_buf Binding 0
+               OpDecorate %vertex_index BuiltIn VertexIndex
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+      %block = OpTypeStruct %uint
+%_ptr_StorageBuffer_block = OpTypePointer StorageBuffer %block
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+%_ptr_Input_uint = OpTypePointer Input %uint
+    %out_buf = OpVariable %_ptr_StorageBuffer_block StorageBuffer
+%vertex_index = OpVariable %_ptr_Input_uint Input
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+        %idx = OpLoad %uint %vertex_index
+        %ptr = OpAccessChain %_ptr_StorageBuffer_uint %out_buf %uint_0
+               OpStore %ptr %idx
+               OpReturn
+               OpFunctionEnd
+)");
+    ASSERT_EQ(got, Success) << got.Failure();
+    EXPECT_EQ(got, R"(
+S = struct @align(4) {
+  v:u32 @offset(0)
+}
+
+$B1: {  # root
+  %out_buf:ptr<storage, S, read_write> = var @binding_point(0, 0)
+}
+
+%main_inner = func(%vertex_index:u32):void {
+  $B2: {
+    %4:ptr<storage, u32, read_write> = access %out_buf, 0u
+    store %4, %vertex_index
+    ret
+  }
+}
+%main = @vertex func(%vertex_index_1:u32 [@vertex_index]):vec4<f32> [@position] {  # %vertex_index_1: 'vertex_index'
+  $B3: {
+    %7:void = call %main_inner, %vertex_index_1
+    ret vec4<f32>(0.0f)
+  }
+}
+)");
+}
+
+// A vertex shader with a location output and no BuiltIn Position synthesizes a @position member.
+TEST_F(SpirvReaderTest, Vertex_MissingPosition_WithLocationOutput) {
+    auto got = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %color
+               OpName %color "color"
+               OpName %main "main"
+               OpDecorate %color Location 0
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+    %float_1 = OpConstant %float 1
+       %ones = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+      %color = OpVariable %_ptr_Output_v4float Output
+    %void_fn = OpTypeFunction %void
+       %main = OpFunction %void None %void_fn
+ %main_start = OpLabel
+               OpStore %color %ones
+               OpReturn
+               OpFunctionEnd
+)");
+    ASSERT_EQ(got, Success) << got.Failure();
+    EXPECT_EQ(got, R"(
+tint_symbol_1 = struct @align(16) {
+  color:vec4<f32> @offset(0), @location(0)
+  tint_symbol:vec4<f32> @offset(16), @builtin(position)
+}
+
+$B1: {  # root
+  %color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_inner = func():void {
+  $B2: {
+    store %color, vec4<f32>(1.0f)
+    ret
+  }
+}
+%main = @vertex func():tint_symbol_1 {
+  $B3: {
+    %4:void = call %main_inner
+    %5:vec4<f32> = load %color
+    %6:tint_symbol_1 = construct %5, vec4<f32>(0.0f)
+    ret %6
   }
 }
 )");

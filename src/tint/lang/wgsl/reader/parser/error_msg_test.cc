@@ -1141,5 +1141,32 @@ var<workgroup> vec4_data: array<mat4x4<f@32>, 256>;
 )");
 }
 
+TEST_F(ParserImplErrorTest, InterpolatedStringExprMaxDepth) {
+    uint32_t kMaxDepth = 128;
+
+    StringStream src;
+    StringStream mkr;
+    src << "fn f(){print(";
+    mkr << "             ";
+    for (size_t i = 2; i < kMaxDepth + 8; i++) {
+        src << "`${";
+        if (i < kMaxDepth) {
+            mkr << "   ";
+        } else if (i == kMaxDepth) {
+            mkr << "^^^";
+        }
+    }
+    src << "1.0";
+    for (size_t i = 2; i < kMaxDepth + 8; i++) {
+        src << "}`";
+    }
+    src << ");}";
+    StringStream err;
+    err << "test.wgsl:1:392 error: maximum parser recursive depth reached\n"
+        << src.str() << "\n"
+        << mkr.str() << "\n";
+    EXPECT(src.str().c_str(), err.str().c_str());
+}
+
 }  // namespace
 }  // namespace tint::wgsl::reader

@@ -68,6 +68,8 @@ enum class Toggle {
     DisableRobustness,
     MetalEnableVertexPulling,
     AllowUnsafeAPIs,
+    AllowExperimentalAPIs,
+    WebViewInstance,
     FlushBeforeClientWaitSync,
     UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
     EmitHLSLDebugSymbols,
@@ -131,7 +133,6 @@ enum class Toggle {
     UseBlitForSintTextureToBufferCopy,
     VulkanSplitBufferTextureCopyForArrayLayers,
     VulkanForceAlphaWriteForAlphaToCoverage,
-    SplitBufferTextureCopyForOversizedRow,
     GLUseArrayLengthFromImmediate,
     D3D11DisableCPUUploadBuffers,
     UseT2B2TForSRGBTextureCopy,
@@ -170,7 +171,6 @@ enum class Toggle {
     GLDepthBiasModifier,
     GLForceES31AndNoExtensions,
     VulkanMonolithicPipelineCache,
-    VulkanIncompletePipelineCacheWorkaround,
     MetalSerializeTimestampGenerationAndResolution,
     D3D12RelaxMinSubgroupSizeTo8,
     D3D12RelaxBufferTextureCopyPitchAndOffsetAlignment,
@@ -199,13 +199,15 @@ enum class Toggle {
     D3D12UseHLSL2021,
     MetalFixU32DivMod,
     VulkanSleepAfterLostDeviceWait,
-    UseSpirvReconvergenceMode,
     VulkanReplaceWorkgroupAtomicStoreWithExchange,
     VulkanDisallowNPOTDepthStencilMipmaps,
     VulkanReplaceUnsignedCompareZero,
     VulkanUseCooperativeMatrixRobustBufferAccess,
     MetalEnableTensors,
     AllowAlphaToCoverageNotBlendable,
+    GLHoistConstantArrayInitializers,
+    UseSpirvMaximalReconvergence,
+    UseSpirvSubgroupUniformControlFlow,
 
     // Once all backends have been updated to be thread safe for waiting, we can remove this toggle.
     WaitIsThreadSafe,
@@ -233,6 +235,12 @@ enum class Toggle {
     AutoMapBackendBuffer,
     PolyfillBoolVecDynamicStore,
     VulkanRelaxMaxInterStageShaderVariables,
+    Limit3DTexturePotFootprintTo4GB,
+    LimitMaxTextureBytesTo1MB,
+    VulkanUseDescriptorUpdateTemplate,
+    D3D12DisableRelaxedBufferTextureCopyAlignmentForCompressedFormats,
+    GLLimitTextureImageUnitsTo13,
+    ClearDepthWithDraw,
 
     EnumCount,
     InvalidEnum = EnumCount,
@@ -289,7 +297,7 @@ class TogglesState {
     // inherited to all later stage as forced.
     void ForceSet(Toggle toggle, bool enabled);
 
-    // Set a toggle of any stage for testing propose. Return *this to allow method chaining
+    // Set a toggle of any stage for testing purpose. Return *this to allow method chaining
     // manner.
     TogglesState& SetForTesting(Toggle toggle, bool enabled, bool forced);
 

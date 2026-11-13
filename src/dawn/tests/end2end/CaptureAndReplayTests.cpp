@@ -51,6 +51,11 @@
 namespace dawn {
 namespace {
 
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
+using ::testing::ElementsAreArray;
+
 class CaptureAndReplayTests : public DawnTest {
   public:
     void SetUp() override {
@@ -518,7 +523,7 @@ TEST_P(CaptureAndReplayTests, CaptureWithMapRead) {
     auto actual = static_cast<const uint8_t*>(dstBuffer.GetConstMappedRange(0, sizeof(myData)));
     std::span<const uint8_t> actual_span =
         DAWN_UNSAFE_TODO(std::span<const uint8_t>(actual, std::size(myData)));
-    ASSERT_THAT(actual_span, ::testing::ElementsAreArray(myData));
+    ASSERT_THAT(actual_span, ElementsAreArray(myData));
 }
 
 TEST_P(CaptureAndReplayTests, CaptureCopyBufferToBuffer) {
@@ -1253,6 +1258,78 @@ TEST_P(CaptureAndReplayTests, CaptureRenderPassBasicWithAttributes) {
     ExpectTextureEQ(replay, "dstTexture", {1}, expected);
 }
 
+// Capture and replay a render pipeline whose vertex buffer layout has an unused slot before a
+// used one. The used slot must keep its index on replay instead of shifting down.
+TEST_P(CaptureAndReplayTests, CaptureRenderPassWithUnusedVertexBufferSlot) {
+    const float myVertices[] = {
+        -1, -1, 3, -1, -1, 3,
+    };
+
+    wgpu::Buffer vertexBuffer = CreateBuffer(
+        "vertexBuffer", sizeof(myVertices), wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
+    queue.WriteBuffer(vertexBuffer, 0, &myVertices, sizeof(myVertices));
+
+    wgpu::Texture dstTexture = CreateTexture("dstTexture", {1}, wgpu::TextureFormat::RGBA8Uint,
+                                             wgpu::TextureUsage::RenderAttachment);
+
+    const char* shader = R"(
+        @vertex fn vs(@location(0) pos: vec4f) -> @builtin(position) vec4f {
+            return pos;
+        }
+
+        @fragment fn fs() -> @location(0) vec4u {
+            return vec4u(0x11, 0x22, 0x33, 0x44);
+        }
+    )";
+    auto module = utils::CreateShaderModule(device, shader);
+
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = module;
+    desc.cFragment.module = module;
+    desc.cFragment.targetCount = 1;
+    desc.cTargets[0].format = wgpu::TextureFormat::RGBA8Uint;
+    desc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+    // Slot 0 is unused.
+    desc.cBuffers[0].arrayStride = 0;
+    desc.cBuffers[0].stepMode = wgpu::VertexStepMode::Undefined;
+    desc.cBuffers[0].attributeCount = 0;
+    desc.cBuffers[0].attributes = nullptr;
+    // Slot 1 holds the positions.
+    desc.cBuffers[1].arrayStride = 2 * sizeof(float);
+    desc.cBuffers[1].stepMode = wgpu::VertexStepMode::Vertex;
+    desc.cBuffers[1].attributeCount = 1;
+    desc.cBuffers[1].attributes = &desc.cAttributes[0];
+    desc.cAttributes[0].shaderLocation = 0;
+    desc.cAttributes[0].format = wgpu::VertexFormat::Float32x2;
+    desc.vertex.bufferCount = 2;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        utils::ComboRenderPassDescriptor passDescriptor({dstTexture.CreateView()});
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
+        pass.SetPipeline(pipeline);
+        pass.SetVertexBuffer(1, vertexBuffer);
+        pass.Draw(3);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto replay = recorder->Replay(device);
+
+    utils::RGBA8 expected[] = {{0x11, 0x22, 0x33, 0x44}};
+    ExpectTextureEQ(replay, "dstTexture", {1}, expected);
+}
+
 // Capture and replay a compute shader with an explicit bindGroupLayout
 TEST_P(CaptureAndReplayTests, CaptureComputeShaderBasicExplicitBindGroup) {
     wgpu::BindGroupLayoutEntry entries[1];
@@ -1593,29 +1670,26 @@ class OcclusionExpectation : public detail::Expectation {
 
     explicit OcclusionExpectation(const std::vector<Result> expected) { mExpected = expected; }
 
-    testing::AssertionResult Check(const void* data, size_t size) override {
-        DAWN_ASSERT(size % sizeof(uint64_t) == 0);
-        DAWN_ASSERT(size / sizeof(uint64_t) == mExpected.size());
-        const uint64_t* actual = static_cast<const uint64_t*>(data);
-        for (size_t i = 0; i < size / sizeof(uint64_t); i++) {
-            if (DAWN_UNSAFE_TODO(actual[i]) == kSentinelValue) {
-                return testing::AssertionFailure()
+    AssertionResult Check(Span<const std::byte> data) override {
+        auto actual = ReinterpretSpan<const uint64_t>(data);
+        DAWN_ASSERT(actual.size() == mExpected.size());
+        for (size_t i = 0; i < actual.size(); i++) {
+            if (actual[i] == kSentinelValue) {
+                return AssertionFailure()
                        << "Data[" << i << "] was not written (it kept the sentinel value of "
                        << kSentinelValue << ").\n";
             }
             Result expected = mExpected[i];
-            if (expected == Result::Zero && DAWN_UNSAFE_TODO(actual[i]) != 0) {
-                return testing::AssertionFailure()
-                       << "Expected data[" << i
-                       << "] to be zero, actual: " << DAWN_UNSAFE_TODO(actual[i]) << ".\n";
+            if (expected == Result::Zero && actual[i] != 0) {
+                return AssertionFailure()
+                       << "Expected data[" << i << "] to be zero, actual: " << actual[i] << ".\n";
             }
-            if (expected == Result::NonZero && DAWN_UNSAFE_TODO(actual[i]) == 0) {
-                return testing::AssertionFailure()
-                       << "Expected data[" << i << "] to be non-zero.\n";
+            if (expected == Result::NonZero && actual[i] == 0) {
+                return AssertionFailure() << "Expected data[" << i << "] to be non-zero.\n";
             }
         }
 
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 
   private:

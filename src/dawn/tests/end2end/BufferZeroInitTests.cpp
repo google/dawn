@@ -41,6 +41,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::HasSubstr;
+
 // Expect lazy clear count for test in device to increment by N after `statement`.
 // Note: WebGPU backend doesn't maintain the lazy clear count for testing but rely on the inner
 // layer implementation for the initialization.
@@ -1084,7 +1086,8 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
 // storage buffer.
 TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
     // TODO(42242119): fail on Qualcomm Adreno X1.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm() &&
+                          GetDriverVersion() < gpu_info::DriverVersion({31, 0, 170, 0}));
 
     constexpr uint32_t kBoundBufferSize = 32u;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
@@ -1561,7 +1564,7 @@ TEST_P(BufferZeroInitMaxBufferSizeTest, CopyTextureToBufferLargerThanMaxBufferSi
 
     // Submit fails when lazy-clearing `poison` tries to allocate a staging buffer larger than
     // maxBufferSize.
-    EXPECT_DEVICE_LOSS_MSG(queue.Submit(1, &cb), testing::HasSubstr("max buffer size limit"));
+    EXPECT_DEVICE_LOSS_MSG(queue.Submit(1, &cb), HasSubstr("max buffer size limit"));
 }
 
 DAWN_INSTANTIATE_TEST(BufferZeroInitMaxBufferSizeTest,

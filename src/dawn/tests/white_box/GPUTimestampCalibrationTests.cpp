@@ -34,10 +34,13 @@
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
+
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
 
 using FeatureName = wgpu::FeatureName;
 enum class EncoderType { NonPass, ComputePass, RenderPass };
@@ -71,8 +74,8 @@ class ExpectBetweenTimestamps : public detail::Expectation {
         : mMinValue(minValue), mMaxValue(maxValue), mErrorToleranceRatio(errorToleranceRatio) {}
 
     // Expect the actual results are between mMinValue and mMaxValue with error tolerance ratio.
-    testing::AssertionResult Check(const void* data, size_t size) override {
-        const uint64_t* actual = static_cast<const uint64_t*>(data);
+    AssertionResult Check(Span<const std::byte> data) override {
+        auto actual = ReinterpretSpan<const uint64_t>(data);
 
         if (mErrorToleranceRatio != 0.0f) {
             mMinValue -=
@@ -81,16 +84,15 @@ class ExpectBetweenTimestamps : public detail::Expectation {
                 static_cast<uint64_t>(static_cast<double>(mMaxValue * mErrorToleranceRatio));
         }
 
-        for (size_t i = 0; i < size / sizeof(uint64_t); ++i) {
-            if (DAWN_UNSAFE_TODO(actual[i]) < mMinValue ||
-                DAWN_UNSAFE_TODO(actual[i]) > mMaxValue) {
-                return testing::AssertionFailure()
+        for (size_t i = 0; i < actual.size(); ++i) {
+            if (actual[i] < mMinValue || actual[i] > mMaxValue) {
+                return AssertionFailure()
                        << "Expected data[" << i << "] to be between " << mMinValue << " and "
-                       << mMaxValue << ", actual " << DAWN_UNSAFE_TODO(actual[i]) << "\n";
+                       << mMaxValue << ", actual " << actual[i] << "\n";
             }
         }
 
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 
   private:

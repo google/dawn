@@ -223,6 +223,7 @@ var (
 			fs.StringVar(&c.inputs, "corpus", defaultWgslCorpusDir(c.osWrapper), "obsolete, use -inputs instead")
 			fs.StringVar(&c.inputs, "inputs", defaultWgslCorpusDir(c.osWrapper), "the directory that holds the files to use")
 			fs.StringVar(&c.out, "out", "<tmp>", "the directory to store outputs to")
+			fs.IntVar(&c.numProcesses, "j", 0, "number of concurrent processes to run (defaults to NumCPU)")
 		},
 		validate: func(fs *flag.FlagSet, c *mainConfig) error {
 			if len(fs.Args()) > 0 {
@@ -230,6 +231,9 @@ var (
 			}
 			if c.out == "" || c.out == "<tmp>" {
 				return fmt.Errorf("need to specify -out when using generate")
+			}
+			if c.numProcesses < 1 {
+				c.numProcesses = runtime.NumCPU()
 			}
 			c.cmdMode = TaskModeGenerate
 			return nil
@@ -718,6 +722,133 @@ func generateTaskConfig(tm TaskMode, c *mainConfig) (*taskConfig, error) {
 	return &t, nil
 }
 
+// maxBatchSize limits the number of input files passed in a single batch
+// invocation to a fuzzer or assembler process. Grouping files into batches
+// amortizes the per-process overhead better than having one exec per test
+// file, but need to limit how long the command line invocation is to stay
+// within OS limits and provide process updates.
+const maxBatchSize = 100
+
+// calcBatchSize calculates an appropriate batch size for distributing numFiles
+// across numProcesses concurrent workers. Tries to target running 4 batches per
+// processor to balance granularity of control with efficiency of dispatch.
+func calcBatchSize(numFiles, numProcesses int) int {
+	if numFiles <= 0 {
+		return 1
+	}
+	if numProcesses < 1 {
+		numProcesses = 1
+	}
+	targetBatches := numProcesses * 4
+	batchSize := (numFiles + targetBatches - 1) / targetBatches
+	if batchSize < 1 {
+		return 1
+	}
+	if batchSize > maxBatchSize {
+		return maxBatchSize
+	}
+	return batchSize
+}
+
+// batchFiles partitions a slice of file paths into contiguous batches of at
+// most batchSize elements.
+func batchFiles(files []string, batchSize int) [][]string {
+	if batchSize < 1 {
+		batchSize = 1
+	}
+
+	numFiles := len(files)
+	if numFiles == 0 {
+		return nil
+	}
+
+	numBatches := (numFiles + batchSize - 1) / batchSize
+	batches := make([][]string, 0, numBatches)
+	for i := 0; i < numFiles; i += batchSize {
+		end := min(i+batchSize, numFiles)
+		batches = append(batches, files[i:end])
+	}
+	return batches
+}
+
+// findLastRunningFileIndex inspects combined libFuzzer output from a failed
+// batch execution to determine which file in batch was being processed when the
+// failure occurred. Returns -1 if no matching "Running:" line is found.
+func findLastRunningFileIndex(output string, batch []string) int {
+	lines := strings.Split(output, "\n")
+	for i := len(lines) - 1; i >= 0; i-- {
+		line := strings.TrimSpace(lines[i])
+		if after, ok := strings.CutPrefix(line, "Running:"); ok {
+			runningFile := strings.TrimSpace(after)
+			for idx, f := range batch {
+				if f == runningFile {
+					return idx
+				}
+			}
+		}
+	}
+	return -1
+}
+
+// checkBatch executes the fuzzer against a batch of files. In the common case
+// where all files pass, the entire batch completes in a single process
+// invocation. If the batch fails, the failing runs are identified, error logs
+// recorded and remaining files checked.
+func checkBatch(ctx context.Context, t *taskConfig, files []string, onFilesDone func(int), failureChan chan<- error) {
+	_, fuzzer := filepath.Split(t.fuzzer)
+	tasks := make([][]string, 0, 1)
+	tasks = append(tasks, files)
+
+	for len(tasks) > 0 {
+		if ctx.Err() != nil {
+			return
+		}
+
+		batch := tasks[0]
+		tasks = tasks[1:]
+		if len(batch) < 1 {
+			continue
+		}
+
+		out, err := t.runCmd(t.fuzzer, batch...)
+		if err == nil {
+			onFilesDone(len(batch))
+			continue
+		}
+
+		// Everything after this point is if there is a failure in processing the current task
+		if len(batch) == 1 {
+			failureChan <- fmt.Errorf("fuzzer '%s' failed to process file '%s' with error: %w\nOutput:\n%s", fuzzer, batch[0], err, string(out))
+			onFilesDone(1)
+			continue
+		}
+
+		failedIdx := findLastRunningFileIndex(string(out), batch)
+		if failedIdx >= 0 {
+			// All files prior to failedIdx ran and passed before the crash.
+			if failedIdx > 0 {
+				onFilesDone(failedIdx)
+				// Re-run the failed file in isolation so its error output is not mixed
+				// with logs from the preceding files in the batch.
+				tasks = append(tasks, []string{batch[failedIdx]})
+			} else {
+				failureChan <- fmt.Errorf("fuzzer '%s' failed to process file '%s' with error: %w\nOutput:\n%s", fuzzer, batch[0], err, string(out))
+				onFilesDone(1)
+			}
+
+			// Continue checking the remaining files in the batch after failedIdx.
+			tasks = append(tasks, batch[failedIdx+1:])
+			continue
+		}
+
+		// Fallback if no "Running: <file>" line was found in output (e.g. startup error):
+		// test each file in the batch separately.
+		for _, file := range batch {
+			tasks = append(tasks, []string{file})
+		}
+	}
+}
+
 // checkFuzzer runs the fuzzer against all the test files the inputs directory,
 // ensuring that the fuzzers do not error for the given file.
 func checkFuzzer(t *taskConfig) error {
@@ -740,11 +871,23 @@ func checkFuzzer(t *taskConfig) error {
 
 	fmt.Printf("checking %v files...\n", len(files))
 
-	remaining := transform.SliceToChan(files)
+	batchSize := calcBatchSize(len(files), t.numProcesses)
+	batches := batchFiles(files, batchSize)
+	remaining := transform.SliceToChan(batches)
 
 	pb := t.progressBuilder(os.Stdout, nil)
 	defer pb.Stop()
 	var numDone uint32
+
+	onFilesDone := func(n int) {
+		done := atomic.AddUint32(&numDone, uint32(n))
+		pb.Update(progressbar.Status{
+			Total: len(files),
+			Segments: []progressbar.Segment{
+				{Count: int(done)},
+			},
+		})
+	}
 
 	failureChan := make(chan error, len(files))
 
@@ -755,22 +898,11 @@ func checkFuzzer(t *taskConfig) error {
 				select {
 				case <-ctx.Done():
 					return ctx.Err()
-				case file, ok := <-remaining:
+				case batch, ok := <-remaining:
 					if !ok {
 						return nil
 					}
-					atomic.AddUint32(&numDone, 1)
-					pb.Update(progressbar.Status{
-						Total: len(files),
-						Segments: []progressbar.Segment{
-							{Count: int(atomic.LoadUint32(&numDone))},
-						},
-					})
-
-					if out, err := t.runCmd(t.fuzzer, file); err != nil {
-						_, fuzzer := filepath.Split(t.fuzzer)
-						failureChan <- fmt.Errorf("fuzzer '%s' failed to process file '%s' with error: %w\nOutput:\n%s", fuzzer, file, err, string(out))
-					}
+					checkBatch(ctx, t, batch, onFilesDone, failureChan)
 				}
 			}
 		})
@@ -780,6 +912,7 @@ func checkFuzzer(t *taskConfig) error {
 		return err
 	}
 
+	pb.Stop()
 	close(failureChan)
 
 	if len(failureChan) > 0 {

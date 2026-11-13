@@ -49,6 +49,9 @@ struct wgpu::IsWGPUBitmask<Color> {
     static constexpr bool enable = true;
 };
 
+namespace dawn {
+namespace {
+
 TEST(BitmaskTests, BasicOperations) {
     Color test1 = Color::R | Color::G;
     ASSERT_EQ(1u | 2u, static_cast<uint32_t>(test1));
@@ -108,3 +111,6 @@ TEST(BitmaskTests, ZeroOrOneBits) {
     ASSERT_FALSE(HasZeroOrOneBits(static_cast<Color>(Color::G | Color::B)));
     ASSERT_FALSE(HasZeroOrOneBits(static_cast<Color>(Color::B | Color::A)));
 }
+
+}  // anonymous namespace
+}  // namespace dawn

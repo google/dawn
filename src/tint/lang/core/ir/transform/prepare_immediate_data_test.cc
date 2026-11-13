@@ -55,7 +55,7 @@ TEST_F(IR_PrepareImmediateDataTests, NoModify_NoInternalImmediateData) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<private, i32, read_write> = var undef
+  %v:ptr<private, i32, read_write> = var
 }
 
 )";
@@ -82,7 +82,7 @@ TEST_F(IR_PrepareImmediateDataTests, NoModify_UserImmediateData_NoInternalImmedi
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<immediate, i32, read> = var undef
+  %v:ptr<immediate, i32, read> = var
 }
 
 %foo = func():i32 {
@@ -110,7 +110,7 @@ TEST_F(IR_PrepareImmediateDataTests, NoUserImmedaiteData_OneInternalImmediateDat
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<private, i32, read_write> = var undef
+  %v:ptr<private, i32, read_write> = var
 }
 
 )";
@@ -122,8 +122,8 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %v:ptr<private, i32, read_write> = var undef
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %v:ptr<private, i32, read_write> = var
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 )";
@@ -177,7 +177,7 @@ TEST_F(IR_PrepareImmediateDataTests, NoUserImmediateData_MultipleInternalImmedia
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<private, i32, read_write> = var undef
+  %v:ptr<private, i32, read_write> = var
 }
 
 )";
@@ -191,8 +191,8 @@ tint_immediate_data_struct = struct @align(16), @block {
 }
 
 $B1: {  # root
-  %v:ptr<private, i32, read_write> = var undef
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %v:ptr<private, i32, read_write> = var
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 )";
@@ -228,7 +228,7 @@ TEST_F(IR_PrepareImmediateDataTests, UserImmediateData_MultipleInternalImmediate
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<immediate, i32, read> = var undef
+  %v:ptr<immediate, i32, read> = var
 }
 
 %foo = func():i32 {
@@ -249,7 +249,7 @@ tint_immediate_data_struct = struct @align(16), @block {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = func():i32 {

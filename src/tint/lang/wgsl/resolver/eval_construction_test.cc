@@ -35,7 +35,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 TEST_F(ConstEvalTest, Scalar_AFloat) {
     auto* expr = Expr(99.0_a);
-    auto* a = Const("a", expr);
+    auto* a = Const("a", ast::Type{}, expr);
     WrapInFunction(a);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -51,7 +51,7 @@ TEST_F(ConstEvalTest, Scalar_AFloat) {
 
 TEST_F(ConstEvalTest, Scalar_AInt) {
     auto* expr = Expr(99_a);
-    auto* a = Const("a", expr);
+    auto* a = Const("a", ast::Type{}, expr);
     WrapInFunction(a);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -157,7 +157,7 @@ TEST_P(ConstEvalZeroInitTest, Test) {
     auto& param = GetParam();
     auto ty = param.type(*this);
     auto* expr = Call(ty);
-    auto* a = Const("a", expr);
+    auto* a = Const("a", ast::Type{}, expr);
     WrapInFunction(a);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -518,7 +518,7 @@ TEST_F(ConstEvalTest, Vec3_Splat_bool) {
 
 TEST_F(ConstEvalTest, Vec3_FullConstruct_AInt) {
     auto* expr = Call<vec3<Infer>>(1_a, 2_a, 3_a);
-    auto* a = Const("a", expr);
+    auto* a = Const("a", ast::Type{}, expr);
     WrapInFunction(a);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -548,7 +548,7 @@ TEST_F(ConstEvalTest, Vec3_FullConstruct_AInt) {
 
 TEST_F(ConstEvalTest, Vec3_FullConstruct_AFloat) {
     auto* expr = Call<vec3<Infer>>(1.0_a, 2.0_a, 3.0_a);
-    auto* a = Const("a", expr);
+    auto* a = Const("a", ast::Type{}, expr);
     WrapInFunction(a);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1656,7 +1656,7 @@ TEST_P(ResolverConstEvalArrayInitTest, Test) {
     Enable(wgsl::Extension::kF16);
     auto& param = GetParam();
     auto* expr = param.input.Expr(*this);
-    auto* a = Const("a", expr);
+    auto* a = Const("a", ast::Type{}, expr);
     WrapInFunction(a);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1836,7 +1836,7 @@ TEST_F(ConstEvalTest, Struct_ZeroInit) {
                              });
 
     auto* expr = Call(ty.Of(s));
-    auto* a = Const("a", expr);
+    auto* a = Const("a", ast::Type{}, expr);
     WrapInFunction(a);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1883,7 +1883,7 @@ TEST_F(ConstEvalTest, Struct_Nested_ZeroInit) {
                         });
 
     auto* expr = Call(ty.Of(s));
-    auto* a = Const("a", expr);
+    auto* a = Const("a", ast::Type{}, expr);
     WrapInFunction(a);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

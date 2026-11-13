@@ -55,7 +55,7 @@
          %26 = OpLabel
                OpBranch %9
          %24 = OpLabel
-               OpUnreachable
+               OpBranch %7
           %7 = OpLabel
          %28 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
          %31 = OpLoad %uint %28 None

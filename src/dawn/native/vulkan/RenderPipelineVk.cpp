@@ -486,18 +486,19 @@ ResultOrUnknownError<RenderPipeline::SpecializationResult> RenderPipeline::Initi
     std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
     uint32_t stageCount = 0;
 
+    std::array<ShaderModule::ModuleAndSpirv, 2> modules;
+
     auto AddShaderStage = [&](const ShaderModule::CompileParameters& compileParams) -> MaybeError {
-        ShaderModule::ModuleAndSpirv moduleAndSpirv;
-        DAWN_TRY_ASSIGN(moduleAndSpirv,
+        DAWN_TRY_ASSIGN(modules[stageCount],
                         ToBackend(compileParams.stage->module)->GetHandleAndSpirv(compileParams));
-        mHasInputAttachment = mHasInputAttachment || moduleAndSpirv.hasInputAttachment;
+        mHasInputAttachment = mHasInputAttachment || modules[stageCount].hasInputAttachment;
         if (buildCacheKey) {
             // Record cache key for each shader since it will become inaccessible later on.
-            StreamIn(&mCacheKey, moduleAndSpirv.spirv);
+            StreamIn(&mCacheKey, modules[stageCount].spirv);
         }
 
         VkPipelineShaderStageCreateInfo* shaderStage = &shaderStages[stageCount];
-        shaderStage->module = moduleAndSpirv.module;
+        shaderStage->module = modules[stageCount].module;
         shaderStage->sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         shaderStage->pNext = nullptr;
         shaderStage->flags = 0;
@@ -903,19 +904,15 @@ ResultOrUnknownError<RenderPipeline::SpecializationResult> RenderPipeline::Initi
         // Without any specific toggle only vertex inputs can be made robust enough for WebGPU.
         robustnessCreateInfo.vertexInputs =
             VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_ROBUST_BUFFER_ACCESS;
-        robustnessCreateInfo.uniformBuffers = VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_DISABLED;
-        robustnessCreateInfo.storageBuffers = VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_DISABLED;
-        robustnessCreateInfo.images = VK_PIPELINE_ROBUSTNESS_IMAGE_BEHAVIOR_DISABLED;
 
-        if (device->IsToggleEnabled(Toggle::VulkanUseBufferRobustAccess2)) {
-            // Uniform buffers are checked with WebGPU validation and don't need robustness.
-            robustnessCreateInfo.storageBuffers =
-                VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_ROBUST_BUFFER_ACCESS_2;
-        }
-        if (device->IsToggleEnabled(Toggle::VulkanUseImageRobustAccess2)) {
-            robustnessCreateInfo.images =
-                VK_PIPELINE_ROBUSTNESS_IMAGE_BEHAVIOR_ROBUST_IMAGE_ACCESS_2;
-        }
+        // Device default for uniform and storage buffers is based on
+        // Toggle::VulkanUseBufferRobustAccess2.
+        robustnessCreateInfo.uniformBuffers =
+            VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_DEVICE_DEFAULT_EXT;
+        robustnessCreateInfo.storageBuffers =
+            VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_DEVICE_DEFAULT_EXT;
+        // Device default for images is based on Toggle::VulkanUseImageRobustAccess2.
+        robustnessCreateInfo.images = VK_PIPELINE_ROBUSTNESS_IMAGE_BEHAVIOR_DEVICE_DEFAULT_EXT;
     }
 
     // Record cache key information now since createInfo is not stored. Only store for the noop
@@ -936,20 +933,24 @@ ResultOrUnknownError<RenderPipeline::SpecializationResult> RenderPipeline::Initi
         return DAWN_PIPELINE_UNCATEGORIZED_ERROR(
             "CreateGraphicsPipelines failed with VK_ERROR_UNKNOWN");
     } else {
-        DAWN_TRY(CheckVkSuccess(vkResult, "CreateGraphicsPipelines"));
+        DAWN_TRY_WITH_CLEANUP(CheckVkSuccess(vkResult, "CreateGraphicsPipelines"), {
+            // The ErrorInjector can swap the result from a VK_SUCCESS to something else. In this
+            // case, the pipeline would have been created successfully, but we now think we have an
+            // error. So, while this should never happen outside the ErrorInjector, make sure we
+            // cleanup the pipeline if needed.
+            if (pipeline != VK_NULL_HANDLE) {
+                device->fn.DestroyPipeline(device->GetVkDevice(), pipeline, nullptr);
+            }
+        });
     }
 
     result.pipeline = AcquireRef(new RefCountedVkHandle<VkPipeline>(device, pipeline));
     cacheTimer.RecordMicroseconds(cache->CacheHit() ? "Vulkan.CreateGraphicsPipelines.CacheHit"
                                                     : "Vulkan.CreateGraphicsPipelines.CacheMiss");
 
-    DAWN_TRY(cache->DidCompilePipeline());
+    cache->DidCompilePipeline();
 
     SetLabelImpl();
-
-    for (uint32_t i = 0; i < stageCount; ++i) {
-        device->fn.DestroyShaderModule(device->GetVkDevice(), shaderStages[i].module, nullptr);
-    }
 
     return result;
 }

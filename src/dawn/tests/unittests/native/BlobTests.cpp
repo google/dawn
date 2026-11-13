@@ -40,6 +40,9 @@
 namespace dawn::native {
 namespace {
 
+using ::testing::MockFunction;
+using ::testing::StrictMock;
+
 // Test that a blob starts empty.
 TEST(BlobTests, DefaultEmpty) {
     Blob b;
@@ -74,7 +77,7 @@ TEST(BlobTests, EmptySizedCreation) {
 // called on destruction.
 TEST(BlobTests, UnsafeCreateWithDeleter) {
     unsigned char data[13] = "hello world!";
-    testing::StrictMock<testing::MockFunction<void()>> mockDeleter;
+    StrictMock<MockFunction<void()>> mockDeleter;
     {
         // Make a blob with a mock deleter.
         Blob b = DAWN_UNSAFE_TODO(
@@ -94,7 +97,7 @@ TEST(BlobTests, UnsafeCreateWithDeleter) {
 // The deleter is still called on destruction, and the blob is normalized to be empty.
 TEST(BlobTests, UnsafeCreateWithDeleterZeroSize) {
     unsigned char data[13] = "hello world!";
-    testing::StrictMock<testing::MockFunction<void()>> mockDeleter;
+    StrictMock<MockFunction<void()>> mockDeleter;
     {
         // Make a blob with a mock deleter.
         Blob b =
@@ -113,7 +116,7 @@ TEST(BlobTests, UnsafeCreateWithDeleterZeroSize) {
 // Test that you can create a blob with UnsafeCreateWithDeleter that points to nothing.
 // The deleter should still be called.
 TEST(BlobTests, UnsafeCreateWithDeleterEmpty) {
-    testing::StrictMock<testing::MockFunction<void()>> mockDeleter;
+    StrictMock<MockFunction<void()>> mockDeleter;
     {
         // Make a blob with a mock deleter.
         Blob b = DAWN_UNSAFE_TODO(
@@ -171,7 +174,7 @@ TEST(BlobTests, MoveAssignOver) {
     std::ranges::copy(std::as_bytes(std::span(data)), b1.Data().begin());
 
     // Create another blob with a mock deleter.
-    testing::StrictMock<testing::MockFunction<void()>> mockDeleter;
+    StrictMock<MockFunction<void()>> mockDeleter;
     Blob b2 =
         DAWN_UNSAFE_TODO(Blob::UnsafeCreateWithDeleter(nullptr, 0, [&] { mockDeleter.Call(); }));
 
@@ -190,7 +193,7 @@ TEST(BlobTests, MoveAssignOver) {
 TEST(BlobTests, OffsetMoveConstructor) {
     std::array<unsigned char, 13> data{"hello world!"};
     static constexpr size_t kOffset = 2u;
-    testing::StrictMock<testing::MockFunction<void()>> mockDeleter;
+    StrictMock<MockFunction<void()>> mockDeleter;
 
     // Make a blob with a mock deleter.
     Blob b1 = DAWN_UNSAFE_TODO(

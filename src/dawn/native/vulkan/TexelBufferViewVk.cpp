@@ -48,13 +48,15 @@ ResultOrError<Ref<TexelBufferView>> TexelBufferView::Create(
 TexelBufferView::~TexelBufferView() = default;
 
 MaybeError TexelBufferView::Initialize(const UnpackedPtr<TexelBufferViewDescriptor>& descriptor) {
+    Device* device = ToBackend(GetDevice());
     Buffer* buffer = ToBackend(GetBuffer());
-    VkBuffer handle = buffer->GetHandle();
-    if (buffer->IsDestroyed() || handle == VK_NULL_HANDLE) {
+    if (buffer->IsDestroyed()) {
+        mHandle = device->GetPlaceholderTexelBufferViewHandle();
         return {};
     }
 
-    Device* device = ToBackend(GetDevice());
+    VkBuffer handle = buffer->GetHandle();
+    DAWN_ASSERT(handle != VK_NULL_HANDLE);
 
     VkBufferViewCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
@@ -66,6 +68,7 @@ MaybeError TexelBufferView::Initialize(const UnpackedPtr<TexelBufferViewDescript
     DAWN_TRY(CheckVkSuccess(
         device->fn.CreateBufferView(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
         "CreateBufferView"));
+    mOwnsHandle = true;
 
     SetLabelImpl();
     return {};
@@ -73,19 +76,27 @@ MaybeError TexelBufferView::Initialize(const UnpackedPtr<TexelBufferViewDescript
 
 void TexelBufferView::DestroyImpl(DestroyReason reason) {
     Device* device = ToBackend(GetDevice());
-    if (mHandle != VK_NULL_HANDLE) {
+    if (mOwnsHandle) {
         device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
-        mHandle = VK_NULL_HANDLE;
+        mOwnsHandle = false;
     }
+    mHandle = device->GetPlaceholderTexelBufferViewHandle();
     TexelBufferViewBase::DestroyImpl(reason);
 }
 
 VkBufferView TexelBufferView::GetHandle() const {
+    DAWN_ASSERT(mOwnsHandle);
+    return mHandle;
+}
+
+VkBufferView TexelBufferView::GetHandleOrPlaceholder() const {
     return mHandle;
 }
 
 void TexelBufferView::SetLabelImpl() {
-    SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_TexelBufferView", GetLabel());
+    if (mOwnsHandle) {
+        SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_TexelBufferView", GetLabel());
+    }
 }
 
 }  // namespace dawn::native::vulkan

@@ -29,15 +29,17 @@
 #include <array>
 #include <functional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "src/dawn/common/Math.h"
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
+
+using ::testing::ValuesIn;
 
 // Helper for replacing all occurrences of substr in str with replacement
 std::string ReplaceAll(std::string str, const std::string& substr, const std::string& replacement) {
@@ -498,8 +500,8 @@ class ComputeLayoutMemoryBufferTests
         if (!IsD3D12()) {
             mUseDxcEnabledOrNonD3D12 = true;
         } else {
-            for (auto* enabledToggle : GetParam().forceEnabledWorkarounds) {
-                if (DAWN_UNSAFE_TODO(strncmp(enabledToggle, "use_dxc", 7)) == 0) {
+            for (std::string_view enabledToggle : GetParam().forceEnabledWorkarounds) {
+                if (enabledToggle.starts_with("use_dxc")) {
                     mUseDxcEnabledOrNonD3D12 = true;
                     break;
                 }
@@ -671,8 +673,7 @@ fn main() {
     // silently transformed into a quiet NaN). Having NaN and Inf floating point data in input may
     // result in bitwise mismatch.
     field.CheckData([&](uint32_t offset, uint32_t size) {
-        DAWN_UNSAFE_TODO(
-            EXPECT_BUFFER_U8_RANGE_EQ(expectedData.data() + offset, outputBuf, offset, size))
+        EXPECT_BUFFER_U8_RANGE_EQ(&expectedData[offset], outputBuf, offset, size)
             << "offset: " << offset << "\n Input buffer:" << inputData << "Shader:\n"
             << shader << "\n";
     });
@@ -753,8 +754,7 @@ fn main() {
     // silently transformed into a quiet NaN). Having NaN and Inf floating point data in input may
     // result in bitwise mismatch.
     field.CheckData([&](uint32_t offset, uint32_t size) {
-        DAWN_UNSAFE_TODO(
-            EXPECT_BUFFER_U8_RANGE_EQ(expectedData.data() + offset, outputBuf, offset, size))
+        EXPECT_BUFFER_U8_RANGE_EQ(&expectedData[offset], outputBuf, offset, size)
             << "offset: " << offset << "\n Input buffer:" << inputData << "Shader:\n"
             << shader << "\n";
     });
@@ -1042,7 +1042,7 @@ auto GenerateParams() {
 
 INSTANTIATE_TEST_SUITE_P(,
                          ComputeLayoutMemoryBufferTests,
-                         ::testing::ValuesIn(GenerateParams()),
+                         ValuesIn(GenerateParams()),
                          DawnTestBase::PrintToStringParamName("ComputeLayoutMemoryBufferTests"));
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ComputeLayoutMemoryBufferTests);
 

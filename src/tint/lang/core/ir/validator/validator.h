@@ -405,6 +405,7 @@ class Validator {
     bool Check16BitInteger(std::function<diag::Diagnostic&()>& diag);
     bool Check64BitInteger(std::function<diag::Diagnostic&()>& diag);
     bool Check16BitFloat(std::function<diag::Diagnostic&()>& diag);
+    bool Check16BitBFloat(std::function<diag::Diagnostic&()>& diag, const core::type::Type* parent);
 
     /// NOTE: Expects to be called by CheckType, i.e. on a 'root' type, not in the middle a walk of
     ///       elements of a composite..

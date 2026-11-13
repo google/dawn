@@ -316,16 +316,16 @@ MaybeError Queue::SubmitPendingCommandsImpl() {
 }
 
 MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
-    // CommandBuffer::Execute() will modify the state of the global immediate device context, it may
-    // affect following usage of it.
+    // CommandBuffer::RecordCommands() will modify the state of the global immediate device
+    // context, it may affect following usage of it.
     // TODO(dawn:1770): figure how if we need to track and restore the state of the immediate device
     // context.
-    TRACE_EVENT_BEGIN(DAWN_TRACE_CATEGORY("recording"), "CommandBufferD3D11::Execute");
+    TRACE_EVENT_BEGIN(DAWN_TRACE_CATEGORY("recording"), "CommandBufferD3D11::RecordCommands");
     {
         auto commandContext =
             GetScopedSwapStatePendingCommandContext(QueueBase::SubmitMode::Normal);
         for (CommandBufferBase* commandBuffer : commands) {
-            DAWN_TRY(ToBackend(commandBuffer)->Execute(&commandContext));
+            DAWN_TRY(ToBackend(commandBuffer)->RecordCommands(&commandContext));
         }
     }
     DAWN_TRY(SubmitPendingCommandsImpl());
@@ -505,8 +505,8 @@ ResultOrError<ExecutionSerial> MonitoredFenceQueue::CheckCompletedSerialsImpl() 
         ID3D11Device* d3d11Device = ToBackend(GetDevice())->GetD3D11Device();
         DAWN_TRY(CheckHRESULT(d3d11Device->GetDeviceRemovedReason(),
                               "ID3D11Device::GetDeviceRemovedReason"));
-        // Otherwise, return a generic device lost error.
-        return DAWN_BACKEND_DEVICE_LOST_ERROR("Device lost");
+        // A removed device must report a failing HRESULT.
+        DAWN_UNREACHABLE();
     }
 
     DAWN_TRY(RecycleSystemEventReceivers(completedSerial));
@@ -838,7 +838,23 @@ MaybeError DelayFlushQueue::BlockWaitForLastSubmittedSerial(
     DAWN_TRY_ASSIGN(receiver, GetSystemEventReceiver());
     commandContext->Flush1(D3D11_CONTEXT_TYPE_ALL, receiver.GetPrimitive().Get());
 
-    DWORD result = WaitForSingleObject(receiver.GetPrimitive().Get(), INFINITE);
+    // Flush1() does not return an HRESULT, so if the device is already removed (or becomes removed
+    // before the event is signaled), the event might never be signaled. Wait in intervals and
+    // check IsQueryCompleted() on timeout to avoid blocking indefinitely.
+    DAWN_CHECK(!mPendingQueries.empty());
+    DWORD result = WAIT_TIMEOUT;
+    do {
+        result = WaitForSingleObject(receiver.GetPrimitive().Get(), 1000);
+        if (result == WAIT_TIMEOUT) {
+            // If the device is lost, IsQueryCompleted() will return an error.
+            bool done = false;
+            DAWN_TRY_ASSIGN(done, IsQueryCompleted(commandContext, /*requireFlush=*/false,
+                                                   &mPendingQueries.back()));
+            if (done) {
+                return {};
+            }
+        }
+    } while (result == WAIT_TIMEOUT);
     DAWN_UNRECOVERABLE_ERROR_IF(result != WAIT_OBJECT_0, "WaitForSingleObject() failed");
 
     SystemEventReceiver returnedReceivers[] = {std::move(receiver)};

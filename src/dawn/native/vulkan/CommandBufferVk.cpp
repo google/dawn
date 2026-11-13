@@ -235,20 +235,9 @@ VkRect2D GetAlignedRenderArea(VkExtent2D granularity, BeginRenderPassCmd* render
     return renderArea;
 }
 
-// Returns the render area from `renderPassCmd` aligned to render area granularity for
-// `renderPassVk`.
-VkRect2D GetAlignedRenderArea(Device* device,
-                              VkRenderPass renderPassVk,
-                              BeginRenderPassCmd* renderPassCmd) {
-    VkExtent2D granularity;
-    device->fn.GetRenderAreaGranularity(device->GetVkDevice(), renderPassVk, &granularity);
-
-    return GetAlignedRenderArea(granularity, renderPassCmd);
-}
-
 class DescriptorSetTracker : public BindGroupTrackerBase<true> {
   public:
-    bool AreLayoutsCompatible() override {
+    bool CanSkipDirtying() override {
         return mLastAppliedPipeline != nullptr &&
                mLastAppliedPipeline->GetLayout() == mPipeline->GetLayout() &&
                mLastAppliedImmediateSize == mImmediateSize;
@@ -857,7 +846,8 @@ MaybeError RecordBeginDynamicRenderPass(CommandRecordingContext* recordingContex
         }
 
         colorAttachment.loadOp = VulkanAttachmentLoadOp(attachmentInfo.loadOp);
-        colorAttachment.storeOp = VulkanAttachmentStoreOp(attachmentInfo.storeOp);
+        colorAttachment.storeOp =
+            VulkanAttachmentStoreOp(device, attachmentInfo.storeOp, /*isReadOnly=*/false);
         colorAttachment.clearValue = ToVkClearValue(
             attachmentInfo.clearColor, view->GetFormat().GetAspectInfo(Aspect::Color).baseType);
     }
@@ -886,7 +876,8 @@ MaybeError RecordBeginDynamicRenderPass(CommandRecordingContext* recordingContex
             depthAttachment.resolveImageView = nullImageView;
             depthAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
             depthAttachment.loadOp = VulkanAttachmentLoadOp(attachmentInfo.depthLoadOp);
-            depthAttachment.storeOp = VulkanAttachmentStoreOp(attachmentInfo.depthStoreOp);
+            depthAttachment.storeOp = VulkanAttachmentStoreOp(device, attachmentInfo.depthStoreOp,
+                                                              attachmentInfo.depthReadOnly);
             depthAttachment.clearValue.depthStencil.depth = attachmentInfo.clearDepth;
             renderInfo.pDepthAttachment = &depthAttachment;
         }
@@ -900,7 +891,8 @@ MaybeError RecordBeginDynamicRenderPass(CommandRecordingContext* recordingContex
             stencilAttachment.resolveImageView = nullImageView;
             stencilAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
             stencilAttachment.loadOp = VulkanAttachmentLoadOp(attachmentInfo.stencilLoadOp);
-            stencilAttachment.storeOp = VulkanAttachmentStoreOp(attachmentInfo.stencilStoreOp);
+            stencilAttachment.storeOp = VulkanAttachmentStoreOp(
+                device, attachmentInfo.stencilStoreOp, attachmentInfo.stencilReadOnly);
             stencilAttachment.clearValue.depthStencil.stencil = attachmentInfo.clearStencil;
             renderInfo.pStencilAttachment = &stencilAttachment;
         }
@@ -934,8 +926,7 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
     VkCommandBuffer commands = recordingContext->commandBuffer;
 
     // Query a VkRenderPass from the cache
-    VkRenderPass renderPassVK = VK_NULL_HANDLE;
-    uint64_t renderPassId = 0;
+    RenderPassCache::RenderPassInfo renderPassInfo;
     {
         RenderPassCacheQuery query;
 
@@ -960,10 +951,7 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
 
         query.SetSampleCount(renderPass->attachmentState->GetSampleCount());
 
-        RenderPassCache::RenderPassInfo renderPassInfo;
         DAWN_TRY_ASSIGN(renderPassInfo, device->GetRenderPassCache()->GetRenderPass(query));
-        renderPassVK = renderPassInfo.renderPass;
-        renderPassId = renderPassInfo.uniqueId;
     }
 
     // Query a framebuffer from the cache and gather the clear values for the attachments at the
@@ -971,7 +959,8 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
     FramebufferCacheQuery framebufferQuery;
     VkFramebuffer framebuffer = VK_NULL_HANDLE;
     {
-        framebufferQuery.SetRenderPass(renderPassId, renderPass->width, renderPass->height);
+        framebufferQuery.SetRenderPass(renderPassInfo.uniqueId, renderPass->width,
+                                       renderPass->height);
 
         // Fill in the attachment info that will be chained in the framebuffer create info.
         for (auto i : renderPass->attachmentState->GetColorAttachmentsMask()) {
@@ -1016,7 +1005,7 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
                     createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
                     createInfo.pNext = nullptr;
                     createInfo.flags = 0;
-                    createInfo.renderPass = renderPassVK;
+                    createInfo.renderPass = renderPassInfo.renderPass;
                     createInfo.attachmentCount = query.attachmentCount;
                     createInfo.pAttachments = AsVkArray(query.attachments.data());
                     createInfo.width = query.width;
@@ -1035,9 +1024,9 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
     VkRenderPassBeginInfo beginInfo;
     beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     beginInfo.pNext = nullptr;
-    beginInfo.renderPass = renderPassVK;
+    beginInfo.renderPass = renderPassInfo.renderPass;
     beginInfo.framebuffer = framebuffer;
-    beginInfo.renderArea = GetAlignedRenderArea(device, renderPassVK, renderPass);
+    beginInfo.renderArea = GetAlignedRenderArea(renderPassInfo.renderAreaGranularity, renderPass);
     beginInfo.clearValueCount = framebufferQuery.attachmentCount;
     beginInfo.pClearValues = framebufferQuery.clearValues.data();
 
@@ -1550,6 +1539,16 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                 break;
             }
 
+            case Command::SetResourceUsage: {
+                SetResourceUsageCmd* cmd = mCommands.NextCommand<SetResourceUsageCmd>();
+                UsageBindingResource resource{
+                    .buffer = cmd->buffer.Get(),
+                    .texture = cmd->texture.Get(),
+                };
+                cmd->table->SetResourceUsage(&resource, cmd->usage);
+                break;
+            }
+
             default:
                 break;
         }
@@ -1716,6 +1715,16 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
                 break;
             }
 
+            case Command::SetResourceUsage: {
+                SetResourceUsageCmd* cmd = mCommands.NextCommand<SetResourceUsageCmd>();
+                UsageBindingResource resource{
+                    .buffer = cmd->buffer.Get(),
+                    .texture = cmd->texture.Get(),
+                };
+                cmd->table->SetResourceUsage(&resource, cmd->usage);
+                break;
+            }
+
             default:
                 DAWN_UNREACHABLE();
         }
@@ -1798,7 +1807,6 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
     auto EncodeRenderBundleCommand = [&](CommandIterator* iter, Command type) -> MaybeError {
         switch (type) {
             case Command::Draw: {
-                workCommandCount++;
                 DrawCmd* draw = iter->NextCommand<DrawCmd>();
 
                 if (draw->vertexCount > 0 && draw->instanceCount > 0) {
@@ -1807,12 +1815,12 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                             vk.CmdDraw(commands, draw->vertexCount, draw->instanceCount,
                                        draw->firstVertex, draw->firstInstance);
                         }));
+                    workCommandCount++;
                 }
                 break;
             }
 
             case Command::DrawIndexed: {
-                workCommandCount++;
                 DrawIndexedCmd* draw = iter->NextCommand<DrawIndexedCmd>();
 
                 if (draw->indexCount > 0 && draw->instanceCount > 0) {
@@ -1821,12 +1829,12 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                         vk.CmdDrawIndexed(commands, draw->indexCount, draw->instanceCount,
                                           draw->firstIndex, draw->baseVertex, draw->firstInstance);
                     }));
+                    workCommandCount++;
                 }
                 break;
             }
 
             case Command::DrawIndirect: {
-                workCommandCount++;
                 DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
 
                 IndirectDrawMetadata::ValidatedIndirectDraw validatedDraw =
@@ -1839,11 +1847,12 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                     vk.CmdDrawIndirect(commands, indirectBuffer->GetHandle(),
                                        validatedDraw.indirectOffset, 1, 0);
                 }));
+
+                workCommandCount++;
                 break;
             }
 
             case Command::DrawIndexedIndirect: {
-                workCommandCount++;
                 DrawIndexedIndirectCmd* draw = iter->NextCommand<DrawIndexedIndirectCmd>();
 
                 IndirectDrawMetadata::ValidatedIndirectDraw validatedDraw =
@@ -1856,11 +1865,12 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                     vk.CmdDrawIndexedIndirect(commands, indirectBuffer->GetHandle(),
                                               validatedDraw.indirectOffset, 1, 0);
                 }));
+
+                workCommandCount++;
                 break;
             }
 
             case Command::MultiDrawIndirect: {
-                workCommandCount++;
                 MultiDrawIndirectCmd* cmd = iter->NextCommand<MultiDrawIndirectCmd>();
 
                 Buffer* indirectBuffer = ToBackend(cmd->indirectBuffer.Get());
@@ -1881,11 +1891,11 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                                                    static_cast<VkDeviceSize>(cmd->drawCountOffset),
                                                    cmd->maxDrawCount, kDrawIndirectSize);
                     }
+                    workCommandCount++;
                 }));
                 break;
             }
             case Command::MultiDrawIndexedIndirect: {
-                workCommandCount++;
                 MultiDrawIndexedIndirectCmd* cmd = iter->NextCommand<MultiDrawIndexedIndirectCmd>();
 
                 Buffer* indirectBuffer = ToBackend(cmd->indirectBuffer.Get());
@@ -1907,6 +1917,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                             static_cast<VkDeviceSize>(cmd->drawCountOffset), cmd->maxDrawCount,
                             kDrawIndexedIndirectSize);
                     }
+                    workCommandCount++;
                 }));
 
                 break;
@@ -2124,33 +2135,36 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             }
 
             case Command::BeginOcclusionQuery: {
-                workCommandCount++;
                 BeginOcclusionQueryCmd* cmd = mCommands.NextCommand<BeginOcclusionQueryCmd>();
 
                 device->fn.CmdBeginQuery(commands, ToBackend(cmd->querySet.Get())->GetHandle(),
                                          uint32_t{cmd->queryIndex}, 0);
+
+                workCommandCount++;
                 break;
             }
 
             case Command::EndOcclusionQuery: {
-                workCommandCount++;
                 EndOcclusionQueryCmd* cmd = mCommands.NextCommand<EndOcclusionQueryCmd>();
 
                 device->fn.CmdEndQuery(commands, ToBackend(cmd->querySet.Get())->GetHandle(),
                                        uint32_t{cmd->queryIndex});
 
                 UpdateQueryAvailability(cmd);
+
+                workCommandCount++;
                 break;
             }
 
             case Command::WriteTimestamp: {
-                workCommandCount++;
                 WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
 
                 RecordWriteTimestampCmd(recordingContext, device, cmd->querySet.Get(),
                                         cmd->queryIndex, true, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
 
                 UpdateQueryAvailability(cmd);
+
+                workCommandCount++;
                 break;
             }
 

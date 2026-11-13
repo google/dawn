@@ -49,7 +49,7 @@ TEST_F(SpirvParserTest, FunctionVar) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, u32, read_write> = var undef
+    %2:ptr<function, u32, read_write> = var
     ret
   }
 }
@@ -76,7 +76,7 @@ TEST_F(SpirvParserTest, FunctionVar_RelaxedPrecision) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, u32, read_write> = var undef
+    %2:ptr<function, u32, read_write> = var
     ret
   }
 }
@@ -128,7 +128,7 @@ TEST_F(SpirvParserTest, PrivateVar) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<private, u32, read_write> = var undef
+  %1:ptr<private, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -198,7 +198,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read> = var undef @binding_point(1, 2)
+  %1:ptr<storage, tint_symbol_1, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -237,7 +237,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read_write> = var undef @binding_point(1, 2)
+  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -282,7 +282,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read_write> = var undef @binding_point(1, 2)
+  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -330,7 +330,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read_write> = var undef @binding_point(1, 2)
+  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -376,8 +376,8 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read> = var undef @binding_point(1, 2)
-  %2:ptr<storage, tint_symbol_1, read_write> = var undef @binding_point(1, 3)
+  %1:ptr<storage, tint_symbol_1, read> = var @binding_point(1, 2)
+  %2:ptr<storage, tint_symbol_1, read_write> = var @binding_point(1, 3)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -416,7 +416,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<uniform, tint_symbol_1, read> = var undef @binding_point(1, 2)
+  %1:ptr<uniform, tint_symbol_1, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -454,7 +454,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read_write> = var undef @binding_point(1, 2)
+  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -493,7 +493,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read_write> = var undef @binding_point(1, 2)
+  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -537,7 +537,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read_write> = var undef @binding_point(1, 2)
+  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -580,7 +580,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read> = var undef @binding_point(1, 2)
+  %1:ptr<storage, tint_symbol_1, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -611,7 +611,7 @@ TEST_F(SpirvParserTest, UniformConstantVar) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, sampler, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, sampler, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -649,7 +649,7 @@ tint_symbol_2 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<immediate, tint_symbol_2, read> = var undef
+  %1:ptr<immediate, tint_symbol_2, read> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -711,77 +711,77 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinCase{
             "vec4f",
             "FragCoord",
-            "%1:ptr<__in, vec4<f32>, read> = var undef @builtin(position)",
+            "%1:ptr<__in, vec4<f32>, read> = var @builtin(position)",
         },
         BuiltinCase{
             "bool",
             "FrontFacing",
-            "%1:ptr<__in, bool, read> = var undef @builtin(front_facing)",
+            "%1:ptr<__in, bool, read> = var @builtin(front_facing)",
         },
         BuiltinCase{
             "vec3u",
             "GlobalInvocationId",
-            "%1:ptr<__in, vec3<u32>, read> = var undef @builtin(global_invocation_id)",
+            "%1:ptr<__in, vec3<u32>, read> = var @builtin(global_invocation_id)",
         },
         BuiltinCase{
             "u32",
             "InstanceIndex",
-            "%1:ptr<__in, u32, read> = var undef @builtin(instance_index)",
+            "%1:ptr<__in, u32, read> = var @builtin(instance_index)",
         },
         BuiltinCase{
             "vec3u",
             "LocalInvocationId",
-            "%1:ptr<__in, vec3<u32>, read> = var undef @builtin(local_invocation_id)",
+            "%1:ptr<__in, vec3<u32>, read> = var @builtin(local_invocation_id)",
         },
         BuiltinCase{
             "u32",
             "LocalInvocationIndex",
-            "%1:ptr<__in, u32, read> = var undef @builtin(local_invocation_index)",
+            "%1:ptr<__in, u32, read> = var @builtin(local_invocation_index)",
         },
         BuiltinCase{
             "vec3u",
             "NumWorkgroups",
-            "%1:ptr<__in, vec3<u32>, read> = var undef @builtin(num_workgroups)",
+            "%1:ptr<__in, vec3<u32>, read> = var @builtin(num_workgroups)",
         },
         BuiltinCase{
             "u32",
             "SampleId",
-            "%1:ptr<__in, u32, read> = var undef @builtin(sample_index)",
+            "%1:ptr<__in, u32, read> = var @builtin(sample_index)",
         },
         BuiltinCase{
             "arr_u32_1",
             "SampleMask",
-            "%1:ptr<__in, array<u32, 1>, read> = var undef @builtin(sample_mask)",
+            "%1:ptr<__in, array<u32, 1>, read> = var @builtin(sample_mask)",
         },
         BuiltinCase{
             "u32",
             "SubgroupId",
-            "%1:ptr<__in, u32, read> = var undef @builtin(subgroup_id)",
+            "%1:ptr<__in, u32, read> = var @builtin(subgroup_id)",
         },
         BuiltinCase{
             "u32",
             "SubgroupSize",
-            "%1:ptr<__in, u32, read> = var undef @builtin(subgroup_size)",
+            "%1:ptr<__in, u32, read> = var @builtin(subgroup_size)",
         },
         BuiltinCase{
             "u32",
             "SubgroupLocalInvocationId",
-            "%1:ptr<__in, u32, read> = var undef @builtin(subgroup_invocation_id)",
+            "%1:ptr<__in, u32, read> = var @builtin(subgroup_invocation_id)",
         },
         BuiltinCase{
             "u32",
             "NumSubgroups",
-            "%1:ptr<__in, u32, read> = var undef @builtin(num_subgroups)",
+            "%1:ptr<__in, u32, read> = var @builtin(num_subgroups)",
         },
         BuiltinCase{
             "u32",
             "VertexIndex",
-            "%1:ptr<__in, u32, read> = var undef @builtin(vertex_index)",
+            "%1:ptr<__in, u32, read> = var @builtin(vertex_index)",
         },
         BuiltinCase{
             "vec3u",
             "WorkgroupId",
-            "%1:ptr<__in, vec3<u32>, read> = var undef @builtin(workgroup_id)",
+            "%1:ptr<__in, vec3<u32>, read> = var @builtin(workgroup_id)",
         }),
     PrintBuiltinCase);
 
@@ -823,17 +823,17 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinCase{
             "f32",
             "PointSize",
-            "%1:ptr<__out, f32, read_write> = var undef @builtin(__point_size)",
+            "%1:ptr<__out, f32, read_write> = var @builtin(__point_size)",
         },
         BuiltinCase{
             "vec4f",
             "Position",
-            "%1:ptr<__out, vec4<f32>, read_write> = var undef @builtin(position)",
+            "%1:ptr<__out, vec4<f32>, read_write> = var @builtin(position)",
         },
         BuiltinCase{
             "arr_u32_1",
             "SampleMask",
-            "%1:ptr<__out, array<u32, 1>, read_write> = var undef @builtin(sample_mask)",
+            "%1:ptr<__out, array<u32, 1>, read_write> = var @builtin(sample_mask)",
         }),
     PrintBuiltinCase);
 
@@ -858,7 +858,7 @@ TEST_F(SpirvParserTest, Invariant_OnVariable) {
                OpReturn
                OpFunctionEnd
 )",
-              "%1:ptr<__out, vec4<f32>, read_write> = var undef @invariant @builtin(position)");
+              "%1:ptr<__out, vec4<f32>, read_write> = var @invariant @builtin(position)");
 }
 
 struct LocationCase {
@@ -925,33 +925,33 @@ INSTANTIATE_TEST_SUITE_P(SpirvParser,
                          testing::Values(
                              LocationCase{
                                  "OpDecorate %var Location 1 ",
-                                 "var undef @location(1)",
+                                 "var @location(1)",
                              },
                              LocationCase{
                                  "OpDecorate %var Location 2 "
                                  "OpDecorate %var NoPerspective ",
-                                 "var undef @location(2) @interpolate(linear)",
+                                 "var @location(2) @interpolate(linear)",
                              },
                              LocationCase{
                                  "OpDecorate %var Location 3 "
                                  "OpDecorate %var Flat ",
-                                 "var undef @location(3) @interpolate(flat)",
+                                 "var @location(3) @interpolate(flat)",
                              },
                              LocationCase{
                                  "OpDecorate %var Location 4 "
                                  "OpDecorate %var Centroid ",
-                                 "var undef @location(4) @interpolate(perspective, centroid)",
+                                 "var @location(4) @interpolate(perspective, centroid)",
                              },
                              LocationCase{
                                  "OpDecorate %var Location 5 "
                                  "OpDecorate %var Sample ",
-                                 "var undef @location(5) @interpolate(perspective, sample)",
+                                 "var @location(5) @interpolate(perspective, sample)",
                              },
                              LocationCase{
                                  "OpDecorate %var Location 6 "
                                  "OpDecorate %var NoPerspective "
                                  "OpDecorate %var Centroid ",
-                                 "var undef @location(6) @interpolate(linear, centroid)",
+                                 "var @location(6) @interpolate(linear, centroid)",
                              }));
 
 TEST_F(SpirvParserTest, Vertex_Output_I32) {
@@ -976,7 +976,7 @@ TEST_F(SpirvParserTest, Vertex_Output_I32) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<__out, i32, read_write> = var undef @location(0) @interpolate(flat)
+  %1:ptr<__out, i32, read_write> = var @location(0) @interpolate(flat)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1009,7 +1009,7 @@ TEST_F(SpirvParserTest, Vertex_Output_U32) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<__out, u32, read_write> = var undef @location(0) @interpolate(flat)
+  %1:ptr<__out, u32, read_write> = var @location(0) @interpolate(flat)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1043,7 +1043,7 @@ TEST_F(SpirvParserTest, Vertex_Output_Vec3_I32) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<__out, vec3<i32>, read_write> = var undef @location(0) @interpolate(flat)
+  %1:ptr<__out, vec3<i32>, read_write> = var @location(0) @interpolate(flat)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1076,7 +1076,7 @@ TEST_F(SpirvParserTest, Vertex_Output_F32) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<__out, f32, read_write> = var undef @location(0)
+  %1:ptr<__out, f32, read_write> = var @location(0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1275,7 +1275,7 @@ TEST_F(SpirvParserTest, Var_OpSpecConstantTrue_NoSpecId) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, bool, read_write> = var undef
+    %2:ptr<function, bool, read_write> = var
     store %2, true
     ret
   }
@@ -1342,7 +1342,7 @@ TEST_F(SpirvParserTest, Var_OpSpecConstantFalse_NoSpecId) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, bool, read_write> = var undef
+    %2:ptr<function, bool, read_write> = var
     store %2, false
     ret
   }
@@ -3274,7 +3274,7 @@ $B1: {  # root
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:ptr<function, array<f32, 3>, read_write> = var undef
+    %4:ptr<function, array<f32, 3>, read_write> = var
     %5:array<f32, 3> = construct %1, 2.0f, %2
     store %4, %5
     %6:ptr<function, f32, read_write> = access %4, 2u
@@ -3328,7 +3328,7 @@ $B1: {  # root
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:ptr<function, tint_symbol_2, read_write> = var undef
+    %3:ptr<function, tint_symbol_2, read_write> = var
     %4:tint_symbol_2 = construct %1, 2.0f
     store %3, %4
     %5:ptr<function, f32, read_write> = access %3, 1i
@@ -3405,12 +3405,12 @@ TEST_F(SpirvParserTest, InterpolationFlatNoLocation) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<__in, u32, read> = var undef @builtin(sample_index)
+  %1:ptr<__in, u32, read> = var @builtin(sample_index)
 }
 
 %main = @fragment func():void {
   $B2: {
-    undef = phony %1
+    phony %1
     %3:u32 = load %1
     ret
   }
@@ -3444,7 +3444,7 @@ $B1: {  # root
 
 %main = @fragment func():void {
   $B2: {
-    undef = phony %1
+    phony %1
     ret
   }
 }
@@ -3493,8 +3493,8 @@ TEST_F(SpirvParserTest, PrimitiveIndex) {
 )",
               R"(
 $B1: {  # root
-  %main_primitive_id_Input:ptr<__in, u32, read> = var undef @builtin(primitive_index)
-  %main_loc0_Output:ptr<__out, vec4<f32>, read_write> = var undef @location(0)
+  %main_primitive_id_Input:ptr<__in, u32, read> = var @builtin(primitive_index)
+  %main_loc0_Output:ptr<__out, vec4<f32>, read_write> = var @location(0)
 }
 
 %main_inner = func(%prim_id:u32):vec4<f32> {
@@ -3506,8 +3506,8 @@ $B1: {  # root
 }
 %main = @fragment func():void {
   $B3: {
-    undef = phony %main_loc0_Output
-    undef = phony %main_primitive_id_Input
+    phony %main_loc0_Output
+    phony %main_primitive_id_Input
     %8:u32 = load %main_primitive_id_Input
     %9:vec4<f32> = call %main_inner, %8
     store %main_loc0_Output, %9
@@ -3541,12 +3541,12 @@ TEST_F(SpirvParserTest, ViewIndex) {
 )",
               R"(
 $B1: {  # root
-  %view_index:ptr<__in, u32, read> = var undef @builtin(view_index)
+  %view_index:ptr<__in, u32, read> = var @builtin(view_index)
 }
 
 %main = @fragment func():void {
   $B2: {
-    undef = phony %view_index
+    phony %view_index
     %3:u32 = load %view_index
     ret
   }
@@ -3803,6 +3803,216 @@ TEST_F(SpirvParserTest, Var_OpUndef_MemoryView_Unsupported) {
     EXPECT_NE(result, Success);
     EXPECT_THAT(result.Failure().reason,
                 testing::HasSubstr("cannot create an undef memory view in WGSL"));
+}
+
+// A Private variable larger than the temporary storage limit is rejected.
+TEST_F(SpirvParserTest, Var_Private_ExceedsTemporaryStorageLimit) {
+    auto result = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %f32 = OpTypeFloat 32
+   %u32_8193 = OpConstant %u32 8193
+        %arr = OpTypeArray %f32 %u32_8193
+    %ptr_arr = OpTypePointer Private %arr
+          %p = OpVariable %ptr_arr Private
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+               OpReturn
+               OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr("error: var: result type size (32772) exceeds maximum allowed (32768)"));
+}
+
+// A Function variable larger than the temporary storage limit is rejected.
+TEST_F(SpirvParserTest, Var_Function_ExceedsTemporaryStorageLimit) {
+    auto result = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %f32 = OpTypeFloat 32
+   %u32_8193 = OpConstant %u32 8193
+        %arr = OpTypeArray %f32 %u32_8193
+    %ptr_arr = OpTypePointer Function %arr
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+          %p = OpVariable %ptr_arr Function
+               OpReturn
+               OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr("error: var: result type size (32772) exceeds maximum allowed (32768)"));
+}
+
+// Private variables that each fit the temporary storage limit are rejected when their combined
+// size exceeds the private variable limit.
+TEST_F(SpirvParserTest, Var_Private_ExceedsCombinedPrivateVariableLimit) {
+    // 257 arrays of 32 KiB is 8 MiB + 32 KiB.
+    std::string vars;
+    for (uint32_t i = 0; i < 257; i++) {
+        vars += "%p" + std::to_string(i) + " = OpVariable %ptr_arr Private\n";
+    }
+    auto result = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %f32 = OpTypeFloat 32
+   %u32_8192 = OpConstant %u32 8192
+        %arr = OpTypeArray %f32 %u32_8192
+    %ptr_arr = OpTypePointer Private %arr
+)" + vars + R"(
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+               OpReturn
+               OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr(
+            "error: var: total size of private address-space variables exceeds 8388608 bytes"));
+}
+
+// A storage buffer may hold an array larger than the temporary storage limit.
+TEST_F(SpirvParserTest, Var_StorageBuffer_ExceedsTemporaryStorageLimit) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %arr ArrayStride 4
+               OpDecorate %str Block
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %p DescriptorSet 0
+               OpDecorate %p Binding 0
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %f32 = OpTypeFloat 32
+      %u32_0 = OpConstant %u32 0
+  %u32_16385 = OpConstant %u32 16385
+        %arr = OpTypeArray %f32 %u32_16385
+        %str = OpTypeStruct %arr
+    %ptr_str = OpTypePointer StorageBuffer %str
+    %ptr_f32 = OpTypePointer StorageBuffer %f32
+          %p = OpVariable %ptr_str StorageBuffer
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+     %access = OpAccessChain %ptr_f32 %p %u32_0 %u32_0
+       %load = OpLoad %f32 %access
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(4) {
+  tint_symbol:array<f32, 16385> @offset(0)
+}
+
+$B1: {  # root
+  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<storage, f32, read_write> = access %1, 0u, 0u
+    %4:f32 = load %3
+    ret
+  }
+}
+)");
+}
+
+// Loading a whole array larger than the temporary storage limit is rejected.
+TEST_F(SpirvParserTest, Load_ExceedsTemporaryStorageLimit) {
+    auto result = Run(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %arr ArrayStride 4
+               OpDecorate %str Block
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %p DescriptorSet 0
+               OpDecorate %p Binding 0
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %f32 = OpTypeFloat 32
+      %u32_0 = OpConstant %u32 0
+   %u32_8193 = OpConstant %u32 8193
+        %arr = OpTypeArray %f32 %u32_8193
+        %str = OpTypeStruct %arr
+    %ptr_str = OpTypePointer StorageBuffer %str
+    %ptr_arr = OpTypePointer StorageBuffer %arr
+          %p = OpVariable %ptr_str StorageBuffer
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+     %access = OpAccessChain %ptr_arr %p %u32_0
+       %load = OpLoad %arr %access
+               OpReturn
+               OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr(
+                    "error: load: result type size (32772) exceeds maximum allowed (32768)"));
+}
+
+// A constant larger than the temporary storage limit is rejected when used as an operand.
+TEST_F(SpirvParserTest, ConstantNull_ExceedsTemporaryStorageLimit) {
+    auto result = Run(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %arr ArrayStride 4
+               OpDecorate %str Block
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %p DescriptorSet 0
+               OpDecorate %p Binding 0
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %f32 = OpTypeFloat 32
+      %u32_0 = OpConstant %u32 0
+   %u32_8193 = OpConstant %u32 8193
+        %arr = OpTypeArray %f32 %u32_8193
+        %str = OpTypeStruct %arr
+    %ptr_str = OpTypePointer StorageBuffer %str
+    %ptr_arr = OpTypePointer StorageBuffer %arr
+          %p = OpVariable %ptr_str StorageBuffer
+       %null = OpConstantNull %arr
+     %voidfn = OpTypeFunction %void
+       %main = OpFunction %void None %voidfn
+ %main_entry = OpLabel
+     %access = OpAccessChain %ptr_arr %p %u32_0
+               OpStore %access %null
+               OpReturn
+               OpFunctionEnd
+)");
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(
+        result.Failure().reason,
+        testing::HasSubstr("error: store: operand size (32772) exceeds maximum allowed (32768)"));
 }
 
 }  // namespace

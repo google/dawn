@@ -36,8 +36,6 @@ namespace {
 
 constexpr size_t kBlockSize = 16384;
 
-}  // anonymous namespace
-
 // A deallocated block is handed back out by a later request for kBlockSize,
 // instead of a fresh block being allocated.
 TEST(MemoryBlockAllocator, AllocateReturnReusesBlock) {
@@ -175,4 +173,5 @@ TEST(MemoryBlockAllocator, AllocateAndReturnManyBlocks) {
     pool.Return(std::move(reallocated));
 }
 
+}  // anonymous namespace
 }  // namespace dawn

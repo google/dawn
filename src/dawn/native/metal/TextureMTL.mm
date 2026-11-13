@@ -39,6 +39,7 @@
 #include "src/dawn/native/Queue.h"
 #include "src/dawn/native/metal/BufferMTL.h"
 #include "src/dawn/native/metal/DeviceMTL.h"
+#include "src/dawn/native/metal/FencedReferencer.h"
 #include "src/dawn/native/metal/QueueMTL.h"
 #include "src/dawn/native/metal/SharedFenceMTL.h"
 #include "src/dawn/native/metal/SharedTextureMemoryMTL.h"
@@ -172,7 +173,8 @@ bool AllowFormatReinterpretationWithoutFlag(MTLPixelFormat origin,
             return reinterpretation == MTLPixelFormatRGBA8Unorm_sRGB ||
                    reinterpretation == MTLPixelFormatBGRA8Unorm;
 
-#if DAWN_PLATFORM_IS(MACOS)
+#if DAWN_PLATFORM_IS(MACOS) || \
+    (defined(__IPHONE_16_4) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_16_4)
             SRGB_PAIR(MTLPixelFormatBC1_RGBA, MTLPixelFormatBC1_RGBA_sRGB);
             SRGB_PAIR(MTLPixelFormatBC2_RGBA, MTLPixelFormatBC2_RGBA_sRGB);
             SRGB_PAIR(MTLPixelFormatBC3_RGBA, MTLPixelFormatBC3_RGBA_sRGB);
@@ -842,6 +844,17 @@ MaybeError TextureView::Initialize(const UnpackedPtr<TextureViewDescriptor>& des
 }
 
 void TextureView::DestroyImpl(DestroyReason reason) {
+    if (mMtlTextureView && [mMtlTextureView.Get() parentTexture] != nil) {
+        // TextureViews aren't tracked by PassResourceUsageTracker - doing so would add overhead to
+        // all backends (we only track the base texture). But for argument buffers, we need to keep
+        // views ref'd until the GPU is done using them, because that's what Metal Shader Validation
+        // wants. Since the TextureView is being destroyed, it will no longer keep the MTLTexture
+        // alive, but we know that no new work on it can be enqueued. So here we transfer ownership
+        // of the MTLTexture to the current pending serial in the FencedReferencer. (Note this is a
+        // bit of a pessimization, as we don't track the last time the view was _actually_ used, so
+        // we limit to doing this when we're using an actual Metal texture view.)
+        ToBackend(GetDevice())->GetFencedReferencer().RefUntilUnused(mMtlTextureView.Get());
+    }
     mMtlTextureView = nil;
 }
 

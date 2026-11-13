@@ -86,10 +86,6 @@
 	path = third_party/mesa/src
 	url = https://chromium.googlesource.com/external/gitlab.freedesktop.org/mesa/mesa/
 	gclient-condition = checkout_mesa and host_os == "linux"
-[submodule "third_party/meson/src"]
-	path = third_party/meson/src
-	url = https://chromium.googlesource.com/external/github.com/mesonbuild/meson
-	gclient-condition = checkout_mesa and host_os == "linux"
 [submodule "third_party/jinja2"]
 	path = third_party/jinja2
 	url = https://chromium.googlesource.com/chromium/src/third_party/jinja2
@@ -260,4 +256,12 @@
 [submodule "third_party/simdutf/src"]
 	path = third_party/simdutf/src
 	url = https://chromium.googlesource.com/chromium/src/third_party/simdutf
+	gclient-condition = dawn_standalone and checkout_v8
+[submodule "third_party/boringssl/src"]
+	path = third_party/boringssl/src
+	url = https://boringssl.googlesource.com/boringssl.git
+	gclient-condition = dawn_standalone and checkout_v8
+[submodule "third_party/nasm/src"]
+	path = third_party/nasm/src
+	url = https://chromium.googlesource.com/chromium/deps/nasm.git
 	gclient-condition = dawn_standalone and checkout_v8

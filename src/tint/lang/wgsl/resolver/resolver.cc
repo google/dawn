@@ -39,6 +39,7 @@
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/atomic.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
@@ -160,8 +161,9 @@ bool Resolver::Resolve() {
 
     b.Sem().Reserve(b.LastAllocatedNodeID());
 
-    // Pre-allocate the marked bitset with the total number of AST nodes.
+    // Pre-allocate the marked and not_evaluated bitsets with the total number of AST nodes.
     marked_.Resize(b.ASTNodes().Count());
+    not_evaluated_.Resize(b.ASTNodes().Count());
 
     TINT_RET_IF(!DependencyGraph::Build(b.AST(), diagnostics_, dependencies_));
 
@@ -183,7 +185,8 @@ bool Resolver::Resolve() {
         // Run the uniformity analysis, which requires a complete semantic module.
         const bool subgroup_uniformity =
             allowed_features_.features.contains(wgsl::LanguageFeature::kSubgroupUniformity);
-        TINT_RET_IF(!AnalyzeUniformity(b, dependencies_, subgroup_uniformity));
+        TINT_RET_IF(
+            !AnalyzeUniformity(b, dependencies_, subgroup_uniformity, alias_analysis_infos_));
     }
 
     return result;
@@ -1323,7 +1326,7 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
                     // Mark entire expression tree to not const-evaluate
                     auto r = ast::TraverseExpressions(  //
                         (*binary)->rhs, [&](const ast::Expression* e) {
-                            not_evaluated_.Add(e);
+                            not_evaluated_[e->node_id.value] = true;
                             if (e->Is<ast::IdentifierExpression>()) {
                                 // Template arguments are still evaluated when the outer identifier
                                 // expression is skipped. This happens in expressions like:
@@ -1478,7 +1481,7 @@ void Resolver::RegisterBufferView(const sem::Call* call, wgsl::BuiltinFn fn) {
     }
 
     if (const auto* param = call->RootIdentifier()->As<sem::Parameter>()) {
-        auto where = buffer_view_sizes_.GetOrAddEntry(param, [min_type_size, total_size, call]() {
+        auto& where = buffer_view_sizes_.GetOrAddEntry(param, [min_type_size, total_size, call]() {
             BufferViewInfo info;
             info.min_type_size = min_type_size;
             info.total_size = total_size;
@@ -1583,7 +1586,8 @@ void Resolver::RegisterSubgroupMatrixAccess(const sem::Call* call, wgsl::Builtin
     mat_required_size += FindSubgroupMatrixStructOffset(pointer);
 
     if (const auto* param = root->As<sem::Parameter>()) {
-        auto where = subgroup_matrix_sizes_.GetOrAddEntry(param, [&] { return mat_required_size; });
+        auto& where =
+            subgroup_matrix_sizes_.GetOrAddEntry(param, [&] { return mat_required_size; });
         where.value = std::max(where.value, mat_required_size);
     }
 
@@ -1626,7 +1630,7 @@ void Resolver::PropagateSubgroupMatrixAccesses(const sem::Call* call) {
                 }
             },
             [&](const sem::Parameter* param) {
-                auto param_where = subgroup_matrix_sizes_.GetOrAddEntry(
+                auto& param_where = subgroup_matrix_sizes_.GetOrAddEntry(
                     param, [mat_required_size]() { return mat_required_size; });
                 param_where.value = std::max(param_where.value, mat_required_size);
             });
@@ -1687,7 +1691,7 @@ bool Resolver::CheckBufferViews(const sem::Call* call) {
                         return false;
                     }
                 }
-                auto param_where =
+                auto& param_where =
                     buffer_view_sizes_.GetOrAddEntry(param, [where]() { return *where; });
                 param_where.value = {
                     std::max(param_where.value.min_type_size, where->min_type_size),
@@ -1747,17 +1751,20 @@ bool Resolver::AliasAnalysis(const sem::Call* call) {
         if (target_info.parameter_writes.Contains(target->Parameters()[i])) {
             // Arguments that are written to can alias with any other argument or module-scope
             // variable access.
-            if (auto write = arg_writes.Get(root)) {
-                return make_error(arg, {*write, Alias::Argument, "write"});
-            }
-            if (auto read = arg_reads.Get(root)) {
-                return make_error(arg, {*read, Alias::Argument, "read"});
-            }
-            if (auto read = target_info.module_scope_reads.Get(root)) {
-                return make_error(arg, {*read, Alias::ModuleScope, "read"});
-            }
-            if (auto write = target_info.module_scope_writes.Get(root)) {
-                return make_error(arg, {*write, Alias::ModuleScope, "write"});
+            if (!allowed_features_.features.contains(
+                    wgsl::LanguageFeature::kUnrestrictedAliasing)) {
+                if (auto write = arg_writes.Get(root)) {
+                    return make_error(arg, {*write, Alias::Argument, "write"});
+                }
+                if (auto read = arg_reads.Get(root)) {
+                    return make_error(arg, {*read, Alias::Argument, "read"});
+                }
+                if (auto read = target_info.module_scope_reads.Get(root)) {
+                    return make_error(arg, {*read, Alias::ModuleScope, "read"});
+                }
+                if (auto write = target_info.module_scope_writes.Get(root)) {
+                    return make_error(arg, {*write, Alias::ModuleScope, "write"});
+                }
             }
             arg_writes.Add(root, arg);
 
@@ -1771,11 +1778,14 @@ bool Resolver::AliasAnalysis(const sem::Call* call) {
         } else if (target_info.parameter_reads.Contains(target->Parameters()[i])) {
             // Arguments that are read from can alias with arguments or module-scope variables
             // that are written to.
-            if (auto write = arg_writes.Get(root)) {
-                return make_error(arg, {*write, Alias::Argument, "write"});
-            }
-            if (auto write = target_info.module_scope_writes.Get(root)) {
-                return make_error(arg, {*write, Alias::ModuleScope, "write"});
+            if (!allowed_features_.features.contains(
+                    wgsl::LanguageFeature::kUnrestrictedAliasing)) {
+                if (auto write = arg_writes.Get(root)) {
+                    return make_error(arg, {*write, Alias::Argument, "write"});
+                }
+                if (auto write = target_info.module_scope_writes.Get(root)) {
+                    return make_error(arg, {*write, Alias::ModuleScope, "write"});
+                }
             }
             arg_reads.Add(root, arg);
 
@@ -1895,7 +1905,7 @@ const sem::ValueExpression* Resolver::Materialize(
     TINT_RET_IF(!validator_.Materialize(concrete_ty, src_ty, decl->source));
 
     const core::constant::Value* materialized_val = nullptr;
-    if (!not_evaluated_.Contains(decl)) {
+    if (!not_evaluated_[decl->node_id.value]) {
         auto expr_val = expr->ConstantValue();
         if (DAWN_UNLIKELY(!expr_val)) {
             ICE(decl->source) << "Materialize(" << decl->TypeInfo().name
@@ -2028,7 +2038,7 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
 
     const core::constant::Value* val = nullptr;
     auto stage = core::EarliestStage(obj->Stage(), idx->Stage());
-    if (not_evaluated_.Contains(expr)) {
+    if (not_evaluated_[expr->node_id.value]) {
         stage = core::EvaluationStage::kNotEvaluated;
     } else {
         if (auto* idx_val = idx->ConstantValue()) {
@@ -2106,7 +2116,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
         const core::constant::Value* value = nullptr;
         auto stage = core::EarliestStage(overload_stage, args_stage);
-        if (not_evaluated_.Contains(expr)) {
+        if (not_evaluated_[expr->node_id.value]) {
             stage = core::EvaluationStage::kNotEvaluated;
         }
         if (stage == core::EvaluationStage::kConstant) {
@@ -2133,7 +2143,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             // Composites that contain subgroup matrices cannot be evaluated until runtime.
             stage = core::EvaluationStage::kRuntime;
         }
-        if (not_evaluated_.Contains(expr)) {
+        if (not_evaluated_[expr->node_id.value]) {
             stage = core::EvaluationStage::kNotEvaluated;
         }
         if (stage == core::EvaluationStage::kConstant) {
@@ -2225,6 +2235,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                             scalar_ty = b.create<core::type::I32>();
                         } else if (m->Type()->Is<core::type::U8>()) {
                             scalar_ty = b.create<core::type::U32>();
+                        } else if (m->Type()->Is<core::type::BF16>()) {
+                            scalar_ty = b.create<core::type::F32>();
                         }
                         auto params = tint::Transform(args, [&](auto, size_t i) {
                             return b.create<sem::Parameter>(nullptr,  // declaration
@@ -2241,7 +2253,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
                 // Subgroup matrix constructors are never const-evaluated.
                 auto stage = core::EvaluationStage::kRuntime;
-                if (not_evaluated_.Contains(expr)) {
+                if (not_evaluated_[expr->node_id.value]) {
                     stage = core::EvaluationStage::kNotEvaluated;
                 }
 
@@ -2422,7 +2434,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     // now.
     const core::constant::Value* value = nullptr;
     auto stage = core::EarliestStage(arg_stage, target->Stage());
-    if (not_evaluated_.Contains(expr)) {
+    if (not_evaluated_[expr->node_id.value]) {
         stage = core::EvaluationStage::kNotEvaluated;
     }
     if (stage == core::EvaluationStage::kConstant) {
@@ -2605,6 +2617,8 @@ const core::type::Type* Resolver::BuiltinType(core::BuiltinType builtin_ty,
             return check_no_tmpl_args(I32());
         case core::BuiltinType::kU32:
             return check_no_tmpl_args(U32());
+        case core::BuiltinType::kBf16:
+            return check_no_tmpl_args(BF16(ident));
         case core::BuiltinType::kF16:
             return check_no_tmpl_args(F16(ident));
         case core::BuiltinType::kF32:
@@ -2848,6 +2862,10 @@ const core::type::I8* Resolver::I8(const ast::Identifier* ident) {
 
 const core::type::U8* Resolver::U8(const ast::Identifier* ident) {
     return validator_.CheckU8Enabled(ident->source) ? b.create<core::type::U8>() : nullptr;
+}
+
+const core::type::BF16* Resolver::BF16(const ast::Identifier* ident) {
+    return validator_.CheckBF16Enabled(ident->source) ? b.create<core::type::BF16>() : nullptr;
 }
 
 const core::type::U16* Resolver::U16(const ast::Identifier* ident) {
@@ -3194,8 +3212,8 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
     Vector<const sem::ValueExpression*, 8> args = std::move(args_in);
     TINT_RET_IF(!MaybeMaterializeArguments(args, target));
 
-    auto stage = not_evaluated_.Contains(expr) ? core::EvaluationStage::kNotEvaluated
-                                               : core::EvaluationStage::kRuntime;
+    auto stage = not_evaluated_[expr->node_id.value] ? core::EvaluationStage::kNotEvaluated
+                                                     : core::EvaluationStage::kRuntime;
 
     auto* call = b.create<sem::Call>(expr, target, stage, std::move(args), current_statement_,
                                      /* constant_value */ nullptr);
@@ -3270,7 +3288,7 @@ sem::ValueExpression* Resolver::Literal(const ast::LiteralExpression* literal) {
 
     const core::constant::Value* val = nullptr;
     auto stage = core::EvaluationStage::kConstant;
-    if (not_evaluated_.Contains(literal)) {
+    if (not_evaluated_[literal->node_id.value]) {
         stage = core::EvaluationStage::kNotEvaluated;
     }
     if (stage == core::EvaluationStage::kConstant) {
@@ -3313,8 +3331,8 @@ sem::ValueExpression* Resolver::InterpolatedString(const ast::InterpolatedString
         TINT_RET_IF(!validator_.InterpolatedStringElement(sem_el));
     }
 
-    auto stage = not_evaluated_.Contains(tmpl) ? core::EvaluationStage::kNotEvaluated
-                                               : core::EvaluationStage::kRuntime;
+    auto stage = not_evaluated_[tmpl->node_id.value] ? core::EvaluationStage::kNotEvaluated
+                                                     : core::EvaluationStage::kRuntime;
 
     return b.create<sem::ValueExpression>(tmpl, b.create<core::type::String>(), stage,
                                           current_statement_, /* constant_value */ nullptr);
@@ -3338,7 +3356,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
 
                 auto stage = variable->Stage();
                 const core::constant::Value* value = variable->ConstantValue();
-                if (not_evaluated_.Contains(expr)) {
+                if (not_evaluated_[expr->node_id.value]) {
                     // This expression is short-circuited by an ancestor expression.
                     // Do not const-eval.
                     stage = core::EvaluationStage::kNotEvaluated;
@@ -3655,7 +3673,7 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
     TINT_RET_IF(!validator_.BinaryExpression(expr, expr->op, lhs, rhs));
 
     const core::constant::Value* value = nullptr;
-    if (not_evaluated_.Contains(expr)) {
+    if (not_evaluated_[expr->node_id.value]) {
         // This expression is short-circuited by an ancestor expression.
         // Do not const-eval.
         stage = core::EvaluationStage::kNotEvaluated;

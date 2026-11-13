@@ -72,13 +72,8 @@ struct D3D12DeviceInfo {
     size_t sharedSystemMemory;
 
 #ifdef DAWN_USE_AGILITY_SDK
-    // Mirrors D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_SUPPORT but with owned shapes information.
-    struct LinAlgWMMSupport {
-        D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_INPUTS Inputs;
-        D3D12_LINEAR_ALGEBRA_MULTIPLICATION_SUPPORT_FLAGS SupportFlags;
-        std::vector<D3D12_LINEAR_ALGEBRA_MATRIX_MULTIPLY_SHAPE> Shapes;
-    };
-    std::vector<LinAlgWMMSupport> linAlgWaveMatrixMultiplySupports;
+    std::vector<D3D12_LINEAR_ALGEBRA_WAVE_MATRIX_MULTIPLY_ENUMERATION_ENTRY>
+        linAlgWaveMatrixMultiplyEntries;
 #endif
 };
 

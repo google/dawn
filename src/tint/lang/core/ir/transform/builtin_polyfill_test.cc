@@ -3651,5 +3651,42 @@ TEST_F(IR_BuiltinPolyfillTest, Absi32_Enabled) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_BuiltinPolyfillTest, Absi32_ConstantFoldedIntoOOBVectorAccess) {
+    auto* func = b.Function("foo", ty.void_(), Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        // Construct an unfolded constant `abs 121i` like the IR binary decoder produces.
+        auto* abs_call = mod.CreateInstruction<ir::CoreBuiltinCall>(
+            b.InstructionResult(ty.i32()), core::BuiltinFn::kAbs, Vector{b.Value(121_i)});
+        b.Append(abs_call);
+        b.Access(ty.i32(), b.Splat(ty.vec2i(), 121_i), abs_call->Result());
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:i32 = abs 121i
+    %3:i32 = access vec2<i32>(121i), %2
+    ret
+  }
+}
+)";
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:i32 = access vec2<i32>(121i), 121i
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.abs_signed_int = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::core::ir::transform

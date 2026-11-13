@@ -46,6 +46,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::HasSubstr;
+
 constexpr bool Is8Bit(wgpu::SubgroupMatrixComponentType c) {
     return c == wgpu::SubgroupMatrixComponentType::U8 || c == wgpu::SubgroupMatrixComponentType::I8;
 }
@@ -399,6 +401,9 @@ TEST_P(SubgroupMatrixTest, AdvertisedConfigsValidated) {
     // TODO(crbug.com/492539239): Access violation during test teardown.
     DAWN_TEST_UNSUPPORTED_IF(IsWindows() && IsVulkan() && IsAMD());
 
+    // TODO(crbug.com/566128737): Remove once Agility SDK and WARP support retail LinAlg.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
     wgpu::AdapterInfo info;
     wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
     info.nextInChain = &subgroupMatrixConfigs;
@@ -456,7 +461,7 @@ fn main() {
                 device.CreateComputePipeline(&csDesc);
             } else {
                 ASSERT_DEVICE_ERROR_MSG(device.CreateComputePipeline(&csDesc),
-                                        testing::HasSubstr("not supported by the device"));
+                                        HasSubstr("not supported by the device"));
             }
         }
     };
@@ -506,8 +511,7 @@ fn main() {
         std::stringstream err;
         err << "The x-dimension of workgroup_size (" << (info.subgroupMaxSize / 2)
             << ") must be a multiple of the device maxSubgroupSize";
-        ASSERT_DEVICE_ERROR_MSG(device.CreateComputePipeline(&csDesc),
-                                testing::HasSubstr(err.str()));
+        ASSERT_DEVICE_ERROR_MSG(device.CreateComputePipeline(&csDesc), HasSubstr(err.str()));
     }
 }
 
@@ -524,6 +528,9 @@ TEST_P(SubgroupMatrixSubgroupSizeControlTest, WorkgroupSizeUsesExplicitSubgroupS
 
     // TODO(crbug.com/492539239): Access violation during test teardown.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsVulkan());
+
+    // TODO(crbug.com/566128737): Remove once Agility SDK and WARP support retail LinAlg.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     wgpu::AdapterInfo info;
     wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
@@ -783,6 +790,9 @@ TEST_P(SubgroupMatrix_MatrixMatrixArithmeticTest, MatrixMultiply) {
     // TODO(crbug.com/492539239): Access violation during test teardown.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsVulkan());
 
+    // TODO(crbug.com/566128737): Remove once Agility SDK and WARP support retail LinAlg.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
     MatrixOp op = GetParam().mMatrixOp;
     bool columnMajor = GetParam().mColumnMajor;
 
@@ -989,6 +999,9 @@ TEST_P(SubgroupMatrix_MatrixScalarArithmeticTest, MatrixScalar) {
     DAWN_TEST_UNSUPPORTED_IF(
         !adapter.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix));
 
+    // TODO(crbug.com/566128737): Remove once Agility SDK and WARP support retail LinAlg.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
     MatrixOp op = GetParam().mMatrixOp;
     bool columnMajor = GetParam().mColumnMajor;
 
@@ -1180,6 +1193,9 @@ fn main() {
 TEST_P(SubgroupMatrix_MatrixStoreTest, MatrixStoreWithOffset) {
     DAWN_TEST_UNSUPPORTED_IF(
         !adapter.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix));
+
+    // TODO(crbug.com/566128737): Remove once Agility SDK and WARP support retail LinAlg.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     // Query the supported subgroup matrix configurations.
     wgpu::AdapterInfo info;
@@ -1440,6 +1456,9 @@ TEST_P(SubgroupMatrix_OutOfBoundsTest, StoreOutOfBoundsDoesNotAffectDataOutsideR
     DAWN_TEST_UNSUPPORTED_IF(
         !adapter.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix));
 
+    // TODO(crbug.com/566128737): Remove once Agility SDK and WARP support retail LinAlg.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
     wgpu::AdapterInfo info;
     wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
     info.nextInChain = &subgroupMatrixConfigs;
@@ -1462,6 +1481,9 @@ TEST_P(SubgroupMatrix_OutOfBoundsTest, StoreOutOfBoundsDoesNotAffectDataOutsideR
 TEST_P(SubgroupMatrix_OutOfBoundsTest, LoadOutOfBoundsDoesNotAffectDataOutsideRange) {
     DAWN_TEST_UNSUPPORTED_IF(
         !adapter.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix));
+
+    // TODO(crbug.com/566128737): Remove once Agility SDK and WARP support retail LinAlg.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     wgpu::AdapterInfo info;
     wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
@@ -1559,7 +1581,7 @@ fn main() {
         std::string storeResult;
         loadInput = "let input_matrix = subgroup_matrix_left<ComponentType, K, M>(";
         if (withArgument) {
-            loadInput += "5";
+            loadInput += '5';
         }
         loadInput += ");";
         storeResult = "subgroupMatrixStore<row_major>(&output, 0, input_matrix, kStride);";
@@ -1636,6 +1658,9 @@ TEST_P(SubgroupMatrix_MatrixConstructorTest, MatrixConstruct) {
     // TODO(crbug.com/492539239): Access violation during test teardown.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsVulkan());
 
+    // TODO(crbug.com/566128737): Remove once Agility SDK and WARP support retail LinAlg.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
     // Query the supported subgroup matrix configurations.
     wgpu::AdapterInfo info;
     wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
@@ -1705,6 +1730,9 @@ TEST_P(SubgroupMatrix_TiledMatrixMultiplyTest, MatrixMultiply) {
 
     // TODO(crbug.com/492539239): Access violation during test teardown.
     DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsVulkan());
+
+    // TODO(crbug.com/566128737): Remove once Agility SDK and WARP support retail LinAlg.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     // TODO(crbug.com/525517826): On WARP, starts hanging for tile dim 2+
     DAWN_SUPPRESS_TEST_IF(IsWARP() && kTileDim >= 2);
@@ -2089,6 +2117,9 @@ TEST_P(SubgroupMatrix_WorkgroupLoadStoreTest, WorkgroupLoadStore) {
     DAWN_TEST_UNSUPPORTED_IF(
         !adapter.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix));
 
+    // TODO(crbug.com/566128737): Remove once Agility SDK and WARP support retail LinAlg.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
     bool columnMajor = GetParam().mInputColumnMajor;
 
     // Query the supported subgroup matrix configurations.
@@ -2099,13 +2130,6 @@ TEST_P(SubgroupMatrix_WorkgroupLoadStoreTest, WorkgroupLoadStore) {
 
     for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
         auto& config = subgroupMatrixConfigs.configs[i];
-
-        // TODO(crbug.com/512455144): Support 8-bit subgroup matrix loads from workgroup memory in
-        // the HLSL writer.
-        if (IsD3D12() && Is8Bit(config.componentType)) {
-            std::cout << "Skipping config: " << config << "\n";
-            continue;
-        }
 
         TestSubgroupMatrixConfig(config, info.subgroupMaxSize, columnMajor);
     }

@@ -37,14 +37,15 @@
 namespace dawn {
 namespace {
 
-using testing::_;
-using testing::EmptySizedString;
-using testing::InSequence;
-using testing::IsNull;
-using testing::MockCppCallback;
-using testing::NonEmptySizedString;
-using testing::NotNull;
-using testing::WithArgs;
+using ::testing::_;
+using ::testing::EmptySizedString;
+using ::testing::HasSubstr;
+using ::testing::InSequence;
+using ::testing::IsNull;
+using ::testing::MockCppCallback;
+using ::testing::NonEmptySizedString;
+using ::testing::NotNull;
+using ::testing::WithArgs;
 
 class RequestDeviceValidationTest : public ValidationTest {
   protected:
@@ -360,8 +361,7 @@ TEST_F(DeviceGetAHardwareBufferPropertiesValidationTest,
 
     ASSERT_DEVICE_ERROR(
         device.GetAHardwareBufferProperties(handle, properties),
-        testing::HasSubstr(
-            "without the FeatureName::SharedTextureMemoryAHardwareBuffer feature being set"));
+        HasSubstr("without the FeatureName::SharedTextureMemoryAHardwareBuffer feature being set"));
 }
 
 class RequestDeviceCoreValidationTest : public RequestDeviceValidationTest {

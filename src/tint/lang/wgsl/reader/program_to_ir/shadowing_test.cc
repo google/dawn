@@ -173,7 +173,7 @@ fn f() -> i32 {
 
     EXPECT_EQ(Dis(m.Get()), R"(%f = func():i32 {
   $B1: {
-    %i:ptr<function, i32, read_write> = var undef
+    %i:ptr<function, i32, read_write> = var
     if true [t: $B2] {  # if_1
       $B2: {  # true
         %3:i32 = load %i
@@ -212,7 +212,7 @@ fn f() -> i32 {
 
     EXPECT_EQ(Dis(m.Get()), R"(%f = func():i32 {
   $B1: {
-    %i:ptr<function, i32, read_write> = var undef
+    %i:ptr<function, i32, read_write> = var
     if true [t: $B2] {  # if_1
       $B2: {  # true
         %3:i32 = load %i
@@ -247,7 +247,7 @@ fn f() -> i32 {
 
     EXPECT_EQ(Dis(m.Get()), R"(%f = func():i32 {
   $B1: {
-    %i:ptr<function, i32, read_write> = var undef
+    %i:ptr<function, i32, read_write> = var
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
         %3:i32 = load %i
@@ -293,7 +293,7 @@ fn f() -> i32 {
 
     EXPECT_EQ(Dis(m.Get()), R"(%f = func():i32 {
   $B1: {
-    %i:ptr<function, i32, read_write> = var undef
+    %i:ptr<function, i32, read_write> = var
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
         %3:i32 = load %i
@@ -337,7 +337,7 @@ fn f() -> i32 {
 
     EXPECT_EQ(Dis(m.Get()), R"(%f = func():i32 {
   $B1: {
-    %i:ptr<function, i32, read_write> = var undef
+    %i:ptr<function, i32, read_write> = var
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         %i_1:ptr<function, f32, read_write> = var 0.0f  # %i_1: 'i'
@@ -381,7 +381,7 @@ fn f() -> i32 {
 
     EXPECT_EQ(Dis(m.Get()), R"(%f = func():i32 {
   $B1: {
-    %i:ptr<function, i32, read_write> = var undef
+    %i:ptr<function, i32, read_write> = var
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         %i_1:f32 = let 0.0f  # %i_1: 'i'
@@ -424,7 +424,7 @@ fn f() -> i32 {
 
     EXPECT_EQ(Dis(m.Get()), R"(%f = func():i32 {
   $B1: {
-    %i:ptr<function, i32, read_write> = var undef
+    %i:ptr<function, i32, read_write> = var
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         %x:ptr<function, i32, read_write> = var 0i
@@ -471,7 +471,7 @@ fn f() -> i32 {
 
     EXPECT_EQ(Dis(m.Get()), R"(%f = func():i32 {
   $B1: {
-    %i:ptr<function, i32, read_write> = var undef
+    %i:ptr<function, i32, read_write> = var
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         %x:ptr<function, i32, read_write> = var 0i
@@ -522,7 +522,7 @@ fn f() -> i32 {
 
     EXPECT_EQ(Dis(m.Get()), R"(%f = func():i32 {
   $B1: {
-    %i:ptr<function, i32, read_write> = var undef
+    %i:ptr<function, i32, read_write> = var
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
         %3:i32 = load %i
@@ -576,7 +576,7 @@ fn f() -> i32 {
 
     EXPECT_EQ(Dis(m.Get()), R"(%f = func():i32 {
   $B1: {
-    %i:ptr<function, i32, read_write> = var undef
+    %i:ptr<function, i32, read_write> = var
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
         %3:i32 = load %i
@@ -630,7 +630,7 @@ fn f() -> i32 {
 
     EXPECT_EQ(Dis(m.Get()), R"(%f = func():i32 {
   $B1: {
-    %i:ptr<function, i32, read_write> = var undef
+    %i:ptr<function, i32, read_write> = var
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
         %3:i32 = load %i
@@ -680,7 +680,7 @@ fn f() -> i32 {
 
     EXPECT_EQ(Dis(m.Get()), R"(%f = func():i32 {
   $B1: {
-    %i:ptr<function, i32, read_write> = var undef
+    %i:ptr<function, i32, read_write> = var
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
         %3:i32 = load %i
@@ -730,7 +730,7 @@ fn f() -> i32 {
 
     EXPECT_EQ(Dis(m.Get()), R"(%f = func():i32 {
   $B1: {
-    %i:ptr<function, i32, read_write> = var undef
+    %i:ptr<function, i32, read_write> = var
     %3:i32 = load %i
     switch %3 [c: (0i, $B2), c: (1i, $B3), c: (default, $B4)] {  # switch_1
       $B2: {  # case
@@ -778,7 +778,7 @@ fn f() -> i32 {
 
     EXPECT_EQ(Dis(m.Get()), R"(%f = func():i32 {
   $B1: {
-    %i:ptr<function, i32, read_write> = var undef
+    %i:ptr<function, i32, read_write> = var
     %3:i32 = load %i
     switch %3 [c: (0i, $B2), c: (1i, $B3), c: (default, $B4)] {  # switch_1
       $B2: {  # case

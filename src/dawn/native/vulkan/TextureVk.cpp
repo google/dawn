@@ -1070,11 +1070,11 @@ void Texture::TransitionUsageForPassImpl(
         lastSyncInfo->usage = newUsage;
     });
 
-    TweakTransition(recordingContext, imageBarriers, transitionBarrierStart);
-
     // Skip adding pipeline stages if no barrier was needed to avoid putting TOP_OF_PIPE in the
     // destination stages.
     if (allNewUsages != wgpu::TextureUsage::None) {
+        TweakTransition(recordingContext, imageBarriers, transitionBarrierStart);
+
         *srcStages |= VulkanPipelineStage(allLastUsages, allLastShaderStages, format);
         *dstStages |= VulkanPipelineStage(allNewUsages, allNewShaderStages, format);
     }
@@ -1092,9 +1092,9 @@ void Texture::TransitionUsageNow(CommandRecordingContext* recordingContext,
     TransitionUsageAndGetResourceBarrier(usage, shaderStages, range, &barriers, &srcStages,
                                          &dstStages);
 
-    TweakTransition(recordingContext, &barriers, 0);
-
     if (!barriers.empty()) {
+        TweakTransition(recordingContext, &barriers, 0);
+
         DAWN_ASSERT(srcStages != 0 && dstStages != 0);
         ToBackend(GetDevice())
             ->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages, 0, 0,
@@ -1442,6 +1442,7 @@ ResultOrError<Ref<InternalTexture>> InternalTexture::Create(
     Device* device,
     const UnpackedPtr<TextureDescriptor>& descriptor,
     VkImageUsageFlags extraUsages) {
+    DAWN_TRY(VerifyBaseLevelFootprint(device, *descriptor));
     Ref<InternalTexture> texture = AcquireRef(new InternalTexture(device, descriptor));
     DAWN_TRY(texture->Initialize(extraUsages));
     return std::move(texture);
@@ -1694,7 +1695,8 @@ bool ImportedTextureBase::CanReuseWithoutBarrier(wgpu::TextureUsage lastUsage,
                                                  wgpu::TextureUsage usage,
                                                  wgpu::ShaderStage lastShaderStage,
                                                  wgpu::ShaderStage shaderStage) {
-    return mLastExternalState == mExternalState &&
+    DAWN_ASSERT(mExternalState != ExternalState::Released);
+    return mExternalState == ExternalState::Acquired &&
            Texture::CanReuseWithoutBarrier(lastUsage, usage, lastShaderStage, shaderStage);
 }
 
@@ -1703,35 +1705,30 @@ void ImportedTextureBase::TweakTransition(CommandRecordingContext* recordingCont
                                           size_t transitionBarrierStart) {
     DAWN_ASSERT(GetNumMipLevels() == 1 && GetArrayLayers() == 1);
 
-    mLastSharedTextureMemoryUsageSerial = GetDevice()->GetQueue()->GetPendingCommandSerial();
-
     // transitionBarrierStart specify the index where barriers for current transition start in
     // the vector. barriers->size() - transitionBarrierStart is the number of barriers that we
     // have already added into the vector during current transition.
-    DAWN_ASSERT(barriers->size() - transitionBarrierStart <= 1);
+    DAWN_ASSERT(barriers->size() - transitionBarrierStart == 1);
+
+    mLastSharedTextureMemoryUsageSerial = GetDevice()->GetQueue()->GetPendingCommandSerial();
 
     if (mExternalState == ExternalState::PendingAcquire ||
         mExternalState == ExternalState::EagerlyTransitioned) {
         recordingContext->specialSyncTextures.insert(this);
-        if (barriers->size() == transitionBarrierStart) {
-            barriers->push_back(BuildMemoryBarrier(
-                this, wgpu::TextureUsage::None, wgpu::TextureUsage::None,
-                SubresourceRange::SingleMipAndLayer(0, 0, GetDisjointVulkanAspects())));
-        }
 
-        VkImageMemoryBarrier* barrier = &(*barriers)[transitionBarrierStart];
+        VkImageMemoryBarrier& barrier = (*barriers)[transitionBarrierStart];
         // Transfer texture from external queue to graphics queue
-        barrier->srcQueueFamilyIndex = mExportQueueFamilyIndex;
-        barrier->dstQueueFamilyIndex = ToBackend(GetDevice())->GetGraphicsQueueFamily();
+        barrier.srcQueueFamilyIndex = mExportQueueFamilyIndex;
+        barrier.dstQueueFamilyIndex = ToBackend(GetDevice())->GetGraphicsQueueFamily();
 
         // srcAccessMask means nothing when importing. Queue transfers require a barrier on
         // both the importing and exporting queues. The exporting queue should have specified
         // this.
-        barrier->srcAccessMask = 0;
+        barrier.srcAccessMask = 0;
 
         // Save the desired layout. We may need to transition through an intermediate
         // |mPendingAcquireLayout| first.
-        VkImageLayout desiredLayout = barrier->newLayout;
+        VkImageLayout desiredLayout = barrier.newLayout;
 
         if (mExternalState == ExternalState::PendingAcquire) {
             bool isInitialized = IsSubresourceContentInitialized(GetAllSubresources());
@@ -1743,11 +1740,11 @@ void ImportedTextureBase::TweakTransition(CommandRecordingContext* recordingCont
             // https://www.khronos.org/registry/vulkan/specs/1.3-extensions/html/vkspec.html#VUID-VkImageMemoryBarrier-newLayout-01198
             if (!isInitialized || mPendingAcquireNewLayout == VK_IMAGE_LAYOUT_UNDEFINED ||
                 mPendingAcquireNewLayout == VK_IMAGE_LAYOUT_PREINITIALIZED) {
-                barrier->oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-                barrier->newLayout = desiredLayout;
+                barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                barrier.newLayout = desiredLayout;
             } else {
-                barrier->oldLayout = mPendingAcquireOldLayout;
-                barrier->newLayout = mPendingAcquireNewLayout;
+                barrier.oldLayout = mPendingAcquireOldLayout;
+                barrier.newLayout = mPendingAcquireNewLayout;
             }
         } else {
             // In case of ExternalState::EagerlyTransitioned, the layouts of the texture's queue
@@ -1757,23 +1754,23 @@ void ImportedTextureBase::TweakTransition(CommandRecordingContext* recordingCont
             // desired, then the values of oldLayout and newLayout in the release operation's memory
             // barrier must be equal to values of oldLayout and newLayout in the acquire operation's
             // memory barrier.
-            barrier->newLayout = barrier->oldLayout;
+            barrier.newLayout = barrier.oldLayout;
         }
 
         // If these are unequal, we need an another barrier to transition the layout.
-        if (barrier->newLayout != desiredLayout) {
+        if (barrier.newLayout != desiredLayout) {
             VkImageMemoryBarrier layoutBarrier;
             layoutBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
             layoutBarrier.pNext = nullptr;
             layoutBarrier.image = GetHandle();
-            layoutBarrier.subresourceRange = barrier->subresourceRange;
+            layoutBarrier.subresourceRange = barrier.subresourceRange;
 
             // Transition from the acquired new layout to the desired layout.
-            layoutBarrier.oldLayout = barrier->newLayout;
+            layoutBarrier.oldLayout = barrier.newLayout;
             layoutBarrier.newLayout = desiredLayout;
 
             layoutBarrier.srcAccessMask = 0;
-            layoutBarrier.dstAccessMask = barrier->dstAccessMask;
+            layoutBarrier.dstAccessMask = barrier.dstAccessMask;
             layoutBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
             layoutBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
@@ -1782,18 +1779,12 @@ void ImportedTextureBase::TweakTransition(CommandRecordingContext* recordingCont
 
         mExternalState = ExternalState::Acquired;
     }
-
-    mLastExternalState = mExternalState;
 }
 
 MaybeError ImportedTextureBase::EndAccess(ExternalSemaphoreHandle* handle,
                                           VkImageLayout* releasedOldLayout,
                                           VkImageLayout* releasedNewLayout) {
     DAWN_ASSERT(GetNumMipLevels() == 1 && GetArrayLayers() == 1);
-
-    // Release the texture
-    mExternalState = ExternalState::Released;
-    mLastExternalState = ExternalState::Released;
 
     // Compute the layouts for the queue transition for export. desiredLayout == UNDEFINED is a tag
     // value used to export with whatever the current layout is. However queue transitioning to the
@@ -1821,6 +1812,9 @@ MaybeError ImportedTextureBase::EndAccess(ExternalSemaphoreHandle* handle,
         currentLayout = targetLayout;
     }
     DAWN_ASSERT(mExternalSemaphoreHandle != kNullExternalSemaphoreHandle);
+
+    // Release the texture
+    mExternalState = ExternalState::Released;
 
     // Write out the layouts and signal semaphore
     *releasedOldLayout = currentLayout;
@@ -1922,7 +1916,6 @@ MaybeUnknownError ExternalVkImageTexture::Initialize(
     DAWN_ASSERT(!GetFormat().IsMultiPlanar() || mCombinedAspect == Aspect::Color);
 
     mExternalState = ExternalState::PendingAcquire;
-    mLastExternalState = ExternalState::Released;
     mExportQueueFamilyIndex = externalMemoryService->GetQueueFamilyIndex(descriptor->GetType());
 
     mPendingAcquireOldLayout = descriptor->releasedOldLayout;
@@ -2053,7 +2046,6 @@ void SharedTexture::SetPendingAcquire(VkImageLayout pendingAcquireOldLayout,
                                       VkImageLayout pendingAcquireNewLayout) {
     DAWN_ASSERT(GetSharedResourceMemoryContents() != nullptr);
     mExternalState = ExternalState::PendingAcquire;
-    mLastExternalState = ExternalState::Released;
 
     mPendingAcquireOldLayout = pendingAcquireOldLayout;
     mPendingAcquireNewLayout = pendingAcquireNewLayout;
@@ -2102,12 +2094,15 @@ MaybeError TextureView::Initialize(const UnpackedPtr<TextureViewDescriptor>& des
         return {};
     }
 
-    // Texture could be destroyed by the time we make a view.
+    Device* device = ToBackend(GetTexture()->GetDevice());
+
     if (GetTexture()->IsDestroyed()) {
+        VkImageView placeholderHandle = device->GetPlaceholderTextureViewHandle(GetFormat());
+        mHandle = placeholderHandle;
+        mHandleForBGRA8UnormStorage = placeholderHandle;
         return {};
     }
 
-    Device* device = ToBackend(GetTexture()->GetDevice());
     VkImageViewCreateInfo createInfo = GetCreateInfo(descriptor->format, descriptor->dimension);
 
     VkImageViewUsageCreateInfo usageInfo = {};
@@ -2160,6 +2155,7 @@ MaybeError TextureView::Initialize(const UnpackedPtr<TextureViewDescriptor>& des
     DAWN_TRY(CheckVkSuccess(
         device->fn.CreateImageView(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
         "CreateImageView"));
+    mOwnsHandle = true;
 
     // We should create an image view with format RGBA8Unorm on the BGRA8Unorm texture when the
     // texture is used as storage texture. See http://crbug.com/dawn/1641 for more details.
@@ -2190,15 +2186,16 @@ void TextureView::DestroyImpl(DestroyReason reason) {
         mSamplerYCbCrConversion = VK_NULL_HANDLE;
     }
 
-    if (mHandle != VK_NULL_HANDLE) {
+    if (mOwnsHandle) {
         device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
-        mHandle = VK_NULL_HANDLE;
+        if (mHandleForBGRA8UnormStorage != VK_NULL_HANDLE) {
+            device->GetFencedDeleter()->DeleteWhenUnused(mHandleForBGRA8UnormStorage);
+        }
+        mOwnsHandle = false;
     }
-
-    if (mHandleForBGRA8UnormStorage != VK_NULL_HANDLE) {
-        device->GetFencedDeleter()->DeleteWhenUnused(mHandleForBGRA8UnormStorage);
-        mHandleForBGRA8UnormStorage = VK_NULL_HANDLE;
-    }
+    VkImageView placeholderHandle = device->GetPlaceholderTextureViewHandle(GetFormat());
+    mHandle = placeholderHandle;
+    mHandleForBGRA8UnormStorage = placeholderHandle;
 
     for (auto& handle : mHandlesFor2DViewOn3D) {
         if (handle != VK_NULL_HANDLE) {
@@ -2209,10 +2206,20 @@ void TextureView::DestroyImpl(DestroyReason reason) {
 }
 
 VkImageView TextureView::GetHandle() const {
+    DAWN_ASSERT(mOwnsHandle);
+    return mHandle;
+}
+
+VkImageView TextureView::GetHandleOrPlaceholder() const {
     return mHandle;
 }
 
 VkImageView TextureView::GetHandleForBGRA8UnormStorage() const {
+    DAWN_ASSERT(mOwnsHandle);
+    return mHandleForBGRA8UnormStorage;
+}
+
+VkImageView TextureView::GetHandleForBGRA8UnormStorageOrPlaceholder() const {
     return mHandleForBGRA8UnormStorage;
 }
 
@@ -2305,7 +2312,9 @@ VkImageLayout TextureView::VulkanImageLayout(wgpu::TextureUsage usage) const {
 }
 
 void TextureView::SetLabelImpl() {
-    SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_TextureView", GetLabel());
+    if (mOwnsHandle) {
+        SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_TextureView", GetLabel());
+    }
 }
 
 }  // namespace dawn::native::vulkan

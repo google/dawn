@@ -61,7 +61,7 @@ tint_symbol_1 = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<uniform, tint_symbol_1, read> = var undef @binding_point(1, 2)
+  %1:ptr<uniform, tint_symbol_1, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -103,7 +103,7 @@ tint_symbol_1 = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<uniform, tint_symbol_1, read> = var undef @binding_point(1, 2)
+  %1:ptr<uniform, tint_symbol_1, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -149,7 +149,7 @@ tint_symbol_1 = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<uniform, tint_symbol_1, read> = var undef @binding_point(1, 2)
+  %1:ptr<uniform, tint_symbol_1, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -195,7 +195,7 @@ tint_symbol_1 = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<uniform, tint_symbol_1, read> = var undef @binding_point(1, 2)
+  %1:ptr<uniform, tint_symbol_1, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -239,7 +239,7 @@ tint_symbol_1 = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read_write> = var undef @binding_point(1, 2)
+  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -283,7 +283,7 @@ tint_symbol_1 = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read_write> = var undef @binding_point(1, 2)
+  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -322,7 +322,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<uniform, tint_symbol_1, read> = var undef @binding_point(1, 2)
+  %1:ptr<uniform, tint_symbol_1, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -361,7 +361,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<uniform, tint_symbol_1, read> = var undef @binding_point(1, 2)
+  %1:ptr<uniform, tint_symbol_1, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -400,7 +400,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<uniform, tint_symbol_1, read> = var undef @binding_point(1, 2)
+  %1:ptr<uniform, tint_symbol_1, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -588,7 +588,7 @@ TEST_F(SpirvParserTest, CompositeConstruct_Array_ArrayStride_EqualsElementSize_A
 )",
               R"(
 $B1: {  # root
-  %1:ptr<private, spirv.explicit_layout_array<vec3<u32>, 4, stride=12>, read_write> = var undef
+  %1:ptr<private, spirv.explicit_layout_array<vec3<u32>, 4, stride=12>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -627,7 +627,7 @@ TEST_F(SpirvParserTest,
 )",
               R"(
 $B1: {  # root
-  %1:ptr<private, array<vec3<u32>, 4>, read_write> = var undef
+  %1:ptr<private, array<vec3<u32>, 4>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1019,8 +1019,8 @@ TEST_F(SpirvParserTest, CompositeInsert_Vector) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var undef
-    %3:ptr<function, u32, read_write> = var undef
+    %2:ptr<function, vec4<u32>, read_write> = var
+    %3:ptr<function, u32, read_write> = var
     %4:vec4<u32> = load %2
     %5:u32 = load %3
     %6:ptr<function, vec4<u32>, read_write> = var %4
@@ -1060,8 +1060,8 @@ TEST_F(SpirvParserTest, CompositeInsert_MatrixColumn) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, mat2x4<f32>, read_write> = var undef
-    %3:ptr<function, vec4<f32>, read_write> = var undef
+    %2:ptr<function, mat2x4<f32>, read_write> = var
+    %3:ptr<function, vec4<f32>, read_write> = var
     %4:mat2x4<f32> = load %2
     %5:vec4<f32> = load %3
     %6:ptr<function, mat2x4<f32>, read_write> = var %4
@@ -1101,8 +1101,8 @@ TEST_F(SpirvParserTest, CompositeInsert_MatrixElement) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, mat2x4<f32>, read_write> = var undef
-    %3:ptr<function, f32, read_write> = var undef
+    %2:ptr<function, mat2x4<f32>, read_write> = var
+    %3:ptr<function, f32, read_write> = var
     %4:mat2x4<f32> = load %2
     %5:f32 = load %3
     %6:ptr<function, mat2x4<f32>, read_write> = var %4
@@ -1142,8 +1142,8 @@ TEST_F(SpirvParserTest, CompositeInsert_Array) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, array<f32, 3>, read_write> = var undef
-    %3:ptr<function, f32, read_write> = var undef
+    %2:ptr<function, array<f32, 3>, read_write> = var
+    %3:ptr<function, f32, read_write> = var
     %4:array<f32, 3> = load %2
     %5:f32 = load %3
     %6:ptr<function, array<f32, 3>, read_write> = var %4
@@ -1185,8 +1185,8 @@ TEST_F(SpirvParserTest, CompositeInsert_ArrayOfVec) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, array<vec3<f32>, 4>, read_write> = var undef
-    %3:ptr<function, vec3<f32>, read_write> = var undef
+    %2:ptr<function, array<vec3<f32>, 4>, read_write> = var
+    %3:ptr<function, vec3<f32>, read_write> = var
     %4:array<vec3<f32>, 4> = load %2
     %5:vec3<f32> = load %3
     %6:ptr<function, array<vec3<f32>, 4>, read_write> = var %4
@@ -1230,8 +1230,8 @@ tint_symbol_2 = struct @align(8) {
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, tint_symbol_2, read_write> = var undef
-    %3:ptr<function, f32, read_write> = var undef
+    %2:ptr<function, tint_symbol_2, read_write> = var
+    %3:ptr<function, f32, read_write> = var
     %4:tint_symbol_2 = load %2
     %5:f32 = load %3
     %6:ptr<function, tint_symbol_2, read_write> = var %4
@@ -1268,7 +1268,7 @@ TEST_F(SpirvParserTest, VectorInsertDynamic_VectorComponent) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %2:ptr<function, vec4<u32>, read_write> = var
     %3:vec4<u32> = load %2
     %4:ptr<function, vec4<u32>, read_write> = var %3
     store_vector_element %4, 1u, 1u
@@ -1305,8 +1305,8 @@ TEST_F(SpirvParserTest, VectorShuffle_AlternateVectors) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var undef
-    %3:ptr<function, vec4<u32>, read_write> = var undef
+    %2:ptr<function, vec4<u32>, read_write> = var
+    %3:ptr<function, vec4<u32>, read_write> = var
     %4:vec4<u32> = load %2
     %5:vec4<u32> = load %3
     %6:u32 = swizzle %4, x
@@ -1347,8 +1347,8 @@ TEST_F(SpirvParserTest, VectorShuffle_TwoFromA_Then_TwoFromB) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var undef
-    %3:ptr<function, vec4<u32>, read_write> = var undef
+    %2:ptr<function, vec4<u32>, read_write> = var
+    %3:ptr<function, vec4<u32>, read_write> = var
     %4:vec4<u32> = load %2
     %5:vec4<u32> = load %3
     %6:vec2<u32> = swizzle %4, xz
@@ -1387,8 +1387,8 @@ TEST_F(SpirvParserTest, VectorShuffle_OneFromA_Then_TwoFromB_Then_OneFromA) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var undef
-    %3:ptr<function, vec4<u32>, read_write> = var undef
+    %2:ptr<function, vec4<u32>, read_write> = var
+    %3:ptr<function, vec4<u32>, read_write> = var
     %4:vec4<u32> = load %2
     %5:vec4<u32> = load %3
     %6:u32 = swizzle %4, x
@@ -1431,8 +1431,8 @@ TEST_F(SpirvParserTest, VectorShuffle_BothVectorsToBigger) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec2<u32>, read_write> = var undef
-    %3:ptr<function, vec3<u32>, read_write> = var undef
+    %2:ptr<function, vec2<u32>, read_write> = var
+    %3:ptr<function, vec3<u32>, read_write> = var
     %4:vec2<u32> = load %2
     %5:vec3<u32> = load %3
     %6:u32 = swizzle %4, x
@@ -1476,8 +1476,8 @@ TEST_F(SpirvParserTest, VectorShuffle_BothVectorsToSmaller) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec3<u32>, read_write> = var undef
-    %3:ptr<function, vec4<u32>, read_write> = var undef
+    %2:ptr<function, vec3<u32>, read_write> = var
+    %3:ptr<function, vec4<u32>, read_write> = var
     %4:vec3<u32> = load %2
     %5:vec4<u32> = load %3
     %6:u32 = swizzle %4, x
@@ -1516,8 +1516,8 @@ TEST_F(SpirvParserTest, VectorShuffle_BothVectors_UndefinedIndex) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var undef
-    %3:ptr<function, vec4<u32>, read_write> = var undef
+    %2:ptr<function, vec4<u32>, read_write> = var
+    %3:ptr<function, vec4<u32>, read_write> = var
     %4:vec4<u32> = load %2
     %5:vec4<u32> = load %3
     %6:vec2<u32> = swizzle %4, xx
@@ -1560,8 +1560,8 @@ TEST_F(SpirvParserTest, VectorShuffle_MixedDimensions_234) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec2<u32>, read_write> = var undef
-    %3:ptr<function, vec3<u32>, read_write> = var undef
+    %2:ptr<function, vec2<u32>, read_write> = var
+    %3:ptr<function, vec3<u32>, read_write> = var
     %4:vec2<u32> = load %2
     %5:vec3<u32> = load %3
     %6:u32 = swizzle %4, x
@@ -1600,7 +1600,7 @@ TEST_F(SpirvParserTest, VectorShuffle_AllFromA) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %2:ptr<function, vec4<u32>, read_write> = var
     %3:vec4<u32> = load %2
     %4:vec2<u32> = swizzle %3, xz
     %5:vec2<u32> = let %4
@@ -1636,8 +1636,8 @@ TEST_F(SpirvParserTest, VectorShuffle_AllFromB) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var undef
-    %3:ptr<function, vec4<u32>, read_write> = var undef
+    %2:ptr<function, vec4<u32>, read_write> = var
+    %3:ptr<function, vec4<u32>, read_write> = var
     %4:vec4<u32> = load %2
     %5:vec4<u32> = load %3
     %6:vec4<u32> = swizzle %5, xyzw
@@ -1673,7 +1673,7 @@ TEST_F(SpirvParserTest, VectorShuffle_Swizzle_SmallerResult) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec4<u32>, read_write> = var undef
+    %2:ptr<function, vec4<u32>, read_write> = var
     %3:vec4<u32> = load %2
     %4:vec2<u32> = swizzle %3, zx
     %5:vec2<u32> = let %4
@@ -1708,7 +1708,7 @@ TEST_F(SpirvParserTest, VectorShuffle_Swizzle_BiggerResult) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec2<u32>, read_write> = var undef
+    %2:ptr<function, vec2<u32>, read_write> = var
     %3:vec2<u32> = load %2
     %4:vec4<u32> = swizzle %3, yxyx
     %5:vec4<u32> = let %4
@@ -1745,7 +1745,7 @@ TEST_F(SpirvParserTest, VectorShuffle_Swizzle_OneVectorUndef) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:ptr<function, vec2<u32>, read_write> = var undef
+    %2:ptr<function, vec2<u32>, read_write> = var
     %3:vec2<u32> = load %2
     %4:vec2<u32> = swizzle %3, xy
     %5:vec2<u32> = let %4

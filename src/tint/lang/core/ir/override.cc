@@ -41,14 +41,17 @@ Override::Override(Id id) : Base(id) {}
 
 Override::Override(Id id, InstructionResult* result) : Base(id) {
     // Default to no initializer.
-    AddOperand(Override::kInitializerOperandOffset, nullptr);
     AddResult(result);
 }
 
 Override::~Override() = default;
 
 void Override::SetInitializer(Value* initializer) {
-    SetOperand(Override::kInitializerOperandOffset, initializer);
+    if (Operands().Length() > Override::kInitializerOperandOffset) {
+        SetOperand(Override::kInitializerOperandOffset, initializer);
+    } else {
+        AddOperand(Override::kInitializerOperandOffset, initializer);
+    }
 }
 
 Override* Override::Clone(CloneContext& ctx) {

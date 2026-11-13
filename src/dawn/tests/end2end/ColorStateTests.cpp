@@ -234,7 +234,6 @@ class ColorStateTest : public DawnTest {
     wgpu::ShaderModule vsModule;
 };
 
-namespace {
 // Add two colors and clamp
 constexpr utils::RGBA8 operator+(const utils::RGBA8& col1, const utils::RGBA8& col2) {
     int r = static_cast<int>(col1.r) + static_cast<int>(col2.r);
@@ -312,7 +311,6 @@ constexpr std::array<utils::RGBA8, 8> kColors = {{
     utils::RGBA8(0, 0, 0, 0),
     utils::RGBA8(255, 255, 255, 255),
 }};
-}  // namespace
 
 // Test compilation and usage of the fixture
 TEST_P(ColorStateTest, Basic) {
@@ -344,7 +342,6 @@ TEST_P(ColorStateTest, BlendOperationAdd) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<utils::RGBA8, utils::RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -355,7 +352,6 @@ TEST_P(ColorStateTest, BlendOperationAdd) {
 TEST_P(ColorStateTest, BlendOperationSubtract) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<utils::RGBA8, utils::RGBA8>> tests;
@@ -368,7 +364,6 @@ TEST_P(ColorStateTest, BlendOperationReverseSubtract) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<utils::RGBA8, utils::RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -379,7 +374,6 @@ TEST_P(ColorStateTest, BlendOperationReverseSubtract) {
 TEST_P(ColorStateTest, BlendOperationMin) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<utils::RGBA8, utils::RGBA8>> tests;
@@ -392,7 +386,6 @@ TEST_P(ColorStateTest, BlendOperationMin) {
 TEST_P(ColorStateTest, BlendOperationMax) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<utils::RGBA8, utils::RGBA8>> tests;
@@ -407,7 +400,6 @@ TEST_P(ColorStateTest, SrcBlendFactorZero) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
     std::transform(
@@ -419,7 +411,6 @@ TEST_P(ColorStateTest, SrcBlendFactorZero) {
 TEST_P(ColorStateTest, SrcBlendFactorOne) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
@@ -433,7 +424,6 @@ TEST_P(ColorStateTest, SrcBlendFactorOne) {
 TEST_P(ColorStateTest, SrcBlendFactorSrc) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
@@ -451,7 +441,6 @@ TEST_P(ColorStateTest, SrcBlendFactorOneMinusSrc) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -468,7 +457,6 @@ TEST_P(ColorStateTest, SrcBlendFactorSrcAlpha) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -483,7 +471,6 @@ TEST_P(ColorStateTest, SrcBlendFactorSrcAlpha) {
 TEST_P(ColorStateTest, SrcBlendFactorOneMinusSrcAlpha) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
@@ -502,7 +489,6 @@ TEST_P(ColorStateTest, SrcBlendFactorDst) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -518,7 +504,6 @@ TEST_P(ColorStateTest, SrcBlendFactorDst) {
 TEST_P(ColorStateTest, SrcBlendFactorOneMinusDst) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
@@ -536,7 +521,6 @@ TEST_P(ColorStateTest, SrcBlendFactorDstAlpha) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -551,7 +535,6 @@ TEST_P(ColorStateTest, SrcBlendFactorDstAlpha) {
 TEST_P(ColorStateTest, SrcBlendFactorOneMinusDstAlpha) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
@@ -570,7 +553,6 @@ TEST_P(ColorStateTest, SrcBlendFactorSrcAlphaSaturated) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -588,7 +570,6 @@ TEST_P(ColorStateTest, SrcBlendFactorConstant) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -604,7 +585,6 @@ TEST_P(ColorStateTest, SrcBlendFactorConstant) {
 TEST_P(ColorStateTest, SrcBlendFactorOneMinusConstant) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
@@ -624,7 +604,6 @@ TEST_P(ColorStateTest, DstBlendFactorZero) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
     std::transform(
@@ -636,7 +615,6 @@ TEST_P(ColorStateTest, DstBlendFactorZero) {
 TEST_P(ColorStateTest, DstBlendFactorOne) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
@@ -650,7 +628,6 @@ TEST_P(ColorStateTest, DstBlendFactorOne) {
 TEST_P(ColorStateTest, DstBlendFactorSrc) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
@@ -668,7 +645,6 @@ TEST_P(ColorStateTest, DstBlendFactorOneMinusSrc) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -685,7 +661,6 @@ TEST_P(ColorStateTest, DstBlendFactorSrcAlpha) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -700,7 +675,6 @@ TEST_P(ColorStateTest, DstBlendFactorSrcAlpha) {
 TEST_P(ColorStateTest, DstBlendFactorOneMinusSrcAlpha) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
@@ -719,7 +693,6 @@ TEST_P(ColorStateTest, DstBlendFactorDst) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -735,7 +708,6 @@ TEST_P(ColorStateTest, DstBlendFactorDst) {
 TEST_P(ColorStateTest, DstBlendFactorOneMinusDst) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
@@ -753,7 +725,6 @@ TEST_P(ColorStateTest, DstBlendFactorDstAlpha) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -768,7 +739,6 @@ TEST_P(ColorStateTest, DstBlendFactorDstAlpha) {
 TEST_P(ColorStateTest, DstBlendFactorOneMinusDstAlpha) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
@@ -787,7 +757,6 @@ TEST_P(ColorStateTest, DstBlendFactorSrcAlphaSaturated) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -805,7 +774,6 @@ TEST_P(ColorStateTest, DstBlendFactorConstant) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
 
-
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -821,7 +789,6 @@ TEST_P(ColorStateTest, DstBlendFactorConstant) {
 TEST_P(ColorStateTest, DstBlendFactorOneMinusConstant) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;
@@ -840,7 +807,6 @@ TEST_P(ColorStateTest, DstBlendFactorOneMinusConstant) {
 TEST_P(ColorStateTest, ColorWriteMask) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     wgpu::BlendComponent blendComponent;
     blendComponent.operation = wgpu::BlendOperation::Add;
@@ -931,7 +897,6 @@ TEST_P(ColorStateTest, ColorWriteMaskBlendingDisabled) {
 TEST_P(ColorStateTest, IndependentColorState) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     // Compatibility mode doesn't support per-draw-buffer blending
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
@@ -1085,7 +1050,6 @@ TEST_P(ColorStateTest, IndependentColorState) {
 TEST_P(ColorStateTest, DefaultBlendColor) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct MyBlock {
@@ -1342,7 +1306,6 @@ TEST_P(ColorStateTest, SparseAttachmentsDifferentColorMask) {
 TEST_P(ColorStateTest, SrcBlendFactorDstAlphaDstBlendFactorZero) {
     // TODO(crbug.com/518853214): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
 
     utils::RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, utils::RGBA8>> tests;

@@ -34,6 +34,8 @@
 namespace dawn::native {
 namespace {
 
+using ::testing::HasSubstr;
+
 LimitsForCompilationRequest MakeWorkgroupLimits() {
     LimitsForCompilationRequest limits = {};
     limits.maxComputeWorkgroupSizeX = 256;
@@ -74,7 +76,7 @@ TEST(ShaderModuleTests, SubgroupMatrixUsesMaximumSubgroupSizeWithoutExplicitSize
         result.AcquireSuccess();
         FAIL() << "Expected workgroup validation to fail";
     }
-    EXPECT_THAT(result.AcquireError()->GetMessage(), testing::HasSubstr("maxSubgroupSize (64)"));
+    EXPECT_THAT(result.AcquireError()->GetMessage(), HasSubstr("maxSubgroupSize (64)"));
 }
 
 }  // anonymous namespace

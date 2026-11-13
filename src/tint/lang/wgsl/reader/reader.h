@@ -63,8 +63,11 @@ Program Parse(const Source::File* file, const Options& options = {});
 /// Parse a WGSL program from source, and return an IR module.
 /// @param file the input WGSL file
 /// @param options the configuration options to use when parsing WGSL
+/// @param ir_options the configuration options to use when generating the IR module
 /// @returns the resulting IR module, or failure
-Result<core::ir::Module> WgslToIR(const Source::File* file, const Options& options = {});
+Result<core::ir::Module> WgslToIR(const Source::File* file,
+                                  const Options& options = {},
+                                  const IROptions& ir_options = {});
 
 /// Builds a core-dialect core::ir::Module from the given Program
 /// @param program the Program to use.

@@ -163,7 +163,7 @@ TEST_F(IR_ForLoopAnalysisTest, ConditionUniformArray) {
 
     auto* src = R"(
 $B1: {  # root
-  %U:ptr<uniform, array<vec4<u32>, 8>, read> = var undef @binding_point(0, 0)
+  %U:ptr<uniform, array<vec4<u32>, 8>, read> = var @binding_point(0, 0)
 }
 
 %b = func():void {
@@ -268,7 +268,7 @@ UniformStruct = struct @align(16) {
 }
 
 $B1: {  # root
-  %U:ptr<uniform, UniformStruct, read> = var undef @binding_point(0, 0)
+  %U:ptr<uniform, UniformStruct, read> = var @binding_point(0, 0)
 }
 
 %b = func():void {
@@ -376,7 +376,7 @@ UniformStruct = struct @align(16) {
 }
 
 $B1: {  # root
-  %U:ptr<uniform, UniformStruct, read> = var undef @binding_point(0, 0)
+  %U:ptr<uniform, UniformStruct, read> = var @binding_point(0, 0)
 }
 
 %b = func():void {

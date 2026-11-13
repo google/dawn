@@ -127,6 +127,12 @@
     } while (0)
 #define EXPECT_DEPRECATION_WARNING(statement) EXPECT_DEPRECATION_WARNINGS(statement, 1)
 
+// Proxy to the same function in the dawn:: namespace as Chromium as an unnamespaced forward
+// declaration in its main file for dawn_unittests.
+void InitDawnValidationTestEnvironment(int argc, char** argv);
+
+namespace dawn {
+
 // Gmock matcher helpers that may be used throughout other tests.
 
 // BindGroupLayouts can either be cache equivalent meaning that they may have different
@@ -141,9 +147,9 @@ MATCHER_P(BindGroupLayoutEq, other, "") {
     return dawn::native::FromAPI(arg.Get())->IsLayoutEqual(dawn::native::FromAPI(other.Get()));
 }
 
-namespace dawn::utils {
+namespace utils {
 class WireHelper;
-}  // namespace dawn::utils
+}  // namespace utils
 
 void InitDawnValidationTestEnvironment(int argc, char** argv);
 
@@ -199,6 +205,9 @@ class ValidationTest : public testing::Test {
     // Called during SetUp() to get the required features and toggles to be enabled for the tests.
     // Override these appropriately for different tests.
     virtual bool AllowUnsafeAPIs();
+    // Returning false disables allow_experimental_apis on the instance, so the device only accepts
+    // the parts of the API that are in Dawn's stable ABI.
+    virtual bool AllowExperimentalAPIs();
     virtual std::vector<wgpu::FeatureName> GetRequiredFeatures();
     // Note implementations of this can assume `required` starts as default-initialized.
     virtual void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
@@ -245,5 +254,7 @@ class ValidationTest : public testing::Test {
 
 template <typename T, typename Base = ValidationTest>
 class ValidationTestWithParam : public Base, public testing::WithParamInterface<T> {};
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_TESTS_UNITTESTS_VALIDATION_VALIDATIONTEST_H_

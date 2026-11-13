@@ -35,7 +35,9 @@
 namespace dawn {
 namespace {
 
-class ITypBitsetTest : public testing::Test {
+using ::testing::Test;
+
+class ITypBitsetTest : public Test {
   protected:
     using Key = TypedInteger<struct KeyT, size_t>;
     using Bitset = ityp::bitset<Key, 9>;
@@ -186,7 +188,7 @@ TEST_F(ITypBitsetTest, Xor) {
     Bitset bits = {1 << 1 | 1 << 2 | 1 << 7};
     ExpectBits(bits, {1, 2, 7});
 
-    Bitset bits2 = bits ^ Bitset { 1 << 0 | 1 << 3 | 1 << 7 };
+    Bitset bits2 = bits ^ Bitset{1 << 0 | 1 << 3 | 1 << 7};
     ExpectBits(bits2, {0, 1, 2, 3});
     ExpectBits(bits, {1, 2, 7});
 
@@ -235,8 +237,8 @@ TEST_F(ITypBitsetDeathTest, OutOfBounds) {
 
         constexpr uint64_t one = uint64_t{1};
         constexpr uint64_t validBits = (one << bits) - 1;
-        ityp::bitset<Key, bits>{0};                                             // Valid
-        ityp::bitset<Key, bits>{validBits};                                     // All valid bits
+        ityp::bitset<Key, bits>{0};          // Valid
+        ityp::bitset<Key, bits>{validBits};  // All valid bits
         DAWN_EXPECT_DEATH_IF_SUPPORTED((ityp::bitset<Key, bits>{one << bits}), "");  // Invalid lsb
         DAWN_EXPECT_DEATH_IF_SUPPORTED((ityp::bitset<Key, bits>{one << 63}), "");    // Invalid msb
         DAWN_EXPECT_DEATH_IF_SUPPORTED((ityp::bitset<Key, bits>{~validBits}),
@@ -253,7 +255,7 @@ TEST_F(ITypBitsetDeathTest, OutOfBounds) {
 }
 #endif
 
-class ITypBitsetIteratorTest : public testing::Test {
+class ITypBitsetIteratorTest : public Test {
   protected:
     using IntegerT = TypedInteger<struct Foo, uint32_t>;
     ityp::bitset<IntegerT, 40> mStateBits;
@@ -380,7 +382,7 @@ TEST_F(ITypBitsetIteratorTest, NonLValueBitset_Large) {
     EXPECT_EQ((mLargeStateBits & otherBits).count(), seenBits.size());
 }
 
-class EnumBitSetIteratorTest : public testing::Test {
+class EnumBitSetIteratorTest : public Test {
   protected:
     enum class TestEnum : uint8_t { A, B, C, D, E, F, G, H, I, J, EnumCount };
 

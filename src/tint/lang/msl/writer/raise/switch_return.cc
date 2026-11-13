@@ -77,7 +77,9 @@ struct State {
                 // If the switch produces result values, use nullptr since this exit path is
                 // dynamically unreachable.
                 Vector<core::ir::Value*, 4> args;
-                args.Resize(sw->Results().Length(), nullptr);
+                for (auto* result : sw->Results()) {
+                    args.Push(b.Undef(result->Type()));
+                }
                 b.Exit(sw, std::move(args));
 
                 ret->Remove();

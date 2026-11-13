@@ -33,6 +33,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::HasSubstr;
+
 class InternalUsageValidationDisabledTest : public ValidationTest {};
 
 // Test that using DawnTextureInternalUsageDescriptor is an error if DawnInternalUsages is not
@@ -76,8 +78,7 @@ TEST_F(InternalUsageValidationDisabledTest, CommandEncoderDescriptorRequiresFeat
 
     // Check that the encoder records that it is invalid, and not any other errors.
     encoder.InjectValidationError("injected error");
-    ASSERT_DEVICE_ERROR(encoder.Finish(),
-                        testing::HasSubstr("[Invalid CommandEncoder (unlabeled)]"));
+    ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr("[Invalid CommandEncoder (unlabeled)]"));
 }
 
 class TextureInternalUsageValidationTest : public ValidationTest {

@@ -59,8 +59,7 @@ bool PhysicalDevice::SupportsExternalImages() const {
     return true;
 }
 
-bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
-                                          InstanceBase* instance) const {
+bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel) const {
     // TODO(dawn:1820): compare D3D11 feature levels with Dawn feature levels.
     switch (featureLevel) {
         case wgpu::FeatureLevel::Core: {
@@ -373,12 +372,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         if (gpu_info::IntelWindowsDriverVersion(GetDriverVersion()) < kKnownGoodDriverVersion) {
             deviceToggles->Default(Toggle::D3DSkipShaderOptimizations, true);
         }
-    }
-
-    if (gpu_info::IsIntel(vendorId)) {
-        // Workaround an Intel GPU hardware limitation that corrupts buffer<->texture copies with
-        // a large row pitch. See https://crbug.com/481934465.
-        deviceToggles->Default(Toggle::SplitBufferTextureCopyForOversizedRow, true);
     }
 
     // Enable the integer range analysis for shader robustness by default if the corresponding

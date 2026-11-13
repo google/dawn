@@ -109,8 +109,15 @@
 #define TINT_DISABLE_WARNING_EXTRA_SEMICOLON \
     _Pragma("clang diagnostic ignored \"-Wextra-semi-stmt\"")
 #define TINT_DISABLE_WARNING_FLOAT_EQUAL _Pragma("clang diagnostic ignored \"-Wfloat-equal\"")
+#if __has_warning("-Wlifetime-safety-experimental-invalidation")
+#define TINT_DISABLE_WARNING_LIFETIME_SAFETY_INVALIDATION \
+    _Pragma("clang diagnostic ignored \"-Wlifetime-safety-experimental-invalidation\"")
+#elif __has_warning("-Wlifetime-safety-invalidation")
 #define TINT_DISABLE_WARNING_LIFETIME_SAFETY_INVALIDATION \
     _Pragma("clang diagnostic ignored \"-Wlifetime-safety-invalidation\"")
+#else
+#define TINT_DISABLE_WARNING_LIFETIME_SAFETY_INVALIDATION /* currently no-op */
+#endif
 #define TINT_DISABLE_WARNING_MAYBE_UNINITIALIZED \
     _Pragma("clang diagnostic ignored \"-Wconditional-uninitialized\"")
 #define TINT_DISABLE_WARNING_MISSING_DESTRUCTOR_OVERRIDE                  \

@@ -421,5 +421,59 @@ TEST(ChainUtilsTests, ValidateSubsetOut) {
     }
 }
 
+// ValidateStable() accepts only chained structs that are part of Dawn's stable ABI.
+TEST(ChainUtilsTests, ValidateStable) {
+    // DeviceDescriptor has no stable chained extensions; DawnTogglesDescriptor is rejected.
+    {
+        DeviceDescriptor desc;
+        auto unpacked = ValidateAndUnpack(&desc).AcquireSuccess();
+        EXPECT_TRUE(unpacked.ValidateStable().IsSuccess());
+
+        DawnTogglesDescriptor togglesDesc;
+        desc.nextInChain = &togglesDesc;
+        unpacked = ValidateAndUnpack(&desc).AcquireSuccess();
+        auto err = unpacked.ValidateStable().AcquireError();
+        ASSERT_NE(err, nullptr);
+        EXPECT_THAT(err->GetFormattedMessage(), HasSubstr("DawnTogglesDescriptor"));
+    }
+    // ShaderModuleDescriptor accepts ShaderSourceWGSL and rejects ShaderSourceSPIRV.
+    {
+        ShaderModuleDescriptor desc;
+        ShaderSourceWGSL wgsl;
+        desc.nextInChain = &wgsl;
+        auto unpacked = ValidateAndUnpack(&desc).AcquireSuccess();
+        EXPECT_TRUE(unpacked.ValidateStable().IsSuccess());
+
+        ShaderSourceSPIRV spirv;
+        desc.nextInChain = &spirv;
+        unpacked = ValidateAndUnpack(&desc).AcquireSuccess();
+        EXPECT_NE(unpacked.ValidateStable().AcquireError(), nullptr);
+    }
+    // RequestAdapterOptions has no stable chained extensions; DawnTogglesDescriptor is rejected.
+    {
+        RequestAdapterOptions options;
+        auto unpacked = ValidateAndUnpack(&options).AcquireSuccess();
+        EXPECT_TRUE(unpacked.ValidateStable().IsSuccess());
+
+        DawnTogglesDescriptor togglesDesc;
+        options.nextInChain = &togglesDesc;
+        unpacked = ValidateAndUnpack(&options).AcquireSuccess();
+        EXPECT_NE(unpacked.ValidateStable().AcquireError(), nullptr);
+    }
+    // SurfaceDescriptor accepts the six platform surface sources and rejects Dawn-only ones.
+    {
+        SurfaceDescriptor desc;
+        SurfaceSourceXlibWindow xlib;
+        desc.nextInChain = &xlib;
+        auto unpacked = ValidateAndUnpack(&desc).AcquireSuccess();
+        EXPECT_TRUE(unpacked.ValidateStable().IsSuccess());
+
+        SurfaceDescriptorFromWindowsCoreWindow coreWindow;
+        desc.nextInChain = &coreWindow;
+        unpacked = ValidateAndUnpack(&desc).AcquireSuccess();
+        EXPECT_NE(unpacked.ValidateStable().AcquireError(), nullptr);
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn::native

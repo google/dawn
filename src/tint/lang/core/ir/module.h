@@ -78,6 +78,8 @@ enum class Property : uint8_t {
     kAllowDuplicateBindings,
     /// Allows @location on structs, matrices, and arrays that have numeric elements
     kAllowLocationForNumericComposites,
+    /// Allows vertex entry points without a @builtin(position) output.
+    kAllowMissingVertexPosition,
     /// Allows module scoped lets
     kAllowModuleScopeLets,
     /// Allows MSL specific entry point interface variance.
@@ -134,6 +136,7 @@ auto& operator<<(STREAM& out, Property p) {
         CASE(AllowClipDistancesOnF32ScalarAndVector);
         CASE(AllowDuplicateBindings);
         CASE(AllowLocationForNumericComposites);
+        CASE(AllowMissingVertexPosition);
         CASE(AllowModuleScopeLets);
         CASE(AllowMslEntryPointInterface);
         CASE(AllowMultipleEntryPoints);

@@ -43,10 +43,23 @@
     };
 {% endmacro %}
 
-{% macro define_kotlin_to_struct_conversion(function_name, kotlin_name, struct_name, members, is_structure_converter=False) %}
+{% macro define_kotlin_to_struct_conversion(function_name, kotlin_name, struct_name, members, is_structure_converter=False, unwrap_objects=False) %}
     inline void {{function_name}}(JNIContext* c, const {{kotlin_name}}& inStruct, {{struct_name}}* outStruct) {
-        JNIEnv* env = c->env;
-        JNIClasses* classes = JNIClasses::getInstance(env);
+        {% set ns = namespace(needs_env=false, needs_classes=false) %}
+        {% for member in kotlin_record_members(members) if not member.kotlin_only %}
+            {% if member.type.category == 'object' and ((member.length and member.length != 'constant') or (not member.length and not unwrap_objects)) %}
+                {% set ns.needs_classes = true %}
+                {% set ns.needs_env = true %}
+            {% elif member.type.category in ['callback function', 'structure'] or (member.length and member.constant_length != 1) %}
+                {% set ns.needs_env = true %}
+            {% endif %}
+        {% endfor %}
+        {% if ns.needs_env %}
+            JNIEnv* env = c->env;
+        {% endif %}
+        {% if ns.needs_classes %}
+            JNIClasses* classes = JNIClasses::getInstance(env);
+        {% endif %}
         *outStruct = {};
 
         {% for member in kotlin_record_members(members) %}
@@ -78,6 +91,8 @@
                                 {% set userdata = 'userdata1' %}
                             //* User data is used to carry the JNI context (env) for use by the
                             //* callback.
+                            ScopedJVMAttachment jvmAttachment(
+                                static_cast<UserData*>({{ userdata }})->jvm);
                             {% if member.type.name.get() in ['uncaptured error callback', 'dawn load cache data callback', 'dawn store cache data callback'] %}
                             std::shared_ptr<UserData> userData1 = static_cast<UserData *>({{ userdata }})->shared_from_this();
                             {% else %}
@@ -98,16 +113,8 @@
                                 FreeDeviceCallbacks(*device);
                             }
                             {% endif %}
-                            JavaVM* jvm = userData1->jvm;
-                            JNIEnv *env = NULL;
-                            //* Deal with difference in signatures between Oracle's jni.h and Android's.
-                            #ifdef _JAVASOFT_JNI_H_  //* Oracle's jni.h violates the JNI spec.
-                                jvm->AttachCurrentThread(reinterpret_cast<void**>(&env), NULL);
-                            #else
-                                jvm->AttachCurrentThread(&env, NULL);
-                            #endif
-
-                            if (env->ExceptionCheck()) {
+                            JNIEnv* env = jvmAttachment.GetEnv();
+                            if (!env || env->ExceptionCheck()) {
                                 return;
                             }
                             JNIClasses* classes = JNIClasses::getInstance(env);
@@ -195,6 +202,13 @@
                             );
 
                             env->CallVoidMethod(userData1->executor, executeMethodID, runnable);
+                            //* An exception thrown by a direct executor on a newly attached native
+                            //* worker thread has no outer Java frame; forward it to the thread's
+                            //* uncaught-exception handler before detaching. On an already-attached
+                            //* caller thread, leave it pending so it propagates to the Kotlin caller.
+                            if (jvmAttachment.NeedsDetach() && env->ExceptionCheck()) {
+                                classes->DispatchPendingException(env);
+                            }
                         };
                         {% if member.type.name.get() in ['uncaptured error callback', 'dawn load cache data callback', 'dawn store cache data callback'] %}
                         auto newUserDataShared = std::make_shared<UserData>();
@@ -274,16 +288,18 @@
                             out = array;
 
                             {% if member.type.category == 'object' %}
-                                jclass memberClass = classes->{{ member.type.name.camelCase() }};
-                                jmethodID getHandle = env->GetMethodID(memberClass, "getHandle", "()J");
+                                jfieldID handleField = classes->{{ member.type.name.camelCase() }}Handle;
                                 for (int idx = 0; idx != outLength; idx++) {
                                     jobject element = env->GetObjectArrayElement(in, idx);
-                                    array[idx] = reinterpret_cast<{{ as_cType(member.type.name) }}>(
-                                            env->CallLongMethod(element, getHandle));
+                                    array[idx] = element ? reinterpret_cast<{{ as_cType(member.type.name) }}>(
+                                            env->GetLongField(element, handleField)) : nullptr;
+                                    env->DeleteLocalRef(element);
                                 }
                             {% elif member.type.category == 'structure' %}
                                 for (int idx = 0; idx != outLength; idx++) {
-                                    ToNative(c, env, env->GetObjectArrayElement(in, idx), &array[idx]);
+                                    jobject element = env->GetObjectArrayElement(in, idx);
+                                    ToNative(c, env, element, &array[idx]);
+                                    env->DeleteLocalRef(element);
                                 }
                             {% else %}
                                 {{ unreachable_code() }}
@@ -308,14 +324,17 @@
                     {% endif %}
                 //* From here members are single values.
                 {% elif member.type.category == 'object' %}
-                    if (in != nullptr) {
-                        jclass memberClass = classes->{{ member.type.name.camelCase() }};
-                        jmethodID getHandle = env->GetMethodID(memberClass, "getHandle", "()J");
-                        out = reinterpret_cast<{{as_cType(member.type.name)}}>(
-                                env->CallLongMethod(in, getHandle));
-                    } else {
-                        out = nullptr;
-                    }
+                    {% if unwrap_objects %}
+                        //* Handle was already unwrapped on the Kotlin side. 0 maps to nullptr.
+                        out = reinterpret_cast<{{as_cType(member.type.name)}}>(in);
+                    {% else %}
+                        if (in != nullptr) {
+                            out = reinterpret_cast<{{as_cType(member.type.name)}}>(
+                                    env->GetLongField(in, classes->{{ member.type.name.camelCase() }}Handle));
+                        } else {
+                            out = nullptr;
+                        }
+                    {% endif %}
                 {% elif member.type.category == 'callback function' %}
                     //* Do nothing for this case.
                 {% elif member.type.category == 'structure' %}

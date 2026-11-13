@@ -26,8 +26,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import os, subprocess, sys, shutil
+import argparse, json, os, subprocess, sys, shutil
 
+from dawn_json_parsing import parse_addin, parse_json
 from generator_lib import Generator, run_generator, FileRender, GeneratorOutput
 
 
@@ -122,10 +123,33 @@ def get_version_byte_array(version_str):
     return ", ".join(byte_values)
 
 
+def _get_stable_versions(version_addins):
+    versions = [
+        v["stable_version"] for v in version_addins.values()
+        if "stable_version" in v
+    ]
+    return max(versions)
+
+
+# Hard-coded to 1 for now since we don't anticipate needing to ever increment
+# the major version (i.e. Dawn will always be backwards compatible), but we
+# introduce the major version nonetheless to provide a mechanism to make
+# breaking changes if it's ever needed.
+def get_major_version():
+    return 1
+
+
+def get_minor_version(json_filepath):
+    return _get_stable_versions(parse_addin(json_filepath))
+
+
 def compute_params(args):
     version = get_version(args)
+    version_json = os.path.abspath(args.version_json)
     return {
         "get_version_byte_array": lambda: get_version_byte_array(version),
+        "get_major_version": get_major_version,
+        "get_minor_version": lambda: get_minor_version(version_json),
     }
 
 
@@ -150,20 +174,27 @@ class DawnVersionGenerator(Generator):
             help=
             ("Path to one-liner version string file used when git may not be present. "
              "In general the version string is a git hash."))
+        parser.add_argument(
+            "--version-json",
+            required=True,
+            type=str,
+            help="The DAWN VERSION JSON definition to use.",
+        )
 
     def get_dependencies(self, args):
         dawn_dir = os.path.abspath(args.dawn_dir)
         version_file = args.version_file
 
+        deps = [os.path.abspath(args.version_json)]
         if version_file:
-            return [version_file]
+            return deps + [version_file]
         if git_exists(dawn_dir):
             try:
-                return [get_git_head(dawn_dir)
-                        ] + get_git_resolved_head(dawn_dir)
+                return deps + [get_git_head(dawn_dir)
+                               ] + get_git_resolved_head(dawn_dir)
             except Exception:
-                return []
-        return []
+                return deps
+        return deps
 
     def get_outputs(self, args):
         params = compute_params(args)
@@ -171,11 +202,93 @@ class DawnVersionGenerator(Generator):
         renders = [
             FileRender("dawn/dawn_version.h", "include/dawn/dawn_version.h",
                        [params]),
-            FileRender("dawn/dawn_version.h",
-                       "src/dawn/common/Version_autogen.h", [params]),
         ]
         return GeneratorOutput(renders=renders, imported_templates=[])
 
 
+def run_check(args):
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--dawn-json",
+        required=True,
+        type=str,
+        help="The DAWN JSON definition to use.",
+    )
+    parser.add_argument(
+        "--old-version-json",
+        required=True,
+        type=str,
+        help="The old dawn_version.json file path before changes.",
+    )
+    parser.add_argument(
+        "--new-version-json",
+        required=True,
+        type=str,
+        help="The new dawn_version.json file path after changes.",
+    )
+    options = parser.parse_args(args)
+
+    with open(options.dawn_json) as f:
+        dawn_json = json.loads(f.read())
+    new_addins = parse_addin(options.new_version_json)
+    old_addins = parse_addin(options.old_version_json)
+
+    # Verify that the new addins file doesn't contain any mismatched entries
+    # with respect to dawn.json.
+    parse_json(dawn_json, enabled_tags=["dawn", "native"], addins=[new_addins])
+
+    old_max = _get_stable_versions(old_addins)
+
+    # Verify that all old entries are unchanged and any new entries have a
+    # stable_version greater than the old max.
+    for key, value in new_addins.items():
+        if key in old_addins:
+            old_value = old_addins.pop(key)
+            if value.get("stable_version") != old_value.get("stable_version"):
+                print(f"Stable API entry '{key}' in dawn_version.json was "
+                      f"modified from {old_value} to {value}. Existing stable "
+                      f"API entries cannot be changed.")
+                return 1
+        else:
+            new_version = value.get("stable_version")
+            if new_version is None or new_version <= old_max:
+                print(
+                    f"New stable API entry '{key}' in dawn_version.json has "
+                    f"'stable_version' {new_version}, which is not greater "
+                    f"than the previous maximum 'stable_version' ({old_max}).")
+                return 1
+
+    # TODO(crbug.com/577079442): Remove this allowlist once the SPIR-V removal
+    # lands; SPIR-V was marked experimental prior to Dawn's first stable ABI
+    # release.
+    pre_release_allowed_removals = {
+        "shader source SPIRV",
+        "instance feature name::shader source SPIRV",
+        "s type::shader source SPIRV",
+    }
+    for key in pre_release_allowed_removals:
+        old_addins.pop(key, None)
+
+    if old_addins:
+        removed_keys = ", ".join(f"'{k}'" for k in old_addins)
+        print(f"Stable API entries ({removed_keys}) were removed from "
+              f"dawn_version.json. Stable API entries cannot be removed.")
+        return 1
+
+    return 0
+
+
+def main(args):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("action", choices=("gen", "check"))
+    options, remaining_args = parser.parse_known_args(args[1:])
+
+    if options.action == "gen":
+        return run_generator(DawnVersionGenerator(), remaining_args)
+
+    if options.action == "check":
+        return run_check(remaining_args)
+
+
 if __name__ == "__main__":
-    sys.exit(run_generator(DawnVersionGenerator()))
+    sys.exit(main(sys.argv))

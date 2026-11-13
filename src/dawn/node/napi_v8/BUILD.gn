@@ -44,6 +44,8 @@ if (checkout_v8 && dawn_node) {
 
     public_configs = [ ":napi_v8_public_config" ]
 
+    public_deps = [ "${dawn_root}/src/dawn/node/standalone:event_loop" ]
+
     deps = [
       "${dawn_abseil_dir}:absl",
       "${dawn_root}/src/utils",

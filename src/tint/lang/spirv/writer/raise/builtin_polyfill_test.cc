@@ -77,7 +77,7 @@ Buffer = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, Buffer, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():u32 {
@@ -98,7 +98,7 @@ Buffer = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, Buffer, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():u32 {
@@ -143,7 +143,7 @@ Buffer = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, Buffer, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():u32 {
@@ -166,7 +166,7 @@ Buffer = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, Buffer, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():u32 {
@@ -214,7 +214,7 @@ Buffer = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, Buffer, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():u32 {
@@ -237,7 +237,7 @@ Buffer = struct @align(4) {
 }
 
 $B1: {  # root
-  %var:ptr<storage, Buffer, read_write> = var undef @binding_point(0, 0)
+  %var:ptr<storage, Buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():u32 {
@@ -272,7 +272,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicAdd_Storage) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<storage, atomic<i32>, read_write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -286,7 +286,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<storage, atomic<i32>, read_write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -317,7 +317,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicAdd_Workgroup) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -331,7 +331,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -362,7 +362,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicAnd) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -376,7 +376,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -415,7 +415,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%cmp:i32, %val:i32):i32 {
@@ -435,7 +435,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%cmp:i32, %val:i32):i32 {
@@ -469,7 +469,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicExchange) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -483,7 +483,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -512,7 +512,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicLoad) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func():i32 {
@@ -526,7 +526,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func():i32 {
@@ -557,7 +557,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMax_I32) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -571,7 +571,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -602,7 +602,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMax_U32) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %foo = func(%arg1:u32):u32 {
@@ -616,7 +616,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %foo = func(%arg1:u32):u32 {
@@ -647,7 +647,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMin_I32) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -661,7 +661,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -692,7 +692,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMin_U32) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %foo = func(%arg1:u32):u32 {
@@ -706,7 +706,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %foo = func(%arg1:u32):u32 {
@@ -737,7 +737,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicOr) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -751,7 +751,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -782,7 +782,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicStore) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):void {
@@ -796,7 +796,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):void {
@@ -827,7 +827,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicStore_ReplaceWithExchange) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):void {
@@ -841,7 +841,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):void {
@@ -874,7 +874,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicSub) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -888,7 +888,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -920,7 +920,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicStoreMax) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, atomic<u64>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%arg1:vec2<u32>):void {
@@ -935,7 +935,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, atomic<u64>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%arg1:vec2<u32>):void {
@@ -967,7 +967,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicStoreMin) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, atomic<u64>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%arg1:vec2<u32>):void {
@@ -982,7 +982,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<storage, atomic<u64>, read_write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, atomic<u64>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%arg1:vec2<u32>):void {
@@ -1014,7 +1014,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicXor) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -1028,7 +1028,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %1:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = func(%arg1:i32):i32 {
@@ -1565,14 +1565,14 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleDown_WithRobustness) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
-  %tint_subgroup_invocation_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var
+  %tint_subgroup_invocation_id:ptr<private, u32, read_write> = var
 }
 
 %foo = @fragment func(%tint_subgroup_invocation_id_1:u32 [@subgroup_invocation_id]):i32 [@location(0)] {  # %tint_subgroup_invocation_id_1: 'tint_subgroup_invocation_id'
   $B2: {
-    %5:u32 = subgroupAdd 1u
-    %6:u32 = sub %5, 1u
+    %5:vec4<u32> = subgroupBallot true
+    %6:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %5
     store %tint_subgroup_last_id, %6
     store %tint_subgroup_invocation_id, %tint_subgroup_invocation_id_1
     %val:i32 = let 1i
@@ -1653,14 +1653,14 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleUp_WithRobustness) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
-  %tint_subgroup_invocation_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var
+  %tint_subgroup_invocation_id:ptr<private, u32, read_write> = var
 }
 
 %foo = @fragment func(%tint_subgroup_invocation_id_1:u32 [@subgroup_invocation_id]):i32 [@location(0)] {  # %tint_subgroup_invocation_id_1: 'tint_subgroup_invocation_id'
   $B2: {
-    %5:u32 = subgroupAdd 1u
-    %6:u32 = sub %5, 1u
+    %5:vec4<u32> = subgroupBallot true
+    %6:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %5
     store %tint_subgroup_last_id, %6
     store %tint_subgroup_invocation_id, %tint_subgroup_invocation_id_1
     %val:i32 = let 1i
@@ -1741,14 +1741,14 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleXor_WithRobustness) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
-  %tint_subgroup_invocation_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var
+  %tint_subgroup_invocation_id:ptr<private, u32, read_write> = var
 }
 
 %foo = @fragment func(%tint_subgroup_invocation_id_1:u32 [@subgroup_invocation_id]):i32 [@location(0)] {  # %tint_subgroup_invocation_id_1: 'tint_subgroup_invocation_id'
   $B2: {
-    %5:u32 = subgroupAdd 1u
-    %6:u32 = sub %5, 1u
+    %5:vec4<u32> = subgroupBallot true
+    %6:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %5
     store %tint_subgroup_last_id, %6
     store %tint_subgroup_invocation_id, %tint_subgroup_invocation_id_1
     %val:i32 = let 1i
@@ -4337,13 +4337,13 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle_WithRobustness) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = subgroupAdd 1u
-    %4:u32 = sub %3, 1u
+    %3:vec4<u32> = subgroupBallot true
+    %4:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %3
     store %tint_subgroup_last_id, %4
     %id:i32 = let 1i
     %val:i32 = let 1i
@@ -4387,13 +4387,13 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle_ExistingBuiltin) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var
 }
 
 %foo = @fragment func(%my_subgroup_size:u32 [@subgroup_size]):void {
   $B2: {
-    %4:u32 = subgroupAdd 1u
-    %5:u32 = sub %4, 1u
+    %4:vec4<u32> = subgroupBallot true
+    %5:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %4
     store %tint_subgroup_last_id, %5
     %6:u32 = load %tint_subgroup_last_id
     %7:u32 = min 1u, %6
@@ -4451,13 +4451,13 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var
 }
 
 %foo = @fragment func(%inputs:S):void {
   $B2: {
-    %4:u32 = subgroupAdd 1u
-    %5:u32 = sub %4, 1u
+    %4:vec4<u32> = subgroupBallot true
+    %5:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %4
     store %tint_subgroup_last_id, %5
     %6:u32 = load %tint_subgroup_last_id
     %7:u32 = min 1u, %6
@@ -4528,13 +4528,13 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupBroadcast_WithRobustness) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = subgroupAdd 1u
-    %4:u32 = sub %3, 1u
+    %3:vec4<u32> = subgroupBallot true
+    %4:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %3
     store %tint_subgroup_last_id, %4
     %5:i32 = subgroupBroadcast 1i, 1u
     %6:u32 = load %tint_subgroup_last_id
@@ -5719,13 +5719,13 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleClamped_I32) {
 )";
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = subgroupAdd 1u
-    %4:u32 = sub %3, 1u
+    %3:vec4<u32> = subgroupBallot true
+    %4:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %3
     store %tint_subgroup_last_id, %4
     %arg1:i32 = let 1i
     %arg2:i32 = let 1i
@@ -5768,13 +5768,13 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleClamped_U32) {
 )";
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = subgroupAdd 1u
-    %4:u32 = sub %3, 1u
+    %3:vec4<u32> = subgroupBallot true
+    %4:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %3
     store %tint_subgroup_last_id, %4
     %arg1:u32 = let 1u
     %arg2:u32 = let 1u
@@ -5816,13 +5816,13 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleClamped_F32) {
 )";
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = subgroupAdd 1u
-    %4:u32 = sub %3, 1u
+    %3:vec4<u32> = subgroupBallot true
+    %4:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %3
     store %tint_subgroup_last_id, %4
     %arg1:f32 = let 1.0f
     %arg2:u32 = let 1u
@@ -5864,13 +5864,13 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffleClamped_Vec2F32) {
 )";
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = subgroupAdd 1u
-    %4:u32 = sub %3, 1u
+    %3:vec4<u32> = subgroupBallot true
+    %4:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %3
     store %tint_subgroup_last_id, %4
     %arg1:vec2<f32> = let vec2<f32>(1.0f)
     %arg2:u32 = let 1u
@@ -5925,8 +5925,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle_ComputeHelper_Clamped) {
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_last_id:ptr<private, u32, read_write> = var undef
-  %tint_subgroup_invocation_id:ptr<private, u32, read_write> = var undef
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var
+  %tint_subgroup_invocation_id:ptr<private, u32, read_write> = var
 }
 
 %helper = func(%arg1:i32, %arg2:u32):i32 {
@@ -5942,11 +5942,59 @@ $B1: {  # root
 }
 %ep = @compute @workgroup_size(1u, 1u, 1u) func(%tint_subgroup_invocation_id_1:u32 [@subgroup_invocation_id]):void {  # %tint_subgroup_invocation_id_1: 'tint_subgroup_invocation_id'
   $B3: {
-    %14:u32 = subgroupAdd 1u
-    %15:u32 = sub %14, 1u
+    %14:vec4<u32> = subgroupBallot true
+    %15:u32 = spirv.group_non_uniform_ballot_find_msb 3u, %14
     store %tint_subgroup_last_id, %15
     store %tint_subgroup_invocation_id, %tint_subgroup_invocation_id_1
     %16:i32 = call %helper, 1i, 1u
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, PolyfillConfig{});
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle_ExplicitSubgroupSize_Clamped) {
+    auto* ep = b.Function("ep", ty.void_());
+    ep->SetStage(core::ir::Function::PipelineStage::kCompute);
+    ep->SetWorkgroupSize(b.Constant(16_u), b.Constant(1_u), b.Constant(1_u));
+    ep->SetSubgroupSize(b.Constant(16_u));
+    b.Append(ep->Block(), [&] {
+        auto* arg1 = b.Let("arg1", 1_i);
+        auto* arg2 = b.Let("arg2", 1_u);
+        b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kSubgroupShuffle, arg1, arg2));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%ep = @compute @workgroup_size(16u, 1u, 1u) @subgroup_size(16u) func():void {
+  $B1: {
+    %arg1:i32 = let 1i
+    %arg2:u32 = let 1u
+    %4:i32 = subgroupShuffle %arg1, %arg2
+    %a:i32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tint_subgroup_last_id:ptr<private, u32, read_write> = var
+}
+
+%ep = @compute @workgroup_size(16u, 1u, 1u) @subgroup_size(16u) func():void {
+  $B2: {
+    store %tint_subgroup_last_id, 15u
+    %arg1:i32 = let 1i
+    %arg2:u32 = let 1u
+    %5:u32 = load %tint_subgroup_last_id
+    %6:u32 = min %arg2, %5
+    %7:i32 = subgroupShuffle %arg1, %6
+    %a:i32 = let %7
     ret
   }
 }
@@ -5969,7 +6017,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %3:subgroup_matrix_result<f32, 8, 8> = load %v
     %4:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixScalarAdd %3, 3.0f
     %r:subgroup_matrix_result<f32, 8, 8> = let %4
@@ -5982,7 +6030,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd) {
     auto* expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %3:subgroup_matrix_result<f32, 8, 8> = load %v
     %4:subgroup_matrix_result<f32, 8, 8> = construct 3.0f
     %5:subgroup_matrix_result<f32, 8, 8> = add %3, %4
@@ -6013,7 +6061,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_i8) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<i8, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<i8, 8, 8>, read_write> = var
     %3:subgroup_matrix_result<i8, 8, 8> = load %v
     %l:i32 = let 3i
     %5:subgroup_matrix_result<i8, 8, 8> = subgroupMatrixScalarAdd %3, %l
@@ -6027,7 +6075,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_i8) {
     auto* expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<i8, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<i8, 8, 8>, read_write> = var
     %3:subgroup_matrix_result<i8, 8, 8> = load %v
     %l:i32 = let 3i
     %5:i32 = clamp %l, -128i, 127i
@@ -6059,7 +6107,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<i32, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<i32, 8, 8>, read_write> = var
     %3:subgroup_matrix_result<i32, 8, 8> = load %v
     %4:subgroup_matrix_result<i32, 8, 8> = subgroupMatrixScalarSubtract %3, 3i
     %r:subgroup_matrix_result<i32, 8, 8> = let %4
@@ -6072,7 +6120,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract) {
     auto* expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<i32, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<i32, 8, 8>, read_write> = var
     %3:subgroup_matrix_result<i32, 8, 8> = load %v
     %4:subgroup_matrix_result<i32, 8, 8> = construct 3i
     %5:subgroup_matrix_result<i32, 8, 8> = sub %3, %4
@@ -6103,7 +6151,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract_u8) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<u8, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<u8, 8, 8>, read_write> = var
     %3:subgroup_matrix_result<u8, 8, 8> = load %v
     %l:u32 = let 3u
     %5:subgroup_matrix_result<u8, 8, 8> = subgroupMatrixScalarSubtract %3, %l
@@ -6117,7 +6165,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract_u8) {
     auto* expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<u8, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<u8, 8, 8>, read_write> = var
     %3:subgroup_matrix_result<u8, 8, 8> = load %v
     %l:u32 = let 3u
     %5:u32 = clamp %l, 0u, 255u
@@ -6149,7 +6197,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarMultiply) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %3:subgroup_matrix_result<f32, 8, 8> = load %v
     %4:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixScalarMultiply %3, 3.0f
     %r:subgroup_matrix_result<f32, 8, 8> = let %4
@@ -6162,7 +6210,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarMultiply) {
     auto* expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var
     %3:subgroup_matrix_result<f32, 8, 8> = load %v
     %4:subgroup_matrix_result<f32, 8, 8> = construct 3.0f
     %5:subgroup_matrix_result<f32, 8, 8> = mul %3, %4
@@ -6193,7 +6241,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarMultiply_u8) {
     auto* src = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<u8, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<u8, 8, 8>, read_write> = var
     %3:subgroup_matrix_result<u8, 8, 8> = load %v
     %l:u32 = let 3u
     %5:subgroup_matrix_result<u8, 8, 8> = subgroupMatrixScalarMultiply %3, %l
@@ -6207,7 +6255,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarMultiply_u8) {
     auto* expect = R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %v:ptr<function, subgroup_matrix_result<u8, 8, 8>, read_write> = var undef
+    %v:ptr<function, subgroup_matrix_result<u8, 8, 8>, read_write> = var
     %3:subgroup_matrix_result<u8, 8, 8> = load %v
     %l:u32 = let 3u
     %5:u32 = clamp %l, 0u, 255u

@@ -1,19 +1,19 @@
 enable chromium_experimental_subgroup_matrix, subgroups;
 enable f16;
 
-var<workgroup> in0 : array<u32, 1024>;
+var<workgroup> in0 : array<u32, 128>;
 
-var<workgroup> in1 : array<vec2i, 1024>;
+var<workgroup> in1 : array<vec2i, 128>;
 
-var<workgroup> in2 : array<vec3f, 1024>;
+var<workgroup> in2 : array<vec3f, 128>;
 
-var<workgroup> in3 : array<vec4u, 1024>;
+var<workgroup> in3 : array<vec4u, 128>;
 
-var<workgroup> in4 : array<f16, 1024>;
+var<workgroup> in4 : array<f16, 128>;
 
-var<workgroup> in5 : array<vec2h, 1024>;
+var<workgroup> in5 : array<vec2h, 128>;
 
-var<workgroup> in6 : array<vec3h, 1024>;
+var<workgroup> in6 : array<vec3h, 128>;
 
 @group(0) @binding(0) var<storage, read_write> out : array<u32>;
 

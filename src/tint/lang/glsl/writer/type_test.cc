@@ -121,6 +121,40 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, EmitType_StructArrayVec_HoistConstantArrayInitializers) {
+    auto* Inner =
+        ty.Struct(mod.symbols.New("Inner"), {
+                                                {mod.symbols.New("t"), ty.array<vec3<f32>, 5>()},
+                                            });
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, Inner));
+        b.Return(func);
+    });
+
+    Options options;
+    options.workarounds.hoist_constant_array_initializers = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+
+struct Inner {
+  vec3 t[5];
+};
+
+Inner tint_construct_Inner(vec3 t[5]) {
+  Inner v;
+  v.t = t;
+  return v;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  vec3 v_1[5] = vec3[5](vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f));
+  Inner a = tint_construct_Inner(v_1);
+}
+)");
+}
+
 TEST_F(GlslWriterTest, EmitType_Bool) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {

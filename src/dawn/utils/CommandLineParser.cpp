@@ -165,14 +165,23 @@ std::vector<std::string> CommandLineParser::StringListOption::GetOwnedValue() co
     return result;
 }
 
+CommandLineParser::StringListOption& CommandLineParser::StringListOption::SplitOnComma(bool split) {
+    mSplitOnComma = split;
+    return *this;
+}
+
 CommandLineParser::OptionBase::ParseResult CommandLineParser::StringListOption::ParseImpl(
     absl::Span<const absl::string_view> args) {
     if (args.empty()) {
         return {false, args, "expected a value"};
     }
 
-    for (absl::string_view s : absl::StrSplit(args.front(), ",")) {
-        mValue.push_back(std::string{s});
+    if (mSplitOnComma) {
+        for (absl::string_view s : absl::StrSplit(args.front(), ",")) {
+            mValue.push_back(std::string{s});
+        }
+    } else {
+        mValue.push_back(std::string{args.front()});
     }
     return {true, args.subspan(1)};
 }

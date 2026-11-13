@@ -16,12 +16,12 @@ struct tint_immediate_data_struct {
 };
 
 struct tint_module_vars_struct {
-  threadgroup array<uint, 1024>* in0;
-  threadgroup array<int2, 1024>* in1;
-  threadgroup array<tint_packed_vec3_f32_array_element, 1024>* in2;
-  threadgroup array<uint4, 1024>* in3;
-  threadgroup array<half2, 1024>* in5;
-  threadgroup array<tint_packed_vec3_f16_array_element, 1024>* in6;
+  threadgroup array<uint, 128>* in0;
+  threadgroup array<int2, 128>* in1;
+  threadgroup array<tint_packed_vec3_f32_array_element, 128>* in2;
+  threadgroup array<uint4, 128>* in3;
+  threadgroup array<half2, 128>* in5;
+  threadgroup array<tint_packed_vec3_f16_array_element, 128>* in6;
   device array<uint, 1>* out;
   const constant tint_immediate_data_struct* tint_immediate_data;
 };
@@ -31,12 +31,12 @@ struct tint_array_lengths_struct {
 };
 
 struct tint_symbol_6 {
-  array<uint, 1024> tint_symbol;
-  array<int2, 1024> tint_symbol_1;
-  array<tint_packed_vec3_f32_array_element, 1024> tint_symbol_2;
-  array<uint4, 1024> tint_symbol_3;
-  array<half2, 1024> tint_symbol_4;
-  array<tint_packed_vec3_f16_array_element, 1024> tint_symbol_5;
+  array<uint, 128> tint_symbol;
+  array<int2, 128> tint_symbol_1;
+  array<tint_packed_vec3_f32_array_element, 128> tint_symbol_2;
+  array<uint4, 128> tint_symbol_3;
+  array<half2, 128> tint_symbol_4;
+  array<tint_packed_vec3_f16_array_element, 128> tint_symbol_5;
 };
 
 void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
@@ -44,7 +44,7 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
     uint idx = tint_local_index;
     while(true) {
       uint const v = idx;
-      if ((v >= 1024u)) {
+      if ((v >= 128u)) {
         break;
       }
       (*tint_module_vars.in0)[v] = 0u;

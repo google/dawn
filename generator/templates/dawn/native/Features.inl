@@ -77,7 +77,9 @@ static constexpr ityp::array<Feature, FeatureInfo, kEnumCount<Feature>> Initiali
             "{{enum.name.js_enum_case()}}",
             kFeatureInfo[i].info.description,
             kFeatureInfo[i].info.url,
-            kFeatureInfo[i].info.featureState,
+            kFeatureInfo[i].info.featureSafety,
+            //* ABI stability comes from dawn_version.json: a feature is Stable iff it has a "stable_version".
+            FeatureInfo::FeatureStability::{{ "Stable" if is_stable(enum) else "Experimental" }},
           };
         }
       }

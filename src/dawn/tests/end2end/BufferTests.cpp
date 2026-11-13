@@ -50,9 +50,12 @@
 namespace dawn {
 namespace {
 
-using testing::_;
-using testing::MockCppCallback;
-using testing::StrictMock;
+using ::testing::_;
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
+using ::testing::MockCppCallback;
+using ::testing::StrictMock;
 
 using MockMapAsyncCallback = MockCppCallback<wgpu::BufferMapCallback<void>*>;
 using FutureCallbackMode = wgpu::CallbackMode;
@@ -219,6 +222,7 @@ TEST_P(BufferMappingTests, MapRead_Large) {
     wgpu::Buffer buffer = CreateMapReadBuffer(kByteSize);
 
     std::vector<uint32_t> myData;
+    myData.reserve(kDataSize);
     for (uint32_t i = 0; i < kDataSize; ++i) {
         myData.push_back(i);
     }
@@ -463,6 +467,7 @@ TEST_P(BufferMappingTests, MapWrite_Large) {
     wgpu::Buffer buffer = CreateMapWriteBuffer(kDataSize * sizeof(uint32_t));
 
     std::vector<uint32_t> myData;
+    myData.reserve(kDataSize);
     for (uint32_t i = 0; i < kDataSize; ++i) {
         myData.push_back(i);
     }
@@ -484,6 +489,7 @@ TEST_P(BufferMappingTests, MapWrite_ManySimultaneous) {
 
     constexpr uint32_t kDataSize = 1000;
     std::vector<uint32_t> myData;
+    myData.reserve(kDataSize);
     for (uint32_t i = 0; i < kDataSize; ++i) {
         myData.push_back(i);
     }
@@ -1041,6 +1047,7 @@ TEST_P(BufferMappedAtCreationTests, NonMappableUsageSmall) {
 TEST_P(BufferMappedAtCreationTests, MapWriteUsageLarge) {
     constexpr uint64_t kDataSize = 1000ULL * 1000;
     std::vector<uint32_t> myData;
+    myData.reserve(kDataSize);
     for (uint32_t i = 0; i < kDataSize; ++i) {
         myData.push_back(i);
     }
@@ -1059,6 +1066,7 @@ TEST_P(BufferMappedAtCreationTests, MapReadUsageLarge) {
 
     constexpr uint64_t kDataSize = 1000ULL * 1000;
     std::vector<uint32_t> myData;
+    myData.reserve(kDataSize);
     for (uint32_t i = 0; i < kDataSize; ++i) {
         myData.push_back(i);
     }
@@ -1076,6 +1084,7 @@ TEST_P(BufferMappedAtCreationTests, MapReadUsageLarge) {
 TEST_P(BufferMappedAtCreationTests, NonMappableUsageLarge) {
     constexpr uint64_t kDataSize = 1000ULL * 1000;
     std::vector<uint32_t> myData;
+    myData.reserve(kDataSize);
     for (uint32_t i = 0; i < kDataSize; ++i) {
         myData.push_back(i);
     }
@@ -1942,15 +1951,14 @@ TEST_P(BufferMapExtendedUsagesTests, MapWriteQueryBufferThenDrawThenMapWrite) {
 
     class NonZeroExpectation : public detail::Expectation {
       public:
-        testing::AssertionResult Check(const void* data, size_t size) override {
-            DAWN_ASSERT(size % sizeof(uint64_t) == 0);
-            const uint64_t* actual = static_cast<const uint64_t*>(data);
+        AssertionResult Check(Span<const std::byte> data) override {
+            auto actual = ReinterpretSpan<const uint64_t>(data);
 
             if (actual[0] == 0) {
-                return testing::AssertionFailure() << "Expected data[0] to be non-zero.\n";
+                return AssertionFailure() << "Expected data[0] to be non-zero.\n";
             }
 
-            return testing::AssertionSuccess();
+            return AssertionSuccess();
         }
     };
 

@@ -456,12 +456,12 @@ fn imageStore(texture: texture_storage_2d_array<u32_texel_format, writable>,
                                 coords: vec3<i32>,
                                 value: vec4<u32>)
 
-implicit(T: fiu32_f16 N: num) fn lessThan(vec<N, T>, vec<N, T>) -> vec<N, bool>
-implicit(T: fiu32_f16 N: num) fn lessThanEqual(vec<N, T>, vec<N, T>) -> vec<N, bool>
-implicit(T: fiu32_f16 N: num) fn greaterThan(vec<N, T>, vec<N, T>) -> vec<N, bool>
-implicit(T: fiu32_f16 N: num) fn greaterThanEqual(vec<N, T>, vec<N, T>) -> vec<N, bool>
-implicit(T: fiu32_f16_bool N: num) fn equal(vec<N, T>, vec<N, T>) -> vec<N, bool>
-implicit(T: fiu32_f16_bool N: num) fn notEqual(vec<N, T>, vec<N, T>) -> vec<N, bool>
+implicit(T: fiu32_f16, N: num) fn lessThan(vec<N, T>, vec<N, T>) -> vec<N, bool>
+implicit(T: fiu32_f16, N: num) fn lessThanEqual(vec<N, T>, vec<N, T>) -> vec<N, bool>
+implicit(T: fiu32_f16, N: num) fn greaterThan(vec<N, T>, vec<N, T>) -> vec<N, bool>
+implicit(T: fiu32_f16, N: num) fn greaterThanEqual(vec<N, T>, vec<N, T>) -> vec<N, bool>
+implicit(T: fiu32_f16_bool, N: num) fn equal(vec<N, T>, vec<N, T>) -> vec<N, bool>
+implicit(T: fiu32_f16_bool, N: num) fn notEqual(vec<N, T>, vec<N, T>) -> vec<N, bool>
 
 implicit(T: u32) fn uaddCarry(T, T, ptr<function, T, read_write>) -> T
 implicit(T: u32, N:num) fn uaddCarry(vec<N, T>, vec<N, T>, ptr<function, vec<N, T>, read_write>) -> vec<N, T>

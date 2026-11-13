@@ -52,6 +52,8 @@ struct FuzzedOptions {
     std::unordered_set<uint32_t> bgra_swizzle_locations;
     SubstituteOverridesConfig substitute_overrides_config;
     bool has_gl_ext_conservative_depth;
+    bool hoist_constant_array_initializers;
+    bool polyfill_pack_unpack_4x8_norm;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(FuzzedOptions,
@@ -63,7 +65,9 @@ struct FuzzedOptions {
                  use_array_length_from_immediate,
                  bgra_swizzle_locations,
                  substitute_overrides_config,
-                 has_gl_ext_conservative_depth);
+                 has_gl_ext_conservative_depth,
+                 hoist_constant_array_initializers,
+                 polyfill_pack_unpack_4x8_norm);
     TINT_REFLECT_HASH_CODE(FuzzedOptions);
 };
 
@@ -107,6 +111,10 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.bgra_swizzle_locations = fuzzed_options.bgra_swizzle_locations;
     options.substitute_overrides_config = fuzzed_options.substitute_overrides_config;
     options.has_gl_ext_conservative_depth = fuzzed_options.has_gl_ext_conservative_depth;
+    options.workarounds.hoist_constant_array_initializers =
+        fuzzed_options.hoist_constant_array_initializers;
+    options.workarounds.polyfill_pack_unpack_4x8_norm =
+        fuzzed_options.polyfill_pack_unpack_4x8_norm;
 
     options.version = Version(Version::Standard::kES, 3, 1);
 

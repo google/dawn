@@ -114,11 +114,11 @@ bool Platform::IsFeatureEnabled(Features feature) {
             return true;
         case Features::kWebGPUUseSpirv14:
             return true;
-        case Features::kWebGPUDecomposeUniformBuffers:
-            return true;
         case Features::kWebGPUUseHLSL2021:
             return true;
-        case Features::kWebGPUUseSpirvReconvergenceMode:
+        case Features::kWebGPUUseSpirvMaximalReconvergence:
+            return true;
+        case Features::kWebGPUUseSpirvSubgroupUniformControlFlow:
             return true;
     }
     return false;

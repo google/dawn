@@ -545,5 +545,94 @@ TEST_F(SpirvWriterTest, StoreVectorElement_DynamicIndex_Bool_Polyfill) {
 )");
 }
 
+TEST_F(SpirvWriterTest, Access_Array_Value_ConstantOOBIndex_NoRobustness) {
+    auto* arr_val = b.FunctionParam("arr", ty.array(ty.i32(), 4));
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arr_val});
+    b.Append(func->Block(), [&] {
+        // An unfolded `abs(121i)` folds to constant `121i` during `BuiltinPolyfill` after WGSL
+        // override validation.
+        auto* oob = b.Append(mod.CreateInstruction<core::ir::CoreBuiltinCall>(
+            b.InstructionResult(ty.i32()), core::BuiltinFn::kAbs, Vector{b.Value(121_i)}));
+        auto* result = b.Access(ty.i32(), arr_val, oob->Result());
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.array(ty.i32(), 4))));
+        b.Return(eb);
+    });
+
+    Options options{
+        .entry_point_name = "main",
+        .disable_robustness = true,
+    };
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("%result = OpCompositeExtract %int %arr 3");
+}
+
+TEST_F(SpirvWriterTest, Access_Vector_Value_ConstantNegativeIndex_NoRobustness) {
+    auto* vec_val = b.FunctionParam("vec", ty.vec2i());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({vec_val});
+    b.Append(func->Block(), [&] {
+        // An unfolded `clamp(-1i, -1i, -1i)` folds to constant `-1i` during `BuiltinPolyfill`.
+        auto* neg = b.Append(mod.CreateInstruction<core::ir::CoreBuiltinCall>(
+            b.InstructionResult(ty.i32()), core::BuiltinFn::kClamp,
+            Vector{b.Value(-1_i), b.Value(-1_i), b.Value(-1_i)}));
+        auto* result = b.Access(ty.i32(), vec_val, neg->Result());
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec2i())));
+        b.Return(eb);
+    });
+
+    Options options{
+        .entry_point_name = "main",
+        .disable_robustness = true,
+    };
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("%result = OpCompositeExtract %int %vec 1");
+}
+
+TEST_F(SpirvWriterTest, Access_NestedConstant_PartialOOBThenDynamic_NoRobustness) {
+    auto* idx = b.FunctionParam("idx", ty.u32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({idx});
+    b.Append(func->Block(), [&] {
+        auto* c = b.Composite(ty.array(ty.array(ty.i32(), 2), 2),
+                              b.Composite(ty.array(ty.i32(), 2), 1_i, 2_i),
+                              b.Composite(ty.array(ty.i32(), 2), 3_i, 4_i));
+        auto* oob = b.Append(mod.CreateInstruction<core::ir::CoreBuiltinCall>(
+            b.InstructionResult(ty.u32()), core::BuiltinFn::kClamp,
+            Vector{b.Value(121_u), b.Value(121_u), b.Value(121_u)}));
+        auto* result = b.Access(ty.i32(), c, oob->Result(), idx);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, 0_u));
+        b.Return(eb);
+    });
+
+    Options options{
+        .entry_point_name = "main",
+        .disable_robustness = true,
+    };
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("OpAccessChain %_ptr_Private_int");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

@@ -64,6 +64,8 @@ GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(BufferHostMappedPointerTests);
 
 namespace {
 
+using ::testing::HasSubstr;
+
 class BufferHostMappedPointerNoFeatureTests : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
@@ -87,8 +89,7 @@ TEST_P(BufferHostMappedPointerNoFeatureTests, Creation) {
 
     ASSERT_DEVICE_ERROR_MSG(
         device.CreateBuffer(&bufferDesc),
-        testing::HasSubstr(
-            "SType::BufferHostMappedPointer requires FeatureName::HostMappedPointer"));
+        HasSubstr("SType::BufferHostMappedPointer requires FeatureName::HostMappedPointer"));
 }
 
 DAWN_INSTANTIATE_TEST(BufferHostMappedPointerNoFeatureTests,
@@ -274,7 +275,7 @@ TEST_P(BufferHostMappedPointerTests, Mapping) {
     ASSERT_DEVICE_ERROR_MSG(buffer.MapAsync(wgpu::MapMode::Write, 0, wgpu::kWholeMapSize,
                                             wgpu::CallbackMode::AllowSpontaneous,
                                             [](wgpu::MapAsyncStatus, wgpu::StringView) {}),
-                            testing::HasSubstr("cannot be mapped"));
+                            HasSubstr("cannot be mapped"));
 
     // Still invalid to GetMappedRange() or Unmap.
     ASSERT_EQ(buffer.GetMappedRange(), nullptr);

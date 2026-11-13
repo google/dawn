@@ -51,7 +51,17 @@
 #include "src/utils/assert.h"
 #include "src/utils/crash_handler.h"
 
+void InitDawnValidationTestEnvironment(int argc, char** argv) {
+    dawn::InitDawnValidationTestEnvironment(argc, argv);
+}
+
+namespace dawn {
 namespace {
+
+using ::testing::_;
+using ::testing::Matcher;
+using ::testing::SizedStringMatches;
+using ::testing::UnitTest;
 
 bool gUseWire = false;
 // NOLINTNEXTLINE(runtime/string)
@@ -153,8 +163,6 @@ ValidationTest::ValidationTest() {
         // flags so that toggle flags will always take precedence. Note that disabling toggles also
         // take precedence.
         wgpu::DawnTogglesDescriptor deviceTogglesDesc;
-        deviceTogglesDesc.nextInChain = deviceDesc.nextInChain;
-        deviceDesc.nextInChain = &deviceTogglesDesc;
 
         auto enabledToggles = gCurrentTest->GetEnabledToggles();
         auto disabledToggles = gCurrentTest->GetDisabledToggles();
@@ -168,6 +176,12 @@ ValidationTest::ValidationTest() {
         deviceTogglesDesc.enabledToggleCount = enabledToggles.size();
         deviceTogglesDesc.disabledToggles = disabledToggles.data();
         deviceTogglesDesc.disabledToggleCount = disabledToggles.size();
+        // Only chain the toggles when there are some: an instance with allow_experimental_apis
+        // disabled rejects DawnTogglesDescriptor on the device.
+        if (!enabledToggles.empty() || !disabledToggles.empty()) {
+            deviceTogglesDesc.nextInChain = deviceDesc.nextInChain;
+            deviceDesc.nextInChain = &deviceTogglesDesc;
+        }
 
         return dawn::native::GetProcs().adapterRequestDevice(
             self, reinterpret_cast<WGPUDeviceDescriptor*>(&deviceDesc),
@@ -198,6 +212,11 @@ void ValidationTest::SetUp() {
         instanceToggles.enabledToggleCount = 1;
         instanceToggles.enabledToggles = &allowUnsafeApisToggle;
     }
+    if (!AllowExperimentalAPIs()) {
+        static const char* allowExperimentalApisToggle = "allow_experimental_apis";
+        instanceToggles.disabledToggleCount = 1;
+        instanceToggles.disabledToggles = &allowExperimentalApisToggle;
+    }
 
     std::vector<const char*> blocklistedFeatures = GetWGSLBlocklistedFeatures();
     dawn::native::DawnWGSLBlocklist blockList;
@@ -211,6 +230,11 @@ void ValidationTest::SetUp() {
                    wgpu::InstanceFeatureName::ShaderSourceSPIRV};
     instanceDesc.requiredFeatureCount = kRequiredFeatures.size();
     instanceDesc.requiredFeatures = kRequiredFeatures.data();
+    if (!AllowExperimentalAPIs()) {
+        // DawnWGSLBlocklist and ShaderSourceSPIRV are not part of the stable ABI.
+        instanceDesc.nextInChain = &instanceToggles;
+        instanceDesc.requiredFeatureCount = 1;
+    }
 
     SetUp(&instanceDesc);
 }
@@ -247,27 +271,26 @@ void ValidationTest::TearDown() {
     ExpectDeviceDestruction();
 }
 
-void ValidationTest::StartExpectDeviceError(testing::Matcher<std::string> errorMatcher) {
+void ValidationTest::StartExpectDeviceError(Matcher<std::string> errorMatcher) {
     mExpectError = true;
     mError = false;
     mErrorMatcher = errorMatcher;
 }
 
 void ValidationTest::StartExpectDeviceError() {
-    StartExpectDeviceError(testing::_);
+    StartExpectDeviceError(_);
 }
 
 bool ValidationTest::EndExpectDeviceError() {
     mExpectError = false;
-    mErrorMatcher = testing::_;
+    mErrorMatcher = _;
     return mError;
 }
 std::string ValidationTest::GetLastDeviceErrorMessage() const {
     return mDeviceErrorMessage;
 }
 
-void ValidationTest::StartExpectDeviceLog(wgpu::LoggingType type,
-                                          testing::Matcher<std::string> message) {
+void ValidationTest::StartExpectDeviceLog(wgpu::LoggingType type, Matcher<std::string> message) {
     mExpectLog = std::tuple(type, message);
     mGotLog = false;
 }
@@ -277,7 +300,7 @@ bool ValidationTest::EndExpectDeviceLog() {
 }
 
 void ValidationTest::StartExpectNoDeviceLog() {
-    mExpectLog = std::tuple(kExpectNoLog, testing::_);
+    mExpectLog = std::tuple(kExpectNoLog, _);
 }
 void ValidationTest::EndExpectNoDeviceLog() {
     mExpectLog.reset();
@@ -315,6 +338,10 @@ const dawn::utils::ComboLimits& ValidationTest::GetSupportedLimits() const {
 }
 
 bool ValidationTest::AllowUnsafeAPIs() {
+    return true;
+}
+
+bool ValidationTest::AllowExperimentalAPIs() {
     return true;
 }
 
@@ -370,8 +397,8 @@ dawn::native::Adapter& ValidationTest::GetBackendAdapter() {
 void ValidationTest::SetUp(const wgpu::InstanceDescriptor* nativeDesc,
                            const wgpu::InstanceDescriptor* wireDesc) {
     std::string traceName =
-        std::string(::testing::UnitTest::GetInstance()->current_test_info()->test_suite_name()) +
-        "_" + ::testing::UnitTest::GetInstance()->current_test_info()->name();
+        std::string(UnitTest::GetInstance()->current_test_info()->test_suite_name()) + "_" +
+        UnitTest::GetInstance()->current_test_info()->name();
     mWireHelper->BeginWireTrace(traceName.c_str());
 
     // Initialize the instances.
@@ -417,7 +444,7 @@ void ValidationTest::SetUp(const wgpu::InstanceDescriptor* nativeDesc,
 
             self->mDeviceErrorMessage = message;
             if (self->mExpectError) {
-                ASSERT_THAT(message, testing::SizedStringMatches(self->mErrorMatcher));
+                ASSERT_THAT(message, SizedStringMatches(self->mErrorMatcher));
             }
             self->mError = true;
         },
@@ -446,7 +473,7 @@ void ValidationTest::SetUp(const wgpu::InstanceDescriptor* nativeDesc,
                     FAIL() << "Unexpected log during ASSERT_NO_DEVICE_LOG:\n" << message;
                 } else {
                     ASSERT_EQ(type, expectedType);
-                    ASSERT_THAT(message, testing::SizedStringMatches(expectedMessage));
+                    ASSERT_THAT(message, SizedStringMatches(expectedMessage));
                     self->mGotLog = true;
                 }
             }
@@ -487,3 +514,5 @@ ValidationTest::PlaceholderRenderPass::PlaceholderRenderPass(const wgpu::Device&
     colorAttachments = &mColorAttachment;
     depthStencilAttachment = nullptr;
 }
+
+}  // namespace dawn

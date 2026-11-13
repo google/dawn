@@ -139,9 +139,9 @@ enum class Features {
     kWebGPUUseDXC,
     kWebGPUEnableRangeAnalysisForRobustness,
     kWebGPUUseSpirv14,
-    kWebGPUDecomposeUniformBuffers,
     kWebGPUUseHLSL2021,
-    kWebGPUUseSpirvReconvergenceMode,
+    kWebGPUUseSpirvMaximalReconvergence,
+    kWebGPUUseSpirvSubgroupUniformControlFlow,
 };
 
 class DAWN_PLATFORM_EXPORT Platform {

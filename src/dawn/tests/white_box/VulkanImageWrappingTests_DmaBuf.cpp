@@ -40,6 +40,7 @@
 #include "src/dawn/tests/GBMUtils.h"
 
 namespace dawn::native::vulkan {
+namespace {
 
 class ExternalSemaphoreDmaBuf : public VulkanImageWrappingTestBackend::ExternalSemaphore {
   public:
@@ -185,6 +186,8 @@ class VulkanImageWrappingTestBackendDmaBuf : public VulkanImageWrappingTestBacke
     OwnedGbmDevice mGbmDevice;
     raw_ptr<native::vulkan::Device> mDeviceVk;
 };
+
+}  // anonymous namespace
 
 std::unique_ptr<VulkanImageWrappingTestBackend> CreateDMABufBackend(const wgpu::Device& device) {
     return std::make_unique<VulkanImageWrappingTestBackendDmaBuf>(device);

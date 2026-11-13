@@ -100,10 +100,33 @@ struct Hasher<T*> {
 #ifdef TINT_HASH_SEED
         hash ^= static_cast<uint32_t>(TINT_HASH_SEED);
 #endif
+        // Derived from MurmurHash3's finalizer (fmix64 / fmix32 by
+        // Austin Appleby),
+        // https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp
+        // That source file has this notice:
+        // // MurmurHash3 was written by Austin Appleby, and is placed in the public
+        // // domain. The author hereby disclaims copyright to this source code.
+        //
+        // Avoids aligned block-allocated pointers and
+        // high-bit-saturated 64-bit addresses from clustering in
+        // non-prime HashmapBase slot tables and causing catastrophic
+        // slow downs
         if constexpr (sizeof(hash) > 4) {
-            return static_cast<HashCode>(hash >> 4 | hash >> 32);
+            uint64_t h = static_cast<uint64_t>(hash);
+            h ^= h >> 33;
+            h *= 0xff51afd7ed558ccdULL;
+            h ^= h >> 33;
+            h *= 0xc4ceb9fe1a85ec53ULL;
+            h ^= h >> 33;
+            return static_cast<HashCode>(h);
         } else {
-            return static_cast<HashCode>(hash >> 4);
+            uint32_t h = static_cast<uint32_t>(hash);
+            h ^= h >> 16;
+            h *= 0x85ebca6bU;
+            h ^= h >> 13;
+            h *= 0xc2b2ae35U;
+            h ^= h >> 16;
+            return static_cast<HashCode>(h);
         }
     }
 };

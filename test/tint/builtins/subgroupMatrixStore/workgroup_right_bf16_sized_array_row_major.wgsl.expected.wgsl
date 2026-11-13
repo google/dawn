@@ -1,0 +1,28 @@
+enable chromium_experimental_subgroup_matrix, subgroups;
+enable f16;
+
+var<workgroup> out0 : array<u32, 128>;
+
+var<workgroup> out1 : array<vec2i, 128>;
+
+var<workgroup> out2 : array<vec3f, 128>;
+
+var<workgroup> out3 : array<vec4u, 128>;
+
+var<workgroup> out4 : array<f16, 128>;
+
+var<workgroup> out5 : array<vec2h, 128>;
+
+var<workgroup> out6 : array<vec3h, 128>;
+
+@compute @workgroup_size(64)
+fn main() {
+  let m = subgroup_matrix_right<bf16, 8, 8>();
+  subgroupMatrixStore<row_major>(&(out0), 0u, m, 16u);
+  subgroupMatrixStore<row_major>(&(out1), 0u, m, 16u);
+  subgroupMatrixStore<row_major>(&(out2), 0u, m, 16u);
+  subgroupMatrixStore<row_major>(&(out3), 0u, m, 16u);
+  subgroupMatrixStore<row_major>(&(out4), 0u, m, 16u);
+  subgroupMatrixStore<row_major>(&(out5), 0u, m, 16u);
+  subgroupMatrixStore<row_major>(&(out6), 0u, m, 16u);
+}

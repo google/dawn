@@ -159,8 +159,11 @@ class CommandLineParser {
         absl::Span<const std::string> GetValue() const;
         std::vector<std::string> GetOwnedValue() const;
 
+        StringListOption& SplitOnComma(bool split);
+
       private:
         ParseResult ParseImpl(absl::Span<const absl::string_view> args) override;
+        bool mSplitOnComma = true;
         std::vector<std::string> mValue;
     };
     StringListOption& AddStringList(absl::string_view name, absl::string_view desc = {});

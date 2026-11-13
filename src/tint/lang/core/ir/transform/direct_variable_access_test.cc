@@ -262,7 +262,12 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    auto* expect = src;
+    auto* expect = R"(
+$B1: {  # root
+  %keep_me:ptr<private, i32, read_write> = var 42i
+}
+
+)";
 
     Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
@@ -334,7 +339,12 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    auto* expect = src;
+    auto* expect = R"(
+$B1: {  # root
+  %keep_me:ptr<private, i32, read_write> = var 42i
+}
+
+)";
 
     Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
@@ -405,7 +415,12 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    auto* expect = src;
+    auto* expect = R"(
+$B1: {  # root
+  %keep_me:ptr<private, i32, read_write> = var 42i
+}
+
+)";
 
     Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
@@ -544,15 +559,16 @@ TEST_F(IR_DirectVariableAccessTest_PtrChains, ConstantIndices) {
         b.Return(fn_c);
     });
 
-    auto* fn_d = b.Function("d", ty.void_());
+    auto* fn_d = b.Function("d", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_d->Block(), [&] {
+        b.Call(ty.void_(), fn_b);
         b.Call(ty.void_(), fn_c, U);
         b.Return(fn_d);
     });
 
     auto* src = R"(
 $B1: {  # root
-  %U:ptr<uniform, array<array<array<vec4<i32>, 8>, 8>, 8>, read> = var undef @binding_point(0, 0)
+  %U:ptr<uniform, array<array<array<vec4<i32>, 8>, 8>, 8>, read> = var @binding_point(0, 0)
 }
 
 %a = func(%pre:i32, %p:ptr<uniform, vec4<i32>, read>, %post:i32):vec4<i32> {
@@ -581,9 +597,10 @@ $B1: {  # root
     ret
   }
 }
-%d = func():void {
+%d = @fragment func():void {
   $B5: {
-    %21:void = call %c, %U
+    %21:void = call %b
+    %22:void = call %c, %U
     ret
   }
 }
@@ -594,7 +611,7 @@ $B1: {  # root
     auto* expect =
         R"(
 $B1: {  # root
-  %U:ptr<uniform, array<array<array<vec4<i32>, 8>, 8>, 8>, read> = var undef @binding_point(0, 0)
+  %U:ptr<uniform, array<array<array<vec4<i32>, 8>, 8>, 8>, read> = var @binding_point(0, 0)
 }
 
 %a = func(%pre:i32, %p_indices:array<u32, 3>, %post:i32):vec4<i32> {
@@ -619,9 +636,10 @@ $B1: {  # root
     ret
   }
 }
-%d = func():void {
+%d = @fragment func():void {
   $B5: {
-    %16:void = call %c
+    %16:void = call %b
+    %17:void = call %c
     ret
   }
 }
@@ -691,16 +709,17 @@ TEST_F(IR_DirectVariableAccessTest_PtrChains, DynamicIndices) {
         b.Return(fn_c);
     });
 
-    auto* fn_d = b.Function("d", ty.void_());
+    auto* fn_d = b.Function("d", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_d->Block(), [&] {
+        b.Call(ty.void_(), fn_b);
         b.Call(ty.void_(), fn_c, U);
         b.Return(fn_d);
     });
 
     auto* src = R"(
 $B1: {  # root
-  %U:ptr<uniform, array<array<array<vec4<i32>, 8>, 8>, 8>, read> = var undef @binding_point(0, 0)
-  %i:ptr<private, i32, read_write> = var undef
+  %U:ptr<uniform, array<array<array<vec4<i32>, 8>, 8>, 8>, read> = var @binding_point(0, 0)
+  %i:ptr<private, i32, read_write> = var
 }
 
 %first = func():i32 {
@@ -760,9 +779,10 @@ $B1: {  # root
     ret
   }
 }
-%d = func():void {
+%d = @fragment func():void {
   $B8: {
-    %38:void = call %c, %U
+    %38:void = call %b
+    %39:void = call %c, %U
     ret
   }
 }
@@ -772,8 +792,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %U:ptr<uniform, array<array<array<vec4<i32>, 8>, 8>, 8>, read> = var undef @binding_point(0, 0)
-  %i:ptr<private, i32, read_write> = var undef
+  %U:ptr<uniform, array<array<array<vec4<i32>, 8>, 8>, 8>, read> = var @binding_point(0, 0)
+  %i:ptr<private, i32, read_write> = var
 }
 
 %first = func():i32 {
@@ -839,9 +859,10 @@ $B1: {  # root
     ret
   }
 }
-%d = func():void {
+%d = @fragment func():void {
   $B8: {
-    %43:void = call %c
+    %43:void = call %b
+    %44:void = call %c
     ret
   }
 }
@@ -878,7 +899,7 @@ TEST_F(IR_DirectVariableAccessTest_UniformAS, Param_ptr_i32_read) {
     });
     b.Append(fn_a->Block(), [&] { b.Return(fn_a, b.Load(fn_a_p)); });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         b.Call(fn_a, 10_i, U, 20_i);
         b.Return(fn_b);
@@ -886,7 +907,7 @@ TEST_F(IR_DirectVariableAccessTest_UniformAS, Param_ptr_i32_read) {
 
     auto* src = R"(
 $B1: {  # root
-  %U:ptr<uniform, i32, read> = var undef @binding_point(0, 0)
+  %U:ptr<uniform, i32, read> = var @binding_point(0, 0)
 }
 
 %a = func(%pre:i32, %p:ptr<uniform, i32, read>, %post:i32):i32 {
@@ -895,7 +916,7 @@ $B1: {  # root
     ret %6
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %8:i32 = call %a, 10i, %U, 20i
     ret
@@ -907,7 +928,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %U:ptr<uniform, i32, read> = var undef @binding_point(0, 0)
+  %U:ptr<uniform, i32, read> = var @binding_point(0, 0)
 }
 
 %a = func(%pre:i32, %post:i32):i32 {
@@ -916,7 +937,7 @@ $B1: {  # root
     ret %5
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %7:i32 = call %a, 10i, 20i
     ret
@@ -946,7 +967,7 @@ TEST_F(IR_DirectVariableAccessTest_UniformAS, Param_ptr_vec4i32_Via_array_Dynami
     });
     b.Append(fn_a->Block(), [&] { b.Return(fn_a, b.Load(fn_a_p)); });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto* I = b.Let("I", 3_i);
         auto* access = b.Access(ty.ptr<uniform, vec4<i32>>(), U, I);
@@ -956,7 +977,7 @@ TEST_F(IR_DirectVariableAccessTest_UniformAS, Param_ptr_vec4i32_Via_array_Dynami
 
     auto* src = R"(
 $B1: {  # root
-  %U:ptr<uniform, array<vec4<i32>, 8>, read> = var undef @binding_point(0, 0)
+  %U:ptr<uniform, array<vec4<i32>, 8>, read> = var @binding_point(0, 0)
 }
 
 %a = func(%pre:i32, %p:ptr<uniform, vec4<i32>, read>, %post:i32):vec4<i32> {
@@ -965,7 +986,7 @@ $B1: {  # root
     ret %6
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %I:i32 = let 3i
     %9:ptr<uniform, vec4<i32>, read> = access %U, %I
@@ -979,7 +1000,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %U:ptr<uniform, array<vec4<i32>, 8>, read> = var undef @binding_point(0, 0)
+  %U:ptr<uniform, array<vec4<i32>, 8>, read> = var @binding_point(0, 0)
 }
 
 %a = func(%pre:i32, %p_indices:array<u32, 1>, %post:i32):vec4<i32> {
@@ -990,7 +1011,7 @@ $B1: {  # root
     ret %8
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %I:i32 = let 3i
     %11:u32 = convert %I
@@ -1097,7 +1118,7 @@ TEST_F(IR_DirectVariableAccessTest_UniformAS, CallChaining) {
         b.Return(fn_4, b.Call(ty.f32(), fn_3, access_0, access_1));
     });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         b.Call(ty.f32(), fn_4, U);
         b.Return(fn_b);
@@ -1114,7 +1135,7 @@ Outer = struct @align(16) {
 }
 
 $B1: {  # root
-  %U:ptr<uniform, Outer, read> = var undef @binding_point(0, 0)
+  %U:ptr<uniform, Outer, read> = var @binding_point(0, 0)
 }
 
 %f0 = func(%p:ptr<uniform, vec4<f32>, read>):f32 {
@@ -1125,7 +1146,7 @@ $B1: {  # root
 }
 %f1 = func(%p_1:ptr<uniform, mat3x4<f32>, read>):f32 {  # %p_1: 'p'
   $B3: {
-    %res:ptr<function, f32, read_write> = var undef
+    %res:ptr<function, f32, read_write> = var
     %one:i32 = let 1i
     %two:i32 = let 2i
     %10:ptr<uniform, vec4<f32>, read> = access %p_1, %one
@@ -1177,7 +1198,7 @@ $B1: {  # root
     ret %43
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B7: {
     %45:f32 = call %f4, %U
     ret
@@ -1198,7 +1219,7 @@ Outer = struct @align(16) {
 }
 
 $B1: {  # root
-  %U:ptr<uniform, Outer, read> = var undef @binding_point(0, 0)
+  %U:ptr<uniform, Outer, read> = var @binding_point(0, 0)
 }
 
 %f0 = func(%p_indices:array<u32, 1>):f32 {
@@ -1220,7 +1241,7 @@ $B1: {  # root
 }
 %f1 = func():f32 {
   $B4: {
-    %res:ptr<function, f32, read_write> = var undef
+    %res:ptr<function, f32, read_write> = var
     %one:i32 = let 1i
     %two:i32 = let 2i
     %17:u32 = convert %one
@@ -1256,7 +1277,7 @@ $B1: {  # root
 %f1_1 = func(%p_indices_2:array<u32, 1>):f32 {  # %f1_1: 'f1', %p_indices_2: 'p_indices'
   $B5: {
     %42:u32 = access %p_indices_2, 0u
-    %res_1:ptr<function, f32, read_write> = var undef  # %res_1: 'res'
+    %res_1:ptr<function, f32, read_write> = var  # %res_1: 'res'
     %one_1:i32 = let 1i  # %one_1: 'one'
     %two_1:i32 = let 2i  # %two_1: 'two'
     %46:u32 = convert %one_1
@@ -1314,7 +1335,7 @@ $B1: {  # root
     ret %82
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B9: {
     %84:f32 = call %f4
     ret
@@ -1368,7 +1389,7 @@ TEST_F(IR_DirectVariableAccessTest_UniformAS, CallChaining2) {
         });
     }
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(main->Block(), [&] {
         b.Call(f0, input);
         b.Return(main);
@@ -1376,7 +1397,7 @@ TEST_F(IR_DirectVariableAccessTest_UniformAS, CallChaining2) {
 
     auto* src = R"(
 $B1: {  # root
-  %U:ptr<uniform, array<array<array<vec4<i32>, 5>, 5>, 5>, read> = var undef @binding_point(0, 0)
+  %U:ptr<uniform, array<array<array<vec4<i32>, 5>, 5>, 5>, read> = var @binding_point(0, 0)
 }
 
 %f2 = func(%p:ptr<uniform, array<vec4<i32>, 5>, read>):vec4<i32> {
@@ -1402,7 +1423,7 @@ $B1: {  # root
     ret %15
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B5: {
     %17:vec4<i32> = call %f0, %U
     ret
@@ -1414,7 +1435,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %U:ptr<uniform, array<array<array<vec4<i32>, 5>, 5>, 5>, read> = var undef @binding_point(0, 0)
+  %U:ptr<uniform, array<array<array<vec4<i32>, 5>, 5>, 5>, read> = var @binding_point(0, 0)
 }
 
 %f2 = func(%p_indices:array<u32, 2>):vec4<i32> {
@@ -1444,7 +1465,7 @@ $B1: {  # root
     ret %18
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B5: {
     %20:vec4<i32> = call %f0
     ret
@@ -1482,7 +1503,7 @@ TEST_F(IR_DirectVariableAccessTest_ImmediateAS, Param_ptr_i32_read) {
     });
     b.Append(fn_a->Block(), [&] { b.Return(fn_a, b.Load(fn_a_p)); });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         b.Call(fn_a, 10_i, U, 20_i);
         b.Return(fn_b);
@@ -1490,7 +1511,7 @@ TEST_F(IR_DirectVariableAccessTest_ImmediateAS, Param_ptr_i32_read) {
 
     auto* src = R"(
 $B1: {  # root
-  %U:ptr<immediate, i32, read> = var undef
+  %U:ptr<immediate, i32, read> = var
 }
 
 %a = func(%pre:i32, %p:ptr<immediate, i32, read>, %post:i32):i32 {
@@ -1499,7 +1520,7 @@ $B1: {  # root
     ret %6
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %8:i32 = call %a, 10i, %U, 20i
     ret
@@ -1511,7 +1532,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %U:ptr<immediate, i32, read> = var undef
+  %U:ptr<immediate, i32, read> = var
 }
 
 %a = func(%pre:i32, %post:i32):i32 {
@@ -1520,7 +1541,7 @@ $B1: {  # root
     ret %5
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %7:i32 = call %a, 10i, 20i
     ret
@@ -1549,7 +1570,7 @@ TEST_F(IR_DirectVariableAccessTest_ImmediateAS, Param_ptr_vec4i32_Via_array_Dyna
     });
     b.Append(fn_a->Block(), [&] { b.Return(fn_a, b.Load(fn_a_p)); });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto* I = b.Let("I", 3_i);
         auto* access = b.Access(ty.ptr<immediate, vec4<i32>>(), U, I);
@@ -1559,7 +1580,7 @@ TEST_F(IR_DirectVariableAccessTest_ImmediateAS, Param_ptr_vec4i32_Via_array_Dyna
 
     auto* src = R"(
 $B1: {  # root
-  %U:ptr<immediate, array<vec4<i32>, 8>, read> = var undef
+  %U:ptr<immediate, array<vec4<i32>, 8>, read> = var
 }
 
 %a = func(%pre:i32, %p:ptr<immediate, vec4<i32>, read>, %post:i32):vec4<i32> {
@@ -1568,7 +1589,7 @@ $B1: {  # root
     ret %6
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %I:i32 = let 3i
     %9:ptr<immediate, vec4<i32>, read> = access %U, %I
@@ -1582,7 +1603,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %U:ptr<immediate, array<vec4<i32>, 8>, read> = var undef
+  %U:ptr<immediate, array<vec4<i32>, 8>, read> = var
 }
 
 %a = func(%pre:i32, %p_indices:array<u32, 1>, %post:i32):vec4<i32> {
@@ -1593,7 +1614,7 @@ $B1: {  # root
     ret %8
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %I:i32 = let 3i
     %11:u32 = convert %I
@@ -1699,7 +1720,7 @@ TEST_F(IR_DirectVariableAccessTest_ImmediateAS, CallChaining) {
         b.Return(fn_4, b.Call(ty.f32(), fn_3, access_0, access_1));
     });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         b.Call(ty.f32(), fn_4, U);
         b.Return(fn_b);
@@ -1716,7 +1737,7 @@ Outer = struct @align(16) {
 }
 
 $B1: {  # root
-  %U:ptr<immediate, Outer, read> = var undef
+  %U:ptr<immediate, Outer, read> = var
 }
 
 %f0 = func(%p:ptr<immediate, vec4<f32>, read>):f32 {
@@ -1727,7 +1748,7 @@ $B1: {  # root
 }
 %f1 = func(%p_1:ptr<immediate, mat3x4<f32>, read>):f32 {  # %p_1: 'p'
   $B3: {
-    %res:ptr<function, f32, read_write> = var undef
+    %res:ptr<function, f32, read_write> = var
     %one:i32 = let 1i
     %two:i32 = let 2i
     %10:ptr<immediate, vec4<f32>, read> = access %p_1, %one
@@ -1779,7 +1800,7 @@ $B1: {  # root
     ret %43
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B7: {
     %45:f32 = call %f4, %U
     ret
@@ -1800,7 +1821,7 @@ Outer = struct @align(16) {
 }
 
 $B1: {  # root
-  %U:ptr<immediate, Outer, read> = var undef
+  %U:ptr<immediate, Outer, read> = var
 }
 
 %f0 = func(%p_indices:array<u32, 1>):f32 {
@@ -1822,7 +1843,7 @@ $B1: {  # root
 }
 %f1 = func():f32 {
   $B4: {
-    %res:ptr<function, f32, read_write> = var undef
+    %res:ptr<function, f32, read_write> = var
     %one:i32 = let 1i
     %two:i32 = let 2i
     %17:u32 = convert %one
@@ -1858,7 +1879,7 @@ $B1: {  # root
 %f1_1 = func(%p_indices_2:array<u32, 1>):f32 {  # %f1_1: 'f1', %p_indices_2: 'p_indices'
   $B5: {
     %42:u32 = access %p_indices_2, 0u
-    %res_1:ptr<function, f32, read_write> = var undef  # %res_1: 'res'
+    %res_1:ptr<function, f32, read_write> = var  # %res_1: 'res'
     %one_1:i32 = let 1i  # %one_1: 'one'
     %two_1:i32 = let 2i  # %two_1: 'two'
     %46:u32 = convert %one_1
@@ -1916,7 +1937,7 @@ $B1: {  # root
     ret %82
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B9: {
     %84:f32 = call %f4
     ret
@@ -1969,7 +1990,7 @@ TEST_F(IR_DirectVariableAccessTest_ImmediateAS, CallChaining2) {
         });
     }
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(main->Block(), [&] {
         b.Call(f0, input);
         b.Return(main);
@@ -1977,7 +1998,7 @@ TEST_F(IR_DirectVariableAccessTest_ImmediateAS, CallChaining2) {
 
     auto* src = R"(
 $B1: {  # root
-  %U:ptr<immediate, array<array<array<vec4<i32>, 5>, 5>, 5>, read> = var undef
+  %U:ptr<immediate, array<array<array<vec4<i32>, 5>, 5>, 5>, read> = var
 }
 
 %f2 = func(%p:ptr<immediate, array<vec4<i32>, 5>, read>):vec4<i32> {
@@ -2003,7 +2024,7 @@ $B1: {  # root
     ret %15
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B5: {
     %17:vec4<i32> = call %f0, %U
     ret
@@ -2015,7 +2036,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %U:ptr<immediate, array<array<array<vec4<i32>, 5>, 5>, 5>, read> = var undef
+  %U:ptr<immediate, array<array<array<vec4<i32>, 5>, 5>, 5>, read> = var
 }
 
 %f2 = func(%p_indices:array<u32, 2>):vec4<i32> {
@@ -2045,7 +2066,7 @@ $B1: {  # root
     ret %18
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B5: {
     %20:vec4<i32> = call %f0
     ret
@@ -2088,7 +2109,7 @@ TEST_F(IR_DirectVariableAccessTest_StorageAS, Param_ptr_i32_Via_struct_read) {
     });
     b.Append(fn_a->Block(), [&] { b.Return(fn_a, b.Load(fn_a_p)); });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto* access = b.Access(ty.ptr<storage, i32, read>(), S, 0_u);
         b.Call(fn_a, 10_i, access, 20_i);
@@ -2101,7 +2122,7 @@ str = struct @align(4) {
 }
 
 $B1: {  # root
-  %S:ptr<storage, str, read> = var undef @binding_point(0, 0)
+  %S:ptr<storage, str, read> = var @binding_point(0, 0)
 }
 
 %a = func(%pre:i32, %p:ptr<storage, i32, read>, %post:i32):i32 {
@@ -2110,7 +2131,7 @@ $B1: {  # root
     ret %6
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %8:ptr<storage, i32, read> = access %S, 0u
     %9:i32 = call %a, 10i, %8, 20i
@@ -2127,7 +2148,7 @@ str = struct @align(4) {
 }
 
 $B1: {  # root
-  %S:ptr<storage, str, read> = var undef @binding_point(0, 0)
+  %S:ptr<storage, str, read> = var @binding_point(0, 0)
 }
 
 %a = func(%pre:i32, %post:i32):i32 {
@@ -2137,7 +2158,7 @@ $B1: {  # root
     ret %6
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %8:i32 = call %a, 10i, 20i
     ret
@@ -2175,7 +2196,7 @@ TEST_F(IR_DirectVariableAccessTest_StorageAS, Param_ptr_arr_i32_Via_struct_write
         b.Return(fn_a);
     });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto* access = b.Access(ty.ptr<storage, array<i32, 4>>(), S, 0_u);
         b.Call(fn_a, 10_i, access, 20_i);
@@ -2188,7 +2209,7 @@ str = struct @align(4) {
 }
 
 $B1: {  # root
-  %S:ptr<storage, str, read_write> = var undef @binding_point(0, 0)
+  %S:ptr<storage, str, read_write> = var @binding_point(0, 0)
 }
 
 %a = func(%pre:i32, %p:ptr<storage, array<i32, 4>, read_write>, %post:i32):void {
@@ -2197,7 +2218,7 @@ $B1: {  # root
     ret
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %7:ptr<storage, array<i32, 4>, read_write> = access %S, 0u
     %8:void = call %a, 10i, %7, 20i
@@ -2214,7 +2235,7 @@ str = struct @align(4) {
 }
 
 $B1: {  # root
-  %S:ptr<storage, str, read_write> = var undef @binding_point(0, 0)
+  %S:ptr<storage, str, read_write> = var @binding_point(0, 0)
 }
 
 %a = func(%pre:i32, %post:i32):void {
@@ -2224,7 +2245,7 @@ $B1: {  # root
     ret
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %7:void = call %a, 10i, 20i
     ret
@@ -2257,7 +2278,7 @@ TEST_F(IR_DirectVariableAccessTest_StorageAS, Param_ptr_vec4i32_Via_array_Dynami
         b.Return(fn_a);
     });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto* I = b.Let("I", 3_i);
         auto* access = b.Access(ty.ptr<storage, vec4<i32>>(), S, I);
@@ -2267,7 +2288,7 @@ TEST_F(IR_DirectVariableAccessTest_StorageAS, Param_ptr_vec4i32_Via_array_Dynami
 
     auto* src = R"(
 $B1: {  # root
-  %S:ptr<storage, array<vec4<i32>, 8>, read_write> = var undef @binding_point(0, 0)
+  %S:ptr<storage, array<vec4<i32>, 8>, read_write> = var @binding_point(0, 0)
 }
 
 %a = func(%pre:i32, %p:ptr<storage, vec4<i32>, read_write>, %post:i32):void {
@@ -2276,7 +2297,7 @@ $B1: {  # root
     ret
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %I:i32 = let 3i
     %8:ptr<storage, vec4<i32>, read_write> = access %S, %I
@@ -2290,7 +2311,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %S:ptr<storage, array<vec4<i32>, 8>, read_write> = var undef @binding_point(0, 0)
+  %S:ptr<storage, array<vec4<i32>, 8>, read_write> = var @binding_point(0, 0)
 }
 
 %a = func(%pre:i32, %p_indices:array<u32, 1>, %post:i32):void {
@@ -2301,7 +2322,7 @@ $B1: {  # root
     ret
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %I:i32 = let 3i
     %10:u32 = convert %I
@@ -2408,7 +2429,7 @@ TEST_F(IR_DirectVariableAccessTest_StorageAS, CallChaining) {
         b.Return(fn_4, b.Call(ty.f32(), fn_3, access_0, access_1));
     });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         b.Call(ty.f32(), fn_4, S);
         b.Return(fn_b);
@@ -2425,7 +2446,7 @@ Outer = struct @align(16) {
 }
 
 $B1: {  # root
-  %S:ptr<storage, Outer, read> = var undef @binding_point(0, 0)
+  %S:ptr<storage, Outer, read> = var @binding_point(0, 0)
 }
 
 %f0 = func(%p:ptr<storage, vec4<f32>, read>):f32 {
@@ -2436,7 +2457,7 @@ $B1: {  # root
 }
 %f1 = func(%p_1:ptr<storage, mat3x4<f32>, read>):f32 {  # %p_1: 'p'
   $B3: {
-    %res:ptr<function, f32, read_write> = var undef
+    %res:ptr<function, f32, read_write> = var
     %one:i32 = let 1i
     %two:i32 = let 2i
     %10:ptr<storage, vec4<f32>, read> = access %p_1, %one
@@ -2488,7 +2509,7 @@ $B1: {  # root
     ret %43
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B7: {
     %45:f32 = call %f4, %S
     ret
@@ -2509,7 +2530,7 @@ Outer = struct @align(16) {
 }
 
 $B1: {  # root
-  %S:ptr<storage, Outer, read> = var undef @binding_point(0, 0)
+  %S:ptr<storage, Outer, read> = var @binding_point(0, 0)
 }
 
 %f0 = func(%p_indices:array<u32, 1>):f32 {
@@ -2531,7 +2552,7 @@ $B1: {  # root
 }
 %f1 = func():f32 {
   $B4: {
-    %res:ptr<function, f32, read_write> = var undef
+    %res:ptr<function, f32, read_write> = var
     %one:i32 = let 1i
     %two:i32 = let 2i
     %17:u32 = convert %one
@@ -2567,7 +2588,7 @@ $B1: {  # root
 %f1_1 = func(%p_indices_2:array<u32, 1>):f32 {  # %f1_1: 'f1', %p_indices_2: 'p_indices'
   $B5: {
     %42:u32 = access %p_indices_2, 0u
-    %res_1:ptr<function, f32, read_write> = var undef  # %res_1: 'res'
+    %res_1:ptr<function, f32, read_write> = var  # %res_1: 'res'
     %one_1:i32 = let 1i  # %one_1: 'one'
     %two_1:i32 = let 2i  # %two_1: 'two'
     %46:u32 = convert %one_1
@@ -2625,7 +2646,7 @@ $B1: {  # root
     ret %82
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B9: {
     %84:f32 = call %f4
     ret
@@ -2679,7 +2700,7 @@ TEST_F(IR_DirectVariableAccessTest_StorageAS, CallChaining2) {
         });
     }
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(main->Block(), [&] {
         b.Call(f0, input);
         b.Return(main);
@@ -2687,7 +2708,7 @@ TEST_F(IR_DirectVariableAccessTest_StorageAS, CallChaining2) {
 
     auto* src = R"(
 $B1: {  # root
-  %U:ptr<storage, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var undef @binding_point(0, 0)
+  %U:ptr<storage, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var @binding_point(0, 0)
 }
 
 %f2 = func(%p:ptr<storage, array<vec4<i32>, 5>, read_write>):vec4<i32> {
@@ -2713,7 +2734,7 @@ $B1: {  # root
     ret %15
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B5: {
     %17:vec4<i32> = call %f0, %U
     ret
@@ -2725,7 +2746,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %U:ptr<storage, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var undef @binding_point(0, 0)
+  %U:ptr<storage, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var @binding_point(0, 0)
 }
 
 %f2 = func(%p_indices:array<u32, 2>):vec4<i32> {
@@ -2755,7 +2776,7 @@ $B1: {  # root
     ret %18
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B5: {
     %20:vec4<i32> = call %f0
     ret
@@ -2793,7 +2814,7 @@ TEST_F(IR_DirectVariableAccessTest_WorkgroupAS, Param_ptr_vec4i32_Via_array_Stat
     });
     b.Append(fn_a->Block(), [&] { b.Return(fn_a, b.Load(fn_a_p)); });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.ComputeFunction("b");
     b.Append(fn_b->Block(), [&] {
         auto* idx = b.Let("idx", 3_i);
         auto* access = b.Access(ty.ptr<workgroup, vec4<i32>>(), W, idx);
@@ -2803,7 +2824,7 @@ TEST_F(IR_DirectVariableAccessTest_WorkgroupAS, Param_ptr_vec4i32_Via_array_Stat
 
     auto* src = R"(
 $B1: {  # root
-  %W:ptr<workgroup, array<vec4<i32>, 8>, read_write> = var undef
+  %W:ptr<workgroup, array<vec4<i32>, 8>, read_write> = var
 }
 
 %a = func(%pre:i32, %p:ptr<workgroup, vec4<i32>, read_write>, %post:i32):vec4<i32> {
@@ -2812,7 +2833,7 @@ $B1: {  # root
     ret %6
   }
 }
-%b = func():void {
+%b = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
     %idx:i32 = let 3i
     %9:ptr<workgroup, vec4<i32>, read_write> = access %W, %idx
@@ -2826,7 +2847,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %W:ptr<workgroup, array<vec4<i32>, 8>, read_write> = var undef
+  %W:ptr<workgroup, array<vec4<i32>, 8>, read_write> = var
 }
 
 %a = func(%pre:i32, %p_indices:array<u32, 1>, %post:i32):vec4<i32> {
@@ -2837,7 +2858,7 @@ $B1: {  # root
     ret %8
   }
 }
-%b = func():void {
+%b = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
     %idx:i32 = let 3i
     %11:u32 = convert %idx
@@ -2872,7 +2893,7 @@ TEST_F(IR_DirectVariableAccessTest_WorkgroupAS, Param_ptr_vec4i32_Via_array_Stat
         b.Return(fn_a);
     });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.ComputeFunction("b");
     b.Append(fn_b->Block(), [&] {
         auto* idx = b.Let("idx", 3_i);
         auto* access = b.Access(ty.ptr<workgroup, vec4<i32>>(), W, idx);
@@ -2882,7 +2903,7 @@ TEST_F(IR_DirectVariableAccessTest_WorkgroupAS, Param_ptr_vec4i32_Via_array_Stat
 
     auto* src = R"(
 $B1: {  # root
-  %W:ptr<workgroup, array<vec4<i32>, 8>, read_write> = var undef
+  %W:ptr<workgroup, array<vec4<i32>, 8>, read_write> = var
 }
 
 %a = func(%pre:i32, %p:ptr<workgroup, vec4<i32>, read_write>, %post:i32):void {
@@ -2891,7 +2912,7 @@ $B1: {  # root
     ret
   }
 }
-%b = func():void {
+%b = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
     %idx:i32 = let 3i
     %8:ptr<workgroup, vec4<i32>, read_write> = access %W, %idx
@@ -2905,7 +2926,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %W:ptr<workgroup, array<vec4<i32>, 8>, read_write> = var undef
+  %W:ptr<workgroup, array<vec4<i32>, 8>, read_write> = var
 }
 
 %a = func(%pre:i32, %p_indices:array<u32, 1>, %post:i32):void {
@@ -2916,7 +2937,7 @@ $B1: {  # root
     ret
   }
 }
-%b = func():void {
+%b = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
     %idx:i32 = let 3i
     %10:u32 = convert %idx
@@ -3022,7 +3043,7 @@ TEST_F(IR_DirectVariableAccessTest_WorkgroupAS, CallChaining) {
         b.Return(fn_4, b.Call(ty.f32(), fn_3, access_0, access_1));
     });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.ComputeFunction("b");
     b.Append(fn_b->Block(), [&] {
         b.Call(ty.f32(), fn_4, W);
         b.Return(fn_b);
@@ -3039,7 +3060,7 @@ Outer = struct @align(16) {
 }
 
 $B1: {  # root
-  %W:ptr<workgroup, Outer, read_write> = var undef
+  %W:ptr<workgroup, Outer, read_write> = var
 }
 
 %f0 = func(%p:ptr<workgroup, vec4<f32>, read_write>):f32 {
@@ -3050,7 +3071,7 @@ $B1: {  # root
 }
 %f1 = func(%p_1:ptr<workgroup, mat3x4<f32>, read_write>):f32 {  # %p_1: 'p'
   $B3: {
-    %res:ptr<function, f32, read_write> = var undef
+    %res:ptr<function, f32, read_write> = var
     %one:i32 = let 1i
     %two:i32 = let 2i
     %10:ptr<workgroup, vec4<f32>, read_write> = access %p_1, %one
@@ -3102,7 +3123,7 @@ $B1: {  # root
     ret %43
   }
 }
-%b = func():void {
+%b = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B7: {
     %45:f32 = call %f4, %W
     ret
@@ -3123,7 +3144,7 @@ Outer = struct @align(16) {
 }
 
 $B1: {  # root
-  %W:ptr<workgroup, Outer, read_write> = var undef
+  %W:ptr<workgroup, Outer, read_write> = var
 }
 
 %f0 = func(%p_indices:array<u32, 1>):f32 {
@@ -3145,7 +3166,7 @@ $B1: {  # root
 }
 %f1 = func():f32 {
   $B4: {
-    %res:ptr<function, f32, read_write> = var undef
+    %res:ptr<function, f32, read_write> = var
     %one:i32 = let 1i
     %two:i32 = let 2i
     %17:u32 = convert %one
@@ -3181,7 +3202,7 @@ $B1: {  # root
 %f1_1 = func(%p_indices_2:array<u32, 1>):f32 {  # %f1_1: 'f1', %p_indices_2: 'p_indices'
   $B5: {
     %42:u32 = access %p_indices_2, 0u
-    %res_1:ptr<function, f32, read_write> = var undef  # %res_1: 'res'
+    %res_1:ptr<function, f32, read_write> = var  # %res_1: 'res'
     %one_1:i32 = let 1i  # %one_1: 'one'
     %two_1:i32 = let 2i  # %two_1: 'two'
     %46:u32 = convert %one_1
@@ -3239,7 +3260,7 @@ $B1: {  # root
     ret %82
   }
 }
-%b = func():void {
+%b = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B9: {
     %84:f32 = call %f4
     ret
@@ -3292,7 +3313,7 @@ TEST_F(IR_DirectVariableAccessTest_WorkgroupAS, CallChaining2) {
         });
     }
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.ComputeFunction("main");
     b.Append(main->Block(), [&] {
         b.Call(f0, input);
         b.Return(main);
@@ -3300,7 +3321,7 @@ TEST_F(IR_DirectVariableAccessTest_WorkgroupAS, CallChaining2) {
 
     auto* src = R"(
 $B1: {  # root
-  %U:ptr<workgroup, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var undef
+  %U:ptr<workgroup, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var
 }
 
 %f2 = func(%p:ptr<workgroup, array<vec4<i32>, 5>, read_write>):vec4<i32> {
@@ -3326,7 +3347,7 @@ $B1: {  # root
     ret %15
   }
 }
-%main = func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B5: {
     %17:vec4<i32> = call %f0, %U
     ret
@@ -3338,7 +3359,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %U:ptr<workgroup, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var undef
+  %U:ptr<workgroup, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var
 }
 
 %f2 = func(%p_indices:array<u32, 2>):vec4<i32> {
@@ -3368,7 +3389,7 @@ $B1: {  # root
     ret %18
   }
 }
-%main = func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B5: {
     %20:vec4<i32> = call %f0
     ret
@@ -3406,7 +3427,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Enabled_Param_ptr_i32_read) {
     });
     b.Append(fn_a->Block(), [&] { b.Return(fn_a, b.Load(fn_a_p)); });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         b.Call(fn_a, 10_i, P, 20_i);
         b.Return(fn_b);
@@ -3414,7 +3435,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Enabled_Param_ptr_i32_read) {
 
     auto* src = R"(
 $B1: {  # root
-  %P:ptr<private, i32, read_write> = var undef
+  %P:ptr<private, i32, read_write> = var
 }
 
 %a = func(%pre:i32, %p:ptr<private, i32, read_write>, %post:i32):i32 {
@@ -3423,7 +3444,7 @@ $B1: {  # root
     ret %6
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %8:i32 = call %a, 10i, %P, 20i
     ret
@@ -3435,7 +3456,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %P:ptr<private, i32, read_write> = var undef
+  %P:ptr<private, i32, read_write> = var
 }
 
 %a = func(%pre:i32, %post:i32):i32 {
@@ -3444,7 +3465,7 @@ $B1: {  # root
     ret %5
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %7:i32 = call %a, 10i, 20i
     ret
@@ -3476,7 +3497,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Enabled_Param_ptr_i32_write) {
         b.Return(fn_a);
     });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         b.Call(fn_a, 10_i, P, 20_i);
         b.Return(fn_b);
@@ -3484,7 +3505,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Enabled_Param_ptr_i32_write) {
 
     auto* src = R"(
 $B1: {  # root
-  %P:ptr<private, i32, read_write> = var undef
+  %P:ptr<private, i32, read_write> = var
 }
 
 %a = func(%pre:i32, %p:ptr<private, i32, read_write>, %post:i32):void {
@@ -3493,7 +3514,7 @@ $B1: {  # root
     ret
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %7:void = call %a, 10i, %P, 20i
     ret
@@ -3505,7 +3526,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %P:ptr<private, i32, read_write> = var undef
+  %P:ptr<private, i32, read_write> = var
 }
 
 %a = func(%pre:i32, %post:i32):void {
@@ -3514,7 +3535,7 @@ $B1: {  # root
     ret
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %6:void = call %a, 10i, 20i
     ret
@@ -3547,7 +3568,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Enabled_Param_ptr_i32_Via_struct_r
     });
     b.Append(fn_a->Block(), [&] { b.Return(fn_a, b.Load(fn_a_p)); });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto* access = b.Access(ty.ptr<private_, i32>(), P, 0_u);
         b.Call(fn_a, 10_i, access, 20_i);
@@ -3560,7 +3581,7 @@ str = struct @align(4) {
 }
 
 $B1: {  # root
-  %P:ptr<private, str, read_write> = var undef
+  %P:ptr<private, str, read_write> = var
 }
 
 %a = func(%pre:i32, %p:ptr<private, i32, read_write>, %post:i32):i32 {
@@ -3569,7 +3590,7 @@ $B1: {  # root
     ret %6
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %8:ptr<private, i32, read_write> = access %P, 0u
     %9:i32 = call %a, 10i, %8, 20i
@@ -3586,7 +3607,7 @@ str = struct @align(4) {
 }
 
 $B1: {  # root
-  %P:ptr<private, str, read_write> = var undef
+  %P:ptr<private, str, read_write> = var
 }
 
 %a = func(%pre:i32, %post:i32):i32 {
@@ -3596,7 +3617,7 @@ $B1: {  # root
     ret %6
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %8:i32 = call %a, 10i, 20i
     ret
@@ -3629,7 +3650,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Disabled_Param_ptr_i32_Via_struct_
     });
     b.Append(fn_a->Block(), [&] { b.Return(fn_a, b.Load(fn_a_p)); });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto* access = b.Access(ty.ptr<private_, i32>(), P, 0_u);
         b.Call(fn_a, 10_i, access, 20_i);
@@ -3642,7 +3663,7 @@ str = struct @align(4) {
 }
 
 $B1: {  # root
-  %P:ptr<private, str, read_write> = var undef
+  %P:ptr<private, str, read_write> = var
 }
 
 %a = func(%pre:i32, %p:ptr<private, i32, read_write>, %post:i32):i32 {
@@ -3651,7 +3672,7 @@ $B1: {  # root
     ret %6
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %8:ptr<private, i32, read_write> = access %P, 0u
     %9:i32 = call %a, 10i, %8, 20i
@@ -3693,7 +3714,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Enabled_Param_ptr_arr_i32_Via_stru
         b.Return(fn_a);
     });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto* access = b.Access(ty.ptr<private_, array<i32, 4>>(), P, 0_u);
         b.Call(fn_a, 10_i, access, 20_i);
@@ -3706,7 +3727,7 @@ str = struct @align(4) {
 }
 
 $B1: {  # root
-  %P:ptr<private, str, read_write> = var undef
+  %P:ptr<private, str, read_write> = var
 }
 
 %a = func(%pre:i32, %p:ptr<private, array<i32, 4>, read_write>, %post:i32):void {
@@ -3715,7 +3736,7 @@ $B1: {  # root
     ret
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %7:ptr<private, array<i32, 4>, read_write> = access %P, 0u
     %8:void = call %a, 10i, %7, 20i
@@ -3732,7 +3753,7 @@ str = struct @align(4) {
 }
 
 $B1: {  # root
-  %P:ptr<private, str, read_write> = var undef
+  %P:ptr<private, str, read_write> = var
 }
 
 %a = func(%pre:i32, %post:i32):void {
@@ -3742,7 +3763,7 @@ $B1: {  # root
     ret
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %7:void = call %a, 10i, 20i
     ret
@@ -3779,7 +3800,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Disabled_Param_ptr_arr_i32_Via_str
         b.Return(fn_a);
     });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto* access = b.Access(ty.ptr<private_, array<i32, 4>>(), P, 0_u);
         b.Call(fn_a, 10_i, access, 20_i);
@@ -3792,7 +3813,7 @@ str = struct @align(4) {
 }
 
 $B1: {  # root
-  %P:ptr<private, str, read_write> = var undef
+  %P:ptr<private, str, read_write> = var
 }
 
 %a = func(%pre:i32, %p:ptr<private, array<i32, 4>, read_write>, %post:i32):void {
@@ -3801,7 +3822,7 @@ $B1: {  # root
     ret
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %7:ptr<private, array<i32, 4>, read_write> = access %P, 0u
     %8:void = call %a, 10i, %7, 20i
@@ -3843,7 +3864,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Enabled_Param_ptr_i32_mixed) {
     });
     b.Append(fn_a->Block(), [&] { b.Return(fn_a, b.Load(fn_a_p)); });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         {  // a(10, &Pi, 20);
             b.Call(fn_a, 10_i, Pi, 20_i);
@@ -3866,9 +3887,9 @@ str = struct @align(4) {
 }
 
 $B1: {  # root
-  %Pi:ptr<private, i32, read_write> = var undef
-  %Ps:ptr<private, str, read_write> = var undef
-  %Pa:ptr<private, array<i32, 4>, read_write> = var undef
+  %Pi:ptr<private, i32, read_write> = var
+  %Ps:ptr<private, str, read_write> = var
+  %Pa:ptr<private, array<i32, 4>, read_write> = var
 }
 
 %a = func(%pre:i32, %p:ptr<private, i32, read_write>, %post:i32):i32 {
@@ -3877,7 +3898,7 @@ $B1: {  # root
     ret %8
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %10:i32 = call %a, 10i, %Pi, 20i
     %11:ptr<private, i32, read_write> = access %Ps, 0u
@@ -3898,9 +3919,9 @@ str = struct @align(4) {
 }
 
 $B1: {  # root
-  %Pi:ptr<private, i32, read_write> = var undef
-  %Ps:ptr<private, str, read_write> = var undef
-  %Pa:ptr<private, array<i32, 4>, read_write> = var undef
+  %Pi:ptr<private, i32, read_write> = var
+  %Ps:ptr<private, str, read_write> = var
+  %Pa:ptr<private, array<i32, 4>, read_write> = var
 }
 
 %a = func(%pre:i32, %post:i32):i32 {
@@ -3924,7 +3945,7 @@ $B1: {  # root
     ret %19
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B5: {
     %21:i32 = call %a, 10i, 20i
     %22:i32 = call %a_1, 30i, 40i
@@ -3966,7 +3987,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Disabled_Param_ptr_i32_mixed) {
     });
     b.Append(fn_a->Block(), [&] { b.Return(fn_a, b.Load(fn_a_p)); });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         {  // a(10, &Pi, 20);
             b.Call(fn_a, 10_i, Pi, 20_i);
@@ -3988,9 +4009,9 @@ str = struct @align(4) {
 }
 
 $B1: {  # root
-  %Pi:ptr<private, i32, read_write> = var undef
-  %Ps:ptr<private, str, read_write> = var undef
-  %Pa:ptr<private, array<i32, 4>, read_write> = var undef
+  %Pi:ptr<private, i32, read_write> = var
+  %Ps:ptr<private, str, read_write> = var
+  %Pa:ptr<private, array<i32, 4>, read_write> = var
 }
 
 %a = func(%pre:i32, %p:ptr<private, i32, read_write>, %post:i32):i32 {
@@ -3999,7 +4020,7 @@ $B1: {  # root
     ret %8
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %10:i32 = call %a, 10i, %Pi, 20i
     %11:ptr<private, i32, read_write> = access %Ps, 0u
@@ -4110,7 +4131,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Enabled_CallChaining) {
         b.Return(fn_4, b.Call(ty.f32(), fn_3, access_0, access_1));
     });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         b.Call(ty.f32(), fn_4, P);
         b.Return(fn_b);
@@ -4127,7 +4148,7 @@ Outer = struct @align(16) {
 }
 
 $B1: {  # root
-  %P:ptr<private, Outer, read_write> = var undef
+  %P:ptr<private, Outer, read_write> = var
 }
 
 %f0 = func(%p:ptr<private, vec4<f32>, read_write>):f32 {
@@ -4138,7 +4159,7 @@ $B1: {  # root
 }
 %f1 = func(%p_1:ptr<private, mat3x4<f32>, read_write>):f32 {  # %p_1: 'p'
   $B3: {
-    %res:ptr<function, f32, read_write> = var undef
+    %res:ptr<function, f32, read_write> = var
     %one:i32 = let 1i
     %two:i32 = let 2i
     %10:ptr<private, vec4<f32>, read_write> = access %p_1, %one
@@ -4190,7 +4211,7 @@ $B1: {  # root
     ret %43
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B7: {
     %45:f32 = call %f4, %P
     ret
@@ -4211,7 +4232,7 @@ Outer = struct @align(16) {
 }
 
 $B1: {  # root
-  %P:ptr<private, Outer, read_write> = var undef
+  %P:ptr<private, Outer, read_write> = var
 }
 
 %f0 = func(%p_indices:array<u32, 1>):f32 {
@@ -4233,7 +4254,7 @@ $B1: {  # root
 }
 %f1 = func():f32 {
   $B4: {
-    %res:ptr<function, f32, read_write> = var undef
+    %res:ptr<function, f32, read_write> = var
     %one:i32 = let 1i
     %two:i32 = let 2i
     %17:u32 = convert %one
@@ -4269,7 +4290,7 @@ $B1: {  # root
 %f1_1 = func(%p_indices_2:array<u32, 1>):f32 {  # %f1_1: 'f1', %p_indices_2: 'p_indices'
   $B5: {
     %42:u32 = access %p_indices_2, 0u
-    %res_1:ptr<function, f32, read_write> = var undef  # %res_1: 'res'
+    %res_1:ptr<function, f32, read_write> = var  # %res_1: 'res'
     %one_1:i32 = let 1i  # %one_1: 'one'
     %two_1:i32 = let 2i  # %two_1: 'two'
     %46:u32 = convert %one_1
@@ -4327,7 +4348,7 @@ $B1: {  # root
     ret %82
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B9: {
     %84:f32 = call %f4
     ret
@@ -4427,7 +4448,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Disabled_CallChaining) {
         b.Return(fn_4, b.Call(ty.f32(), fn_3, access_0, access_1));
     });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         b.Call(ty.f32(), fn_4, P);
         b.Return(fn_b);
@@ -4444,7 +4465,7 @@ Outer = struct @align(16) {
 }
 
 $B1: {  # root
-  %P:ptr<private, Outer, read_write> = var undef
+  %P:ptr<private, Outer, read_write> = var
 }
 
 %f0 = func(%p:ptr<private, vec4<f32>, read_write>):f32 {
@@ -4455,7 +4476,7 @@ $B1: {  # root
 }
 %f1 = func(%p_1:ptr<private, mat3x4<f32>, read_write>):f32 {  # %p_1: 'p'
   $B3: {
-    %res:ptr<function, f32, read_write> = var undef
+    %res:ptr<function, f32, read_write> = var
     %8:ptr<private, vec4<f32>, read_write> = access %p_1, 1i
     %9:f32 = call %f0, %8
     %10:f32 = load %res
@@ -4504,7 +4525,7 @@ $B1: {  # root
     ret %40
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B7: {
     %42:f32 = call %f4, %P
     ret
@@ -4562,7 +4583,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Enabled_CallChaining2) {
         });
     }
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(main->Block(), [&] {
         b.Call(f0, P);
         b.Return(main);
@@ -4570,7 +4591,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Enabled_CallChaining2) {
 
     auto* src = R"(
 $B1: {  # root
-  %P:ptr<private, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var undef
+  %P:ptr<private, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var
 }
 
 %f2 = func(%p:ptr<private, array<vec4<i32>, 5>, read_write>):vec4<i32> {
@@ -4596,7 +4617,7 @@ $B1: {  # root
     ret %15
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B5: {
     %17:vec4<i32> = call %f0, %P
     ret
@@ -4608,7 +4629,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %P:ptr<private, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var undef
+  %P:ptr<private, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var
 }
 
 %f2 = func(%p_indices:array<u32, 2>):vec4<i32> {
@@ -4638,7 +4659,7 @@ $B1: {  # root
     ret %18
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B5: {
     %20:vec4<i32> = call %f0
     ret
@@ -4688,7 +4709,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Disabled_CallChaining2) {
                  [&] { b.Return(f0, b.Call(f1, b.Access(ty.ptr<private_>(T1), p, 1_u))); });
     }
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(main->Block(), [&] {
         b.Call(f0, P);
         b.Return(main);
@@ -4696,7 +4717,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Disabled_CallChaining2) {
 
     auto* src = R"(
 $B1: {  # root
-  %P:ptr<private, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var undef
+  %P:ptr<private, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var
 }
 
 %f2 = func(%p:ptr<private, array<vec4<i32>, 5>, read_write>):vec4<i32> {
@@ -4720,7 +4741,7 @@ $B1: {  # root
     ret %13
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B5: {
     %15:vec4<i32> = call %f0, %P
     ret
@@ -4747,7 +4768,7 @@ namespace function_as_tests {
 using IR_DirectVariableAccessTest_FunctionAS = TransformTest;
 
 TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_LocalPtr) {
-    auto* fn = b.Function("f", ty.void_());
+    auto* fn = b.Function("f", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn->Block(), [&] {
         auto* v = b.Var<function, i32>("v");
         auto* p = b.Let("p", v);
@@ -4756,9 +4777,9 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_LocalPtr) {
     });
 
     auto* src = R"(
-%f = func():void {
+%f = @fragment func():void {
   $B1: {
-    %v:ptr<function, i32, read_write> = var undef
+    %v:ptr<function, i32, read_write> = var
     %p:ptr<function, i32, read_write> = let %v
     %4:i32 = load %p
     %x:ptr<function, i32, read_write> = var %4
@@ -4786,7 +4807,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_Param_ptr_i32_read) {
     });
     b.Append(fn_a->Block(), [&] { b.Return(fn_a, b.Load(fn_a_p)); });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto* F = b.Var<function, i32>("F");
         b.Call(fn_a, 10_i, F, 20_i);
@@ -4800,9 +4821,9 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_Param_ptr_i32_read) {
     ret %5
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B2: {
-    %F:ptr<function, i32, read_write> = var undef
+    %F:ptr<function, i32, read_write> = var
     %8:i32 = call %a, 10i, %F, 20i
     ret
   }
@@ -4818,9 +4839,9 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_Param_ptr_i32_read) {
     ret %5
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B2: {
-    %F:ptr<function, i32, read_write> = var undef
+    %F:ptr<function, i32, read_write> = var
     %8:i32 = call %a, 10i, %F, 20i
     ret
   }
@@ -4845,7 +4866,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_Param_ptr_i32_write) {
         b.Return(fn_a);
     });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto* F = b.Var<function, i32>("F");
         b.Call(fn_a, 10_i, F, 20_i);
@@ -4859,9 +4880,9 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_Param_ptr_i32_write) {
     ret
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B2: {
-    %F:ptr<function, i32, read_write> = var undef
+    %F:ptr<function, i32, read_write> = var
     %7:void = call %a, 10i, %F, 20i
     ret
   }
@@ -4877,9 +4898,9 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_Param_ptr_i32_write) {
     ret
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B2: {
-    %F:ptr<function, i32, read_write> = var undef
+    %F:ptr<function, i32, read_write> = var
     %7:void = call %a, 10i, %F, 20i
     ret
   }
@@ -4905,7 +4926,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_Param_ptr_i32_Via_struct_
     });
     b.Append(fn_a->Block(), [&] { b.Return(fn_a, b.Load(fn_a_p)); });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto* F = b.Var("F", ty.ptr<function>(str_));
         auto* access = b.Access(ty.ptr<function, i32>(), F, 0_u);
@@ -4924,9 +4945,9 @@ str = struct @align(4) {
     ret %5
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B2: {
-    %F:ptr<function, str, read_write> = var undef
+    %F:ptr<function, str, read_write> = var
     %8:ptr<function, i32, read_write> = access %F, 0u
     %9:i32 = call %a, 10i, %8, 20i
     ret
@@ -4948,9 +4969,9 @@ str = struct @align(4) {
     ret %6
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B2: {
-    %F:ptr<function, str, read_write> = var undef
+    %F:ptr<function, str, read_write> = var
     %9:i32 = call %a, 10i, %F, 20i
     ret
   }
@@ -4980,7 +5001,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_Param_ptr_arr_i32_Via_str
         b.Return(fn_a);
     });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto* F = b.Var("F", ty.ptr<function>(str_));
         auto* access = b.Access(ty.ptr<function, array<i32, 4>>(), F, 0_u);
@@ -4999,9 +5020,9 @@ str = struct @align(4) {
     ret
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B2: {
-    %F:ptr<function, str, read_write> = var undef
+    %F:ptr<function, str, read_write> = var
     %7:ptr<function, array<i32, 4>, read_write> = access %F, 0u
     %8:void = call %a, 10i, %7, 20i
     ret
@@ -5023,9 +5044,9 @@ str = struct @align(4) {
     ret
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B2: {
-    %F:ptr<function, str, read_write> = var undef
+    %F:ptr<function, str, read_write> = var
     %8:void = call %a, 10i, %F, 20i
     ret
   }
@@ -5051,7 +5072,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_Param_ptr_i32_mixed) {
     });
     b.Append(fn_a->Block(), [&] { b.Return(fn_a, b.Load(fn_a_p)); });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto* Fi = b.Var("Fi", ty.ptr<function, i32>());
         auto* Fs = b.Var("Fs", ty.ptr<function>(str_));
@@ -5082,11 +5103,11 @@ str = struct @align(4) {
     ret %5
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B2: {
-    %Fi:ptr<function, i32, read_write> = var undef
-    %Fs:ptr<function, str, read_write> = var undef
-    %Fa:ptr<function, array<i32, 4>, read_write> = var undef
+    %Fi:ptr<function, i32, read_write> = var
+    %Fs:ptr<function, str, read_write> = var
+    %Fa:ptr<function, array<i32, 4>, read_write> = var
     %10:i32 = call %a, 10i, %Fi, 20i
     %11:ptr<function, i32, read_write> = access %Fs, 0u
     %12:i32 = call %a, 30i, %11, 40i
@@ -5126,11 +5147,11 @@ str = struct @align(4) {
     ret %19
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B4: {
-    %Fi:ptr<function, i32, read_write> = var undef
-    %Fs:ptr<function, str, read_write> = var undef
-    %Fa:ptr<function, array<i32, 4>, read_write> = var undef
+    %Fi:ptr<function, i32, read_write> = var
+    %Fs:ptr<function, str, read_write> = var
+    %Fa:ptr<function, array<i32, 4>, read_write> = var
     %24:i32 = call %a, 10i, %Fi, 20i
     %25:i32 = call %a_1, 30i, %Fs, 40i
     %two:i32 = let 2i
@@ -5161,7 +5182,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Disabled_Param_ptr_i32_Via_struct
     });
     b.Append(fn_a->Block(), [&] { b.Return(fn_a, b.Load(fn_a_p)); });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto* F = b.Var("F", ty.ptr<function>(str_));
         auto* access = b.Access(ty.ptr<function, i32>(), F, 0_u);
@@ -5180,9 +5201,9 @@ str = struct @align(4) {
     ret %5
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B2: {
-    %F:ptr<function, str, read_write> = var undef
+    %F:ptr<function, str, read_write> = var
     %8:ptr<function, i32, read_write> = access %F, 0u
     %9:i32 = call %a, 10i, %8, 20i
     ret
@@ -5217,7 +5238,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Disabled_Param_ptr_arr_i32_Via_st
         b.Return(fn_a);
     });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto* F = b.Var("F", ty.ptr<function>(str_));
         auto* access = b.Access(ty.ptr<function, array<i32, 4>>(), F, 0_u);
@@ -5236,9 +5257,9 @@ str = struct @align(4) {
     ret
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B2: {
-    %F:ptr<function, str, read_write> = var undef
+    %F:ptr<function, str, read_write> = var
     %7:ptr<function, array<i32, 4>, read_write> = access %F, 0u
     %8:void = call %a, 10i, %7, 20i
     ret
@@ -5330,7 +5351,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_CallChaining) {
         });
     }
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto F = b.Var("F", ty.ptr<function>(Outer));
         b.Call(f4, F);
@@ -5355,7 +5376,7 @@ Outer = struct @align(16) {
 }
 %f1 = func(%p_1:ptr<function, mat3x4<f32>, read_write>):f32 {  # %p_1: 'p'
   $B2: {
-    %res:ptr<function, f32, read_write> = var undef
+    %res:ptr<function, f32, read_write> = var
     %one:i32 = let 1i
     %8:ptr<function, vec4<f32>, read_write> = access %p_1, %one
     %9:f32 = call %f0, %8
@@ -5393,9 +5414,9 @@ Outer = struct @align(16) {
     ret %29
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B6: {
-    %F:ptr<function, Outer, read_write> = var undef
+    %F:ptr<function, Outer, read_write> = var
     %32:f32 = call %f4, %F
     ret
   }
@@ -5426,7 +5447,7 @@ Outer = struct @align(16) {
 %f1 = func(%p_root_1:ptr<function, Outer, read_write>, %p_indices_1:array<u32, 1>):f32 {  # %p_root_1: 'p_root', %p_indices_1: 'p_indices'
   $B2: {
     %11:u32 = access %p_indices_1, 0u
-    %res:ptr<function, f32, read_write> = var undef
+    %res:ptr<function, f32, read_write> = var
     %one:i32 = let 1i
     %14:u32 = convert %one
     %15:array<u32, 2> = construct %11, %14
@@ -5467,9 +5488,9 @@ Outer = struct @align(16) {
     ret %39
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B6: {
-    %F:ptr<function, Outer, read_write> = var undef
+    %F:ptr<function, Outer, read_write> = var
     %42:f32 = call %f4, %F
     ret
   }
@@ -5554,7 +5575,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Disabled_CallChaining) {
         });
     }
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_b->Block(), [&] {
         auto F = b.Var("F", ty.ptr<function>(Outer));
         b.Call(f4, F);
@@ -5579,7 +5600,7 @@ Outer = struct @align(16) {
 }
 %f1 = func(%p_1:ptr<function, mat3x4<f32>, read_write>):f32 {  # %p_1: 'p'
   $B2: {
-    %res:ptr<function, f32, read_write> = var undef
+    %res:ptr<function, f32, read_write> = var
     %7:ptr<function, vec4<f32>, read_write> = access %p_1, 1i
     %8:f32 = call %f0, %7
     %9:f32 = load %res
@@ -5615,9 +5636,9 @@ Outer = struct @align(16) {
     ret %27
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B6: {
-    %F:ptr<function, Outer, read_write> = var undef
+    %F:ptr<function, Outer, read_write> = var
     %30:f32 = call %f4, %F
     ret
   }
@@ -5668,7 +5689,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_CallChaining2) {
         });
     }
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(main->Block(), [&] {
         auto* F = b.Var("F", ty.ptr<function>(T));
         b.Call(f0, F);
@@ -5699,9 +5720,9 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_CallChaining2) {
     ret %14
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B4: {
-    %F:ptr<function, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var undef
+    %F:ptr<function, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var
     %17:vec4<i32> = call %f0, %F
     ret
   }
@@ -5738,9 +5759,9 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_CallChaining2) {
     ret %20
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B4: {
-    %F:ptr<function, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var undef
+    %F:ptr<function, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var
     %23:vec4<i32> = call %f0, %F
     ret
   }
@@ -5783,7 +5804,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Disabled_CallChaining2) {
                  [&] { b.Return(f0, b.Call(f1, b.Access(ty.ptr<function>(T1), p, 1_u))); });
     }
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(main->Block(), [&] {
         auto* F = b.Var("F", ty.ptr<function>(T));
         b.Call(f0, F);
@@ -5812,9 +5833,9 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Disabled_CallChaining2) {
     ret %12
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B4: {
-    %F:ptr<function, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var undef
+    %F:ptr<function, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var
     %15:vec4<i32> = call %f0, %F
     ret
   }
@@ -5824,6 +5845,769 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Disabled_CallChaining2) {
     EXPECT_EQ(src, str());
 
     auto* expect = src;
+
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DirectVariableAccessTest_FunctionAS, Disabled_AliasedParams) {
+    auto* bar = b.Function("bar", ty.void_());
+    {
+        auto* p1 = b.FunctionParam("p1", ty.ptr<function, u32>());
+        auto* p2 = b.FunctionParam("p2", ty.ptr<function, u32>());
+        bar->SetParams({p1, p2});
+        b.Append(bar->Block(), [&] {
+            b.Store(p1, 4_u);
+            b.Store(p2, 5_u);
+            b.Return(bar);
+        });
+    }
+
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(main->Block(), [&] {
+        auto* a = b.Var<function, u32>("a");
+        auto* b_var = b.Var<function, u32>("b");
+        b.Call(bar, a, b_var);
+        b.Call(bar, a, a);
+        b.Return(main);
+    });
+
+    auto* src = R"(
+%bar = func(%p1:ptr<function, u32, read_write>, %p2:ptr<function, u32, read_write>):void {
+  $B1: {
+    store %p1, 4u
+    store %p2, 5u
+    ret
+  }
+}
+%main = @fragment func():void {
+  $B2: {
+    %a:ptr<function, u32, read_write> = var
+    %b:ptr<function, u32, read_write> = var
+    %7:void = call %bar, %a, %b
+    %8:void = call %bar, %a, %a
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%bar = func(%p1:ptr<function, u32, read_write>, %p2:ptr<function, u32, read_write>):void {
+  $B1: {
+    store %p1, 4u
+    store %p2, 5u
+    ret
+  }
+}
+%bar_1 = func(%p1_root:ptr<function, u32, read_write>):void {  # %bar_1: 'bar'
+  $B2: {
+    store %p1_root, 4u
+    store %p1_root, 5u
+    ret
+  }
+}
+%main = @fragment func():void {
+  $B3: {
+    %a:ptr<function, u32, read_write> = var
+    %b:ptr<function, u32, read_write> = var
+    %9:void = call %bar, %a, %b
+    %10:void = call %bar_1, %a
+    ret
+  }
+}
+)";
+
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_AliasedParams) {
+    auto* bar = b.Function("bar", ty.void_());
+    {
+        auto* p1 = b.FunctionParam("p1", ty.ptr<function, u32>());
+        auto* p2 = b.FunctionParam("p2", ty.ptr<function, u32>());
+        bar->SetParams({p1, p2});
+        b.Append(bar->Block(), [&] {
+            b.Store(p1, 4_u);
+            b.Store(p2, 5_u);
+            b.Return(bar);
+        });
+    }
+
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(main->Block(), [&] {
+        auto* a = b.Var<function, u32>("a");
+        auto* b_var = b.Var<function, u32>("b");
+        b.Call(bar, a, b_var);
+        b.Call(bar, a, a);
+        b.Return(main);
+    });
+
+    auto* src = R"(
+%bar = func(%p1:ptr<function, u32, read_write>, %p2:ptr<function, u32, read_write>):void {
+  $B1: {
+    store %p1, 4u
+    store %p2, 5u
+    ret
+  }
+}
+%main = @fragment func():void {
+  $B2: {
+    %a:ptr<function, u32, read_write> = var
+    %b:ptr<function, u32, read_write> = var
+    %7:void = call %bar, %a, %b
+    %8:void = call %bar, %a, %a
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%bar = func(%p1_root:ptr<function, u32, read_write>, %p2_root:ptr<function, u32, read_write>):void {
+  $B1: {
+    store %p1_root, 4u
+    store %p2_root, 5u
+    ret
+  }
+}
+%bar_1 = func(%p1_root_1:ptr<function, u32, read_write>):void {  # %bar_1: 'bar', %p1_root_1: 'p1_root'
+  $B2: {
+    store %p1_root_1, 4u
+    store %p1_root_1, 5u
+    ret
+  }
+}
+%main = @fragment func():void {
+  $B3: {
+    %a:ptr<function, u32, read_write> = var
+    %b:ptr<function, u32, read_write> = var
+    %9:void = call %bar, %a, %b
+    %10:void = call %bar_1, %a
+    ret
+  }
+}
+)";
+
+    Run(DirectVariableAccess, kTransformFunction);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DirectVariableAccessTest_FunctionAS, Disabled_CallChaining_AliasedAndNonAliased) {
+    auto* baz = b.Function("baz", ty.void_());
+    {
+        auto* p1 = b.FunctionParam("p1", ty.ptr<function, u32>());
+        auto* p2 = b.FunctionParam("p2", ty.ptr<function, u32>());
+        baz->SetParams({p1, p2});
+        b.Append(baz->Block(), [&] {
+            b.Store(p1, 41_u);
+            b.Store(p2, 42_u);
+            b.Return(baz);
+        });
+    }
+
+    auto* bar = b.Function("bar", ty.void_());
+    {
+        auto* p1 = b.FunctionParam("p1", ty.ptr<function, array<u32, 4>>());
+        auto* p2 = b.FunctionParam("p2", ty.ptr<function, u32>());
+        bar->SetParams({p1, p2});
+        b.Append(bar->Block(), [&] {
+            auto* l1 = b.Let("l1", p1);
+            auto* l2 = b.Let("l2", l1);
+            auto* elem = b.Access(ty.ptr<function, u32>(), l2, 2_u);
+            auto* l3 = b.Let("l3", elem);
+            b.Call(baz, l3, p2);
+            b.Return(bar);
+        });
+    }
+
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(main->Block(), [&] {
+        auto* a = b.Var<function, array<u32, 4>>("a");
+        auto* b_var = b.Var<function, u32>("b");
+        auto* c = b.Var<function, array<u32, 4>>("c");
+        b.Call(bar, a, b_var);
+        b.Call(bar, a, b.Access(ty.ptr<function, u32>(), c, 1_u));
+        b.Call(bar, a, b.Access(ty.ptr<function, u32>(), a, 1_u));
+        b.Return(main);
+    });
+
+    auto* src = R"(
+%baz = func(%p1:ptr<function, u32, read_write>, %p2:ptr<function, u32, read_write>):void {
+  $B1: {
+    store %p1, 41u
+    store %p2, 42u
+    ret
+  }
+}
+%bar = func(%p1_1:ptr<function, array<u32, 4>, read_write>, %p2_1:ptr<function, u32, read_write>):void {  # %p1_1: 'p1', %p2_1: 'p2'
+  $B2: {
+    %l1:ptr<function, array<u32, 4>, read_write> = let %p1_1
+    %l2:ptr<function, array<u32, 4>, read_write> = let %l1
+    %9:ptr<function, u32, read_write> = access %l2, 2u
+    %l3:ptr<function, u32, read_write> = let %9
+    %11:void = call %baz, %l3, %p2_1
+    ret
+  }
+}
+%main = @fragment func():void {
+  $B3: {
+    %a:ptr<function, array<u32, 4>, read_write> = var
+    %b:ptr<function, u32, read_write> = var
+    %c:ptr<function, array<u32, 4>, read_write> = var
+    %16:void = call %bar, %a, %b
+    %17:ptr<function, u32, read_write> = access %c, 1u
+    %18:void = call %bar, %a, %17
+    %19:ptr<function, u32, read_write> = access %a, 1u
+    %20:void = call %bar, %a, %19
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%baz = func(%p1:ptr<function, u32, read_write>, %p2:ptr<function, u32, read_write>):void {
+  $B1: {
+    store %p1, 41u
+    store %p2, 42u
+    ret
+  }
+}
+%baz_1 = func(%p1_root:ptr<function, array<u32, 4>, read_write>, %p1_indices:array<u32, 1>, %p2_indices:array<u32, 1>):void {  # %baz_1: 'baz'
+  $B2: {
+    %8:u32 = access %p1_indices, 0u
+    %9:ptr<function, u32, read_write> = access %p1_root, %8
+    %10:u32 = access %p2_indices, 0u
+    %11:ptr<function, u32, read_write> = access %p1_root, %10
+    store %9, 41u
+    store %11, 42u
+    ret
+  }
+}
+%bar = func(%p1_1:ptr<function, array<u32, 4>, read_write>, %p2_1:ptr<function, u32, read_write>):void {  # %p1_1: 'p1', %p2_1: 'p2'
+  $B3: {
+    %l1:ptr<function, array<u32, 4>, read_write> = let %p1_1
+    %l2:ptr<function, array<u32, 4>, read_write> = let %l1
+    %17:ptr<function, u32, read_write> = access %l2, 2u
+    %l3:ptr<function, u32, read_write> = let %17
+    %19:void = call %baz, %l3, %p2_1
+    ret
+  }
+}
+%bar_1 = func(%p1_root_1:ptr<function, array<u32, 4>, read_write>, %p2_indices_1:array<u32, 1>):void {  # %bar_1: 'bar', %p1_root_1: 'p1_root', %p2_indices_1: 'p2_indices'
+  $B4: {
+    %23:u32 = access %p2_indices_1, 0u
+    %24:array<u32, 1> = construct %23
+    %25:void = call %baz_1, %p1_root_1, array<u32, 1>(2u), %24
+    ret
+  }
+}
+%main = @fragment func():void {
+  $B5: {
+    %a:ptr<function, array<u32, 4>, read_write> = var
+    %b:ptr<function, u32, read_write> = var
+    %c:ptr<function, array<u32, 4>, read_write> = var
+    %30:void = call %bar, %a, %b
+    %31:ptr<function, u32, read_write> = access %c, 1u
+    %32:void = call %bar, %a, %31
+    %33:void = call %bar_1, %a, array<u32, 1>(1u)
+    ret
+  }
+}
+)";
+
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_CallChaining_AliasedAndNonAliased) {
+    auto* baz = b.Function("baz", ty.void_());
+    {
+        auto* p1 = b.FunctionParam("p1", ty.ptr<function, u32>());
+        auto* p2 = b.FunctionParam("p2", ty.ptr<function, u32>());
+        baz->SetParams({p1, p2});
+        b.Append(baz->Block(), [&] {
+            b.Store(p1, 41_u);
+            b.Store(p2, 42_u);
+            b.Return(baz);
+        });
+    }
+
+    auto* bar = b.Function("bar", ty.void_());
+    {
+        auto* p1 = b.FunctionParam("p1", ty.ptr<function, array<u32, 4>>());
+        auto* p2 = b.FunctionParam("p2", ty.ptr<function, u32>());
+        bar->SetParams({p1, p2});
+        b.Append(bar->Block(), [&] {
+            auto* elem = b.Access(ty.ptr<function, u32>(), p1, 2_u);
+            b.Call(baz, elem, p2);
+            b.Return(bar);
+        });
+    }
+
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(main->Block(), [&] {
+        auto* a = b.Var<function, array<u32, 4>>("a");
+        auto* b_var = b.Var<function, u32>("b");
+        auto* c = b.Var<function, array<u32, 4>>("c");
+        b.Call(bar, a, b_var);
+        b.Call(bar, a, b.Access(ty.ptr<function, u32>(), c, 1_u));
+        b.Call(bar, a, b.Access(ty.ptr<function, u32>(), a, 1_u));
+        b.Return(main);
+    });
+
+    auto* src = R"(
+%baz = func(%p1:ptr<function, u32, read_write>, %p2:ptr<function, u32, read_write>):void {
+  $B1: {
+    store %p1, 41u
+    store %p2, 42u
+    ret
+  }
+}
+%bar = func(%p1_1:ptr<function, array<u32, 4>, read_write>, %p2_1:ptr<function, u32, read_write>):void {  # %p1_1: 'p1', %p2_1: 'p2'
+  $B2: {
+    %7:ptr<function, u32, read_write> = access %p1_1, 2u
+    %8:void = call %baz, %7, %p2_1
+    ret
+  }
+}
+%main = @fragment func():void {
+  $B3: {
+    %a:ptr<function, array<u32, 4>, read_write> = var
+    %b:ptr<function, u32, read_write> = var
+    %c:ptr<function, array<u32, 4>, read_write> = var
+    %13:void = call %bar, %a, %b
+    %14:ptr<function, u32, read_write> = access %c, 1u
+    %15:void = call %bar, %a, %14
+    %16:ptr<function, u32, read_write> = access %a, 1u
+    %17:void = call %bar, %a, %16
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%baz = func(%p1_root:ptr<function, array<u32, 4>, read_write>, %p1_indices:array<u32, 1>, %p2_root:ptr<function, u32, read_write>):void {
+  $B1: {
+    %5:u32 = access %p1_indices, 0u
+    %6:ptr<function, u32, read_write> = access %p1_root, %5
+    store %6, 41u
+    store %p2_root, 42u
+    ret
+  }
+}
+%baz_1 = func(%p1_root_1:ptr<function, array<u32, 4>, read_write>, %p1_indices_1:array<u32, 1>, %p2_root_1:ptr<function, array<u32, 4>, read_write>, %p2_indices:array<u32, 1>):void {  # %baz_1: 'baz', %p1_root_1: 'p1_root', %p1_indices_1: 'p1_indices', %p2_root_1: 'p2_root'
+  $B2: {
+    %12:u32 = access %p1_indices_1, 0u
+    %13:ptr<function, u32, read_write> = access %p1_root_1, %12
+    %14:u32 = access %p2_indices, 0u
+    %15:ptr<function, u32, read_write> = access %p2_root_1, %14
+    store %13, 41u
+    store %15, 42u
+    ret
+  }
+}
+%baz_2 = func(%p1_root_2:ptr<function, array<u32, 4>, read_write>, %p1_indices_2:array<u32, 1>, %p2_indices_1:array<u32, 1>):void {  # %baz_2: 'baz', %p1_root_2: 'p1_root', %p1_indices_2: 'p1_indices', %p2_indices_1: 'p2_indices'
+  $B3: {
+    %20:u32 = access %p1_indices_2, 0u
+    %21:ptr<function, u32, read_write> = access %p1_root_2, %20
+    %22:u32 = access %p2_indices_1, 0u
+    %23:ptr<function, u32, read_write> = access %p1_root_2, %22
+    store %21, 41u
+    store %23, 42u
+    ret
+  }
+}
+%bar = func(%p1_root_3:ptr<function, array<u32, 4>, read_write>, %p2_root_2:ptr<function, u32, read_write>):void {  # %p1_root_3: 'p1_root', %p2_root_2: 'p2_root'
+  $B4: {
+    %27:void = call %baz, %p1_root_3, array<u32, 1>(2u), %p2_root_2
+    ret
+  }
+}
+%bar_1 = func(%p1_root_4:ptr<function, array<u32, 4>, read_write>, %p2_root_3:ptr<function, array<u32, 4>, read_write>, %p2_indices_2:array<u32, 1>):void {  # %bar_1: 'bar', %p1_root_4: 'p1_root', %p2_root_3: 'p2_root', %p2_indices_2: 'p2_indices'
+  $B5: {
+    %32:u32 = access %p2_indices_2, 0u
+    %33:array<u32, 1> = construct %32
+    %34:void = call %baz_1, %p1_root_4, array<u32, 1>(2u), %p2_root_3, %33
+    ret
+  }
+}
+%bar_2 = func(%p1_root_5:ptr<function, array<u32, 4>, read_write>, %p2_indices_3:array<u32, 1>):void {  # %bar_2: 'bar', %p1_root_5: 'p1_root', %p2_indices_3: 'p2_indices'
+  $B6: {
+    %38:u32 = access %p2_indices_3, 0u
+    %39:array<u32, 1> = construct %38
+    %40:void = call %baz_2, %p1_root_5, array<u32, 1>(2u), %39
+    ret
+  }
+}
+%main = @fragment func():void {
+  $B7: {
+    %a:ptr<function, array<u32, 4>, read_write> = var
+    %b:ptr<function, u32, read_write> = var
+    %c:ptr<function, array<u32, 4>, read_write> = var
+    %45:void = call %bar, %a, %b
+    %46:void = call %bar_1, %a, %c, array<u32, 1>(1u)
+    %47:void = call %bar_2, %a, array<u32, 1>(1u)
+    ret
+  }
+}
+)";
+
+    Run(DirectVariableAccess, kTransformFunction);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DirectVariableAccessTest_FunctionAS, Disabled_ThreeParams_AliasingVariants) {
+    auto* foo = b.Function("foo", ty.void_());
+    {
+        auto* p1 = b.FunctionParam("p1", ty.ptr<function, u32>());
+        auto* p2 = b.FunctionParam("p2", ty.ptr<function, u32>());
+        auto* p3 = b.FunctionParam("p3", ty.ptr<function, u32>());
+        foo->SetParams({p1, p2, p3});
+        b.Append(foo->Block(), [&] {
+            b.Store(p1, 1_u);
+            b.Store(p2, 2_u);
+            b.Store(p3, 3_u);
+            b.Return(foo);
+        });
+    }
+
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(main->Block(), [&] {
+        auto* a = b.Var<function, u32>("a");
+        auto* b_var = b.Var<function, u32>("b");
+        auto* c = b.Var<function, array<u32, 4>>("c");
+        // None alias
+        b.Call(foo, a, b_var, b.Access(ty.ptr<function, u32>(), c, 0_u));
+        // p1 & p2 alias (p3 is non-aliased sub-object access)
+        b.Call(foo, a, a, b.Access(ty.ptr<function, u32>(), c, 1_u));
+        // p1 & p3 alias
+        b.Call(foo, a, b_var, a);
+        // p2 & p3 alias
+        b.Call(foo, a, b_var, b_var);
+        // All 3 alias
+        b.Call(foo, a, a, a);
+        b.Return(main);
+    });
+
+    auto* src = R"(
+%foo = func(%p1:ptr<function, u32, read_write>, %p2:ptr<function, u32, read_write>, %p3:ptr<function, u32, read_write>):void {
+  $B1: {
+    store %p1, 1u
+    store %p2, 2u
+    store %p3, 3u
+    ret
+  }
+}
+%main = @fragment func():void {
+  $B2: {
+    %a:ptr<function, u32, read_write> = var
+    %b:ptr<function, u32, read_write> = var
+    %c:ptr<function, array<u32, 4>, read_write> = var
+    %9:ptr<function, u32, read_write> = access %c, 0u
+    %10:void = call %foo, %a, %b, %9
+    %11:ptr<function, u32, read_write> = access %c, 1u
+    %12:void = call %foo, %a, %a, %11
+    %13:void = call %foo, %a, %b, %a
+    %14:void = call %foo, %a, %b, %b
+    %15:void = call %foo, %a, %a, %a
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%p1:ptr<function, u32, read_write>, %p2:ptr<function, u32, read_write>, %p3:ptr<function, u32, read_write>):void {
+  $B1: {
+    store %p1, 1u
+    store %p2, 2u
+    store %p3, 3u
+    ret
+  }
+}
+%foo_1 = func(%p1_root:ptr<function, u32, read_write>, %p3_1:ptr<function, u32, read_write>):void {  # %foo_1: 'foo', %p3_1: 'p3'
+  $B2: {
+    store %p1_root, 1u
+    store %p1_root, 2u
+    store %p3_1, 3u
+    ret
+  }
+}
+%foo_2 = func(%p1_root_1:ptr<function, u32, read_write>, %p2_1:ptr<function, u32, read_write>):void {  # %foo_2: 'foo', %p1_root_1: 'p1_root', %p2_1: 'p2'
+  $B3: {
+    store %p1_root_1, 1u
+    store %p2_1, 2u
+    store %p1_root_1, 3u
+    ret
+  }
+}
+%foo_3 = func(%p1_1:ptr<function, u32, read_write>, %p2_root:ptr<function, u32, read_write>):void {  # %foo_3: 'foo', %p1_1: 'p1'
+  $B4: {
+    store %p1_1, 1u
+    store %p2_root, 2u
+    store %p2_root, 3u
+    ret
+  }
+}
+%foo_4 = func(%p1_root_2:ptr<function, u32, read_write>):void {  # %foo_4: 'foo', %p1_root_2: 'p1_root'
+  $B5: {
+    store %p1_root_2, 1u
+    store %p1_root_2, 2u
+    store %p1_root_2, 3u
+    ret
+  }
+}
+%main = @fragment func():void {
+  $B6: {
+    %a:ptr<function, u32, read_write> = var
+    %b:ptr<function, u32, read_write> = var
+    %c:ptr<function, array<u32, 4>, read_write> = var
+    %20:ptr<function, u32, read_write> = access %c, 0u
+    %21:void = call %foo, %a, %b, %20
+    %22:ptr<function, u32, read_write> = access %c, 1u
+    %23:void = call %foo_1, %a, %22
+    %24:void = call %foo_2, %a, %b
+    %25:void = call %foo_3, %a, %b
+    %26:void = call %foo_4, %a
+    ret
+  }
+}
+)";
+
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DirectVariableAccessTest_FunctionAS, OnlyAliasedVariants) {
+    auto* foo = b.Function("foo", ty.void_());
+    {
+        auto* p1 = b.FunctionParam("p1", ty.ptr<function, u32>());
+        auto* p2 = b.FunctionParam("p2", ty.ptr<function, u32>());
+        auto* p3 = b.FunctionParam("p3", ty.ptr<function, u32>());
+        foo->SetParams({p1, p2, p3});
+        b.Append(foo->Block(), [&] {
+            b.Store(p1, 1_u);
+            b.Store(p2, 2_u);
+            b.Store(p3, 3_u);
+            b.Return(foo);
+        });
+    }
+
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(main->Block(), [&] {
+        auto* a = b.Var<function, u32>("a");
+        auto* b_var = b.Var<function, u32>("b");
+        auto* c = b.Var<function, array<u32, 4>>("c");
+        // p1 & p2 alias (p3 is non-aliased sub-object access)
+        b.Call(foo, a, a, b.Access(ty.ptr<function, u32>(), c, 1_u));
+        // p1 & p3 alias
+        b.Call(foo, a, b_var, a);
+        // p2 & p3 alias
+        b.Call(foo, a, b_var, b_var);
+        // All 3 alias
+        b.Call(foo, a, a, a);
+        b.Return(main);
+    });
+
+    auto* src = R"(
+%foo = func(%p1:ptr<function, u32, read_write>, %p2:ptr<function, u32, read_write>, %p3:ptr<function, u32, read_write>):void {
+  $B1: {
+    store %p1, 1u
+    store %p2, 2u
+    store %p3, 3u
+    ret
+  }
+}
+%main = @fragment func():void {
+  $B2: {
+    %a:ptr<function, u32, read_write> = var
+    %b:ptr<function, u32, read_write> = var
+    %c:ptr<function, array<u32, 4>, read_write> = var
+    %9:ptr<function, u32, read_write> = access %c, 1u
+    %10:void = call %foo, %a, %a, %9
+    %11:void = call %foo, %a, %b, %a
+    %12:void = call %foo, %a, %b, %b
+    %13:void = call %foo, %a, %a, %a
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%p1_root:ptr<function, u32, read_write>, %p3:ptr<function, u32, read_write>):void {
+  $B1: {
+    store %p1_root, 1u
+    store %p1_root, 2u
+    store %p3, 3u
+    ret
+  }
+}
+%foo_1 = func(%p1_root_1:ptr<function, u32, read_write>, %p2:ptr<function, u32, read_write>):void {  # %foo_1: 'foo', %p1_root_1: 'p1_root'
+  $B2: {
+    store %p1_root_1, 1u
+    store %p2, 2u
+    store %p1_root_1, 3u
+    ret
+  }
+}
+%foo_2 = func(%p1:ptr<function, u32, read_write>, %p2_root:ptr<function, u32, read_write>):void {  # %foo_2: 'foo'
+  $B3: {
+    store %p1, 1u
+    store %p2_root, 2u
+    store %p2_root, 3u
+    ret
+  }
+}
+%foo_3 = func(%p1_root_2:ptr<function, u32, read_write>):void {  # %foo_3: 'foo', %p1_root_2: 'p1_root'
+  $B4: {
+    store %p1_root_2, 1u
+    store %p1_root_2, 2u
+    store %p1_root_2, 3u
+    ret
+  }
+}
+%main = @fragment func():void {
+  $B5: {
+    %a:ptr<function, u32, read_write> = var
+    %b:ptr<function, u32, read_write> = var
+    %c:ptr<function, array<u32, 4>, read_write> = var
+    %16:ptr<function, u32, read_write> = access %c, 1u
+    %17:void = call %foo, %a, %16
+    %18:void = call %foo_1, %a, %b
+    %19:void = call %foo_2, %a, %b
+    %20:void = call %foo_3, %a
+    ret
+  }
+}
+)";
+
+    Run(DirectVariableAccess, DirectVariableAccessConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DirectVariableAccessTest_FunctionAS,
+       AlwaysTransform_AliasedAndNonAliased_DifferentRoots) {
+    auto* ssbo = b.Var("ssbo", ty.ptr(storage, ty.u32()));
+    ssbo->SetBindingPoint(0, 0);
+    mod.root_block->Append(ssbo);
+
+    auto* baz = b.Function("baz", ty.void_());
+    auto* p1 = b.FunctionParam("p1", ty.ptr(storage, ty.u32()));
+    auto* p2 = b.FunctionParam("p2", ty.ptr(function, ty.u32()));
+    auto* p3 = b.FunctionParam("p3", ty.ptr(function, ty.u32()));
+    baz->SetParams({p1, p2, p3});
+    b.Append(baz->Block(), [&] {
+        b.Load(p1);
+        b.Load(p2);
+        b.Load(p3);
+        b.Return(baz);
+    });
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* a = b.Var("a", ty.ptr(function, ty.u32()));
+        b.Call(ty.void_(), baz, ssbo, a, a);
+        b.Return(foo);
+    });
+
+    auto* bar = b.Function("bar", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(bar->Block(), [&] {
+        auto* x = b.Var("x", ty.ptr(function, ty.u32()));
+        auto* y = b.Var("y", ty.ptr(function, ty.u32()));
+        b.Call(ty.void_(), baz, ssbo, x, y);
+        b.Call(ty.void_(), foo);
+        b.Return(bar);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %ssbo:ptr<storage, u32, read_write> = var @binding_point(0, 0)
+}
+
+%baz = func(%p1:ptr<storage, u32, read_write>, %p2:ptr<function, u32, read_write>, %p3:ptr<function, u32, read_write>):void {
+  $B2: {
+    %6:u32 = load %p1
+    %7:u32 = load %p2
+    %8:u32 = load %p3
+    ret
+  }
+}
+%foo = func():void {
+  $B3: {
+    %a:ptr<function, u32, read_write> = var
+    %11:void = call %baz, %ssbo, %a, %a
+    ret
+  }
+}
+%bar = @fragment func():void {
+  $B4: {
+    %x:ptr<function, u32, read_write> = var
+    %y:ptr<function, u32, read_write> = var
+    %15:void = call %baz, %ssbo, %x, %y
+    %16:void = call %foo
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %ssbo:ptr<storage, u32, read_write> = var @binding_point(0, 0)
+}
+
+%baz = func(%p2:ptr<function, u32, read_write>, %p3:ptr<function, u32, read_write>):void {
+  $B2: {
+    %5:u32 = load %ssbo
+    %6:u32 = load %p2
+    %7:u32 = load %p3
+    ret
+  }
+}
+%baz_1 = func(%p2_root:ptr<function, u32, read_write>):void {  # %baz_1: 'baz'
+  $B3: {
+    %10:u32 = load %ssbo
+    %11:u32 = load %p2_root
+    %12:u32 = load %p2_root
+    ret
+  }
+}
+%foo = func():void {
+  $B4: {
+    %a:ptr<function, u32, read_write> = var
+    %15:void = call %baz_1, %a
+    ret
+  }
+}
+%bar = @fragment func():void {
+  $B5: {
+    %x:ptr<function, u32, read_write> = var
+    %y:ptr<function, u32, read_write> = var
+    %19:void = call %baz, %x, %y
+    %20:void = call %foo
+    ret
+  }
+}
+)";
 
     Run(DirectVariableAccess, DirectVariableAccessConfig{});
 
@@ -5850,7 +6634,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureSampler) {
     samp->SetBindingPoint(0, 1);
     b.ir.root_block->Append(samp);
 
-    auto* fn = b.Function("f", ty.void_());
+    auto* fn = b.Function("f", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn->Block(), [&] {
         auto* t = b.Load(tex);
         auto* s = b.Load(samp);
@@ -5862,11 +6646,11 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureSampler) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
-%f = func():void {
+%f = @fragment func():void {
   $B2: {
     %4:texture_2d<f32> = load %tex
     %5:sampler = load %samp
@@ -5895,7 +6679,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, External_LocalTextureSampler) {
     samp->SetBindingPoint(0, 1);
     b.ir.root_block->Append(samp);
 
-    auto* fn = b.Function("f", ty.void_());
+    auto* fn = b.Function("f", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn->Block(), [&] {
         auto* t = b.Load(tex);
         auto* s = b.Load(samp);
@@ -5907,11 +6691,11 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, External_LocalTextureSampler) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_external, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_external, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
-%f = func():void {
+%f = @fragment func():void {
   $B2: {
     %4:texture_external = load %tex
     %5:sampler = load %samp
@@ -5954,7 +6738,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureParamSampler) {
         b.Return(fn);
     });
 
-    auto* fn2 = b.Function("g", ty.void_());
+    auto* fn2 = b.Function("g", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn2->Block(), [&] {
         auto* s2 = b.Load(samp);
         b.Call(ty.void_(), fn, s2);
@@ -5963,8 +6747,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureParamSampler) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func(%s:sampler):void {
@@ -5975,7 +6759,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %9:sampler = load %samp
     %10:void = call %f, %9
@@ -5988,8 +6772,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func():void {
@@ -6001,7 +6785,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %9:void = call %f
     ret
@@ -6035,7 +6819,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, External_LocalTextureParamSampler) 
         b.Return(fn);
     });
 
-    auto* fn2 = b.Function("g", ty.void_());
+    auto* fn2 = b.Function("g", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn2->Block(), [&] {
         auto* s2 = b.Load(samp);
         b.Call(ty.void_(), fn, s2);
@@ -6044,8 +6828,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, External_LocalTextureParamSampler) 
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_external, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_external, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func(%s:sampler):void {
@@ -6056,7 +6840,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %9:sampler = load %samp
     %10:void = call %f, %9
@@ -6069,8 +6853,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_external, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_external, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func(%s:sampler):void {
@@ -6081,7 +6865,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %9:sampler = load %samp
     %10:void = call %f, %9
@@ -6113,7 +6897,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureParamTextureLoa
         b.Return(fn);
     });
 
-    auto* fn2 = b.Function("g", ty.void_());
+    auto* fn2 = b.Function("g", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn2->Block(), [&] {
         auto* t2 = b.Load(tex);
         b.Call(ty.void_(), fn, t2);
@@ -6122,7 +6906,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureParamTextureLoa
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %f = func(%texparam:texture_2d<f32>):void {
@@ -6132,7 +6916,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %7:texture_2d<f32> = load %tex
     %8:void = call %f, %7
@@ -6145,7 +6929,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %f = func():void {
@@ -6156,7 +6940,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %7:void = call %f
     ret
@@ -6183,7 +6967,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, External_LocalTextureParamTextureLo
         b.Return(fn);
     });
 
-    auto* fn2 = b.Function("g", ty.void_());
+    auto* fn2 = b.Function("g", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn2->Block(), [&] {
         auto* t2 = b.Load(tex);
         b.Call(ty.void_(), fn, t2);
@@ -6192,7 +6976,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, External_LocalTextureParamTextureLo
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_external, read> = var undef @binding_point(0, 0)
+  %tex:ptr<handle, texture_external, read> = var @binding_point(0, 0)
 }
 
 %f = func(%texparam:texture_external):void {
@@ -6202,7 +6986,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %7:texture_external = load %tex
     %8:void = call %f, %7
@@ -6215,7 +6999,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_external, read> = var undef @binding_point(0, 0)
+  %tex:ptr<handle, texture_external, read> = var @binding_point(0, 0)
 }
 
 %f = func():void {
@@ -6226,7 +7010,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %7:void = call %f
     ret
@@ -6261,7 +7045,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_ParamTextureLocalSampler) {
         b.Return(fn);
     });
 
-    auto* fn2 = b.Function("g", ty.void_());
+    auto* fn2 = b.Function("g", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn2->Block(), [&] {
         auto* t2 = b.Load(tex);
         b.Call(ty.void_(), fn, t2);
@@ -6270,8 +7054,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_ParamTextureLocalSampler) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func(%t:texture_2d<f32>):void {
@@ -6282,7 +7066,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %9:texture_2d<f32> = load %tex
     %10:void = call %f, %9
@@ -6295,8 +7079,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func():void {
@@ -6308,7 +7092,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %9:void = call %f
     ret
@@ -6343,7 +7127,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, External_ParamTextureLocalSampler) 
         b.Return(fn);
     });
 
-    auto* fn2 = b.Function("g", ty.void_());
+    auto* fn2 = b.Function("g", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn2->Block(), [&] {
         auto* t2 = b.Load(tex);
         b.Call(ty.void_(), fn, t2);
@@ -6352,8 +7136,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, External_ParamTextureLocalSampler) 
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_external, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_external, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func(%t:texture_external):void {
@@ -6364,7 +7148,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %9:texture_external = load %tex
     %10:void = call %f, %9
@@ -6377,8 +7161,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_external, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_external, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func():void {
@@ -6390,7 +7174,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %9:void = call %f
     ret
@@ -6424,7 +7208,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_ParamTextureParamSampler) {
         b.Return(fn);
     });
 
-    auto* fn2 = b.Function("g", ty.void_());
+    auto* fn2 = b.Function("g", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn2->Block(), [&] {
         auto* s2 = b.Load(samp);
         auto* t2 = b.Load(tex);
@@ -6434,8 +7218,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_ParamTextureParamSampler) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func(%t:texture_2d<f32>, %s:sampler):void {
@@ -6445,7 +7229,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %9:sampler = load %samp
     %10:texture_2d<f32> = load %tex
@@ -6459,8 +7243,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func():void {
@@ -6472,7 +7256,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %9:void = call %f
     ret
@@ -6506,7 +7290,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, External_ParamTextureParamSampler) 
         b.Return(fn);
     });
 
-    auto* fn2 = b.Function("g", ty.void_());
+    auto* fn2 = b.Function("g", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn2->Block(), [&] {
         auto* s2 = b.Load(samp);
         auto* t2 = b.Load(tex);
@@ -6516,8 +7300,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, External_ParamTextureParamSampler) 
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_external, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_external, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func(%t:texture_external, %s:sampler):void {
@@ -6527,7 +7311,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %9:sampler = load %samp
     %10:texture_external = load %tex
@@ -6541,8 +7325,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_external, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_external, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func(%s:sampler):void {
@@ -6553,7 +7337,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %9:sampler = load %samp
     %10:void = call %f, %9
@@ -6597,7 +7381,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_MultiFunction) {
         b.Return(fn2);
     });
 
-    auto* fn3 = b.Function("h", ty.void_());
+    auto* fn3 = b.Function("h", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn3->Block(), [&] {
         auto* t3 = b.Load(tex);
         b.Call(ty.void_(), fn2, t3);
@@ -6606,8 +7390,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_MultiFunction) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func(%t:texture_2d<f32>, %s:sampler):void {
@@ -6624,7 +7408,7 @@ $B1: {  # root
     ret
   }
 }
-%h = func():void {
+%h = @fragment func():void {
   $B4: {
     %13:texture_2d<f32> = load %tex
     %14:void = call %g, %13
@@ -6637,8 +7421,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func():void {
@@ -6656,7 +7440,7 @@ $B1: {  # root
     ret
   }
 }
-%h = func():void {
+%h = @fragment func():void {
   $B4: {
     %11:void = call %g
     ret
@@ -6698,7 +7482,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, External_MultiFunction) {
         b.Return(fn2);
     });
 
-    auto* fn3 = b.Function("h", ty.void_());
+    auto* fn3 = b.Function("h", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn3->Block(), [&] {
         auto* t3 = b.Load(tex);
         b.Call(ty.void_(), fn2, t3);
@@ -6707,8 +7491,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, External_MultiFunction) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_external, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_external, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func(%t:texture_external, %s:sampler):void {
@@ -6725,7 +7509,7 @@ $B1: {  # root
     ret
   }
 }
-%h = func():void {
+%h = @fragment func():void {
   $B4: {
     %13:texture_external = load %tex
     %14:void = call %g, %13
@@ -6738,8 +7522,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_external, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_external, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func(%s:sampler):void {
@@ -6757,7 +7541,7 @@ $B1: {  # root
     ret
   }
 }
-%h = func():void {
+%h = @fragment func():void {
   $B4: {
     %12:void = call %g
     ret
@@ -6800,7 +7584,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Disabled_MultiFunction) {
         b.Return(fn2);
     });
 
-    auto* fn3 = b.Function("h", ty.void_());
+    auto* fn3 = b.Function("h", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn3->Block(), [&] {
         auto* t3 = b.Load(tex);
         b.Call(ty.void_(), fn2, t3);
@@ -6809,8 +7593,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Disabled_MultiFunction) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func(%t:texture_2d<f32>, %s:sampler):void {
@@ -6827,7 +7611,7 @@ $B1: {  # root
     ret
   }
 }
-%h = func():void {
+%h = @fragment func():void {
   $B4: {
     %13:texture_2d<f32> = load %tex
     %14:void = call %g, %13
@@ -6870,7 +7654,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_DuplicateParam) {
         b.Return(fn);
     });
 
-    auto* fn2 = b.Function("g", ty.void_());
+    auto* fn2 = b.Function("g", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn2->Block(), [&] {
         auto* t3 = b.Load(tex);
         auto* t4 = b.Load(tex);
@@ -6880,8 +7664,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_DuplicateParam) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func(%t1:texture_2d<f32>, %t2:texture_2d<f32>):void {
@@ -6894,7 +7678,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %12:texture_2d<f32> = load %tex
     %13:texture_2d<f32> = load %tex
@@ -6908,8 +7692,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %tex:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %f = func():void {
@@ -6924,7 +7708,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %12:void = call %f
     ret
@@ -6956,7 +7740,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, External_DuplicateParam) {
         b.Return(fn);
     });
 
-    auto* fn2 = b.Function("g", ty.void_());
+    auto* fn2 = b.Function("g", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn2->Block(), [&] {
         auto* t3 = b.Load(tex);
         auto* t4 = b.Load(tex);
@@ -6966,7 +7750,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, External_DuplicateParam) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_external, read> = var undef @binding_point(0, 0)
+  %tex:ptr<handle, texture_external, read> = var @binding_point(0, 0)
 }
 
 %f = func(%t1:texture_external, %t2:texture_external):void {
@@ -6978,7 +7762,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %10:texture_external = load %tex
     %11:texture_external = load %tex
@@ -6992,7 +7776,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex:ptr<handle, texture_external, read> = var undef @binding_point(0, 0)
+  %tex:ptr<handle, texture_external, read> = var @binding_point(0, 0)
 }
 
 %f = func():void {
@@ -7006,7 +7790,7 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %10:void = call %f
     ret
@@ -7043,14 +7827,16 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_Fork) {
         b.Return(fn);
     });
 
-    auto* fn2 = b.Function("g", ty.void_());
+    auto* fn2 = b.Function("g", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* fn3 = b.Function("h", ty.void_());
+
     b.Append(fn2->Block(), [&] {
         auto* t2 = b.Load(tex1);
         b.Call(ty.void_(), fn, t2);
+        b.Call(ty.void_(), fn3);
         b.Return(fn2);
     });
 
-    auto* fn3 = b.Function("h", ty.void_());
     b.Append(fn3->Block(), [&] {
         auto* t2 = b.Load(tex2);
         b.Call(ty.void_(), fn, t2);
@@ -7059,9 +7845,9 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_Fork) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %tex2:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 1)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 2)
+  %tex1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %tex2:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 1)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 2)
 }
 
 %f = func(%t:texture_2d<f32>):void {
@@ -7072,17 +7858,18 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %10:texture_2d<f32> = load %tex1
     %11:void = call %f, %10
+    %12:void = call %h
     ret
   }
 }
 %h = func():void {
   $B4: {
-    %13:texture_2d<f32> = load %tex2
-    %14:void = call %f, %13
+    %14:texture_2d<f32> = load %tex2
+    %15:void = call %f, %14
     ret
   }
 }
@@ -7092,9 +7879,9 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %tex2:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 1)
-  %samp:ptr<handle, sampler, read> = var undef @binding_point(0, 2)
+  %tex1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %tex2:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 1)
+  %samp:ptr<handle, sampler, read> = var @binding_point(0, 2)
 }
 
 %f = func():void {
@@ -7115,15 +7902,16 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B4: {
     %15:void = call %f
+    %16:void = call %h
     ret
   }
 }
 %h = func():void {
   $B5: {
-    %17:void = call %f_1
+    %18:void = call %f_1
     ret
   }
 }
@@ -7152,14 +7940,16 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, External_Fork) {
         b.Return(fn);
     });
 
-    auto* fn2 = b.Function("g", ty.void_());
+    auto* fn2 = b.Function("g", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* fn3 = b.Function("h", ty.void_());
+
     b.Append(fn2->Block(), [&] {
         auto* t2 = b.Load(tex1);
         b.Call(ty.void_(), fn, t2);
+        b.Call(ty.void_(), fn3);
         b.Return(fn2);
     });
 
-    auto* fn3 = b.Function("h", ty.void_());
     b.Append(fn3->Block(), [&] {
         auto* t2 = b.Load(tex2);
         b.Call(ty.void_(), fn, t2);
@@ -7168,8 +7958,8 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, External_Fork) {
 
     auto* src = R"(
 $B1: {  # root
-  %tex1:ptr<handle, texture_external, read> = var undef @binding_point(0, 0)
-  %tex2:ptr<handle, texture_external, read> = var undef @binding_point(0, 1)
+  %tex1:ptr<handle, texture_external, read> = var @binding_point(0, 0)
+  %tex2:ptr<handle, texture_external, read> = var @binding_point(0, 1)
 }
 
 %f = func(%t:texture_external):void {
@@ -7179,17 +7969,18 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B3: {
     %8:texture_external = load %tex1
     %9:void = call %f, %8
+    %10:void = call %h
     ret
   }
 }
 %h = func():void {
   $B4: {
-    %11:texture_external = load %tex2
-    %12:void = call %f, %11
+    %12:texture_external = load %tex2
+    %13:void = call %f, %12
     ret
   }
 }
@@ -7199,8 +7990,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %tex1:ptr<handle, texture_external, read> = var undef @binding_point(0, 0)
-  %tex2:ptr<handle, texture_external, read> = var undef @binding_point(0, 1)
+  %tex1:ptr<handle, texture_external, read> = var @binding_point(0, 0)
+  %tex2:ptr<handle, texture_external, read> = var @binding_point(0, 1)
 }
 
 %f = func():void {
@@ -7219,15 +8010,16 @@ $B1: {  # root
     ret
   }
 }
-%g = func():void {
+%g = @fragment func():void {
   $B4: {
     %12:void = call %f
+    %13:void = call %h
     ret
   }
 }
 %h = func():void {
   $B5: {
-    %14:void = call %f_1
+    %15:void = call %f_1
     ret
   }
 }
@@ -7263,7 +8055,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_TextureBindingArrayParam) {
 
     auto* src = R"(
 $B1: {  # root
-  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var @binding_point(0, 0)
 }
 
 %f = func(%p:binding_array<texture_2d<f32>, 3>):void {
@@ -7286,7 +8078,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var @binding_point(0, 0)
 }
 
 %f = func():void {
@@ -7337,7 +8129,7 @@ TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_TextureFromBindingArrayPara
 
     auto* src = R"(
 $B1: {  # root
-  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var @binding_point(0, 0)
 }
 
 %f = func(%p:texture_2d<f32>):void {
@@ -7361,7 +8153,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+  %ts:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var @binding_point(0, 0)
 }
 
 %f = func(%p_indices:array<u32, 1>):void {
@@ -7413,7 +8205,7 @@ TEST_F(IR_DirectVariableAccessTest_BuiltinFn, ArrayLength) {
                  b.Return(fn_len, b.Call(ty.u32(), core::BuiltinFn::kArrayLength, fn_len_p));
              });
 
-    auto* fn_f = b.Function("b", ty.void_());
+    auto* fn_f = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_f->Block(), [&] {
         b.Call(fn_len, S);
         b.Return(fn_f);
@@ -7421,7 +8213,7 @@ TEST_F(IR_DirectVariableAccessTest_BuiltinFn, ArrayLength) {
 
     auto* src = R"(
 $B1: {  # root
-  %S:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+  %S:ptr<storage, array<f32>, read_write> = var @binding_point(0, 0)
 }
 
 %len = func(%p:ptr<storage, array<f32>, read_write>):u32 {
@@ -7430,7 +8222,7 @@ $B1: {  # root
     ret %4
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %6:u32 = call %len, %S
     ret
@@ -7442,7 +8234,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %S:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+  %S:ptr<storage, array<f32>, read_write> = var @binding_point(0, 0)
 }
 
 %len = func():u32 {
@@ -7451,7 +8243,7 @@ $B1: {  # root
     ret %3
   }
 }
-%b = func():void {
+%b = @fragment func():void {
   $B3: {
     %5:u32 = call %len
     ret
@@ -7479,7 +8271,7 @@ TEST_F(IR_DirectVariableAccessTest_BuiltinFn, AtomicLoad) {
                  b.Return(fn_load, b.Call(ty.i32(), core::BuiltinFn::kAtomicLoad, fn_load_p));
              });
 
-    auto* fn_f = b.Function("b", ty.void_());
+    auto* fn_f = b.ComputeFunction("b");
     b.Append(fn_f->Block(), [&] {
         b.Call(fn_load, W);
         b.Return(fn_f);
@@ -7487,7 +8279,7 @@ TEST_F(IR_DirectVariableAccessTest_BuiltinFn, AtomicLoad) {
 
     auto* src = R"(
 $B1: {  # root
-  %W:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %W:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %load = func(%p:ptr<workgroup, atomic<i32>, read_write>):i32 {
@@ -7496,7 +8288,7 @@ $B1: {  # root
     ret %4
   }
 }
-%b = func():void {
+%b = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
     %6:i32 = call %load, %W
     ret
@@ -7508,7 +8300,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %W:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %W:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %load = func():i32 {
@@ -7517,7 +8309,7 @@ $B1: {  # root
     ret %3
   }
 }
-%b = func():void {
+%b = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
     %5:i32 = call %load
     ret
@@ -7597,7 +8389,7 @@ TEST_F(IR_DirectVariableAccessTest_Complex, Param_ptr_mixed_vec4i32_ViaMultiple)
     fn_w->SetParams({fn_w_p});
     b.Append(fn_w->Block(), [&] { b.Return(fn_w, b.Load(fn_w_p)); });
 
-    auto* fn_b = b.Function("b", ty.void_());
+    auto* fn_b = b.ComputeFunction("b");
     b.Append(fn_b->Block(), [&] {
         auto* I = b.Let("I", 3_i);
         auto* J = b.Let("J", 4_i);
@@ -7676,18 +8468,18 @@ str = struct @align(16) {
 }
 
 $B1: {  # root
-  %U:ptr<uniform, vec4<i32>, read> = var undef @binding_point(0, 0)
-  %U_str:ptr<uniform, str, read> = var undef @binding_point(0, 1)
-  %U_arr:ptr<uniform, array<vec4<i32>, 8>, read> = var undef @binding_point(0, 2)
-  %U_arr_arr:ptr<uniform, array<array<vec4<i32>, 8>, 4>, read> = var undef @binding_point(0, 3)
-  %S:ptr<storage, vec4<i32>, read> = var undef @binding_point(1, 0)
-  %S_str:ptr<storage, str, read> = var undef @binding_point(1, 1)
-  %S_arr:ptr<storage, array<vec4<i32>, 8>, read> = var undef @binding_point(1, 2)
-  %S_arr_arr:ptr<storage, array<array<vec4<i32>, 8>, 4>, read> = var undef @binding_point(1, 3)
-  %W:ptr<workgroup, vec4<i32>, read_write> = var undef
-  %W_str:ptr<workgroup, str, read_write> = var undef
-  %W_arr:ptr<workgroup, array<vec4<i32>, 8>, read_write> = var undef
-  %W_arr_arr:ptr<workgroup, array<array<vec4<i32>, 8>, 4>, read_write> = var undef
+  %U:ptr<uniform, vec4<i32>, read> = var @binding_point(0, 0)
+  %U_str:ptr<uniform, str, read> = var @binding_point(0, 1)
+  %U_arr:ptr<uniform, array<vec4<i32>, 8>, read> = var @binding_point(0, 2)
+  %U_arr_arr:ptr<uniform, array<array<vec4<i32>, 8>, 4>, read> = var @binding_point(0, 3)
+  %S:ptr<storage, vec4<i32>, read> = var @binding_point(1, 0)
+  %S_str:ptr<storage, str, read> = var @binding_point(1, 1)
+  %S_arr:ptr<storage, array<vec4<i32>, 8>, read> = var @binding_point(1, 2)
+  %S_arr_arr:ptr<storage, array<array<vec4<i32>, 8>, 4>, read> = var @binding_point(1, 3)
+  %W:ptr<workgroup, vec4<i32>, read_write> = var
+  %W_str:ptr<workgroup, str, read_write> = var
+  %W_arr:ptr<workgroup, array<vec4<i32>, 8>, read_write> = var
+  %W_arr_arr:ptr<workgroup, array<array<vec4<i32>, 8>, 4>, read_write> = var
 }
 
 %fn_u = func(%p:ptr<uniform, vec4<i32>, read>):vec4<i32> {
@@ -7708,7 +8500,7 @@ $B1: {  # root
     ret %21
   }
 }
-%b = func():void {
+%b = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B5: {
     %I:i32 = let 3i
     %J:i32 = let 4i
@@ -7776,18 +8568,18 @@ str = struct @align(16) {
 }
 
 $B1: {  # root
-  %U:ptr<uniform, vec4<i32>, read> = var undef @binding_point(0, 0)
-  %U_str:ptr<uniform, str, read> = var undef @binding_point(0, 1)
-  %U_arr:ptr<uniform, array<vec4<i32>, 8>, read> = var undef @binding_point(0, 2)
-  %U_arr_arr:ptr<uniform, array<array<vec4<i32>, 8>, 4>, read> = var undef @binding_point(0, 3)
-  %S:ptr<storage, vec4<i32>, read> = var undef @binding_point(1, 0)
-  %S_str:ptr<storage, str, read> = var undef @binding_point(1, 1)
-  %S_arr:ptr<storage, array<vec4<i32>, 8>, read> = var undef @binding_point(1, 2)
-  %S_arr_arr:ptr<storage, array<array<vec4<i32>, 8>, 4>, read> = var undef @binding_point(1, 3)
-  %W:ptr<workgroup, vec4<i32>, read_write> = var undef
-  %W_str:ptr<workgroup, str, read_write> = var undef
-  %W_arr:ptr<workgroup, array<vec4<i32>, 8>, read_write> = var undef
-  %W_arr_arr:ptr<workgroup, array<array<vec4<i32>, 8>, 4>, read_write> = var undef
+  %U:ptr<uniform, vec4<i32>, read> = var @binding_point(0, 0)
+  %U_str:ptr<uniform, str, read> = var @binding_point(0, 1)
+  %U_arr:ptr<uniform, array<vec4<i32>, 8>, read> = var @binding_point(0, 2)
+  %U_arr_arr:ptr<uniform, array<array<vec4<i32>, 8>, 4>, read> = var @binding_point(0, 3)
+  %S:ptr<storage, vec4<i32>, read> = var @binding_point(1, 0)
+  %S_str:ptr<storage, str, read> = var @binding_point(1, 1)
+  %S_arr:ptr<storage, array<vec4<i32>, 8>, read> = var @binding_point(1, 2)
+  %S_arr_arr:ptr<storage, array<array<vec4<i32>, 8>, 4>, read> = var @binding_point(1, 3)
+  %W:ptr<workgroup, vec4<i32>, read_write> = var
+  %W_str:ptr<workgroup, str, read_write> = var
+  %W_arr:ptr<workgroup, array<vec4<i32>, 8>, read_write> = var
+  %W_arr_arr:ptr<workgroup, array<array<vec4<i32>, 8>, 4>, read_write> = var
 }
 
 %fn_u = func():vec4<i32> {
@@ -7880,7 +8672,7 @@ $B1: {  # root
     ret %60
   }
 }
-%b = func():void {
+%b = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B14: {
     %I:i32 = let 3i
     %J:i32 = let 4i
@@ -7979,7 +8771,7 @@ TEST_F(IR_DirectVariableAccessTest_Complex, Indexing) {
         b.Return(fn_b, load_3);
     });
 
-    auto* fn_c = b.Function("c", ty.void_());
+    auto* fn_c = b.Function("c", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_c->Block(), [&] {
         auto* forty_two = b.Let("forty_two", 42_i);
         auto* access =
@@ -7991,7 +8783,7 @@ TEST_F(IR_DirectVariableAccessTest_Complex, Indexing) {
 
     auto* src = R"(
 $B1: {  # root
-  %S:ptr<storage, array<array<array<array<i32, 9>, 9>, 9>, 50>, read> = var undef @binding_point(0, 0)
+  %S:ptr<storage, array<array<array<array<i32, 9>, 9>, 9>, 50>, read> = var @binding_point(0, 0)
 }
 
 %a = func(%i:i32):i32 {
@@ -8017,7 +8809,7 @@ $B1: {  # root
     ret %18
   }
 }
-%c = func():void {
+%c = @fragment func():void {
   $B4: {
     %forty_two:i32 = let 42i
     %21:ptr<storage, array<array<array<i32, 9>, 9>, 9>, read> = access %S, %forty_two
@@ -8031,7 +8823,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %S:ptr<storage, array<array<array<array<i32, 9>, 9>, 9>, 50>, read> = var undef @binding_point(0, 0)
+  %S:ptr<storage, array<array<array<array<i32, 9>, 9>, 9>, 50>, read> = var @binding_point(0, 0)
 }
 
 %a = func(%i:i32):i32 {
@@ -8059,7 +8851,7 @@ $B1: {  # root
     ret %20
   }
 }
-%c = func():void {
+%c = @fragment func():void {
   $B4: {
     %forty_two:i32 = let 42i
     %23:u32 = convert %forty_two
@@ -8111,7 +8903,7 @@ TEST_F(IR_DirectVariableAccessTest_Complex, IndexingInPtrCall) {
         b.Return(fn_b, call_3);
     });
 
-    auto* fn_c = b.Function("c", ty.void_());
+    auto* fn_c = b.Function("c", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_c->Block(), [&] {
         auto* forty_two = b.Let("forty_two", 42_i);
         auto* access =
@@ -8123,7 +8915,7 @@ TEST_F(IR_DirectVariableAccessTest_Complex, IndexingInPtrCall) {
 
     auto* src = R"(
 $B1: {  # root
-  %S:ptr<storage, array<array<array<array<i32, 9>, 9>, 9>, 50>, read> = var undef @binding_point(0, 0)
+  %S:ptr<storage, array<array<array<array<i32, 9>, 9>, 9>, 50>, read> = var @binding_point(0, 0)
 }
 
 %a = func(%pre:i32, %i:ptr<storage, i32, read>, %post:i32):i32 {
@@ -8145,7 +8937,7 @@ $B1: {  # root
     ret %16
   }
 }
-%c = func():void {
+%c = @fragment func():void {
   $B4: {
     %forty_two:i32 = let 42i
     %19:ptr<storage, array<array<array<i32, 9>, 9>, 9>, read> = access %S, %forty_two
@@ -8159,7 +8951,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %S:ptr<storage, array<array<array<array<i32, 9>, 9>, 9>, 50>, read> = var undef @binding_point(0, 0)
+  %S:ptr<storage, array<array<array<array<i32, 9>, 9>, 9>, 50>, read> = var @binding_point(0, 0)
 }
 
 %a = func(%pre:i32, %i_indices:array<u32, 4>, %post:i32):i32 {
@@ -8190,7 +8982,7 @@ $B1: {  # root
     ret %25
   }
 }
-%c = func():void {
+%c = @fragment func():void {
   $B4: {
     %forty_two:i32 = let 42i
     %28:u32 = convert %forty_two
@@ -8214,7 +9006,7 @@ TEST_F(IR_DirectVariableAccessTest_Complex, IndexingDualPointers) {
                  S = b.Var<storage, array<array<array<i32, 9>, 9>, 50>, read>("S");
                  S->SetBindingPoint(0, 0);
                  U = b.Var<uniform, array<array<array<vec4<i32>, 9>, 9>, 50>, read>("U");
-                 U->SetBindingPoint(0, 0);
+                 U->SetBindingPoint(0, 1);
              });
 
     auto* fn_a = b.Function("a", ty.i32());
@@ -8239,7 +9031,7 @@ TEST_F(IR_DirectVariableAccessTest_Complex, IndexingDualPointers) {
         b.Return(fn_b, b.Load(access_2));
     });
 
-    auto* fn_c = b.Function("c", ty.void_());
+    auto* fn_c = b.Function("c", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn_c->Block(), [&] {
         auto* forty_two = b.Let("forty_two", 42_i);
         auto* twenty_four = b.Let("twenty_four", 24_i);
@@ -8253,8 +9045,8 @@ TEST_F(IR_DirectVariableAccessTest_Complex, IndexingDualPointers) {
 
     auto* src = R"(
 $B1: {  # root
-  %S:ptr<storage, array<array<array<i32, 9>, 9>, 50>, read> = var undef @binding_point(0, 0)
-  %U:ptr<uniform, array<array<array<vec4<i32>, 9>, 9>, 50>, read> = var undef @binding_point(0, 0)
+  %S:ptr<storage, array<array<array<i32, 9>, 9>, 50>, read> = var @binding_point(0, 0)
+  %U:ptr<uniform, array<array<array<vec4<i32>, 9>, 9>, 50>, read> = var @binding_point(0, 1)
 }
 
 %a = func(%i:i32):i32 {
@@ -8276,7 +9068,7 @@ $B1: {  # root
     ret %16
   }
 }
-%c = func():void {
+%c = @fragment func():void {
   $B4: {
     %forty_two:i32 = let 42i
     %twenty_four:i32 = let 24i
@@ -8292,8 +9084,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %S:ptr<storage, array<array<array<i32, 9>, 9>, 50>, read> = var undef @binding_point(0, 0)
-  %U:ptr<uniform, array<array<array<vec4<i32>, 9>, 9>, 50>, read> = var undef @binding_point(0, 0)
+  %S:ptr<storage, array<array<array<i32, 9>, 9>, 50>, read> = var @binding_point(0, 0)
+  %U:ptr<uniform, array<array<array<vec4<i32>, 9>, 9>, 50>, read> = var @binding_point(0, 1)
 }
 
 %a = func(%i:i32):i32 {
@@ -8319,7 +9111,7 @@ $B1: {  # root
     ret %20
   }
 }
-%c = func():void {
+%c = @fragment func():void {
   $B4: {
     %forty_two:i32 = let 42i
     %twenty_four:i32 = let 24i
@@ -8362,7 +9154,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Simple_BufferLength) {
         b.Return(foo);
     });
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(main->Block(), [&] {
         b.Call(ty.void_(), foo, v);
         b.Return(main);
@@ -8370,7 +9162,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Simple_BufferLength) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%p:ptr<storage, buffer, read_write>):void {
@@ -8379,7 +9171,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B3: {
     %6:void = call %foo, %v
     ret
@@ -8391,7 +9183,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -8400,7 +9192,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B3: {
     %5:void = call %foo
     ret
@@ -8428,7 +9220,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Simple_BufferView) {
         b.Return(foo);
     });
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(main->Block(), [&] {
         b.Call(ty.void_(), foo, v, 16_u);
         b.Return(main);
@@ -8436,7 +9228,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Simple_BufferView) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%p:ptr<storage, buffer, read_write>, %offset:u32):void {
@@ -8445,7 +9237,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B3: {
     %7:void = call %foo, %v, 16u
     ret
@@ -8457,7 +9249,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32):void {
@@ -8466,7 +9258,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B3: {
     %6:void = call %foo, 16u
     ret
@@ -8495,7 +9287,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Simple_BufferArrayView) {
         b.Return(foo);
     });
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(main->Block(), [&] {
         b.Call(ty.void_(), foo, v, 16_u, 64_u);
         b.Return(main);
@@ -8503,7 +9295,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Simple_BufferArrayView) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%p:ptr<storage, buffer, read_write>, %offset:u32, %size:u32):void {
@@ -8512,7 +9304,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B3: {
     %8:void = call %foo, %v, 16u, 64u
     ret
@@ -8524,7 +9316,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32, %size:u32):void {
@@ -8533,7 +9325,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B3: {
     %7:void = call %foo, 16u, 64u
     ret
@@ -8570,9 +9362,15 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, BufferView_Chain) {
         b.Return(foo);
     });
 
+    auto* main = b.ComputeFunction("main");
+    b.Append(main->Block(), [&] {
+        b.Call(ty.void_(), foo, 1_u);
+        b.Return(main);
+    });
+
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<workgroup, buffer<128>, read_write> = var undef
+  %v:ptr<workgroup, buffer<128>, read_write> = var
 }
 
 %bar = func(%p:ptr<workgroup, array<vec4<u32>, 4>, read_write>):void {
@@ -8589,13 +9387,19 @@ $B1: {  # root
     ret
   }
 }
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B4: {
+    %11:void = call %foo, 1u
+    ret
+  }
+}
 )";
 
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, buffer<128>, read_write> = var undef
+  %v:ptr<workgroup, buffer<128>, read_write> = var
 }
 
 %bar = func(%p_view_args:array<u32, 1>):void {
@@ -8611,6 +9415,12 @@ $B1: {  # root
   $B3: {
     %10:array<u32, 1> = construct %offset
     %11:void = call %bar, %10
+    ret
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B4: {
+    %13:void = call %foo, 1u
     ret
   }
 }
@@ -8646,9 +9456,15 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, BufferView_Chain_WithLength) {
         b.Return(foo);
     });
 
+    auto* main = b.ComputeFunction("main");
+    b.Append(main->Block(), [&] {
+        b.Call(ty.void_(), foo, 1_u, 2_u);
+        b.Return(main);
+    });
+
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<workgroup, buffer<128>, read_write> = var undef
+  %v:ptr<workgroup, buffer<128>, read_write> = var
 }
 
 %bar = func(%p:ptr<workgroup, array<vec4<u32>, 4>, read_write>):void {
@@ -8665,13 +9481,19 @@ $B1: {  # root
     ret
   }
 }
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B4: {
+    %12:void = call %foo, 1u, 2u
+    ret
+  }
+}
 )";
 
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, buffer<128>, read_write> = var undef
+  %v:ptr<workgroup, buffer<128>, read_write> = var
 }
 
 %bar = func(%p_view_args:array<u32, 2>):void {
@@ -8688,6 +9510,12 @@ $B1: {  # root
   $B3: {
     %12:array<u32, 2> = construct %offset, %length
     %13:void = call %bar, %12
+    ret
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B4: {
+    %15:void = call %foo, 1u, 2u
     ret
   }
 }
@@ -8723,9 +9551,15 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, BufferArrayView_Chain) {
         b.Return(foo);
     });
 
+    auto* main = b.ComputeFunction("main");
+    b.Append(main->Block(), [&] {
+        b.Call(ty.void_(), foo, 1_u, 2_u);
+        b.Return(main);
+    });
+
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<workgroup, buffer<128>, read_write> = var undef
+  %v:ptr<workgroup, buffer<128>, read_write> = var
 }
 
 %bar = func(%p:ptr<workgroup, array<vec4<u32>>, read_write>):void {
@@ -8742,13 +9576,19 @@ $B1: {  # root
     ret
   }
 }
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B4: {
+    %12:void = call %foo, 1u, 2u
+    ret
+  }
+}
 )";
 
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, buffer<128>, read_write> = var undef
+  %v:ptr<workgroup, buffer<128>, read_write> = var
 }
 
 %bar = func(%p_view_args:array<u32, 2>):void {
@@ -8765,6 +9605,12 @@ $B1: {  # root
   $B3: {
     %12:array<u32, 2> = construct %offset, %size
     %13:void = call %bar, %12
+    ret
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B4: {
+    %15:void = call %foo, 1u, 2u
     ret
   }
 }
@@ -8801,9 +9647,15 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, BufferArrayView_Chain_WithLength)
         b.Return(foo);
     });
 
+    auto* main = b.ComputeFunction("main");
+    b.Append(main->Block(), [&] {
+        b.Call(ty.void_(), foo, 1_u, 2_u, 3_u);
+        b.Return(main);
+    });
+
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<workgroup, buffer<128>, read_write> = var undef
+  %v:ptr<workgroup, buffer<128>, read_write> = var
 }
 
 %bar = func(%p:ptr<workgroup, array<vec4<u32>>, read_write>):void {
@@ -8820,13 +9672,19 @@ $B1: {  # root
     ret
   }
 }
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B4: {
+    %13:void = call %foo, 1u, 2u, 3u
+    ret
+  }
+}
 )";
 
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, buffer<128>, read_write> = var undef
+  %v:ptr<workgroup, buffer<128>, read_write> = var
 }
 
 %bar = func(%p_view_args:array<u32, 3>):void {
@@ -8844,6 +9702,12 @@ $B1: {  # root
   $B3: {
     %14:array<u32, 3> = construct %offset, %size, %length
     %15:void = call %bar, %14
+    ret
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B4: {
+    %17:void = call %foo, 1u, 2u, 3u
     ret
   }
 }
@@ -8889,9 +9753,15 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, BufferView_MultiChain) {
         b.Return(foo);
     });
 
+    auto* main = b.ComputeFunction("main");
+    b.Append(main->Block(), [&] {
+        b.Call(ty.void_(), foo, 1_u);
+        b.Return(main);
+    });
+
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<workgroup, buffer<128>, read_write> = var undef
+  %v:ptr<workgroup, buffer<128>, read_write> = var
 }
 
 %bar = func(%p:ptr<workgroup, array<vec4<u32>, 4>, read_write>):void {
@@ -8916,13 +9786,19 @@ $B1: {  # root
     ret
   }
 }
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B5: {
+    %16:void = call %foo, 1u
+    ret
+  }
+}
 )";
 
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, buffer<128>, read_write> = var undef
+  %v:ptr<workgroup, buffer<128>, read_write> = var
 }
 
 %bar = func(%p_view_args:array<u32, 1>, %p_indices:array<u32, 1>):void {
@@ -8950,6 +9826,12 @@ $B1: {  # root
   $B4: {
     %20:array<u32, 1> = construct %offset
     %21:void = call %foobar, %20
+    ret
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B5: {
+    %23:void = call %foo, 1u
     ret
   }
 }
@@ -8996,9 +9878,15 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, BufferArrayView_MultiChain) {
         b.Return(foo);
     });
 
+    auto* main = b.ComputeFunction("main");
+    b.Append(main->Block(), [&] {
+        b.Call(ty.void_(), foo, 1_u, 2_u);
+        b.Return(main);
+    });
+
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<workgroup, buffer<128>, read_write> = var undef
+  %v:ptr<workgroup, buffer<128>, read_write> = var
 }
 
 %bar = func(%p:ptr<workgroup, array<vec4<u32>, 4>, read_write>):void {
@@ -9023,13 +9911,19 @@ $B1: {  # root
     ret
   }
 }
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B5: {
+    %17:void = call %foo, 1u, 2u
+    ret
+  }
+}
 )";
 
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, buffer<128>, read_write> = var undef
+  %v:ptr<workgroup, buffer<128>, read_write> = var
 }
 
 %bar = func(%p_view_args:array<u32, 2>, %p_indices:array<u32, 1>):void {
@@ -9062,6 +9956,12 @@ $B1: {  # root
     ret
   }
 }
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B5: {
+    %26:void = call %foo, 1u, 2u
+    ret
+  }
+}
 )";
 
     Run(DirectVariableAccess, DirectVariableAccessConfig{});
@@ -9081,7 +9981,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Disambiguate_Fn) {
     bar->SetParams({p});
     b.Append(bar->Block(), [&] { b.Return(bar); });
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(main->Block(), [&] {
         auto* offset = b.Let("offset", 0_u);
         auto* v1 = b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferView,
@@ -9098,7 +9998,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Disambiguate_Fn) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%p:ptr<storage, array<u32>, read_write>):void {
@@ -9106,7 +10006,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B3: {
     %offset:u32 = let 0u
     %6:ptr<storage, array<u32>, read_write> = bufferView<array<u32>> %v, %offset
@@ -9123,7 +10023,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%p_view_args:array<u32, 1>):void {
@@ -9141,7 +10041,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B4: {
     %offset:u32 = let 0u
     %13:array<u32, 1> = construct %offset
@@ -9171,7 +10071,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Disambiguate_Length) {
     bar->SetParams({p});
     b.Append(bar->Block(), [&] { b.Return(bar); });
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(main->Block(), [&] {
         auto* offset = b.Let("offset", 0_u);
         auto* v1 = b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferView,
@@ -9188,7 +10088,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Disambiguate_Length) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%p:ptr<storage, array<u32>, read_write>):void {
@@ -9196,7 +10096,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B3: {
     %offset:u32 = let 0u
     %6:ptr<storage, array<u32>, read_write> = bufferView<array<u32>> %v, %offset
@@ -9213,7 +10113,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%p_view_args:array<u32, 1>):void {
@@ -9231,7 +10131,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B4: {
     %offset:u32 = let 0u
     %13:array<u32, 1> = construct %offset
@@ -9272,7 +10172,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, MultiLevelPropagation) {
         b.Return(foo);
     });
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(main->Block(), [&] {
         auto* offset = b.Let("offset", 0_u);
         auto* v1 = b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferView,
@@ -9283,7 +10183,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, MultiLevelPropagation) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%p:ptr<storage, array<u32>, read_write>):void {
@@ -9298,7 +10198,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B4: {
     %offset:u32 = let 0u
     %10:ptr<storage, array<u32>, read_write> = bufferView<array<u32>> %v, %offset
@@ -9312,7 +10212,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %bar = func(%p_view_args:array<u32, 1>):void {
@@ -9331,7 +10231,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B4: {
     %offset:u32 = let 0u
     %14:array<u32, 1> = construct %offset
@@ -9358,7 +10258,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, LetDeclaration) {
     foo->SetParams({p});
     b.Append(foo->Block(), [&] { b.Return(foo); });
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(main->Block(), [&] {
         auto* offset = b.Let("offset", 0_u);
         auto* v1 = b.CallExplicit(ty.ptr(storage, arr_ty), BuiltinFn::kBufferView,
@@ -9370,7 +10270,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, LetDeclaration) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%p:ptr<storage, array<u32>, read_write>):void {
@@ -9378,7 +10278,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B3: {
     %offset:u32 = let 0u
     %6:ptr<storage, array<u32>, read_write> = bufferView<array<u32>> %v, %offset
@@ -9393,7 +10293,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%p_view_args:array<u32, 1>):void {
@@ -9403,7 +10303,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B3: {
     %offset:u32 = let 0u
     %8:array<u32, 1> = construct %offset
@@ -9430,8 +10330,9 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, DynamicArgs) {
     foo->SetParams({p});
     b.Append(foo->Block(), [&] { b.Return(foo); });
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     auto* offset = b.FunctionParam("offset", ty.u32());
+    offset->SetBuiltin(BuiltinValue::kSampleIndex);
     main->SetParams({offset});
     b.Append(main->Block(), [&] {
         auto* dyn_offset = b.Add(offset, 4_u);
@@ -9443,7 +10344,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, DynamicArgs) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%p:ptr<storage, array<u32>, read_write>):void {
@@ -9451,7 +10352,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func(%offset:u32):void {
+%main = @fragment func(%offset:u32 [@sample_index]):void {
   $B3: {
     %6:u32 = add %offset, 4u
     %7:ptr<storage, array<u32>, read_write> = bufferView<array<u32>> %v, %6
@@ -9465,7 +10366,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%p_view_args:array<u32, 1>):void {
@@ -9475,7 +10376,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func(%offset:u32):void {
+%main = @fragment func(%offset:u32 [@sample_index]):void {
   $B3: {
     %8:u32 = add %offset, 4u
     %9:array<u32, 1> = construct %8
@@ -9502,7 +10403,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Uniform) {
     foo->SetParams({p});
     b.Append(foo->Block(), [&] { b.Return(foo); });
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(main->Block(), [&] {
         auto* offset = b.Let("offset", 0_u);
         auto* v1 = b.CallExplicit(ty.ptr(uniform, arr_ty), BuiltinFn::kBufferView,
@@ -9513,7 +10414,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Uniform) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<uniform, buffer<128>, read> = var undef @binding_point(0, 0)
+  %v:ptr<uniform, buffer<128>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%p:ptr<uniform, array<u32, 4>, read>):void {
@@ -9521,7 +10422,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B3: {
     %offset:u32 = let 0u
     %6:ptr<uniform, array<u32, 4>, read> = bufferView<array<u32, 4>> %v, %offset
@@ -9535,7 +10436,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<uniform, buffer<128>, read> = var undef @binding_point(0, 0)
+  %v:ptr<uniform, buffer<128>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%p_view_args:array<u32, 1>):void {
@@ -9545,7 +10446,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B3: {
     %offset:u32 = let 0u
     %8:array<u32, 1> = construct %offset
@@ -9579,7 +10480,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, Struct) {
         b.Return(foo);
     });
 
-    auto* main = b.Function("main", ty.void_());
+    auto* main = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(main->Block(), [&] {
         auto* offset = b.Let("offset", 0_u);
         auto* v1 = b.CallExplicit(ty.ptr(storage, str_), BuiltinFn::kBufferView,
@@ -9594,7 +10495,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%p:ptr<storage, S, read_write>):void {
@@ -9604,7 +10505,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B3: {
     %offset:u32 = let 0u
     %8:ptr<storage, S, read_write> = bufferView<S> %v, %offset
@@ -9622,7 +10523,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%p_view_args:array<u32, 1>):void {
@@ -9634,7 +10535,7 @@ $B1: {  # root
     ret
   }
 }
-%main = func():void {
+%main = @fragment func():void {
   $B3: {
     %offset:u32 = let 0u
     %10:array<u32, 1> = construct %offset
@@ -9666,7 +10567,7 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, ConvertedParameters) {
         b.Return(bar);
     });
 
-    auto* foo = b.Function("foo", ty.void_());
+    auto* foo = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(foo->Block(), [&] {
         b.Call(ty.void_(), bar, gv1);
         b.Call(ty.void_(), bar, gv2);
@@ -9675,8 +10576,8 @@ TEST_F(IR_DirectVariableAccessTest_BufferView, ConvertedParameters) {
 
     auto* src = R"(
 $B1: {  # root
-  %gv1:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
-  %gv2:ptr<storage, buffer<128>, read_write> = var undef @binding_point(0, 1)
+  %gv1:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
+  %gv2:ptr<storage, buffer<128>, read_write> = var @binding_point(0, 1)
 }
 
 %bar = func(%p:ptr<storage, buffer, read_write>):void {
@@ -9685,7 +10586,7 @@ $B1: {  # root
     ret
   }
 }
-%foo = func():void {
+%foo = @fragment func():void {
   $B3: {
     %7:void = call %bar, %gv1
     %8:void = call %bar, %gv2
@@ -9698,8 +10599,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %gv1:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
-  %gv2:ptr<storage, buffer<128>, read_write> = var undef @binding_point(0, 1)
+  %gv1:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
+  %gv2:ptr<storage, buffer<128>, read_write> = var @binding_point(0, 1)
 }
 
 %bar = func():void {
@@ -9714,7 +10615,7 @@ $B1: {  # root
     ret
   }
 }
-%foo = func():void {
+%foo = @fragment func():void {
   $B4: {
     %8:void = call %bar
     %9:void = call %bar_1

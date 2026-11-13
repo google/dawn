@@ -103,8 +103,10 @@ enum class DeviceExt : uint32_t {
     // Promoted to 1.4
     PipelineRobustness,
     Maintenance5,
+    LoadStoreOpNone,
 
     // Others
+    Maintenance9,
     DepthClipEnable,
     ImageDrmFormatModifier,
     Swapchain,
@@ -118,6 +120,8 @@ enum class DeviceExt : uint32_t {
     RasterizationOrderAttachmentAccess,
     MaximalReconvergence,
     SubgroupUniformControlFlow,
+    LoadStoreOpNoneEXT,
+    RenderPassStoreOpsQCOM,
 
     // External* extensions
     ExternalMemoryAndroidHardwareBuffer,

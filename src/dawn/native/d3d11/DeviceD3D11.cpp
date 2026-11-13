@@ -522,7 +522,7 @@ void Device::UnmapDestroyedBuffers() {
     });
 }
 
-bool Device::ReduceMemoryUsageImpl() {
+ResultOrError<bool> Device::ReduceMemoryUsageImpl() {
     mVertexShaderCache.Clear();
     mPixelShaderCache.Clear();
     mComputeShaderCache.Clear();

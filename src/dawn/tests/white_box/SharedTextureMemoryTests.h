@@ -190,6 +190,9 @@ class SharedTextureMemoryTests : public DawnTestWithParams<SharedTextureMemoryTe
     void CheckFourColors(wgpu::Device& deviceObj,
                          wgpu::TextureFormat format,
                          wgpu::Texture& colorTarget);
+    void CheckCleared(wgpu::Device& deviceObj,
+                      wgpu::TextureFormat format,
+                      wgpu::Texture& colorTarget);
     wgpu::ResourceTable MakeResourceTable(
         wgpu::Device& deviceObj,
         uint32_t size,

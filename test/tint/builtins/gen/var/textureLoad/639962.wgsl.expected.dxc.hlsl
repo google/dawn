@@ -7,9 +7,11 @@ Texture2DMS<int4> arg_0 : register(t0, space1);
 int4 textureLoad_639962() {
   uint2 arg_1 = (1u).xx;
   uint arg_2 = 1u;
-  uint v = arg_2;
-  int2 v_1 = int2(arg_1);
-  int4 res = arg_0.Load(v_1, int(v));
+  uint3 v = (0u).xxx;
+  arg_0.GetDimensions(v.x, v.y, v.z);
+  uint v_1 = min(arg_2, (v.z - 1u));
+  int2 v_2 = int2(arg_1);
+  int4 res = arg_0.Load(v_2, int(v_1));
   return res;
 }
 
@@ -26,9 +28,11 @@ Texture2DMS<int4> arg_0 : register(t0, space1);
 int4 textureLoad_639962() {
   uint2 arg_1 = (1u).xx;
   uint arg_2 = 1u;
-  uint v = arg_2;
-  int2 v_1 = int2(arg_1);
-  int4 res = arg_0.Load(v_1, int(v));
+  uint3 v = (0u).xxx;
+  arg_0.GetDimensions(v.x, v.y, v.z);
+  uint v_1 = min(arg_2, (v.z - 1u));
+  int2 v_2 = int2(arg_1);
+  int4 res = arg_0.Load(v_2, int(v_1));
   return res;
 }
 
@@ -55,23 +59,25 @@ Texture2DMS<int4> arg_0 : register(t0, space1);
 int4 textureLoad_639962() {
   uint2 arg_1 = (1u).xx;
   uint arg_2 = 1u;
-  uint v = arg_2;
-  int2 v_1 = int2(arg_1);
-  int4 res = arg_0.Load(v_1, int(v));
+  uint3 v = (0u).xxx;
+  arg_0.GetDimensions(v.x, v.y, v.z);
+  uint v_1 = min(arg_2, (v.z - 1u));
+  int2 v_2 = int2(arg_1);
+  int4 res = arg_0.Load(v_2, int(v_1));
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_2 = (VertexOutput)0;
-  v_2.pos = (0.0f).xxxx;
-  v_2.prevent_dce = textureLoad_639962();
-  VertexOutput v_3 = v_2;
-  return v_3;
+  VertexOutput v_3 = (VertexOutput)0;
+  v_3.pos = (0.0f).xxxx;
+  v_3.prevent_dce = textureLoad_639962();
+  VertexOutput v_4 = v_3;
+  return v_4;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_4 = vertex_main_inner();
-  vertex_main_outputs v_5 = {v_4.prevent_dce, v_4.pos};
-  return v_5;
+  VertexOutput v_5 = vertex_main_inner();
+  vertex_main_outputs v_6 = {v_5.prevent_dce, v_5.pos};
+  return v_6;
 }
 

@@ -41,11 +41,13 @@
 #include "src/dawn/native/metal/BufferMTL.h"
 #include "src/dawn/native/metal/CommandBufferMTL.h"
 #include "src/dawn/native/metal/ComputePipelineMTL.h"
+#include "src/dawn/native/metal/FencedReferencer.h"
 #include "src/dawn/native/metal/PhysicalDeviceMTL.h"
 #include "src/dawn/native/metal/PipelineLayoutMTL.h"
 #include "src/dawn/native/metal/QuerySetMTL.h"
 #include "src/dawn/native/metal/QueueMTL.h"
 #include "src/dawn/native/metal/RenderPipelineMTL.h"
+#include "src/dawn/native/metal/ResourceTableMTL.h"
 #include "src/dawn/native/metal/SamplerMTL.h"
 #include "src/dawn/native/metal/ShaderModuleMTL.h"
 #include "src/dawn/native/metal/SharedFenceMTL.h"
@@ -162,8 +164,10 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     // itself is not captured.
     StartTrace();
 
+    mFencedReferencer = AcquireRef(new FencedReferencer(this));
     Ref<Queue> queue;
     DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue));
+    queue->RegisterSerialProcessor(QueuePriority::BestEffort, mFencedReferencer);
 
     if (mIsTimestampQueryEnabled && !IsToggleEnabled(Toggle::DisableTimestampQueryConversion)) {
         // Make a best guess of timestamp period based on device vendor info, and converge it to
@@ -224,8 +228,7 @@ Ref<RenderPipelineBase> Device::CreateUninitializedRenderPipelineImpl(
 }
 ResultOrError<Ref<ResourceTableBase>> Device::CreateResourceTableImpl(
     const ResourceTableDescriptor* descriptor) {
-    // TODO(https://issues.chromium.org/473444514): Implement resource tables in Metal.
-    return DAWN_UNIMPLEMENTED_ERROR("ResourceTable is not implemented on Metal");
+    return ResourceTable::Create(this, descriptor);
 }
 ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
     return Sampler::Create(this, descriptor);
@@ -321,6 +324,10 @@ id<MTLDevice> Device::GetMTLDevice() const {
     return mMtlDevice.Get();
 }
 
+FencedReferencer& Device::GetFencedReferencer() const {
+    return *mFencedReferencer.Get();
+}
+
 MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
                                            uint64_t sourceOffset,
                                            BufferBase* destination,
@@ -380,6 +387,7 @@ void Device::DestroyImpl(DestroyReason reason) {
     //   is implicitly destroyed. This case is thread-safe because there are no
     //   other threads using the device since there are no other live refs.
     mCounterSampleBufferAllocator = nullptr;
+    mFencedReferencer = nullptr;
     mMtlDevice = nullptr;
     mMockBlitMtlBuffer = nullptr;
 }
@@ -410,6 +418,46 @@ bool Device::UseCounterSamplingAtStageBoundary() const {
 
 bool Device::BackendWillValidateMultiDraw() const {
     return true;
+}
+
+std::optional<DeviceGuard> Device::UseGuardForCreateBindGroup() {
+    return std::nullopt;
+}
+
+std::optional<DeviceGuard> Device::UseGuardForCreateBindGroupLayout() {
+    return std::nullopt;
+}
+
+std::optional<DeviceGuard> Device::UseGuardForCreateBuffer() {
+    // Buffer::Initialize() clears padding bytes (when LazyClearResourceOnFirstUse is enabled) or
+    // initializes the buffer to non-zero (when NonzeroClearResourcesOnCreationForTesting is
+    // enabled) using the queue's shared CommandRecordingContext, which is not thread-safe. If we
+    // defer padding byte clearing to first use on the GPU in the future, we may be able to remove
+    // the LazyClearResourceOnFirstUse check here.
+    if (IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) ||
+        IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
+        return GetGuard();
+    }
+    return std::nullopt;
+}
+
+std::optional<DeviceGuard> Device::UseGuardForCreateSampler() {
+    return std::nullopt;
+}
+
+std::optional<DeviceGuard> Device::UseGuardForCreateTexture() {
+    // Texture::Create() clears textures at creation time when ShouldKeepInitialized() is true
+    // (for multi-subresource depth/stencil textures when LazyClearResourceOnFirstUse and
+    // MetalKeepMultisubresourceDepthStencilTexturesInitialized are enabled) or when
+    // NonzeroClearResourcesOnCreationForTesting is enabled. Clearing uses the queue's shared
+    // CommandRecordingContext and DynamicUploader, which are not thread-safe without the device
+    // lock.
+    if (IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting) ||
+        (IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) &&
+         IsToggleEnabled(Toggle::MetalKeepMultisubresourceDepthStencilTexturesInitialized))) {
+        return GetGuard();
+    }
+    return std::nullopt;
 }
 
 id<MTLBuffer> Device::GetMockBlitMtlBuffer() {

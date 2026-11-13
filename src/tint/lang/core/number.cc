@@ -413,4 +413,22 @@ core::Number<core::detail::NumberKindF16> f16::FromBits(uint16_t bits) {
     return f16(tint::Bitcast<f16::type>(val));
 }
 
+// static
+bf16::type bf16::Quantize(bf16::type value) {
+    utype uvalue = tint::Bitcast<utype>(value);
+    uvalue &= kMask;
+    return tint::Bitcast<type>(uvalue);
+}
+
+uint16_t bf16::BitsRepresentation() const {
+    uint16_t bits = static_cast<uint16_t>(tint::Bitcast<utype>(value) >> 16);
+    return bits;
+}
+
+// static
+core::Number<core::detail::NumberKindBF16> bf16::FromBits(uint16_t bits) {
+    utype fullbits = static_cast<utype>(bits) << 16;
+    return bf16(tint::Bitcast<type>(fullbits));
+}
+
 }  // namespace tint::core

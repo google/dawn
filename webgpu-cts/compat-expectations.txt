@@ -56,7 +56,12 @@
 #         angle-swiftshader
 #         angle-vulkan ]
 # Skia Renderer
-# tags: [ renderer-skia-gl
+# tags: [ renderer-graphite-dawn-d3d11
+#         renderer-graphite-dawn-d3d12
+#         renderer-graphite-dawn-gl
+#         renderer-graphite-dawn-metal
+#         renderer-graphite-dawn-vulkan
+#         renderer-skia-gl
 #         renderer-skia-vulkan
 #         renderer-software ]
 # Driver
@@ -95,7 +100,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2026-10-08 08:26:25AM
+# Last rolled: 2026-11-11 12:43:31PM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -137,6 +142,20 @@ crbug.com/407076121 [ linux nvidia ] webgpu:shader,execution,limits:const_array_
 # The "Skip" expectations in this section are expected to be removable at some
 # point.
 ################################################################################
+
+# Skip until unrestricted_aliasing lands.
+crbug.com/495899057 [ linux ] webgpu:shader,validation,functions,alias_analysis:* [ Skip ]
+crbug.com/495899057 [ android ] webgpu:shader,validation,functions,alias_analysis:* [ Skip ]
+crbug.com/495899057 [ win ] webgpu:shader,validation,functions,alias_analysis:* [ Skip ]
+crbug.com/495899057 [ mac ] webgpu:shader,validation,functions,alias_analysis:* [ Skip ]
+crbug.com/495899057 [ android ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ mac ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ linux ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ win ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ android ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ mac ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ linux ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ win ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="unrestricted_aliasing" [ Skip ]
 
 # These tests are invalid under Compat and need to be modified upstream
 crbug.com/520527496 webgpu:shader,execution,memory_model,texture_intra_invocation_coherence:texture_intra_invocation_coherence:format="r32float";dim="2d-array" [ Skip ]
@@ -403,6 +422,10 @@ crbug.com/563029604 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,i
 # sample_texture_combos test is failing on all Compat platforms
 crbug.com/402772749 [ angle-opengl arch-x86_64 desktop display-server-x memory_ge_16gb nvidia-0x2184 release ubuntu ] webgpu:api,operation,sampling,sampler_texture:sample_texture_combos: [ Failure ]
 
+# Linux/GTX 1660 failures when going to 595.104.02
+crbug.com/563458562 [ linux nvidia-0x2184 ] webgpu:api,validation,state,device_lost,destroy:importExternalTexture:* [ Failure ]
+crbug.com/578632701 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleBaseClampToEdge:*textureType="texture_external"* [ Failure ]
+
 ### This section represents tests which may require CTS changes.
 
 ### This section represents things that will require Compat validation
@@ -492,12 +515,6 @@ crbug.com/42241262 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bui
 crbug.com/42241262 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="uniform";vectorize=2 [ Failure ]
 crbug.com/42241262 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="uniform";vectorize=3 [ Failure ]
 crbug.com/42241262 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="uniform";vectorize=4 [ Failure ]
-
-# limits:function_variable_combined_byte_size failing on NVidia
-crbug.com/372044248 [ nvidia-0x2184 ] webgpu:shader,execution,limits:function_variable_combined_byte_size:type="bool" [ Failure ]
-crbug.com/372044248 [ nvidia-0x2184 ] webgpu:shader,execution,limits:function_variable_combined_byte_size:type="u32" [ Failure ]
-crbug.com/372044248 [ nvidia-0x2184 ] webgpu:shader,execution,limits:private_array_combined_byte_size:type="bool" [ Failure ]
-crbug.com/372044248 [ nvidia-0x2184 ] webgpu:shader,execution,limits:private_array_combined_byte_size:type="u32" [ Failure ]
 
 # alpha_to_coverage occlusion query tests failing on Intel 630
 crbug.com/42241192 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="direct";bufferOffset="non-zero";querySetOffset="non-zero";alpha=0 [ Failure ]
@@ -688,119 +705,29 @@ crbug.com/407076123 [ linux nvidia ] webgpu:api,validation,createBindGroup:buffe
 # Not implemented yet
 crbug.com/342840940 [ angle-opengl arch-x86_64 compat-min-es31 desktop display-server-x memory_ge_16gb nvidia-0x2184 release ubuntu ] webgpu:api,validation,capability_checks,features,texture_formats:check_capability_guarantees: [ Failure ]
 
-crbug.com/444283285 [ android-14 android-pixel-6 ] webgpu:api,validation,createBindGroupLayout:max_resources_per_stage,in_pipeline_layout:* [ Failure ]
-
 # Regression on Pixel 10 devices
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="float16" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="float16x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="float16x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="float32" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="float32x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="float32x3" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="float32x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="sint16" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="sint16x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="sint16x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="sint32" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="sint32x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="sint32x3" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="sint32x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="sint8" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="sint8x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="sint8x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="snorm10-10-10-2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="snorm16" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="snorm16x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="snorm16x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="snorm8" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="snorm8x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="snorm8x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="uint16" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="uint16x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="uint16x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="uint32" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="uint32x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="uint32x3" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="uint32x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="uint8" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="uint8x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="uint8x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="unorm10-10-10-2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="unorm16" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="unorm16x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="unorm8" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="unorm8x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:format="unorm8x4-bgra" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="float16" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="float16x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="float16x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="float32" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="float32x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="float32x3" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="float32x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="sint16" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="sint16x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="sint16x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="sint32" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="sint32x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="sint32x3" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="sint32x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="sint8" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="sint8x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="sint8x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="snorm10-10-10-2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="snorm16" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="snorm16x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="snorm16x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="snorm8" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="snorm8x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="snorm8x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="uint16" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="uint16x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="uint32" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="uint32x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="uint32x3" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="uint8" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="uint8x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="uint8x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="unorm10-10-10-2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="unorm16" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="unorm16x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="unorm16x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="unorm8" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="unorm8x2" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="unorm8x4-bgra" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:api,operation,vertex_state,correctness:overlapping_attributes:format="unorm8x4" [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,dpdx:f32:vectorize="_undef_";non_uniform_discard=false [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,dpdx:f32:vectorize="_undef_";non_uniform_discard=true [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,dpdxCoarse:f32:vectorize="_undef_";non_uniform_discard=false [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,dpdxCoarse:f32:vectorize="_undef_";non_uniform_discard=true [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,dpdxCoarse:f32:vectorize=2;non_uniform_discard=false [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,dpdxCoarse:f32:vectorize=2;non_uniform_discard=true [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,dpdy:f32:vectorize="_undef_";non_uniform_discard=false [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,dpdy:f32:vectorize="_undef_";non_uniform_discard=true [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,dpdyCoarse:f32:vectorize="_undef_";non_uniform_discard=false [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,dpdyCoarse:f32:vectorize="_undef_";non_uniform_discard=true [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,dpdyCoarse:f32:vectorize=2;non_uniform_discard=false [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,dpdyCoarse:f32:vectorize=2;non_uniform_discard=true [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,fwidth:f32:vectorize="_undef_";non_uniform_discard=false [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,fwidth:f32:vectorize="_undef_";non_uniform_discard=true [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,fwidth:f32:vectorize=2;non_uniform_discard=false [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,fwidth:f32:vectorize=2;non_uniform_discard=true [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,fwidth:f32:vectorize=3;non_uniform_discard=false [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,fwidth:f32:vectorize=3;non_uniform_discard=true [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,fwidth:f32:vectorize=4;non_uniform_discard=false [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,fwidth:f32:vectorize=4;non_uniform_discard=true [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,fwidthCoarse:f32:vectorize="_undef_";non_uniform_discard=false [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,fwidthCoarse:f32:vectorize="_undef_";non_uniform_discard=true [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,fwidthCoarse:f32:vectorize=2;non_uniform_discard=false [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,fwidthCoarse:f32:vectorize=2;non_uniform_discard=true [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,fwidthCoarse:f32:vectorize=3;non_uniform_discard=false [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,fwidthCoarse:f32:vectorize=3;non_uniform_discard=true [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,fwidthCoarse:f32:vectorize=4;non_uniform_discard=false [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,fwidthCoarse:f32:vectorize=4;non_uniform_discard=true [ Failure ]
-crbug.com/523261709 [ android android-pixel-10 ] webgpu:shader,execution,expression,call,builtin,textureDimensions:external: [ Failure ]
 crbug.com/524800786 [ android android-pixel-10 ] webgpu:api,validation,image_copy,buffer_texture_copies:texture_buffer_usages:copyType="CopyB2T" [ Failure ]
+
+# PowerVR on OpenGLES limits maxSampledTexturesPerShaderStage and
+# maxSamplersPerShaderStage to 13, below the spec minimum of 16, to work around a
+# driver bug.
+crbug.com/580872855 [ android-pixel-10 ] webgpu:api,operation,adapter,requestDevice:default: [ Failure ]
+crbug.com/580872855 [ android-pixel-10 ] webgpu:api,operation,adapter,requestDevice:limit,worse_than_default:limit="maxSampledTexturesPerShaderStage" [ Failure ]
+crbug.com/580872855 [ android-pixel-10 ] webgpu:api,operation,adapter,requestDevice:limit,worse_than_default:limit="maxSamplersPerShaderStage" [ Failure ]
+crbug.com/580872855 [ android-pixel-10 ] webgpu:api,operation,adapter,requestDevice:limits,supported:limit="maxSampledTexturesPerShaderStage" [ Failure ]
+crbug.com/580872855 [ android-pixel-10 ] webgpu:api,operation,adapter,requestDevice:limits,supported:limit="maxSamplersPerShaderStage" [ Failure ]
+crbug.com/580872855 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createBindGroupLayout,at_over:limitTest="atMaximum";* [ Failure ]
+crbug.com/580872855 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipeline,at_over:limitTest="atMaximum";* [ Failure ]
+crbug.com/580872855 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limits,maxSampledTexturesPerShaderStage:createPipelineLayout,at_over:limitTest="atMaximum";* [ Failure ]
+crbug.com/580872855 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limits,maxSamplersPerShaderStage:createBindGroupLayout,at_over:limitTest="atMaximum";* [ Failure ]
+crbug.com/580872855 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limits,maxSamplersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";* [ Failure ]
+crbug.com/580872855 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limits,maxSamplersPerShaderStage:createPipelineLayout,at_over:limitTest="atMaximum";* [ Failure ]
+crbug.com/580872855 [ android-pixel-10 ] webgpu:compat,api,validation,pipeline_creation:texture_sampler_combos:pass=true;numCombos="1";numNonSampled="max";numExternal=0;useSame=false;* [ Failure ]
+crbug.com/580872855 [ android-pixel-10 ] webgpu:idl,javascript:limits:type="adapter" [ Failure ]
+crbug.com/580872855 [ android-pixel-10 ] webgpu:idl,javascript:limits:type="device" [ Failure ]
+
+# Failed in the same run as the above, likely unrelated.
+crbug.com/580872855 [ android-pixel-10 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="overLimit";async=false;bindingCombination="compute" [ Failure ]
 
 # Untriaged failures of Pixel 10
 # See crbug.com/40238674 and crbug.com/475503907
@@ -3249,27 +3176,29 @@ crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,t
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:storage:format="rgba8snorm";aspect="all" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:storage:format="rgba8uint";aspect="all" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureDimensions:storage:format="rgba8unorm";aspect="all" [ Failure ]
+crbug.com/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:stage="v";format="r16float";dim="cube";filt="linear";modeU="r";modeV="r";modeW="m";offset=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:composite_and_element:address_space="function";composite="array";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:composite_and_element:address_space="function";composite="struct";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:composite_and_element:address_space="private";composite="array";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:composite_and_element:address_space="private";composite="struct";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:composite_copy:address_space="function";composite="array";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:composite_copy:address_space="function";composite="struct";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:composite_copy:address_space="private";composite="array";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:composite_copy:address_space="private";composite="struct";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:loop_carried_dependence:address_space="function";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:loop_carried_dependence:address_space="private";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:one_pointer_one_module_scope:address_space="private";target="array_element";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:one_pointer_one_module_scope:address_space="private";target="scalar";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:one_pointer_one_module_scope:address_space="private";target="struct_member";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:two_pointers:address_space="function";target="array_element";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:two_pointers:address_space="function";target="scalar";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:two_pointers:address_space="function";target="struct_member";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:two_pointers:address_space="private";target="array_element";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:two_pointers:address_space="private";target="scalar";aliased=false [ Failure ]
+crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,expression,call,user,ptr_aliasing:two_pointers:address_space="private";target="struct_member";aliased=false [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,statement,assignment,vector:vector_dynamic_index:elementType="i32";width=3;indexType="u32" [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,value_init:scalars:addressSpace="private";type="u32" [ Failure ]
 crbug.com/0000 [ android-pixel-10 ] webgpu:shader,execution,value_init:struct:addressSpace="private" [ Failure ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="fragment_depth" [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="fragment_depth" [ Failure ]
-crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="fragment_depth" [ Failure ]
-crbug.com/0000 [ android-pixel-10 ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="fragment_depth" [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="fragment_depth" [ Failure ]
-crbug.com/0000 [ linux nvidia ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="fragment_depth" [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="offscreen";format="bgra8unorm";usage=8 [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="offscreen";format="bgra8unorm";usage=8 [ Failure ]
-crbug.com/0000 [ linux nvidia ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="offscreen";format="bgra8unorm";usage=8 [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="onscreen";format="bgra8unorm";usage=8 [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="onscreen";format="bgra8unorm";usage=8 [ Failure ]
-crbug.com/0000 [ linux nvidia ] webgpu:web_platform,canvas,configure:invalid_usage:canvasType="onscreen";format="bgra8unorm";usage=8 [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:transferToImageBitmap_unconfigured_nonzero_size:readbackCanvasType="offscreen" [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:transferToImageBitmap_unconfigured_nonzero_size:readbackCanvasType="offscreen" [ Failure ]
-crbug.com/0000 [ linux nvidia ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:transferToImageBitmap_unconfigured_nonzero_size:readbackCanvasType="offscreen" [ Failure ]
-crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:transferToImageBitmap_unconfigured_nonzero_size:readbackCanvasType="onscreen" [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:transferToImageBitmap_unconfigured_nonzero_size:readbackCanvasType="onscreen" [ Failure ]
-crbug.com/0000 [ linux nvidia ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:transferToImageBitmap_unconfigured_nonzero_size:readbackCanvasType="onscreen" [ Failure ]
 
 crbug.com/0000 [ android-pixel-6 ] webgpu:api,validation,encoding,encoder_open_state:compute_pass_commands:command="dispatchWorkgroups" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,validation,encoding,encoder_open_state:compute_pass_commands:command="dispatchWorkgroups" [ Failure ]

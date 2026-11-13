@@ -234,10 +234,12 @@ struct State {
         for (auto* idx : old_indices) {
             new_operands.Push(idx);
 
-            auto* const_idx = idx->As<core::ir::Constant>();
-            current_type = const_idx
-                               ? current_type->Element(const_idx->Value()->ValueAs<uint32_t>())
-                               : current_type->Elements().type;
+            if (auto* el = current_type->Elements().type) {
+                current_type = el;
+            } else {
+                auto* const_idx = idx->As<core::ir::Constant>();
+                current_type = current_type->Element(const_idx->Value()->ValueAs<uint32_t>());
+            }
 
             if (padded_structures.Contains(current_type)) {
                 new_operands.Push(b.Zero<core::u32>());

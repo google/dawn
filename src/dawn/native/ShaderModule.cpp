@@ -1006,8 +1006,8 @@ ResultOrValError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint
         BoolName boolNames[] = {
             {&entryPoint.front_facing_used, "front_facing"},
             {&entryPoint.input_sample_mask_used, "sample_mask"},
-            {&entryPoint.sample_index_used, "sample_index_used"},
-            {&entryPoint.primitive_index_used, "primitive_index_used"},
+            {&entryPoint.sample_index_used, "sample_index"},
+            {&entryPoint.primitive_index_used, "primitive_index"},
             {&entryPoint.subgroup_invocation_id_used, "subgroup_invocation_id"},
             {&entryPoint.subgroup_size_used, "subgroup_size"},
         };

@@ -1460,5 +1460,52 @@ DAWN_INSTANTIATE_TEST(MaxVertexAttributesPipelineCreationTests,
                       VulkanBackend(),
                       WebGPUBackend());
 
+// Tests for the gl_limit_texture_image_units_to_13 toggle. Uses the default limits, as they must be
+// clamped even when not requested.
+class GLLimitTextureImageUnitsTests : public DawnTest {
+  protected:
+    static constexpr uint32_t kLimit = 13;
+
+    wgpu::RenderPipeline CreatePipeline(uint32_t textureCount) {
+        std::string fs = "@group(0) @binding(0) var s : sampler;\n";
+        for (uint32_t i = 0; i < textureCount; ++i) {
+            fs += "@group(0) @binding(" + std::to_string(i + 1) + ") var t" + std::to_string(i) +
+                  " : texture_2d<f32>;\n";
+        }
+        fs += "@fragment fn main() -> @location(0) vec4f {\n  var c = vec4f(0);\n";
+        for (uint32_t i = 0; i < textureCount; ++i) {
+            fs += "  c += textureSampleLevel(t" + std::to_string(i) + ", s, vec2f(0), 0);\n";
+        }
+        fs += "  return c;\n}\n";
+
+        utils::ComboRenderPipelineDescriptor desc;
+        desc.vertex.module = utils::CreateShaderModule(device, R"(
+            @vertex fn main() -> @builtin(position) vec4f {
+                return vec4f(0, 0, 0, 1);
+            })");
+        desc.cFragment.module = utils::CreateShaderModule(device, fs);
+        return device.CreateRenderPipeline(&desc);
+    }
+};
+
+// The adapter and device limits are clamped by the toggle.
+TEST_P(GLLimitTextureImageUnitsTests, Limits) {
+    EXPECT_TRUE(HasToggleEnabled("gl_limit_texture_image_units_to_13"));
+
+    EXPECT_EQ(GetAdapterLimits().maxSampledTexturesPerShaderStage, kLimit);
+    EXPECT_EQ(GetAdapterLimits().maxSamplersPerShaderStage, kLimit);
+    EXPECT_EQ(GetSupportedLimits().maxSampledTexturesPerShaderStage, kLimit);
+    EXPECT_EQ(GetSupportedLimits().maxSamplersPerShaderStage, kLimit);
+}
+
+// A pipeline can use 13 texture units in a stage, but not 14.
+TEST_P(GLLimitTextureImageUnitsTests, Pipeline) {
+    CreatePipeline(kLimit);
+    ASSERT_DEVICE_ERROR(CreatePipeline(kLimit + 1));
+}
+
+DAWN_INSTANTIATE_TEST(GLLimitTextureImageUnitsTests,
+                      OpenGLESBackend({"gl_limit_texture_image_units_to_13"}));
+
 }  // anonymous namespace
 }  // namespace dawn

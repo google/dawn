@@ -34,7 +34,7 @@
 namespace dawn {
 namespace {
 
-using testing::Not;
+using ::testing::Not;
 
 // These tests works assuming Dawn Native's object deduplication. Comparing the pointer is
 // exploiting an implementation detail of Dawn Native.

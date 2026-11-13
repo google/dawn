@@ -38,6 +38,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::HasSubstr;
+
 class RenderPipelineValidationTest : public ValidationTest {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
@@ -463,7 +465,7 @@ TEST_F(RenderPipelineValidationTest, UndefinedColorStateFormatWithBlend) {
 
         ASSERT_DEVICE_ERROR(
             device.CreateRenderPipeline(&descriptor),
-            testing::HasSubstr("Color target[0] blend state is set when the format is undefined."));
+            HasSubstr("Color target[0] blend state is set when the format is undefined."));
     }
 }
 
@@ -533,7 +535,7 @@ TEST_F(RenderPipelineValidationTest, NonBlendableFormat) {
         descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Uint;
 
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
-                            testing::HasSubstr("Blending is enabled but color format"));
+                            HasSubstr("Blending is enabled but color format"));
     }
 
     {
@@ -571,7 +573,7 @@ TEST_F(RenderPipelineValidationTest, Float32NonBlendableFormats) {
             descriptor.cTargets[0].format = f32Format;
 
             ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
-                                testing::HasSubstr("Blending is enabled but color format"));
+                                HasSubstr("Blending is enabled but color format"));
         }
     }
 }
@@ -1466,8 +1468,7 @@ TEST_F(RenderPipelineValidationTest, UnclippedDepthWithoutFeature) {
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
         descriptor.primitive.unclippedDepth = true;
-        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
-                            testing::HasSubstr("not supported"));
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor), HasSubstr("not supported"));
     }
 }
 
@@ -2102,7 +2103,7 @@ TEST_F(RenderPipelineValidationTest, LoadResolveTextureOnUnsupportedDevice) {
     pipelineDescriptor.cTargets[0].nextInChain = &pipelineMSAAExpandResolveDesc;
 
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pipelineDescriptor),
-                        testing::HasSubstr("feature is not enabled"));
+                        HasSubstr("feature is not enabled"));
 }
 
 /// Tests that depthBias can't be used with point or line topologies.
@@ -2628,7 +2629,7 @@ TEST_F(LoadResolveTexturePipelineDescriptorValidationTest,
     pipelineDescriptor.cTargets[0].nextInChain = &pipelineMSAAExpandResolveDesc;
 
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pipelineDescriptor),
-                        testing::HasSubstr("multisample count (1) is not > 1"));
+                        HasSubstr("multisample count (1) is not > 1"));
 }
 
 // If a render pipeline is created with ColorTargetStateExpandResolveTextureDawn.enabled =
@@ -2804,7 +2805,7 @@ TEST_F(LoadResolveTexturePipelineDescriptorValidationTest,
     renderPass.SetPipeline(pipeline);
     renderPass.End();
 
-    ASSERT_DEVICE_ERROR(encoder.Finish(), testing::HasSubstr("not compatible"));
+    ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr("not compatible"));
 }
 
 // Test that the following render pipeline and render pass are incompatible.
@@ -2862,7 +2863,7 @@ TEST_F(LoadResolveTexturePipelineDescriptorValidationTest,
     renderPass.SetPipeline(pipeline);
     renderPass.End();
 
-    ASSERT_DEVICE_ERROR(encoder.Finish(), testing::HasSubstr("not compatible"));
+    ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr("not compatible"));
 }
 
 // Bind resolve attachment in a ExpandResolveTexture render pass as texture should result
@@ -2908,8 +2909,7 @@ TEST_F(LoadResolveTexturePipelineDescriptorValidationTest, BindColorAttachmentAs
 
     ASSERT_DEVICE_ERROR(
         encoder.Finish(),
-        testing::HasSubstr(
-            "includes writable usage and another usage in the same synchronization scope"));
+        HasSubstr("includes writable usage and another usage in the same synchronization scope"));
 }
 
 class DualSourceBlendingFeatureTest : public RenderPipelineValidationTest {

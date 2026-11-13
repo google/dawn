@@ -52,7 +52,7 @@ TEST_F(IR_RemoveUniformVectorComponentLoadsTest, NoModify_NotUniform) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, vec4<f32>, read> = var undef @binding_point(0, 0)
+  %buffer:ptr<storage, vec4<f32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func():f32 {
@@ -84,7 +84,7 @@ TEST_F(IR_RemoveUniformVectorComponentLoadsTest, Basic) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<uniform, vec4<f32>, read> = var undef @binding_point(0, 0)
+  %buffer:ptr<uniform, vec4<f32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func():f32 {
@@ -98,7 +98,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<uniform, vec4<f32>, read> = var undef @binding_point(0, 0)
+  %buffer:ptr<uniform, vec4<f32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func():f32 {
@@ -130,7 +130,7 @@ TEST_F(IR_RemoveUniformVectorComponentLoadsTest, ViaLet) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<uniform, vec4<f32>, read> = var undef @binding_point(0, 0)
+  %buffer:ptr<uniform, vec4<f32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func():f32 {
@@ -145,7 +145,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<uniform, vec4<f32>, read> = var undef @binding_point(0, 0)
+  %buffer:ptr<uniform, vec4<f32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func():f32 {
@@ -181,7 +181,7 @@ TEST_F(IR_RemoveUniformVectorComponentLoadsTest, Multiple) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<uniform, vec4<f32>, read> = var undef @binding_point(0, 0)
+  %buffer:ptr<uniform, vec4<f32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func():vec4<f32> {
@@ -199,7 +199,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<uniform, vec4<f32>, read> = var undef @binding_point(0, 0)
+  %buffer:ptr<uniform, vec4<f32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func():vec4<f32> {

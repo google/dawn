@@ -507,6 +507,12 @@ wgpu::ShaderModule VideoViewsTestsBase::GetTestVertexShaderModule() const {
             })");
 }
 
+namespace {
+
+using ::testing::AnyNumber;
+using ::testing::HasSubstr;
+using ::testing::Ne;
+
 class VideoViewsTests : public VideoViewsTestsBase {
   protected:
     void SetUp() override {
@@ -527,8 +533,6 @@ class VideoViewsTests : public VideoViewsTestsBase {
     }
     std::unique_ptr<VideoViewsTestBackend> mBackend;
 };
-
-namespace {
 
 // Create video texture uninitialized.
 TEST_P(VideoViewsTests, CreateVideoTextureWithoutInitializedData) {
@@ -1495,10 +1499,9 @@ TEST_P(VideoViewsValidationTests, SamplingMultiPlanarTexture) {
 // Tests creating a texture with a multi-plane format.
 TEST_P(VideoViewsValidationTests, RenderAttachmentInvalid) {
     // "Invalid Texture" error is expected if failed to create the video texture.
-    EXPECT_CALL(mDeviceErrorCallback,
-                Call(CHandleIs(device.Get()), testing::Ne(wgpu::ErrorType::NoError),
-                     testing::HasSubstr("Invalid Texture")))
-        .Times(testing::AnyNumber());
+    EXPECT_CALL(mDeviceErrorCallback, Call(CHandleIs(device.Get()), Ne(wgpu::ErrorType::NoError),
+                                           HasSubstr("Invalid Texture")))
+        .Times(AnyNumber());
 
     // multi-planar formats are NOT allowed to be renderable by default and require
     // Feature::MultiPlanarRenderTargets.
@@ -1507,7 +1510,7 @@ TEST_P(VideoViewsValidationTests, RenderAttachmentInvalid) {
                                 GetFormat(), wgpu::TextureUsage::RenderAttachment,
                                 /*isCheckerboard*/ true,
                                 /*initialized*/ true),
-                            testing::HasSubstr("is incompatible"));
+                            HasSubstr("is incompatible"));
     mBackend->DestroyVideoTextureForTest(std::move(platformTexture));
 }
 
@@ -2313,7 +2316,7 @@ class VideoViewsExtendedUsagesTests : public VideoViewsTestsBase {
                         subsampleFactor.verticalFactor,
                     isCheckerboard, hasAlpha);
 
-                DAWN_UNSAFE_TODO(memcpy(buffer.GetMappedRange(), data.data(), bufferDesc.size));
+                buffer.WriteMappedRange(0, data.data(), bufferDesc.size);
                 buffer.Unmap();
 
                 wgpu::TexelCopyBufferInfo copySrc =
@@ -2360,7 +2363,7 @@ TEST_P(VideoViewsExtendedUsagesTests, CreateTextureFailsIfMipmapped) {
     descriptor.format = GetFormat();
     descriptor.usage = wgpu::TextureUsage::TextureBinding;
     ASSERT_DEVICE_ERROR_MSG(device.CreateTexture(&descriptor),
-                            testing::HasSubstr("must be non-mipmapped & 2D"));
+                            HasSubstr("must be non-mipmapped & 2D"));
 }
 
 // Test that creating multi-planar texture should fail if the specified descriptor is not 2D.
@@ -2375,13 +2378,13 @@ TEST_P(VideoViewsExtendedUsagesTests, CreateTextureFailsIfNot2D) {
     descriptor.format = GetFormat();
     descriptor.usage = wgpu::TextureUsage::TextureBinding;
     ASSERT_DEVICE_ERROR_MSG(device.CreateTexture(&descriptor),
-                            testing::HasSubstr("must be non-mipmapped & 2D"));
+                            HasSubstr("must be non-mipmapped & 2D"));
 
     // Texture must not be array.
     descriptor.dimension = wgpu::TextureDimension::e2D;
     descriptor.size.depthOrArrayLayers = 2;
     ASSERT_DEVICE_ERROR_MSG(device.CreateTexture(&descriptor),
-                            testing::HasSubstr("must be non-mipmapped & 2D"));
+                            HasSubstr("must be non-mipmapped & 2D"));
 }
 
 // Test that creating multiplanar texture with view formats should fail.
@@ -2641,11 +2644,9 @@ void VideoViewsExtendedUsagesTests::RunT2BCopyPlaneAspectsTest() {
         auto cmdBuffer = encoder.Finish();
         device.GetQueue().Submit(1, &cmdBuffer);
 
-        // Convert 1st pixel's luma component to array of 8 bits bytes.
-        uint8_t expectedYDataAsU8[sizeof(ComponentType)];
-        DAWN_UNSAFE_TODO(memcpy(expectedYDataAsU8, &expectedData[0], sizeof(expectedYDataAsU8)));
-
-        EXPECT_BUFFER_U8_RANGE_EQ(expectedYDataAsU8, dstBuffer, 0, sizeof(expectedYDataAsU8));
+        // Expect 1st pixel's luma component.
+        EXPECT_BUFFER(dstBuffer, 0, sizeof(ComponentType),
+                      new detail::ExpectEq<ComponentType>(expectedData[0]));
     }
 
     // Plane1
@@ -2667,12 +2668,9 @@ void VideoViewsExtendedUsagesTests::RunT2BCopyPlaneAspectsTest() {
         auto cmdBuffer = encoder.Finish();
         device.GetQueue().Submit(1, &cmdBuffer);
 
-        // Convert 1st pixel's chroma component to array of 8 bits bytes.
-        uint8_t expectedUVDataAsU8[sizeof(ComponentType) * 2];
-        DAWN_UNSAFE_TODO(
-            memcpy(expectedUVDataAsU8, expectedData.data(), sizeof(expectedUVDataAsU8)));
-
-        EXPECT_BUFFER_U8_RANGE_EQ(expectedUVDataAsU8, dstBuffer, 0, sizeof(expectedUVDataAsU8));
+        // Expect 1st pixel's chroma components.
+        EXPECT_BUFFER(dstBuffer, 0, 2 * sizeof(ComponentType),
+                      new detail::ExpectEq<ComponentType>(expectedData.data(), 2));
     }
 
     if (hasAlpha) {
@@ -2696,12 +2694,9 @@ void VideoViewsExtendedUsagesTests::RunT2BCopyPlaneAspectsTest() {
             auto cmdBuffer = encoder.Finish();
             device.GetQueue().Submit(1, &cmdBuffer);
 
-            // Convert 1st pixel's alpha component to array of 8 bits bytes.
-            uint8_t expectedADataAsU8[sizeof(ComponentType)];
-            DAWN_UNSAFE_TODO(
-                memcpy(expectedADataAsU8, expectedData.data(), sizeof(expectedADataAsU8)));
-
-            EXPECT_BUFFER_U8_RANGE_EQ(expectedADataAsU8, dstBuffer, 0, sizeof(expectedADataAsU8));
+            // Expect 1st pixel's alpha component.
+            EXPECT_BUFFER(dstBuffer, 0, sizeof(ComponentType),
+                          new detail::ExpectEq<ComponentType>(expectedData[0]));
         }
     }
 }
@@ -2730,7 +2725,7 @@ TEST_P(VideoViewsExtendedUsagesTests, T2BCopyAllAspectsFails) {
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyTextureToBuffer(&copySrc, &copyDst, &copySize);
-    ASSERT_DEVICE_ERROR_MSG(encoder.Finish(), testing::HasSubstr("More than a single aspect"));
+    ASSERT_DEVICE_ERROR_MSG(encoder.Finish(), HasSubstr("More than a single aspect"));
 }
 
 // Test copying from one multi-planar formatted texture into another fails even if
@@ -2759,7 +2754,7 @@ TEST_P(VideoViewsExtendedUsagesTests, T2TCopyPlaneAspectFails) {
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyTextureToTexture(&copySrc, &copyDst, &copySize);
-    ASSERT_DEVICE_ERROR_MSG(encoder.Finish(), testing::HasSubstr("not allowed"));
+    ASSERT_DEVICE_ERROR_MSG(encoder.Finish(), HasSubstr("not allowed"));
 }
 
 DAWN_INSTANTIATE_TEST_B(VideoViewsTests,

@@ -43,6 +43,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::HasSubstr;
+
 class BindGroupValidationTest : public ValidationTest {
   public:
     wgpu::Texture CreateTexture(wgpu::TextureUsage usage,
@@ -1428,7 +1430,7 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutEntryTooManySet) {
     descriptor.entryCount = 1;
     descriptor.entries = &entry;
     ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor),
-                        testing::HasSubstr("had more than one of"));
+                        HasSubstr("had more than one of"));
 }
 
 // Test that it is invalid to create a BGL with none one of buffer,
@@ -1439,8 +1441,7 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutEntryNoneSet) {
     wgpu::BindGroupLayoutDescriptor descriptor;
     descriptor.entryCount = 1;
     descriptor.entries = &entry;
-    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor),
-                        testing::HasSubstr("had none of"));
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor), HasSubstr("had none of"));
 }
 
 // This test verifies that visibility of bindings in BindGroupLayout can be none
@@ -1675,11 +1676,6 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimitsWithExternalTexture) {
 
 // Check that dynamic buffer numbers exceed maximum value in one bind group layout.
 TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
-    wgpu::BindGroupLayout bgl[2];
-    std::vector<wgpu::BindGroupLayoutEntry> maxUniformDB;
-    std::vector<wgpu::BindGroupLayoutEntry> maxStorageDB;
-    std::vector<wgpu::BindGroupLayoutEntry> maxReadonlyStorageDB;
-
     const auto& limits = GetSupportedLimits();
 
     // In this test, we use all the same shader stage. Ensure that this does not exceed the
@@ -1689,20 +1685,28 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
     DAWN_ASSERT(limits.maxDynamicStorageBuffersPerPipelineLayout <=
                 limits.maxStorageBuffersPerShaderStage);
 
+    std::vector<wgpu::BindGroupLayoutEntry> maxUniformDB;
+    maxUniformDB.reserve(limits.maxDynamicUniformBuffersPerPipelineLayout);
     for (uint32_t i = 0; i < limits.maxDynamicUniformBuffersPerPipelineLayout; ++i) {
         maxUniformDB.push_back(utils::BindingLayoutEntryInitializationHelper(
             i, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform, true));
     }
 
+    std::vector<wgpu::BindGroupLayoutEntry> maxStorageDB;
+    maxStorageDB.reserve(limits.maxDynamicStorageBuffersPerPipelineLayout);
     for (uint32_t i = 0; i < limits.maxDynamicStorageBuffersPerPipelineLayout; ++i) {
         maxStorageDB.push_back(utils::BindingLayoutEntryInitializationHelper(
             i, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage, true));
     }
 
+    std::vector<wgpu::BindGroupLayoutEntry> maxReadonlyStorageDB;
+    maxReadonlyStorageDB.reserve(limits.maxDynamicStorageBuffersPerPipelineLayout);
     for (uint32_t i = 0; i < limits.maxDynamicStorageBuffersPerPipelineLayout; ++i) {
         maxReadonlyStorageDB.push_back(utils::BindingLayoutEntryInitializationHelper(
             i, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::ReadOnlyStorage, true));
     }
+
+    wgpu::BindGroupLayout bgl[2];
 
     // Test creating with the maxes works
     {
@@ -4143,8 +4147,7 @@ TEST_F(FilterabilityValidationTest, FilterableBGL_DepthShader_Fail) {
                     {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float},
                 });
 
-    ASSERT_DEVICE_ERROR(CreateComputePipeline(shaderSource, {bgl}),
-                        testing::HasSubstr("isn't compatible"));
+    ASSERT_DEVICE_ERROR(CreateComputePipeline(shaderSource, {bgl}), HasSubstr("isn't compatible"));
 }
 
 TEST_F(FilterabilityValidationTest, FilterableBGL_i32Shader_Fail) {
@@ -4160,8 +4163,7 @@ TEST_F(FilterabilityValidationTest, FilterableBGL_i32Shader_Fail) {
                     {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float},
                 });
 
-    ASSERT_DEVICE_ERROR(CreateComputePipeline(shaderSource, {bgl}),
-                        testing::HasSubstr("isn't compatible"));
+    ASSERT_DEVICE_ERROR(CreateComputePipeline(shaderSource, {bgl}), HasSubstr("isn't compatible"));
 }
 
 TEST_F(FilterabilityValidationTest, FilteringBGL_FilteringShader_Pass) {

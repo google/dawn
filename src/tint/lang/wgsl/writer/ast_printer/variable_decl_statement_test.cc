@@ -69,11 +69,11 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_InferredType) {
 }
 
 TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_AInt) {
-    auto* C = Const("C", Expr(1_a));
+    auto* C = Const("C", ast::Type{}, Expr(1_a));
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -87,11 +87,11 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_AInt) {
 }
 
 TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_AFloat) {
-    auto* C = Const("C", Expr(1._a));
+    auto* C = Const("C", ast::Type{}, Expr(1._a));
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -105,11 +105,11 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_AFloat) {
 }
 
 TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_i32) {
-    auto* C = Const("C", Expr(1_i));
+    auto* C = Const("C", ast::Type{}, Expr(1_i));
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -123,11 +123,11 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_i32) {
 }
 
 TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_u32) {
-    auto* C = Const("C", Expr(1_u));
+    auto* C = Const("C", ast::Type{}, Expr(1_u));
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -141,11 +141,11 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_u32) {
 }
 
 TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_f32) {
-    auto* C = Const("C", Expr(1_f));
+    auto* C = Const("C", ast::Type{}, Expr(1_f));
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -161,11 +161,11 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_f32) {
 TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_f16) {
     Enable(wgsl::Extension::kF16);
 
-    auto* C = Const("C", Expr(1_h));
+    auto* C = Const("C", ast::Type{}, Expr(1_h));
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -181,11 +181,11 @@ fn f() {
 }
 
 TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_vec3_AInt) {
-    auto* C = Const("C", Call<vec3<Infer>>(1_a, 2_a, 3_a));
+    auto* C = Const("C", ast::Type{}, Call<vec3<Infer>>(1_a, 2_a, 3_a));
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -199,11 +199,11 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_vec3_AInt) {
 }
 
 TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_vec3_AFloat) {
-    auto* C = Const("C", Call<vec3<Infer>>(1._a, 2._a, 3._a));
+    auto* C = Const("C", ast::Type{}, Call<vec3<Infer>>(1._a, 2._a, 3._a));
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -217,11 +217,11 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_vec3_AFloat) {
 }
 
 TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_vec3_f32) {
-    auto* C = Const("C", Call<vec3<f32>>(1_f, 2_f, 3_f));
+    auto* C = Const("C", ast::Type{}, Call<vec3<f32>>(1_f, 2_f, 3_f));
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -237,11 +237,11 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_vec3_f32) {
 TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_vec3_f16) {
     Enable(wgsl::Extension::kF16);
 
-    auto* C = Const("C", Call<vec3<f16>>(1_h, 2_h, 3_h));
+    auto* C = Const("C", ast::Type{}, Call<vec3<f16>>(1_h, 2_h, 3_h));
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -257,11 +257,11 @@ fn f() {
 }
 
 TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_mat2x3_AFloat) {
-    auto* C = Const("C", Call<mat2x3<Infer>>(1._a, 2._a, 3._a, 4._a, 5._a, 6._a));
+    auto* C = Const("C", ast::Type{}, Call<mat2x3<Infer>>(1._a, 2._a, 3._a, 4._a, 5._a, 6._a));
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -275,11 +275,11 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_mat2x3_AFloat) {
 }
 
 TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_mat2x3_f32) {
-    auto* C = Const("C", Call<mat2x3<f32>>(1_f, 2_f, 3_f, 4_f, 5_f, 6_f));
+    auto* C = Const("C", ast::Type{}, Call<mat2x3<f32>>(1_f, 2_f, 3_f, 4_f, 5_f, 6_f));
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -295,11 +295,11 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_mat2x3_f32) {
 TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_mat2x3_f16) {
     Enable(wgsl::Extension::kF16);
 
-    auto* C = Const("C", Call<mat2x3<f16>>(1_h, 2_h, 3_h, 4_h, 5_h, 6_h));
+    auto* C = Const("C", ast::Type{}, Call<mat2x3<f16>>(1_h, 2_h, 3_h, 4_h, 5_h, 6_h));
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -315,11 +315,11 @@ fn f() {
 }
 
 TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_arr_f32) {
-    auto* C = Const("C", Call<array<f32, 3>>(1_f, 2_f, 3_f));
+    auto* C = Const("C", ast::Type{}, Call<array<f32, 3>>(1_f, 2_f, 3_f));
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();
@@ -333,14 +333,15 @@ TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_arr_f32) {
 }
 
 TEST_F(WgslASTPrinterTest, Emit_VariableDeclStatement_Const_arr_vec2_bool) {
-    auto* C = Const("C", Call<array<vec2<bool>, 3>>(         //
-                             Call<vec2<bool>>(true, false),  //
-                             Call<vec2<bool>>(false, true),  //
-                             Call<vec2<bool>>(true, true)));
+    auto* C = Const("C", ast::Type{},
+                    Call<array<vec2<bool>, 3>>(         //
+                        Call<vec2<bool>>(true, false),  //
+                        Call<vec2<bool>>(false, true),  //
+                        Call<vec2<bool>>(true, true)));
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(C),
-             Decl(Let("l", Expr(C))),
+             Decl(Let("l", ast::Type{}, Expr(C))),
          });
 
     ASTPrinter& gen = Build();

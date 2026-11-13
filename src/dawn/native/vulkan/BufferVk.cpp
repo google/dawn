@@ -265,6 +265,8 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
 
     // Round uniform buffer sizes up to a multiple of 16 bytes since Tint will polyfill them as
     // array<vec4u, ...>.
+    // Note: If this value changes, update the setting of
+    // disable_uniform_runtime_sized_array_index_clamping in ShaderModuleVk.cpp to match.
     if (GetUsage() & wgpu::BufferUsage::Uniform) {
         mAllocatedSize = Align(size, 16u);
     }
@@ -295,6 +297,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     DAWN_TRY(CheckVkOOMThenSuccess(
         device->fn.CreateBuffer(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
         "vkCreateBuffer"));
+    mOwnsHandle = true;
 
     // Gather requirements for the buffer's memory and allocate it.
     VkMemoryRequirements requirements;
@@ -386,6 +389,7 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
     DAWN_TRY(CheckVkOOMThenSuccess(
         device->fn.CreateBuffer(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
         "vkCreateBuffer"));
+    mOwnsHandle = true;
 
     // Gather requirements for the buffer's memory and allocate it.
     VkMemoryRequirements requirements;
@@ -456,6 +460,11 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
 Buffer::~Buffer() = default;
 
 VkBuffer Buffer::GetHandle() const {
+    DAWN_ASSERT(mOwnsHandle);
+    return mHandle;
+}
+
+VkBuffer Buffer::GetHandleOrPlaceholder() const {
     return mHandle;
 }
 
@@ -765,10 +774,11 @@ void Buffer::DestroyImpl(DestroyReason reason) {
 
     ToBackend(GetDevice())->GetResourceMemoryAllocator()->Deallocate(&mMemoryAllocation);
 
-    if (mHandle != VK_NULL_HANDLE) {
+    if (mOwnsHandle) {
         ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
-        mHandle = VK_NULL_HANDLE;
+        mOwnsHandle = false;
     }
+    mHandle = ToBackend(GetDevice())->GetPlaceholderBufferHandle();
 
     if (mDedicatedDeviceMemory != VK_NULL_HANDLE) {
         ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mDedicatedDeviceMemory);
@@ -856,7 +866,9 @@ void Buffer::TransitionMappableBuffersEagerly(Device* device,
 }
 
 void Buffer::SetLabelImpl() {
-    SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_Buffer", GetLabel());
+    if (mOwnsHandle) {
+        SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_Buffer", GetLabel());
+    }
 }
 
 void Buffer::InitializeToZero(CommandRecordingContext* recordingContext) {

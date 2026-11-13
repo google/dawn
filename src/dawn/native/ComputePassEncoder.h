@@ -65,6 +65,9 @@ class ComputePassEncoder final : public ProgrammableEncoder {
     void APISetPipeline(ComputePipelineBase* pipeline);
 
     void APISetResourceTable(ResourceTableBase* table);
+    void APISetResourceUsage(ResourceTableBase* table,
+                             const UsageBindingResource* resource,
+                             wgpu::ResourceTableUsage usage);
 
     void APISetBindGroup(uint32_t groupIndex,
                          BindGroupBase* group,

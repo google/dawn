@@ -29,6 +29,9 @@
 #include <webgpu/webgpu.h>
 #include <webgpu/webgpu_cpp.h>
 
+namespace dawn {
+namespace {
+
 // Test that the C init structs match the C++ default values
 TEST(DefaultTests, CMatchesCpp) {
     // Test render pipeline descriptor.
@@ -46,3 +49,6 @@ TEST(DefaultTests, CMatchesCpp) {
     EXPECT_EQ(cppDesc.multisample.mask, cDesc.multisample.mask);
     EXPECT_EQ(cppDesc.multisample.alphaToCoverageEnabled, cDesc.multisample.alphaToCoverageEnabled);
 }
+
+}  // anonymous namespace
+}  // namespace dawn

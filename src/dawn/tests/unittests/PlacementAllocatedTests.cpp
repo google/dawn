@@ -35,8 +35,9 @@
 namespace dawn {
 namespace {
 
-using testing::InSequence;
-using testing::StrictMock;
+using ::testing::InSequence;
+using ::testing::StrictMock;
+using ::testing::Test;
 
 enum class DestructedClass {
     Foo,
@@ -50,7 +51,7 @@ class MockDestructor {
 
 std::unique_ptr<StrictMock<MockDestructor>> mockDestructor;
 
-class PlacementAllocatedTests : public testing::Test {
+class PlacementAllocatedTests : public Test {
     void SetUp() override { mockDestructor = std::make_unique<StrictMock<MockDestructor>>(); }
 
     void TearDown() override { mockDestructor = nullptr; }

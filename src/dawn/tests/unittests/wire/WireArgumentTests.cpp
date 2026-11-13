@@ -35,12 +35,12 @@
 namespace dawn::wire {
 namespace {
 
-using testing::_;
-using testing::AllOf;
-using testing::Eq;
-using testing::Field;
-using testing::Return;
-using testing::Sequence;
+using ::testing::_;
+using ::testing::AllOf;
+using ::testing::Eq;
+using ::testing::Field;
+using ::testing::Return;
+using ::testing::Sequence;
 
 MATCHER_P2(EqBytes, bytes, size, "") {
     const char* dataToCheck = arg;

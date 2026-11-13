@@ -169,7 +169,7 @@ TEST_F(MslWriterTest, ArrayLengthFromImmediate_Unused) {
     });
 
     Options options;
-    options.immediate_binding_point = tint::BindingPoint{0, 30};
+    options.immediate_binding_point = 30u;
     options.array_length_from_constants.bindpoint_to_size_index[{0u, 0u}] = 0u;
     options.array_length_from_constants.buffer_sizes_offset = 64u;
     options.disable_robustness = true;
@@ -203,7 +203,7 @@ TEST_F(MslWriterTest, ArrayLengthFromImmediate_Used) {
     });
 
     Options options;
-    options.immediate_binding_point = tint::BindingPoint{0, 30};
+    options.immediate_binding_point = 30u;
     options.array_length_from_constants.bindpoint_to_size_index[{0u, 0u}] = 0u;
     options.array_length_from_constants.buffer_sizes_offset = 64u;
     options.disable_robustness = true;
@@ -252,7 +252,7 @@ TEST_P(MslWriterStorageBufferSizesTest, ConfiguredLayout) {
 
     Options options;
     options.disable_robustness = true;
-    options.immediate_binding_point = BindingPoint{0, 30};
+    options.immediate_binding_point = 30u;
     options.non_constant_zero_offset = 4u;
     if (GetParam()) {
         options.array_length_from_constants.buffer_sizes_offset = 64u;
@@ -321,7 +321,7 @@ TEST_F(MslWriterTest, ArrayLengthFromImmediate_ZeroOffset) {
     });
 
     Options options;
-    options.immediate_binding_point = BindingPoint{0, 30};
+    options.immediate_binding_point = 30u;
     options.non_constant_zero_offset = 4u;
     options.array_length_from_constants.buffer_sizes_offset = 0u;
     options.array_length_from_constants.bindpoint_to_size_index[{0, 0}] = 0u;
@@ -344,7 +344,7 @@ TEST_F(MslWriterTest, ImmediateF16) {
     });
 
     Options options;
-    options.immediate_binding_point = tint::BindingPoint{0, 30};
+    options.immediate_binding_point = 30u;
     options.non_constant_zero_offset = 64;
     auto result = Generate(options);
     ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
@@ -380,7 +380,7 @@ TEST_F(MslWriterTest, ImmediateVec3F16) {
     });
 
     Options options;
-    options.immediate_binding_point = tint::BindingPoint{0, 30};
+    options.immediate_binding_point = 30u;
     options.non_constant_zero_offset = 64;
     auto result = Generate(options);
     ASSERT_EQ(result, Success) << result.Failure() << output_.msl;
@@ -530,7 +530,7 @@ TEST_F(MslWriterTest, VertexPulling) {
     Options options;
     options.bindings.storage.emplace(BindingPoint{4u, 0u}, BindingPoint{0u, 1u});
     options.vertex_pulling_config = std::move(vertex_pulling_config);
-    options.immediate_binding_point = BindingPoint{0, 30};
+    options.immediate_binding_point = 30u;
     options.array_length_from_constants = std::move(array_length_config);
 
     auto result = Generate(options);
@@ -898,6 +898,65 @@ kernel void v(const constant tint_immediate_data_struct* tint_immediate_data [[b
   uint const result = ((lhs + (*tint_module_vars.tint_immediate_data).tint_non_constant_zero) % 3u);
 }
 )");
+}
+
+TEST_F(MslWriterTest, AccessArray_ConstantOOBIndex_NoRobustness) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* arr = b.Var("arr", b.Zero<array<f32, 3>>());
+        auto* oob = b.Append(mod.CreateInstruction<core::ir::CoreBuiltinCall>(
+            b.InstructionResult(ty.u32()), core::BuiltinFn::kClamp,
+            Vector{b.Value(99_u), b.Value(99_u), b.Value(99_u)}));
+        b.Let("x", b.Load(b.Access(ty.ptr<function, f32>(), arr, oob->Result())));
+        b.Return(func);
+    });
+
+    Options options;
+    options.entry_point_name = "main";
+    options.disable_robustness = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure();
+    EXPECT_THAT(output_.msl, testing::HasSubstr("arr[2u]"));
+}
+
+TEST_F(MslWriterTest, AccessArray_ConstantNegativeIndex_NoRobustness) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* arr = b.Var("arr", b.Zero<array<f32, 3>>());
+        auto* neg = b.Append(mod.CreateInstruction<core::ir::CoreBuiltinCall>(
+            b.InstructionResult(ty.i32()), core::BuiltinFn::kClamp,
+            Vector{b.Value(-1_i), b.Value(-1_i), b.Value(-1_i)}));
+        b.Let("x", b.Load(b.Access(ty.ptr<function, f32>(), arr, neg->Result())));
+        b.Return(func);
+    });
+
+    Options options;
+    options.entry_point_name = "main";
+    options.disable_robustness = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure();
+    EXPECT_THAT(output_.msl, testing::HasSubstr("arr[2u]"));
+}
+
+TEST_F(MslWriterTest, AccessArray_BufferLengthOOBIndex_NoRobustness) {
+    mod.properties.Add(core::ir::Property::kAllowBufferTypes);
+    auto* buf = b.Var("buf", ty.ptr(workgroup, ty.buffer(64)));
+    mod.root_block->Append(buf);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* arr = b.Var("arr", b.Zero<array<f32, 3>>());
+        auto* oob = b.Call(ty.u32(), core::BuiltinFn::kBufferLength, buf);
+        b.Let("x", b.Load(b.Access(ty.ptr<function, f32>(), arr, oob)));
+        b.Return(func);
+    });
+
+    Options options;
+    options.entry_point_name = "main";
+    options.disable_robustness = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure();
+    EXPECT_THAT(output_.msl, testing::HasSubstr("arr[2u]"));
 }
 
 }  // namespace

@@ -34,6 +34,7 @@
 #include "src/tint/lang/spirv/reader/lower/builtins.h"
 #include "src/tint/lang/spirv/reader/lower/decompose_strided_array.h"
 #include "src/tint/lang/spirv/reader/lower/decompose_strided_matrix.h"
+#include "src/tint/lang/spirv/reader/lower/hoist_constant_array.h"
 #include "src/tint/lang/spirv/reader/lower/shader_io.h"
 #include "src/tint/lang/spirv/reader/lower/texture.h"
 #include "src/tint/lang/spirv/reader/lower/transpose_row_major.h"
@@ -43,6 +44,7 @@ namespace tint::spirv::reader {
 
 Result<SuccessType> Lower(core::ir::Module& mod) {
     TINT_CHECK_RESULT(core::ir::transform::DeadCodeElimination(mod));
+    TINT_CHECK_RESULT(lower::HoistConstantArray(mod));
     TINT_CHECK_RESULT(lower::VectorElementPointer(mod));
     TINT_CHECK_RESULT(lower::ShaderIO(mod));
     TINT_CHECK_RESULT(lower::Builtins(mod));

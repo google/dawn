@@ -35,7 +35,6 @@
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/spirv/reader/common/helper_test.h"
 #include "src/tint/lang/spirv/reader/parser/parser.h"
 
@@ -69,9 +68,6 @@ class SpirvParserTestHelperBase : public BASE {
 
         // Parse the SPIR-V to produce an IR module.
         TINT_CHECK_RESULT_UNWRAP(parsed, Parse(binary, options));
-
-        // Validate the IR module.
-        core::ir::AssertValid(parsed, "after spirv.test");
 
         // Return the disassembled IR module.
         return core::ir::Disassembler(parsed).Plain();

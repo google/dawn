@@ -35,7 +35,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using ProgramToIRLetTest = helpers::IRProgramTest;
 
 TEST_F(ProgramToIRLetTest, Constant) {
-    WrapInFunction(Let("a", Expr(42_i)));
+    WrapInFunction(Let("a", ast::Type{}, Expr(42_i)));
 
     auto m = Build();
     ASSERT_EQ(m, Success);
@@ -51,7 +51,7 @@ TEST_F(ProgramToIRLetTest, Constant) {
 }
 
 TEST_F(ProgramToIRLetTest, BinaryOp) {
-    WrapInFunction(Let("a", Add(1_i, 2_i)));
+    WrapInFunction(Let("a", ast::Type{}, Add(1_i, 2_i)));
 
     auto m = Build();
     ASSERT_EQ(m, Success);
@@ -67,9 +67,9 @@ TEST_F(ProgramToIRLetTest, BinaryOp) {
 }
 
 TEST_F(ProgramToIRLetTest, Chain) {
-    WrapInFunction(Let("a", Expr(1_i)),  //
-                   Let("b", Expr("a")),  //
-                   Let("c", Expr("b")));
+    WrapInFunction(Let("a", ast::Type{}, Expr(1_i)),  //
+                   Let("b", ast::Type{}, Expr("a")),  //
+                   Let("c", ast::Type{}, Expr("b")));
 
     auto m = Build();
     ASSERT_EQ(m, Success);

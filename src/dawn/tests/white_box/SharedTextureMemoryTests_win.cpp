@@ -32,9 +32,11 @@
 #include <webgpu/webgpu_cpp.h>
 #include <wrl/client.h>
 
+#include <algorithm>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -43,11 +45,11 @@
 #include "dawn/native/DawnNative.h"
 #include "src/dawn/common/SystemHandle.h"
 #include "src/dawn/tests/white_box/SharedTextureMemoryTests.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
 using Microsoft::WRL::ComPtr;
+using ::testing::HasSubstr;
 
 enum class Mode {
     DXGISharedHandle,
@@ -135,9 +137,7 @@ class Backend : public SharedTextureMemoryTestBackend {
 
     bool HasFenceSupport(const wgpu::Device& device) const {
         auto toggles = dawn::native::GetTogglesUsed(device.Get());
-        return std::find_if(toggles.begin(), toggles.end(), [](const char* name) {
-                   return DAWN_UNSAFE_TODO(strcmp("d3d11_disable_fence", name)) == 0;
-               }) == toggles.end();
+        return std::ranges::find(toggles, std::string_view("d3d11_disable_fence")) == toggles.end();
     }
 
     bool UseKeyedMutex() const { return mUseKeyedMutex; }
@@ -413,7 +413,7 @@ TEST_P(SharedTextureMemoryNoFeatureTests, SharedFenceImportWithoutFeature) {
     fenceDesc.nextInChain = &sharedHandleDesc;
 
     ASSERT_DEVICE_ERROR_MSG(wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc),
-                            testing::HasSubstr("is not enabled"));
+                            HasSubstr("is not enabled"));
 }
 
 // Test that a shared handle can be imported, and then exported.
@@ -502,7 +502,7 @@ TEST_P(SharedTextureMemoryTests, SharedFenceImportDXGISharedHandleMissing) {
     fenceDesc.nextInChain = &sharedHandleDesc;
 
     ASSERT_DEVICE_ERROR_MSG(wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc),
-                            testing::HasSubstr("missing"));
+                            HasSubstr("missing"));
 }
 
 // Test exporting info from a shared fence with no chained struct.

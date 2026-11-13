@@ -45,6 +45,7 @@
 #include "src/tint/lang/wgsl/allowed_features.h"
 #include "src/tint/lang/wgsl/intrinsic/dialect.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/alias_analysis_info.h"
 #include "src/tint/lang/wgsl/resolver/dependency_graph.h"
 #include "src/tint/lang/wgsl/resolver/sem_helper.h"
 #include "src/tint/lang/wgsl/resolver/validator.h"
@@ -170,6 +171,9 @@ class Resolver {
 
     /// @returns a new u8, if the subgroup matrix extension is enabled, otherwise nullptr
     const core::type::U8* U8(const ast::Identifier* ident);
+
+    /// @returns a new bf16, if the subgroup matrix extension is enabled, otherwise nullptr
+    const core::type::BF16* BF16(const ast::Identifier* ident);
 
     /// @returns nullptr since u16 is not enabled in WGSL.
     const core::type::U16* U16(const ast::Identifier* ident);
@@ -665,19 +669,6 @@ class Resolver {
         const char* constraint = nullptr;
     };
 
-    /// AliasAnalysisInfo captures the memory accesses performed by a given function for the purpose
-    /// of determining if any two arguments alias at any callsite.
-    struct AliasAnalysisInfo {
-        /// The set of module-scope variables that are written to, and where that write occurs.
-        Hashmap<const sem::Variable*, const sem::ValueExpression*, 4> module_scope_writes;
-        /// The set of module-scope variables that are read from, and where that read occurs.
-        Hashmap<const sem::Variable*, const sem::ValueExpression*, 4> module_scope_reads;
-        /// The set of function parameters that are written to.
-        Hashset<const sem::Variable*, 4> parameter_writes;
-        /// The set of function parameters that are read from.
-        Hashset<const sem::Variable*, 4> parameter_reads;
-    };
-
     // BufferViewInfo tracks info for invalid buffer sizes.
     struct BufferViewInfo {
         /// The minimum type size. This is propagated out through the inspector.
@@ -714,7 +705,7 @@ class Resolver {
     Vector<std::function<void(const sem::GlobalVariable*)>, 4> on_transitively_reference_global_;
     uint32_t current_scoping_depth_ = 0;
     Hashmap<const ast::Expression*, const ast::BinaryExpression*, 8> logical_binary_lhs_to_parent_;
-    Hashset<const ast::Expression*, 8> not_evaluated_;
+    tint::Bitset<0> not_evaluated_;
     Hashmap<const core::type::Type*, size_t, 8> nest_depth_;
     Hashmap<std::pair<core::intrinsic::Overload, wgsl::BuiltinFn>, sem::BuiltinFn*, 64> builtins_;
     Hashmap<core::intrinsic::Overload, sem::ValueConstructor*, 16> constructors_;

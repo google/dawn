@@ -85,6 +85,7 @@ struct VulkanDeviceKnobs {
     VkPhysicalDeviceShaderMaximalReconvergenceFeaturesKHR shaderMaximalReconvergenceFeatures;
     VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR
         shaderSubgroupUniformControlFlowFeatures;
+    VkPhysicalDeviceMaintenance9FeaturesKHR maintenance9Features;
 
     bool HasExt(DeviceExt ext) const;
     DeviceExtSet extensions;
@@ -105,6 +106,7 @@ struct VulkanDeviceInfo : VulkanDeviceKnobs {
     VkPhysicalDeviceDescriptorIndexingProperties descriptorIndexingProperties;
     VkPhysicalDevicePipelineRobustnessProperties pipelineRobustnessProperties;
     VkPhysicalDeviceDrmPropertiesEXT drmProperties;
+    VkPhysicalDeviceRobustness2PropertiesEXT robustness2Properties;
 
     std::vector<VkQueueFamilyProperties> queueFamilies;
     std::vector<VkCooperativeMatrixPropertiesKHR> cooperativeMatrixConfigs;

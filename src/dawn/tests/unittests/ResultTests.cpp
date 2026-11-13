@@ -69,6 +69,24 @@ class AClass : public RefCounted {
     int a = 0;
 };
 
+class OtherClass {
+  public:
+    int a = 0;
+};
+class Base : public RefCounted {};
+class Child : public OtherClass, public Base {};
+
+struct VError {
+    int a = 2;
+};
+
+struct UError {
+    UError() = default;
+    explicit(false) UError(std::unique_ptr<VError>) {}
+    bool operator==(const UError&) const = default;
+    int a = 1;
+};
+
 // Tests using the following overload of TestSuccess make
 // local Ref instances to placeholderSuccessObj. Tests should
 // ensure any local Ref objects made along the way continue
@@ -146,6 +164,39 @@ TEST(ResultOnlyPointerError, ReturningSuccess) {
     EXPECT_FALSE(result.IsError());
 }
 
+// Tests converting from a Result<void, E2>
+TEST(ResultOnlyPointerError, ConversionFromConvertibleError) {
+    UError uerr;
+    {
+        Result<void, UError> result(std::make_unique<VError>());
+        TestError(&result, uerr);
+    }
+    {
+        Result<void, VError> resultError(std::make_unique<VError>());
+        Result<void, UError> result(std::move(resultError));
+        TestError(&result, uerr);
+    }
+    {
+        Result<void, VError> resultError(std::make_unique<VError>());
+        Result<void, UError> result;
+        result = std::move(resultError);
+        TestError(&result, uerr);
+    }
+    {
+        Result<void, VError> resultSuccess;
+        Result<void, UError> result(std::move(resultSuccess));
+        EXPECT_TRUE(result.IsSuccess());
+        EXPECT_FALSE(result.IsError());
+    }
+    {
+        Result<void, VError> resultSuccess;
+        Result<void, UError> result;
+        result = std::move(resultSuccess);
+        EXPECT_TRUE(result.IsSuccess());
+        EXPECT_FALSE(result.IsError());
+    }
+}
+
 // Result<T*, E*>
 
 // Test constructing an error Result<T*, E>
@@ -217,6 +268,32 @@ TEST(ResultBothPointer, ConversionFromChildClass) {
     }
 }
 
+// Tests converting from a Result<TChild*, E2>
+TEST(ResultBothPointer, ConversionFromConvertibleError) {
+    Child child;
+    Base* childAsBase = &child;
+    UError uerr;
+    {
+        Result<Base*, UError> result(std::make_unique<VError>());
+        TestError(&result, uerr);
+    }
+    {
+        Result<Base*, VError> resultError(std::make_unique<VError>());
+        Result<Base*, UError> result(std::move(resultError));
+        TestError(&result, uerr);
+    }
+    {
+        Result<Child*, VError> resultError(std::make_unique<VError>());
+        Result<Base*, UError> result = std::move(resultError);
+        TestError(&result, uerr);
+    }
+    {
+        Result<Child*, VError> resultChild(&child);
+        Result<Base*, UError> result = std::move(resultChild);
+        TestSuccess(&result, childAsBase);
+    }
+}
+
 // Result<const T*, E>
 
 // Test constructing an error Result<const T*, E>
@@ -261,6 +338,52 @@ TEST(ResultBothPointerWithConstResult, ReturningSuccess) {
 
     Result<const float*, int> result = CreateSuccess();
     TestSuccess(&result, &placeholderConstSuccess);
+}
+
+// Tests converting from a Result<const TChild*, E>
+TEST(ResultBothPointerWithConstResult, ConversionFromChildClass) {
+    const Child child{};
+    const Base* childAsBase = &child;
+    {
+        Result<const Base*, int> result(&child);
+        TestSuccess(&result, childAsBase);
+    }
+    {
+        Result<const Child*, int> resultChild(&child);
+        Result<const Base*, int> result(std::move(resultChild));
+        TestSuccess(&result, childAsBase);
+    }
+    {
+        Result<const Child*, int> resultChild(&child);
+        Result<const Base*, int> result = std::move(resultChild);
+        TestSuccess(&result, childAsBase);
+    }
+}
+
+// Tests converting from a Result<const TChild*, E2>
+TEST(ResultBothPointerWithConstResult, ConversionFromConvertibleError) {
+    const Child child{};
+    const Base* childAsBase = &child;
+    UError uerr;
+    {
+        Result<const Base*, UError> result(std::make_unique<VError>());
+        TestError(&result, uerr);
+    }
+    {
+        Result<const Base*, VError> resultError(std::make_unique<VError>());
+        Result<const Base*, UError> result(std::move(resultError));
+        TestError(&result, uerr);
+    }
+    {
+        Result<const Child*, VError> resultError(std::make_unique<VError>());
+        Result<const Base*, UError> result = std::move(resultError);
+        TestError(&result, uerr);
+    }
+    {
+        Result<const Child*, VError> resultChild(&child);
+        Result<const Base*, UError> result = std::move(resultChild);
+        TestSuccess(&result, childAsBase);
+    }
 }
 
 // Result<Ref<T>, E>
@@ -316,13 +439,6 @@ TEST(ResultRefT, ReturningSuccess) {
     TestSuccess(&result, &success);
 }
 
-class OtherClass {
-  public:
-    int a = 0;
-};
-class Base : public RefCounted {};
-class Child : public OtherClass, public Base {};
-
 // Test constructing a Result<Ref<TChild>, E>
 TEST(ResultRefT, ConversionFromChildConstructor) {
     Child child;
@@ -350,6 +466,32 @@ TEST(ResultRefT, ConversionFromChildAssignmentOperator) {
     Result<Ref<Child>, int> resultChild(std::move(refChild));
     Result<Ref<Base>, int> result = std::move(resultChild);
     TestSuccess<Base>(&result, &child);
+}
+
+// Tests converting from a Result<Ref<TChild>, E2>
+TEST(ResultRefT, ConversionFromConvertibleError) {
+    Child child;
+    UError uerr;
+    {
+        Result<Ref<Base>, UError> result(std::make_unique<VError>());
+        TestError(&result, uerr);
+    }
+    {
+        Result<Ref<Child>, VError> resultError(std::make_unique<VError>());
+        Result<Ref<Child>, UError> result(std::move(resultError));
+        TestError(&result, uerr);
+    }
+    {
+        Result<Ref<Child>, VError> resultError(std::make_unique<VError>());
+        Result<Ref<Base>, UError> result = std::move(resultError);
+        TestError(&result, uerr);
+    }
+    {
+        Ref<Child> refChild(&child);
+        Result<Ref<Child>, VError> resultChild(std::move(refChild));
+        Result<Ref<Base>, UError> result = std::move(resultChild);
+        TestSuccess<Base>(&result, &child);
+    }
 }
 
 // Result<T, E>
@@ -396,6 +538,35 @@ TEST(ResultGeneric, ReturningSuccess) {
 
     Result<std::vector<float>, int> result = CreateSuccess();
     TestSuccess(&result, {1.0f});
+}
+
+// Tests converting from a Result<T, E2>
+TEST(ResultGeneric, ConversionFromConvertibleError) {
+    UError uerr;
+    {
+        Result<std::vector<float>, UError> result(std::make_unique<VError>());
+        TestError(&result, uerr);
+    }
+    {
+        Result<std::vector<float>, VError> resultError(std::make_unique<VError>());
+        Result<std::vector<float>, UError> result(std::move(resultError));
+        TestError(&result, uerr);
+    }
+    {
+        Result<std::vector<float>, VError> resultError(std::make_unique<VError>());
+        Result<std::vector<float>, UError> result = std::move(resultError);
+        TestError(&result, uerr);
+    }
+    {
+        Result<std::vector<float>, VError> resultSuccess({1.0f});
+        Result<std::vector<float>, UError> result(std::move(resultSuccess));
+        TestSuccess(&result, {1.0f});
+    }
+    {
+        Result<std::vector<float>, VError> resultSuccess({1.0f});
+        Result<std::vector<float>, UError> result = std::move(resultSuccess);
+        TestSuccess(&result, {1.0f});
+    }
 }
 
 class NonDefaultConstructible {
@@ -450,19 +621,6 @@ TEST(ResultNonDefaultConstructible, ReturningSuccess) {
     Result<NonDefaultConstructible, int> result = CreateSuccess();
     TestSuccess(&result, NonDefaultConstructible(1.0f));
 }
-
-struct VError {
-  public:
-    int a = 2;
-};
-
-struct UError {
-  public:
-    UError() = default;
-    explicit(false) UError(std::unique_ptr<VError>) {}
-    bool operator==(const UError&) const { return true; }
-    int a = 1;
-};
 
 TEST(ResultGeneric, ConvertRefDiffereingError) {
     Child child;

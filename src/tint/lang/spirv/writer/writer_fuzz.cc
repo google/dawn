@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <mutex>
 #include <span>
 #include <string>
 #include <vector>
@@ -36,7 +37,6 @@
 #include "src/tint/lang/spirv/validate/validate.h"
 #include "src/tint/lang/spirv/writer/printer/printer.h"
 #include "src/tint/lang/spirv/writer/writer.h"
-#include "src/tint/utils/macros/defer.h"
 
 #if TINT_BUILD_FUZZER_VULKAN_SUPPORT
 #include <vulkan/vulkan.h>
@@ -74,7 +74,7 @@ struct FuzzedOptions {
     bool use_zero_initialize_workgroup_memory;
     bool use_vulkan_memory_model;
     bool disable_image_robustness;
-    bool disable_runtime_sized_array_index_clamping;
+    bool disable_storage_runtime_sized_array_index_clamping;
     bool dot_4x8_packed;
     std::optional<Options::RangeOffsets> depth_range_offsets;
     SpvVersion spirv_version;
@@ -90,6 +90,7 @@ struct FuzzedOptions {
     bool replace_workgroup_atomic_store_with_exchange;
     bool replace_unsigned_compare_zero;
     bool polyfill_bool_vec_dynamic_store;
+    bool disable_uniform_runtime_sized_array_index_clamping;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(FuzzedOptions,
@@ -114,7 +115,7 @@ struct FuzzedOptions {
                  use_zero_initialize_workgroup_memory,
                  use_vulkan_memory_model,
                  disable_image_robustness,
-                 disable_runtime_sized_array_index_clamping,
+                 disable_storage_runtime_sized_array_index_clamping,
                  dot_4x8_packed,
                  depth_range_offsets,
                  spirv_version,
@@ -129,71 +130,111 @@ struct FuzzedOptions {
                  collapse_subgroup_min_max,
                  replace_workgroup_atomic_store_with_exchange,
                  replace_unsigned_compare_zero,
-                 polyfill_bool_vec_dynamic_store);
+                 polyfill_bool_vec_dynamic_store,
+                 disable_uniform_runtime_sized_array_index_clamping);
     TINT_REFLECT_HASH_CODE(FuzzedOptions);
 };
 
 namespace {
 
 #if TINT_BUILD_FUZZER_VULKAN_SUPPORT
-Result<SuccessType> ValidateUsingVulkan(const std::string& vk_icd_path,
-                                        std::span<const uint32_t> spirv) {
 #if TINT_BUILD_IS_WIN
 #error "TINT_BUILD_FUZZER_VULKAN_SUPPORT is not supported on Windows"
+// This is due to a setenv call below
 #endif  // TINT_BUILD_IS_WIN
-    // This setenv call is why this works on Linux/Mac but not Windows
-    setenv("VK_ICD_FILENAMES", vk_icd_path.c_str(), 1);
 
-    TINT_BEGIN_DISABLE_WARNING(OLD_STYLE_CAST);
-    VkApplicationInfo app_info = {
-        .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-        .apiVersion = VK_API_VERSION_1_1,
-    };
-    TINT_END_DISABLE_WARNING(OLD_STYLE_CAST);
+struct VulkanContext {
+    std::string icd_path;
+    VkInstance instance = VK_NULL_HANDLE;
+    VkDevice device = VK_NULL_HANDLE;
 
-    VkInstanceCreateInfo create_info = {
-        .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-        .pApplicationInfo = &app_info,
-    };
+    ~VulkanContext() { Reset(); }
 
-    VkInstance instance;
-    if (vkCreateInstance(&create_info, nullptr, &instance) != VK_SUCCESS) {
-        return Failure{"Failed to create Vulkan instance"};
-    }
-    TINT_DEFER(vkDestroyInstance(instance, nullptr));
-
-    uint32_t count = 0;
-    vkEnumeratePhysicalDevices(instance, &count, nullptr);
-    if (count == 0) {
-        return Failure{"Failed to enumerate physical devices"};
+    void Reset() {
+        if (device != VK_NULL_HANDLE) {
+            vkDestroyDevice(device, nullptr);
+            device = VK_NULL_HANDLE;
+        }
+        if (instance != VK_NULL_HANDLE) {
+            vkDestroyInstance(instance, nullptr);
+            instance = VK_NULL_HANDLE;
+        }
+        icd_path.clear();
     }
 
-    std::vector<VkPhysicalDevice> physical_devices(count);
-    VkResult res = vkEnumeratePhysicalDevices(instance, &count, physical_devices.data());
-    if ((res != VK_SUCCESS && res != VK_INCOMPLETE) || count == 0) {
-        return Failure{"Failed to enumerate physical devices"};
+    Result<VkDevice> GetOrCreateDevice(const std::string& vk_icd_path) {
+        if (device != VK_NULL_HANDLE && icd_path == vk_icd_path) {
+            return device;
+        }
+        Reset();
+
+        // This setenv call is why this works on Linux/Mac but not Windows
+        setenv("VK_ICD_FILENAMES", vk_icd_path.c_str(), 1);
+
+        TINT_BEGIN_DISABLE_WARNING(OLD_STYLE_CAST);
+        VkApplicationInfo app_info = {
+            .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+            .apiVersion = VK_API_VERSION_1_1,
+        };
+        TINT_END_DISABLE_WARNING(OLD_STYLE_CAST);
+
+        VkInstanceCreateInfo create_info = {
+            .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+            .pApplicationInfo = &app_info,
+        };
+
+        if (vkCreateInstance(&create_info, nullptr, &instance) != VK_SUCCESS) {
+            instance = VK_NULL_HANDLE;
+            return Failure{"Failed to create Vulkan instance"};
+        }
+
+        uint32_t count = 0;
+        vkEnumeratePhysicalDevices(instance, &count, nullptr);
+        if (count == 0) {
+            Reset();
+            return Failure{"Failed to enumerate physical devices"};
+        }
+
+        std::vector<VkPhysicalDevice> physical_devices(count);
+        VkResult res = vkEnumeratePhysicalDevices(instance, &count, physical_devices.data());
+        if ((res != VK_SUCCESS && res != VK_INCOMPLETE) || count == 0) {
+            Reset();
+            return Failure{"Failed to enumerate physical devices"};
+        }
+        VkPhysicalDevice physical_device = physical_devices[0];
+
+        float queue_priority = 1.0f;
+        VkDeviceQueueCreateInfo queue_create_info = {
+            .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+            .queueFamilyIndex = 0,
+            .queueCount = 1,
+            .pQueuePriorities = &queue_priority,
+        };
+
+        VkDeviceCreateInfo device_create_info = {
+            .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+            .queueCreateInfoCount = 1,
+            .pQueueCreateInfos = &queue_create_info,
+        };
+
+        if (vkCreateDevice(physical_device, &device_create_info, nullptr, &device) != VK_SUCCESS) {
+            device = VK_NULL_HANDLE;
+            Reset();
+            return Failure{"Failed to create Vulkan device"};
+        }
+
+        icd_path = vk_icd_path;
+        return device;
     }
-    VkPhysicalDevice physical_device = physical_devices[0];
+};
 
-    float queue_priority = 1.0f;
-    VkDeviceQueueCreateInfo queue_create_info = {
-        .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-        .queueFamilyIndex = 0,
-        .queueCount = 1,
-        .pQueuePriorities = &queue_priority,
-    };
+Result<SuccessType> ValidateUsingVulkan(const std::string& vk_icd_path,
+                                        std::span<const uint32_t> spirv) {
+    static std::mutex mutex;
+    std::lock_guard<std::mutex> lock(mutex);
 
-    VkDeviceCreateInfo device_create_info = {
-        .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-        .queueCreateInfoCount = 1,
-        .pQueueCreateInfos = &queue_create_info,
-    };
-
-    VkDevice device;
-    if (vkCreateDevice(physical_device, &device_create_info, nullptr, &device) != VK_SUCCESS) {
-        return Failure{"Failed to create Vulkan device"};
-    }
-    TINT_DEFER(vkDestroyDevice(device, nullptr));
+    static VulkanContext context;
+    TINT_CHECK_RESULT_UNWRAP(device, context.GetOrCreateDevice(vk_icd_path));
 
     VkShaderModuleCreateInfo shader_module_create_info = {
         .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
@@ -339,8 +380,10 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
         fuzzed_options.use_zero_initialize_workgroup_memory;
     options.extensions.use_vulkan_memory_model = fuzzed_options.use_vulkan_memory_model;
     options.extensions.disable_image_robustness = fuzzed_options.disable_image_robustness;
-    options.extensions.disable_runtime_sized_array_index_clamping =
-        fuzzed_options.disable_runtime_sized_array_index_clamping;
+    options.extensions.disable_storage_runtime_sized_array_index_clamping =
+        fuzzed_options.disable_storage_runtime_sized_array_index_clamping;
+    options.extensions.disable_uniform_runtime_sized_array_index_clamping =
+        fuzzed_options.disable_uniform_runtime_sized_array_index_clamping;
     options.extensions.dot_4x8_packed = fuzzed_options.dot_4x8_packed;
     options.depth_range_offsets = fuzzed_options.depth_range_offsets;
     options.spirv_version = fuzzed_options.spirv_version;

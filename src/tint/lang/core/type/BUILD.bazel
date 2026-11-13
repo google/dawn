@@ -49,6 +49,7 @@ cc_library(
     "array.cc",
     "array_count.cc",
     "atomic.cc",
+    "bf16.cc",
     "binding_array.cc",
     "bool.cc",
     "buffer.cc",
@@ -101,6 +102,7 @@ cc_library(
     "array.h",
     "array_count.h",
     "atomic.h",
+    "bf16.h",
     "binding_array.h",
     "bool.h",
     "buffer.h",
@@ -172,6 +174,7 @@ cc_library(
   srcs = [
     "array_test.cc",
     "atomic_test.cc",
+    "bf16_test.cc",
     "binding_array_test.cc",
     "bool_test.cc",
     "buffer_test.cc",

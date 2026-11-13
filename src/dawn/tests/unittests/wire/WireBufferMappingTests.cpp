@@ -57,10 +57,10 @@ static std::ostream& operator<<(std::ostream& os, const MapMode& param) {
 namespace dawn::wire {
 namespace {
 
-using testing::_;
-using testing::Return;
-using testing::SizedString;
-using testing::WithArg;
+using ::testing::_;
+using ::testing::Return;
+using ::testing::SizedString;
+using ::testing::WithArg;
 
 // For the buffer tests, we make passing a map mode optional to reuse the same test fixture for
 // tests that test multiple modes and tests that are mode specific. By making it an optional, it
@@ -1024,6 +1024,23 @@ TEST_P(WireBufferMappingTests, MapInsideCallbackBeforeDestroy) {
             FlushCallbacks();
         });
     }
+}
+
+// Check that destroying the buffer before a spontaneous map completion aborts the map.
+TEST_P(WireBufferMappingTests, DestroyBeforeSpontaneousMapCompletion) {
+    if (!IsSpontaneous()) {
+        GTEST_SKIP() << "Spontaneous callbacks required for this test.";
+    }
+
+    wgpu::MapMode mapMode = GetMapMode();
+    MapAsync(mapMode, 0, kBufferSize);
+
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Aborted, _)).Times(1);
+
+        buffer.Destroy();
+        FlushCallbacks();
+    });
 }
 
 }  // anonymous namespace

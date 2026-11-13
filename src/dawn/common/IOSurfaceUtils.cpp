@@ -119,9 +119,23 @@ size_t BytesPerElement(wgpu::TextureFormat format, size_t plane) {
 
 }  // namespace
 
-IOSurfaceRef CreateMultiPlanarIOSurface(wgpu::TextureFormat format,
-                                        uint32_t width,
-                                        uint32_t height) {
+CFRef<IOSurfaceRef> CreateIOSurface(uint32_t width,
+                                    uint32_t height,
+                                    uint32_t pixelFormat,
+                                    uint32_t bytesPerElement) {
+    CFRef<CFMutableDictionaryRef> dict = AcquireCFRef(CFDictionaryCreateMutable(
+        kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
+    AddIntegerValue(dict.Get(), kIOSurfaceWidth, static_cast<int32_t>(width));
+    AddIntegerValue(dict.Get(), kIOSurfaceHeight, static_cast<int32_t>(height));
+    AddIntegerValue(dict.Get(), kIOSurfacePixelFormat, static_cast<int32_t>(pixelFormat));
+    AddIntegerValue(dict.Get(), kIOSurfaceBytesPerElement, static_cast<int32_t>(bytesPerElement));
+
+    return AcquireCFRef(IOSurfaceCreate(dict.Get()));
+}
+
+CFRef<IOSurfaceRef> CreateMultiPlanarIOSurface(wgpu::TextureFormat format,
+                                               uint32_t width,
+                                               uint32_t height) {
     CFRef<CFMutableDictionaryRef> dict = AcquireCFRef(CFDictionaryCreateMutable(
         kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
     AddIntegerValue(dict.Get(), kIOSurfaceWidth, sign_cast(width));
@@ -166,8 +180,6 @@ IOSurfaceRef CreateMultiPlanarIOSurface(wgpu::TextureFormat format,
     totalBytesAlloc = IOSurfaceAlignProperty(kIOSurfaceAllocSize, totalBytesAlloc);
     AddIntegerValue(dict.Get(), kIOSurfaceAllocSize, checked_cast<int32_t>(totalBytesAlloc));
 
-    IOSurfaceRef surface = IOSurfaceCreate(dict.Get());
-
-    return surface;
+    return AcquireCFRef(IOSurfaceCreate(dict.Get()));
 }
 }  // namespace dawn

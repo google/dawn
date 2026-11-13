@@ -85,6 +85,12 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		return err
 	}
 	c.state = *state
+	if c.flags.Node == "" {
+		return common.ErrNodeNotFound
+	}
+	if !fileutils.IsDir(c.flags.CTS, cfg.OsWrapper) {
+		return fmt.Errorf("'%v' is not a directory; only run-cts standalone can run a CTS zip", c.flags.CTS)
+	}
 
 	// The test query is the optional unnamed argument
 	c.query = "webgpu:*"

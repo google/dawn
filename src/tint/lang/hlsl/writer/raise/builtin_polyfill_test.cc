@@ -51,509 +51,6 @@ struct HlslWriter_BuiltinPolyfillTest : public core::ir::transform::TransformTes
     void SetUp() override { mod.properties.Add(core::ir::Property::kAllow16BitFloats); }
 };
 
-TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastIdentity) {
-    auto* a = b.FunctionParam<i32>("a");
-    auto* func = b.Function("foo", ty.i32());
-    func->SetParams({a});
-    b.Append(func->Block(), [&] { b.Return(func, b.Bitcast<i32>(a)); });
-
-    auto* src = R"(
-%foo = func(%a:i32):i32 {
-  $B1: {
-    %3:i32 = bitcast<i32> %a
-    ret %3
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-%foo = func(%a:i32):i32 {
-  $B1: {
-    ret %a
-  }
-}
-)";
-
-    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(HlslWriter_BuiltinPolyfillTest, Asuint) {
-    auto* a = b.FunctionParam<i32>("a");
-    auto* func = b.Function("foo", ty.u32());
-    func->SetParams({a});
-    b.Append(func->Block(), [&] { b.Return(func, b.Bitcast<u32>(a)); });
-
-    auto* src = R"(
-%foo = func(%a:i32):u32 {
-  $B1: {
-    %3:u32 = bitcast<u32> %a
-    ret %3
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-%foo = func(%a:i32):u32 {
-  $B1: {
-    %3:u32 = hlsl.asuint %a
-    ret %3
-  }
-}
-)";
-
-    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(HlslWriter_BuiltinPolyfillTest, Asint) {
-    auto* a = b.FunctionParam<u32>("a");
-    auto* func = b.Function("foo", ty.i32());
-    func->SetParams({a});
-    b.Append(func->Block(), [&] { b.Return(func, b.Bitcast<i32>(a)); });
-
-    auto* src = R"(
-%foo = func(%a:u32):i32 {
-  $B1: {
-    %3:i32 = bitcast<i32> %a
-    ret %3
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-%foo = func(%a:u32):i32 {
-  $B1: {
-    %3:i32 = hlsl.asint %a
-    ret %3
-  }
-}
-)";
-
-    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(HlslWriter_BuiltinPolyfillTest, Asfloat) {
-    auto* a = b.FunctionParam<i32>("a");
-    auto* func = b.Function("foo", ty.f32());
-    func->SetParams({a});
-    b.Append(func->Block(), [&] { b.Return(func, b.Bitcast<f32>(a)); });
-
-    auto* src = R"(
-%foo = func(%a:i32):f32 {
-  $B1: {
-    %3:f32 = bitcast<f32> %a
-    ret %3
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-%foo = func(%a:i32):f32 {
-  $B1: {
-    %3:f32 = hlsl.asfloat %a
-    ret %3
-  }
-}
-)";
-
-    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(HlslWriter_BuiltinPolyfillTest, AsfloatVec) {
-    auto* a = b.FunctionParam<vec3<i32>>("a");
-    auto* func = b.Function("foo", ty.vec<f32, 3>());
-    func->SetParams({a});
-    b.Append(func->Block(), [&] { b.Return(func, b.Bitcast(ty.vec(ty.f32(), 3), a)); });
-
-    auto* src = R"(
-%foo = func(%a:vec3<i32>):vec3<f32> {
-  $B1: {
-    %3:vec3<f32> = bitcast<vec3<f32>> %a
-    ret %3
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-%foo = func(%a:vec3<i32>):vec3<f32> {
-  $B1: {
-    %3:vec3<f32> = hlsl.asfloat %a
-    ret %3
-  }
-}
-)";
-
-    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastFromF16) {
-    auto* a = b.FunctionParam<vec2<f16>>("a");
-    auto* func = b.Function("foo", ty.f32());
-    func->SetParams({a});
-    b.Append(func->Block(), [&] { b.Return(func, b.Bitcast(ty.f32(), a)); });
-
-    auto* src = R"(
-%foo = func(%a:vec2<f16>):f32 {
-  $B1: {
-    %3:f32 = bitcast<f32> %a
-    ret %3
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-%foo = func(%a:vec2<f16>):f32 {
-  $B1: {
-    %3:f32 = call %tint_bitcast_from_f16, %a
-    ret %3
-  }
-}
-%tint_bitcast_from_f16 = func(%src:vec2<f16>):f32 {
-  $B2: {
-    %6:vec2<u16> = hlsl.asuint16 %src
-    %7:vec2<u32> = convert %6
-    %8:vec2<u32> = and %7, vec2<u32>(65535u)
-    %9:vec2<u32> = shl %8, vec2<u32>(0u, 16u)
-    %10:u32 = access %9, 0u
-    %11:u32 = access %9, 1u
-    %12:u32 = or %10, %11
-    %13:f32 = hlsl.asfloat %12
-    ret %13
-  }
-}
-)";
-
-    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastToF16) {
-    auto* a = b.FunctionParam<f32>("a");
-    auto* func = b.Function("foo", ty.vec2h());
-    func->SetParams({a});
-    b.Append(func->Block(), [&] { b.Return(func, b.Bitcast(ty.vec2h(), a)); });
-
-    auto* src = R"(
-%foo = func(%a:f32):vec2<f16> {
-  $B1: {
-    %3:vec2<f16> = bitcast<vec2<f16>> %a
-    ret %3
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-%foo = func(%a:f32):vec2<f16> {
-  $B1: {
-    %3:vec2<f16> = call %tint_bitcast_to_f16, %a
-    ret %3
-  }
-}
-%tint_bitcast_to_f16 = func(%src:f32):vec2<f16> {
-  $B2: {
-    %6:u32 = hlsl.asuint %src
-    %v:u32 = let %6
-    %8:vec2<u32> = construct %v, %v
-    %9:vec2<u32> = shr %8, vec2<u32>(0u, 16u)
-    %10:vec2<u32> = and %9, vec2<u32>(65535u)
-    %11:vec2<u16> = convert %10
-    %v16:vec2<u16> = let %11
-    %13:vec2<f16> = hlsl.asfloat16 %v16
-    ret %13
-  }
-}
-)";
-
-    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastFromVec2F16) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] {
-        auto* a = b.Var("a", b.Construct<vec2<f16>>(1_h, 2_h));
-        auto* z = b.Load(a);
-        b.Let("b", b.Bitcast<i32>(z));
-        b.Return(func);
-    });
-
-    auto* src = R"(
-%foo = @fragment func():void {
-  $B1: {
-    %a:ptr<function, vec2<f16>, read_write> = var vec2<f16>(1.0h, 2.0h)
-    %3:vec2<f16> = load %a
-    %4:i32 = bitcast<i32> %3
-    %b:i32 = let %4
-    ret
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-%foo = @fragment func():void {
-  $B1: {
-    %a:ptr<function, vec2<f16>, read_write> = var vec2<f16>(1.0h, 2.0h)
-    %3:vec2<f16> = load %a
-    %4:i32 = call %tint_bitcast_from_f16, %3
-    %b:i32 = let %4
-    ret
-  }
-}
-%tint_bitcast_from_f16 = func(%src:vec2<f16>):i32 {
-  $B2: {
-    %8:vec2<u16> = hlsl.asuint16 %src
-    %9:vec2<u32> = convert %8
-    %10:vec2<u32> = and %9, vec2<u32>(65535u)
-    %11:vec2<u32> = shl %10, vec2<u32>(0u, 16u)
-    %12:u32 = access %11, 0u
-    %13:u32 = access %11, 1u
-    %14:u32 = or %12, %13
-    %15:i32 = hlsl.asint %14
-    ret %15
-  }
-}
-)";
-
-    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastToVec4F16) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] {
-        auto* a = b.Var("a", b.Construct<vec2<i32>>(1_i, 2_i));
-        b.Let("b", b.Bitcast<vec4<f16>>(b.Load(a)));
-        b.Return(func);
-    });
-
-    auto* src = R"(
-%foo = @fragment func():void {
-  $B1: {
-    %a:ptr<function, vec2<i32>, read_write> = var vec2<i32>(1i, 2i)
-    %3:vec2<i32> = load %a
-    %4:vec4<f16> = bitcast<vec4<f16>> %3
-    %b:vec4<f16> = let %4
-    ret
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-%foo = @fragment func():void {
-  $B1: {
-    %a:ptr<function, vec2<i32>, read_write> = var vec2<i32>(1i, 2i)
-    %3:vec2<i32> = load %a
-    %4:vec4<f16> = call %tint_bitcast_to_f16, %3
-    %b:vec4<f16> = let %4
-    ret
-  }
-}
-%tint_bitcast_to_f16 = func(%src:vec2<i32>):vec4<f16> {
-  $B2: {
-    %8:vec2<u32> = hlsl.asuint %src
-    %v:vec2<u32> = let %8
-    %10:vec4<u32> = swizzle %v, xxyy
-    %11:vec4<u32> = shr %10, vec4<u32>(0u, 16u, 0u, 16u)
-    %12:vec4<u32> = and %11, vec4<u32>(65535u)
-    %13:vec4<u16> = convert %12
-    %v16:vec4<u16> = let %13
-    %15:vec4<f16> = hlsl.asfloat16 %v16
-    ret %15
-  }
-}
-)";
-
-    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
-    EXPECT_EQ(expect, str());
-}
-
-// Test bitcast from f16 to u16 scalar — should use asuint16.
-TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastF16ToU16) {
-    mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
-    auto* a = b.FunctionParam("a", ty.f16());
-    auto* func = b.Function("foo", ty.u16());
-    func->SetParams({a});
-    b.Append(func->Block(), [&] { b.Return(func, b.Bitcast(ty.u16(), a)); });
-
-    auto* src = R"(
-%foo = func(%a:f16):u16 {
-  $B1: {
-    %3:u16 = bitcast<u16> %a
-    ret %3
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-%foo = func(%a:f16):u16 {
-  $B1: {
-    %3:u16 = hlsl.asuint16 %a
-    ret %3
-  }
-}
-)";
-
-    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
-    EXPECT_EQ(expect, str());
-}
-
-// Test bitcast from u16 to f16 scalar — should use asfloat16.
-TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastU16ToF16) {
-    mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
-    auto* a = b.FunctionParam("a", ty.u16());
-    auto* func = b.Function("foo", ty.f16());
-    func->SetParams({a});
-    b.Append(func->Block(), [&] { b.Return(func, b.Bitcast(ty.f16(), a)); });
-
-    auto* src = R"(
-%foo = func(%a:u16):f16 {
-  $B1: {
-    %3:f16 = bitcast<f16> %a
-    ret %3
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-%foo = func(%a:u16):f16 {
-  $B1: {
-    %3:f16 = hlsl.asfloat16 %a
-    ret %3
-  }
-}
-)";
-
-    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastVec2U16ToVec2F16) {
-    mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
-    auto* a = b.FunctionParam<vec2<u16>>("a");
-    auto* func = b.Function("foo", ty.vec2h());
-    func->SetParams({a});
-    b.Append(func->Block(), [&] { b.Return(func, b.Bitcast(ty.vec2h(), a)); });
-
-    auto* src = R"(
-%foo = func(%a:vec2<u16>):vec2<f16> {
-  $B1: {
-    %3:vec2<f16> = bitcast<vec2<f16>> %a
-    ret %3
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-%foo = func(%a:vec2<u16>):vec2<f16> {
-  $B1: {
-    %3:vec2<f16> = hlsl.asfloat16 %a
-    ret %3
-  }
-}
-)";
-
-    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastVec2U16ToU32) {
-    mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
-    auto* a = b.FunctionParam<vec2<u16>>("a");
-    auto* func = b.Function("foo", ty.u32());
-    func->SetParams({a});
-    b.Append(func->Block(), [&] { b.Return(func, b.Bitcast(ty.u32(), a)); });
-
-    auto* src = R"(
-%foo = func(%a:vec2<u16>):u32 {
-  $B1: {
-    %3:u32 = bitcast<u32> %a
-    ret %3
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-%foo = func(%a:vec2<u16>):u32 {
-  $B1: {
-    %3:u32 = call %tint_bitcast_from_u16, %a
-    ret %3
-  }
-}
-%tint_bitcast_from_u16 = func(%src:vec2<u16>):u32 {
-  $B2: {
-    %6:vec2<u32> = convert %src
-    %7:vec2<u32> = and %6, vec2<u32>(65535u)
-    %8:vec2<u32> = shl %7, vec2<u32>(0u, 16u)
-    %9:u32 = access %8, 0u
-    %10:u32 = access %8, 1u
-    %11:u32 = or %9, %10
-    ret %11
-  }
-}
-)";
-
-    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastU32ToVec2U16) {
-    mod.properties.Add(core::ir::Property::kAllow16BitIntegers);
-    auto* a = b.FunctionParam<u32>("a");
-    auto* func = b.Function("foo", ty.vec(ty.u16(), 2));
-    func->SetParams({a});
-    b.Append(func->Block(), [&] { b.Return(func, b.Bitcast(ty.vec(ty.u16(), 2), a)); });
-
-    auto* src = R"(
-%foo = func(%a:u32):vec2<u16> {
-  $B1: {
-    %3:vec2<u16> = bitcast<vec2<u16>> %a
-    ret %3
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-%foo = func(%a:u32):vec2<u16> {
-  $B1: {
-    %3:vec2<u16> = call %tint_bitcast_to_u16, %a
-    ret %3
-  }
-}
-%tint_bitcast_to_u16 = func(%src:u32):vec2<u16> {
-  $B2: {
-    %v:u32 = let %src
-    %7:vec2<u32> = construct %v, %v
-    %8:vec2<u32> = shr %7, vec2<u32>(0u, 16u)
-    %9:vec2<u32> = and %8, vec2<u32>(65535u)
-    %10:vec2<u16> = convert %9
-    %v16:vec2<u16> = let %10
-    ret %v16
-  }
-}
-)";
-
-    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
-    EXPECT_EQ(expect, str());
-}
-
 TEST_F(HlslWriter_BuiltinPolyfillTest, Sign) {
     auto* arg = b.FunctionParam("arg", ty.f32());
     auto* func = b.Function("foo", ty.void_());
@@ -645,7 +142,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumLevels) {
     auto* expect = R"(
 %foo = func(%t:texture_1d<f32>):u32 {
   $B1: {
-    %3:ptr<function, vec2<u32>, read_write> = var undef
+    %3:ptr<function, vec2<u32>, read_write> = var
     %4:ptr<function, u32, read_write> = access %3, 0u
     %5:ptr<function, u32, read_write> = access %3, 1u
     %6:void = %t.GetDimensions 0u, %4, %5
@@ -683,7 +180,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumLayers) {
     auto* expect = R"(
 %foo = func(%t:texture_cube_array<f32>):u32 {
   $B1: {
-    %3:ptr<function, vec3<u32>, read_write> = var undef
+    %3:ptr<function, vec3<u32>, read_write> = var
     %4:ptr<function, u32, read_write> = access %3, 0u
     %5:ptr<function, u32, read_write> = access %3, 1u
     %6:ptr<function, u32, read_write> = access %3, 2u
@@ -723,7 +220,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumLayersMultisampledArray) {
     auto* expect = R"(
 %foo = func(%t:texture_multisampled_2d_array<f32>):u32 {
   $B1: {
-    %3:ptr<function, vec4<u32>, read_write> = var undef
+    %3:ptr<function, vec4<u32>, read_write> = var
     %4:ptr<function, u32, read_write> = access %3, 0u
     %5:ptr<function, u32, read_write> = access %3, 1u
     %6:ptr<function, u32, read_write> = access %3, 2u
@@ -764,7 +261,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumSamples) {
     auto* expect = R"(
 %foo = func(%t:texture_multisampled_2d<f32>):u32 {
   $B1: {
-    %3:ptr<function, vec3<u32>, read_write> = var undef
+    %3:ptr<function, vec3<u32>, read_write> = var
     %4:ptr<function, u32, read_write> = access %3, 0u
     %5:ptr<function, u32, read_write> = access %3, 1u
     %6:ptr<function, u32, read_write> = access %3, 2u
@@ -804,7 +301,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumSamplesArray) {
     auto* expect = R"(
 %foo = func(%t:texture_multisampled_2d_array<f32>):u32 {
   $B1: {
-    %3:ptr<function, vec4<u32>, read_write> = var undef
+    %3:ptr<function, vec4<u32>, read_write> = var
     %4:ptr<function, u32, read_write> = access %3, 0u
     %5:ptr<function, u32, read_write> = access %3, 1u
     %6:ptr<function, u32, read_write> = access %3, 2u
@@ -844,7 +341,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_1d_WithoutLod) {
     auto* expect = R"(
 %foo = func(%t:texture_1d<f32>):u32 {
   $B1: {
-    %3:ptr<function, u32, read_write> = var undef
+    %3:ptr<function, u32, read_write> = var
     %4:void = %t.GetDimensions %3
     %5:u32 = load %3
     ret %5
@@ -879,7 +376,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_1d_WithI32Lod) {
     auto* expect = R"(
 %foo = func(%t:texture_1d<f32>):u32 {
   $B1: {
-    %3:ptr<function, vec2<u32>, read_write> = var undef
+    %3:ptr<function, vec2<u32>, read_write> = var
     %4:ptr<function, u32, read_write> = access %3, 0u
     %5:ptr<function, u32, read_write> = access %3, 1u
     %6:void = %t.GetDimensions 3u, %4, %5
@@ -917,7 +414,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_1d_WithU32Lod) {
     auto* expect = R"(
 %foo = func(%t:texture_1d<f32>):u32 {
   $B1: {
-    %3:ptr<function, vec2<u32>, read_write> = var undef
+    %3:ptr<function, vec2<u32>, read_write> = var
     %4:ptr<function, u32, read_write> = access %3, 0u
     %5:ptr<function, u32, read_write> = access %3, 1u
     %6:void = %t.GetDimensions 3u, %4, %5
@@ -955,7 +452,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_2d_WithoutLod) {
     auto* expect = R"(
 %foo = func(%t:texture_2d<f32>):vec2<u32> {
   $B1: {
-    %3:ptr<function, vec2<u32>, read_write> = var undef
+    %3:ptr<function, vec2<u32>, read_write> = var
     %4:ptr<function, u32, read_write> = access %3, 0u
     %5:ptr<function, u32, read_write> = access %3, 1u
     %6:void = %t.GetDimensions %4, %5
@@ -992,7 +489,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_2d_WithI32Lod) {
     auto* expect = R"(
 %foo = func(%t:texture_2d<f32>):vec2<u32> {
   $B1: {
-    %3:ptr<function, vec3<u32>, read_write> = var undef
+    %3:ptr<function, vec3<u32>, read_write> = var
     %4:ptr<function, u32, read_write> = access %3, 0u
     %5:ptr<function, u32, read_write> = access %3, 1u
     %6:ptr<function, u32, read_write> = access %3, 2u
@@ -1031,7 +528,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_3d) {
     auto* expect = R"(
 %foo = func(%t:texture_3d<f32>):vec3<u32> {
   $B1: {
-    %3:ptr<function, vec3<u32>, read_write> = var undef
+    %3:ptr<function, vec3<u32>, read_write> = var
     %4:ptr<function, u32, read_write> = access %3, 0u
     %5:ptr<function, u32, read_write> = access %3, 1u
     %6:ptr<function, u32, read_write> = access %3, 2u
@@ -1353,7 +850,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureStore1D) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_storage_1d<r32float, read_write>, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, texture_storage_1d<r32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1368,7 +865,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_storage_1d<r32float, read_write>, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, texture_storage_1d<r32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1402,7 +899,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureStore3D) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_storage_3d<r32float, read_write>, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, texture_storage_3d<r32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1417,7 +914,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_storage_3d<r32float, read_write>, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, texture_storage_3d<r32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1451,7 +948,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureStoreArray) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_storage_2d_array<rgba32float, read_write>, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, texture_storage_2d_array<rgba32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1466,7 +963,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_storage_2d_array<rgba32float, read_write>, read> = var undef @binding_point(0, 0)
+  %1:ptr<handle, texture_storage_2d_array<rgba32float, read_write>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1508,8 +1005,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2d) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -1526,8 +1023,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -1572,8 +1069,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2dOffset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -1590,8 +1087,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -1636,8 +1133,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGatherCompare_DepthCubeArray) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_cube_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_cube_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -1654,8 +1151,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_cube_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_cube_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -1701,8 +1198,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2dArrayOffset) 
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -1719,8 +1216,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -1763,8 +1260,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_Alpha) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<i32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<i32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -1781,8 +1278,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<i32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<i32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -1825,8 +1322,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_RedOffset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<i32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<i32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -1843,8 +1340,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<i32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<i32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -1888,8 +1385,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_GreenArray) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<i32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<i32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -1906,8 +1403,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<i32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<i32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -1953,8 +1450,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_BlueArrayOffset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<i32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<i32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -1971,8 +1468,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<i32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<i32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2014,8 +1511,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_Depth) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2032,8 +1529,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2075,8 +1572,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_DepthOffset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2093,8 +1590,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2136,8 +1633,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_DepthArray) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2154,8 +1651,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2199,8 +1696,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_DepthArrayOffset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2217,8 +1714,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2261,8 +1758,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_1d) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_1d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_1d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2279,8 +1776,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_1d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_1d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2321,8 +1818,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_2d) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2339,8 +1836,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2382,8 +1879,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_2d_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2400,8 +1897,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2443,8 +1940,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_2d_Array) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2461,8 +1958,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2506,8 +2003,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_2d_Array_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2524,8 +2021,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2566,8 +2063,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_3d) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_3d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2584,8 +2081,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_3d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2627,8 +2124,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_3d_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_3d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2645,8 +2142,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_3d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2687,8 +2184,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_Cube) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_cube<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_cube<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2705,8 +2202,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_cube<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_cube<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2748,8 +2245,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_Cube_Array) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_cube_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_cube_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2766,8 +2263,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_cube_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_cube_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2807,8 +2304,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_Depth2d) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2825,8 +2322,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2868,8 +2365,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_Depth2d_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2886,8 +2383,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2929,8 +2426,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_Depth2d_Array) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2947,8 +2444,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -2991,8 +2488,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_Depth2d_Array_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3009,8 +2506,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3052,8 +2549,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSample_DepthCube_Array) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_cube_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_cube_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3070,8 +2567,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_cube_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_cube_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3113,8 +2610,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleBias_2d) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3131,8 +2628,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3175,8 +2672,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleBias_2d_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3193,8 +2690,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3237,8 +2734,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleBias_2d_Array) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3255,8 +2752,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3300,8 +2797,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleBias_2d_Array_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3318,8 +2815,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3360,8 +2857,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleBias_3d) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_3d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3378,8 +2875,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_3d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3422,8 +2919,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleBias_3d_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_3d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3440,8 +2937,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_3d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3482,8 +2979,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleBias_Cube) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_cube<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_cube<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3500,8 +2997,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_cube<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_cube<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3544,8 +3041,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleBias_Cube_Array) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_cube_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_cube_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3562,8 +3059,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_cube_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_cube_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3603,8 +3100,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompare_2d) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3621,8 +3118,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3663,8 +3160,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompare_2d_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3681,8 +3178,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3724,8 +3221,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompare_2d_Array) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3742,8 +3239,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3786,8 +3283,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompare_2d_Array_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3804,8 +3301,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3845,8 +3342,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompare_Cube) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_cube, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_cube, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3863,8 +3360,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_cube, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_cube, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3906,8 +3403,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompare_Cube_Array) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_cube_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_cube_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3924,8 +3421,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_cube_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_cube_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3965,8 +3462,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2d) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -3983,8 +3480,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4026,8 +3523,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2d_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4044,8 +3541,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4087,8 +3584,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2d_Array) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4105,8 +3602,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4149,8 +3646,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2d_Array_Offset
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4167,8 +3664,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4208,8 +3705,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_Cube) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_cube, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_cube, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4226,8 +3723,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_cube, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_cube, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4269,8 +3766,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_Cube_Array) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_cube_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_cube_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4287,8 +3784,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_cube_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler_comparison, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_cube_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4331,8 +3828,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleGrad_2d) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4349,8 +3846,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4395,8 +3892,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleGrad_2d_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4413,8 +3910,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4459,8 +3956,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleGrad_2d_Array) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4477,8 +3974,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4524,8 +4021,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleGrad_2d_Array_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4542,8 +4039,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4586,8 +4083,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleGrad_3d) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_3d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4604,8 +4101,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_3d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4650,8 +4147,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleGrad_3d_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_3d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4668,8 +4165,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_3d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4712,8 +4209,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleGrad_Cube) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_cube<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_cube<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4730,8 +4227,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_cube<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_cube<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4776,8 +4273,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleGrad_Cube_Array) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_cube_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_cube_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4794,8 +4291,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_cube_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_cube_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4836,8 +4333,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_1d) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_1d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_1d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4854,8 +4351,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_1d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_1d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4896,8 +4393,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_2d) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4914,8 +4411,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4958,8 +4455,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_2d_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -4976,8 +4473,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5020,8 +4517,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_2d_Array) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5038,8 +4535,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5083,8 +4580,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_2d_Array_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5101,8 +4598,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_2d_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5143,8 +4640,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_3d) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_3d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5161,8 +4658,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_3d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5205,8 +4702,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_3d_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_3d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5223,8 +4720,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_3d<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5265,8 +4762,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_Cube) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_cube<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_cube<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5283,8 +4780,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_cube<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_cube<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5327,8 +4824,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_Cube_Array) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_cube_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_cube_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5345,8 +4842,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_cube_array<f32>, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_cube_array<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5386,8 +4883,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_Depth2d) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5404,8 +4901,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5447,8 +4944,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_Depth2d_Offset) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5465,8 +4962,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5508,8 +5005,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_Depth2d_Array) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5526,8 +5023,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5571,8 +5068,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_Depth2d_Array_Offset) 
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5589,8 +5086,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_2d_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5632,8 +5129,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_DepthCube_Array) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_cube_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_cube_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5650,8 +5147,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ptr<handle, texture_depth_cube_array, read> = var undef @binding_point(0, 0)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+  %1:ptr<handle, texture_depth_cube_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
 }
 
 %foo = @fragment func():void {
@@ -5729,7 +5226,7 @@ TEST_P(HlslBuiltinPolyfillWorkgroupAtomic, Access) {
 
     std::string src = R"(
 $B1: {  # root
-  %v:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %v:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -5745,7 +5242,7 @@ $B1: {  # root
 
     std::string expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %v:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -5800,7 +5297,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, SB, read_write> = var undef
+  %v:ptr<workgroup, SB, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -5821,7 +5318,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, SB, read_write> = var undef
+  %v:ptr<workgroup, SB, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -5862,7 +5359,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, SB, read_write> = var undef
+  %v:ptr<workgroup, SB, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -5884,7 +5381,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, SB, read_write> = var undef
+  %v:ptr<workgroup, SB, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -5929,7 +5426,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, SB, read_write> = var undef
+  %v:ptr<workgroup, SB, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -5954,7 +5451,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, SB, read_write> = var undef
+  %v:ptr<workgroup, SB, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -6009,7 +5506,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, SB, read_write> = var undef
+  %v:ptr<workgroup, SB, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -6036,7 +5533,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, SB, read_write> = var undef
+  %v:ptr<workgroup, SB, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -7187,7 +6684,7 @@ __modf_result_f32 = struct @align(4) {
 
 %foo = @fragment func():void {
   $B1: {
-    %2:ptr<function, f32, read_write> = var undef
+    %2:ptr<function, f32, read_write> = var
     %3:f32 = load %2
     %4:__modf_result_f32 = modf %3
     %a:__modf_result_f32 = let %4
@@ -7205,9 +6702,9 @@ __modf_result_f32 = struct @align(4) {
 
 %foo = @fragment func():void {
   $B1: {
-    %2:ptr<function, f32, read_write> = var undef
+    %2:ptr<function, f32, read_write> = var
     %3:f32 = load %2
-    %4:ptr<function, f32, read_write> = var undef
+    %4:ptr<function, f32, read_write> = var
     %5:f32 = load %4
     %6:f32 = hlsl.modf %3, %5
     %7:f32 = load %4
@@ -7239,7 +6736,7 @@ __modf_result_vec3_f32 = struct @align(16) {
 
 %foo = @fragment func():void {
   $B1: {
-    %2:ptr<function, vec3<f32>, read_write> = var undef
+    %2:ptr<function, vec3<f32>, read_write> = var
     %3:vec3<f32> = load %2
     %4:__modf_result_vec3_f32 = modf %3
     %a:__modf_result_vec3_f32 = let %4
@@ -7257,9 +6754,9 @@ __modf_result_vec3_f32 = struct @align(16) {
 
 %foo = @fragment func():void {
   $B1: {
-    %2:ptr<function, vec3<f32>, read_write> = var undef
+    %2:ptr<function, vec3<f32>, read_write> = var
     %3:vec3<f32> = load %2
-    %4:ptr<function, vec3<f32>, read_write> = var undef
+    %4:ptr<function, vec3<f32>, read_write> = var
     %5:vec3<f32> = load %4
     %6:vec3<f32> = hlsl.modf %3, %5
     %7:vec3<f32> = load %4
@@ -7291,7 +6788,7 @@ __frexp_result_f32 = struct @align(4) {
 
 %foo = @fragment func():void {
   $B1: {
-    %2:ptr<function, f32, read_write> = var undef
+    %2:ptr<function, f32, read_write> = var
     %3:f32 = load %2
     %4:__frexp_result_f32 = frexp %3
     %a:__frexp_result_f32 = let %4
@@ -7309,9 +6806,9 @@ __frexp_result_f32 = struct @align(4) {
 
 %foo = @fragment func():void {
   $B1: {
-    %2:ptr<function, f32, read_write> = var undef
+    %2:ptr<function, f32, read_write> = var
     %3:f32 = load %2
-    %4:ptr<function, f32, read_write> = var undef
+    %4:ptr<function, f32, read_write> = var
     %5:f32 = load %4
     %6:f32 = hlsl.frexp %3, %5
     %7:i32 = hlsl.sign %3
@@ -7347,7 +6844,7 @@ __frexp_result_vec3_f32 = struct @align(16) {
 
 %foo = @fragment func():void {
   $B1: {
-    %2:ptr<function, vec3<f32>, read_write> = var undef
+    %2:ptr<function, vec3<f32>, read_write> = var
     %3:vec3<f32> = load %2
     %4:__frexp_result_vec3_f32 = frexp %3
     %a:__frexp_result_vec3_f32 = let %4
@@ -7365,9 +6862,9 @@ __frexp_result_vec3_f32 = struct @align(16) {
 
 %foo = @fragment func():void {
   $B1: {
-    %2:ptr<function, vec3<f32>, read_write> = var undef
+    %2:ptr<function, vec3<f32>, read_write> = var
     %3:vec3<f32> = load %2
-    %4:ptr<function, vec3<f32>, read_write> = var undef
+    %4:ptr<function, vec3<f32>, read_write> = var
     %5:vec3<f32> = load %4
     %6:vec3<f32> = hlsl.frexp %3, %5
     %7:vec3<i32> = hlsl.sign %3
@@ -7709,8 +7206,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_Deduplication) {
     auto* src = R"(
 %foo = func():void {
   $B1: {
-    %2:ptr<function, subgroup_matrix_left<f32, 4, 4>, read_write> = var undef
-    %3:ptr<function, subgroup_matrix_left<i32, 4, 4>, read_write> = var undef
+    %2:ptr<function, subgroup_matrix_left<f32, 4, 4>, read_write> = var
+    %3:ptr<function, subgroup_matrix_left<i32, 4, 4>, read_write> = var
     %4:subgroup_matrix_left<f32, 4, 4> = load %2
     %5:subgroup_matrix_left<f32, 4, 4> = subgroupMatrixScalarAdd %4, 1.0f
     %6:subgroup_matrix_left<f32, 4, 4> = load %2
@@ -7728,8 +7225,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_Deduplication) {
     auto* expect = R"(
 %foo = func():void {
   $B1: {
-    %2:ptr<function, subgroup_matrix_left<f32, 4, 4>, read_write> = var undef
-    %3:ptr<function, subgroup_matrix_left<i32, 4, 4>, read_write> = var undef
+    %2:ptr<function, subgroup_matrix_left<f32, 4, 4>, read_write> = var
+    %3:ptr<function, subgroup_matrix_left<i32, 4, 4>, read_write> = var
     %4:subgroup_matrix_left<f32, 4, 4> = load %2
     %5:subgroup_matrix_left<f32, 4, 4> = call %tint_subgroup_matrix_scalar_op, %4, 1.0f
     %7:subgroup_matrix_left<f32, 4, 4> = load %2
@@ -8140,7 +7637,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var
 }
 
 %foo = func():subgroup_matrix_left<f32, 4, 4> {
@@ -8154,7 +7651,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var
 }
 
 %foo = func():subgroup_matrix_left<f32, 4, 4> {
@@ -8187,7 +7684,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_SignedOffset
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var
 }
 
 %foo = func(%offset:i32, %stride:i32):subgroup_matrix_left<f32, 4, 4> {
@@ -8201,7 +7698,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var
 }
 
 %foo = func(%offset:i32, %stride:i32):subgroup_matrix_left<f32, 4, 4> {
@@ -8238,7 +7735,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_UnsignedOffs
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var
 }
 
 %foo = func(%offset:u32, %stride:u32):subgroup_matrix_left<f32, 4, 4> {
@@ -8270,7 +7767,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_ColMajorTemp
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var
 }
 
 %foo = func():subgroup_matrix_left<f32, 4, 4> {
@@ -8284,7 +7781,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var
 }
 
 %foo = func():subgroup_matrix_left<f32, 4, 4> {
@@ -8314,7 +7811,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_RowMajorTemp
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var
 }
 
 %foo = func():subgroup_matrix_left<f32, 4, 4> {
@@ -8328,7 +7825,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var
 }
 
 %foo = func():subgroup_matrix_left<f32, 4, 4> {
@@ -8360,7 +7857,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Workgroup) {
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 4, 4>):void {
@@ -8374,7 +7871,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 4, 4>):void {
@@ -8408,7 +7905,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Workgroup_SignedOffse
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 4, 4>, %offset:i32, %stride:i32):void {
@@ -8422,7 +7919,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 4, 4>, %offset:i32, %stride:i32):void {
@@ -8458,7 +7955,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Workgroup_ColMajorTem
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 4, 4>):void {
@@ -8472,7 +7969,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 4, 4>):void {
@@ -8504,7 +8001,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Workgroup_RowMajorTem
 
     auto* src = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 4, 4>):void {
@@ -8518,7 +8015,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wg:ptr<workgroup, array<f32, 256>, read_write> = var undef
+  %wg:ptr<workgroup, array<f32, 256>, read_write> = var
 }
 
 %foo = func(%mat:subgroup_matrix_left<f32, 4, 4>):void {

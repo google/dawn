@@ -117,7 +117,7 @@
                OpStore %i %86 None
                OpBranch %52
          %65 = OpLabel
-               OpBranch %52
+               OpBranch %50
          %50 = OpLabel
          %68 = OpAccessChain %_ptr_Function_uint %tint_loop_idx_0 %uint_0
          %69 = OpLoad %uint %68 None

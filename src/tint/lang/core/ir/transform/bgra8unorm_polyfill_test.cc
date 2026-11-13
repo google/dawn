@@ -77,7 +77,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, NoModify_ModuleScopeVariable_Rgba) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%value:vec4<f32>, %coords:vec2<u32>):void {
@@ -146,7 +146,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopeVariable) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%value:vec4<f32>, %coords:vec2<u32>):void {
@@ -159,7 +159,7 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%value:vec4<f32>, %coords:vec2<u32>):void {
@@ -250,7 +250,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopePassedToUserFunction) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var @binding_point(1, 2)
 }
 
 %bar = func(%texture_1:texture_storage_2d<bgra8unorm, write>, %coords:vec2<u32>, %value:vec4<f32>):void {  # %texture_1: 'texture'
@@ -269,7 +269,7 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(1, 2)
 }
 
 %bar = func(%texture_1:texture_storage_2d<rgba8unorm, write>, %coords:vec2<u32>, %value:vec4<f32>):void {  # %texture_1: 'texture'
@@ -340,9 +340,9 @@ TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopePassedToUserFunction_MultipleTextur
 
     auto* src = R"(
 $B1: {  # root
-  %texture_a:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var undef @binding_point(1, 2)
-  %texture_b:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var undef @binding_point(1, 3)
-  %texture_c:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var undef @binding_point(1, 4)
+  %texture_a:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var @binding_point(1, 2)
+  %texture_b:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var @binding_point(1, 3)
+  %texture_c:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var @binding_point(1, 4)
 }
 
 %bar = func(%texture_a_1:texture_storage_2d<bgra8unorm, write>, %texture_b_1:texture_storage_2d<bgra8unorm, write>, %texture_b_2:texture_storage_2d<bgra8unorm, write>, %coords:vec2<u32>, %value:vec4<f32>):void {  # %texture_a_1: 'texture_a', %texture_b_1: 'texture_b', %texture_b_2: 'texture_b'
@@ -365,9 +365,9 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %texture_a:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(1, 2)
-  %texture_b:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(1, 3)
-  %texture_c:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(1, 4)
+  %texture_a:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(1, 2)
+  %texture_b:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(1, 3)
+  %texture_c:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(1, 4)
 }
 
 %bar = func(%texture_a_1:texture_storage_2d<rgba8unorm, write>, %texture_b_1:texture_storage_2d<rgba8unorm, write>, %texture_b_2:texture_storage_2d<rgba8unorm, write>, %coords:vec2<u32>, %value:vec4<f32>):void {  # %texture_a_1: 'texture_a', %texture_b_1: 'texture_b', %texture_b_2: 'texture_b'
@@ -438,7 +438,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, MutipleUsesOfOneTexture) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var @binding_point(1, 2)
 }
 
 %bar = func(%texture_1:texture_storage_2d<bgra8unorm, write>, %coords:vec2<u32>, %value:vec4<f32>):void {  # %texture_1: 'texture'
@@ -463,7 +463,7 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(1, 2)
 }
 
 %bar = func(%texture_1:texture_storage_2d<rgba8unorm, write>, %coords:vec2<u32>, %value:vec4<f32>):void {  # %texture_1: 'texture'
@@ -518,7 +518,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, ArrayedImage) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d_array<bgra8unorm, write>, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d_array<bgra8unorm, write>, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<u32>, %index:u32, %value:vec4<f32>):void {
@@ -531,7 +531,7 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d_array<rgba8unorm, write>, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d_array<rgba8unorm, write>, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<u32>, %index:u32, %value:vec4<f32>):void {
@@ -568,7 +568,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, TextureDimensions) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<bgra8unorm, write>, read> = var @binding_point(1, 2)
 }
 
 %foo = func():vec2<u32> {
@@ -581,7 +581,7 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(1, 2)
 }
 
 %foo = func():vec2<u32> {
@@ -619,7 +619,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, TextureLoad) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<bgra8unorm, read>, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<bgra8unorm, read>, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<u32>):vec4<f32> {
@@ -632,7 +632,7 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<rgba8unorm, read>, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, read>, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<u32>):vec4<f32> {
@@ -672,7 +672,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, TextureLoadAndStore) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<bgra8unorm, read_write>, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<bgra8unorm, read_write>, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<u32>):void {
@@ -686,7 +686,7 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<rgba8unorm, read_write>, read> = var undef @binding_point(1, 2)
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, read_write>, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<u32>):void {
@@ -727,7 +727,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, TexelBuffer_TextureLoad) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<handle, texel_buffer<bgra8unorm, read>, read> = var undef @binding_point(1, 2)
+  %buffer:ptr<handle, texel_buffer<bgra8unorm, read>, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%coord:u32):vec4<f32> {
@@ -740,7 +740,7 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<handle, texel_buffer<rgba8unorm, read>, read> = var undef @binding_point(1, 2)
+  %buffer:ptr<handle, texel_buffer<rgba8unorm, read>, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%coord:u32):vec4<f32> {
@@ -779,7 +779,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, TexelBuffer_TextureStore) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<handle, texel_buffer<bgra8unorm, read_write>, read> = var undef @binding_point(1, 2)
+  %buffer:ptr<handle, texel_buffer<bgra8unorm, read_write>, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%coord:u32, %value:vec4<f32>):void {
@@ -792,7 +792,7 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<handle, texel_buffer<rgba8unorm, read_write>, read> = var undef @binding_point(1, 2)
+  %buffer:ptr<handle, texel_buffer<rgba8unorm, read_write>, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%coord:u32, %value:vec4<f32>):void {
@@ -833,7 +833,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, TexelBuffer_TextureLoadAndStore) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<handle, texel_buffer<bgra8unorm, read_write>, read> = var undef @binding_point(1, 2)
+  %buffer:ptr<handle, texel_buffer<bgra8unorm, read_write>, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%coord:u32, %value:vec4<f32>):void {
@@ -847,7 +847,7 @@ $B1: {  # root
 )";
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<handle, texel_buffer<rgba8unorm, read_write>, read> = var undef @binding_point(1, 2)
+  %buffer:ptr<handle, texel_buffer<rgba8unorm, read_write>, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%coord:u32, %value:vec4<f32>):void {

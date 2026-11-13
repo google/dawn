@@ -52,6 +52,7 @@ bool HasAnisotropicFiltering(const OpenGLFunctions& gl);
 
 const char* GLErrorAsString(GLenum error);
 const char* GLFramebufferStatusAsString(GLenum status);
+const char* GLResetStatusAsString(GLenum status);
 
 // Checks that the framebuffer bound to `target` is complete, returning an internal error
 // otherwise. The check is unconditional so that callers relying on subsequent framebuffer
@@ -64,15 +65,30 @@ void ClearErrors(const OpenGLFunctions& gl,
                  const char* function,
                  unsigned int line);
 
-// Check for a single GL error.
+// Check for a GL error, also reporting the errors left pending by earlier unchecked calls. Returns
+// a device lost error if any of them is a context loss.
 MaybeError CheckError(const OpenGLFunctions& gl,
                       const char* call,
                       const char* file,
                       const char* function,
                       unsigned int line);
 
-#define DAWN_GL_TRY_ALWAYS_CHECK(gl, call)                      \
-    (ClearErrors(gl, __FILE__, __func__, __LINE__), (gl.call)); \
+// Checks for any GL error pending on the context. Call it explicitly before data becomes visible to
+// the application, so that errors from unchecked GL calls lose the device before the data becomes
+// visible to app. Also checks for a GPU reset, see CheckGraphicsResetStatus.
+MaybeError CheckPendingErrorBeforeUserVisibleData(const OpenGLFunctions& gl,
+                                                  const char* description);
+
+// Checks whether the GL context was reset (e.g. by a GPU hang). A reset can discard GPU work while
+// fences still signal and no GL error is generated, for example leaving the destination of a
+// readback unwritten. Call it before results of GPU work become visible to the application. Returns
+// a device lost error if a reset happened.
+MaybeError CheckGraphicsResetStatus(const OpenGLFunctions& gl, const char* description);
+
+// Errors left pending by earlier unchecked calls are not cleared, so that they are reported by
+// CheckError instead of being silently dropped.
+#define DAWN_GL_TRY_ALWAYS_CHECK(gl, call) \
+    (gl.call);                             \
     DAWN_TRY(CheckError(gl, "gl" #call, __FILE__, __func__, __LINE__))
 #define DAWN_GL_TRY_ALWAYS_CHECK_IGNORE_ERRORS(gl, call)        \
     (ClearErrors(gl, __FILE__, __func__, __LINE__), (gl.call)); \

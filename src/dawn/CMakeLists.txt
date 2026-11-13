@@ -32,9 +32,12 @@
 DawnGenerator(
     SCRIPT "${Dawn_SOURCE_DIR}/generator/dawn_version_generator.py"
     PRINT_NAME "Dawn version based utilities"
-    OUTPUT_HEADERS DAWN_VERSION_AUTOGEN_HEADERS
-    EXTRA_PARAMETERS "--dawn-dir"
+    OUTPUT_HEADERS DAWN_VERSION_GEN_HEADERS
+    EXTRA_PARAMETERS "gen"
+         "--dawn-dir"
          "${Dawn_SOURCE_DIR}"
+         "--version-json"
+         "${Dawn_SOURCE_DIR}/src/dawn/dawn_version.json"
 )
 
 dawn_add_library(
@@ -43,7 +46,7 @@ dawn_add_library(
     ENABLE_EMSCRIPTEN
     UTILITY_TARGET dawn_internal_config
     HEADERS
-        ${DAWN_VERSION_AUTOGEN_HEADERS}
+        ${DAWN_VERSION_GEN_HEADERS}
     DEPENDS
         dawn_public_config
 )
@@ -64,9 +67,11 @@ dawn_add_library(
     UTILITY_TARGET dawn_internal_config
     HEADERS
         "${DAWN_INCLUDE_DIR}/webgpu/webgpu.h"
+        ${DAWN_VERSION_GEN_HEADERS}
         ${DAWN_HEADERS_GEN_HEADERS}
     DEPENDS
         dawn_public_config
+        dawn::dawn_version
 )
 
 if(BUILD_SHARED_LIBS)

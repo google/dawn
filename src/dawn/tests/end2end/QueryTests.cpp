@@ -30,10 +30,13 @@
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
+
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
 
 // Clear the content of the result buffer into 0xFFFFFFFF.
 constexpr static uint64_t kSentinelValue = ~uint64_t{0};
@@ -71,27 +74,24 @@ class OcclusionExpectation : public detail::Expectation {
 
     explicit OcclusionExpectation(Result expected) { mExpected = expected; }
 
-    testing::AssertionResult Check(const void* data, size_t size) override {
-        DAWN_ASSERT(size % sizeof(uint64_t) == 0);
-        const uint64_t* actual = static_cast<const uint64_t*>(data);
-        for (size_t i = 0; i < size / sizeof(uint64_t); i++) {
-            if (DAWN_UNSAFE_TODO(actual[i]) == kSentinelValue) {
-                return testing::AssertionFailure()
+    AssertionResult Check(Span<const std::byte> data) override {
+        auto actual = ReinterpretSpan<const uint64_t>(data);
+        for (size_t i = 0; i < actual.size(); i++) {
+            if (actual[i] == kSentinelValue) {
+                return AssertionFailure()
                        << "Data[" << i << "] was not written (it kept the sentinel value of "
                        << kSentinelValue << ").\n";
             }
-            if (mExpected == Result::Zero && DAWN_UNSAFE_TODO(actual[i]) != 0) {
-                return testing::AssertionFailure()
-                       << "Expected data[" << i
-                       << "] to be zero, actual: " << DAWN_UNSAFE_TODO(actual[i]) << ".\n";
+            if (mExpected == Result::Zero && actual[i] != 0) {
+                return AssertionFailure()
+                       << "Expected data[" << i << "] to be zero, actual: " << actual[i] << ".\n";
             }
-            if (mExpected == Result::NonZero && DAWN_UNSAFE_TODO(actual[i]) == 0) {
-                return testing::AssertionFailure()
-                       << "Expected data[" << i << "] to be non-zero.\n";
+            if (mExpected == Result::NonZero && actual[i] == 0) {
+                return AssertionFailure() << "Expected data[" << i << "] to be non-zero.\n";
             }
         }
 
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 
   private:
@@ -734,17 +734,15 @@ class TimestampExpectation : public detail::Expectation {
     ~TimestampExpectation() override = default;
 
     // Expect the timestamp results are greater than 0.
-    testing::AssertionResult Check(const void* data, size_t size) override {
-        DAWN_ASSERT(size % sizeof(uint64_t) == 0);
-        const uint64_t* timestamps = static_cast<const uint64_t*>(data);
-        for (size_t i = 0; i < size / sizeof(uint64_t); i++) {
-            if (DAWN_UNSAFE_TODO(timestamps[i]) == 0) {
-                return testing::AssertionFailure()
-                       << "Expected data[" << i << "] to be greater than 0.\n";
+    AssertionResult Check(Span<const std::byte> data) override {
+        auto timestamps = ReinterpretSpan<const uint64_t>(data);
+        for (size_t i = 0; i < timestamps.size(); i++) {
+            if (timestamps[i] == 0) {
+                return AssertionFailure() << "Expected data[" << i << "] to be greater than 0.\n";
             }
         }
 
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 };
 
@@ -752,7 +750,6 @@ class TimestampQueryTestsBase : public QueryTests {
   protected:
     void SetUp() override {
         QueryTests::SetUp();
-
 
         // TODO(crbug.com/451389800): [Capture] implement query set.
         DAWN_SUPPRESS_TEST_IF(IsCaptureReplayCheckingEnabled());
@@ -981,7 +978,6 @@ class TimestampQueryTests : public TimestampQueryTestsBase {
         }
     }
 
-  private:
     wgpu::ComputePipeline computePipeline;
 };
 
@@ -995,9 +991,6 @@ TEST_P(TimestampQueryTests, QuerySetCreation) {
 
 // Test calling timestamp query from command encoder
 TEST_P(TimestampQueryTests, TimestampOnCommandEncoder) {
-    // TODO (530541262): Investigate failure on macOS 26 M2.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsApple());
-
     constexpr uint32_t kQueryCount = 2;
 
     // Write timestamp with different query indexes
@@ -1076,6 +1069,33 @@ TEST_P(TimestampQueryTests, TimestampWritesLocationOnComputePass) {
 
         TestTimestampWritesOnComputePass({nullptr, querySet0, 0, wgpu::kQuerySetIndexUndefined},
                                          {nullptr, querySet1, 0, wgpu::kQuerySetIndexUndefined});
+
+        TestTimestampWritesOnComputePass({nullptr, querySet0, wgpu::kQuerySetIndexUndefined, 0},
+                                         {nullptr, querySet1, wgpu::kQuerySetIndexUndefined, 0});
+    }
+
+    // Regression test for crbug.com/448394568 - a compute pass with no timestamps, followed by a
+    // compute pass with only endOfPassWriteIndex, in the same command encoder. Without the proper
+    // workaround, something happens in the driver (Apple GPU, possibly a regression in macOS 26)
+    // causing the command buffer to fail with kIOGPUCommandBufferCallbackErrorOutOfMemory.
+    {
+        wgpu::QuerySet querySet = CreateQuerySetForTimestamp(1);
+        wgpu::Buffer destination = CreateResolveBuffer(sizeof(uint64_t));
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass0 = encoder.BeginComputePass();
+        pass0.SetPipeline(computePipeline);
+        pass0.DispatchWorkgroups(1, 1, 1);
+        pass0.End();
+
+        EncodeComputeTimestampWrites(encoder,
+                                     {nullptr, querySet, wgpu::kQuerySetIndexUndefined, 0});
+        encoder.ResolveQuerySet(querySet, 0, 1, destination, 0);
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_BUFFER(destination, 0, sizeof(uint64_t), new TimestampExpectation);
     }
 }
 
@@ -1171,9 +1191,6 @@ TEST_P(TimestampQueryTests, ResolveFromAnotherEncoder) {
 
 // Test resolving timestamp query correctly if the queries are written sparsely
 TEST_P(TimestampQueryTests, ResolveSparseQueries) {
-    // TODO (530541262): Investigate failure on macOS 26 M2.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsApple());
-
     constexpr uint32_t kQueryCount = 4;
 
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
@@ -1254,9 +1271,6 @@ TEST_P(TimestampQueryTests, UnsubmittedEncoderMarksQueryAvailable) {
 
 // Test resolving timestamp query to one slot in the buffer
 TEST_P(TimestampQueryTests, ResolveToBufferWithOffset) {
-    // TODO (530541262): Investigate failure on macOS 26 M2.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsApple());
-
     constexpr uint32_t kQueryCount = 2;
     constexpr uint64_t kBufferSize = kQueryCount * sizeof(uint64_t) + kMinDestinationOffset;
     constexpr uint64_t kCount = kQueryCount + kMinCount;
@@ -1301,9 +1315,6 @@ TEST_P(TimestampQueryTests, ResolveToBufferWithOffset) {
 
 // Test that resolving with firstQuery != 0 works as expected.
 TEST_P(TimestampQueryTests, ResolveWithFirstQuery) {
-    // TODO (530541262): Investigate failure on macOS 26 M2.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsApple());
-
     // Create a query set for 2 queries, the second of which will be resolved in the buffer.
     constexpr uint32_t kQueryCount = 2;
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
@@ -1325,8 +1336,6 @@ TEST_P(TimestampQueryTests, ResolveWithFirstQuery) {
 // Test resolving a query set twice into the same destination buffer with potentially overlapping
 // ranges
 TEST_P(TimestampQueryTests, ResolveTwiceToSameBuffer) {
-    // TODO (530541262): Investigate failure on macOS 26 M2.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsApple());
     constexpr uint32_t kQueryCount = kMinCount + 2;
 
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);

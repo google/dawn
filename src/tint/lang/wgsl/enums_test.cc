@@ -338,6 +338,7 @@ static constexpr LanguageFeatureCase kValidLanguageFeatureCases[] = {
     {"texture_and_sampler_let", LanguageFeature::kTextureAndSamplerLet},
     {"texture_formats_tier1", LanguageFeature::kTextureFormatsTier1},
     {"uniform_buffer_standard_layout", LanguageFeature::kUniformBufferStandardLayout},
+    {"unrestricted_aliasing", LanguageFeature::kUnrestrictedAliasing},
     {"unrestricted_pointer_parameters", LanguageFeature::kUnrestrictedPointerParameters},
 };
 
@@ -408,9 +409,12 @@ static constexpr LanguageFeatureCase kInvalidLanguageFeatureCases[] = {
     {"uniform_buffMr_standaroo_laydt", LanguageFeature::kUndefined},
     {"uniformbuffer_staMMdard_layout", LanguageFeature::kUndefined},
     {"uniform_buffer_standard_l55yout", LanguageFeature::kUndefined},
-    {"Nnresricted_pointer_parametes", LanguageFeature::kUndefined},
-    {"unrestricted33poin3Or_parameter", LanguageFeature::kUndefined},
-    {"un3estricted_pointer_parameters", LanguageFeature::kUndefined},
+    {"unNesticed_aliasing", LanguageFeature::kUndefined},
+    {"uOresricted33aliasi3g", LanguageFeature::kUndefined},
+    {"unrestri3ted_aliasing", LanguageFeature::kUndefined},
+    {"unrestrimted_ponter_parImeters", LanguageFeature::kUndefined},
+    {"unresnnricted_pointerrpKrameters", LanguageFeature::kUndefined},
+    {"unresrictd_pointe_arametXXrs", LanguageFeature::kUndefined},
 };
 
 using LanguageFeatureParseTest = testing::TestWithParam<LanguageFeatureCase>;

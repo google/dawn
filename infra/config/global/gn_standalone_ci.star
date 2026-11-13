@@ -1140,10 +1140,7 @@ ci.thin_tester(
         run_tests_serially = True,
     ),
     targets = targets.bundle(
-        targets = [
-            "real_hardware_common_gtests",
-            "litert_lm_benchmark",
-        ],
+        targets = [],
         mixins = [
             "linux_nvidia_gtx_1660_experimental",
         ],
@@ -1153,10 +1150,10 @@ ci.thin_tester(
         os_type = targets.os_type.LINUX,
     ),
     # Uncomment this entry when this experimental tester is actually in use.
-    console_view_entry = consoles.console_view_entry(
-        category = "linux|test|clang|exp|x64",
-        short_name = "1660",
-    ),
+    # console_view_entry = consoles.console_view_entry(
+    #     category = "linux|test|clang|exp|x64",
+    #     short_name = "1660",
+    # ),
     list_view = "exp",
 )
 
@@ -1926,9 +1923,7 @@ ci.thin_tester(
         run_tests_serially = True,
     ),
     targets = targets.bundle(
-        targets = [
-            "real_hardware_win_gtests",
-        ],
+        targets = [],
         mixins = [
             "win10_nvidia_gtx_1660_experimental",
         ],
@@ -1938,10 +1933,10 @@ ci.thin_tester(
         os_type = targets.os_type.WINDOWS,
     ),
     # Uncomment this entry when this experimental tester is actually in use.
-    console_view_entry = consoles.console_view_entry(
-        category = "win|test|clang|exp|x64",
-        short_name = "1660",
-    ),
+    # console_view_entry = consoles.console_view_entry(
+    #     category = "win|test|clang|exp|x64",
+    #     short_name = "1660",
+    # ),
     list_view = "exp",
 )
 

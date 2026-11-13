@@ -66,7 +66,7 @@ TEST_F(ResolverFunctionValidationTest, LocalConflictsWithParameter) {
     // }
     Func("func", Vector{Param(Source{{12, 34}}, "common_name", ty.f32())}, ty.void_(),
          Vector{
-             Decl(Let(Source{{56, 78}}, "common_name", Expr(1_i))),
+             Decl(Let(Source{{56, 78}}, "common_name", ast::Type{}, Expr(1_i))),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -82,7 +82,7 @@ TEST_F(ResolverFunctionValidationTest, NestedLocalMayShadowParameter) {
     // }
     Func("func", Vector{Param(Source{{12, 34}}, "common_name", ty.f32())}, ty.void_(),
          Vector{
-             Block(Decl(Let(Source{{56, 78}}, "common_name", Expr(1_i)))),
+             Block(Decl(Let(Source{{56, 78}}, "common_name", ast::Type{}, Expr(1_i)))),
          });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();

@@ -33,7 +33,9 @@
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/dawn_platform_autogen.h"
 #include "gtest/gtest.h"
+#include "src/dawn/native/Error.h"
 #include "src/dawn/native/SharedResourceMemory.h"
+#include "src/dawn/tests/StringViewMatchers.h"
 #include "src/dawn/tests/unittests/native/mocks/BufferMock.h"
 #include "src/dawn/tests/unittests/native/mocks/DawnMockTest.h"
 #include "src/dawn/tests/unittests/native/mocks/TextureMock.h"
@@ -43,8 +45,10 @@ namespace {
 
 using ::testing::ByMove;
 using ::testing::DoDefault;
+using ::testing::HasSubstr;
 using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::SizedStringMatches;
 using ::testing::StrEq;
 
 class MemoryDumpMock : public MemoryDump {
@@ -335,7 +339,7 @@ TEST_F(MemoryInstrumentationTest, ReduceMemoryUsage) {
     // DynamicUploader buffers will still be alive.
     MemoryUsageInfo memInfo = ComputeEstimatedMemoryUsageInfo(device.Get());
     EXPECT_GT(memInfo.totalUsage, uint64_t{0});
-    ReduceMemoryUsage(device.Get());
+    EXPECT_FALSE(ReduceMemoryUsage(device.Get()));
     // But not any more.
     memInfo = ComputeEstimatedMemoryUsageInfo(device.Get());
     EXPECT_EQ(memInfo.totalUsage, uint64_t{0});
@@ -353,6 +357,27 @@ TEST_F(MemoryInstrumentationTest, ReduceMemoryUsage) {
 
     memInfo = ComputeEstimatedMemoryUsageInfo(device.Get());
     EXPECT_GT(memInfo.totalUsage, uint64_t{0});
+}
+
+TEST_F(MemoryInstrumentationTest, ReduceMemoryUsagePendingWork) {
+    EXPECT_CALL(*mDeviceMock, ReduceMemoryUsageImpl)
+        .WillOnce([]() -> ResultOrError<bool> { return true; })
+        .WillOnce([]() -> ResultOrError<bool> { return false; });
+
+    EXPECT_TRUE(ReduceMemoryUsage(device.Get()));
+    EXPECT_FALSE(ReduceMemoryUsage(device.Get()));
+}
+
+TEST_F(MemoryInstrumentationTest, ReduceMemoryUsageBackendError) {
+    constexpr char kErrorMessage[] = "Failed to reduce memory usage";
+    EXPECT_CALL(*mDeviceMock, ReduceMemoryUsageImpl).WillOnce([&]() -> ResultOrError<bool> {
+        return DAWN_UNRECOVERABLE_ERROR(kErrorMessage);
+    });
+    EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
+                                          SizedStringMatches(HasSubstr(kErrorMessage))));
+
+    EXPECT_FALSE(ReduceMemoryUsage(device.Get()));
+    EXPECT_TRUE(mDeviceMock->IsLost());
 }
 
 // Test the detailed memory usage reported by ComputeEstimatedMemoryUsageInfo()

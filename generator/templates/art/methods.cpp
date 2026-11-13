@@ -76,49 +76,67 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     {% set KotlinRecord = FunctionSuffix + "KotlinRecord" %}
     {% set ArgsStruct = FunctionSuffix + "ArgsStruct" %}
 
-    //* Define the helper structs to perform most of the conversion.
-    struct {{KotlinRecord}} {
-        {% for arg in kotlin_record_members(method.arguments) %}
-            {{ arg_to_jni_type(arg) }} {{ as_varName(arg.name) }};
-        {% endfor %}
-    };
-    struct {{ArgsStruct}} {
-        {% for arg in method.arguments %}
-            {{ as_annotated_cType(arg) }};
-        {% endfor %}
-    };
-
-    {{ define_kotlin_to_struct_conversion("ConvertInternal", KotlinRecord, ArgsStruct, method.arguments)}}
-
+    {% set unwrap_objs = (object is not none) %}
     {% set _kotlin_return = kotlin_return(method) %}
+    {% set _kotlin_args = kotlin_record_members(method.arguments) | list %}
+    //* Define the helper structs to perform most of the conversion.
+    {% if _kotlin_args %}
+        struct {{KotlinRecord}} {
+            {% for arg in _kotlin_args %}
+                {{ 'jlong' if (unwrap_objs and arg.type.category == 'object' and not arg.length) else arg_to_jni_type(arg) }} {{ as_varName(arg.name) }};
+            {% endfor %}
+        };
+    {% endif %}
+    {% if method.arguments %}
+        struct {{ArgsStruct}} {
+            {% for arg in method.arguments %}
+                {{ as_annotated_cType(arg) }};
+            {% endfor %}
+        };
+    {% endif %}
+    {% if _kotlin_args %}
+
+        {{ define_kotlin_to_struct_conversion("ConvertInternal", KotlinRecord, ArgsStruct, method.arguments, unwrap_objects=unwrap_objs)}}
+    {% endif %}
+
     //*  A JNI-external method is built with the JNI signature expected to match the host Kotlin.
-    DEFAULT extern "C"
-    {{ arg_to_jni_type(_kotlin_return) }}
-    Java_{{ kotlin_package.replace('.', '_') }}_{{ FunctionSuffix }}
-            (JNIEnv *env{{ ', jobject obj' if object else ', jclass clazz' -}}
+    //*  Object methods bind to the top-level static native on {{ kotlin_name(object) }}Kt, receiving the handle as a jlong.
+    static {{ arg_to_jni_type(_kotlin_return) }}
+    {% if object %}
+        {{ kotlin_name(object) }}_native{{ method.name.CamelCase() }}
+                (JNIEnv *env, jclass clazz, jlong _handle
+    {%- else %}
+        {{ FunctionSuffix }}
+                (JNIEnv *env, jclass clazz
+    {%- endif -%}
 
     //* Make the signature for each argument in turn.
-    {% for arg in kotlin_record_members(method.arguments) %},
-        {{ arg_to_jni_type(arg) }} _{{ as_varName(arg.name) }}
-    {% endfor %}) {
+    {%- for arg in (_kotlin_args if object else method.arguments) %},
+        {{ 'jlong' if (unwrap_objs and arg.type.category == 'object' and not arg.length) else arg_to_jni_type(arg) }} _{{ as_varName(arg.name) }}
+    {%- endfor %}) {
 
     // * Helper context for the duration of this method call.
-    JNIClasses* classes = JNIClasses::getInstance(env);
-    JNIContext c(env);
+    {% if _kotlin_return and (_kotlin_return.type.category == 'object' or (_kotlin_return.length == 'size_t' and (_kotlin_return.type.category == 'structure' or _kotlin_return.type.name.get() == 'char'))) %}
+        JNIClasses* classes = JNIClasses::getInstance(env);
+    {% endif %}
+    {% if _kotlin_args or (_kotlin_return and _kotlin_return.length == 'size_t') %}
+        JNIContext c(env);
+    {% endif %}
 
-    //* Perform the conversion of arguments.
-    {{KotlinRecord}} kotlinRecord;
-    {% for arg in kotlin_record_members(method.arguments) %}
-        kotlinRecord.{{ as_varName(arg.name) }} = _{{ as_varName(arg.name) }};
-    {% endfor %}
-    {{ArgsStruct}} args;
-    ConvertInternal(&c, kotlinRecord, &args);
+    {% if _kotlin_args %}
+        //* Perform the conversion of arguments.
+        {{KotlinRecord}} kotlinRecord;
+        {% for arg in _kotlin_args %}
+            kotlinRecord.{{ as_varName(arg.name) }} = _{{ as_varName(arg.name) }};
+        {% endfor %}
+        {{ArgsStruct}} args;
+        ConvertInternal(&c, kotlinRecord, &args);
+    {% elif method.arguments %}
+        {{ArgsStruct}} args = {};
+    {% endif %}
 
     {% if object %}
-        jclass memberClass = classes->{{ object.name.camelCase() }};
-        jmethodID getHandle = env->GetMethodID(memberClass, "getHandle", "()J");
-        auto handle =
-                reinterpret_cast<{{ as_cType(object.name) }}>(env->CallLongMethod(obj, getHandle));
+        auto handle = reinterpret_cast<{{ as_cType(object.name) }}>(_handle);
     {% endif %}
 
     //* Actually invoke the native version of the method.
@@ -151,7 +169,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
             {{ as_cType(_kotlin_return.type.name) }} out = {};
             args.{{ as_varName(_kotlin_return.name) }} = &out;
         {% endif %}
-        {{ 'auto result =' if method.returns }}
+        {{ 'auto result =' if (_kotlin_return and _kotlin_return.annotation != '*') or (method.returns and method.returns.type.name.canonical_case() == 'status') }}
         {% if object %}
             wgpu{{ object.name.CamelCase() }}{{ method.name.CamelCase() }}(handle
         {% else %}
@@ -177,7 +195,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
             }
         {% endif %}
     {% endif %}
-    {% if object and object.name.get() == 'device' %}
+    {% if object and object.name.get() == 'device' and _kotlin_args %}
         // Note: We intentionally only register recurring callbacks for WGPUDevice, as it is
         // the only object in Dawn with a terminal lifecycle event (device lost callback)
         // that guarantees safe cleanup. Instance does not have recurring callbacks in dawn.json.
@@ -194,7 +212,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
                 }
             {% endif %}
         {% endif %}
-        {% if object and method.name.get() == 'create device' %}
+        {% if object and method.name.get() == 'create device' and _kotlin_args %}
             if (result != nullptr) {
                 // Transfer callbacks to the newly created device.
                 RegisterDeviceCallbacks(result, c.recurringCallbacks);
@@ -215,21 +233,72 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     {% endfor %}
 
     //* Every object gets a Release method, to supply a Kotlin AutoCloseable.
-    extern "C"
-    JNIEXPORT void JNICALL
-    Java_{{ kotlin_package.replace('.', '_') }}_{{ kotlin_name(obj) }}_close(
-            JNIEnv *env, jobject obj) {
-        JNIClasses* classes = JNIClasses::getInstance(env);
-        jclass clz = classes->{{ obj.name.camelCase() }};
-        const {{ as_cType(obj.name) }} handle = reinterpret_cast<{{ as_cType(obj.name) }}>(
-                env->CallLongMethod(obj, env->GetMethodID(clz, "getHandle", "()J")));
-        wgpu{{ obj.name.CamelCase() }}Release(handle);
+    //* The handle is unwrapped on the Kotlin side and passed to the top-level static native on {{ kotlin_name(obj) }}Kt.
+    static void {{ kotlin_name(obj) }}_nativeClose(
+            JNIEnv *env, jclass clazz, jlong _handle) {
+        wgpu{{ obj.name.CamelCase() }}Release(reinterpret_cast<{{ as_cType(obj.name) }}>(_handle));
     }
+
+    static const JNINativeMethod k{{ kotlin_name(obj) }}Methods[] = {
+        {% for method in obj.methods if include_method(method) %}
+            {% set _ret = kotlin_return(method) %}
+            {const_cast<char*>("native{{ method.name.CamelCase() }}"),
+             const_cast<char*>("(J{%- for arg in kotlin_record_members(method.arguments) -%}{{ jni_signature(arg, unwrap_objects=True) }}{%- endfor -%}){{ jni_signature(_ret) if _ret else 'V' }}"),
+             reinterpret_cast<void*>({{ kotlin_name(obj) }}_native{{ method.name.CamelCase() }})},
+        {% endfor %}
+        {const_cast<char*>("nativeClose"), const_cast<char*>("(J)V"), reinterpret_cast<void*>({{ kotlin_name(obj) }}_nativeClose)},
+    };
 {% endfor %}
 
 //* Global functions don't have an associated class.
 {% for function in by_category['function'] if include_method(function) %}
     {{ render_method(function, None) }}
 {% endfor %}
+
+static const JNINativeMethod kGPUMethods[] = {
+    {% for function in by_category['function'] if include_method(function) %}
+        {% set _ret = kotlin_return(function) %}
+        {const_cast<char*>("{{ kotlin_name(function) }}"),
+         const_cast<char*>("({%- for arg in function.arguments -%}{{ jni_signature(arg) }}{%- endfor -%}){{ jni_signature(_ret) if _ret else 'V' }}"),
+         reinterpret_cast<void*>(GPU_{{ kotlin_name(function) }})},
+    {% endfor %}
+};
+
+DEFAULT extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
+    JNIEnv* env = nullptr;
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        return JNI_ERR;
+    }
+    auto registerMethods = [env](const char* className, const JNINativeMethod* methods, jint count) {
+        jclass clz = env->FindClass(className);
+        if (!clz) {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+            return false;
+        }
+        jint result = env->RegisterNatives(clz, methods, count);
+        env->DeleteLocalRef(clz);
+        if (result != JNI_OK) {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+            return false;
+        }
+        return true;
+    };
+    {% for obj in by_category['object'] %}
+        if (!registerMethods("{{ jni_name(obj) }}Kt",
+                             k{{ kotlin_name(obj) }}Methods,
+                             static_cast<jint>(std::size(k{{ kotlin_name(obj) }}Methods)))) {
+            return JNI_ERR;
+        }
+    {% endfor %}
+    if (!registerMethods("{{ kotlin_package.replace('.', '/') }}/GPU",
+                         kGPUMethods,
+                         static_cast<jint>(std::size(kGPUMethods)))) {
+        return JNI_ERR;
+    }
+    JNIClasses::getInstance(env);
+    return JNI_VERSION_1_6;
+}
 
 }  // namespace dawn::kotlin_api

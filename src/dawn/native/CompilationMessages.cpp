@@ -62,7 +62,17 @@ size_t CountUTF16CodeUnitsFromUTF8String(std::string_view utf8String) {
     std::string_view remaining = utf8String;
     while (!remaining.empty()) {
         auto [codePoint, utf8CharacterByteLength] = tint::utf8::Decode(remaining);
-        // WGSL validation will already have prevented invalid UTF-8.
+
+        // If the WGSL has invalid UTF-8 characters in it, skip that byte, and continue with the
+        // next. Treat the invalid byte as a single UTF-16 code unit. If this was coming from JS,
+        // then the original source file should have been UTF-16 previously, so the bytes in the
+        // WGSL file contents should be valid.
+        if (utf8CharacterByteLength == 0) {
+            remaining = remaining.substr(1);
+            numberOfUTF16CodeUnits += 1;
+            continue;
+        }
+
         DAWN_ASSERT(utf8CharacterByteLength != 0);
         remaining = remaining.substr(utf8CharacterByteLength);
 

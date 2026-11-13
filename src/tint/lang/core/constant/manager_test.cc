@@ -31,6 +31,7 @@
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
@@ -157,6 +158,15 @@ TEST_F(ManagerTest, Get_f16) {
     static_assert(std::is_same_v<const Scalar<f16>*, decltype(c)>);
     ASSERT_TRUE(Is<core::type::F16>(c->Type()));
     EXPECT_EQ(c->value, 1_h);
+}
+
+TEST_F(ManagerTest, Get_bf16) {
+    constant::Manager cm;
+
+    auto* c = cm.Get(bf16(1_f));
+    static_assert(std::is_same_v<const Scalar<bf16>*, decltype(c)>);
+    ASSERT_TRUE(Is<core::type::BF16>(c->Type()));
+    EXPECT_EQ(c->value, bf16(1_f));
 }
 
 TEST_F(ManagerTest, Get_bool) {

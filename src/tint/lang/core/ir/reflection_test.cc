@@ -52,7 +52,7 @@ TEST_F(IR_ReflectionTest, GetWorkgroupInfoBasic) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<workgroup, u32, read_write> = var undef
+  %a:ptr<workgroup, u32, read_write> = var
 }
 
 %foo = @compute @workgroup_size(8u, 6u, 4u) @subgroup_size(32u) func():void {
@@ -89,10 +89,10 @@ TEST_F(IR_ReflectionTest, GetWorkgroupInfoMultiVar) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<workgroup, u32, read_write> = var undef
-  %b:ptr<workgroup, u32, read_write> = var undef
-  %c:ptr<workgroup, u32, read_write> = var undef
-  %d:ptr<workgroup, u32, read_write> = var undef
+  %a:ptr<workgroup, u32, read_write> = var
+  %b:ptr<workgroup, u32, read_write> = var
+  %c:ptr<workgroup, u32, read_write> = var
+  %d:ptr<workgroup, u32, read_write> = var
 }
 
 %foo = @compute @workgroup_size(128u, 1u, 1u) func():void {
@@ -149,7 +149,7 @@ TEST_F(IR_ReflectionTest, GetWorkgroupInfoFailNoWorkgroupSize) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<workgroup, u32, read_write> = var undef
+  %a:ptr<workgroup, u32, read_write> = var
 }
 
 %foo = @compute func():void {
@@ -178,7 +178,7 @@ TEST_F(IR_ReflectionTest, GetWorkgroupInfo_StorageSizeOverflowAfterAlign) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<workgroup, array<u32, 1073741823>, read_write> = var undef
+  %a:ptr<workgroup, array<u32, 1073741823>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(64u, 1u, 1u) func():void {

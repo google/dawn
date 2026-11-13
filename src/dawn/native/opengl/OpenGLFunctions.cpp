@@ -47,6 +47,25 @@ MaybeError OpenGLFunctions::Initialize(GLGetProcProc getProc) {
 #endif
     }
 
+    // glGetGraphicsResetStatus is core in OpenGL ES 3.2 and OpenGL 4.5. Otherwise load it from the
+    // robustness extensions, which all have the same signature and return values.
+    // TODO(crbug.com/580950772): Support gl.xml aliases in the OpenGL loader generator and load
+    // these with it instead of manually.
+    auto LoadResetStatusFromExtension = [&](const char* extension, const char* procName) {
+        if (GetGraphicsResetStatus == nullptr && IsGLExtensionSupported(extension)) {
+            GetGraphicsResetStatus =
+                reinterpret_cast<PFNGLGETGRAPHICSRESETSTATUSPROC>(getProc(procName));
+        }
+    };
+    if (mVersion.IsES()) {
+        LoadResetStatusFromExtension("GL_KHR_robustness", "glGetGraphicsResetStatusKHR");
+        LoadResetStatusFromExtension("GL_EXT_robustness", "glGetGraphicsResetStatusEXT");
+    } else {
+        // In desktop GL, the GL_KHR_robustness entry points have no suffix.
+        LoadResetStatusFromExtension("GL_KHR_robustness", "glGetGraphicsResetStatus");
+        LoadResetStatusFromExtension("GL_ARB_robustness", "glGetGraphicsResetStatusARB");
+    }
+
     return {};
 }
 

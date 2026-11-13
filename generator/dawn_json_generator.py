@@ -27,461 +27,39 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import json, os, sys
-from collections import namedtuple, defaultdict
+from collections import defaultdict
 from copy import deepcopy
 
 from generator_lib import Generator, run_generator, FileRender, GeneratorOutput
+import dawn_json_parsing
+from dawn_json_parsing import (AnnotatedTypedMember, FunctionDeclaration,
+                               Method, Name, Record, RecordMember,
+                               StructureType, Type, concat_names,
+                               linked_record_members, parse_addin)
 from webgpu_docs_utility import build_doc_map, load_json_data
 
+
+def parse_json(json, enabled_tags, disabled_tags=None, addins=None):
+    api_params = dawn_json_parsing.parse_json(json,
+                                              enabled_tags,
+                                              disabled_tags=disabled_tags,
+                                              addins=addins)
+    api_params.update({
+        'c_methods':
+        lambda typ: c_methods(api_params, typ),
+        'c_methods_sorted_by_parent':
+        get_c_methods_sorted_by_parent(api_params),
+        'c_methods_sorted_by_name':
+        get_c_methods_sorted_by_name(api_params),
+        'cpp_methods':
+        lambda typ: cpp_methods(api_params, typ),
+    })
+    return api_params
+
+
 ############################################################
-# OBJECT MODEL
+# WIRE STUFF
 ############################################################
-
-
-class Metadata:
-
-    def __init__(self, metadata):
-        self.api = metadata['api']
-        self.namespace = metadata['namespace']
-        self.c_prefix = metadata.get('c_prefix', self.namespace.upper())
-        self.proc_table_prefix = metadata['proc_table_prefix']
-        self.impl_dir = metadata.get('impl_dir', '')
-        self.native_namespace = metadata['native_namespace']
-        self.copyright_year = metadata.get('copyright_year', None)
-
-
-class Name:
-
-    def __init__(self, name, native=False):
-        self.native = native
-        self.name = name
-        if native:
-            self.chunks = [name]
-        else:
-            self.chunks = name.split(' ')
-
-    def __lt__(self, other):
-        return self.concatcase().lower() < other.concatcase().lower()
-
-    def get(self):
-        return self.name
-
-    def CamelChunk(self, chunk):
-        return chunk[0].upper() + chunk[1:]
-
-    def canonical_case(self):
-        return ' '.join(self.chunks)
-
-    def concatcase(self):
-        return ''.join(self.chunks)
-
-    def camelCase(self):
-        return self.chunks[0] + ''.join(
-            [self.CamelChunk(chunk) for chunk in self.chunks[1:]])
-
-    def CamelCase(self):
-        return ''.join([self.CamelChunk(chunk) for chunk in self.chunks])
-
-    def SNAKE_CASE(self):
-        return '_'.join([chunk.upper() for chunk in self.chunks])
-
-    def snake_case(self):
-        return '_'.join(self.chunks)
-
-    def namespace_case(self):
-        return '::'.join(self.chunks)
-
-    def Dirs(self):
-        return '/'.join(self.chunks)
-
-    def js_enum_case(self):
-        result = self.chunks[0].lower()
-        for chunk in self.chunks[1:]:
-            if not result[-1].isdigit():
-                result += '-'
-            result += chunk.lower()
-        return result
-
-
-def concat_names(*names):
-    return ' '.join([name.canonical_case() for name in names])
-
-
-def validate_and_get_tags(json_data):
-    allowed_tags = {
-        'dawn',
-        'emscripten',
-        'native',
-        'deprecated',
-        'art',
-        'art_experimental',
-    }
-
-    tags = json_data.get('tags')
-    if tags != None:
-        for tag in tags:
-            assert tag in allowed_tags, f'unrecognized tag "{tag}"'
-    return tags
-
-
-class Type:
-
-    def __init__(self, name, json_data, native=False):
-        self.json_data = json_data
-        self.dict_name = name
-        self.name = Name(name, native=native)
-        self.category = json_data['category']
-        self.is_nullable_pointer = json_data.get('is nullable pointer',
-                                                 self.category == 'object')
-        self.is_wire_transparent = False
-
-    def __lt__(self, other):
-        return self.name < other.name
-
-    def get_child_map(self):
-        return {}
-
-
-EnumValue = namedtuple('EnumValue', ['name', 'value', 'valid', 'json_data'])
-
-
-class EnumType(Type):
-
-    def __init__(self, is_enabled, name, json_data):
-        Type.__init__(self, name, json_data)
-
-        self.values = []
-        self.hasUndefined = False
-        self.contiguous = True
-        self.startValue = None
-        self.allowConflict = False
-        lastValue = None
-        for m in self.json_data['values']:
-            if not is_enabled(m):
-                continue
-            value = m['value']
-            value_name = m['name']
-            tags = validate_and_get_tags(m)
-            if tags == None:
-                tags = []
-
-            prefix = 0
-
-            if 'dawn' in tags:
-                # Dawn-only or Dawn+Emscripten
-                assert prefix == 0
-                prefix = 0x0005_0000
-            elif 'emscripten' in tags:
-                # Emscripten-only
-                assert prefix == 0
-                prefix = 0x0004_0000
-
-            if prefix == 0 and 'native' in tags:
-                prefix = 0x0001_0000
-
-            if 'deprecated' not in tags:
-                # Emscripten implements some Dawn extensions, and some upstream things that
-                # aren't in Dawn yet.
-                if 'emscripten' in tags and 'dawn' not in tags:
-                    assert value_name.startswith('emscripten'), name
-                else:
-                    assert not value_name.startswith('emscripten'), name
-
-            value += prefix
-
-            if value_name == "undefined":
-                self.hasUndefined = True
-            if lastValue == None:
-                self.startValue = value
-            elif value != lastValue + 1:
-                self.contiguous = False
-            lastValue = value
-            self.values.append(
-                EnumValue(Name(value_name), value, m.get('valid', True), m))
-            self.allowConflict |= m.get('enum_value_conflict', False)
-
-        # Assert that all values except those with "enum_value_conflict": true are unique in enums
-        all_values = set()
-        for value in self.values:
-            if value.value in all_values:
-                if not value.json_data.get('enum_value_conflict', False):
-                    raise Exception(
-                        "Duplicate value {} for '{}' in enum '{}'".format(
-                            hex(value.value), value.name.get(), name))
-            all_values.add(value.value)
-        self.is_wire_transparent = True
-
-
-BitmaskValue = namedtuple('BitmaskValue', ['name', 'value', 'json_data'])
-
-
-class BitmaskType(Type):
-
-    def __init__(self, is_enabled, name, json_data):
-        Type.__init__(self, name, json_data)
-        self.values = [
-            BitmaskValue(Name(m['name']), m['value'], m)
-            for m in self.json_data['values'] if is_enabled(m)
-        ]
-        self.full_mask = 0
-        for value in self.values:
-            self.full_mask = self.full_mask | value.value
-        self.is_wire_transparent = True
-
-
-class CallbackFunctionType(Type):
-
-    def __init__(self, is_enabled, name, json_data):
-        Type.__init__(self, name, json_data)
-        self.returns = None
-        self.arguments = []
-
-
-class FunctionPointerType(Type):
-
-    def __init__(self, is_enabled, name, json_data):
-        Type.__init__(self, name, json_data)
-        self.returns = None
-        self.arguments = []
-
-
-class TypedefType(Type):
-
-    def __init__(self, is_enabled, name, json_data):
-        Type.__init__(self, name, json_data)
-        self.type = None
-
-
-class NativeType(Type):
-
-    def __init__(self, is_enabled, name, json_data):
-        Type.__init__(self, name, json_data, native=True)
-        self.is_wire_transparent = json_data.get('wire transparent', True)
-
-
-# Method/function argument, method/function return value, or struct member.
-class AnnotatedTypedMember:
-
-    def __init__(self, typ, annotation, optional, json_data):
-        self.type = typ
-        self.annotation = annotation
-        self.optional = optional
-        self.json_data = json_data
-        self.length = None
-        self.constant_length = None
-        self.is_length = False
-
-    def get_child_map(self):
-        return {}
-
-
-# Methods and structures are both "records", so record members correspond to
-# method arguments or structure members.
-class RecordMember(AnnotatedTypedMember):
-
-    def __init__(self,
-                 name,
-                 typ,
-                 annotation,
-                 json_data,
-                 optional=False,
-                 array_element_optional=False,
-                 is_return_value=False,
-                 default_value=None,
-                 skip_serialize=False,
-                 kotlin_only=False):
-        super().__init__(typ, annotation, optional, json_data)
-        self.name = name
-        self.array_element_optional = array_element_optional
-        if array_element_optional:
-            assert annotation == 'const*', 'array_element_optional can only be used on array types'
-        self.is_return_value = is_return_value
-        self.handle_type = None
-        self.id_type = None
-        self.default_value = default_value
-        self.skip_serialize = skip_serialize
-        self.kotlin_only = kotlin_only
-
-    def set_handle_type(self, handle_type):
-        assert self.type.dict_name == "ObjectHandle"
-        self.handle_type = handle_type
-
-    def set_id_type(self, id_type):
-        assert self.type.dict_name == "ObjectId"
-        self.id_type = id_type
-
-    @property
-    def requires_struct_defaulting(self):
-        if self.annotation != "value":
-            return False
-
-        if self.type.category == "structure":
-            return self.type.any_member_requires_struct_defaulting
-        elif self.type.category == "enum":
-            return (self.type.hasUndefined
-                    and self.default_value not in [None, "undefined"])
-        else:
-            return False
-
-
-class Method():
-
-    def __init__(self, name, returns, arguments, autolock, json_data):
-        self.name = name
-        self.returns = returns
-        self.arguments = arguments
-        self.autolock = autolock
-        self.json_data = json_data
-
-    def get_child_map(self):
-        return {arg.name.get(): arg for arg in self.arguments}
-
-
-class ObjectType(Type):
-
-    def __init__(self, is_enabled, name, json_data):
-        json_data_override = {'methods': []}
-        if 'methods' in json_data:
-            json_data_override['methods'] = [
-                m for m in json_data['methods'] if is_enabled(m)
-            ]
-        Type.__init__(self, name, dict(json_data, **json_data_override))
-
-    def get_child_map(self):
-        return {method.name.get(): method for method in self.methods}
-
-
-class Record:
-
-    def __init__(self, name):
-        self.name = Name(name)
-        self.members = []
-        self.may_have_dawn_object = False
-
-    def update_metadata(self):
-
-        def may_have_dawn_object(member):
-            if isinstance(member.type, ObjectType):
-                return True
-            elif isinstance(member.type, StructureType):
-                return member.type.may_have_dawn_object
-            else:
-                return False
-
-        self.may_have_dawn_object = any(
-            may_have_dawn_object(member) for member in self.members)
-
-        # Set may_have_dawn_object to true if the type is chained or
-        # extensible. Chained structs may contain a Dawn object.
-        if isinstance(self, StructureType):
-            self.may_have_dawn_object = (self.may_have_dawn_object
-                                         or self.chained or self.extensible)
-
-
-class StructureType(Record, Type):
-
-    def __init__(self, is_enabled, name, json_data):
-        tags = validate_and_get_tags(json_data)
-        if tags == ['emscripten']:
-            if name != 'INTERNAL_HAVE_EMDAWNWEBGPU_HEADER':
-                assert name.startswith('emscripten'), name
-        else:
-            assert not name.startswith('emscripten'), name
-
-        Record.__init__(self, name)
-        json_data_override = {}
-        if 'members' in json_data:
-            json_data_override['members'] = [
-                m for m in json_data['members'] if is_enabled(m)
-            ]
-        Type.__init__(self, name, dict(json_data, **json_data_override))
-        self.out = json_data.get('out', False)
-        self.chained = json_data.get('chained', None)
-        self.extensible = json_data.get('extensible', None)
-        if self.chained:
-            assert self.chained == 'in' or self.chained == 'out'
-            assert 'chain roots' in json_data
-            self.chain_roots = []
-        if self.extensible:
-            assert self.extensible == 'in' or self.extensible == 'out'
-        # Chained structs inherit from wgpu::ChainedStruct, which has
-        # nextInChain, so setting both extensible and chained would result in
-        # two nextInChain members.
-        assert not (self.extensible and self.chained)
-        self.extensions = []
-
-    def update_metadata(self):
-        Record.update_metadata(self)
-
-        if self.may_have_dawn_object:
-            self.is_wire_transparent = False
-            return
-
-        assert not (self.chained or self.extensible)
-
-        def get_is_wire_transparent(member):
-            return member.type.is_wire_transparent and member.annotation == 'value'
-
-        self.is_wire_transparent = all(
-            get_is_wire_transparent(m) for m in self.members)
-
-    def get_child_map(self):
-        return {member.name.get(): member for member in self.members}
-
-    @property
-    def output(self):
-        # self.out is a temporary way to express that this is an output structure
-        # without also making it extensible. See
-        # https://dawn-review.googlesource.com/c/dawn/+/212174/comment/2271690b_1fd82ea9/
-        return self.chained == "out" or self.extensible == "out" or self.out
-
-    @property
-    def has_free_members_function(self):
-        if not self.output:
-            return False
-        for m in self.members:
-            if m.annotation != 'value' \
-                or m.type.name.canonical_case() == 'string view':
-                return True
-        return False
-
-    @property
-    def any_member_requires_struct_defaulting(self):
-        return any(member.requires_struct_defaulting
-                   for member in self.members)
-
-
-class CallbackInfoType(StructureType):
-
-    def __init__(self, is_enabled, name, json_data):
-        StructureType.__init__(self, is_enabled, name, json_data)
-        self.extensible = 'in'
-
-
-class ConstantDefinition():
-
-    def __init__(self, is_enabled, name, json_data):
-        self.type = None
-        self.value = json_data['value']
-        self.cpp_value = json_data.get('cpp_value', None)
-        self.json_data = json_data
-        self.name = Name(name)
-
-    def get_child_map(self):
-        return {}
-
-
-class FunctionDeclaration():
-
-    def __init__(self, is_enabled, name, json_data, no_cpp=False):
-        self.returns = None
-        self.arguments = []
-        self.json_data = json_data
-        self.name = Name(name)
-        self.no_cpp = no_cpp
-
-    def get_child_map(self):
-        return {arg.name.get(): arg for arg in self.arguments}
 
 
 class Command(Record):
@@ -491,329 +69,6 @@ class Command(Record):
         self.members = members or []
         self.derived_object = None
         self.derived_method = None
-
-
-def linked_record_members(json_data, types, check_span_regularity=False):
-    members = []
-    members_by_name = {}
-    index_of_member = {}
-    for (i, m) in enumerate(json_data):
-        member = RecordMember(Name(m['name']),
-                              types[m['type']],
-                              m.get('annotation', 'value'),
-                              m,
-                              optional=m.get('optional', False),
-                              array_element_optional=m.get(
-                                  'array_element_optional', False),
-                              is_return_value=m.get('is_return_value', False),
-                              default_value=m.get('default', None),
-                              skip_serialize=m.get('skip_serialize', False))
-        handle_type = m.get('handle_type')
-        if handle_type:
-            member.set_handle_type(types[handle_type])
-        id_type = m.get('id_type')
-        if id_type:
-            member.set_id_type(types[id_type])
-        members.append(member)
-        members_by_name[member.name.canonical_case()] = member
-        index_of_member[member.name.canonical_case()] = i
-
-    for (member, m) in zip(members, json_data):
-        if member.annotation != 'value':
-            if not 'length' in m:
-                if member.type.category != 'object':
-                    member.length = "constant"
-                    member.constant_length = 1
-                else:
-                    assert False
-            elif isinstance(m['length'], int):
-                assert m['length'] > 0
-                member.length = "constant"
-                member.constant_length = m['length']
-            else:
-                # Check that the length member comes just before the `member`
-                if check_span_regularity:
-                    length_index = index_of_member[m['length']]
-                    member_index = index_of_member[
-                        member.name.canonical_case()]
-                    assert length_index == member_index - 1
-
-                member.length = members_by_name[m['length']]
-                member.length.is_length = True
-
-    return members
-
-
-############################################################
-# PARSE
-############################################################
-
-
-def link_object(obj, types):
-    # Disable method's autolock if obj's "no autolock" = True
-    obj_scoped_autolock_enabled = not obj.json_data.get('no autolock', False)
-
-    def make_method(json_data):
-        autolock_enabled = obj_scoped_autolock_enabled and not json_data.get(
-            'no autolock', False)
-        # link_function sets 'returns' and 'arguments'
-        method = Method(Name(json_data['name']), None, None, autolock_enabled,
-                        json_data)
-        link_function(method, types)
-        return method
-
-    obj.methods = [make_method(m) for m in obj.json_data.get('methods', [])]
-    obj.methods.sort(key=lambda method: method.name)
-
-
-def link_structure(struct, types):
-    struct.members = linked_record_members(struct.json_data['members'],
-                                           types,
-                                           check_span_regularity=True)
-    for root in struct.json_data.get('chain roots', []):
-        struct.chain_roots.append(types[root])
-        types[root].extensions.append(struct)
-    struct.chain_roots = [
-        types[root] for root in struct.json_data.get('chain roots', [])
-    ]
-    assert all((root.category == 'structure' for root in struct.chain_roots))
-
-
-def link_function_pointer(function_pointer, types):
-    link_function(function_pointer, types)
-
-
-def link_typedef(typedef, types):
-    typedef.type = types[typedef.json_data['type']]
-
-
-def link_constant(constant, types):
-    constant.type = types[constant.json_data['type']]
-    assert constant.type.name.native
-
-
-def link_function(function, types):
-    # "returns" may be either a bare type name or a AnnotatedTypedMember-like.
-    returns = function.json_data.get('returns')
-    assert returns != 'void', '"returns": "void" should be omitted instead'
-    if returns:
-        if type(returns) == str:
-            returns = {'type': returns}
-        function.returns = AnnotatedTypedMember(
-            types[returns['type']], returns.get('annotation', 'value'),
-            returns.get('optional', False), returns)
-
-    function.arguments = linked_record_members(
-        function.json_data.get('args', []), types)
-
-
-# Sort structures so that if struct A has struct B as a member, then B is
-# listed before A.
-#
-# This is a form of topological sort where we try to keep the order reasonably
-# similar to the original order (though the sort isn't technically stable).
-#
-# It works by computing for each struct type what is the depth of its DAG of
-# dependents, then re-sorting based on that depth using Python's stable sort.
-# This makes a toposort because if A depends on B then its depth will be bigger
-# than B's. It is also nice because all nodes with the same depth are kept in
-# the input order.
-def topo_sort_structure(structs):
-    for struct in structs:
-        struct.visited = False
-        struct.subdag_depth = 0
-        # String view is special cased to -1 because we purposely fully declare
-        # it before all other structs.
-        if struct.name.get() == "string view":
-            struct.subdag_depth = -1
-            struct.visited = True
-
-    def compute_depth(struct):
-        if struct.visited:
-            return struct.subdag_depth
-
-        max_dependent_depth = 0
-        for member in struct.members:
-            if member.type.category == 'structure':
-                max_dependent_depth = max(max_dependent_depth,
-                                          compute_depth(member.type) + 1)
-        for extension in struct.extensions:
-            max_dependent_depth = max(max_dependent_depth,
-                                      compute_depth(extension) + 1)
-
-        struct.subdag_depth = max_dependent_depth
-        struct.visited = True
-        return struct.subdag_depth
-
-    for struct in structs:
-        compute_depth(struct)
-
-    result = sorted(structs, key=lambda struct: struct.subdag_depth)
-
-    for struct in structs:
-        del struct.visited
-        del struct.subdag_depth
-
-    return result
-
-
-# Sort objects so that if object A has a member function with an optional
-# argument of type object B, then B is listed before A. We do this because
-# optional object arguments are emitted as 'Func(B const& arg = nullptr)`, and
-# this requires that B's definition be known so that the compiler can generate
-# the call to B's implicit std::nullptr constructor.
-#
-# See the comment for topo_sort_structure for how this sorts topologically.
-def topo_sort_object(objects):
-    for object in objects:
-        object.visited = False
-        object.subdag_depth = 0
-
-    def compute_depth(object):
-        if object.visited:
-            return object.subdag_depth
-
-        max_dependent_depth = 0
-        for method in object.methods:
-            for arg in method.arguments:
-                if arg.type.category == 'object':
-                    if arg.optional:
-                        max_dependent_depth = max(max_dependent_depth,
-                                                  compute_depth(arg.type) + 1)
-
-        object.subdag_depth = max_dependent_depth
-        object.visited = True
-        return object.subdag_depth
-
-    for object in objects:
-        compute_depth(object)
-
-    result = sorted(objects, key=lambda object: object.subdag_depth)
-
-    for object in objects:
-        del object.visited
-        del object.subdag_depth
-
-    return result
-
-
-def apply_addins(types, addins):
-
-    def get_addin_target(search_map, path):
-        while path:
-            part = path.pop(0)
-            if part not in search_map:
-                return None
-            target = search_map[part]
-            if not path:
-                return target
-            search_map = target.get_child_map()
-        return None
-
-    for key, prop_dict in addins.items():
-        path = key.split('::')
-        target = get_addin_target(types, path)
-        assert target is not None, f'Addin instance "{key}" not found in dawn.json'
-        for prop, val in prop_dict.items():
-            setattr(target, prop, val)
-
-
-def parse_json(json, enabled_tags, disabled_tags=None, metadata=None):
-    is_enabled = lambda json_data: item_is_enabled(
-        enabled_tags, json_data) and not item_is_disabled(
-            disabled_tags, json_data)
-    category_to_parser = {
-        'bitmask': BitmaskType,
-        'callback function': CallbackFunctionType,
-        'callback info': CallbackInfoType,
-        'enum': EnumType,
-        'native': NativeType,
-        'function pointer': FunctionPointerType,
-        'object': ObjectType,
-        'structure': StructureType,
-        'typedef': TypedefType,
-        'constant': ConstantDefinition,
-        'function': FunctionDeclaration
-    }
-
-    types = {}
-
-    by_category = {}
-    for name in category_to_parser.keys():
-        by_category[name] = []
-
-    for (name, json_data) in json.items():
-        if name[0] == '_' or not is_enabled(json_data):
-            continue
-        category = json_data['category']
-        parsed = category_to_parser[category](is_enabled, name, json_data)
-        by_category[category].append(parsed)
-        types[name] = parsed
-
-    for obj in by_category['object']:
-        link_object(obj, types)
-
-    for struct in by_category['structure']:
-        link_structure(struct, types)
-
-    for callback_info in by_category['callback info']:
-        link_structure(callback_info, types)
-
-    for callback_function in by_category['callback function']:
-        link_function_pointer(callback_function, types)
-
-    for function_pointer in by_category['function pointer']:
-        link_function_pointer(function_pointer, types)
-
-    for typedef in by_category['typedef']:
-        link_typedef(typedef, types)
-
-    for constant in by_category['constant']:
-        link_constant(constant, types)
-
-    for function in by_category['function']:
-        link_function(function, types)
-
-    # Sort everything by name
-    for category in by_category.keys():
-        by_category[category] = sorted(by_category[category],
-                                       key=lambda typ: typ.name)
-    # Then sort GetProcAddress last
-    by_category['function'].sort(
-        key=lambda f: f.name.get() == 'get proc address')
-
-    by_category['structure'] = topo_sort_structure(by_category['structure'])
-    by_category['object'] = topo_sort_object(by_category['object'])
-
-    for struct in by_category['structure']:
-        struct.update_metadata()
-
-    addins = metadata.get('addins', {}) if metadata else {}
-    apply_addins(types, addins)
-
-    api_params = {
-        'types': types,
-        'by_category': by_category,
-        'enabled_tags': enabled_tags,
-        'disabled_tags': disabled_tags,
-    }
-    return {
-        'metadata': Metadata(json['_metadata']),
-        'types': types,
-        'by_category': by_category,
-        'enabled_tags': enabled_tags,
-        'disabled_tags': disabled_tags,
-        'c_methods': lambda typ: c_methods(api_params, typ),
-        'c_methods_sorted_by_parent':
-        get_c_methods_sorted_by_parent(api_params),
-        'c_methods_sorted_by_name': get_c_methods_sorted_by_name(api_params),
-        'cpp_methods': lambda typ: cpp_methods(api_params, typ),
-    }
-
-
-############################################################
-# WIRE STUFF
-############################################################
 
 
 # Create wire commands from api methods
@@ -891,6 +146,8 @@ def compute_wire_params(api_params, wire_json):
             api_struct.name.CamelCase() + 'FreeMembers'
         ]
 
+    # TODO(crbug.com/575961728): Move or remove these linked_record_members usages so that
+    # linked_record_members can be made private in dawn_json_parsing.py.
     for (name, json_data) in wire_json['commands'].items():
         commands.append(Command(name, linked_record_members(json_data, types)))
 
@@ -996,12 +253,13 @@ def analyze_converter_usage(params_kotlin):
 
 def compute_kotlin_params(loaded_json,
                           kotlin_json,
+                          kotlin_addins,
                           webgpu_kt_docs_data=None,
                           doc_warn_log_file_path=None):
 
     params_kotlin = parse_json(loaded_json,
                                enabled_tags=['art', 'art_experimental'],
-                               metadata=kotlin_json['metadata'])
+                               addins=kotlin_addins)
     params_kotlin['kotlin_package'] = kotlin_json['kotlin_package']
     params_kotlin['jni_primitives'] = kotlin_json['jni_primitives']
     params_kotlin['jni_signatures'] = kotlin_json['jni_signatures']
@@ -1296,15 +554,13 @@ def compute_kotlin_params(loaded_json,
 
     check_jvm_overload_usage(params_kotlin['by_category']['function'])
 
-    params_kotlin['has_kotlin_classes'] = (
-        [
-            callback for callback in by_category['callback function'] +
-            by_category['function pointer'] if include_callback(callback)
-        ] + [enum for enum in by_category['enum'] if include_enum(enum)] +
-        by_category['object'] + [
-            structure for structure in by_category['structure']
-            if include_structure(structure)
-        ])
+    params_kotlin['has_kotlin_classes'] = ([
+        callback for callback in by_category['callback function'] +
+        by_category['function pointer'] if include_callback(callback)
+    ] + by_category['object'] + [
+        structure for structure in by_category['structure']
+        if include_structure(structure)
+    ])
 
     analyze_converter_usage(params_kotlin)
 
@@ -1438,31 +694,22 @@ def annotate(typ, arg, *, make_const_member=False, with_nullability=False):
     return result
 
 
-def item_is_enabled(enabled_tags, json_data):
-    tags = validate_and_get_tags(json_data)
-    if tags is None: return True
+def is_stable(item, parent=None):
+    """Returns whether an item is part of Dawn's stable (ABI-frozen) API.
 
-    # Strip 'art_experimental' for non-Art targets so it doesn't cause
-    # the item to be excluded from C++/Emscripten builds.
-    if not ('art_experimental' in enabled_tags):
-        original_tags_empty = not tags
-        tags = [tag for tag in tags if tag not in ('art_experimental')]
-        # NOTE: If an item is tagged ONLY with 'art_experimental', it is disabled
-        # for non-Art targets.
-        if not tags and not original_tags_empty:
-            return False
-        if not tags:
-            return True
-
-    return any(tag in enabled_tags for tag in tags)
-
-
-def item_is_disabled(disabled_tags, json_data):
-    if disabled_tags is None: return False
-    tags = validate_and_get_tags(json_data)
-    if tags is None: return False
-
-    return any(tag in disabled_tags for tag in tags)
+    An item is stable iff it carries a "stable_version", which dawn_version.json
+    attaches through the addins mechanism (see _apply_addins). Methods are only
+    stable when their parent object or structure is stable too. AddRef, Release
+    and FreeMembers are synthesized by the generator with an empty json_data and
+    no version entry of their own: they inherit the stability of their parent.
+    """
+    if parent is not None and not is_stable(parent):
+        return False
+    if getattr(item, 'stable_version', None) is not None:
+        return True
+    json_data = getattr(item, 'json_data', None)
+    # Synthesized methods (empty json_data) inherit from the parent.
+    return parent is not None and json_data is not None and len(json_data) == 0
 
 
 def as_cppEnum(value_name):
@@ -1589,7 +836,7 @@ def unreachable_code(msg="unreachable_code"):
     assert False, msg
 
 
-def make_base_render_params(metadata):
+def make_base_render_params(metadata, has_stability_info=False):
     c_prefix = metadata.c_prefix
 
     def as_cTypeEnumSpecialCase(typ):
@@ -1622,6 +869,11 @@ def make_base_render_params(metadata):
         c_proc += method_name.CamelCase()
         return c_proc
 
+    def checked_is_stable(item, parent=None):
+        assert has_stability_info, (
+            'is_stable() requires dawn_version.json in --addin-jsons')
+        return is_stable(item, parent)
+
     return {
             'Name': lambda name: Name(name),
             'as_nullability_annotated_cType': \
@@ -1651,6 +903,7 @@ def make_base_render_params(metadata):
             'print': print,
             'unreachable_code': unreachable_code,
             'is_enum_value_proxy': is_enum_value_proxy,
+            'is_stable': checked_is_stable,
         }
 
 
@@ -1669,6 +922,13 @@ class MultiGeneratorFromDawnJSON(Generator):
                             required=True,
                             type=str,
                             help='The DAWN JSON definition to use.')
+        parser.add_argument(
+            '--addin-jsons',
+            default=None,
+            type=str,
+            nargs='+',
+            action='extend',
+            help='Additional JSON files with metadata.addins to apply.')
         parser.add_argument('--wire-json',
                             default=None,
                             type=str,
@@ -1707,20 +967,28 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         targets = args.targets.split(',')
 
+        extra_addins = [parse_addin(p) for p in (args.addin_jsons or [])]
+        has_stability_info = any('stable_version' in props
+                                 for addin in extra_addins
+                                 for props in addin.values())
+
         wire_json = None
+        wire_addins = []
         if args.wire_json:
             with open(args.wire_json) as f:
                 wire_json = json.loads(f.read())
+            wire_addins = [parse_addin(args.wire_json)]
 
-        native_json = None
+        native_addins = []
         if args.native_json:
-            with open(args.native_json) as f:
-                native_json = json.loads(f.read())
+            native_addins = [parse_addin(args.native_json)]
 
         kotlin_json = None
+        kotlin_addins = []
         if args.kotlin_json:
             with open(args.kotlin_json) as f:
                 kotlin_json = json.loads(f.read())
+            kotlin_addins = [parse_addin(args.kotlin_json)]
 
         webgpu_kt_docs_data = None
         if args.webgpu_kt_docs:
@@ -1732,14 +1000,17 @@ class MultiGeneratorFromDawnJSON(Generator):
         imported_templates = []
 
         params_dawn = parse_json(loaded_json,
-                                 enabled_tags=['dawn', 'native', 'deprecated'])
+                                 enabled_tags=['dawn', 'native', 'deprecated'],
+                                 addins=extra_addins)
 
         params_all = parse_json(
             loaded_json,
-            enabled_tags=['dawn', 'emscripten', 'native', 'deprecated'])
+            enabled_tags=['dawn', 'emscripten', 'native', 'deprecated'],
+            addins=extra_addins)
 
         metadata = params_dawn['metadata']
-        RENDER_PARAMS_BASE = make_base_render_params(metadata)
+        RENDER_PARAMS_BASE = make_base_render_params(
+            metadata, has_stability_info=has_stability_info)
 
         api = metadata.api.lower()
         prefix = metadata.proc_table_prefix.lower()
@@ -1835,7 +1106,8 @@ class MultiGeneratorFromDawnJSON(Generator):
 
             params_upstream = parse_json(loaded_json,
                                          enabled_tags=['native'],
-                                         disabled_tags=['dawn'])
+                                         disabled_tags=['dawn'],
+                                         addins=extra_addins)
             renders.append(
                 FileRender('api.h', 'webgpu-headers/' + api + '.h',
                            [RENDER_PARAMS_BASE, params_upstream]))
@@ -1867,7 +1139,8 @@ class MultiGeneratorFromDawnJSON(Generator):
 
             assert api == 'webgpu'
             params_emscripten = parse_json(loaded_json,
-                                           enabled_tags=['emscripten'])
+                                           enabled_tags=['emscripten'],
+                                           addins=extra_addins)
             # system/include/webgpu
             imported_templates.append('BSD_LICENSE')
             renders.append(
@@ -1899,7 +1172,8 @@ class MultiGeneratorFromDawnJSON(Generator):
         if 'emdawnwebgpu_modules' in targets:
             assert api == 'webgpu'
             params_emscripten = parse_json(loaded_json,
-                                           enabled_tags=['emscripten'])
+                                           enabled_tags=['emscripten'],
+                                           addins=extra_addins)
             renders.append(
                 FileRender('api_cpp.ixx', 'include/dawn/' + api + '.ixx', [
                     RENDER_PARAMS_BASE, params_emscripten, {
@@ -1910,7 +1184,8 @@ class MultiGeneratorFromDawnJSON(Generator):
         if 'emdawnwebgpu_js' in targets:
             assert api == 'webgpu'
             params_emscripten = parse_json(loaded_json,
-                                           enabled_tags=['emscripten'])
+                                           enabled_tags=['emscripten'],
+                                           addins=extra_addins)
             renders.append(
                 FileRender('emdawnwebgpu/struct_info_webgpu.json',
                            'src/emdawnwebgpu/struct_info_webgpu.json',
@@ -1928,7 +1203,8 @@ class MultiGeneratorFromDawnJSON(Generator):
         if 'emdawnwebgpu_link_test_cpp' in targets:
             assert api == 'webgpu'
             params_emscripten = parse_json(loaded_json,
-                                           enabled_tags=['emscripten'])
+                                           enabled_tags=['emscripten'],
+                                           addins=extra_addins)
             renders.append(
                 FileRender('emdawnwebgpu/LinkTest.cpp',
                            'src/emdawnwebgpu/LinkTest.cpp',
@@ -1951,7 +1227,7 @@ class MultiGeneratorFromDawnJSON(Generator):
             params_dawn_native = parse_json(
                 loaded_json,
                 enabled_tags=['dawn', 'native', 'deprecated'],
-                metadata=native_json['metadata'])
+                addins=native_addins + extra_addins)
             frontend_params = [
                 RENDER_PARAMS_BASE,
                 params_dawn_native,
@@ -2047,7 +1323,9 @@ class MultiGeneratorFromDawnJSON(Generator):
             # Generate ComboLimits without any extensions so it works on
             # all targets (and doesn't chain any experimental stuff like
             # extensions that are output only and produce warnings on input).
-            params = parse_json(loaded_json, enabled_tags=[])
+            params = parse_json(loaded_json,
+                                enabled_tags=[],
+                                addins=extra_addins)
             renders.append(
                 FileRender('dawn/utils/ComboLimits.h',
                            'src/dawn/utils/ComboLimits.h',
@@ -2061,7 +1339,7 @@ class MultiGeneratorFromDawnJSON(Generator):
             params_dawn_wire = parse_json(loaded_json,
                                           enabled_tags=['dawn', 'deprecated'],
                                           disabled_tags=['native'],
-                                          metadata=wire_json['metadata'])
+                                          addins=wire_addins + extra_addins)
             additional_params = compute_wire_params(params_dawn_wire,
                                                     wire_json)
 
@@ -2161,9 +1439,9 @@ class MultiGeneratorFromDawnJSON(Generator):
                            'src/dawn/wire/server/WGPUTraits_autogen.h',
                            wire_params))
 
-
         if 'kotlin' in targets:
             params_kotlin = compute_kotlin_params(loaded_json, kotlin_json,
+                                                  kotlin_addins + extra_addins,
                                                   webgpu_kt_docs_data,
                                                   doc_warn_log_file_path)
             kt_file_path = params_kotlin['kotlin_package'].replace('.', '/')
@@ -2244,6 +1522,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if "jni" in targets:
             params_kotlin = compute_kotlin_params(loaded_json, kotlin_json,
+                                                  kotlin_addins + extra_addins,
                                                   webgpu_kt_docs_data,
                                                   doc_warn_log_file_path)
 
@@ -2272,6 +1551,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
     def get_dependencies(self, args):
         deps = [os.path.abspath(args.dawn_json)]
+        deps += [os.path.abspath(p) for p in (args.addin_jsons or [])]
         if args.wire_json != None:
             deps += [os.path.abspath(args.wire_json)]
         if args.native_json != None:

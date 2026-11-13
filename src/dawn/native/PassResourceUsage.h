@@ -126,6 +126,7 @@ struct CommandBufferResourceUsage {
     RAW_PTR_EXCLUSION absl::flat_hash_set<BufferBase*> topLevelBuffers;
     RAW_PTR_EXCLUSION absl::flat_hash_set<TextureBase*> topLevelTextures;
     RAW_PTR_EXCLUSION absl::flat_hash_set<QuerySetBase*> usedQuerySets;
+    RAW_PTR_EXCLUSION absl::flat_hash_set<ResourceTableBase*> topLevelResourceTables;
 };
 
 // Returns a set of writable textures from scope.textures

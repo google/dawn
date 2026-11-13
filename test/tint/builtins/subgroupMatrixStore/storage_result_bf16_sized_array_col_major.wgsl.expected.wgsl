@@ -1,0 +1,28 @@
+enable chromium_experimental_subgroup_matrix, subgroups;
+enable f16;
+
+@group(0) @binding(0) var<storage, read_write> out0 : array<u32, 128>;
+
+@group(0) @binding(1) var<storage, read_write> out1 : array<vec2i, 128>;
+
+@group(0) @binding(2) var<storage, read_write> out2 : array<vec3f, 128>;
+
+@group(0) @binding(3) var<storage, read_write> out3 : array<vec4u, 128>;
+
+@group(0) @binding(4) var<storage, read_write> out4 : array<f16, 128>;
+
+@group(0) @binding(5) var<storage, read_write> out5 : array<vec2h, 128>;
+
+@group(0) @binding(6) var<storage, read_write> out6 : array<vec3h, 128>;
+
+@compute @workgroup_size(64)
+fn main() {
+  let m = subgroup_matrix_result<bf16, 8, 8>();
+  subgroupMatrixStore<col_major>(&(out0), 0u, m, 16u);
+  subgroupMatrixStore<col_major>(&(out1), 0u, m, 16u);
+  subgroupMatrixStore<col_major>(&(out2), 0u, m, 16u);
+  subgroupMatrixStore<col_major>(&(out3), 0u, m, 16u);
+  subgroupMatrixStore<col_major>(&(out4), 0u, m, 16u);
+  subgroupMatrixStore<col_major>(&(out5), 0u, m, 16u);
+  subgroupMatrixStore<col_major>(&(out6), 0u, m, 16u);
+}

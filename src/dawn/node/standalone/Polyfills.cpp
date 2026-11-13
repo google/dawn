@@ -31,6 +31,7 @@
 #include <cctype>
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -48,6 +49,7 @@
 #include "src/dawn/common/SystemUtils.h"
 #include "src/dawn/node/napi_v8/napi_v8.h"
 #include "src/dawn/node/standalone/EventLoop.h"
+#include "src/dawn/node/standalone/FileBundle.h"
 
 namespace dawn::node::standalone {
 
@@ -62,10 +64,14 @@ struct PolyfillContext {
     };
 
     PolyfillContext(EventLoop& event_loop, PolyfillOptions opts)
-        : loop(event_loop), options(std::move(opts)) {}
+        : loop(event_loop),
+          options(std::move(opts)),
+          bundle_root(std::filesystem::path(options.bundle_root).lexically_normal()) {}
 
     EventLoop& loop;
     PolyfillOptions options;
+    // `options.bundle_root` in the form the resolved paths take, so that they compare equal to it.
+    std::filesystem::path bundle_root;
     std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now();
     absl::flat_hash_map<std::string, Napi::ObjectReference> module_cache;
     std::vector<std::unique_ptr<RequireContext>> require_contexts;
@@ -160,6 +166,38 @@ bool RejectUncPath(Napi::Env env, const std::string& path) {
 // fs
 // ---------------------------------------------------------------------------
 
+// Returns the path the fs functions act on for `path`. With a bundle, a relative path is resolved
+// against the bundle's root, which stands in for the working directory. An empty path is not
+// resolved, so that it names no file, as in Node.
+std::string ResolveFsPath(const PolyfillContext& ctx, const std::string& path) {
+    if (ctx.options.bundle == nullptr || path.empty()) {
+        return path;
+    }
+    return (ctx.bundle_root / path).lexically_normal().string();
+}
+
+// Returns the name in the bundle of `resolved`, a path from ResolveFsPath(), if the context has a
+// bundle and the path lies under its root. Returns nullopt for a path on the disk.
+std::optional<std::string> PathInBundle(const PolyfillContext& ctx, const std::string& resolved) {
+    if (ctx.options.bundle == nullptr) {
+        return std::nullopt;
+    }
+    const std::filesystem::path relative =
+        std::filesystem::path(resolved).lexically_relative(ctx.bundle_root);
+    if (relative.empty() || relative.begin()->string() == "..") {
+        return std::nullopt;
+    }
+    if (relative == ".") {
+        return "";
+    }
+    // "a/", "a/." and "a/b/.." normalize to "a/", which names the entry "a".
+    std::string name = relative.generic_string();
+    if (name.ends_with('/')) {
+        name.pop_back();
+    }
+    return name;
+}
+
 // Retrieves the path argument from `info` and stores it in `*path`. Every fs
 // entry point with a path argument has it in the first position. If the path
 // cannot be retrieved or it is a UNC path, a JavaScript exception is thrown.
@@ -247,10 +285,26 @@ bool OpenAndSizeFile(Napi::Env env,
     return true;
 }
 
-bool ReadFileUtf8(Napi::Env env, const std::string& path, std::string* out) {
+// Reads the file at `path`, from the bundle when the path lies under its root and from the disk
+// otherwise, or returns false with an exception pending.
+bool ReadFileUtf8(Napi::Env env,
+                  const PolyfillContext& ctx,
+                  const std::string& path,
+                  std::string* out) {
+    const std::string resolved = ResolveFsPath(ctx, path);
+    if (std::optional<std::string> name = PathInBundle(ctx, resolved)) {
+        std::optional<std::string> contents = ctx.options.bundle->ReadFile(*name);
+        if (!contents) {
+            Napi::Error::New(env, "Failed to open file: " + path).ThrowAsJavaScriptException();
+            return false;
+        }
+        *out = std::move(*contents);
+        return true;
+    }
+
     std::ifstream file;
     std::streamoff offset = 0;
-    if (!OpenAndSizeFile(env, path, &file, &offset)) {
+    if (!OpenAndSizeFile(env, resolved, &file, &offset)) {
         return false;
     }
     out->resize(static_cast<size_t>(offset));
@@ -261,6 +315,7 @@ bool ReadFileUtf8(Napi::Env env, const std::string& path, std::string* out) {
 
 Napi::Value ReadFileSync(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
+    const auto* ctx = static_cast<PolyfillContext*>(info.Data());
     std::string path;
     Encoding encoding = Encoding::kNone;
     if (!GetPathArgument(info, &path) || !GetEncodingOption(info, &encoding)) {
@@ -269,15 +324,27 @@ Napi::Value ReadFileSync(const Napi::CallbackInfo& info) {
 
     if (encoding == Encoding::kUtf8) {
         std::string content;
-        if (!ReadFileUtf8(env, path, &content)) {
+        if (!ReadFileUtf8(env, *ctx, path, &content)) {
             return env.Undefined();
         }
         return Napi::String::New(env, content);
     }
 
+    const std::string resolved = ResolveFsPath(*ctx, path);
+    if (std::optional<std::string> name = PathInBundle(*ctx, resolved)) {
+        std::optional<std::string> contents = ctx->options.bundle->ReadFile(*name);
+        if (!contents) {
+            Napi::Error::New(env, "Failed to open file: " + path).ThrowAsJavaScriptException();
+            return env.Undefined();
+        }
+        Napi::ArrayBuffer array_buffer = Napi::ArrayBuffer::New(env, contents->size());
+        std::ranges::copy(*contents, static_cast<char*>(array_buffer.Data()));
+        return Napi::Uint8Array::New(env, contents->size(), array_buffer, 0);
+    }
+
     std::ifstream file;
     std::streamoff offset = 0;
-    if (!OpenAndSizeFile(env, path, &file, &offset)) {
+    if (!OpenAndSizeFile(env, resolved, &file, &offset)) {
         return env.Undefined();
     }
 
@@ -288,10 +355,32 @@ Napi::Value ReadFileSync(const Napi::CallbackInfo& info) {
     return Napi::Uint8Array::New(env, static_cast<size_t>(file.gcount()), array_buffer, 0);
 }
 
+// Returns the type of what is at `path`, in the bundle when the path lies under its root and on the
+// disk otherwise, or nullopt if there is nothing there.
+std::optional<std::filesystem::file_type> FileType(const PolyfillContext& ctx,
+                                                   const std::string& path) {
+    const std::string resolved = ResolveFsPath(ctx, path);
+    if (std::optional<std::string> name = PathInBundle(ctx, resolved)) {
+        FileBundle::Kind kind = ctx.options.bundle->Stat(*name);
+        if (kind == FileBundle::Kind::kNotFound) {
+            return std::nullopt;
+        }
+        return kind == FileBundle::Kind::kFile ? std::filesystem::file_type::regular
+                                               : std::filesystem::file_type::directory;
+    }
+    std::error_code ec;
+    std::filesystem::file_status status = std::filesystem::status(resolved, ec);
+    if (ec || !std::filesystem::exists(status)) {
+        return std::nullopt;
+    }
+    return status.type();
+}
+
 // Returns true if the given file exists. A JavaScript exception is thrown if a
 // UNC path is given.
 Napi::Value ExistsSync(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
+    const auto* ctx = static_cast<PolyfillContext*>(info.Data());
     if (info.Length() < 1 || !info[0].IsString()) {
         return Napi::Boolean::New(env, false);
     }
@@ -299,13 +388,12 @@ Napi::Value ExistsSync(const Napi::CallbackInfo& info) {
     if (RejectUncPath(env, path)) {
         return env.Undefined();
     }
-    std::error_code ec;
-    bool exists = std::filesystem::exists(path, ec);
-    return Napi::Boolean::New(env, exists && !ec);
+    return Napi::Boolean::New(env, FileType(*ctx, path).has_value());
 }
 
 Napi::Value ReaddirSync(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
+    const auto* ctx = static_cast<PolyfillContext*>(info.Data());
     std::string path;
     // The entries are always strings, so the encoding needs validating rather than honouring; the
     // point of the call is to reject `withFileTypes` and friends.
@@ -314,8 +402,23 @@ Napi::Value ReaddirSync(const Napi::CallbackInfo& info) {
         return env.Undefined();
     }
 
+    const std::string resolved = ResolveFsPath(*ctx, path);
+    if (std::optional<std::string> name = PathInBundle(*ctx, resolved)) {
+        std::optional<std::vector<std::string>> entries = ctx->options.bundle->ReadDir(*name);
+        if (!entries) {
+            Napi::Error::New(env, "Failed to read directory: " + path).ThrowAsJavaScriptException();
+            return env.Undefined();
+        }
+        Napi::Array result = Napi::Array::New(env);
+        uint32_t index = 0;
+        for (const std::string& entry : *entries) {
+            result.Set(index++, Napi::String::New(env, entry));
+        }
+        return result;
+    }
+
     std::error_code ec;
-    std::filesystem::directory_iterator it(path, ec);
+    std::filesystem::directory_iterator it(resolved, ec);
     if (ec) {
         Napi::Error::New(env, ec.message()).ThrowAsJavaScriptException();
         return env.Undefined();
@@ -339,29 +442,25 @@ Napi::Value ReturnFalse(const Napi::CallbackInfo& info) {
 
 Napi::Value StatSync(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
+    const auto* ctx = static_cast<PolyfillContext*>(info.Data());
     std::string path;
     Encoding encoding = Encoding::kNone;
     if (!GetPathArgument(info, &path) || !GetEncodingOption(info, &encoding)) {
         return env.Undefined();
     }
 
-    std::error_code ec;
-    std::filesystem::file_status status = std::filesystem::status(path, ec);
-    if (ec || !std::filesystem::exists(status)) {
+    std::optional<std::filesystem::file_type> type = FileType(*ctx, path);
+    if (!type) {
         Napi::Error::New(env, "Failed to stat: " + path).ThrowAsJavaScriptException();
         return env.Undefined();
     }
 
-    // The answer is settled here, so each predicate is just the constant it will always return.
+    const bool is_file = *type == std::filesystem::file_type::regular;
+    const bool is_directory = *type == std::filesystem::file_type::directory;
     Napi::Object stats = Napi::Object::New(env);
-    stats.Set(
-        "isFile",
-        Napi::Function::New(
-            env, std::filesystem::is_regular_file(status) ? ReturnTrue : ReturnFalse, "isFile"));
-    stats.Set(
-        "isDirectory",
-        Napi::Function::New(env, std::filesystem::is_directory(status) ? ReturnTrue : ReturnFalse,
-                            "isDirectory"));
+    stats.Set("isFile", Napi::Function::New(env, is_file ? ReturnTrue : ReturnFalse, "isFile"));
+    stats.Set("isDirectory",
+              Napi::Function::New(env, is_directory ? ReturnTrue : ReturnFalse, "isDirectory"));
     return stats;
 }
 
@@ -369,12 +468,12 @@ Napi::Value StatSync(const Napi::CallbackInfo& info) {
 //
 // Only the synchronous entry points are native. The callback and promise forms are built on top of
 // them by the bootstrap script.
-void RegisterFs(Napi::Env env) {
+void RegisterFs(Napi::Env env, PolyfillContext* ctx) {
     Napi::Object fs = Napi::Object::New(env);
-    fs.Set("readFileSync", Napi::Function::New(env, ReadFileSync, "readFileSync"));
-    fs.Set("existsSync", Napi::Function::New(env, ExistsSync, "existsSync"));
-    fs.Set("readdirSync", Napi::Function::New(env, ReaddirSync, "readdirSync"));
-    fs.Set("statSync", Napi::Function::New(env, StatSync, "statSync"));
+    fs.Set("readFileSync", Napi::Function::New(env, ReadFileSync, "readFileSync", ctx));
+    fs.Set("existsSync", Napi::Function::New(env, ExistsSync, "existsSync", ctx));
+    fs.Set("readdirSync", Napi::Function::New(env, ReaddirSync, "readdirSync", ctx));
+    fs.Set("statSync", Napi::Function::New(env, StatSync, "statSync", ctx));
     env.Global().Set("_fs_polyfill", fs);
 }
 
@@ -528,8 +627,13 @@ std::string JoinPaths(const std::vector<std::string>& args) {
 }
 
 // The working directory, or false with an exception pending. Shared by process.cwd() and by
-// resolve(), which anchors relative arguments on it.
-bool CurrentDirectory(Napi::Env env, std::string* out) {
+// resolve(), which anchors relative arguments on it. With a bundle, this is the bundle's root,
+// regardless of where the process itself was started.
+bool CurrentDirectory(Napi::Env env, const PolyfillContext& ctx, std::string* out) {
+    if (ctx.options.bundle != nullptr) {
+        *out = ctx.bundle_root.string();
+        return true;
+    }
     std::error_code ec;
     const std::filesystem::path cwd = std::filesystem::current_path(ec);
     if (ec) {
@@ -544,7 +648,10 @@ bool CurrentDirectory(Napi::Env env, std::string* out) {
     return !RejectUncPath(env, *out);
 }
 
-bool ResolvePaths(Napi::Env env, const std::vector<std::string>& args, std::string* out) {
+bool ResolvePaths(Napi::Env env,
+                  const PolyfillContext& ctx,
+                  const std::vector<std::string>& args,
+                  std::string* out) {
     std::filesystem::path accumulated;
     for (const std::string& arg : args) {
         if (arg.empty()) {
@@ -561,7 +668,7 @@ bool ResolvePaths(Napi::Env env, const std::vector<std::string>& args, std::stri
     // confusing failure about the argument.
     if (!accumulated.is_absolute()) {
         std::string cwd;
-        if (!CurrentDirectory(env, &cwd)) {
+        if (!CurrentDirectory(env, ctx, &cwd)) {
             return false;
         }
 
@@ -569,6 +676,9 @@ bool ResolvePaths(Napi::Env env, const std::vector<std::string>& args, std::stri
         // below will fail. Replacing it with `cwd` to match Node's behaviour.
         if (accumulated.empty()) {
             accumulated = std::filesystem::path(cwd);
+        } else if (ctx.options.bundle != nullptr) {
+            // absolute() below would anchor on the process's working directory, not the bundle's.
+            accumulated = std::filesystem::path(cwd) / accumulated;
         }
     }
 
@@ -593,11 +703,16 @@ bool ResolvePaths(Napi::Env env, const std::vector<std::string>& args, std::stri
     return true;
 }
 
-bool RelativePath(Napi::Env env, const std::string& from, const std::string& to, std::string* out) {
+bool RelativePath(Napi::Env env,
+                  const PolyfillContext& ctx,
+                  const std::string& from,
+                  const std::string& to,
+                  std::string* out) {
     // Node resolves both sides first, so the answer depends only on where they land.
     std::string from_resolved;
     std::string to_resolved;
-    if (!ResolvePaths(env, {from}, &from_resolved) || !ResolvePaths(env, {to}, &to_resolved)) {
+    if (!ResolvePaths(env, ctx, {from}, &from_resolved) ||
+        !ResolvePaths(env, ctx, {to}, &to_resolved)) {
         return false;
     }
 
@@ -662,32 +777,34 @@ Napi::Value PathJoin(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value PathResolve(const Napi::CallbackInfo& info) {
+    const auto* ctx = static_cast<PolyfillContext*>(info.Data());
     std::vector<std::string> args;
     std::string resolved;
-    if (!GetPathArguments(info, 0, &args) || !ResolvePaths(info.Env(), args, &resolved)) {
+    if (!GetPathArguments(info, 0, &args) || !ResolvePaths(info.Env(), *ctx, args, &resolved)) {
         return info.Env().Undefined();
     }
     return Napi::String::New(info.Env(), resolved);
 }
 
 Napi::Value PathRelative(const Napi::CallbackInfo& info) {
+    const auto* ctx = static_cast<PolyfillContext*>(info.Data());
     std::vector<std::string> args;
     std::string relative;
     if (!GetPathArguments(info, 2, &args) ||
-        !RelativePath(info.Env(), args[0], args[1], &relative)) {
+        !RelativePath(info.Env(), *ctx, args[0], args[1], &relative)) {
         return info.Env().Undefined();
     }
     return Napi::String::New(info.Env(), relative);
 }
 
 // https://nodejs.org/api/path.html
-void RegisterPath(Napi::Env env) {
+void RegisterPath(Napi::Env env, PolyfillContext* ctx) {
     Napi::Object path = Napi::Object::New(env);
     path.Set("dirname", Napi::Function::New(env, PathDirname, "dirname"));
     path.Set("join", Napi::Function::New(env, PathJoin, "join"));
     path.Set("normalize", Napi::Function::New(env, PathNormalize, "normalize"));
-    path.Set("relative", Napi::Function::New(env, PathRelative, "relative"));
-    path.Set("resolve", Napi::Function::New(env, PathResolve, "resolve"));
+    path.Set("relative", Napi::Function::New(env, PathRelative, "relative", ctx));
+    path.Set("resolve", Napi::Function::New(env, PathResolve, "resolve", ctx));
     path.Set("sep", Napi::String::New(env, std::string(1, kPreferredSeparator)));
     env.Global().Set("_path_polyfill", path);
 }
@@ -698,12 +815,13 @@ void RegisterPath(Napi::Env env) {
 
 Napi::Value Cwd(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
+    const auto* ctx = static_cast<PolyfillContext*>(info.Data());
     // The working directory is the one path the runtime is not handed by its caller, so it is also
     // the one that can go wrong without anybody having asked for anything unusual. Everything
     // resolve() produces is built on it, so CurrentDirectory() throws rather than return a string
     // that would quietly contaminate every path derived from it.
     std::string cwd;
-    if (!CurrentDirectory(env, &cwd)) {
+    if (!CurrentDirectory(env, *ctx, &cwd)) {
         return env.Undefined();
     }
     return Napi::String::New(env, cwd);
@@ -722,6 +840,11 @@ Napi::Value Exit(const Napi::CallbackInfo& info) {
     napi_env c_env = info.Env();
     reinterpret_cast<napi_env__*>(c_env)->isolate->TerminateExecution();
     return info.Env().Undefined();
+}
+
+// https://nodejs.org/api/process.html#processabort
+[[noreturn]] void Abort(const Napi::CallbackInfo&) {
+    std::abort();
 }
 
 Napi::Value HrtimeBigint(const Napi::CallbackInfo& info) {
@@ -752,8 +875,9 @@ Napi::Value StderrWrite(const Napi::CallbackInfo& info) {
 // https://nodejs.org/api/process.html
 void RegisterProcess(Napi::Env env, const PolyfillOptions& options, PolyfillContext* ctx) {
     Napi::Object process = Napi::Object::New(env);
-    process.Set("cwd", Napi::Function::New(env, Cwd, "cwd"));
+    process.Set("cwd", Napi::Function::New(env, Cwd, "cwd", ctx));
     process.Set("exit", Napi::Function::New(env, Exit, "exit", ctx));
+    process.Set("abort", Napi::Function::New(env, Abort, "abort"));
 
     Napi::Object hrtime = Napi::Object::New(env);
     hrtime.Set("bigint", Napi::Function::New(env, HrtimeBigint, "bigint"));
@@ -1044,7 +1168,7 @@ Napi::Value LoadModule(Napi::Env env, PolyfillContext* ctx, const std::string& r
     }
 
     std::string content;
-    if (!ReadFileUtf8(env, resolved_path, &content)) {
+    if (!ReadFileUtf8(env, *ctx, resolved_path, &content)) {
         return env.Undefined();
     }
 
@@ -1106,12 +1230,12 @@ Napi::Value Require(const Napi::CallbackInfo& info) {
 
     auto* req_ctx = static_cast<PolyfillContext::RequireContext*>(info.Data());
     std::string from_dir = req_ctx->from_dir;
-    if (from_dir.empty() && !CurrentDirectory(env, &from_dir)) {
+    if (from_dir.empty() && !CurrentDirectory(env, *req_ctx->ctx, &from_dir)) {
         return env.Undefined();
     }
 
     std::string resolved;
-    if (!ResolvePaths(env, {from_dir, specifier}, &resolved)) {
+    if (!ResolvePaths(env, *req_ctx->ctx, {from_dir, specifier}, &resolved)) {
         return env.Undefined();
     }
 
@@ -1290,8 +1414,8 @@ void RegisterPolyfills(Napi::Env env, EventLoop& loop, const PolyfillOptions& op
     auto* ctx = new PolyfillContext(loop, options);
 
     RegisterConsole(env);
-    RegisterFs(env);
-    RegisterPath(env);
+    RegisterFs(env, ctx);
+    RegisterPath(env, ctx);
     RegisterProcess(env, options, ctx);
     RegisterTimers(env, ctx);
     RegisterPerformance(env, ctx);

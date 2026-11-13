@@ -52,6 +52,7 @@ var statusColor = map[Status]string{
 	Skip:    term.Cyan,
 	Timeout: term.Yellow,
 	Fail:    term.Red,
+	Crash:   term.Magenta,
 }
 
 var pbStatusColor = map[Status]progressbar.Color{
@@ -60,6 +61,7 @@ var pbStatusColor = map[Status]progressbar.Color{
 	Skip:    progressbar.Cyan,
 	Timeout: progressbar.Yellow,
 	Fail:    progressbar.Red,
+	Crash:   progressbar.Magenta,
 }
 
 // Create another goroutine to close the results chan when all the runner
@@ -201,7 +203,7 @@ func StreamResults(
 			continue
 		}
 
-		if s == Fail {
+		if s.isFailure() {
 			unexpectedFailures += 1
 		}
 

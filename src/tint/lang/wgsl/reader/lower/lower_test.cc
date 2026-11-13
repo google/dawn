@@ -88,7 +88,7 @@ TEST_F(Wgslreader_LowerTest, WorkgroupUniformLoad) {
 
     auto* src = R"(
 $B1: {  # root
-  %wgvar:ptr<workgroup, i32, read_write> = var undef
+  %wgvar:ptr<workgroup, i32, read_write> = var
 }
 
 %f = func():i32 {
@@ -102,7 +102,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wgvar:ptr<workgroup, i32, read_write> = var undef
+  %wgvar:ptr<workgroup, i32, read_write> = var
 }
 
 %f = func():i32 {
@@ -133,7 +133,7 @@ TEST_F(Wgslreader_LowerTest, WorkgroupUniformLoadAtomic) {
 
     auto* src = R"(
 $B1: {  # root
-  %wgvar:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %wgvar:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %f = func():i32 {
@@ -147,7 +147,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %wgvar:ptr<workgroup, atomic<i32>, read_write> = var undef
+  %wgvar:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %f = func():i32 {
@@ -183,7 +183,7 @@ TEST_F(Wgslreader_LowerTest, SubgroupMatrixLoad_u8_const) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -198,7 +198,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -234,7 +234,7 @@ TEST_F(Wgslreader_LowerTest, SubgroupMatrixLoad_f16) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f16>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32, %stride:u32):void {
@@ -249,7 +249,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f16>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f16>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:u32, %stride:u32):void {
@@ -285,7 +285,7 @@ TEST_F(Wgslreader_LowerTest, SubgroupMatrixStore_u8) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%m:subgroup_matrix_left<u8, 8, 8>, %offset:i32, %stride:i32):void {
@@ -300,7 +300,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%m:subgroup_matrix_left<u8, 8, 8>, %offset:i32, %stride:i32):void {
@@ -337,7 +337,7 @@ TEST_F(Wgslreader_LowerTest, SubgroupMatrixStore_f32_const) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%m:subgroup_matrix_left<f32, 8, 8>):void {
@@ -352,7 +352,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, array<f32>, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, array<f32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%m:subgroup_matrix_left<f32, 8, 8>):void {

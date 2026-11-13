@@ -35,7 +35,9 @@
 namespace dawn {
 namespace {
 
-class BitSetRangeIteratorTest : public testing::Test {
+using ::testing::Test;
+
+class BitSetRangeIteratorTest : public Test {
   protected:
     struct Range {
         uint32_t offset;

@@ -30,8 +30,8 @@
 namespace dawn::wire {
 namespace {
 
-using testing::_;
-using testing::Return;
+using ::testing::_;
+using ::testing::Return;
 
 class WireOptionalTests : public WireTest {
   public:

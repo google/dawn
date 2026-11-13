@@ -7,8 +7,13 @@ Texture2DMS<float4> arg_0 : register(t0, space1);
 float4 textureLoad_f0abad() {
   uint2 arg_1 = (1u).xx;
   int arg_2 = int(1);
-  int v = arg_2;
-  float4 res = arg_0.Load(int2(arg_1), v);
+  uint2 v = arg_1;
+  uint3 v_1 = (0u).xxx;
+  arg_0.GetDimensions(v_1.x, v_1.y, v_1.z);
+  uint v_2 = (v_1.z - 1u);
+  uint v_3 = min(uint(arg_2), v_2);
+  int2 v_4 = int2(v);
+  float4 res = arg_0.Load(v_4, int(v_3));
   return res;
 }
 
@@ -25,8 +30,13 @@ Texture2DMS<float4> arg_0 : register(t0, space1);
 float4 textureLoad_f0abad() {
   uint2 arg_1 = (1u).xx;
   int arg_2 = int(1);
-  int v = arg_2;
-  float4 res = arg_0.Load(int2(arg_1), v);
+  uint2 v = arg_1;
+  uint3 v_1 = (0u).xxx;
+  arg_0.GetDimensions(v_1.x, v_1.y, v_1.z);
+  uint v_2 = (v_1.z - 1u);
+  uint v_3 = min(uint(arg_2), v_2);
+  int2 v_4 = int2(v);
+  float4 res = arg_0.Load(v_4, int(v_3));
   return res;
 }
 
@@ -53,22 +63,27 @@ Texture2DMS<float4> arg_0 : register(t0, space1);
 float4 textureLoad_f0abad() {
   uint2 arg_1 = (1u).xx;
   int arg_2 = int(1);
-  int v = arg_2;
-  float4 res = arg_0.Load(int2(arg_1), v);
+  uint2 v = arg_1;
+  uint3 v_1 = (0u).xxx;
+  arg_0.GetDimensions(v_1.x, v_1.y, v_1.z);
+  uint v_2 = (v_1.z - 1u);
+  uint v_3 = min(uint(arg_2), v_2);
+  int2 v_4 = int2(v);
+  float4 res = arg_0.Load(v_4, int(v_3));
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_1 = (VertexOutput)0;
-  v_1.pos = (0.0f).xxxx;
-  v_1.prevent_dce = textureLoad_f0abad();
-  VertexOutput v_2 = v_1;
-  return v_2;
+  VertexOutput v_5 = (VertexOutput)0;
+  v_5.pos = (0.0f).xxxx;
+  v_5.prevent_dce = textureLoad_f0abad();
+  VertexOutput v_6 = v_5;
+  return v_6;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_3 = vertex_main_inner();
-  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
-  return v_4;
+  VertexOutput v_7 = vertex_main_inner();
+  vertex_main_outputs v_8 = {v_7.prevent_dce, v_7.pos};
+  return v_8;
 }
 

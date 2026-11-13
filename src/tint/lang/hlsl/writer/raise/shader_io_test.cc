@@ -747,7 +747,7 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read> = var undef @binding_point(0, 0)
+  %1:ptr<storage, Outputs, read> = var @binding_point(0, 0)
 }
 
 %vert = @vertex func():Outputs {
@@ -771,7 +771,7 @@ vert_outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read> = var undef @binding_point(0, 0)
+  %1:ptr<storage, Outputs, read> = var @binding_point(0, 0)
 }
 
 %vert_inner = func():Outputs {
@@ -838,7 +838,7 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read_write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, Outputs, read_write> = var @binding_point(0, 0)
 }
 
 %frag = @fragment func():void {
@@ -857,7 +857,7 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read_write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, Outputs, read_write> = var @binding_point(0, 0)
 }
 
 %frag = @fragment func():void {
@@ -1289,7 +1289,7 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo_inner = func(%num_wgs:vec3<u32>):void {
@@ -1373,7 +1373,7 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo_inner = func(%inputs:Inputs):void {
@@ -1447,7 +1447,7 @@ foo_inputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo_inner = func(%invoc_id:vec3<u32>, %num_wgs:vec3<u32>):void {
@@ -1521,7 +1521,7 @@ foo_inputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo_inner = func(%num_wgs:vec3<u32>, %invoc_id:vec3<u32>):void {
@@ -1625,7 +1625,7 @@ foo_inputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo_inner = func(%invoc_id:vec3<u32>, %num_wgs:vec3<u32>, %invoc_index:u32, %sg_id:u32, %glob_id:vec3<u32>, %sg_size:u32, %wg_id:vec3<u32>):void {
@@ -3047,7 +3047,7 @@ foo_outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo_inner = func(%vert_idx:u32):vec4<f32> {
@@ -3123,7 +3123,7 @@ foo_outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo_inner = func(%inst_idx:u32):vec4<f32> {
@@ -3204,7 +3204,7 @@ foo_outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo_inner = func(%vert_idx:u32, %inst_idx:u32):vec4<f32> {
@@ -3294,7 +3294,7 @@ foo_outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo_inner = func(%inst_idx:u32, %vert_idx:u32):vec4<f32> {
@@ -3366,7 +3366,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_SubgroupId_NonLinearWorkgroup
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_id_counter:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %tint_subgroup_id_counter:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %foo_inner = func(%id:u32):void {
@@ -3380,7 +3380,7 @@ $B1: {  # root
   $B3: {
     %7:void = atomicStore %tint_subgroup_id_counter, 0u
     %8:void = workgroupBarrier
-    %tint_subgroup_id:ptr<function, u32, read_write> = var undef
+    %tint_subgroup_id:ptr<function, u32, read_write> = var
     %10:bool = subgroupElect
     if %10 [t: $B4] {  # if_1
       $B4: {  # true
@@ -3428,7 +3428,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumSubgroups_NonLinearWorkgro
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_id_counter:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %tint_subgroup_id_counter:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %foo_inner = func(%num:u32):void {
@@ -3442,7 +3442,7 @@ $B1: {  # root
   $B3: {
     %7:void = atomicStore %tint_subgroup_id_counter, 0u
     %8:void = workgroupBarrier
-    %tint_subgroup_id:ptr<function, u32, read_write> = var undef
+    %tint_subgroup_id:ptr<function, u32, read_write> = var
     %10:bool = subgroupElect
     if %10 [t: $B4] {  # if_1
       $B4: {  # true
@@ -3493,7 +3493,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_SubgroupId_Then_NumSubgroups_
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_id_counter:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %tint_subgroup_id_counter:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %foo_inner = func(%id:u32, %num:u32):void {
@@ -3507,7 +3507,7 @@ $B1: {  # root
   $B3: {
     %8:void = atomicStore %tint_subgroup_id_counter, 0u
     %9:void = workgroupBarrier
-    %tint_subgroup_id:ptr<function, u32, read_write> = var undef
+    %tint_subgroup_id:ptr<function, u32, read_write> = var
     %11:bool = subgroupElect
     if %11 [t: $B4] {  # if_1
       $B4: {  # true
@@ -3560,7 +3560,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumSubgroups_Then_SubgroupId_
 
     auto* expect = R"(
 $B1: {  # root
-  %tint_subgroup_id_counter:ptr<workgroup, atomic<u32>, read_write> = var undef
+  %tint_subgroup_id_counter:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %foo_inner = func(%num:u32, %id:u32):void {
@@ -3574,7 +3574,7 @@ $B1: {  # root
   $B3: {
     %8:void = atomicStore %tint_subgroup_id_counter, 0u
     %9:void = workgroupBarrier
-    %tint_subgroup_id:ptr<function, u32, read_write> = var undef
+    %tint_subgroup_id:ptr<function, u32, read_write> = var
     %11:bool = subgroupElect
     if %11 [t: $B4] {  # if_1
       $B4: {  # true
@@ -3881,7 +3881,7 @@ foo_inputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo_inner = func(%wgid:vec3<u32>, %numwgs:vec3<u32>, %wgindex:u32):void {
@@ -3970,7 +3970,7 @@ foo_inputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo_inner = func(%wgindex:u32):void {
@@ -4053,7 +4053,7 @@ foo_inputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo_inner = func(%numwgs:vec3<u32>, %gindex:u32):void {
@@ -4143,7 +4143,7 @@ foo_inputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo_inner = func(%gindex:u32):void {

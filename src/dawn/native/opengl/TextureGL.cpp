@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <new>
 #include <utility>
 
 #include "src/dawn/common/Constants.h"
@@ -45,6 +46,8 @@
 #include "src/dawn/native/opengl/UtilsGL.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/heap_array.h"
+#include "src/utils/span.h"
 
 namespace dawn::native::opengl {
 
@@ -259,6 +262,9 @@ MaybeError FramebufferTextureHelper(const OpenGLFunctions& gl,
 // static
 ResultOrError<Ref<Texture>> Texture::Create(Device* device,
                                             const UnpackedPtr<TextureDescriptor>& descriptor) {
+    // Report synthetic OOM from CreateTexture even when GL commands are deferred.
+    DAWN_TRY(VerifyBaseLevelFootprint(device, *descriptor));
+
     // Wrap the handle in a Texture class early so that it is deleted if initialization fails
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, 0, OwnsHandle::Yes));
 
@@ -612,21 +618,18 @@ MaybeError Texture::ClearTexture(const OpenGLFunctions& gl,
         }
         size_t bufferSize = static_cast<size_t>(bufferSize64);
 
-        dawn::native::BufferDescriptor descriptor = {};
-        descriptor.mappedAtCreation = true;
-        descriptor.usage = wgpu::BufferUsage::CopySrc;
-        descriptor.size = bufferSize;
+        // Use client memory to avoid an extra staging copy when GL commands are deferred.
+        HeapArray<std::byte> clearData(bufferSize, std::nothrow);
+        if (!clearData) {
+            return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
+        }
+        // HeapArray is already zero-initialized.
+        if (clearValue == TextureBase::ClearValue::NonZero) {
+            Span<std::byte>(clearData).FillBytes(std::byte(clearColor));
+        }
 
-        // We don't count the lazy clear of srcBuffer because it is an internal buffer.
-        // TODO(natlee@microsoft.com): use Dynamic Uploader here for temp buffer
-        Ref<Buffer> srcBuffer;
-        DAWN_TRY_ASSIGN(srcBuffer, Buffer::CreateInternalBuffer(device, &descriptor, false));
-
-        // Fill the buffer with clear color
-        srcBuffer->GetMappedRange().FillBytes(std::byte(clearColor));
-        DAWN_TRY(srcBuffer->Unmap());
-
-        DAWN_GL_TRY(gl, BindBuffer(GL_PIXEL_UNPACK_BUFFER, srcBuffer->GetHandle()));
+        // Make sure there is no unpack buffer bound so that DoTexSubImage reads from client memory.
+        DAWN_GL_TRY(gl, BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0));
         for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
              ++level) {
             TextureCopy textureCopy;
@@ -652,10 +655,9 @@ MaybeError Texture::ClearTexture(const OpenGLFunctions& gl,
                 }
 
                 textureCopy.origin.z = TexelCount{layer};
-                DAWN_TRY(DoTexSubImage(gl, textureCopy, nullptr, dataLayout, mipSize));
+                DAWN_TRY(DoTexSubImage(gl, textureCopy, clearData.data(), dataLayout, mipSize));
             }
         }
-        DAWN_GL_TRY(gl, BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0));
     }
     if (clearValue == TextureBase::ClearValue::Zero) {
         SetIsSubresourceContentInitialized(true, range);

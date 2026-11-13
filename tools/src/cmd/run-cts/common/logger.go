@@ -57,7 +57,7 @@ func (l *Logger) logResults(res Result, failuresOnly bool) {
 		if !ok {
 			break
 		}
-		if !failuresOnly || logRes.Status == Fail {
+		if !failuresOnly || logRes.Status.isFailure() {
 			fmt.Fprintf(l.writer, "%v [%v]\n%v", logRes.TestCase, logRes.Status, logRes.Message)
 		}
 		l.lastIndex++

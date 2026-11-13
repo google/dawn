@@ -100,9 +100,9 @@ TEST_F(IR_ValidatorTest, Access_NoResults) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:13 error: access: expected exactly 1 results, got 0
-    undef = access %2, 0i
-            ^^^^^^
+                testing::HasSubstr(R"(:3:17 error: access: expected exactly 1 results, got 0
+    <nullptr> = access %2, 0i
+                ^^^^^^
 )")) << res.Failure();
 }
 
@@ -115,10 +115,9 @@ TEST_F(IR_ValidatorTest, Access_NullObject) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:21 error: access: operand is undefined
-    %2:f32 = access undef, 0u
-                    ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:21 error: access: operand is nullptr
+    %2:f32 = access <nullptr>, 0u
+                    ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -135,10 +134,9 @@ TEST_F(IR_ValidatorTest, Access_NullIndex) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:25 error: access: operand is undefined
-    %3:f32 = access %2, undef
-                        ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:25 error: access: operand is nullptr
+    %3:f32 = access %2, <nullptr>
+                        ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -152,10 +150,46 @@ TEST_F(IR_ValidatorTest, Access_NegativeIndex) {
         b.Return(f);
     });
 
+    auto res = ir::Validate(mod, ErrorSource::kWgsl);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("error: access: constant index must be positive, got -1"))
+        << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Access_NegativeIndex_NonWGSL) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.vec3f());
+    f->SetParams({obj});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ty.f32(), obj, -1_i);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    EXPECT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Access_NegativeIndex_Struct) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.f32()},
+                                                              {mod.symbols.New("b"), ty.i32()},
+                                                          });
+
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam(str_ty);
+    f->SetParams({obj});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ty.f32(), obj, -1_i);
+        b.Return(f);
+    });
+
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:25 error: access: constant index must be positive, got -1
+                testing::HasSubstr(R"(:8:25 error: access: constant index must be positive, got -1
     %3:f32 = access %2, -1i
                         ^^^
 )")) << res.Failure();
@@ -171,13 +205,26 @@ TEST_F(IR_ValidatorTest, Access_OOB_Index_Value) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod);
+    auto res = ir::Validate(mod, ErrorSource::kWgsl);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:29 error: access: index out of bounds for type 'vec2<f32>'
-    %3:f32 = access %2, 1u, 3u
-                            ^^
-)")) << res.Failure();
+                testing::HasSubstr(R"(error: access: index out of bounds for type 'vec2<f32>'
+note: acceptable range: [0..1])"))
+        << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Access_OOB_Index_Value_NonWGSL) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.mat3x2<f32>());
+    f->SetParams({obj});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ty.f32(), obj, 1_u, 3_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    EXPECT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Access_OOB_Index_Ptr) {
@@ -190,22 +237,59 @@ TEST_F(IR_ValidatorTest, Access_OOB_Index_Ptr) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod);
+    auto res = ir::Validate(mod, ErrorSource::kWgsl);
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:3:55 error: access: index out of bounds for type 'ptr<private, array<f32, 2>, read_write>'
-    %3:ptr<private, f32, read_write> = access %2, 1u, 3u
-                                                      ^^
+            R"(error: access: index out of bounds for type 'ptr<private, array<f32, 2>, read_write>'
+note: acceptable range: [0..1])"))
+        << res.Failure();
+}
 
-:2:3 note: in block
+TEST_F(IR_ValidatorTest, Access_OOB_Index_Ptr_NonWGSL) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.ptr<private_, array<array<f32, 2>, 3>>());
+    f->SetParams({obj});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ty.ptr<private_, f32>(), obj, 1_u, 3_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    EXPECT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Access_OOB_Index_Struct) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.f32()},
+                                                              {mod.symbols.New("b"), ty.i32()},
+                                                          });
+
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam(str_ty);
+    f->SetParams({obj});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ty.f32(), obj, 5_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:8:25 error: access: index out of bounds for type 'MyStruct'
+    %3:f32 = access %2, 5u
+                        ^^
+
+:7:3 note: in block
   $B1: {
   ^^^
 
-:3:55 note: acceptable range: [0..1]
-    %3:ptr<private, f32, read_write> = access %2, 1u, 3u
-                                                      ^^
+:8:25 note: acceptable range: [0..1]
+    %3:f32 = access %2, 5u
+                        ^^
 )")) << res.Failure();
 }
 
@@ -534,9 +618,9 @@ TEST_F(IR_ValidatorTest, Load_NullFrom) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:19 error: load: operand is undefined
-    %2:i32 = load undef
-                  ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:19 error: load: operand is nullptr
+    %2:i32 = load <nullptr>
+                  ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -592,9 +676,9 @@ TEST_F(IR_ValidatorTest, Load_MissingResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:4:13 error: load: expected exactly 1 results, got 0
-    undef = load %2
-            ^^^^
+                testing::HasSubstr(R"(:4:17 error: load: expected exactly 1 results, got 0
+    <nullptr> = load %2
+                ^^^^
 )")) << res.Failure();
 }
 
@@ -716,9 +800,9 @@ TEST_F(IR_ValidatorTest, Store_NullTo) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:11 error: store: operand is undefined
-    store undef, 42i
-          ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:11 error: store: operand is nullptr
+    store <nullptr>, 42i
+          ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -733,9 +817,9 @@ TEST_F(IR_ValidatorTest, Store_NullFrom) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:4:15 error: store: operand is undefined
-    store %2, undef
-              ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:4:15 error: store: operand is nullptr
+    store %2, <nullptr>
+              ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -897,8 +981,8 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullResult) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:4:5 error: load_vector_element: result is undefined
-    undef = load_vector_element %2, 1i
-    ^^^^^
+    <nullptr> = load_vector_element %2, 1i
+    ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -914,9 +998,9 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullFrom) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:34 error: load_vector_element: operand is undefined
-    %2:f32 = load_vector_element undef, 1i
-                                 ^^^^^
+                testing::HasSubstr(R"(:3:34 error: load_vector_element: operand is nullptr
+    %2:f32 = load_vector_element <nullptr>, 1i
+                                 ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -933,9 +1017,9 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullIndex) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:4:38 error: load_vector_element: operand is undefined
-    %3:f32 = load_vector_element %2, undef
-                                     ^^^^^
+                testing::HasSubstr(R"(:4:38 error: load_vector_element: operand is nullptr
+    %3:f32 = load_vector_element %2, <nullptr>
+                                     ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -953,9 +1037,9 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_MissingResult) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
-        testing::HasSubstr(R"(:4:13 error: load_vector_element: expected exactly 1 results, got 0
-    undef = load_vector_element %2, 1i
-            ^^^^^^^^^^^^^^^^^^^
+        testing::HasSubstr(R"(:4:17 error: load_vector_element: expected exactly 1 results, got 0
+    <nullptr> = load_vector_element %2, 1i
+                ^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1052,9 +1136,9 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullTo) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:3:26 error: store_vector_element: operand is undefined
-    store_vector_element undef, 1i, 2.0f
-                         ^^^^^
+                testing::HasSubstr(R"(:3:26 error: store_vector_element: operand is nullptr
+    store_vector_element <nullptr>, 1i, 2.0f
+                         ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1071,9 +1155,9 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullIndex) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:4:30 error: store_vector_element: operand is undefined
-    store_vector_element %2, undef, 2.0f
-                             ^^^^^
+                testing::HasSubstr(R"(:4:30 error: store_vector_element: operand is nullptr
+    store_vector_element %2, <nullptr>, 2.0f
+                             ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1090,9 +1174,9 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullValue) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:4:34 error: store_vector_element: operand is undefined
-    store_vector_element %2, 1i, undef
-                                 ^^^^^
+                testing::HasSubstr(R"(:4:34 error: store_vector_element: operand is nullptr
+    store_vector_element %2, 1i, <nullptr>
+                                 ^^^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1266,7 +1350,7 @@ TEST_F(IR_ValidatorTest, Swizzle_MissingValue) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:5:20 error: swizzle: expected exactly 1 operands, got 0
-    %4:vec4<f32> = swizzle undef, wzyx
+    %4:vec4<f32> = swizzle <nullptr>, wzyx
                    ^^^^^^^
 )")) << res.Failure();
 }
@@ -1282,7 +1366,7 @@ TEST_F(IR_ValidatorTest, Swizzle_NullValue) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(error: swizzle: operand is undefined
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(error: swizzle: operand is nullptr
 )")) << res.Failure();
 }
 
@@ -1298,9 +1382,9 @@ TEST_F(IR_ValidatorTest, Swizzle_MissingResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:5:13 error: swizzle: expected exactly 1 results, got 0
-    undef = swizzle %3, wzyx
-            ^^^^^^^
+                testing::HasSubstr(R"(:5:17 error: swizzle: expected exactly 1 results, got 0
+    <nullptr> = swizzle %3, wzyx
+                ^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1316,8 +1400,8 @@ TEST_F(IR_ValidatorTest, Swizzle_NullResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:5:5 error: swizzle: result is undefined
-    undef = swizzle %3, wzyx
-    ^^^^^
+    <nullptr> = swizzle %3, wzyx
+    ^^^^^^^^^
 )")) << res.Failure();
 }
 

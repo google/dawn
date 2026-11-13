@@ -41,6 +41,7 @@
 #include "src/dawn/native/vulkan/UtilsVulkan.h"
 
 namespace dawn::native::vulkan {
+namespace {
 
 class ExternalSemaphoreOpaqueFD : public VulkanImageWrappingTestBackend::ExternalSemaphore {
   public:
@@ -295,6 +296,8 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
     wgpu::Device mDevice;
     raw_ptr<native::vulkan::Device> mDeviceVk;
 };
+
+}  // anonymous namespace
 
 std::unique_ptr<VulkanImageWrappingTestBackend> CreateOpaqueFDBackend(const wgpu::Device& device) {
     return std::make_unique<VulkanImageWrappingTestBackendOpaqueFD>(device);

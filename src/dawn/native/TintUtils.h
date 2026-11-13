@@ -50,7 +50,7 @@ class RenderPipelineBase;
 
 tint::VertexPullingConfig BuildVertexPullingTransformConfig(
     const RenderPipelineBase& renderPipeline,
-    BindGroupIndex pullingBufferBindingSet);
+    uint32_t pullingBufferBindGroupID);
 
 std::unordered_map<tint::OverrideId, double> BuildSubstituteOverridesTransformConfig(
     const ProgrammableStage& stage);

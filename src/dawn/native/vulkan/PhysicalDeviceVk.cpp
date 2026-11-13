@@ -139,9 +139,8 @@ constexpr bool SafeGreaterThan(T a, U b) {
 PhysicalDevice::PhysicalDevice(InstanceBase* instance,
                                VulkanInstance* vulkanInstance,
                                VkPhysicalDevice physicalDevice)
-    : PhysicalDeviceBase(wgpu::BackendType::Vulkan),
+    : PhysicalDeviceBase(instance, wgpu::BackendType::Vulkan),
       mVkPhysicalDevice(physicalDevice),
-      mInstance(instance),
       mVulkanInstance(vulkanInstance) {}
 
 PhysicalDevice::~PhysicalDevice() = default;
@@ -898,8 +897,8 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     // Vulkan backend), accept that floor for these devices. 64 components leave room for 14
     // inter-stage variables (14 * 4 + 8) instead of the 16 required above.
     uint32_t interStageShaderVariablesBase = baseLimits.v1.maxInterStageShaderVariables;
-    if (gpu_info::IsImgTec(GetVendorId()) &&
-        mInstance->GetTogglesState().IsEnabled(Toggle::VulkanRelaxMaxInterStageShaderVariables)) {
+    if (gpu_info::IsImgTec(GetVendorId()) && GetInstance()->GetTogglesState().IsEnabled(
+                                                 Toggle::VulkanRelaxMaxInterStageShaderVariables)) {
         interStageShaderVariablesBase = std::min(interStageShaderVariablesBase, 14u);
     }
     if (vkLimits.maxVertexOutputComponents < interStageShaderVariablesBase * 4 + 8 ||
@@ -998,15 +997,14 @@ bool PhysicalDevice::SupportsExternalImages() const {
                                                      mVulkanInstance->GetFunctions());
 }
 
-bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
-                                          InstanceBase* instance) const {
+bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel) const {
     if (featureLevel == wgpu::FeatureLevel::Core && !mSupportsCoreFeatureLevel) {
-        if (mCoreError && instance) {
-            // Log a warning explaining why this device doesn't support core the first time a core
-            // adapter is requested.
+        if (mCoreError) {
+            // Log why this device doesn't support core. Moving mCoreError ensures this warning
+            // is only logged once.
             mCoreError->AppendContext(
                 absl::StrFormat("checking core feature level support on \"%s\"", GetName()));
-            instance->ConsumedErrorAndWarnOnce(std::move(mCoreError));
+            GetInstance()->ConsumedErrorAndWarnOnce(std::move(mCoreError));
         }
         return false;
     }
@@ -1055,6 +1053,9 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // Vulkan SPEC and drivers.
     deviceToggles->Default(Toggle::UseTemporaryBufferInCompressedTextureToTextureCopy, true);
 
+    // Using VkDescriptorUpdateTemplate on SwiftShader causes memory leaks under LSan in Chromium.
+    deviceToggles->Default(Toggle::VulkanUseDescriptorUpdateTemplate, !IsSwiftshader());
+
     if (MayBeQualcommProprietary()) {
         // dawn:1564, dawn:1897: Recording a compute pass after a render pass in the same command
         // buffer frequently causes a crash on Qualcomm GPUs. To work around that bug, split the
@@ -1089,14 +1090,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::VulkanSampleCompare2DWorkaround, true);
     }
 
-    if (IsPixel10() || IsAndroidSamsung()) {
-        // Pixel 10 has a bug in vkGetPipelineCacheData(), see https://crbug.com/437807243.
-        // Samsung Xclipse GPUs appear to have the same problem, see https://crbug.com/487613497.
-        // TODO(crbug.com/437807243): If newer driver version without bug is released then we can
-        // gate this on driver version.
-        deviceToggles->Default(Toggle::VulkanIncompletePipelineCacheWorkaround, true);
-    }
-
     if (MayBeImaginationProprietary()) {
         // crbug.com/443906252 - Polyfill for case switch with large ranges.
         deviceToggles->Default(Toggle::VulkanPolyfillSwitchWithIf, true);
@@ -1104,6 +1097,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // crbug.com/540087398 - Driver bug miscomputes mip sizes for NPOT depth/stencil textures.
         // TODO(https://crbug.com/540087398): Limit this to old drivers once there's a driver fix.
         deviceToggles->Default(Toggle::VulkanDisallowNPOTDepthStencilMipmaps, true);
+
+        // crbug.com/497202432 - Driver bug in when POT-rounded 3D texture footprint is >= 4 GiB.
+        // TODO(https://crbug.com/497202432): Limit this to old drivers once there's a driver fix.
+        deviceToggles->Default(Toggle::Limit3DTexturePotFootprintTo4GB, true);
     }
 
     // AMD Mesa front end optimizer bug for unary negation and abs.
@@ -1165,12 +1162,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // every sample as covered. Force a real -- but destination-preserving -- alpha
         // write so the driver computes coverage.
         deviceToggles->Default(Toggle::VulkanForceAlphaWriteForAlphaToCoverage, true);
-    }
-
-    if (gpu_info::IsIntel(GetVendorId())) {
-        // crbug.com/481934465: Workaround an Intel GPU hardware limitation that corrupts
-        // buffer<->texture copies with a large row pitch.
-        deviceToggles->Default(Toggle::SplitBufferTextureCopyForOversizedRow, true);
     }
 
     // Collapse redundant subgroup min and max operations to workaround a driver crash on some AMD
@@ -1385,25 +1376,31 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->ForceSet(Toggle::UseSpirv14, false);
     }
 
+    // If maximal reconvergence is supported, don't enable subgroup uniform control flow.
     // TODO(b/379673383): Disabled on Pixel10 devices.
     if (GetDeviceInfo().HasExt(DeviceExt::MaximalReconvergence) &&
         GetDeviceInfo().shaderMaximalReconvergenceFeatures.shaderMaximalReconvergence == VK_TRUE &&
         !IsAndroidImgTec()) {
         deviceToggles->Default(
-            Toggle::UseSpirvReconvergenceMode,
-            platform->IsFeatureEnabled(platform::Features::kWebGPUUseSpirvReconvergenceMode));
-    } else if (GetDeviceInfo().HasExt(DeviceExt::SubgroupUniformControlFlow) &&
-               GetDeviceInfo()
-                       .shaderSubgroupUniformControlFlowFeatures.shaderSubgroupUniformControlFlow ==
-                   VK_TRUE &&
-               (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_COMPUTE_BIT) &&
-               (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_FRAGMENT_BIT) &&
-               !IsAndroidImgTec()) {
-        deviceToggles->Default(
-            Toggle::UseSpirvReconvergenceMode,
-            platform->IsFeatureEnabled(platform::Features::kWebGPUUseSpirvReconvergenceMode));
+            Toggle::UseSpirvMaximalReconvergence,
+            platform->IsFeatureEnabled(platform::Features::kWebGPUUseSpirvMaximalReconvergence));
+        deviceToggles->ForceSet(Toggle::UseSpirvSubgroupUniformControlFlow, false);
     } else {
-        deviceToggles->ForceSet(Toggle::UseSpirvReconvergenceMode, false);
+        deviceToggles->ForceSet(Toggle::UseSpirvMaximalReconvergence, false);
+        if (GetDeviceInfo().HasExt(DeviceExt::SubgroupUniformControlFlow) &&
+            GetDeviceInfo()
+                    .shaderSubgroupUniformControlFlowFeatures.shaderSubgroupUniformControlFlow ==
+                VK_TRUE &&
+            (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_COMPUTE_BIT) &&
+            (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_FRAGMENT_BIT) &&
+            !IsAndroidImgTec()) {
+            deviceToggles->Default(
+                Toggle::UseSpirvSubgroupUniformControlFlow,
+                platform->IsFeatureEnabled(
+                    platform::Features::kWebGPUUseSpirvSubgroupUniformControlFlow));
+        } else {
+            deviceToggles->ForceSet(Toggle::UseSpirvSubgroupUniformControlFlow, false);
+        }
     }
 
     // Vulkan waiting is already thread safe.
@@ -1660,7 +1657,6 @@ std::optional<uint32_t> PhysicalDevice::GetDefaultComputeSubgroupSize() const {
 }
 
 ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(
-    InstanceBase* instance,
     const Surface* surface) const {
     // Gather the Vulkan surface capabilities.
     VulkanSurfaceInfo vkCaps;
@@ -1669,7 +1665,7 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
         VkInstance vkInstance = GetVulkanInstance()->GetVkInstance();
 
         VkSurfaceKHR vkSurface;
-        DAWN_TRY_ASSIGN(vkSurface, CreateVulkanSurface(instance, this, surface));
+        DAWN_TRY_ASSIGN(vkSurface, CreateVulkanSurface(GetInstance(), this, surface));
         DAWN_TRY_ASSIGN_WITH_CLEANUP(vkCaps, GatherSurfaceInfo(*this, vkSurface),
                                      { fn.DestroySurfaceKHR(vkInstance, vkSurface, nullptr); });
 

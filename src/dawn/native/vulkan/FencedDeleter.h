@@ -44,7 +44,7 @@ namespace dawn::native::vulkan {
 //
 // Types are listed in order of deletion.
 //  - Buffers and images must be deleted before memories because it is invalid to free memory
-// that still have resources bound to it.
+//    that still have resources bound to it.
 //  - Vulkan swapchains must be destroyed before their corresponding VkSurface
 #define FENCED_DELETER_TYPES(X)                                        \
     X(VkBufferView, DestroyBufferView, device)                         \
@@ -78,7 +78,6 @@ class FencedDeleter final : public ExecutionQueueBase::SerialProcessor {
 
     // SerialProcessor API.
     void UpdateCompletedSerialTo(ExecutionSerial completedSerial) override;
-    void AssumeCommandsComplete() override;
 
     // Returns the last serial that an object is pending deletion after or
     // kBeginningOfGPUTime if no objects are pending deletion.
@@ -93,11 +92,9 @@ class FencedDeleter final : public ExecutionQueueBase::SerialProcessor {
 #define X(Type, ...) SerialQueue<ExecutionSerial, Type> m##Type;
         FENCED_DELETER_TYPES(X)
 #undef X
-        bool mAssumeCompleted = false;
+        ExecutionSerial mCompletedSerial = kBeginningOfGPUTime;
     };
     MutexProtected<PendingDeletions> mPendingDeletions;
-
-    std::atomic<ExecutionSerial> mLastTaskSerial = kBeginningOfGPUTime;
 };
 
 }  // namespace dawn::native::vulkan

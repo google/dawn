@@ -160,7 +160,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, Literal) {
 TEST_F(ResolverIncrementDecrementValidationTest, Constant) {
     // let a = 1;
     // a++;
-    auto* a = Let(Source{{12, 34}}, "a", Expr(1_i));
+    auto* a = Let(Source{{12, 34}}, "a", ast::Type{}, Expr(1_i));
     WrapInFunction(a, Increment(Expr(Source{{56, 78}}, "a")));
 
     EXPECT_FALSE(r()->Resolve());

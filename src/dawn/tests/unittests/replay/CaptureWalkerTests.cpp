@@ -41,7 +41,7 @@
 namespace dawn::replay {
 namespace {
 
-using testing::ElementsAre;
+using ::testing::ElementsAre;
 
 class MockResourceVisitor : public ResourceVisitor {
   public:

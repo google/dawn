@@ -92,10 +92,19 @@ struct State {
                 // If the loop produces result values, just use `undef` as this exit condition
                 // should never actually be hit.
                 Vector<Value*, 1> results;
-                results.Resize(loop->Results().Length(), nullptr);
+                for (auto* result : loop->Results()) {
+                    results.Push(b.Undef(result->Type()));
+                }
                 b.ExitLoop(loop, std::move(results));
             });
         });
+
+        // Ensure the continuing block survives to the backend. Backend
+        // compilers must see the loop counter increment.
+        if (auto* unreachable = loop->Body()->Terminator()->As<Unreachable>()) {
+            b.InsertBefore(unreachable, [&] { b.Continue(loop); });
+            unreachable->Destroy();
+        }
 
         // Increment the index variable at the top of the continuing block.
         if (loop->Continuing()->IsEmpty()) {

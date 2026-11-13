@@ -244,6 +244,8 @@ const char* str(BuiltinFn i) {
             return "cooperative_matrix_store";
         case BuiltinFn::kCooperativeMatrixMulAdd:
             return "cooperative_matrix_mul_add";
+        case BuiltinFn::kGroupNonUniformBallotFindMsb:
+            return "group_non_uniform_ballot_find_msb";
         case BuiltinFn::kGroupNonUniformBroadcast:
             return "group_non_uniform_broadcast";
         case BuiltinFn::kGroupNonUniformBroadcastFirst:
@@ -391,6 +393,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kGroupNonUniformQuadSwap:
         case BuiltinFn::kGroupNonUniformSMin:
         case BuiltinFn::kGroupNonUniformSMax:
+        case BuiltinFn::kGroupNonUniformBallotFindMsb:
         case BuiltinFn::kInterpolateAtOffset:
         case BuiltinFn::kSConvert:
         case BuiltinFn::kUConvert:

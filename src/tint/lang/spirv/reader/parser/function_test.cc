@@ -213,12 +213,12 @@ TEST_F(SpirvParserTest, FragmentShader_DepthReplacing) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<__out, f32, read_write> = var undef @builtin(frag_depth)
+  %1:ptr<__out, f32, read_write> = var @builtin(frag_depth)
 }
 
 %main = @fragment func():void {
   $B2: {
-    undef = phony %1
+    phony %1
     store %1, 42.0f
     ret
   }
@@ -251,12 +251,12 @@ tint_symbol_1 = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<__out, tint_symbol_1, read_write> = var undef
+  %1:ptr<__out, tint_symbol_1, read_write> = var
 }
 
 %main = @vertex func():void {
   $B2: {
-    undef = phony %1
+    phony %1
     ret
   }
 }
@@ -298,12 +298,12 @@ tint_symbol_1 = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<__out, tint_symbol_1, read_write> = var undef
+  %1:ptr<__out, tint_symbol_1, read_write> = var
 }
 
 %main = @vertex func():void {
   $B2: {
-    undef = phony %1
+    phony %1
     %3:ptr<__out, vec4<f32>, read_write> = access %1, 0u
     store %3, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
     ret
@@ -332,12 +332,12 @@ TEST_F(SpirvParserTest, VertexShader_PositionUnused) {
 )",
               R"(
 $B1: {  # root
-  %position:ptr<__out, vec4<f32>, read_write> = var undef @builtin(position)
+  %position:ptr<__out, vec4<f32>, read_write> = var @builtin(position)
 }
 
 %main = @vertex func():void {
   $B2: {
-    undef = phony %position
+    phony %position
     ret
   }
 }
@@ -370,12 +370,12 @@ TEST_F(SpirvParserTest, VertexShader_PositionUsed) {
 )",
               R"(
 $B1: {  # root
-  %position:ptr<__out, vec4<f32>, read_write> = var undef @builtin(position)
+  %position:ptr<__out, vec4<f32>, read_write> = var @builtin(position)
 }
 
 %main = @vertex func():void {
   $B2: {
-    undef = phony %position
+    phony %position
     store %position, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
     ret
   }
@@ -419,7 +419,7 @@ TEST_F(SpirvParserTest, VertexShader_PositionUsed_Transitive) {
 )",
               R"(
 $B1: {  # root
-  %position:ptr<__out, vec4<f32>, read_write> = var undef @builtin(position)
+  %position:ptr<__out, vec4<f32>, read_write> = var @builtin(position)
 }
 
 %2 = func():void {
@@ -436,7 +436,7 @@ $B1: {  # root
 }
 %main = @vertex func():void {
   $B4: {
-    undef = phony %position
+    phony %position
     %6:void = call %3
     ret
   }

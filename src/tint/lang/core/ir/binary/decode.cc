@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <limits>
 #include <optional>
 #include <string>
 #include <utility>
@@ -40,6 +41,7 @@
 #include "src/tint/lang/core/ir/control_instruction.h"
 #include "src/tint/lang/core/ir/interpolate_string.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
@@ -861,6 +863,8 @@ struct Decoder {
             case pb::TypeBasic::f16:
                 mod_out_.properties.Add(core::ir::Property::kAllow16BitFloats);
                 return mod_out_.Types().f16();
+            case pb::TypeBasic::bf16:
+                return mod_out_.Types().bf16();
             case pb::TypeBasic::i8:
                 return mod_out_.Types().i8();
             case pb::TypeBasic::u8:
@@ -1042,6 +1046,13 @@ struct Decoder {
         if (count >= internal_limits::kMaxArrayElementCount) {
             err_ << "array count (" << count << ") must be less than "
                  << internal_limits::kMaxArrayElementCount << "\n";
+            return mod_out_.Types().invalid();
+        }
+
+        uint64_t size = element->Size();
+        size *= count;
+        if (size >= std::numeric_limits<uint32_t>::max()) {
+            err_ << "array size (" << size << ") exceeds 32 bits";
             return mod_out_.Types().invalid();
         }
 

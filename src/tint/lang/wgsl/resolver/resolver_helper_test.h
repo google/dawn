@@ -38,6 +38,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
@@ -148,6 +149,8 @@ class TestHelper : public ProgramBuilder {
 
     /// Run @p wgsl through the whole WGSL frontend, and check that does not produce an error.
     void ExpectSuccess(std::string_view wgsl);
+
+    void SetOptions(const wgsl::AllowedFeatures& features);
 
   protected:
     std::unique_ptr<Resolver> resolver_;

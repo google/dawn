@@ -356,9 +356,9 @@ MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
         CommandRecordingContext* commandContext = GetPendingCommandContext();
 
         {
-            TRACE_EVENT(DAWN_TRACE_CATEGORY("recording"), "CommandBufferMTL::FillCommands");
+            TRACE_EVENT(DAWN_TRACE_CATEGORY("recording"), "CommandBufferMTL::RecordCommands");
             for (CommandBufferBase* commandBuffer : commands) {
-                DAWN_TRY(ToBackend(commandBuffer)->FillCommands(commandContext));
+                DAWN_TRY(ToBackend(commandBuffer)->RecordCommands(commandContext));
             }
         }
 

@@ -107,7 +107,7 @@ std::string ErrorData::GetFormattedMessage() const {
     ss << mMessage << "\n";
 
     if (!mContexts.empty()) {
-        for (auto context : mContexts) {
+        for (const auto& context : mContexts) {
             ss << " - While " << context << "\n";
         }
     }
@@ -123,14 +123,14 @@ std::string ErrorData::GetFormattedMessage() const {
 
     if (!mDebugGroups.empty()) {
         ss << "\nDebug group stack:\n";
-        for (auto label : mDebugGroups) {
+        for (const auto& label : mDebugGroups) {
             ss << " > \"" << label << "\"\n";
         }
     }
 
     if (!mBackendMessages.empty()) {
         ss << "\nBackend messages:\n";
-        for (auto message : mBackendMessages) {
+        for (const auto& message : mBackendMessages) {
             ss << " * " << message << "\n";
         }
     }

@@ -105,6 +105,24 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, Var_UndefInitializer) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* var = b.Var("a", function, ty.f32());
+        var->SetInitializer(b.Undef(ty.f32()));
+        b.Return(func);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  float a;
+}
+)");
+}
+
 // Not emitted in GLSL
 TEST_F(GlslWriterTest, VarSampler) {
     core::ir::Var* v = nullptr;

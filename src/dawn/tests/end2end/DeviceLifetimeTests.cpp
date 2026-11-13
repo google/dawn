@@ -34,9 +34,9 @@
 namespace dawn {
 namespace {
 
-using testing::_;
-using testing::HasSubstr;
-using testing::MockCppCallback;
+using ::testing::_;
+using ::testing::HasSubstr;
+using ::testing::MockCppCallback;
 
 using MockMapAsyncCallback = MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)>;
 

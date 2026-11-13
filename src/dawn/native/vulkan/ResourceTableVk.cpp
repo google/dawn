@@ -296,10 +296,15 @@ MaybeError ResourceTable::UpdateResourceBindings(const std::vector<ResourceDiff>
                 // Nothing to do
             },
             [&](Ref<TextureViewBase> textureView) {
-                VkImageView handle = ToBackend(textureView)->GetHandle();
-                if (handle == nullptr) {
+                // Skip updating the descriptor if the texture is already destroyed; the slot is
+                // marked as empty in the metadata buffer and the partially-bound descriptor array
+                // does not require a valid descriptor for unused slots.
+                if (textureView->GetTexture()->IsDestroyed()) {
                     return;
                 }
+
+                VkImageView handle = ToBackend(textureView)->GetHandle();
+                DAWN_CHECK(handle != VK_NULL_HANDLE);
 
                 VkDescriptorImageInfo imageWrite = {
                     .sampler = placeholderSampler->GetHandle(),
@@ -312,9 +317,7 @@ MaybeError ResourceTable::UpdateResourceBindings(const std::vector<ResourceDiff>
             },
             [&](Ref<SamplerBase> sampler) {
                 VkSampler handle = ToBackend(sampler)->GetHandle();
-                if (handle == nullptr) {
-                    return;
-                }
+                DAWN_CHECK(handle != VK_NULL_HANDLE);
 
                 VkDescriptorImageInfo imageWrite = {
                     .sampler = handle,

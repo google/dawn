@@ -335,6 +335,13 @@ class Builder {
         /// @returns a 'bool' type
         Type bool_(const Source& source) const;
 
+        /// @returns a 'bf16' type
+        Type bf16() const;
+
+        /// @param source the Source of the node
+        /// @returns a 'bf16' type
+        Type bf16(const Source& source) const;
+
         /// @returns a 'f16' type
         Type f16() const;
 
@@ -1618,23 +1625,6 @@ class Builder {
     }
 
     /// @param name the name
-    /// @param expr the initializer expression
-    /// @returns an `Const` with the given name, and type
-    const ast::Const* Const(std::string_view name, const ast::Expression* expr) {
-        return Const(source_, name, expr);
-    }
-
-    /// @param source the source
-    /// @param name the name
-    /// @param expr the initializer expression
-    /// @returns an `Const` with the given name, and type
-    const ast::Const* Const(const Source& source,
-                            std::string_view name,
-                            const ast::Expression* expr) {
-        return Const(source, name, ast::Type{}, expr);
-    }
-
-    /// @param name the name
     /// @param type the type
     /// @param expr the initializer expression
     /// @returns an `Const` with the given name, and type
@@ -1674,13 +1664,6 @@ class Builder {
         return Let(source_, name, type, init);
     }
 
-    /// @param name the variable name
-    /// @param init initializer expression (required)
-    /// @returns an `Let` with the given name, type and initializer
-    const ast::Let* Let(std::string_view name, const Expression* init) {
-        return Let(source_, name, ast::Type{}, init);
-    }
-
     /// @param source the source location
     /// @param name the variable name
     /// @param type the variable's type
@@ -1708,15 +1691,6 @@ class Builder {
                         Type type,
                         const Expression* init) {
         return create<ast::Let>(source, name, type, init);
-    }
-
-    /// @param source the source location
-    /// @param name the variable name
-    /// @param type the variable's type
-    /// @param init initializer expression (required)
-    /// @returns an `Let` with the given name, type and initializer
-    const ast::Let* Let(const Source& source, std::string_view name, const Expression* init) {
-        return Let(source, name, ast::Type{}, init);
     }
 
     /// @param source the source location

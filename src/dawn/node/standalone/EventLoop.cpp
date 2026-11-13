@@ -192,6 +192,12 @@ void EventLoop::Stop(int exit_code) {
     }
 }
 
+void EventLoop::Clear() {
+    AssertOnLoopThread();
+    immediates_.clear();
+    timers_.clear();
+}
+
 void EventLoop::RunTask(Task task) {
     {
         v8::HandleScope task_scope(isolate_);

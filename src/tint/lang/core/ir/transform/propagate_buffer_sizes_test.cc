@@ -53,7 +53,7 @@ TEST_F(IR_PropagateBufferSizesTest, BufferLength_GlobalVariable_Noop) {
 
     auto* src = R"(
 $B1: {  # root
-  %gv:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %gv:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -88,7 +88,7 @@ TEST_F(IR_PropagateBufferSizesTest, BufferArrayView_GlobalVariable_Direct) {
 
     auto* src = R"(
 $B1: {  # root
-  %gv:ptr<storage, buffer<64>, read_write> = var undef @binding_point(0, 0)
+  %gv:ptr<storage, buffer<64>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -104,7 +104,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %gv:ptr<storage, buffer<64>, read_write> = var undef @binding_point(0, 0)
+  %gv:ptr<storage, buffer<64>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -201,7 +201,7 @@ TEST_F(IR_PropagateBufferSizesTest, BufferView_Variable_Indirect) {
 
     auto* src = R"(
 $B1: {  # root
-  %gv:ptr<storage, buffer<64>, read_write> = var undef @binding_point(0, 0)
+  %gv:ptr<storage, buffer<64>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%p:ptr<storage, buffer, read_write>):void {
@@ -223,7 +223,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %gv:ptr<storage, buffer<64>, read_write> = var undef @binding_point(0, 0)
+  %gv:ptr<storage, buffer<64>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%p:ptr<storage, buffer, read_write>):void {
@@ -275,7 +275,7 @@ TEST_F(IR_PropagateBufferSizesTest, BufferView_Variable_IndirectMultiPath) {
 
     auto* src = R"(
 $B1: {  # root
-  %gv:ptr<storage, buffer<64>, read_write> = var undef @binding_point(0, 0)
+  %gv:ptr<storage, buffer<64>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%p:ptr<storage, buffer, read_write>):void {
@@ -303,7 +303,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %gv:ptr<storage, buffer<64>, read_write> = var undef @binding_point(0, 0)
+  %gv:ptr<storage, buffer<64>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%p:ptr<storage, buffer, read_write>):void {
@@ -460,8 +460,8 @@ TEST_F(IR_PropagateBufferSizesTest, BufferView_Variable_MultiSource_LongChain) {
 
     auto* src = R"(
 $B1: {  # root
-  %gv1:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
-  %gv2:ptr<storage, buffer, read_write> = var undef @binding_point(0, 1)
+  %gv1:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
+  %gv2:ptr<storage, buffer, read_write> = var @binding_point(0, 1)
 }
 
 %foo1 = func(%p1:ptr<storage, buffer, read_write>):void {
@@ -501,8 +501,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %gv1:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
-  %gv2:ptr<storage, buffer, read_write> = var undef @binding_point(0, 1)
+  %gv1:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
+  %gv2:ptr<storage, buffer, read_write> = var @binding_point(0, 1)
 }
 
 %foo1 = func(%p1:ptr<storage, buffer, read_write>, %5:u32):void {
@@ -580,8 +580,8 @@ TEST_F(IR_PropagateBufferSizesTest, BufferView_Variable_MultiSource) {
 
     auto* src = R"(
 $B1: {  # root
-  %gv1:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
-  %gv2:ptr<storage, buffer, read_write> = var undef @binding_point(0, 1)
+  %gv1:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
+  %gv2:ptr<storage, buffer, read_write> = var @binding_point(0, 1)
 }
 
 %foo = func(%p:ptr<storage, buffer, read_write>):void {
@@ -609,8 +609,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %gv1:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
-  %gv2:ptr<storage, buffer, read_write> = var undef @binding_point(0, 1)
+  %gv1:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
+  %gv2:ptr<storage, buffer, read_write> = var @binding_point(0, 1)
 }
 
 %foo = func(%p:ptr<storage, buffer, read_write>, %5:u32):void {
@@ -679,8 +679,8 @@ TEST_F(IR_PropagateBufferSizesTest, LetChain) {
 
     auto* src = R"(
 $B1: {  # root
-  %gv1:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
-  %gv2:ptr<storage, buffer, read_write> = var undef @binding_point(0, 1)
+  %gv1:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
+  %gv2:ptr<storage, buffer, read_write> = var @binding_point(0, 1)
 }
 
 %foo = func(%p:ptr<storage, buffer, read_write>):void {
@@ -713,8 +713,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %gv1:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
-  %gv2:ptr<storage, buffer, read_write> = var undef @binding_point(0, 1)
+  %gv1:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
+  %gv2:ptr<storage, buffer, read_write> = var @binding_point(0, 1)
 }
 
 %foo = func(%p:ptr<storage, buffer, read_write>, %5:u32):void {
@@ -764,7 +764,7 @@ TEST_F(IR_PropagateBufferSizesTest, BufferView_AdjustOffset_Const) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -779,7 +779,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -810,7 +810,7 @@ TEST_F(IR_PropagateBufferSizesTest, BufferView_AdjustOffset_NonConst) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:i32):void {
@@ -825,7 +825,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:i32):void {
@@ -856,7 +856,7 @@ TEST_F(IR_PropagateBufferSizesTest, BufferArrayView_AdjustOffset_Const) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -871,7 +871,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -902,7 +902,7 @@ TEST_F(IR_PropagateBufferSizesTest, BufferArrayView_AdjustOffset_NonConst) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:i32):void {
@@ -917,7 +917,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%offset:i32):void {
@@ -958,7 +958,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -978,7 +978,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1019,7 +1019,7 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%size:i32):void {
@@ -1039,7 +1039,7 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, buffer, read_write> = var undef @binding_point(0, 0)
+  %v:ptr<storage, buffer, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%size:i32):void {

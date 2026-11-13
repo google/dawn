@@ -44,16 +44,14 @@ UnrecoverableError::UnrecoverableError(std::unique_ptr<UnknownError> d)
     }
 }
 
-void IgnoreErrors(MaybeUnknownError maybeError) {
-    if (maybeError.IsError()) {
-        std::unique_ptr<UnrecoverableError> err = ErrorAdapter(maybeError.AcquireError());
-        IgnoreErrors(std::move(err));
-    }
+UnrecoverableError::UnrecoverableError(std::unique_ptr<ValidationError> d)
+    : UnknownError(d->ReleaseData()) {
+    SetType(InternalErrorType::Unrecoverable);
 }
 
-void IgnoreErrors(MaybeError maybeError) {
+void IgnoreErrors(MaybeUnknownError maybeError) {
     if (maybeError.IsError()) {
-        std::unique_ptr<UnrecoverableError> errorData = maybeError.AcquireError();
+        std::unique_ptr<UnknownError> errorData = maybeError.AcquireError();
         // During shutdown and destruction, device lost errors can be ignored.
         // We can also ignore other unexpected internal errors on shut down and treat it as
         // device lost so that we can continue with destruction.

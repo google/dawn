@@ -4,14 +4,14 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 54
+; Bound: 56
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
                OpCapability StorageBuffer16BitAccess
                OpCapability GroupNonUniform
                OpCapability GroupNonUniformShuffleRelative
-               OpCapability GroupNonUniformArithmetic
+               OpCapability GroupNonUniformBallot
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fragment_main "fragment_main" %fragment_main_subgroup_invocation_id_Input
                OpExecutionMode %fragment_main OriginUpperLeft
@@ -58,9 +58,11 @@
          %35 = OpConstantNull %v4half
        %void = OpTypeVoid
          %41 = OpTypeFunction %void %uint
+     %v4uint = OpTypeVector %uint 4
+       %true = OpConstantTrue %bool
 %_ptr_StorageBuffer_v4half = OpTypePointer StorageBuffer %v4half
      %uint_0 = OpConstant %uint 0
-         %50 = OpTypeFunction %void
+         %52 = OpTypeFunction %void
 %subgroupShuffleUp_0990cd = OpFunction %v4half None %14
          %15 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_v4half Function
@@ -84,19 +86,19 @@
 %fragment_main_inner = OpFunction %void None %41
 %tint_subgroup_invocation_id_0 = OpFunctionParameter %uint
          %42 = OpLabel
-         %43 = OpGroupNonUniformIAdd %uint %uint_3 Reduce %uint_1
-         %44 = OpISub %uint %43 %uint_1
-               OpStore %tint_subgroup_last_id %44 None
+         %43 = OpGroupNonUniformBallot %v4uint %uint_3 %true
+         %46 = OpGroupNonUniformBallotFindMSB %uint %uint_3 %43
+               OpStore %tint_subgroup_last_id %46 None
                OpStore %tint_subgroup_invocation_id %tint_subgroup_invocation_id_0 None
-         %45 = OpFunctionCall %v4half %subgroupShuffleUp_0990cd
-         %46 = OpAccessChain %_ptr_StorageBuffer_v4half %1 %uint_0
-               OpStore %46 %45 None
+         %47 = OpFunctionCall %v4half %subgroupShuffleUp_0990cd
+         %48 = OpAccessChain %_ptr_StorageBuffer_v4half %1 %uint_0
+               OpStore %48 %47 None
                OpReturn
                OpFunctionEnd
-%fragment_main = OpFunction %void None %50
-         %51 = OpLabel
-         %52 = OpLoad %uint %fragment_main_subgroup_invocation_id_Input None
-         %53 = OpFunctionCall %void %fragment_main_inner %52
+%fragment_main = OpFunction %void None %52
+         %53 = OpLabel
+         %54 = OpLoad %uint %fragment_main_subgroup_invocation_id_Input None
+         %55 = OpFunctionCall %void %fragment_main_inner %54
                OpReturn
                OpFunctionEnd
 ;
@@ -105,14 +107,14 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 54
+; Bound: 56
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
                OpCapability StorageBuffer16BitAccess
                OpCapability GroupNonUniform
                OpCapability GroupNonUniformShuffleRelative
-               OpCapability GroupNonUniformArithmetic
+               OpCapability GroupNonUniformBallot
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %compute_main "compute_main" %compute_main_subgroup_invocation_id_Input
                OpExecutionMode %compute_main LocalSize 1 1 1
@@ -158,9 +160,11 @@
          %35 = OpConstantNull %v4half
        %void = OpTypeVoid
          %41 = OpTypeFunction %void %uint
+     %v4uint = OpTypeVector %uint 4
+       %true = OpConstantTrue %bool
 %_ptr_StorageBuffer_v4half = OpTypePointer StorageBuffer %v4half
      %uint_0 = OpConstant %uint 0
-         %50 = OpTypeFunction %void
+         %52 = OpTypeFunction %void
 %subgroupShuffleUp_0990cd = OpFunction %v4half None %14
          %15 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_v4half Function
@@ -184,18 +188,18 @@
 %compute_main_inner = OpFunction %void None %41
 %tint_subgroup_invocation_id_0 = OpFunctionParameter %uint
          %42 = OpLabel
-         %43 = OpGroupNonUniformIAdd %uint %uint_3 Reduce %uint_1
-         %44 = OpISub %uint %43 %uint_1
-               OpStore %tint_subgroup_last_id %44 None
+         %43 = OpGroupNonUniformBallot %v4uint %uint_3 %true
+         %46 = OpGroupNonUniformBallotFindMSB %uint %uint_3 %43
+               OpStore %tint_subgroup_last_id %46 None
                OpStore %tint_subgroup_invocation_id %tint_subgroup_invocation_id_0 None
-         %45 = OpFunctionCall %v4half %subgroupShuffleUp_0990cd
-         %46 = OpAccessChain %_ptr_StorageBuffer_v4half %1 %uint_0
-               OpStore %46 %45 None
+         %47 = OpFunctionCall %v4half %subgroupShuffleUp_0990cd
+         %48 = OpAccessChain %_ptr_StorageBuffer_v4half %1 %uint_0
+               OpStore %48 %47 None
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %50
-         %51 = OpLabel
-         %52 = OpLoad %uint %compute_main_subgroup_invocation_id_Input None
-         %53 = OpFunctionCall %void %compute_main_inner %52
+%compute_main = OpFunction %void None %52
+         %53 = OpLabel
+         %54 = OpLoad %uint %compute_main_subgroup_invocation_id_Input None
+         %55 = OpFunctionCall %void %compute_main_inner %54
                OpReturn
                OpFunctionEnd

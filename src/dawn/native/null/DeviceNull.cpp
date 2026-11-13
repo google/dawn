@@ -49,14 +49,15 @@ namespace dawn::native::null {
 // Implementation of pre-Device objects: the null physical device, null backend connection and
 // Connect()
 
-Ref<PhysicalDevice> PhysicalDevice::Create() {
-    auto physicalDevice = AcquireRef(new PhysicalDevice());
+Ref<PhysicalDevice> PhysicalDevice::Create(InstanceBase* instance) {
+    auto physicalDevice = AcquireRef(new PhysicalDevice(instance));
     MaybeError err = physicalDevice->Initialize();
     DAWN_CHECK(err.IsSuccess());
     return physicalDevice;
 }
 
-PhysicalDevice::PhysicalDevice() : PhysicalDeviceBase(wgpu::BackendType::Null) {
+PhysicalDevice::PhysicalDevice(InstanceBase* instance)
+    : PhysicalDeviceBase(instance, wgpu::BackendType::Null) {
     mVendorId = 0;
     mDeviceId = 0;
     mName = "Null backend";
@@ -69,12 +70,11 @@ bool PhysicalDevice::SupportsExternalImages() const {
     return false;
 }
 
-bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel, InstanceBase*) const {
+bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel) const {
     return true;
 }
 
 ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(
-    InstanceBase* instance,
     const Surface* surface) const {
     PhysicalDeviceSurfaceCapabilities capabilities;
     capabilities.usages = wgpu::TextureUsage::RenderAttachment;
@@ -152,7 +152,7 @@ class Backend : public BackendConnection {
         // There is always a single Null physical device because it is purely CPU based
         // and doesn't depend on the system.
         if (mPhysicalDevice == nullptr) {
-            mPhysicalDevice = PhysicalDevice::Create();
+            mPhysicalDevice = PhysicalDevice::Create(GetInstance());
         }
         return {mPhysicalDevice};
     }

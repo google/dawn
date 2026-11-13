@@ -37,6 +37,7 @@
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/clone_context.h"
 #include "src/tint/lang/core/type/manager.h"
@@ -45,6 +46,7 @@
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/subgroup_matrix.h"
 
 namespace tint::hlsl {
 /// A mock non-core type used for testing the non-core type validation rule.
@@ -103,7 +105,7 @@ TEST_F(IR_ValidatorTest, AbstractFloat_Scalar) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
-    %af:ptr<function, abstract-float, read_write> = var undef
+    %af:ptr<function, abstract-float, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -119,7 +121,7 @@ TEST_F(IR_ValidatorTest, AbstractInt_Scalar) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
-    %ai:ptr<function, abstract-int, read_write> = var undef
+    %ai:ptr<function, abstract-int, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -135,7 +137,7 @@ TEST_F(IR_ValidatorTest, AbstractFloat_Vector) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
-    %af:ptr<function, vec2<abstract-float>, read_write> = var undef
+    %af:ptr<function, vec2<abstract-float>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -151,7 +153,7 @@ TEST_F(IR_ValidatorTest, AbstractInt_Vector) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(3:5 error: var: abstracts are not permitted
-    %ai:ptr<function, vec3<abstract-int>, read_write> = var undef
+    %ai:ptr<function, vec3<abstract-int>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -167,7 +169,7 @@ TEST_F(IR_ValidatorTest, AbstractFloat_Matrix) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
-    %af:ptr<function, mat2x2<abstract-float>, read_write> = var undef
+    %af:ptr<function, mat2x2<abstract-float>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -183,7 +185,7 @@ TEST_F(IR_ValidatorTest, AbstractInt_Matrix) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
-    %ai:ptr<function, mat3x4<abstract-int>, read_write> = var undef
+    %ai:ptr<function, mat3x4<abstract-int>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -200,7 +202,7 @@ TEST_F(IR_ValidatorTest, AbstractFloat_Struct) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:6:3 error: var: abstracts are not permitted
-  %1:ptr<private, MyStruct, read_write> = var undef
+  %1:ptr<private, MyStruct, read_write> = var
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -217,7 +219,7 @@ TEST_F(IR_ValidatorTest, AbstractInt_Struct) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:6:3 error: var: abstracts are not permitted
-  %1:ptr<private, MyStruct, read_write> = var undef
+  %1:ptr<private, MyStruct, read_write> = var
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -262,7 +264,7 @@ TEST_F(IR_ValidatorTest, StructMember_Void) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:6:3 error: var: struct member 0 cannot have void type
-  %1:ptr<private, MyStruct, read_write> = var undef
+  %1:ptr<private, MyStruct, read_write> = var
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -279,7 +281,7 @@ TEST_F(IR_ValidatorTest, StructMember_Buffer) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:6:3 error: var: struct member 0 cannot have buffer type
-  %1:ptr<private, MyStruct, read_write> = var undef
+  %1:ptr<private, MyStruct, read_write> = var
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -299,7 +301,7 @@ TEST_F(IR_ValidatorTest, StructMember_AlignZero) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:6:3 error: var: struct member must not have an alignment of 0
-  %1:ptr<private, MyStruct, read_write> = var undef
+  %1:ptr<private, MyStruct, read_write> = var
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -319,7 +321,7 @@ TEST_F(IR_ValidatorTest, StructMember_AlignNotPowerOfTwo) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:6:3 error: var: struct member alignment must be a power of 2
-  %1:ptr<private, MyStruct, read_write> = var undef
+  %1:ptr<private, MyStruct, read_write> = var
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -341,7 +343,7 @@ TEST_F(IR_ValidatorTest, StructMember_AlignNotDivisibleByTypeAlignment) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:6:3 error: var: struct member alignment (8) must be divisible by type alignment (16)
-  %1:ptr<private, MyStruct, read_write> = var undef
+  %1:ptr<private, MyStruct, read_write> = var
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -364,7 +366,7 @@ TEST_F(IR_ValidatorTest, StructMember_TypeAlignZero) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(R"(:6:3 error: var: struct member type must not have an alignment of 0
-  %1:ptr<private, MyStruct, read_write> = var undef
+  %1:ptr<private, MyStruct, read_write> = var
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -387,7 +389,7 @@ TEST_F(IR_ValidatorTest, StructMember_TypeAlignNotPowerOfTwo) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(R"(:6:3 error: var: struct member type alignment must be a power of 2
-  %1:ptr<private, MyStruct, read_write> = var undef
+  %1:ptr<private, MyStruct, read_write> = var
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -478,7 +480,7 @@ TEST_F(IR_ValidatorTest, StructMember_RuntimeArrayNotLast) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:11:3 error: var: runtime-sized arrays can only be the last member of a struct
-  %1:ptr<storage, OuterS, read_write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, OuterS, read_write> = var @binding_point(0, 0)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^)"))
         << res.Failure();
 }
@@ -519,7 +521,7 @@ TEST_F(IR_ValidatorTest, StructMember_MultipleRuntimeArrays) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:11:3 error: var: runtime-sized arrays can only be the last member of a struct
-  %1:ptr<storage, OuterS, read_write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, OuterS, read_write> = var @binding_point(0, 0)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^)"))
         << res.Failure();
 }
@@ -540,7 +542,7 @@ TEST_F(IR_ValidatorTest, StructMember_RowMajor_WithoutProperty) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(R"(:6:3 error: var: Row major annotation not allowed on structures
-  %1:ptr<private, MyStruct, read_write> = var undef
+  %1:ptr<private, MyStruct, read_write> = var
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -558,7 +560,7 @@ TEST_F(IR_ValidatorTest, StructMember_Pointer) {
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(
                     R"(:6:3 error: var: struct member 0 cannot be a pointer type
-  %1:ptr<private, MyStruct, read_write> = var undef
+  %1:ptr<private, MyStruct, read_write> = var
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -591,7 +593,7 @@ TEST_F(IR_ValidatorTest, StructMember_Texture) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:6:3 error: var: struct member 0 cannot be a texture type
-  %1:ptr<private, MyStruct, read_write> = var undef
+  %1:ptr<private, MyStruct, read_write> = var
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -624,7 +626,7 @@ TEST_F(IR_ValidatorTest, StructMember_Sampler) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:6:3 error: var: struct member 0 cannot be a sampler type
-  %1:ptr<private, MyStruct, read_write> = var undef
+  %1:ptr<private, MyStruct, read_write> = var
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -730,7 +732,7 @@ TEST_F(IR_ValidatorTest, StructMember_MatrixStride_WithoutProperty) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(R"(:6:3 error: var: Matrix stride annotation not allowed on structures
-  %1:ptr<private, MyStruct, read_write> = var undef
+  %1:ptr<private, MyStruct, read_write> = var
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -914,7 +916,7 @@ TEST_F(IR_ValidatorTest, ArrayElement_Pointer) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:2:3 error: var: array elements, 'array<ptr<function, i32, read_write>, 4>', must have creation-fixed footprint
-  %1:ptr<private, array<ptr<function, i32, read_write>, 4>, read_write> = var undef
+  %1:ptr<private, array<ptr<function, i32, read_write>, 4>, read_write> = var
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -996,14 +998,14 @@ TEST_F(IR_ValidatorTest, LargeArrays) {
         ty.Struct(mod.symbols.New("MyStruct"),
                   {
                       {mod.symbols.New("a0"), ty.u32(), {}},
-                      {mod.symbols.New("a1"), ty.array<u32, (1ull << 32ull) - 4u>(), {}},
-                      {mod.symbols.New("a2"), ty.array<u32, (1ull << 32ull) - 8u>(), {}},
-                      {mod.symbols.New("a3"), ty.array<u32, (1ull << 32ull) - 12u>(), {}},
-                      {mod.symbols.New("a4"), ty.array<u32, (1ull << 32ull) - 16u>(), {}},
-                      {mod.symbols.New("a5"), ty.array<u32, (1ull << 32ull) - 20u>(), {}},
-                      {mod.symbols.New("a6"), ty.array<u32, (1ull << 32ull) - 24u>(), {}},
-                      {mod.symbols.New("a7"), ty.array<u32, (1ull << 32ull) - 28u>(), {}},
-                      {mod.symbols.New("a8"), ty.array<u32, (1ull << 32ull) - 32u>(), {}},
+                      {mod.symbols.New("a1"), ty.array<u32, (1ull << 30ull) - 4u>(), {}},
+                      {mod.symbols.New("a2"), ty.array<u32, (1ull << 30ull) - 8u>(), {}},
+                      {mod.symbols.New("a3"), ty.array<u32, (1ull << 30ull) - 12u>(), {}},
+                      {mod.symbols.New("a4"), ty.array<u32, (1ull << 30ull) - 16u>(), {}},
+                      {mod.symbols.New("a5"), ty.array<u32, (1ull << 30ull) - 20u>(), {}},
+                      {mod.symbols.New("a6"), ty.array<u32, (1ull << 30ull) - 24u>(), {}},
+                      {mod.symbols.New("a7"), ty.array<u32, (1ull << 30ull) - 28u>(), {}},
+                      {mod.symbols.New("a8"), ty.array<u32, (1ull << 30ull) - 32u>(), {}},
                   });
     mod.root_block->Append(b.Var(ty.ptr<workgroup>(str_ty)));
     auto res = ir::Validate(mod);
@@ -1205,6 +1207,7 @@ INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
                                          std::make_tuple(true, TypeBuilder<i32>),
                                          std::make_tuple(true, TypeBuilder<u8>),
                                          std::make_tuple(true, TypeBuilder<u32>),
+                                         std::make_tuple(true, TypeBuilder<bf16>),
                                          std::make_tuple(false, TypeBuilder<core::type::Bool>),
                                          std::make_tuple(false, TypeBuilder<core::type::Void>)));
 
@@ -1294,7 +1297,7 @@ TEST_F(IR_ValidatorTest, BindingArrayRuntimeCount) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(R"(:2:3 error: var: binding_array count must be a constant expression
-  %m:ptr<handle, binding_array<texture_2d<f32>>, read> = var undef @binding_point(0, 0)
+  %m:ptr<handle, binding_array<texture_2d<f32>>, read> = var @binding_point(0, 0)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^)"));
 }
 
@@ -1309,7 +1312,7 @@ TEST_F(IR_ValidatorTest, BindingArrayNonSampledTexture) {
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(
                     R"(:2:3 error: var: binding_array element type must be a sampled texture type
-  %m:ptr<handle, binding_array<texture_external, 5>, read> = var undef @binding_point(0, 0)
+  %m:ptr<handle, binding_array<texture_external, 5>, read> = var @binding_point(0, 0)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^)"));
 }
 
@@ -1614,7 +1617,7 @@ TEST_P(IR_ValidatorRefTypeTest, BlockParam) {
         auto* loop = b.Loop();
         loop->Continuing()->SetParams({b.BlockParam(type)});
         b.Append(loop->Body(), [&] {  //
-            b.Continue(loop, nullptr);
+            b.Continue(loop, b.Undef(type));
         });
         b.Append(loop->Continuing(), [&] {  //
             b.NextIteration(loop);
@@ -1796,7 +1799,7 @@ TEST_P(IR_Validator8BitIntTypeTest, BlockParam) {
         auto* loop = b.Loop();
         loop->Continuing()->SetParams({b.BlockParam(type)});
         b.Append(loop->Body(), [&] {  //
-            b.Continue(loop, nullptr);
+            b.Continue(loop, b.Undef(type));
         });
         b.Append(loop->Continuing(), [&] {  //
             b.NextIteration(loop);
@@ -1862,7 +1865,7 @@ TEST_F(IR_ValidatorTest, Int8Type_InstructionOperand_NotAllowed_BeforeSubgroupMa
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:8:5 error: var: 8-bit integer types are not permitted
-    %v:ptr<function, MyStruct, read_write> = var undef
+    %v:ptr<function, MyStruct, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -1885,7 +1888,7 @@ TEST_F(IR_ValidatorTest, Int8Type_InstructionOperand_NotAllowed_AfterSubgroupMat
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr(R"(:8:5 error: var: 8-bit integer types are not permitted
-    %v:ptr<function, MyStruct, read_write> = var undef
+    %v:ptr<function, MyStruct, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
@@ -1927,6 +1930,120 @@ TEST_F(IR_ValidatorTest, Int16Type_AllowedWithProperty) {
     auto res = ir::Validate(mod);
     ASSERT_EQ(res, Success) << res.Failure();
 }
+
+using IR_ValidatorBF16TypeTest = IRTestParamHelper<std::tuple<
+    /* valid */ bool,
+    /* type_builder */ TypeBuilderFn>>;
+
+TEST_P(IR_ValidatorBF16TypeTest, Var) {
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("foo", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Var("v", ty.ptr(function, type));
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod);
+    if (std::get<0>(GetParam())) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason,
+                    testing::HasSubstr("error: var: bf16 types are not permitted"));
+    }
+}
+
+TEST_P(IR_ValidatorBF16TypeTest, Param) {
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("foo", ty.void_());
+    auto* p = b.FunctionParam("p", type);
+    fn->SetParams({p});
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    auto res = ir::Validate(mod);
+    if (std::get<0>(GetParam())) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason, testing::HasSubstr("bf16 types are not permitted"));
+    }
+}
+
+TEST_P(IR_ValidatorBF16TypeTest, Let) {
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("foo", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Let("let", b.Construct(type));
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod);
+    if (std::get<0>(GetParam())) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason, testing::HasSubstr("bf16 types are not permitted"));
+    }
+}
+
+TEST_P(IR_ValidatorBF16TypeTest, Return) {
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("foo", type);
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Construct(type)); });
+
+    auto res = ir::Validate(mod);
+    if (std::get<0>(GetParam())) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason, testing::HasSubstr("bf16 types are not permitted"));
+    }
+}
+
+TEST_P(IR_ValidatorBF16TypeTest, BlockParam) {
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("foo", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* loop = b.Loop();
+        loop->Continuing()->SetParams({b.BlockParam(type)});
+        b.Append(loop->Body(), [&] {  //
+            b.Continue(loop, b.Undef(type));
+        });
+        b.Append(loop->Continuing(), [&] {  //
+            b.NextIteration(loop);
+        });
+        b.Unreachable();
+    });
+
+    auto res = ir::Validate(mod);
+    if (std::get<0>(GetParam())) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason, testing::HasSubstr("bf16 types are not permitted"));
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    BF16Types,
+    IR_ValidatorBF16TypeTest,
+    testing::Values(
+        std::make_tuple(true,
+                        TypeBuilder<subgroup_matrix<core::SubgroupMatrixKind::kLeft, bf16, 8, 8>>),
+        std::make_tuple(true,
+                        TypeBuilder<subgroup_matrix<core::SubgroupMatrixKind::kRight, bf16, 8, 8>>),
+        std::make_tuple(
+            true,
+            TypeBuilder<subgroup_matrix<core::SubgroupMatrixKind::kResult, bf16, 8, 8>>),
+        std::make_tuple(false, TypeBuilder<bf16>),
+        std::make_tuple(false, TypeBuilder<vec4<bf16>>),
+        std::make_tuple(false, TypeBuilder<array<bf16, 4>>),
+        std::make_tuple(false, TypeBuilder<mat<2, 2, bf16>>)));
 
 using IR_Validator64BitIntTypeTest = IRTestParamHelper<std::tuple<
     /* int64_allowed */ bool,
@@ -2008,7 +2125,7 @@ TEST_P(IR_Validator64BitIntTypeTest, BlockParam) {
         auto* loop = b.Loop();
         loop->Continuing()->SetParams({b.BlockParam(type)});
         b.Append(loop->Body(), [&] {  //
-            b.Continue(loop, nullptr);
+            b.Continue(loop, b.Undef(type));
         });
         b.Append(loop->Continuing(), [&] {  //
             b.NextIteration(loop);

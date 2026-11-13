@@ -252,7 +252,9 @@ struct State {
     void ExitFromControl(core::ir::ControlInstruction* control) {
         // Produce `undef` values for any results, since they will never be used.
         Vector<core::ir::Value*, 8> exit_args;
-        exit_args.Resize(control->Results().Length());
+        for (auto* result : control->Results()) {
+            exit_args.Push(b.Undef(result->Type()));
+        }
         b.Exit(control, std::move(exit_args));
 
         // Mark the control flow instruction as requiring its merge to be conditionalized.

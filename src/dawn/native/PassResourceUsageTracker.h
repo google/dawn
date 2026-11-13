@@ -108,6 +108,7 @@ class ComputePassResourceUsageTracker {
 
     void AddDispatch(SyncScopeResourceUsage scope);
     void AddReferencedBuffer(BufferBase* buffer);
+    void AddReferencedTexture(TextureBase* texture);
     void AddResourcesReferencedByBindGroup(BindGroupBase* group);
     void AddReferencedResourceTable(ResourceTableBase* table);
 

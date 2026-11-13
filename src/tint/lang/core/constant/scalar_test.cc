@@ -68,6 +68,11 @@ TEST_F(ConstantTest_Scalar, AllZero) {
     auto* aiPos1 = constants.Get(1_a);
     auto* aiNeg1 = constants.Get(-1_a);
 
+    auto* bfPos0 = constants.Get(bf16(0_f));
+    auto* bfNeg0 = constants.Get(bf16(-0_f));
+    auto* bfPos1 = constants.Get(bf16(1_f));
+    auto* bfNeg1 = constants.Get(bf16(-1_f));
+
     EXPECT_TRUE(i0->AllZero());
     EXPECT_FALSE(iPos1->AllZero());
     EXPECT_FALSE(iNeg1->AllZero());
@@ -96,6 +101,11 @@ TEST_F(ConstantTest_Scalar, AllZero) {
     EXPECT_TRUE(ai0->AllZero());
     EXPECT_FALSE(aiPos1->AllZero());
     EXPECT_FALSE(aiNeg1->AllZero());
+
+    EXPECT_TRUE(bfPos0->AllZero());
+    EXPECT_TRUE(bfNeg0->AllZero());
+    EXPECT_FALSE(bfPos1->AllZero());
+    EXPECT_FALSE(bfNeg1->AllZero());
 }
 
 TEST_F(ConstantTest_Scalar, AnyZero) {
@@ -129,6 +139,11 @@ TEST_F(ConstantTest_Scalar, AnyZero) {
     auto* aiPos1 = constants.Get(1_a);
     auto* aiNeg1 = constants.Get(-1_a);
 
+    auto* bfPos0 = constants.Get(bf16(0_f));
+    auto* bfNeg0 = constants.Get(bf16(-0_f));
+    auto* bfPos1 = constants.Get(bf16(1_f));
+    auto* bfNeg1 = constants.Get(bf16(-1_f));
+
     EXPECT_TRUE(i0->AnyZero());
     EXPECT_FALSE(iPos1->AnyZero());
     EXPECT_FALSE(iNeg1->AnyZero());
@@ -157,6 +172,11 @@ TEST_F(ConstantTest_Scalar, AnyZero) {
     EXPECT_TRUE(ai0->AnyZero());
     EXPECT_FALSE(aiPos1->AnyZero());
     EXPECT_FALSE(aiNeg1->AnyZero());
+
+    EXPECT_TRUE(bfPos0->AnyZero());
+    EXPECT_TRUE(bfNeg0->AnyZero());
+    EXPECT_FALSE(bfPos1->AnyZero());
+    EXPECT_FALSE(bfNeg1->AnyZero());
 }
 
 TEST_F(ConstantTest_Scalar, ValueOf) {
@@ -169,6 +189,7 @@ TEST_F(ConstantTest_Scalar, ValueOf) {
     auto* bt = constants.Get(true);
     auto* af1 = constants.Get(1.0_a);
     auto* ai1 = constants.Get(1_a);
+    auto* bf1 = constants.Get(bf16(1_f));
 
     EXPECT_EQ(i1->ValueOf(), 1);
     EXPECT_EQ(u1->ValueOf(), 1u);
@@ -178,6 +199,7 @@ TEST_F(ConstantTest_Scalar, ValueOf) {
     EXPECT_TRUE(bt->ValueOf());
     EXPECT_EQ(af1->ValueOf(), 1.0);
     EXPECT_EQ(ai1->ValueOf(), 1l);
+    EXPECT_EQ(bf1->ValueOf(), bf16(1_f));
 }
 
 TEST_F(ConstantTest_Scalar, Clone) {

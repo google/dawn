@@ -71,12 +71,14 @@
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
+#include "src/tint/lang/core/ir/undef.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/value.h"  // IWYU pragma: export
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/array.h"  // IWYU pragma: export
+#include "src/tint/lang/core/type/bf16.h"   // IWYU pragma: export
 #include "src/tint/lang/core/type/bool.h"   // IWYU pragma: export
 #include "src/tint/lang/core/type/f16.h"    // IWYU pragma: export
 #include "src/tint/lang/core/type/f32.h"    // IWYU pragma: export
@@ -2099,6 +2101,11 @@ class Builder {
         auto* type = ir.Types().Get<TYPE>();
         return InstructionResult(type);
     }
+
+    /// Creates an undef value
+    /// @param type the return type
+    /// @returns the value
+    ir::Undef* Undef(const core::type::Type* type) { return ir.CreateValue<ir::Undef>(type); }
 
     /// Create a ranged loop with a callback to build the loop body.
     /// @param start the first loop index

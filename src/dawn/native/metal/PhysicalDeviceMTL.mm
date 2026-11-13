@@ -291,7 +291,7 @@ ResultOrError<MTLGPUFamily> GetMTLGPUFamily(id<MTLDevice> device) {
 PhysicalDevice::PhysicalDevice(InstanceBase* instance,
                                NSPRef<id<MTLDevice>> device,
                                bool metalValidationEnabled)
-    : PhysicalDeviceBase(wgpu::BackendType::Metal),
+    : PhysicalDeviceBase(instance, wgpu::BackendType::Metal),
       mDevice(std::move(device)),
       mMetalValidationEnabled(metalValidationEnabled) {
     mName = std::string([[*mDevice name] UTF8String]);
@@ -340,12 +340,11 @@ bool PhysicalDevice::SupportsExternalImages() const {
     return false;
 }
 
-bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel, InstanceBase* instance) const {
+bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel) const {
     return true;
 }
 
 ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(
-    InstanceBase* instance,
     const Surface*) const {
     PhysicalDeviceSurfaceCapabilities capabilities;
 
@@ -386,8 +385,8 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
 
 void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platform,
                                                 TogglesState* adapterToggles) const {
-#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 260000
-    if (@available(macos 26.0, ios 26.0, *)) {
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000
+    if (@available(macos 27.0, ios 27.0, *)) {
         if (![*mDevice supportsFamily:MTLGPUFamilyMetal4]) {
             adapterToggles->ForceSet(Toggle::MetalEnableTensors, false);
         }
@@ -816,6 +815,13 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if ([*mDevice readWriteTextureSupport] == MTLReadWriteTextureTier2) {
         EnableFeature(Feature::TextureFormatsTier2);
     }
+
+    // TODO(crbug.com/363031535): Remove this check once Dawn starts assuming support for tier 2.
+    if ([*mDevice argumentBuffersSupport] == MTLArgumentBuffersTier2 &&
+        // TODO(crbug.com/473444514): ResourceTable causes timeouts on Intel mac.
+        !gpu_info::IsIntel(GetVendorId())) {
+        EnableFeature(Feature::ChromiumExperimentalSamplingResourceTable);
+    }
 }
 
 void PhysicalDevice::InitializeVendorArchitectureImpl() {
@@ -916,7 +922,10 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     limits->v1.maxColorAttachmentBytesPerSample = mtlLimits.maxTotalRenderTargetSize;
 
     uint32_t maxBuffersPerStage = mtlLimits.maxBufferArgumentEntriesPerFunc;
-    maxBuffersPerStage -= 1;  // One slot is reserved to store buffer lengths.
+    // Note, this doesn't take resource table into account. There are guards in the resource table
+    // to check for the use of these slots when resource table is enabled.
+    // TODO(473444514): Update text when resource tables is complete
+    maxBuffersPerStage -= 1;  // One slot for immediates
 
     uint32_t baseMaxBuffersPerStage = limits->v1.maxStorageBuffersPerShaderStage +
                                       limits->v1.maxUniformBuffersPerShaderStage +
@@ -1080,8 +1089,8 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
     }
     if (auto* subgroupMatrixConfigs = info.Get<AdapterPropertiesSubgroupMatrixConfigs>()) {
         if (toggles.IsEnabled(Toggle::MetalEnableTensors)) {
-#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 260000
-            if (@available(macos 26.0, ios 26.0, *)) {
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 270000
+            if (@available(macos 27.0, ios 27.0, *)) {
                 DAWN_ASSERT([*mDevice supportsFamily:MTLGPUFamilyMetal4]);
             } else
 #endif

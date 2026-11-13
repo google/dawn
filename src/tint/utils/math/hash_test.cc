@@ -27,9 +27,13 @@
 
 #include "src/tint/utils/math/hash.h"
 
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <string>
 #include <tuple>
 #include <unordered_map>
+#include <vector>
 
 #include "gtest/gtest.h"
 #include "src/tint/utils/containers/vector.h"
@@ -42,6 +46,59 @@ TEST(HashTests, Basic) {
     EXPECT_EQ(Hash(123, 456), Hash(123, 456));
     EXPECT_EQ(Hash(123, 456, false), Hash(123, 456, false));
     EXPECT_EQ(Hash(std::string("hello")), Hash(std::string("hello")));
+}
+
+TEST(HashTests, PointerBasic) {
+    const int* null_ptr = nullptr;
+    EXPECT_EQ(Hash(null_ptr), Hash(null_ptr));
+
+    int a = 1;
+    int b = 2;
+    EXPECT_EQ(Hash(&a), Hash(&a));
+    EXPECT_NE(Hash(&a), Hash(&b));
+
+    if constexpr (sizeof(uintptr_t) > 4) {
+        // Pointers differing only in upper 32 bits must not collide.
+        auto* hi_a = reinterpret_cast<const void*>(static_cast<uintptr_t>(0x00007fff00001000ULL));
+        auto* hi_b = reinterpret_cast<const void*>(static_cast<uintptr_t>(0x00007ffe00001000ULL));
+        EXPECT_NE(Hash(hi_a), Hash(hi_b));
+
+        // Pointers with saturated high bits (0x7fff in bits 32..47) differing only in bits 4..19
+        // must not have their low-bit entropy wiped out.
+        auto* low_a = reinterpret_cast<const void*>(static_cast<uintptr_t>(0x00007fff00010010ULL));
+        auto* low_b = reinterpret_cast<const void*>(static_cast<uintptr_t>(0x00007fff00020020ULL));
+        EXPECT_NE(Hash(low_a), Hash(low_b));
+    }
+}
+
+TEST(HashTests, PointerDistributionModuloHashmapSlots) {
+    constexpr size_t kNumPointers = 4096;
+    // HashmapBase::NumSlots(8192) == (8192 * 75) / 100 == 6144 (3 * 2^11).
+    constexpr size_t kNumSlots = 6144;
+    constexpr uintptr_t kBaseAddress = (sizeof(uintptr_t) > 4)
+                                           ? static_cast<uintptr_t>(0x00007fff00000000ULL)
+                                           : static_cast<uintptr_t>(0x7fff0000U);
+
+    for (size_t stride : {size_t{48}, size_t{64}}) {
+        std::vector<size_t> bucket_counts(kNumSlots, 0);
+        for (size_t i = 0; i < kNumPointers; i++) {
+            auto* ptr = reinterpret_cast<const void*>(kBaseAddress + i * stride);
+            HashCode h = Hash(ptr);
+            bucket_counts[h % kNumSlots]++;
+        }
+
+        size_t occupied_buckets = 0;
+        size_t max_chain_length = 0;
+        for (size_t count : bucket_counts) {
+            if (count > 0) {
+                occupied_buckets++;
+                max_chain_length = std::max(max_chain_length, count);
+            }
+        }
+
+        EXPECT_GT(occupied_buckets, 2000u) << "stride: " << stride;
+        EXPECT_LE(max_chain_length, 8u) << "stride: " << stride;
+    }
 }
 
 TEST(HashTests, StdVector) {

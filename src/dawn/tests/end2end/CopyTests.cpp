@@ -48,9 +48,15 @@
 #include "src/dawn/utils/TestUtils.h"
 #include "src/dawn/utils/TextureUtils.h"
 #include "src/dawn/utils/WGPUHelpers.h"
+#include "src/utils/numeric.h"
 
 namespace dawn {
 namespace {
+
+using ::testing::AssertionFailure;
+using ::testing::AssertionResult;
+using ::testing::AssertionSuccess;
+using ::testing::Message;
 
 // For MinimumBufferSpec bytesPerRow and rowsPerImage, compute a default from the copy extent.
 constexpr uint32_t kStrideComputeDefault = 0xFFFF'FFFEul;
@@ -111,22 +117,18 @@ class ColorExpectation : public detail::CustomTextureExpectation {
 
     uint32_t DataSize() override { return ColorType::kDataSize; }
 
-    testing::AssertionResult Check(const void* data, size_t size) override {
-        size_t expectedSize = sizeof(ColorType) * mExpected.size();
-        DAWN_ASSERT(size == expectedSize);
-        // SAFETY: `data` contains at least `mExpected.size()` ColorType elements as verified by the
-        // assertion above.
-        auto actual = DAWN_UNSAFE_BUFFERS(
-            std::span<const ColorType>(static_cast<const ColorType*>(data), mExpected.size()));
+    AssertionResult Check(Span<const std::byte> data) override {
+        auto actual = ReinterpretSpan<const ColorType>(data);
+        DAWN_ASSERT(actual.size() == mExpected.size());
 
         for (size_t i = 0; i < mExpected.size(); ++i) {
             if (!AreEqual(mExpected[i], actual[i])) {
-                return testing::AssertionFailure()
+                return AssertionFailure()
                        << "Expected data[" << i << "] to be " << ToString(mExpected[i])
                        << ", actual " << ToString(actual[i]) << "\n";
             }
         }
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 
   private:
@@ -475,7 +477,6 @@ class CopyTests {
     }
 };
 
-namespace {
 using TextureFormat = wgpu::TextureFormat;
 DAWN_TEST_PARAM_STRUCT(CopyTextureFormatParams, TextureFormat);
 
@@ -550,8 +551,6 @@ class CopyTests_WithFormatParam : public CopyTests,
     }
 };
 
-}  // namespace
-
 class CopyTests_T2B : public CopyTests_WithFormatParam {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
@@ -595,7 +594,8 @@ class CopyTests_T2B : public CopyTests_WithFormatParam {
                               (IsD3D11() || IsOpenGLES()) && IsIntelGen12());
 
         // TODO(crbug.com/463661449): Flaky on Snapdragon X Elite SoCs w/ D3D11.
-        DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11());
+        DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm() &&
+                              GetDriverVersion() < gpu_info::DriverVersion({31, 0, 170, 0}));
     }
 
     void DoTest(
@@ -1518,7 +1518,8 @@ TEST_P(CopyTests_T2B, OffsetBufferUnaligned) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
     // TODO(42242119): fail on Qualcomm Adreno X1.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm() &&
+                          GetDriverVersion() < gpu_info::DriverVersion({31, 0, 170, 0}));
 
     constexpr uint32_t kWidth = 128;
     constexpr uint32_t kHeight = 128;
@@ -1684,7 +1685,8 @@ TEST_P(CopyTests_T2B, OffsetBufferUnalignedSmallBytesPerRow) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
     // TODO(42242119): fail on Qualcomm Adreno X1.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm() &&
+                          GetDriverVersion() < gpu_info::DriverVersion({31, 0, 170, 0}));
 
     constexpr uint32_t kWidth = 32;
     constexpr uint32_t kHeight = 128;
@@ -1864,7 +1866,7 @@ TEST_P(CopyTests_T2B, ReallyLargeBytesPerRow) {
     //   behavior (262144->0, 262400->256, 524288/1048576->0 without the workaround)
     // - 14-bit row-width texels boundary with 1 byte/texel format(such as R8Unorm)
     for (uint32_t bytesPerRow : {(1u << 18), (1u << 18) + 256u, (1u << 19), (1u << 20)}) {
-        SCOPED_TRACE(testing::Message() << "bytesPerRow=" << bytesPerRow);
+        SCOPED_TRACE(Message() << "bytesPerRow=" << bytesPerRow);
         BufferSpec bufferSpec = MinimumBufferSpec({2, 2, 2}, /*overrideBytesPerRow=*/bytesPerRow);
         DoTest(textureSpec, bufferSpec, {2, 2, 2});
     }
@@ -2095,7 +2097,8 @@ TEST_P(CopyTests_T2B, Texture3DNoSplitRowDataWithEmptyFirstRow) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
     // TODO(42242119): fail on Qualcomm Adreno X1.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm() &&
+                          GetDriverVersion() < gpu_info::DriverVersion({31, 0, 170, 0}));
 
     constexpr uint32_t kWidth = 2;
     constexpr uint32_t kHeight = 4;
@@ -2125,7 +2128,8 @@ TEST_P(CopyTests_T2B, Texture3DSplitRowDataWithoutEmptyFirstRow) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
     // TODO(42242119): fail on Qualcomm Adreno X1.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm() &&
+                          GetDriverVersion() < gpu_info::DriverVersion({31, 0, 170, 0}));
 
     constexpr uint32_t kWidth = 259;
     constexpr uint32_t kHeight = 127;
@@ -2176,7 +2180,8 @@ TEST_P(CopyTests_T2B, Texture3DCopyHeightIsOneCopyWidthIsTiny) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
     // TODO(42242119): fail on Qualcomm Adreno X1.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm() &&
+                          GetDriverVersion() < gpu_info::DriverVersion({31, 0, 170, 0}));
 
     constexpr uint32_t kWidth = 2;
     constexpr uint32_t kHeight = 1;
@@ -2334,13 +2339,195 @@ DAWN_INSTANTIATE_TEST_P(
         wgpu::TextureFormat::BGRA8Unorm,
     });
 
-class CopyTests_T2B_No_Format_Param : public CopyTests, public DawnTest {};
+class CopyTests_T2B_No_Format_Param : public CopyTests, public DawnTest {
+  protected:
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        required.maxBufferSize = supported.maxBufferSize;
+        required.maxStorageBufferBindingSize = supported.maxStorageBufferBindingSize;
+    }
+
+    void TestLargeBytesPerRow(uint32_t bytesPerRow) {
+        constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
+        constexpr uint32_t kWidth = 2;
+        constexpr uint32_t kHeight = 2;
+        constexpr uint32_t kBytesPerTexel = 4;
+        constexpr wgpu::Extent3D kCopySize = {kWidth, kHeight, 1};
+        const uint64_t bufferSize =
+            utils::RequiredBytesInCopy(bytesPerRow, kHeight, kCopySize, kFormat);
+
+        // Skip on configurations that cannot allocate or bind `bufferSize`.
+#if DAWN_PLATFORM_IS(32_BIT)
+        DAWN_TEST_UNSUPPORTED_IF(bufferSize >= 0x80000000ull);
+#endif
+        DAWN_TEST_UNSUPPORTED_IF(bufferSize >= 0x80000000ull &&
+                                 (IsWARP() || IsSwiftshader() || IsANGLESwiftShader()));
+        // TODO(crbug.com/451338754): Exceeds capture-replay's 2 GiB alloc limit.
+        DAWN_SUPPRESS_TEST_IF(bufferSize >= 0x80000000ull && IsCaptureReplayCheckingEnabled());
+        DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxBufferSize < bufferSize);
+        DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("use_blit_for_t2b") &&
+                                 GetSupportedLimits().maxStorageBufferBindingSize < bufferSize);
+
+        // Create and populate the 2x2 source texture with packed row data.
+        wgpu::TextureDescriptor textureDesc;
+        textureDesc.format = kFormat;
+        textureDesc.size = kCopySize;
+        textureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+        wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+        constexpr uint32_t kRowBytes = kWidth * kBytesPerTexel;
+        constexpr std::array<std::array<uint8_t, kRowBytes>, kHeight> kRows = {{
+            {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88},
+            {0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x12},
+        }};
+        wgpu::TexelCopyTextureInfo dstTextureView =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferLayout uploadLayout = utils::CreateTexelCopyBufferLayout(0, kRowBytes);
+        queue.WriteTexture(&dstTextureView, kRows.data(), sizeof(kRows), &uploadLayout, &kCopySize);
+
+        // Create the destination buffer, skipping if the device runs out of memory.
+        wgpu::BufferDescriptor bufferDesc;
+        bufferDesc.size = bufferSize;
+        bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
+        device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
+        wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+        wgpu::ErrorType oomResult = wgpu::ErrorType::NoError;
+        device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents,
+                             [&oomResult](wgpu::PopErrorScopeStatus, wgpu::ErrorType errorType,
+                                          wgpu::StringView) { oomResult = errorType; });
+        WaitForAllOperations();
+        DAWN_TEST_UNSUPPORTED_IF(oomResult == wgpu::ErrorType::OutOfMemory);
+
+        // Copy the texture to the buffer with the oversized `bytesPerRow` and verify both rows.
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::TexelCopyTextureInfo srcTextureView =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferInfo dstBufferView =
+            utils::CreateTexelCopyBufferInfo(buffer, 0, bytesPerRow, kHeight);
+        encoder.CopyTextureToBuffer(&srcTextureView, &dstBufferView, &kCopySize);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_BUFFER_U8_RANGE_EQ(kRows[0].data(), buffer, 0, kRows[0].size());
+        EXPECT_BUFFER_U8_RANGE_EQ(kRows[1].data(), buffer, bytesPerRow, kRows[1].size());
+    }
+
+    void TestLargeBytesPerImage(uint64_t bytesPerImage, wgpu::TextureDimension dimension) {
+        constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
+        constexpr uint32_t kWidth = 2;
+        constexpr uint32_t kHeight = 2;
+        constexpr uint32_t kDepth = 2;
+        constexpr uint32_t kBytesPerTexel = 4;
+        constexpr uint32_t kBytesPerRow = 256;
+        DAWN_ASSERT(bytesPerImage % kBytesPerRow == 0);
+        const uint32_t rowsPerImage = checked_cast<uint32_t>(bytesPerImage / kBytesPerRow);
+        constexpr wgpu::Extent3D kCopySize = {kWidth, kHeight, kDepth};
+        const uint64_t bufferSize =
+            utils::RequiredBytesInCopy(kBytesPerRow, rowsPerImage, kCopySize, kFormat);
+
+        // Skip on configurations that cannot allocate or bind `bufferSize`.
+#if DAWN_PLATFORM_IS(32_BIT)
+        DAWN_TEST_UNSUPPORTED_IF(bufferSize >= 0x80000000ull);
+#endif
+        DAWN_TEST_UNSUPPORTED_IF(bufferSize >= 0x80000000ull &&
+                                 (IsWARP() || IsSwiftshader() || IsANGLESwiftShader()));
+        // TODO(crbug.com/451338754): Exceeds capture-replay's 2 GiB alloc limit.
+        DAWN_SUPPRESS_TEST_IF(bufferSize >= 0x80000000ull && IsCaptureReplayCheckingEnabled());
+        DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxBufferSize < bufferSize);
+        DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("use_blit_for_t2b") &&
+                                 GetSupportedLimits().maxStorageBufferBindingSize < bufferSize);
+
+        // Create and populate the 2x2x2 source texture with packed row data.
+        wgpu::TextureDescriptor textureDesc;
+        textureDesc.dimension = dimension;
+        textureDesc.format = kFormat;
+        textureDesc.size = kCopySize;
+        textureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+        wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+        constexpr uint32_t kRowBytes = kWidth * kBytesPerTexel;
+        constexpr std::array<std::array<uint8_t, kRowBytes>, size_t{kDepth} * kHeight> kRows = {{
+            {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88},
+            {0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x12},
+            {0x21, 0x32, 0x43, 0x54, 0x65, 0x76, 0x87, 0x98},
+            {0xA9, 0xBA, 0xCB, 0xDC, 0xED, 0xFE, 0x0F, 0x23},
+        }};
+        wgpu::TexelCopyTextureInfo dstTextureView =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferLayout uploadLayout =
+            utils::CreateTexelCopyBufferLayout(0, kRowBytes, kHeight);
+        queue.WriteTexture(&dstTextureView, kRows.data(), sizeof(kRows), &uploadLayout, &kCopySize);
+
+        // Create the destination buffer, skipping if the device runs out of memory.
+        wgpu::BufferDescriptor bufferDesc;
+        bufferDesc.size = bufferSize;
+        bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
+        device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
+        wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+        wgpu::ErrorType oomResult = wgpu::ErrorType::NoError;
+        device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents,
+                             [&oomResult](wgpu::PopErrorScopeStatus, wgpu::ErrorType errorType,
+                                          wgpu::StringView) { oomResult = errorType; });
+        WaitForAllOperations();
+        DAWN_TEST_UNSUPPORTED_IF(oomResult == wgpu::ErrorType::OutOfMemory);
+
+        // Copy the texture to the buffer with the oversized `bytesPerImage` and verify all rows.
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::TexelCopyTextureInfo srcTextureView =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferInfo dstBufferView =
+            utils::CreateTexelCopyBufferInfo(buffer, 0, kBytesPerRow, rowsPerImage);
+        encoder.CopyTextureToBuffer(&srcTextureView, &dstBufferView, &kCopySize);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_BUFFER_U8_RANGE_EQ(kRows[0].data(), buffer, 0, kRows[0].size());
+        EXPECT_BUFFER_U8_RANGE_EQ(kRows[1].data(), buffer, kBytesPerRow, kRows[1].size());
+        EXPECT_BUFFER_U8_RANGE_EQ(kRows[2].data(), buffer, bytesPerImage, kRows[2].size());
+        EXPECT_BUFFER_U8_RANGE_EQ(kRows[3].data(), buffer, bytesPerImage + kBytesPerRow,
+                                  kRows[3].size());
+    }
+};
+
+// Regression test for crbug.com/569161611, crbug.com/529867799, and crbug.com/380487895: when
+// copying a multi-row texture to a buffer with bytesPerRow >= 0x10000000 (256 MiB), ARM Mali GLES
+// drivers overflow a signed 32-bit bit-stride calculation ((int32_t)(GL_PACK_ROW_LENGTH * bpp) * 8)
+// and write row 1 at a negative offset before the PBO, ImgTec PowerVR GLES drivers fail with
+// GL_INVALID_OPERATION, and Qualcomm Adreno GPUs wrap row 1's offset back to 0. Verify that row 0
+// and row 1 land at the expected offsets.
+TEST_P(CopyTests_T2B_No_Format_Param, LargeBytesPerRow256MiB) {
+    TestLargeBytesPerRow(0x10000000u);
+}
+
+// Regression test for crbug.com/583083283: when copying a multi-row texture to a buffer with
+// bytesPerRow >= 0x80000000 (2 GiB), NVIDIA Vulkan drivers treat the byte row pitch as a signed
+// 32-bit integer and write row 1 at buffer + bytesPerRow - 2^32 (up to 2 GiB below the buffer).
+TEST_P(CopyTests_T2B_No_Format_Param, LargeBytesPerRow2GiB) {
+    TestLargeBytesPerRow(0x80000000u);
+}
+
+TEST_P(CopyTests_T2B_No_Format_Param, LargeBytesPerImage256MiB_2DArray) {
+    TestLargeBytesPerImage(0x10000000ull, wgpu::TextureDimension::e2D);
+}
+
+TEST_P(CopyTests_T2B_No_Format_Param, LargeBytesPerImage256MiB_3D) {
+    TestLargeBytesPerImage(0x10000000ull, wgpu::TextureDimension::e3D);
+}
+
+TEST_P(CopyTests_T2B_No_Format_Param, LargeBytesPerImage2GiB_2DArray) {
+    TestLargeBytesPerImage(0x80000000ull, wgpu::TextureDimension::e2D);
+}
+
+TEST_P(CopyTests_T2B_No_Format_Param, LargeBytesPerImage2GiB_3D) {
+    TestLargeBytesPerImage(0x80000000ull, wgpu::TextureDimension::e3D);
+}
 
 // A regression test for a bug on D3D12 backend that causes crash when doing texture-to-texture
 // copy one row with the texture format Depth32Float.
 TEST_P(CopyTests_T2B_No_Format_Param, CopyOneRowWithDepth32Float) {
     // TODO(42242119): fail on Qualcomm Adreno X1.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm() &&
+                          GetDriverVersion() < gpu_info::DriverVersion({31, 0, 170, 0}));
 
     constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::Depth32Float;
     constexpr uint32_t kPixelsPerRow = 4u;
@@ -2393,28 +2580,22 @@ class ExpectRG11B10Ufloat : public detail::Expectation {
   public:
     explicit ExpectRG11B10Ufloat(std::vector<uint32_t> expected) : mExpected(std::move(expected)) {}
 
-    testing::AssertionResult Check(const void* data, size_t size) override {
-        size_t expectedSize = sizeof(uint32_t) * mExpected.size();
-        DAWN_ASSERT(size == expectedSize);
-
-        // SAFETY: `data` contains at least `mExpected.size()` uint32_t elements as verified by the
-        // assertion above.
-        auto actual = DAWN_UNSAFE_BUFFERS(
-            std::span<const uint32_t>(static_cast<const uint32_t*>(data), mExpected.size()));
+    AssertionResult Check(Span<const std::byte> data) override {
+        auto actual = ReinterpretSpan<const uint32_t>(data);
+        DAWN_ASSERT(actual.size() == mExpected.size());
 
         for (size_t i = 0; i < mExpected.size(); ++i) {
             uint32_t expectedValue = mExpected[i];
             uint32_t actualValue = actual[i];
 
             if (!RG11B10UfloatMatch(expectedValue, actualValue)) {
-                testing::AssertionResult result = testing::AssertionFailure()
-                                                  << "Expected data[" << i << "] to be "
-                                                  << expectedValue << ", actual " << actualValue
-                                                  << "\n";
+                AssertionResult result = AssertionFailure()
+                                         << "Expected data[" << i << "] to be " << expectedValue
+                                         << ", actual " << actualValue << "\n";
                 return result;
             }
         }
-        return testing::AssertionSuccess();
+        return AssertionSuccess();
     }
 
   private:
@@ -3074,7 +3255,7 @@ TEST_P(CopyTests_B2T, ReallyLargeBytesPerRow) {
     //   behavior (262144->0, 262400->256, 524288/1048576->0 without the workaround)
     // - 14-bit row-width texels boundary with 1 byte/texel format (such as R8Unorm)
     for (uint32_t bytesPerRow : {(1u << 18), (1u << 18) + 256u, (1u << 19), (1u << 20)}) {
-        SCOPED_TRACE(testing::Message() << "bytesPerRow=" << bytesPerRow);
+        SCOPED_TRACE(Message() << "bytesPerRow=" << bytesPerRow);
         BufferSpec bufferSpec = MinimumBufferSpec({2, 2, 2}, /*overrideBytesPerRow=*/bytesPerRow);
         DoTest(textureSpec, bufferSpec, {2, 2, 2});
     }
@@ -3450,6 +3631,198 @@ DAWN_INSTANTIATE_TEST_P(CopyTests_B2T,
 
                             wgpu::TextureFormat::BGRA8Unorm,
                         });
+
+class CopyTests_B2T_No_Format_Param : public CopyTests, public DawnTest {
+  protected:
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        required.maxBufferSize = supported.maxBufferSize;
+        required.maxStorageBufferBindingSize = supported.maxStorageBufferBindingSize;
+    }
+
+    void TestLargeBytesPerRow(uint32_t bytesPerRow) {
+        constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
+        constexpr uint32_t kWidth = 2;
+        constexpr uint32_t kHeight = 2;
+        constexpr uint32_t kBytesPerTexel = 4;
+        constexpr wgpu::Extent3D kCopySize = {kWidth, kHeight, 1};
+        const uint64_t bufferSize =
+            utils::RequiredBytesInCopy(bytesPerRow, kHeight, kCopySize, kFormat);
+
+        // Skip on configurations that cannot allocate or bind `bufferSize`.
+#if DAWN_PLATFORM_IS(32_BIT)
+        DAWN_TEST_UNSUPPORTED_IF(bufferSize >= 0x80000000ull);
+#endif
+        DAWN_TEST_UNSUPPORTED_IF(bufferSize >= 0x80000000ull &&
+                                 (IsWARP() || IsSwiftshader() || IsANGLESwiftShader()));
+        // TODO(crbug.com/451338754): Exceeds capture-replay's 2 GiB alloc limit.
+        DAWN_SUPPRESS_TEST_IF(bufferSize >= 0x80000000ull && IsCaptureReplayCheckingEnabled());
+        DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxBufferSize < bufferSize);
+        DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("use_blit_for_b2t") &&
+                                 GetSupportedLimits().maxStorageBufferBindingSize < bufferSize);
+
+        // Create the source buffer, skipping if the device runs out of memory.
+        wgpu::BufferDescriptor bufferDesc;
+        bufferDesc.size = bufferSize;
+        bufferDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+        device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
+        wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+        wgpu::ErrorType oomResult = wgpu::ErrorType::NoError;
+        device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents,
+                             [&oomResult](wgpu::PopErrorScopeStatus, wgpu::ErrorType errorType,
+                                          wgpu::StringView) { oomResult = errorType; });
+        WaitForAllOperations();
+        DAWN_TEST_UNSUPPORTED_IF(oomResult == wgpu::ErrorType::OutOfMemory);
+
+        // Populate only the two row offsets in the source buffer and create the 2x2 texture.
+        constexpr uint32_t kRowBytes = kWidth * kBytesPerTexel;
+        constexpr std::array<std::array<uint8_t, kRowBytes>, kHeight> kRows = {{
+            {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88},
+            {0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x12},
+        }};
+        queue.WriteBuffer(buffer, 0, kRows[0].data(), kRows[0].size());
+        queue.WriteBuffer(buffer, bytesPerRow, kRows[1].data(), kRows[1].size());
+
+        wgpu::TextureDescriptor textureDesc;
+        textureDesc.format = kFormat;
+        textureDesc.size = kCopySize;
+        textureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+        wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+        // Copy the buffer to the texture with the oversized `bytesPerRow` and verify all texels.
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::TexelCopyBufferInfo srcBufferView =
+            utils::CreateTexelCopyBufferInfo(buffer, 0, bytesPerRow, kHeight);
+        wgpu::TexelCopyTextureInfo dstTextureView =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+        encoder.CopyBufferToTexture(&srcBufferView, &dstTextureView, &kCopySize);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0x11, 0x22, 0x33, 0x44), texture, 0, 0);
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0x55, 0x66, 0x77, 0x88), texture, 1, 0);
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0x99, 0xAA, 0xBB, 0xCC), texture, 0, 1);
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0xDD, 0xEE, 0xFF, 0x12), texture, 1, 1);
+    }
+
+    void TestLargeBytesPerImage(uint64_t bytesPerImage, wgpu::TextureDimension dimension) {
+        constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
+        constexpr uint32_t kWidth = 2;
+        constexpr uint32_t kHeight = 2;
+        constexpr uint32_t kDepth = 2;
+        constexpr uint32_t kBytesPerTexel = 4;
+        constexpr uint32_t kBytesPerRow = 256;
+        DAWN_ASSERT(bytesPerImage % kBytesPerRow == 0);
+        const uint32_t rowsPerImage = checked_cast<uint32_t>(bytesPerImage / kBytesPerRow);
+        constexpr wgpu::Extent3D kCopySize = {kWidth, kHeight, kDepth};
+        const uint64_t bufferSize =
+            utils::RequiredBytesInCopy(kBytesPerRow, rowsPerImage, kCopySize, kFormat);
+
+        // Skip on configurations that cannot allocate or bind `bufferSize`.
+#if DAWN_PLATFORM_IS(32_BIT)
+        DAWN_TEST_UNSUPPORTED_IF(bufferSize >= 0x80000000ull);
+#endif
+        DAWN_TEST_UNSUPPORTED_IF(bufferSize >= 0x80000000ull &&
+                                 (IsWARP() || IsSwiftshader() || IsANGLESwiftShader()));
+        // TODO(crbug.com/451338754): Exceeds capture-replay's 2 GiB alloc limit.
+        DAWN_SUPPRESS_TEST_IF(bufferSize >= 0x80000000ull && IsCaptureReplayCheckingEnabled());
+        DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxBufferSize < bufferSize);
+        DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("use_blit_for_b2t") &&
+                                 GetSupportedLimits().maxStorageBufferBindingSize < bufferSize);
+
+        // Create the source buffer, skipping if the device runs out of memory.
+        wgpu::BufferDescriptor bufferDesc;
+        bufferDesc.size = bufferSize;
+        bufferDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+        device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
+        wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+        wgpu::ErrorType oomResult = wgpu::ErrorType::NoError;
+        device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents,
+                             [&oomResult](wgpu::PopErrorScopeStatus, wgpu::ErrorType errorType,
+                                          wgpu::StringView) { oomResult = errorType; });
+        WaitForAllOperations();
+        DAWN_TEST_UNSUPPORTED_IF(oomResult == wgpu::ErrorType::OutOfMemory);
+
+        // Populate only the four row offsets across both slices and create the 2x2x2 texture.
+        constexpr uint32_t kRowBytes = kWidth * kBytesPerTexel;
+        constexpr std::array<std::array<uint8_t, kRowBytes>, size_t{kDepth} * kHeight> kRows = {{
+            {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88},
+            {0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x12},
+            {0x21, 0x32, 0x43, 0x54, 0x65, 0x76, 0x87, 0x98},
+            {0xA9, 0xBA, 0xCB, 0xDC, 0xED, 0xFE, 0x0F, 0x23},
+        }};
+        queue.WriteBuffer(buffer, 0, kRows[0].data(), kRows[0].size());
+        queue.WriteBuffer(buffer, kBytesPerRow, kRows[1].data(), kRows[1].size());
+        queue.WriteBuffer(buffer, bytesPerImage, kRows[2].data(), kRows[2].size());
+        queue.WriteBuffer(buffer, bytesPerImage + kBytesPerRow, kRows[3].data(), kRows[3].size());
+
+        wgpu::TextureDescriptor textureDesc;
+        textureDesc.dimension = dimension;
+        textureDesc.format = kFormat;
+        textureDesc.size = kCopySize;
+        textureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+        wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+        // Copy the buffer to the texture with the oversized `bytesPerImage` and verify all texels.
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::TexelCopyBufferInfo srcBufferView =
+            utils::CreateTexelCopyBufferInfo(buffer, 0, kBytesPerRow, rowsPerImage);
+        wgpu::TexelCopyTextureInfo dstTextureView =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+        encoder.CopyBufferToTexture(&srcBufferView, &dstTextureView, &kCopySize);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_PIXEL_3D_RGBA8_EQ(utils::RGBA8(0x11, 0x22, 0x33, 0x44), texture, 0, 0, 0);
+        EXPECT_PIXEL_3D_RGBA8_EQ(utils::RGBA8(0x55, 0x66, 0x77, 0x88), texture, 1, 0, 0);
+        EXPECT_PIXEL_3D_RGBA8_EQ(utils::RGBA8(0x99, 0xAA, 0xBB, 0xCC), texture, 0, 1, 0);
+        EXPECT_PIXEL_3D_RGBA8_EQ(utils::RGBA8(0xDD, 0xEE, 0xFF, 0x12), texture, 1, 1, 0);
+        EXPECT_PIXEL_3D_RGBA8_EQ(utils::RGBA8(0x21, 0x32, 0x43, 0x54), texture, 0, 0, 1);
+        EXPECT_PIXEL_3D_RGBA8_EQ(utils::RGBA8(0x65, 0x76, 0x87, 0x98), texture, 1, 0, 1);
+        EXPECT_PIXEL_3D_RGBA8_EQ(utils::RGBA8(0xA9, 0xBA, 0xCB, 0xDC), texture, 0, 1, 1);
+        EXPECT_PIXEL_3D_RGBA8_EQ(utils::RGBA8(0xED, 0xFE, 0x0F, 0x23), texture, 1, 1, 1);
+    }
+};
+
+// Regression test for crbug.com/569161611, crbug.com/529867799, and crbug.com/380487895 in the
+// buffer-to-texture direction with bytesPerRow == 256 MiB.
+TEST_P(CopyTests_B2T_No_Format_Param, LargeBytesPerRow256MiB) {
+    TestLargeBytesPerRow(0x10000000u);
+}
+
+// Regression test for crbug.com/583083283: when copying a buffer to a multi-row texture with
+// bytesPerRow >= 0x80000000 (2 GiB), NVIDIA Vulkan drivers treat the byte row pitch as a signed
+// 32-bit integer and read row 1 from buffer + bytesPerRow - 2^32 (up to 2 GiB below the buffer).
+TEST_P(CopyTests_B2T_No_Format_Param, LargeBytesPerRow2GiB) {
+    TestLargeBytesPerRow(0x80000000u);
+}
+
+TEST_P(CopyTests_B2T_No_Format_Param, LargeBytesPerImage256MiB_2DArray) {
+    TestLargeBytesPerImage(0x10000000ull, wgpu::TextureDimension::e2D);
+}
+
+TEST_P(CopyTests_B2T_No_Format_Param, LargeBytesPerImage256MiB_3D) {
+    TestLargeBytesPerImage(0x10000000ull, wgpu::TextureDimension::e3D);
+}
+
+TEST_P(CopyTests_B2T_No_Format_Param, LargeBytesPerImage2GiB_2DArray) {
+    TestLargeBytesPerImage(0x80000000ull, wgpu::TextureDimension::e2D);
+}
+
+TEST_P(CopyTests_B2T_No_Format_Param, LargeBytesPerImage2GiB_3D) {
+    TestLargeBytesPerImage(0x80000000ull, wgpu::TextureDimension::e3D);
+}
+
+DAWN_INSTANTIATE_TEST(CopyTests_B2T_No_Format_Param,
+                      D3D11Backend(),
+                      D3D11Backend({"d3d11_disable_cpu_buffers"}),
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      OpenGLESBackend({"gl_defer"}),
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 TEST_P(CopyTests_T2T, Texture) {
     constexpr uint32_t kWidth = 256;
@@ -4176,7 +4549,6 @@ DAWN_INSTANTIATE_TEST(ClearBufferTests,
 
 // Regression tests to reproduce a flaky failure when running whole WebGPU CTS on Intel GPUs.
 // See crbug.com/dawn/1487 for more details.
-namespace {
 using TextureFormat = wgpu::TextureFormat;
 
 enum class InitializationMethod {
@@ -4210,8 +4582,6 @@ DAWN_TEST_PARAM_STRUCT(CopyToDepthStencilTextureAfterDestroyingBigBufferTestsPar
                        TextureFormat,
                        InitializationMethod,
                        AddRenderAttachmentUsage);
-
-}  // anonymous namespace
 
 class CopyToDepthStencilTextureAfterDestroyingBigBufferTests
     : public DawnTestWithParams<CopyToDepthStencilTextureAfterDestroyingBigBufferTestsParams> {};

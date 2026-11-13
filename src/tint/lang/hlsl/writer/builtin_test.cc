@@ -672,6 +672,46 @@ void main(main_inputs inputs) {
 )");
 }
 
+// Check that the negation introduced by the atomicSub polyfill is performed with unsigned
+// arithmetic, to avoid the potential UB of signed integer overflow.
+TEST_F(HlslWriterTest, BuiltinWorkgroupAtomicSub_NonConstantI32) {
+    auto* v = b.ir.root_block->Append(b.Var<workgroup, atomic<i32>>("v"));
+    auto* p = b.ir.root_block->Append(b.Var<private_>("p", 123_i));
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call<i32>(core::BuiltinFn::kAtomicSub, v, b.Load(p)));
+        b.Return(func);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(struct main_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
+
+
+groupshared int v;
+static int p = int(123);
+void main_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
+    int v_1 = int(0);
+    InterlockedExchange(v, int(0), v_1);
+  }
+  GroupMemoryBarrierWithGroupSync();
+  int v_2 = int(0);
+  InterlockedAdd(v, asint((0u - asuint(p))), v_2);
+  int x = v_2;
+}
+
+[numthreads(1, 1, 1)]
+void main(main_inputs inputs) {
+  main_inner(inputs.tint_local_index);
+}
+
+)");
+}
+
 TEST_F(HlslWriterTest, BuiltinWorkgroupAtomicCompareExchangeWeak) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("padding"), ty.vec4f()},
@@ -1464,6 +1504,66 @@ void main() {
 )");
 }
 
+TEST_F(HlslWriterTest, BuiltinTextureLoad_Multisampled2DI32_WithRobustness) {
+    auto* t =
+        b.Var(ty.ptr(handle, ty.multisampled_texture(core::type::TextureDimension::k2d, ty.i32())));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Composite(ty.vec2i(), 1_i, 2_i);
+        auto* sample_idx = b.Value(3_i);
+        b.Let("x", b.Call<vec4<i32>>(core::BuiltinFn::kTextureLoad, b.Load(t), coords, sample_idx));
+        b.Return(func);
+    });
+
+    Options opts;
+    opts.entry_point_name = "main";
+    opts.disable_robustness = false;
+    auto result = Generate(opts);
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+Texture2DMS<int4> v : register(t0);
+void main() {
+  uint3 v_1 = (0u).xxx;
+  v.GetDimensions(v_1.x, v_1.y, v_1.z);
+  int4 x = v.Load(int2(int(1), int(2)), int(min(3u, (v_1.z - 1u))));
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinTextureLoad_DepthMultisampledF32_WithRobustness) {
+    auto* t =
+        b.Var(ty.ptr(handle, ty.depth_multisampled_texture(core::type::TextureDimension::k2d)));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Composite(ty.vec2i(), 1_i, 2_i);
+        auto* sample_idx = b.Value(3_u);
+        b.Let("x", b.Call<f32>(core::BuiltinFn::kTextureLoad, b.Load(t), coords, sample_idx));
+        b.Return(func);
+    });
+
+    Options opts;
+    opts.entry_point_name = "main";
+    opts.disable_robustness = false;
+    auto result = Generate(opts);
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+Texture2DMS<float4> v : register(t0);
+void main() {
+  uint3 v_1 = (0u).xxx;
+  v.GetDimensions(v_1.x, v_1.y, v_1.z);
+  float x = v.Load(int2(int(1), int(2)), int(min(3u, (v_1.z - 1u)))).x;
+}
+
+)");
+}
+
 TEST_F(HlslWriterTest, BuiltinTextureStore1D) {
     auto* t = b.Var(
         ty.ptr(handle, ty.storage_texture(core::type::TextureDimension::k1d,
@@ -2069,7 +2169,7 @@ TEST_F(HlslWriterTest, BuiltinPack2x16Snorm) {
 void main() {
   float2 u = (2.0f).xx;
   int2 v = (int2(round((clamp(u, (-1.0f).xx, (1.0f).xx) * 32767.0f))) & (int(65535)).xx);
-  uint a = asuint((v.x | (v.y << 16u)));
+  uint a = asuint((v.x | asint((asuint(v.y) << 16u))));
 }
 
 )");
@@ -2089,7 +2189,7 @@ TEST_F(HlslWriterTest, BuiltinUnpack2x16Snorm) {
 void main() {
   uint u = 2u;
   int v = int(u);
-  float2 a = clamp((float2((int2((v << 16u), v) >> (16u).xx)) / 32767.0f), (-1.0f).xx, (1.0f).xx);
+  float2 a = clamp((float2((int2(asint((asuint(v) << 16u)), v) >> (16u).xx)) / 32767.0f), (-1.0f).xx, (1.0f).xx);
 }
 
 )");
@@ -2149,7 +2249,7 @@ TEST_F(HlslWriterTest, BuiltinPack4x8Snorm) {
 void main() {
   float4 u = (2.0f).xxxx;
   int4 v = (int4(round((clamp(u, (-1.0f).xxxx, (1.0f).xxxx) * 127.0f))) & (int(255)).xxxx);
-  uint a = asuint((v.x | ((v.y << 8u) | ((v.z << 16u) | (v.w << 24u)))));
+  uint a = asuint((v.x | (asint((asuint(v.y) << 8u)) | (asint((asuint(v.z) << 16u)) | asint((asuint(v.w) << 24u))))));
 }
 
 )");
@@ -2169,7 +2269,7 @@ TEST_F(HlslWriterTest, BuiltinUnpack4x8Snorm) {
 void main() {
   uint u = 2u;
   int v = int(u);
-  float4 a = clamp((float4((int4((v << 24u), (v << 16u), (v << 8u), v) >> (24u).xxxx)) / 127.0f), (-1.0f).xxxx, (1.0f).xxxx);
+  float4 a = clamp((float4((int4(asint((asuint(v) << 24u)), asint((asuint(v) << 16u)), asint((asuint(v) << 8u)), v) >> (24u).xxxx)) / 127.0f), (-1.0f).xxxx, (1.0f).xxxx);
 }
 
 )");

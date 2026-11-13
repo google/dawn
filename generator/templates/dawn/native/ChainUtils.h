@@ -114,6 +114,12 @@ enum class Extensibility { In, Out };
 template <typename T>
 inline Extensibility ExtensibilityFor;
 
+// Template listing, for each extensible structure, the chained extensions that are part of Dawn's
+// stable C header and ABI. Used by UnpackedPtr<T>::ValidateStable() to reject any other chained
+// struct, including C++-only extensions registered through AdditionalExtensions.
+template <typename Root>
+struct StableExtensionsFor;
+
 {% for type in by_category["structure"] %}
     {% set T = as_cppType(type.name) %}
     {% if type.extensible == "in" %}
@@ -128,6 +134,14 @@ inline Extensibility ExtensibilityFor;
         };
         template <>
         constexpr inline Extensibility ExtensibilityFor<{{T}}> = Extensibility::In;
+        template <>
+        struct StableExtensionsFor<{{T}}> {
+            using Types = std::tuple<
+                {% for extension in type.extensions if is_stable(extension) %}
+                    {% if not loop.first %}, {% endif %}{{as_cppType(extension.name)}}
+                {% endfor %}
+            >;
+        };
 
     {% elif type.extensible == "out" %}
         template <>
@@ -141,6 +155,14 @@ inline Extensibility ExtensibilityFor;
         };
         template <>
         constexpr inline Extensibility ExtensibilityFor<{{T}}> = Extensibility::Out;
+        template <>
+        struct StableExtensionsFor<{{T}}> {
+            using Types = std::tuple<
+                {% for extension in type.extensions if is_stable(extension) %}
+                    {% if not loop.first %}, {% endif %}{{as_cppType(extension.name)}}
+                {% endfor %}
+            >;
+        };
 
     {% endif %}
 {% endfor %}

@@ -5,12 +5,18 @@ import("../../../scripts/dawn_overrides_with_defaults.gni")
 # Depending on the configuration, this is either:
 # - Delegated to the `partition_alloc` library.
 # - Provided by Dawn itself as "no-op" implementation.
+#
+# WASM (Emscripten) builds always use the "no-op" implementation: PartitionAlloc
+# is neither used as malloc nor provides BackupRefPtr there, so its raw_ptr is
+# a plain pointer anyway. PartitionAlloc is also not built or tested for WASM
+# upstream, so building it can break (e.g. its ThreadCache size static_asserts
+# fail for the Emscripten toolchain).
 
 # This define the same targets as in partition_alloc. See Chrome's file:
 # - base/allocator/partition_allocator/BUILD.gn
 # - base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
 
-if (defined(dawn_partition_alloc_dir)) {
+if (defined(dawn_partition_alloc_dir) && !is_wasm) {
   group("raw_ptr") {
     public_deps = [ "${dawn_partition_alloc_dir}:raw_ptr" ]
   }

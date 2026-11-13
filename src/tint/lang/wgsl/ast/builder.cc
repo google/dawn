@@ -128,6 +128,14 @@ Type Builder::TypesBuilder::bool_(const Source& source) const {
     return AsType(source, "bool");
 }
 
+Type Builder::TypesBuilder::bf16() const {
+    return AsType("bf16");
+}
+
+Type Builder::TypesBuilder::bf16(const Source& source) const {
+    return AsType(source, "bf16");
+}
+
 Type Builder::TypesBuilder::f16() const {
     return AsType("f16");
 }

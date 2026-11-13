@@ -65,11 +65,11 @@ struct State {
 
     const core::type::Type* GetElementType(const core::type::Type* type,
                                            const core::ir::Value* idx) {
-        if (auto* constant = idx->As<core::ir::Constant>()) {
-            auto i = constant->Value()->ValueAs<u32>();
-            return type->Element(i);
+        if (auto* el = type->Elements().type) {
+            return el;
         }
-        return type->Elements().type;
+        auto* constant = idx->As<core::ir::Constant>();
+        return type->Element(constant->Value()->ValueAs<u32>());
     }
 
     void ProcessStore(core::ir::Store* store) {

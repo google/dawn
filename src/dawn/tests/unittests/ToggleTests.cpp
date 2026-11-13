@@ -43,10 +43,11 @@
 namespace dawn {
 namespace {
 
-using testing::Contains;
-using testing::StrEq;
+using ::testing::Contains;
+using ::testing::StrEq;
+using ::testing::Test;
 
-class ToggleTest : public testing::Test {
+class ToggleTest : public Test {
   public:
     // Helper function for getting the null adapter with given toggles.
     native::Adapter CreateNullAdapter(native::Instance* instance,
@@ -100,7 +101,7 @@ TEST_F(InstanceToggleTest, InstanceTogglesSet) {
 
         // Create an instance with default toggles, where AllowUnsafeAPIs is disabled.
         instance = std::make_unique<native::Instance>();
-        validateInstanceToggles(instance.get(), {}, {"allow_unsafe_apis"});
+        validateInstanceToggles(instance.get(), {"allow_experimental_apis"}, {"allow_unsafe_apis"});
     }
 
     // Create instance with empty toggles descriptor
@@ -117,7 +118,7 @@ TEST_F(InstanceToggleTest, InstanceTogglesSet) {
         // Create an instance with default toggles, where AllowUnsafeAPIs is disabled and
         // DisallowUnsafeAPIs is enabled.
         instance = std::make_unique<native::Instance>(&instanceDesc);
-        validateInstanceToggles(instance.get(), {}, {"allow_unsafe_apis"});
+        validateInstanceToggles(instance.get(), {"allow_experimental_apis"}, {"allow_unsafe_apis"});
     }
 
     // Create instance with AllowUnsafeAPIs explicitly enabled in toggles descriptor
@@ -135,7 +136,8 @@ TEST_F(InstanceToggleTest, InstanceTogglesSet) {
 
         // Create an instance with AllowUnsafeAPIs explicitly enabled.
         instance = std::make_unique<native::Instance>(&instanceDesc);
-        validateInstanceToggles(instance.get(), {allowUnsafeApisToggle}, {});
+        validateInstanceToggles(instance.get(), {allowUnsafeApisToggle, "allow_experimental_apis"},
+                                {});
     }
 
     // Create instance with AllowUnsafeAPIs explicitly disabled in toggles descriptor
@@ -153,7 +155,8 @@ TEST_F(InstanceToggleTest, InstanceTogglesSet) {
 
         // Create an instance with AllowUnsafeAPIs explicitly disabled.
         instance = std::make_unique<native::Instance>(&instanceDesc);
-        validateInstanceToggles(instance.get(), {}, {allowUnsafeApisToggle});
+        validateInstanceToggles(instance.get(), {"allow_experimental_apis"},
+                                {allowUnsafeApisToggle});
     }
 }
 
@@ -289,11 +292,14 @@ TEST_F(AdapterToggleTest, AdapterTogglesSetAndInheritToDevice) {
 
     const char* allowUnsafeApisToggle = "allow_unsafe_apis";
     const char* useDXCToggle = "use_dxc";
+    // allow_experimental_apis is enabled by default on a regular instance and inherited.
+    const char* allowExperimentalApisToggle = "allow_experimental_apis";
 
     // Create adapter with no toggles descriptor
     {
         // The created adapter should inherit disabled AllowUnsafeAPIs toggle from instance.
-        CreateAdapterAndValidateToggles(nullptr, {}, {allowUnsafeApisToggle});
+        CreateAdapterAndValidateToggles(nullptr, {allowExperimentalApisToggle},
+                                        {allowUnsafeApisToggle});
     }
 
     // Create adapter with empty toggles descriptor
@@ -301,7 +307,8 @@ TEST_F(AdapterToggleTest, AdapterTogglesSetAndInheritToDevice) {
         wgpu::DawnTogglesDescriptor adapterTogglesDesc = {};
 
         // The created adapter should inherit disabled AllowUnsafeAPIs toggle from instance.
-        CreateAdapterAndValidateToggles(&adapterTogglesDesc, {}, {allowUnsafeApisToggle});
+        CreateAdapterAndValidateToggles(&adapterTogglesDesc, {allowExperimentalApisToggle},
+                                        {allowUnsafeApisToggle});
     }
 
     // Create adapter with UseDXC enabled in toggles descriptor
@@ -312,7 +319,8 @@ TEST_F(AdapterToggleTest, AdapterTogglesSetAndInheritToDevice) {
 
         // The created adapter should enable required UseDXC toggle and inherit disabled
         // AllowUnsafeAPIs toggle from instance.
-        CreateAdapterAndValidateToggles(&adapterTogglesDesc, {useDXCToggle},
+        CreateAdapterAndValidateToggles(&adapterTogglesDesc,
+                                        {useDXCToggle, allowExperimentalApisToggle},
                                         {allowUnsafeApisToggle});
     }
 
@@ -323,7 +331,8 @@ TEST_F(AdapterToggleTest, AdapterTogglesSetAndInheritToDevice) {
         adapterTogglesDesc.enabledToggles = &allowUnsafeApisToggle;
 
         // The created adapter should enable overridden AllowUnsafeAPIs toggle.
-        CreateAdapterAndValidateToggles(&adapterTogglesDesc, {allowUnsafeApisToggle}, {});
+        CreateAdapterAndValidateToggles(&adapterTogglesDesc,
+                                        {allowUnsafeApisToggle, allowExperimentalApisToggle}, {});
     }
 
     // Create adapter with UseDXC enabled and explicitly overriding AllowUnsafeAPIs in toggles
@@ -335,8 +344,9 @@ TEST_F(AdapterToggleTest, AdapterTogglesSetAndInheritToDevice) {
         adapterTogglesDesc.enabledToggles = enableAdapterToggles.data();
 
         // The created adapter should enable required UseDXC and overridden AllowUnsafeAPIs toggle.
-        CreateAdapterAndValidateToggles(&adapterTogglesDesc, {useDXCToggle, allowUnsafeApisToggle},
-                                        {});
+        CreateAdapterAndValidateToggles(
+            &adapterTogglesDesc, {useDXCToggle, allowUnsafeApisToggle, allowExperimentalApisToggle},
+            {});
     }
 }
 
@@ -418,6 +428,56 @@ TEST_F(DeviceToggleTest, DeviceSetToggles) {
 
         // The device created from all adapter should have DumpShader device toggle enabled.
         CreateDeviceAndValidateToggles(adapter.Get(), &deviceTogglesDesc, {}, {dumpShaderToggle});
+    }
+}
+
+// Test that GetDeviceTogglesUsed computes effective device toggles without creating a device.
+TEST_F(DeviceToggleTest, GetDeviceTogglesUsed) {
+    std::unique_ptr<native::Instance> instance = std::make_unique<native::Instance>(&instanceDesc);
+
+    native::Adapter nullAdapter = CreateNullAdapter(instance.get(), nullptr);
+    wgpu::Adapter wgpuAdapter(nullAdapter.Get());
+    Ref<native::AdapterBase> adapter = native::FromAPI(nullAdapter.Get());
+
+    const char* dumpShaderToggle = "dump_shaders";
+
+    // 1. With nullptr descriptor, device toggles match default created device toggles.
+    {
+        std::vector<const char*> queriedToggles =
+            native::GetDeviceTogglesUsed(wgpuAdapter, nullptr);
+        native::DeviceDescriptor desc{};
+        Ref<native::DeviceBase> device = AcquireRef(adapter->APICreateDevice(&desc));
+        std::vector<const char*> actualDeviceToggles = device->GetTogglesUsed();
+
+        EXPECT_EQ(queriedToggles.size(), actualDeviceToggles.size());
+        for (const char* toggle : actualDeviceToggles) {
+            EXPECT_THAT(queriedToggles, Contains(StrEq(toggle)));
+        }
+        EXPECT_THAT(queriedToggles, Not(Contains(StrEq(dumpShaderToggle))));
+    }
+
+    // 2. With an enabled toggle in DawnTogglesDescriptor, queried toggles reflect it.
+    {
+        wgpu::DawnTogglesDescriptor togglesDesc = {};
+        togglesDesc.enabledToggleCount = 1;
+        togglesDesc.enabledToggles = &dumpShaderToggle;
+
+        wgpu::DeviceDescriptor deviceDesc = {};
+        deviceDesc.nextInChain = &togglesDesc;
+
+        std::vector<const char*> queriedToggles =
+            native::GetDeviceTogglesUsed(wgpuAdapter, &deviceDesc);
+        EXPECT_THAT(queriedToggles, Contains(StrEq(dumpShaderToggle)));
+
+        native::DeviceDescriptor desc{};
+        desc.nextInChain = &togglesDesc;
+        Ref<native::DeviceBase> device = AcquireRef(adapter->APICreateDevice(&desc));
+        std::vector<const char*> actualDeviceToggles = device->GetTogglesUsed();
+
+        EXPECT_EQ(queriedToggles.size(), actualDeviceToggles.size());
+        for (const char* toggle : actualDeviceToggles) {
+            EXPECT_THAT(queriedToggles, Contains(StrEq(toggle)));
+        }
     }
 }
 

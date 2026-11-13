@@ -71,6 +71,7 @@
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
+#include "src/tint/lang/core/ir/undef.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator/validate.h"
@@ -408,6 +409,26 @@ class Printer : public tint::TextGenerator {
         }
     }
 
+    void EmitIndexAccess(StringStream& out, const core::ir::Value* index, uint32_t count) {
+        out << "[";
+        if (auto* cnst = index->As<core::ir::Constant>()) {
+            // Clamping for when robustness is disabled
+            bool is_neg =
+                cnst->Type()->IsSignedIntegerScalar() && cnst->Value()->ValueAs<core::AInt>() < 0;
+            uint32_t uval = cnst->Value()->ValueAs<uint32_t>();
+            if (count > 0 && (is_neg || uval >= count)) {
+                out << std::min(uval, count - 1) << "u";
+            } else if (count == 0 && is_neg) {
+                out << "0u";
+            } else {
+                EmitValue(out, index);
+            }
+        } else {
+            EmitValue(out, index);
+        }
+        out << "]";
+    }
+
     void EmitStoreVectorElement(const core::ir::StoreVectorElement* l) {
         auto out = Line();
 
@@ -716,13 +737,16 @@ class Printer : public tint::TextGenerator {
 
         EmitTypeAndName(out, var->Result()->Type(), NameOf(var->Result()));
 
-        if (var->Initializer()) {
+        auto* init = var->Initializer();
+        if (!init) {
+            // No initializer means implicit zero-initialization.
+            if (space == core::AddressSpace::kPrivate || space == core::AddressSpace::kFunction) {
+                out << " = ";
+                EmitZeroValue(out, ptr->UnwrapPtr());
+            }
+        } else if (!init->Is<core::ir::Undef>()) {
             out << " = ";
-            EmitValue(out, var->Initializer());
-        } else if (space == core::AddressSpace::kPrivate ||
-                   space == core::AddressSpace::kFunction) {
-            out << " = ";
-            EmitZeroValue(out, ptr->UnwrapPtr());
+            EmitValue(out, init);
         }
         out << ";";
     }
@@ -1089,10 +1113,9 @@ class Printer : public tint::TextGenerator {
                     EmitVectorAccess(out, index, vec->Width() - 1);
                 },
                 [&](Default) {
-                    out << "[";
-                    EmitValue(out, index);
-                    out << "]";
-                    current_type = current_type->Element(0);
+                    auto elements = current_type->Elements();
+                    EmitIndexAccess(out, index, elements.count);
+                    current_type = elements.type;
                 });
         }
     }

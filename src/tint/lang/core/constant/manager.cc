@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
@@ -128,6 +129,10 @@ const Scalar<f16>* Manager::Get(f16 value) {
     return Get<Scalar<f16>>(types.f16(), value);
 }
 
+const Scalar<bf16>* Manager::Get(bf16 value) {
+    return Get<Scalar<bf16>>(types.bf16(), value);
+}
+
 const Scalar<bool>* Manager::Get(bool value) {
     return Get<Scalar<bool>>(types.bool_(), value);
 }
@@ -191,6 +196,7 @@ const Value* Manager::Zero(const core::type::Type* type) {
         [&](const core::type::U64*) { return Get(u64(0)); },               //
         [&](const core::type::F32*) { return Get(f32(0)); },               //
         [&](const core::type::F16*) { return Get(f16(0)); },               //
+        [&](const core::type::BF16*) { return Get(bf16(0)); },             //
         [&](const core::type::Bool*) { return Get(false); },               //
         [&](const core::type::Invalid*) { return Invalid(); },             //
         [&](const core::type::SubgroupMatrix*) { return nullptr; },        //

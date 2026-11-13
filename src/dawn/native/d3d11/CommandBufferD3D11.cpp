@@ -36,7 +36,7 @@
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/BitSetRangeIterator.h"
 #include "src/dawn/common/WindowsUtils.h"
-#include "src/dawn/native/ApplyClearColorValueWithDrawHelper.h"
+#include "src/dawn/native/ApplyClearWithDrawHelper.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/CommandEncoder.h"
 #include "src/dawn/native/CommandValidation.h"
@@ -293,7 +293,8 @@ Ref<CommandBuffer> CommandBuffer::Create(CommandEncoder* encoder,
     return AcquireRef(new CommandBuffer(encoder, descriptor));
 }
 
-MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* commandContext) {
+MaybeError CommandBuffer::RecordCommands(
+    const ScopedSwapStateCommandRecordingContext* commandContext) {
     ExecutionSerial pendingSerial = GetDevice()->GetQueue()->GetPendingCommandSerial();
 
     auto LazyClearSyncScope = [&commandContext,
@@ -341,7 +342,7 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
                     }
                     DAWN_TRY(LazyClearSyncScope(scope));
                 }
-                DAWN_TRY(ExecuteComputePass(commandContext, &pipelineStateTracker));
+                DAWN_TRY(RecordComputePass(commandContext, &pipelineStateTracker));
 
                 nextComputePassNumber++;
                 break;
@@ -364,8 +365,8 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
                 }
                 DAWN_TRY(
                     LazyClearSyncScope(GetResourceUsages().renderPasses[nextRenderPassNumber]));
-                DAWN_TRY(ExecuteRenderPass(cmd, commandContext, &pipelineStateTracker,
-                                           nextRenderPassNumber));
+                DAWN_TRY(RecordRenderPass(cmd, commandContext, &pipelineStateTracker,
+                                          nextRenderPassNumber));
 
                 nextRenderPassNumber++;
                 break;
@@ -564,7 +565,7 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
     return {};
 }
 
-MaybeError CommandBuffer::ExecuteComputePass(
+MaybeError CommandBuffer::RecordComputePass(
     const ScopedSwapStateCommandRecordingContext* commandContext,
     PipelineStateTracker* pipelineStateTracker) {
     ComputePipeline* lastPipeline = nullptr;
@@ -663,7 +664,7 @@ MaybeError CommandBuffer::ExecuteComputePass(
     DAWN_UNREACHABLE();
 }
 
-MaybeError CommandBuffer::ExecuteRenderPass(
+MaybeError CommandBuffer::RecordRenderPass(
     BeginRenderPassCmd* renderPass,
     const ScopedSwapStateCommandRecordingContext* commandContext,
     PipelineStateTracker* pipelineStateTracker,

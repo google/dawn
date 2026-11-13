@@ -209,6 +209,33 @@ static constexpr auto kSupportedFeatures = std::array{
     wgpu::InstanceFeatureName::MultipleDevicesPerAdapter,
 };
 
+namespace {
+
+consteval size_t GetStableSupportedFeaturesCount() {
+    size_t count = 0;
+    for (wgpu::InstanceFeatureName feature : kSupportedFeatures) {
+        if (IsInstanceFeatureStable(feature)) {
+            count++;
+        }
+    }
+    return count;
+}
+
+consteval auto MakeStableSupportedFeatures() {
+    std::array<wgpu::InstanceFeatureName, GetStableSupportedFeaturesCount()> result{};
+    size_t i = 0;
+    for (wgpu::InstanceFeatureName feature : kSupportedFeatures) {
+        if (IsInstanceFeatureStable(feature)) {
+            result[i++] = feature;
+        }
+    }
+    return result;
+}
+
+static constexpr auto kStableSupportedFeatures = MakeStableSupportedFeatures();
+
+}  // namespace
+
 bool APIHasInstanceFeature(wgpu::InstanceFeatureName feature) {
     return std::find(kSupportedFeatures.begin(), kSupportedFeatures.end(), feature) !=
            kSupportedFeatures.end();
@@ -216,6 +243,15 @@ bool APIHasInstanceFeature(wgpu::InstanceFeatureName feature) {
 
 void APIGetInstanceFeatures(SupportedInstanceFeatures* features) {
     features->features = kSupportedFeatures;
+}
+
+bool APIStableHasInstanceFeature(wgpu::InstanceFeatureName feature) {
+    return std::find(kStableSupportedFeatures.begin(), kStableSupportedFeatures.end(), feature) !=
+           kStableSupportedFeatures.end();
+}
+
+void APIStableGetInstanceFeatures(SupportedInstanceFeatures* features) {
+    features->features = kStableSupportedFeatures;
 }
 
 void APISupportedInstanceFeaturesFreeMembers(WGPUSupportedInstanceFeatures) {
@@ -229,6 +265,27 @@ InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor) {
         return nullptr;
     }
     return ReturnToAPI(result.AcquireSuccess());
+}
+
+InstanceBase* APIStableCreateInstance(const InstanceDescriptor* descriptor) {
+    InstanceDescriptor localDesc = descriptor != nullptr ? *descriptor : InstanceDescriptor{};
+    if (localDesc.nextInChain != nullptr) {
+        dawn::ErrorLog()
+            << "Chained structs on InstanceDescriptor are not allowed for a stable instance.";
+        return nullptr;
+    }
+
+    // Enable the no-op webview_instance toggle on stable instances so Dawn can gate temporary
+    // workarounds or reverts for WebView application regressions without affecting regular
+    // instances, and disable experimental and unsafe APIs.
+    static constexpr auto kEnabledToggles = std::array{"webview_instance"};
+    static constexpr auto kDisabledToggles =
+        std::array{"allow_experimental_apis", "allow_unsafe_apis"};
+    DawnTogglesDescriptor togglesDesc = {};
+    togglesDesc.enabledToggles = kEnabledToggles;
+    togglesDesc.disabledToggles = kDisabledToggles;
+    localDesc.nextInChain = &togglesDesc;
+    return APICreateInstance(&localDesc);
 }
 
 // InstanceBase
@@ -256,6 +313,20 @@ ResultOrError<Ref<InstanceBase>> InstanceBase::Create(const InstanceDescriptor* 
     // By default disable the AllowUnsafeAPIs instance toggle, it will be inherited to adapters
     // and devices created by this instance if not overriden.
     instanceToggles.Default(Toggle::AllowUnsafeAPIs, false);
+    // AllowExperimentalAPIs decides whether features and chained structs outside the stable ABI
+    // are exposed, and is inherited by adapters and devices the same way. The end state is false
+    // everywhere (stable-by-default); this stays true until in-tree callers that chain Dawn-only
+    // structs or request Dawn-only features opt in explicitly, so that flipping it is a one-line,
+    // separately rolled change.
+    // TODO(crbug.com/577079442): Flip to false once Chromium passes allow_experimental_apis.
+    instanceToggles.Default(Toggle::AllowExperimentalAPIs, true);
+
+    if (!instanceToggles.IsEnabled(Toggle::AllowExperimentalAPIs)) {
+        // The caller explicitly opted out through the toggles descriptor: that descriptor is the
+        // only chained struct allowed, everything else is validated like on a stable instance.
+        DAWN_TRY_CONTEXT(unpacked.ValidateSubset<DawnTogglesDescriptor>(),
+                         "validating the InstanceDescriptor with allow_experimental_apis disabled");
+    }
 
     Ref<InstanceBase> instance = AcquireRef(new InstanceBase(instanceToggles));
     DAWN_TRY(instance->Initialize(unpacked));
@@ -310,6 +381,9 @@ MaybeError InstanceBase::Initialize(const UnpackedPtr<InstanceDescriptor>& descr
     }
 #endif
 
+    // Created first so that DeleteThis() can run after any failure below.
+    mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
+
     // Initialize the platform to the default for now.
     mDefaultPlatform = std::make_unique<dawn::platform::Platform>();
     SetPlatform(mDefaultPlatform.get());
@@ -340,16 +414,29 @@ MaybeError InstanceBase::Initialize(const UnpackedPtr<InstanceDescriptor>& descr
     }
     mRuntimeSearchPaths.push_back("");
 
+    for (wgpu::InstanceFeatureName feature : descriptor->requiredFeatures) {
+        DAWN_INVALID_IF(!APIHasInstanceFeature(feature),
+                        "Required instance feature %s is not supported.", feature);
+        DAWN_INVALID_IF(
+            !mToggles.IsEnabled(Toggle::AllowExperimentalAPIs) && !IsInstanceFeatureStable(feature),
+            "Required instance feature %s is guarded by toggle allow_experimental_apis.", feature);
+    }
     mInstanceFeatures = {descriptor->requiredFeatures.begin(), descriptor->requiredFeatures.end()};
 
     if (descriptor->requiredLimits != nullptr) {
-        mLimits = ReifyDefaultLimits(*(descriptor->requiredLimits));
+        UnpackedPtr<InstanceLimits> unpackedLimits;
+        DAWN_TRY_ASSIGN(unpackedLimits,
+                        ValidateAndUnpack(const_cast<InstanceLimits*>(descriptor->requiredLimits)));
+        if (!mToggles.IsEnabled(Toggle::AllowExperimentalAPIs)) {
+            DAWN_TRY_CONTEXT(unpackedLimits.ValidateStable(),
+                             "validating requiredLimits with allow_experimental_apis disabled");
+        }
+        mLimits = ReifyDefaultLimits(**unpackedLimits);
     } else {
         GetDefaultLimits(&mLimits);
     }
     DAWN_TRY(ValidateLimits(mLimits));
 
-    mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
     GatherWGSLFeatures(descriptor.Get<DawnWGSLBlocklist>());
 
     return {};
@@ -422,6 +509,10 @@ const TogglesState& InstanceBase::GetTogglesState() const {
     return mToggles;
 }
 
+std::vector<const char*> InstanceBase::GetTogglesUsed() const {
+    return mToggles.GetEnabledToggleNames();
+}
+
 const ToggleInfo* InstanceBase::GetToggleInfo(const char* toggleName) {
     return mTogglesInfo.GetToggleInfo(toggleName);
 }
@@ -440,7 +531,14 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
     }
 
     RequestAdapterOptions rawOptions = WithTrivialFrontendDefaults(*options);
-    UnpackedPtr<RequestAdapterOptions> unpacked = Unpack(&rawOptions);
+    UnpackedPtr<RequestAdapterOptions> unpacked;
+    if (ConsumedErrorAndWarnOnce(ValidateAndUnpack(&rawOptions), &unpacked)) {
+        return {};
+    }
+    if (!mToggles.IsEnabled(Toggle::AllowExperimentalAPIs) &&
+        ConsumedErrorAndWarnOnce(unpacked.ValidateStable())) {
+        return {};
+    }
     if (unpacked.Has<RequestAdapterWebXROptions>()) {
         std::unique_ptr<ValidationError> err =
             DAWN_VALIDATION_ERROR("RequestAdapterWebXROptions unsupported.");
@@ -451,7 +549,7 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
 
     std::vector<Ref<AdapterBase>> adapters;
     for (const auto& physicalDevice : EnumeratePhysicalDevices(unpacked)) {
-        DAWN_CHECK(physicalDevice->SupportsFeatureLevel(unpacked->featureLevel, this));
+        DAWN_CHECK(physicalDevice->SupportsFeatureLevel(unpacked->featureLevel));
         adapters.push_back(CreateAdapter(physicalDevice, unpacked->featureLevel, togglesDesc,
                                          unpacked->powerPreference));
     }

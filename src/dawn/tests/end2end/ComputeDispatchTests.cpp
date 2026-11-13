@@ -319,10 +319,8 @@ DAWN_INSTANTIATE_TEST(ComputeDispatchTests,
                       VulkanBackend(),
                       WebGPUBackend());
 
-namespace {
 using UseNumWorkgoups = bool;
 DAWN_TEST_PARAM_STRUCT(Params, UseNumWorkgoups);
-}  // namespace
 
 class ComputeMultipleDispatchesTests : public DawnTestWithParams<Params> {
   protected:

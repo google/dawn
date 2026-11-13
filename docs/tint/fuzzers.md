@@ -1,6 +1,6 @@
 # Tint Fuzzers
 
-Tint currently has two fuzzer target executables:
+Tint currently has two primary fuzzer target executables:
 [`tint_wgsl_fuzzer`](#tint_wgsl_fuzzer) which takes WGSL source code
 as input and [`tint_ir_fuzzer`](#tint_ir_fuzzer) which takes a
 protobuf binary file as input.
@@ -36,6 +36,61 @@ Building `tint_ir_fuzzer` requires additional flags to be set:
 - CMake: Define `TINT_BUILD_IR_BINARY=1` (pass
   `-DTINT_BUILD_IR_BINARY=1` to `cmake`)
 - GN: Define `tint_build_ir_binary = true` in `args.gn`.
+
+### Building Mesa fuzzers
+
+Tint also provides fuzzer two additional targets
+(`tint_wgsl_mesa_fuzzer` and `tint_ir_mesa_fuzzer`) that fuzz Mesa
+`third_party/mesa`, by generating SPIR-V via the Tint SPIR-V printer
+fuzzing pass and passing it to Mesa's software Vulkan driver
+(Lavapipe).
+
+**Limitations:**
+
+- **Linux x64 only:** Building Mesa in Dawn is only supported on Linux
+  x64 (`linux-amd64`), because the custom Mesa build rules and prebuilt
+  dependencies (`third_party/llvm-dev` and `third_party/zstd`) only
+  target Linux x86-64.
+- **Vulkan only:** Dawn's custom GN and CMake build rules only build
+  Mesa's software Vulkan driver (Lavapipe). OpenGL and other Mesa
+  drivers or APIs are not supported.
+- **No MSan:** Building Mesa with MemorySanitizer (`is_msan = true` in
+  GN or `DAWN_ENABLE_MSAN=1` in CMake) is not supported, as the
+  prebuilt dependencies are not instrumented for MSan.
+
+1. Add `"checkout_mesa": True` to `custom_vars` in your `.gclient` file
+   (this is disabled by default, including in
+   `scripts/standalone-maximal.gclient`) and sync dependencies:
+
+   ```python
+   solutions = [
+     {
+       ...
+       "custom_vars": {
+         ...
+         "checkout_mesa": True,
+       },
+     },
+   ]
+   ```
+
+   ```bash
+   gclient sync
+   ```
+
+2. Enable the Mesa and Vulkan fuzzer build flags in addition to the
+   base fuzzer flags above (plus the IR binary flag if building
+   `tint_ir_mesa_fuzzer`):
+
+   - CMake: Define `TINT_BUILD_MESA=1` and
+     `TINT_BUILD_FUZZER_VULKAN_SUPPORT=1` (pass
+     `-DTINT_BUILD_MESA=1 -DTINT_BUILD_FUZZER_VULKAN_SUPPORT=1` to
+     `cmake`; requires the Clang toolchain).
+   - GN: Define `tint_build_mesa = true` and
+     `tint_build_fuzzer_vulkan_support = true` in `args.gn` (in GN,
+     `tint_build_fuzzer_vulkan_support` defaults to `tint_build_mesa`,
+     but setting both explicitly is required by tools such as
+     `tools/run fuzz experiment`).
 
 ## Running fuzzers
 

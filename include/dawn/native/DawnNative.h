@@ -37,6 +37,10 @@
 #include "dawn/dawn_proc_table.h"
 #include "dawn/native/dawn_native_export.h"
 
+namespace dawn::gpu_info {
+class DriverVersion;
+}  // namespace dawn::gpu_info
+
 namespace dawn::platform {
 class Platform;
 }  // namespace dawn::platform
@@ -67,10 +71,15 @@ struct FeatureInfo {
     const char* name;
     const char* description;
     const char* url;
-    // The enum of feature state, could be stable or experimental. Using an experimental feature
-    // requires the AllowUnsafeAPIs toggle to be enabled.
-    enum class FeatureState { Stable = 0, Experimental };
-    FeatureState featureState;
+    // Whether the feature has exhaustive validation and security checks and can be used as a
+    // security boundary like in Web browsers. Using an Unsafe feature requires the AllowUnsafeAPIs
+    // toggle to be enabled.
+    enum class FeatureSafety { Safe = 0, Unsafe };
+    FeatureSafety featureSafety;
+    // Whether the feature's C header definition and ABI are stable. Using an Experimental feature
+    // requires the AllowExperimentalAPIs toggle to be enabled.
+    enum class FeatureStability { Stable = 0, Experimental };
+    FeatureStability featureStability;
 };
 
 // An adapter is an object that represent on possibility of creating devices in the system.
@@ -102,6 +111,9 @@ class DAWN_NATIVE_EXPORT Adapter {
 
     // Returns the underlying WGPUAdapter object.
     WGPUAdapter Get() const;
+
+    // Returns the backend's driver version, or an empty version if unavailable.
+    const gpu_info::DriverVersion& GetDriverVersion() const;
 
     // Reset the backend device object for testing purposes.
     void ResetInternalDeviceForTesting();
@@ -209,8 +221,16 @@ class DAWN_NATIVE_EXPORT Instance {
 // Backend-agnostic API for dawn_native
 DAWN_NATIVE_EXPORT const DawnProcTable& GetProcs();
 
+// Query the names of all the toggles that are enabled in instance
+DAWN_NATIVE_EXPORT std::vector<const char*> GetTogglesUsed(const wgpu::Instance& instance);
+
 // Query the names of all the toggles that are enabled in adapter
 DAWN_NATIVE_EXPORT std::vector<const char*> GetTogglesUsed(const wgpu::Adapter& adapter);
+
+// Query the names of all the toggles that would be enabled on a device created from adapter
+DAWN_NATIVE_EXPORT std::vector<const char*> GetDeviceTogglesUsed(
+    const wgpu::Adapter& adapter,
+    const wgpu::DeviceDescriptor* descriptor = nullptr);
 
 // Query the names of all the toggles that are enabled in device
 DAWN_NATIVE_EXPORT std::vector<const char*> GetTogglesUsed(WGPUDevice device);
@@ -226,6 +246,15 @@ DAWN_NATIVE_EXPORT bool IsTextureSubresourceInitialized(
     uint32_t baseArrayLayer,
     uint32_t layerCount,
     WGPUTextureAspect aspect = WGPUTextureAspect_All);
+
+// Resolver restricted to Dawn's stable C ABI: it only returns entry points that are part of
+// Dawn's stable C header, resolves "wgpuGetProcAddress" to itself, filters instance feature
+// queries to stable features, and routes "wgpuCreateInstance" to create an instance with
+// allow_experimental_apis and allow_unsafe_apis disabled.
+DAWN_NATIVE_EXPORT WGPUProc GetStableProcAddress(WGPUStringView procName);
+
+// Backdoor to get the names in the stable ProcMap for testing.
+DAWN_NATIVE_EXPORT std::vector<std::string_view> GetStableProcMapNamesForTesting();
 
 DAWN_NATIVE_EXPORT bool DeviceTick(WGPUDevice device);
 

@@ -55,10 +55,16 @@ struct ResolverAliasAnalysisTest : public resolver::TestHelper, public testing::
 struct TwoPointerConfig {
     const core::AddressSpace address_space;  // The address space for the pointers.
     const bool aliased;                      // Whether the pointers alias or not.
+    const bool unrestricted_aliasing;
 };
 class TwoPointers : public ResolverTestWithParam<TwoPointerConfig> {
   protected:
     void SetUp() override {
+        features_ = wgsl::AllowedFeatures::Everything();
+        if (!GetParam().unrestricted_aliasing) {
+            features_.features.erase(wgsl::LanguageFeature::kUnrestrictedAliasing);
+            SetOptions(features_);
+        }
         Vector<const ast::Statement*, 4> body;
         if (GetParam().address_space == core::AddressSpace::kFunction) {
             body.Push(Decl(Var("v1", ty.i32())));
@@ -80,13 +86,15 @@ class TwoPointers : public ResolverTestWithParam<TwoPointerConfig> {
                  Param("p2", ty.ptr<i32>(addrspace)),
              },
              ty.void_(), std::move(body));
-        if (GetParam().aliased && err) {
+        if (!GetParam().unrestricted_aliasing && GetParam().aliased && err) {
             EXPECT_FALSE(r()->Resolve());
             EXPECT_EQ(r()->error(), err);
         } else {
             EXPECT_TRUE(r()->Resolve()) << r()->error();
         }
     }
+
+    wgsl::AllowedFeatures features_;
 };
 
 TEST_P(TwoPointers, ReadRead) {
@@ -206,18 +214,22 @@ TEST_P(TwoPointers, ReadWriteAcrossDifferentFunctions) {
 12:34 note: aliases with another argument passed here)");
 }
 
-INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,
-                         TwoPointers,
-                         ::testing::Values(TwoPointerConfig{core::AddressSpace::kFunction, false},
-                                           TwoPointerConfig{core::AddressSpace::kFunction, true},
-                                           TwoPointerConfig{core::AddressSpace::kPrivate, false},
-                                           TwoPointerConfig{core::AddressSpace::kPrivate, true}),
-                         [](const ::testing::TestParamInfo<TwoPointers::ParamType>& p) {
-                             StringStream ss;
-                             ss << (p.param.aliased ? "Aliased" : "Unaliased") << "_"
-                                << p.param.address_space;
-                             return ss.str();
-                         });
+INSTANTIATE_TEST_SUITE_P(
+    ResolverAliasAnalysisTest,
+    TwoPointers,
+    ::testing::Values(TwoPointerConfig{core::AddressSpace::kFunction, false, false},
+                      TwoPointerConfig{core::AddressSpace::kFunction, true, false},
+                      TwoPointerConfig{core::AddressSpace::kFunction, true, true},
+                      TwoPointerConfig{core::AddressSpace::kPrivate, false, false},
+                      TwoPointerConfig{core::AddressSpace::kPrivate, true, false},
+                      TwoPointerConfig{core::AddressSpace::kPrivate, true, true}),
+    [](const ::testing::TestParamInfo<TwoPointers::ParamType>& p) {
+        StringStream ss;
+        ss << (p.param.aliased ? "Aliased" : "Unaliased") << "_"
+           << (p.param.unrestricted_aliasing ? "Unrestricted" : "Restricted") << "_"
+           << p.param.address_space;
+        return ss.str();
+    });
 
 // Base test harness for tests that pass a pointer to a function that references a module-scope var.
 //
@@ -229,15 +241,24 @@ INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,
 // fn caller() {
 //   target(aliased ? &global_1 : &global_2);
 // }
-class OnePointerOneModuleScope : public ResolverTestWithParam<bool> {
+struct AliasConfig {
+    bool aliased;
+    bool unrestricted_aliasing;
+};
+class OnePointerOneModuleScope : public ResolverTestWithParam<AliasConfig> {
   protected:
     void SetUp() override {
+        features_ = wgsl::AllowedFeatures::Everything();
+        if (!GetParam().unrestricted_aliasing) {
+            features_.features.erase(wgsl::LanguageFeature::kUnrestrictedAliasing);
+            SetOptions(features_);
+        }
         GlobalVar("global_1", core::AddressSpace::kPrivate, ty.i32());
         GlobalVar("global_2", core::AddressSpace::kPrivate, ty.i32());
         Func("caller", tint::Empty, ty.void_(),
              Vector{
-                 CallStmt(Call("target",
-                               AddressOf(Source{{12, 34}}, GetParam() ? "global_1" : "global_2"))),
+                 CallStmt(Call("target", AddressOf(Source{{12, 34}},
+                                                   GetParam().aliased ? "global_1" : "global_2"))),
              });
     }
 
@@ -247,13 +268,15 @@ class OnePointerOneModuleScope : public ResolverTestWithParam<bool> {
                  Param("p1", ty.ptr<i32>(core::AddressSpace::kPrivate)),
              },
              ty.void_(), std::move(body));
-        if (GetParam() && err) {
+        if (!GetParam().unrestricted_aliasing && GetParam().aliased && err) {
             EXPECT_FALSE(r()->Resolve());
             EXPECT_EQ(r()->error(), err);
         } else {
             EXPECT_TRUE(r()->Resolve()) << r()->error();
         }
     }
+
+    wgsl::AllowedFeatures features_;
 };
 
 TEST_P(OnePointerOneModuleScope, ReadRead) {
@@ -474,9 +497,14 @@ TEST_P(OnePointerOneModuleScope, ReadWriteAcrossDifferentFunctions) {
 
 INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,
                          OnePointerOneModuleScope,
-                         ::testing::Values(false, true),
-                         [](const ::testing::TestParamInfo<bool>& p) {
-                             return p.param ? "Aliased" : "Unaliased";
+                         ::testing::Values(AliasConfig{false, true},
+                                           AliasConfig{true, false},
+                                           AliasConfig{true, true}),
+                         [](const ::testing::TestParamInfo<AliasConfig>& p) {
+                             StringStream ss;
+                             ss << (p.param.aliased ? "Aliased" : "Unaliased") << "_"
+                                << (p.param.unrestricted_aliasing ? "Unrestricted" : "Restricted");
+                             return ss.str();
                          });
 
 // Base test harness for tests that use a potentially aliased pointer in a variety of expressions.
@@ -490,15 +518,20 @@ INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,
 //   var v2 : i32;
 //   target(&v1, aliased ? &v1 : &v2);
 // }
-class Use : public ResolverTestWithParam<bool> {
+class Use : public ResolverTestWithParam<AliasConfig> {
   protected:
     void SetUp() override {
+        features_ = wgsl::AllowedFeatures::Everything();
+        if (!GetParam().unrestricted_aliasing) {
+            features_.features.erase(wgsl::LanguageFeature::kUnrestrictedAliasing);
+            SetOptions(features_);
+        }
         Func("caller", tint::Empty, ty.void_(),
              Vector{
                  Decl(Var("v1", ty.i32())),
                  Decl(Var("v2", ty.i32())),
                  CallStmt(Call("target", AddressOf(Source{{12, 34}}, "v1"),
-                               AddressOf(Source{{56, 78}}, GetParam() ? "v1" : "v2"))),
+                               AddressOf(Source{{56, 78}}, GetParam().aliased ? "v1" : "v2"))),
              });
     }
 
@@ -513,13 +546,15 @@ class Use : public ResolverTestWithParam<bool> {
                  Assign(Deref("p1"), 42_a),
                  stmt,
              });
-        if (GetParam() && err) {
+        if (!GetParam().unrestricted_aliasing && GetParam().aliased && err) {
             EXPECT_FALSE(r()->Resolve());
             EXPECT_EQ(r()->error(), err);
         } else {
             EXPECT_TRUE(r()->Resolve()) << r()->error();
         }
     }
+
+    wgsl::AllowedFeatures features_;
 };
 
 TEST_P(Use, NoAccess) {
@@ -604,7 +639,7 @@ TEST_P(Use, Read_IndexAccessor) {
 
 TEST_P(Use, Read_LetInitializer) {
     // let x = *p2;
-    Run(Decl(Let("x", Deref("p2"))), R"(56:78 error: invalid aliased pointer argument
+    Run(Decl(Let("x", ast::Type{}, Deref("p2"))), R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
@@ -640,14 +675,19 @@ TEST_P(Use, Read_Switch) {
 TEST_P(Use, NoAccess_AddressOf_Deref) {
     // Should not invoke the load-rule, and therefore expect no errors even when aliasing occurs.
     // let newp = &(*p2);
-    Run(Decl(Let("newp", AddressOf(Deref("p2")))));
+    Run(Decl(Let("newp", ast::Type{}, AddressOf(Deref("p2")))));
 }
 
 INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,
                          Use,
-                         ::testing::Values(false, true),
-                         [](const ::testing::TestParamInfo<bool>& p) {
-                             return p.param ? "Aliased" : "Unaliased";
+                         ::testing::Values(AliasConfig{false, true},
+                                           AliasConfig{true, false},
+                                           AliasConfig{true, true}),
+                         [](const ::testing::TestParamInfo<AliasConfig>& p) {
+                             StringStream ss;
+                             ss << (p.param.aliased ? "Aliased" : "Unaliased") << "_"
+                                << (p.param.unrestricted_aliasing ? "Unrestricted" : "Restricted");
+                             return ss.str();
                          });
 
 // Base test harness for tests that use a potentially aliased pointer in a variety of expressions.
@@ -662,7 +702,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,
 //   var v2 : bool;
 //   target(&v1, aliased ? &v1 : &v2);
 // }
-class UseBool : public ResolverTestWithParam<bool> {
+class UseBool : public ResolverTestWithParam<AliasConfig> {
   protected:
     void SetUp() override {
         Func("caller", tint::Empty, ty.void_(),
@@ -670,11 +710,16 @@ class UseBool : public ResolverTestWithParam<bool> {
                  Decl(Var("v1", ty.bool_())),
                  Decl(Var("v2", ty.bool_())),
                  CallStmt(Call("target", AddressOf(Source{{12, 34}}, "v1"),
-                               AddressOf(Source{{56, 78}}, GetParam() ? "v1" : "v2"))),
+                               AddressOf(Source{{56, 78}}, GetParam().aliased ? "v1" : "v2"))),
              });
     }
 
     void Run(const ast::Statement* stmt, const char* err = nullptr) {
+        features_ = wgsl::AllowedFeatures::Everything();
+        if (!GetParam().unrestricted_aliasing) {
+            features_.features.erase(wgsl::LanguageFeature::kUnrestrictedAliasing);
+            SetOptions(features_);
+        }
         Func("target",
              Vector{
                  Param("p1", ty.ptr<bool>(core::AddressSpace::kFunction)),
@@ -685,13 +730,15 @@ class UseBool : public ResolverTestWithParam<bool> {
                  Assign(Deref("p1"), true),
                  stmt,
              });
-        if (GetParam() && err) {
+        if (!GetParam().unrestricted_aliasing && GetParam().aliased && err) {
             EXPECT_FALSE(r()->Resolve());
             EXPECT_EQ(r()->error(), err);
         } else {
             EXPECT_TRUE(r()->Resolve()) << r()->error();
         }
     }
+
+    wgsl::AllowedFeatures features_;
 };
 
 TEST_P(UseBool, Read_IfCond) {
@@ -722,12 +769,30 @@ TEST_P(UseBool, Read_BreakIf) {
 
 INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,
                          UseBool,
-                         ::testing::Values(false, true),
-                         [](const ::testing::TestParamInfo<bool>& p) {
-                             return p.param ? "Aliased" : "Unaliased";
+                         ::testing::Values(AliasConfig{false, true},
+                                           AliasConfig{true, false},
+                                           AliasConfig{true, true}),
+                         [](const ::testing::TestParamInfo<AliasConfig>& p) {
+                             StringStream ss;
+                             ss << (p.param.aliased ? "Aliased" : "Unaliased") << "_"
+                                << (p.param.unrestricted_aliasing ? "Unrestricted" : "Restricted");
+                             return ss.str();
                          });
 
-TEST_F(ResolverAliasAnalysisTest, NoAccess_MemberAccessor) {
+class Basic : public ResolverTestWithParam<bool> {
+  protected:
+    void SetUp() override {
+        features_ = wgsl::AllowedFeatures::Everything();
+        if (!GetParam()) {
+            features_.features.erase(wgsl::LanguageFeature::kUnrestrictedAliasing);
+            SetOptions(features_);
+        }
+    }
+
+    wgsl::AllowedFeatures features_;
+};
+
+TEST_P(Basic, NoAccess_MemberAccessor) {
     // Should not invoke the load-rule, and therefore expect no errors even when aliasing occurs.
     //
     // struct S { a : i32 }
@@ -747,7 +812,7 @@ TEST_F(ResolverAliasAnalysisTest, NoAccess_MemberAccessor) {
          },
          ty.void_(),
          Vector{
-             Decl(Let("newp", AddressOf(MemberAccessor(Deref("p2"), "a")))),
+             Decl(Let("newp", ast::Type{}, AddressOf(MemberAccessor(Deref("p2"), "a")))),
              Assign(MemberAccessor(Deref("p1"), "a"), 42_a),
          });
     Func("f1", tint::Empty, ty.void_(),
@@ -758,7 +823,7 @@ TEST_F(ResolverAliasAnalysisTest, NoAccess_MemberAccessor) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverAliasAnalysisTest, Read_MemberAccessor) {
+TEST_P(Basic, Read_MemberAccessor) {
     // struct S { a : i32 }
     // fn f2(p1 : ptr<function, S>, p2 : ptr<function, S>) {
     //   _ = (*p2).a;
@@ -785,12 +850,16 @@ TEST_F(ResolverAliasAnalysisTest, Read_MemberAccessor) {
              CallStmt(
                  Call("f2", AddressOf(Source{{12, 34}}, "v"), AddressOf(Source{{56, 76}}, "v"))),
          });
-    EXPECT_FALSE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(r()->error(), R"(56:76 error: invalid aliased pointer argument
+    if (GetParam()) {
+        EXPECT_TRUE(r()->Resolve()) << r()->error();
+    } else {
+        EXPECT_FALSE(r()->Resolve()) << r()->error();
+        EXPECT_EQ(r()->error(), R"(56:76 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
+    }
 }
 
-TEST_F(ResolverAliasAnalysisTest, Write_MemberAccessor) {
+TEST_P(Basic, Write_MemberAccessor) {
     // struct S { a : i32 }
     // fn f2(p1 : ptr<function, S>, p2 : ptr<function, S>) {
     //   _ = *p2;
@@ -817,12 +886,16 @@ TEST_F(ResolverAliasAnalysisTest, Write_MemberAccessor) {
              CallStmt(
                  Call("f2", AddressOf(Source{{12, 34}}, "v"), AddressOf(Source{{56, 76}}, "v"))),
          });
-    EXPECT_FALSE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(r()->error(), R"(56:76 error: invalid aliased pointer argument
+    if (GetParam()) {
+        EXPECT_TRUE(r()->Resolve()) << r()->error();
+    } else {
+        EXPECT_FALSE(r()->Resolve()) << r()->error();
+        EXPECT_EQ(r()->error(), R"(56:76 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
+    }
 }
 
-TEST_F(ResolverAliasAnalysisTest, Read_MultiComponentSwizzle) {
+TEST_P(Basic, Read_MultiComponentSwizzle) {
     // fn f2(p1 : ptr<function, vec4<f32>, p2 : ptr<function, vec4<f32>) {
     //   _ = (*p2).zy;
     //   *p1 = vec4<f32>();
@@ -848,12 +921,16 @@ TEST_F(ResolverAliasAnalysisTest, Read_MultiComponentSwizzle) {
              CallStmt(
                  Call("f2", AddressOf(Source{{12, 34}}, "v"), AddressOf(Source{{56, 76}}, "v"))),
          });
-    EXPECT_FALSE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(r()->error(), R"(56:76 error: invalid aliased pointer argument
+    if (GetParam()) {
+        EXPECT_TRUE(r()->Resolve()) << r()->error();
+    } else {
+        EXPECT_FALSE(r()->Resolve()) << r()->error();
+        EXPECT_EQ(r()->error(), R"(56:76 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
+    }
 }
 
-TEST_F(ResolverAliasAnalysisTest, Read_MultiComponentSwizzle_FromPointer) {
+TEST_P(Basic, Read_MultiComponentSwizzle_FromPointer) {
     // fn f2(p1 : ptr<function, vec4<f32>, p2 : ptr<function, vec4<f32>) {
     //   _ = p2.zy;
     //   *p1 = vec4<f32>();
@@ -879,12 +956,16 @@ TEST_F(ResolverAliasAnalysisTest, Read_MultiComponentSwizzle_FromPointer) {
              CallStmt(
                  Call("f2", AddressOf(Source{{12, 34}}, "v"), AddressOf(Source{{56, 76}}, "v"))),
          });
-    EXPECT_FALSE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(r()->error(), R"(56:76 error: invalid aliased pointer argument
+    if (GetParam()) {
+        EXPECT_TRUE(r()->Resolve()) << r()->error();
+    } else {
+        EXPECT_FALSE(r()->Resolve()) << r()->error();
+        EXPECT_EQ(r()->error(), R"(56:76 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
+    }
 }
 
-TEST_F(ResolverAliasAnalysisTest, SinglePointerReadWrite) {
+TEST_P(Basic, SinglePointerReadWrite) {
     // Test that we can both read and write from a single pointer parameter.
     //
     // fn f1(p : ptr<function, i32>) {
@@ -913,7 +994,7 @@ TEST_F(ResolverAliasAnalysisTest, SinglePointerReadWrite) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverAliasAnalysisTest, AliasingInsideFunction) {
+TEST_P(Basic, AliasingInsideFunction) {
     // Test that we can use two aliased pointers inside the same function they are created in.
     //
     // fn f1() {
@@ -926,15 +1007,15 @@ TEST_F(ResolverAliasAnalysisTest, AliasingInsideFunction) {
     Func("f1", tint::Empty, ty.void_(),
          Vector{
              Decl(Var("v", ty.i32())),
-             Decl(Let("p1", AddressOf("v"))),
-             Decl(Let("p2", AddressOf("v"))),
+             Decl(Let("p1", ast::Type{}, AddressOf("v"))),
+             Decl(Let("p2", ast::Type{}, AddressOf("v"))),
              Assign(Deref("p1"), 42_a),
              Assign(Deref("p2"), 42_a),
          });
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverAliasAnalysisTest, NonOverlappingCalls) {
+TEST_P(Basic, NonOverlappingCalls) {
     // Test that we pass the same pointer to multiple non-overlapping function calls.
     //
     // fn f2(p : ptr<function, i32>) {
@@ -973,12 +1054,16 @@ TEST_F(ResolverAliasAnalysisTest, NonOverlappingCalls) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest, Basic, ::testing::Values(false, true));
+
 ////////////////////////////////////////////////////////////////////////////////
 // Atomics
 ////////////////////////////////////////////////////////////////////////////////
-class AtomicPointers
-    : public ResolverTestWithParam<
-          std::tuple<wgsl::BuiltinFn, wgsl::BuiltinFn, core::AddressSpace, bool /* aliased */>> {
+class AtomicPointers : public ResolverTestWithParam<std::tuple<wgsl::BuiltinFn,
+                                                               wgsl::BuiltinFn,
+                                                               core::AddressSpace,
+                                                               bool /* aliased */,
+                                                               bool /* unrestricted aliasing */>> {
   protected:
     static constexpr std::string_view kPass = "<PASS>";
 
@@ -991,6 +1076,11 @@ class AtomicPointers
     }
 
     void SetUp() override {
+        features_ = wgsl::AllowedFeatures::Everything();
+        if (!std::get<4>(GetParam())) {
+            features_.features.erase(wgsl::LanguageFeature::kUnrestrictedAliasing);
+            SetOptions(features_);
+        }
         auto address_space = std::get<2>(GetParam());
         if (address_space == storage) {
             GlobalVar("v1", address_space, read_write, ty.Of<atomic<i32>>(),  //
@@ -1022,8 +1112,8 @@ class AtomicPointers
     }
 
     bool ShouldPass() const {
-        auto [builtin_a, builtin_b, space, aliased] = GetParam();
-        bool fail = aliased && (IsWrite(builtin_a) || IsWrite(builtin_b));
+        auto [builtin_a, builtin_b, space, aliased, unrestricted_aliasing] = GetParam();
+        bool fail = !unrestricted_aliasing && aliased && (IsWrite(builtin_a) || IsWrite(builtin_b));
         return !fail;
     }
 
@@ -1054,6 +1144,8 @@ class AtomicPointers
         }
         return r()->error();
     }
+
+    wgsl::AllowedFeatures features_;
 };
 
 TEST_P(AtomicPointers, CallDirect) {
@@ -1068,7 +1160,7 @@ TEST_P(AtomicPointers, CallDirect) {
     //   <builtin-a>(p1);
     //   <builtin-b>(p2);
     // }
-    auto [builtin_a, builtin_b, space, aliased] = GetParam();
+    auto [builtin_a, builtin_b, space, aliased, _] = GetParam();
 
     Func("caller", tint::Empty, ty.void_(),
          Vector{
@@ -1107,7 +1199,7 @@ TEST_P(AtomicPointers, CallThroughChain) {
     //   <builtin-a>(p1);
     //   <builtin-b>(p2);
     // }
-    auto [builtin_a, builtin_b, space, aliased] = GetParam();
+    auto [builtin_a, builtin_b, space, aliased, _] = GetParam();
 
     Func("caller", tint::Empty, ty.void_(),
          Vector{
@@ -1156,7 +1248,7 @@ TEST_P(AtomicPointers, ReadWriteAcrossDifferentFunctions) {
     // fn f2(p : PTR) {
     //   <builtin-b>(p);
     // }
-    auto [builtin_a, builtin_b, space, aliased] = GetParam();
+    auto [builtin_a, builtin_b, space, aliased, _] = GetParam();
 
     Func("caller", tint::Empty, ty.void_(),
          Vector{
@@ -1205,19 +1297,27 @@ INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,
                                             ::testing::ValuesIn(kAtomicFns),
                                             ::testing::Values(core::AddressSpace::kWorkgroup,
                                                               core::AddressSpace::kStorage),
+                                            ::testing::Values(true, false),
                                             ::testing::Values(true, false)));
 
 ////////////////////////////////////////////////////////////////////////////////
 // Atomics Min/Max
 ////////////////////////////////////////////////////////////////////////////////
-class AtomicMinMax : public ResolverTestWithParam<
-                         std::tuple<wgsl::BuiltinFn, wgsl::BuiltinFn, bool /* aliased */>> {
+class AtomicMinMax : public ResolverTestWithParam<std::tuple<wgsl::BuiltinFn,
+                                                             wgsl::BuiltinFn,
+                                                             bool /* aliased */,
+                                                             bool /* unrestricted aliasing */>> {
   protected:
     static constexpr std::string_view kPass = "<PASS>";
 
     ast::Type Ptr() { return ty.ptr<storage, atomic<vec2u>, read_write>(); }
 
     void SetUp() override {
+        features_ = wgsl::AllowedFeatures::Everything();
+        if (!std::get<3>(GetParam())) {
+            features_.features.erase(wgsl::LanguageFeature::kUnrestrictedAliasing);
+            SetOptions(features_);
+        }
         Enable(wgsl::Extension::kAtomicVec2UMinMax);
 
         GlobalVar("v1", core::AddressSpace::kStorage, read_write, ty.Of<atomic<vec2u>>(),
@@ -1236,6 +1336,8 @@ class AtomicMinMax : public ResolverTestWithParam<
         }
         return r()->error();
     }
+
+    wgsl::AllowedFeatures features_;
 };
 
 TEST_P(AtomicMinMax, CallDirect) {
@@ -1250,7 +1352,7 @@ TEST_P(AtomicMinMax, CallDirect) {
     //   <builtin-a>(p1);
     //   <builtin-b>(p2);
     // }
-    auto [builtin_a, builtin_b, aliased] = GetParam();
+    auto [builtin_a, builtin_b, aliased, unrestricted_aliasing] = GetParam();
 
     Func("caller", tint::Empty, ty.void_(),
          Vector{
@@ -1265,7 +1367,9 @@ TEST_P(AtomicMinMax, CallDirect) {
              CallBuiltin(builtin_b, "p2"),
          });
 
-    EXPECT_EQ(RunAnalysis(), !aliased ? kPass : R"(56:78 error: invalid aliased pointer argument
+    EXPECT_EQ(RunAnalysis(), unrestricted_aliasing || !aliased
+                                 ? kPass
+                                 : R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
@@ -1289,7 +1393,7 @@ TEST_P(AtomicMinMax, CallThroughChain) {
     //   <builtin-a>(p1);
     //   <builtin-b>(p2);
     // }
-    auto [builtin_a, builtin_b, aliased] = GetParam();
+    auto [builtin_a, builtin_b, aliased, unrestricted_aliasing] = GetParam();
 
     Func("caller", tint::Empty, ty.void_(),
          Vector{
@@ -1314,7 +1418,9 @@ TEST_P(AtomicMinMax, CallThroughChain) {
              CallBuiltin(builtin_b, "p2"),
          });
 
-    EXPECT_EQ(RunAnalysis(), !aliased ? kPass : R"(56:78 error: invalid aliased pointer argument
+    EXPECT_EQ(RunAnalysis(), unrestricted_aliasing || !aliased
+                                 ? kPass
+                                 : R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
@@ -1338,7 +1444,7 @@ TEST_P(AtomicMinMax, ReadWriteAcrossDifferentFunctions) {
     // fn f2(p : PTR) {
     //   <builtin-b>(p);
     // }
-    auto [builtin_a, builtin_b, aliased] = GetParam();
+    auto [builtin_a, builtin_b, aliased, unrestricted_aliasing] = GetParam();
 
     Func("caller", tint::Empty, ty.void_(),
          Vector{
@@ -1363,7 +1469,9 @@ TEST_P(AtomicMinMax, ReadWriteAcrossDifferentFunctions) {
              CallBuiltin(builtin_b, "p"),
          });
 
-    EXPECT_EQ(RunAnalysis(), !aliased ? kPass : R"(56:78 error: invalid aliased pointer argument
+    EXPECT_EQ(RunAnalysis(), unrestricted_aliasing || !aliased
+                                 ? kPass
+                                 : R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
 
@@ -1376,6 +1484,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,
                          AtomicMinMax,
                          ::testing::Combine(::testing::ValuesIn(kAtomicMinMaxFns),
                                             ::testing::ValuesIn(kAtomicMinMaxFns),
+                                            ::testing::Values(true, false),
                                             ::testing::Values(true, false)));
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1394,12 +1503,19 @@ std::array kWorkgroupUniformLoadActions{
 };
 
 class WorkgroupUniformLoad
-    : public ResolverTestWithParam<
-          std::tuple<WorkgroupUniformLoadAction, WorkgroupUniformLoadAction, bool>> {
+    : public ResolverTestWithParam<std::tuple<WorkgroupUniformLoadAction,
+                                              WorkgroupUniformLoadAction,
+                                              bool /* aliased */,
+                                              bool /* unrestricted aliasing */>> {
   protected:
     static constexpr std::string_view kPass = "<PASS>";
 
     void SetUp() override {
+        features_ = wgsl::AllowedFeatures::Everything();
+        if (!std::get<3>(GetParam())) {
+            features_.features.erase(wgsl::LanguageFeature::kUnrestrictedAliasing);
+            SetOptions(features_);
+        }
         GlobalVar("v1", workgroup, ty.i32());
         GlobalVar("v2", workgroup, ty.i32());
     }
@@ -1421,8 +1537,8 @@ class WorkgroupUniformLoad
     }
 
     bool ShouldPass() const {
-        auto [action_a, action_b, aliased] = GetParam();
-        bool fail = aliased && (IsWrite(action_a) || IsWrite(action_b));
+        auto [action_a, action_b, aliased, unrestricted_aliasing] = GetParam();
+        bool fail = !unrestricted_aliasing && aliased && (IsWrite(action_a) || IsWrite(action_b));
         return !fail;
     }
 
@@ -1432,6 +1548,8 @@ class WorkgroupUniformLoad
         }
         return r()->error();
     }
+
+    wgsl::AllowedFeatures features_;
 };
 
 TEST_P(WorkgroupUniformLoad, CallDirect) {
@@ -1446,7 +1564,7 @@ TEST_P(WorkgroupUniformLoad, CallDirect) {
     //   <action-a>(p1);
     //   <action-b>(p2);
     // }
-    auto [action_a, action_b, aliased] = GetParam();
+    auto [action_a, action_b, aliased, _] = GetParam();
 
     Func("caller", tint::Empty, ty.void_(),
          Vector{
@@ -1487,7 +1605,7 @@ TEST_P(WorkgroupUniformLoad, CallThroughChain) {
     //   <action-a>(p1);
     //   <action-b>(p2);
     // }
-    auto [action_a, action_b, aliased] = GetParam();
+    auto [action_a, action_b, aliased, _] = GetParam();
 
     Func("caller", tint::Empty, ty.void_(),
          Vector{
@@ -1540,7 +1658,7 @@ TEST_P(WorkgroupUniformLoad, ReadWriteAcrossDifferentFunctions) {
     // fn f2(p : PTR) {
     //   <action-b>(p);
     // }
-    auto [action_a, action_b, aliased] = GetParam();
+    auto [action_a, action_b, aliased, _] = GetParam();
 
     Func("caller", tint::Empty, ty.void_(),
          Vector{
@@ -1568,6 +1686,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,
                          WorkgroupUniformLoad,
                          ::testing::Combine(::testing::ValuesIn(kWorkgroupUniformLoadActions),
                                             ::testing::ValuesIn(kWorkgroupUniformLoadActions),
+                                            ::testing::Values(true, false),
                                             ::testing::Values(true, false)));
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1583,10 +1702,12 @@ constexpr std::array kSubgroupMatrixActions{
     SubgroupMatrixAction::kStore,
 };
 
-class SubgroupMatrixTest : public ResolverTestWithParam<std::tuple<SubgroupMatrixAction,
-                                                                   SubgroupMatrixAction,
-                                                                   core::AddressSpace,
-                                                                   bool /* aliased */>> {
+class SubgroupMatrixTest
+    : public ResolverTestWithParam<std::tuple<SubgroupMatrixAction,
+                                              SubgroupMatrixAction,
+                                              core::AddressSpace,
+                                              bool /* aliased */,
+                                              bool /* unrestricted aliasing */>> {
   protected:
     static constexpr std::string_view kPass = "<PASS>";
 
@@ -1600,6 +1721,11 @@ class SubgroupMatrixTest : public ResolverTestWithParam<std::tuple<SubgroupMatri
     }
 
     void SetUp() override {
+        features_ = wgsl::AllowedFeatures::Everything();
+        if (!std::get<4>(GetParam())) {
+            features_.features.erase(wgsl::LanguageFeature::kUnrestrictedAliasing);
+            SetOptions(features_);
+        }
         Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
         auto address_space = std::get<2>(GetParam());
         if (address_space == storage) {
@@ -1637,8 +1763,8 @@ class SubgroupMatrixTest : public ResolverTestWithParam<std::tuple<SubgroupMatri
     }
 
     bool ShouldPass() const {
-        auto [action_a, action_b, addrspace, aliased] = GetParam();
-        bool fail = aliased && (IsWrite(action_a) || IsWrite(action_b));
+        auto [action_a, action_b, addrspace, aliased, unrestricted_aliasing] = GetParam();
+        bool fail = !unrestricted_aliasing && aliased && (IsWrite(action_a) || IsWrite(action_b));
         return !fail;
     }
 
@@ -1648,6 +1774,8 @@ class SubgroupMatrixTest : public ResolverTestWithParam<std::tuple<SubgroupMatri
         }
         return r()->error();
     }
+
+    wgsl::AllowedFeatures features_;
 };
 
 TEST_P(SubgroupMatrixTest, CallDirect) {
@@ -1662,7 +1790,7 @@ TEST_P(SubgroupMatrixTest, CallDirect) {
     //   <action-a>(p1);
     //   <action-b>(p2);
     // }
-    auto [action_a, action_b, addrspace, aliased] = GetParam();
+    auto [action_a, action_b, addrspace, aliased, _] = GetParam();
 
     Func("caller", tint::Empty, ty.void_(),
          Vector{
@@ -1701,7 +1829,7 @@ TEST_P(SubgroupMatrixTest, CallThroughChain) {
     //   <action-a>(p1);
     //   <action-b>(p2);
     // }
-    auto [action_a, action_b, addrspace, aliased] = GetParam();
+    auto [action_a, action_b, addrspace, aliased, _] = GetParam();
 
     Func("caller", tint::Empty, ty.void_(),
          Vector{
@@ -1750,7 +1878,7 @@ TEST_P(SubgroupMatrixTest, ReadWriteAcrossDifferentFunctions) {
     // fn f2(p : PTR) {
     //   <action-b>(p);
     // }
-    auto [action_a, action_b, addrspace, aliased] = GetParam();
+    auto [action_a, action_b, addrspace, aliased, _] = GetParam();
 
     Func("caller", tint::Empty, ty.void_(),
          Vector{
@@ -1779,6 +1907,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,
                                             ::testing::ValuesIn(kSubgroupMatrixActions),
                                             ::testing::Values(core::AddressSpace::kWorkgroup,
                                                               core::AddressSpace::kStorage),
+                                            ::testing::Values(true, false),
                                             ::testing::Values(true, false)));
 
 }  // namespace

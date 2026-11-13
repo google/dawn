@@ -24,7 +24,11 @@
 //* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+{% from 'art/api_jni_types.cpp' import jni_signature with context %}
 #include "JNIClasses.h"
+
+#include "src/utils/assert.h"
+#include "src/utils/log.h"
 
 namespace dawn::kotlin_api {
 JNIClasses* JNIClasses::getInstance(JNIEnv* env) {
@@ -33,42 +37,147 @@ JNIClasses* JNIClasses::getInstance(JNIEnv* env) {
 }
 
 JNIClasses::JNIClasses(JNIEnv* env) {
-    //* Time of lookups measured on Pixel 6 at 1.7ms.
+    auto check = [env](auto result, const char* name, const char* sig = "") {
+        if (!result || env->ExceptionCheck()) {
+            if (env->ExceptionCheck()) {
+                env->ExceptionDescribe();
+            }
+            dawn::ErrorLog() << "JNIClasses: missing " << name << " " << sig;
+            DAWN_CHECK(false);
+        }
+        return result;
+    };
+    auto findLocalClass = [env, &check](const char* name) -> jclass {
+        return check(env->FindClass(name), name);
+    };
+    auto findGlobalClass = [env, &check, &findLocalClass](const char* name) -> jclass {
+        jclass local = findLocalClass(name);
+        jclass global = reinterpret_cast<jclass>(env->NewGlobalRef(local));
+        env->DeleteLocalRef(local);
+        return check(global, name);
+    };
+    auto getMethodID = [env, &check](jclass clz, const char* name, const char* sig) -> jmethodID {
+        return check(env->GetMethodID(clz, name, sig), name, sig);
+    };
+    auto getStaticMethodID = [env, &check](jclass clz, const char* name, const char* sig) -> jmethodID {
+        return check(env->GetStaticMethodID(clz, name, sig), name, sig);
+    };
+    auto getFieldID = [env, &check](jclass clz, const char* name, const char* sig) -> jfieldID {
+        return check(env->GetFieldID(clz, name, sig), name, sig);
+    };
     {% for entity in has_kotlin_classes %}
-        {{ entity.name.camelCase() }} = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("{{ jni_name(entity, entity.category) }}")));
-        {%if entity.category == 'callback function' %}
-            {{ entity.name.camelCase() }}Runnable = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("{{ jni_name(entity) }}Runnable")));
-        {%endif %}
+        {% if entity.category != 'structure' %}
+            {{ entity.name.camelCase() }} = findGlobalClass("{{ jni_name(entity, entity.category) }}");
+            {% if entity.category == 'callback function' %}
+                {{ entity.name.camelCase() }}Runnable = findGlobalClass("{{ jni_name(entity) }}Runnable");
+            {% elif entity.category == 'object' %}
+                {{ entity.name.camelCase() }}Handle = getFieldID({{ entity.name.camelCase() }}, "handle", "J");
+                {{ entity.name.camelCase() }}Ctor = getMethodID({{ entity.name.camelCase() }}, "<init>", "(J)V");
+            {% endif %}
+        {% else %}
+            {% set _k2n_members = (kotlin_record_members(entity.members) | list) if entity.needs_k2n else [] %}
+            {% set _k2n_children = chain_children[entity.name.get()] if entity.needs_k2n else [] %}
+            {% set _has_extra_fields = entity.name.get() in ['origin 2D', 'extent 2D', 'color space dawn'] %}
+            {% set _needs_local_clz = (not entity.needs_n2k) and ((_k2n_members | length > 0) or (_k2n_children | length > 0) or _has_extra_fields) %}
+            {% if entity.needs_n2k %}
+                {{ entity.name.camelCase() }} = findGlobalClass("{{ jni_name(entity, entity.category) }}");
+                {{ entity.name.camelCase() }}Ctor = getMethodID({{ entity.name.camelCase() }}, "<init>", "(
+                {%- for member in kotlin_record_members(entity.members) %}
+                    {{- jni_signature(member) -}}
+                {%- endfor -%}
+                {%- for structure in chain_children[entity.name.get()] -%}
+                    {{- jni_signature({'type': structure}) -}}
+                {%- endfor %})V");
+            {% elif _needs_local_clz %}
+                jclass {{ entity.name.camelCase() }} = findLocalClass("{{ jni_name(entity, entity.category) }}");
+            {% endif %}
+            {% for member in _k2n_members %}
+                {% set prefix = "is" if member.type.name.get() == "bool" else "get" %}
+                {{ entity.name.camelCase() }}Get{{ member.name.CamelCase() }} = getMethodID({{ entity.name.camelCase() }}, "{{prefix}}{{member.name.CamelCase()}}", "(){{jni_signature(member)}}");
+            {% endfor %}
+            {% for child in _k2n_children %}
+                {{ entity.name.camelCase() }}Get{{ child.name.CamelCase() }} = getMethodID({{ entity.name.camelCase() }}, "get{{ child.name.CamelCase() }}", "()L{{ jni_name(child) }};");
+            {% endfor %}
+            {% if entity.name.get() == 'origin 2D' %}
+                originX = getFieldID(origin2D, "x", "I");
+                originY = getFieldID(origin2D, "y", "I");
+            {% elif entity.name.get() == 'extent 2D' %}
+                extentWidth = getFieldID(extent2D, "width", "I");
+                extentHeight = getFieldID(extent2D, "height", "I");
+            {% elif entity.name.get() == 'color space dawn' %}
+                colorSpacePrimaries = getFieldID(colorSpaceDawn, "primaries", "I");
+                colorSpaceTransfer = getFieldID(colorSpaceDawn, "transfer", "I");
+                colorSpaceYCbCrRange = getFieldID(colorSpaceDawn, "yCbCrRange", "I");
+                colorSpaceYCbCrMatrix = getFieldID(colorSpaceDawn, "yCbCrMatrix", "I");
+            {% endif %}
+            {% if _needs_local_clz %}
+                env->DeleteLocalRef({{ entity.name.camelCase() }});
+            {% endif %}
+        {% endif %}
     {% endfor %}
-    gpuCallbackRunnable = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("androidx/webgpu/GPURequestCallbackRunnable")));
-    gpuCallbackErrorTypeRunnable = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("androidx/webgpu/GPURequestCallbackErrorTypeRunnable")));
-    gpuCallbackVoidRunnable = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("androidx/webgpu/GPURequestCallbackVoidRunnable")));
-    dawnException = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("androidx/webgpu/DawnException")));
-    stringClass = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("java/lang/String")));
-    gpuHardwareBufferExternalTexture = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("androidx/webgpu/GPUHardwareBufferExternalTexture")));
-    gpuHardwareBufferTexture = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("androidx/webgpu/GPUHardwareBufferTexture")));
-    javaIllegalStateException = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("java/lang/IllegalStateException")));
-    javaUnsupportedOperationException = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("java/lang/UnsupportedOperationException")));
-    parcelFileDescriptor = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("android/os/ParcelFileDescriptor")));
-    pfdGetFd = env->GetMethodID(parcelFileDescriptor, "getFd", "()I");
-    pfdAdoptFd = env->GetStaticMethodID(parcelFileDescriptor, "adoptFd", "(I)Landroid/os/ParcelFileDescriptor;");
-    jclass originClz = env->FindClass("androidx/webgpu/GPUOrigin2D");
-    originX = env->GetFieldID(originClz, "x", "I");
-    originY = env->GetFieldID(originClz, "y", "I");
-    env->DeleteLocalRef(originClz);
+    gpuCallbackRunnable = findGlobalClass("androidx/webgpu/GPURequestCallbackRunnable");
+    gpuCallbackErrorTypeRunnable = findGlobalClass("androidx/webgpu/GPURequestCallbackErrorTypeRunnable");
+    gpuCallbackVoidRunnable = findGlobalClass("androidx/webgpu/GPURequestCallbackVoidRunnable");
+    dawnException = findGlobalClass("androidx/webgpu/DawnException");
+    stringClass = findGlobalClass("java/lang/String");
+    gpuHardwareBufferExternalTexture = findGlobalClass("androidx/webgpu/GPUHardwareBufferExternalTexture");
+    gpuHardwareBufferExternalTextureCtor = getMethodID(gpuHardwareBufferExternalTexture, "<init>", "(JLandroidx/webgpu/GPUExternalTexture;)V");
+    gpuHardwareBufferTexture = findGlobalClass("androidx/webgpu/GPUHardwareBufferTexture");
+    gpuHardwareBufferTextureCtor = getMethodID(gpuHardwareBufferTexture, "<init>", "(JLandroidx/webgpu/GPUTexture;)V");
+    javaIllegalStateException = findGlobalClass("java/lang/IllegalStateException");
+    javaUnsupportedOperationException = findGlobalClass("java/lang/UnsupportedOperationException");
+    javaThread = findGlobalClass("java/lang/Thread");
+    threadCurrentThread = getStaticMethodID(javaThread, "currentThread", "()Ljava/lang/Thread;");
+    threadGetUncaughtExceptionHandler = getMethodID(javaThread, "getUncaughtExceptionHandler", "()Ljava/lang/Thread$UncaughtExceptionHandler;");
+    jclass uncaughtExceptionHandlerClz = findLocalClass("java/lang/Thread$UncaughtExceptionHandler");
+    uncaughtExceptionHandlerUncaughtException = getMethodID(uncaughtExceptionHandlerClz, "uncaughtException", "(Ljava/lang/Thread;Ljava/lang/Throwable;)V");
+    env->DeleteLocalRef(uncaughtExceptionHandlerClz);
+    jclass parcelFileDescriptorClz = findLocalClass("android/os/ParcelFileDescriptor");
+    pfdGetFd = getMethodID(parcelFileDescriptorClz, "getFd", "()I");
+    env->DeleteLocalRef(parcelFileDescriptorClz);
+}
 
-    jclass extentClz = env->FindClass("androidx/webgpu/GPUExtent2D");
-    extentWidth = env->GetFieldID(extentClz, "width", "I");
-    extentHeight = env->GetFieldID(extentClz, "height", "I");
-    env->DeleteLocalRef(extentClz);
+void JNIClasses::DispatchPendingException(JNIEnv* env) const {
+    jthrowable pending = env->ExceptionOccurred();
+    if (!pending) {
+        return;
+    }
+    env->ExceptionClear();
 
-    jclass colorSpaceClz = env->FindClass("androidx/webgpu/GPUColorSpaceDawn");
-    colorSpacePrimaries = env->GetFieldID(colorSpaceClz, "primaries", "I");
-    colorSpaceTransfer = env->GetFieldID(colorSpaceClz, "transfer", "I");
-    colorSpaceYCbCrRange = env->GetFieldID(colorSpaceClz, "yCbCrRange", "I");
-    colorSpaceYCbCrMatrix = env->GetFieldID(colorSpaceClz, "yCbCrMatrix", "I");
-    env->DeleteLocalRef(colorSpaceClz);
+    bool dispatched = false;
+    jobject thread = env->CallStaticObjectMethod(javaThread, threadCurrentThread);
+    if (env->ExceptionCheck()) {
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+    } else if (thread != nullptr) {
+        jobject handler = env->CallObjectMethod(thread, threadGetUncaughtExceptionHandler);
+        if (env->ExceptionCheck()) {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+        } else if (handler != nullptr) {
+            env->CallVoidMethod(
+                handler, uncaughtExceptionHandlerUncaughtException, thread, pending);
+            if (env->ExceptionCheck()) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+            } else {
+                dispatched = true;
+            }
+        }
+        if (handler != nullptr) {
+            env->DeleteLocalRef(handler);
+        }
+    }
 
+    if (!dispatched) {
+        env->Throw(pending);
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+    }
+    if (thread != nullptr) {
+        env->DeleteLocalRef(thread);
+    }
+    env->DeleteLocalRef(pending);
 }
 
 }  // namespace dawn::kotlin_api

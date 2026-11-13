@@ -423,7 +423,8 @@ void RenderPassEncoder::APIExecuteBundles(Span<RenderBundleBase* const> renderBu
                     mUsageTracker.MarkFramebufferFetchUsed();
                 }
 
-                if (IsValidationEnabled()) {
+                if (IsValidationEnabled() ||
+                    GetDevice()->MayRequireDuplicationOfIndirectParameters()) {
                     mIndirectDrawMetadata.AddBundle(renderBundles[i]);
                 }
 

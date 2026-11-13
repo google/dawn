@@ -63,7 +63,7 @@ TEST_F(IR_LowerSwizzleViewTest, Accessor_Load_Constant) {
     auto* src = R"(
 %foo = func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %3:swizzle<function, vec3<f32>, read_write, 4, 3> = swizzle %v, zyx
     %4:swizzle<function, f32, read_write, 3, 1> = access %3, 0u
     %5:f32 = load %4
@@ -77,7 +77,7 @@ TEST_F(IR_LowerSwizzleViewTest, Accessor_Load_Constant) {
     auto* expect = R"(
 %foo = func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %3:f32 = load_vector_element %v, 2u
     %x:f32 = let %3
     ret
@@ -110,7 +110,7 @@ TEST_F(IR_LowerSwizzleViewTest, Accessor_Store_Dynamic) {
     auto* src = R"(
 %foo = func(%idx:u32):void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %4:swizzle<function, vec3<f32>, read_write, 4, 3> = swizzle %v, zyx
     %5:swizzle<function, f32, read_write, 3, 1> = access %4, %idx
     store %5, 1.0f
@@ -123,7 +123,7 @@ TEST_F(IR_LowerSwizzleViewTest, Accessor_Store_Dynamic) {
     auto* expect = R"(
 %foo = func(%idx:u32):void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %4:u32 = access array<u32, 3>(2u, 1u, 0u), %idx
     store_vector_element %v, %4, 1.0f
     ret
@@ -152,7 +152,7 @@ TEST_F(IR_LowerSwizzleViewTest, Load_MultiElement) {
     auto* src = R"(
 %foo = func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %3:swizzle<function, vec3<f32>, read_write, 4, 3> = swizzle %v, ywx
     %4:vec3<f32> = load %3
     %x:vec3<f32> = let %4
@@ -165,7 +165,7 @@ TEST_F(IR_LowerSwizzleViewTest, Load_MultiElement) {
     auto* expect = R"(
 %foo = func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %3:vec4<f32> = load %v
     %4:vec3<f32> = swizzle %3, ywx
     %x:vec3<f32> = let %4
@@ -194,7 +194,7 @@ TEST_F(IR_LowerSwizzleViewTest, Store_MultiElement) {
     auto* src = R"(
 %foo = func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %3:swizzle<function, vec3<f32>, read_write, 4, 3> = swizzle %v, ywx
     store %3, vec3<f32>(1.0f, 2.0f, 3.0f)
     ret
@@ -206,7 +206,7 @@ TEST_F(IR_LowerSwizzleViewTest, Store_MultiElement) {
     auto* expect = R"(
 %foo = func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %3:vec4<f32> = load %v
     %4:f32 = access %3, 2u
     %5:vec4<f32> = construct 3.0f, 1.0f, %4, 2.0f
@@ -239,7 +239,7 @@ TEST_F(IR_LowerSwizzleViewTest, ChainedSwizzle_Store) {
     auto* src = R"(
 %foo = func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %3:swizzle<function, vec3<f32>, read_write, 4, 3> = swizzle %v, zyx
     %4:swizzle<function, vec2<f32>, read_write, 3, 2> = swizzle %3, xz
     store %4, vec2<f32>(1.0f, 2.0f)
@@ -252,7 +252,7 @@ TEST_F(IR_LowerSwizzleViewTest, ChainedSwizzle_Store) {
     auto* expect = R"(
 %foo = func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %3:vec4<f32> = load %v
     %4:f32 = access %3, 1u
     %5:f32 = access %3, 3u
@@ -287,7 +287,7 @@ TEST_F(IR_LowerSwizzleViewTest, ChainedSwizzle_Load) {
     auto* src = R"(
 %foo = func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %3:swizzle<function, vec3<f32>, read_write, 4, 3> = swizzle %v, zyx
     %4:swizzle<function, vec2<f32>, read_write, 3, 2> = swizzle %3, xz
     %5:vec2<f32> = load %4
@@ -301,7 +301,7 @@ TEST_F(IR_LowerSwizzleViewTest, ChainedSwizzle_Load) {
     auto* expect = R"(
 %foo = func():void {
   $B1: {
-    %v:ptr<function, vec4<f32>, read_write> = var undef
+    %v:ptr<function, vec4<f32>, read_write> = var
     %3:vec4<f32> = load %v
     %4:vec2<f32> = swizzle %3, zx
     %l:vec2<f32> = let %4

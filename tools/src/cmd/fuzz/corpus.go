@@ -35,11 +35,16 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
+	"sync/atomic"
 
 	"dawn.googlesource.com/dawn/tools/src/glob"
 	"dawn.googlesource.com/dawn/tools/src/oswrapper"
+	"dawn.googlesource.com/dawn/tools/src/progressbar"
 	"dawn.googlesource.com/dawn/tools/src/transform"
+	"dawn.googlesource.com/dawn/tools/src/utils"
+	"golang.org/x/sync/errgroup"
 )
 
 // runCorpusGenerator converts a set of input test files into a fuzzer corpus
@@ -62,7 +67,8 @@ func runCorpusGeneratorWgsl(t *taskConfig) error {
 }
 
 // runCorpusGeneratorIr converts a set of input test .wgsl files into an IR fuzzer corpus.
-// It gathers the WGSL files, then forks out to an external binary (t.assembler) to perform the conversion.
+// It gathers the WGSL files, then forks out to external binary batches (t.assembler) in parallel
+// across t.numProcesses workers to perform the conversion.
 func runCorpusGeneratorIr(t *taskConfig) error {
 	tmp, err := t.osWrapper.MkdirTemp("", "wgsl_corpus_for_ir")
 	if err != nil {
@@ -70,56 +76,121 @@ func runCorpusGeneratorIr(t *taskConfig) error {
 	}
 	defer t.osWrapper.RemoveAll(tmp)
 
-	if err := gatherWgslFiles(t.inputs, tmp, t.osWrapper); err != nil {
+	files, err := gatherWgslFilesList(t.inputs, tmp, t.osWrapper)
+	if err != nil {
 		return fmt.Errorf("failed to gather WGSL files for IR corpus generation: %w", err)
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	args := []string{tmp, t.out}
-	if t.verbose {
-		args = append(args, "--verbose")
+	if err := t.osWrapper.MkdirAll(t.out, 0755); err != nil {
+		return fmt.Errorf("failed to create output directory '%v': %w", t.out, err)
 	}
 
-	cmdStr := fmt.Sprintf("%s %s", t.assembler, strings.Join(args, " "))
-
-	if t.verbose {
-		fmt.Println("Using assembler cmd: " + cmdStr)
-	}
-	fmt.Println("running assembler")
-
-	out := &bytes.Buffer{}
-	var stdout, stderr io.Writer = out, out
-	if t.verbose {
-		stdout = io.MultiWriter(out, os.Stdout)
-		stderr = io.MultiWriter(out, os.Stderr)
+	if len(files) == 0 {
+		fmt.Println("done")
+		return nil
 	}
 
-	cmd := t.execWrapper.CommandContext(ctx, t.assembler, args...).WithStdout(stdout).WithStderr(stderr)
+	numProcesses := max(1, t.numProcesses)
+	batchSize := calcBatchSize(len(files), numProcesses)
+	batches := batchFiles(files, batchSize)
 
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to run IR corpus assembler.\n  command: %s\n  error: %w\n  output:\n%s", cmdStr, err, out.String())
+	batchChan := make(chan []string, len(batches))
+	for _, b := range batches {
+		batchChan <- b
+	}
+	close(batchChan)
+
+	fmt.Printf("running assembler across %d processes (%d files in %d batches)\n", numProcesses, len(files), len(batches))
+
+	var pb progressbar.ProgressBar
+	if t.progressBuilder != nil {
+		pb = t.progressBuilder(os.Stdout, nil)
+		defer pb.Stop()
+	}
+	var numDone atomic.Uint32
+
+	eg, ctx := errgroup.WithContext(utils.CancelOnInterruptContext(context.Background()))
+	for i := 0; i < numProcesses; i++ {
+		eg.Go(func() error {
+			for batch := range batchChan {
+				if err := ctx.Err(); err != nil {
+					return err
+				}
+
+				args := make([]string, 0, len(batch)+2)
+				if t.verbose {
+					args = append(args, "--verbose")
+				}
+				args = append(args, batch...)
+				args = append(args, t.out)
+
+				cmdStr := fmt.Sprintf("%s %s", t.assembler, strings.Join(args, " "))
+				if t.verbose {
+					fmt.Println("Using assembler cmd: " + cmdStr)
+				}
+
+				out := &bytes.Buffer{}
+				var stdout, stderr io.Writer = out, out
+				if t.verbose {
+					stdout = io.MultiWriter(out, os.Stdout)
+					stderr = io.MultiWriter(out, os.Stderr)
+				}
+
+				cmd := t.execWrapper.CommandContext(ctx, t.assembler, args...).WithStdout(stdout).WithStderr(stderr)
+				if err := cmd.Run(); err != nil {
+					return fmt.Errorf("failed to run IR corpus assembler.\n  command: %s\n  error: %w\n  output:\n%s", cmdStr, err, out.String())
+				}
+
+				done := int(numDone.Add(uint32(len(batch))))
+				if pb != nil {
+					pb.Update(progressbar.Status{
+						Total: len(files),
+						Segments: []progressbar.Segment{
+							{Count: done},
+						},
+					})
+				}
+			}
+			return nil
+		})
 	}
 
+	if err := eg.Wait(); err != nil {
+		return err
+	}
+
+	if pb != nil {
+		pb.Stop()
+	}
 	fmt.Println("done")
 	return nil
 }
+
+var reCopyrightNotice = regexp.MustCompile(`(?s)^// Copyright.*?\r?\n// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE\.\r?\n\s*`)
 
 // gatherWgslFiles cleans up and copies all the .wgsl files in a directory structure over to a flat directory
 // structure, via replacing the path separators for the origins with underscores in the destination
 // file names. It also filters out any '*.expected.*' files. If there are copyright notice blocks in the file contents
 // they will be stripped, because they are known to cause issues when decoding fuzzer sidecar data.
 func gatherWgslFiles(inputs string, out string, fsReaderWriter oswrapper.FilesystemReaderWriter) error {
+	_, err := gatherWgslFilesList(inputs, out, fsReaderWriter)
+	return err
+}
+
+func gatherWgslFilesList(inputs string, out string, fsReaderWriter oswrapper.FilesystemReaderWriter) ([]string, error) {
 	fmt.Println("gathering and filtering .wgsl files")
 	globPattern := filepath.Join(inputs, "**.wgsl")
 	files, err := glob.Glob(globPattern, fsReaderWriter)
 	if err != nil {
-		return fmt.Errorf("failed to find .wgsl files with pattern '%v': %w", globPattern, err)
+		return nil, fmt.Errorf("failed to find .wgsl files with pattern '%v': %w", globPattern, err)
 	}
 
 	// Remove '*.expected.*'
 	files = transform.Filter(files, func(s string) bool { return !strings.Contains(s, ".expected.") })
+
+	if err := fsReaderWriter.MkdirAll(out, 0755); err != nil {
+		return nil, fmt.Errorf("failed to create directory '%v': %w", out, err)
+	}
 
 	// Map src file paths to dst filenames where the path separators have been converted to underscores
 	mapping := make(map[string]string, len(files))
@@ -127,32 +198,28 @@ func gatherWgslFiles(inputs string, out string, fsReaderWriter oswrapper.Filesys
 		// paths returned by glob.Glob are absolute, but only want to use the relative path in the dest name
 		relPath, err := filepath.Rel(inputs, f)
 		if err != nil {
-			return fmt.Errorf("failed to calculate relative path for '%v' from base '%v': %w", f, inputs, err)
+			return nil, fmt.Errorf("failed to calculate relative path for '%v' from base '%v': %w", f, inputs, err)
 		}
 		mapping[f] = strings.ReplaceAll(filepath.ToSlash(relPath), "/", "_")
 	}
 
-	reCopyrightNotice := regexp.MustCompile(`(?s)^// Copyright.*?\r?\n// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE\.\r?\n\s*`)
-
+	outFiles := make([]string, 0, len(mapping))
 	for src, dest := range mapping {
 		dstPath := filepath.Join(out, dest)
 		contentBytes, err := fsReaderWriter.ReadFile(src)
 		if err != nil {
-			return fmt.Errorf("failed to read '%v': %w", src, err)
+			return nil, fmt.Errorf("failed to read '%v': %w", src, err)
 		}
 
-		content := string(contentBytes)
-		content = reCopyrightNotice.ReplaceAllString(content, "")
+		contentBytes = reCopyrightNotice.ReplaceAll(contentBytes, nil)
 
-		if err := fsReaderWriter.MkdirAll(filepath.Dir(dstPath), 0755); err != nil {
-			return fmt.Errorf("failed to create directory for '%v': %w", dstPath, err)
+		if err := fsReaderWriter.WriteFile(dstPath, contentBytes, 0644); err != nil {
+			return nil, fmt.Errorf("failed to write '%v': %w", dstPath, err)
 		}
-
-		if err := fsReaderWriter.WriteFile(dstPath, []byte(content), 0644); err != nil {
-			return fmt.Errorf("failed to write '%v': %w", dstPath, err)
-		}
+		outFiles = append(outFiles, dstPath)
 	}
+	slices.Sort(outFiles)
 
 	fmt.Println("done")
-	return nil
+	return outFiles, nil
 }

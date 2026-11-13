@@ -58,13 +58,13 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, Vector) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, vec3<f32>, read_write> = var undef
+    %v:ptr<function, vec3<f32>, read_write> = var
     %5:u32 = load %dyn_index
     store_vector_element %v, %5, 1.0f
     store_vector_element %v, %static_index, 1.0f
@@ -77,13 +77,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, vec3<f32>, read_write> = var undef
+    %v:ptr<function, vec3<f32>, read_write> = var
     %5:u32 = load %dyn_index
     %6:vec3<f32> = load %v
     %7:vec3<u32> = construct %5
@@ -124,13 +124,13 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, S, read_write> = var undef
+    %v:ptr<function, S, read_write> = var
     %5:ptr<function, vec3<f32>, read_write> = access %v, 0u
     %6:u32 = load %dyn_index
     store_vector_element %5, %6, 1.0f
@@ -148,13 +148,13 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, S, read_write> = var undef
+    %v:ptr<function, S, read_write> = var
     %5:ptr<function, vec3<f32>, read_write> = access %v, 0u
     %6:u32 = load %dyn_index
     %7:vec3<f32> = load %5
@@ -191,13 +191,13 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, VectorInArray) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, array<vec3<f32>, 8>, read_write> = var undef
+    %v:ptr<function, array<vec3<f32>, 8>, read_write> = var
     %5:ptr<function, vec3<f32>, read_write> = access %v, 0u
     %6:u32 = load %dyn_index
     store_vector_element %5, %6, 1.0f
@@ -211,13 +211,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, array<vec3<f32>, 8>, read_write> = var undef
+    %v:ptr<function, array<vec3<f32>, 8>, read_write> = var
     %5:ptr<function, vec3<f32>, read_write> = access %v, 0u
     %6:u32 = load %dyn_index
     %7:vec3<f32> = load %5
@@ -260,13 +260,13 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, S, read_write> = var undef
+    %v:ptr<function, S, read_write> = var
     %5:ptr<function, vec3<f32>, read_write> = access %v, 0u, 0u
     %6:u32 = load %dyn_index
     store_vector_element %5, %6, 1.0f
@@ -284,13 +284,13 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, S, read_write> = var undef
+    %v:ptr<function, S, read_write> = var
     %5:ptr<function, vec3<f32>, read_write> = access %v, 0u, 0u
     %6:u32 = load %dyn_index
     %7:vec3<f32> = load %5
@@ -329,7 +329,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, VectorByFunc) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %get_dynamic = func():u32 {
@@ -345,7 +345,7 @@ $B1: {  # root
 }
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B4: {
-    %v:ptr<function, vec3<f32>, read_write> = var undef
+    %v:ptr<function, vec3<f32>, read_write> = var
     %7:u32 = call %get_dynamic
     store_vector_element %v, %7, 1.0f
     %8:u32 = call %get_static
@@ -359,7 +359,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %get_dynamic = func():u32 {
@@ -375,7 +375,7 @@ $B1: {  # root
 }
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B4: {
-    %v:ptr<function, vec3<f32>, read_write> = var undef
+    %v:ptr<function, vec3<f32>, read_write> = var
     %7:u32 = call %get_dynamic
     %8:vec3<f32> = load %v
     %9:vec3<u32> = construct %7
@@ -415,13 +415,13 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, Vector_ViaPointer) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, vec3<f32>, read_write> = var undef
+    %v:ptr<function, vec3<f32>, read_write> = var
     %p:ptr<function, vec3<f32>, read_write> = let %v
     %6:u32 = load %dyn_index
     store_vector_element %p, %6, 1.0f
@@ -435,13 +435,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, vec3<f32>, read_write> = var undef
+    %v:ptr<function, vec3<f32>, read_write> = var
     %5:u32 = load %dyn_index
     %6:vec3<f32> = load %v
     %7:vec3<u32> = construct %5
@@ -476,8 +476,8 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, Vector_PrivateVar) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
-  %v:ptr<private, vec3<f32>, read_write> = var undef
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
+  %v:ptr<private, vec3<f32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -495,8 +495,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
-  %v:ptr<private, vec3<f32>, read_write> = var undef
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
+  %v:ptr<private, vec3<f32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -537,8 +537,8 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, Vector_StorageVar) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
-  %v:ptr<storage, vec3<f32>, read_write> = var undef @binding_point(0, 1)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
+  %v:ptr<storage, vec3<f32>, read_write> = var @binding_point(0, 1)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -578,8 +578,8 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, Vector_WorkgroupVar) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
-  %v:ptr<workgroup, vec3<f32>, read_write> = var undef
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
+  %v:ptr<workgroup, vec3<f32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -619,13 +619,13 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixElement) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, mat2x4<f32>, read_write> = var undef
+    %v:ptr<function, mat2x4<f32>, read_write> = var
     %5:ptr<function, vec4<f32>, read_write> = access %v, 1u
     %6:u32 = load %dyn_index
     store_vector_element %5, %6, 1.0f
@@ -639,13 +639,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, mat2x4<f32>, read_write> = var undef
+    %v:ptr<function, mat2x4<f32>, read_write> = var
     %5:ptr<function, vec4<f32>, read_write> = access %v, 1u
     %6:u32 = load %dyn_index
     %7:vec4<f32> = load %5
@@ -687,13 +687,13 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, S, read_write> = var undef
+    %v:ptr<function, S, read_write> = var
     %5:ptr<function, vec4<f32>, read_write> = access %v, 0u, 1u
     %6:u32 = load %dyn_index
     store_vector_element %5, %6, 1.0f
@@ -711,13 +711,13 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, S, read_write> = var undef
+    %v:ptr<function, S, read_write> = var
     %5:ptr<function, vec4<f32>, read_write> = access %v, 0u, 1u
     %6:u32 = load %dyn_index
     %7:vec4<f32> = load %5
@@ -753,13 +753,13 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixElementInArray) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, array<mat2x4<f32>, 8>, read_write> = var undef
+    %v:ptr<function, array<mat2x4<f32>, 8>, read_write> = var
     %5:ptr<function, vec4<f32>, read_write> = access %v, 7u, 1u
     %6:u32 = load %dyn_index
     store_vector_element %5, %6, 1.0f
@@ -773,13 +773,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, array<mat2x4<f32>, 8>, read_write> = var undef
+    %v:ptr<function, array<mat2x4<f32>, 8>, read_write> = var
     %5:ptr<function, vec4<f32>, read_write> = access %v, 7u, 1u
     %6:u32 = load %dyn_index
     %7:vec4<f32> = load %5
@@ -822,13 +822,13 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, S, read_write> = var undef
+    %v:ptr<function, S, read_write> = var
     %5:ptr<function, vec4<f32>, read_write> = access %v, 0u, 7u, 1u
     %6:u32 = load %dyn_index
     store_vector_element %5, %6, 1.0f
@@ -846,13 +846,13 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, S, read_write> = var undef
+    %v:ptr<function, S, read_write> = var
     %5:ptr<function, vec4<f32>, read_write> = access %v, 0u, 7u, 1u
     %6:u32 = load %dyn_index
     %7:vec4<f32> = load %5
@@ -893,7 +893,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixElementByFunc) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %get_dynamic = func():u32 {
@@ -909,7 +909,7 @@ $B1: {  # root
 }
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B4: {
-    %v:ptr<function, mat2x4<f32>, read_write> = var undef
+    %v:ptr<function, mat2x4<f32>, read_write> = var
     %7:ptr<function, vec4<f32>, read_write> = access %v, 1u
     %8:u32 = call %get_dynamic
     store_vector_element %7, %8, 1.0f
@@ -924,7 +924,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %get_dynamic = func():u32 {
@@ -940,7 +940,7 @@ $B1: {  # root
 }
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B4: {
-    %v:ptr<function, mat2x4<f32>, read_write> = var undef
+    %v:ptr<function, mat2x4<f32>, read_write> = var
     %7:ptr<function, vec4<f32>, read_write> = access %v, 1u
     %8:u32 = call %get_dynamic
     %9:vec4<f32> = load %7
@@ -982,13 +982,13 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixElement_ViaPointer) 
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, mat2x4<f32>, read_write> = var undef
+    %v:ptr<function, mat2x4<f32>, read_write> = var
     %5:ptr<function, vec4<f32>, read_write> = access %v, 1u
     %p:ptr<function, vec4<f32>, read_write> = let %5
     %7:u32 = load %dyn_index
@@ -1003,13 +1003,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, mat2x4<f32>, read_write> = var undef
+    %v:ptr<function, mat2x4<f32>, read_write> = var
     %5:ptr<function, vec4<f32>, read_write> = access %v, 1u
     %6:u32 = load %dyn_index
     %7:vec4<f32> = load %5
@@ -1046,8 +1046,8 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixElement_PrivateVar) 
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
-  %v:ptr<private, mat2x4<f32>, read_write> = var undef
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
+  %v:ptr<private, mat2x4<f32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1066,8 +1066,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
-  %v:ptr<private, mat2x4<f32>, read_write> = var undef
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
+  %v:ptr<private, mat2x4<f32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1110,8 +1110,8 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixElement_StorageVar) 
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
-  %v:ptr<storage, mat2x4<f32>, read_write> = var undef @binding_point(0, 1)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
+  %v:ptr<storage, mat2x4<f32>, read_write> = var @binding_point(0, 1)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1153,8 +1153,8 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixElement_WorkgroupVar
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
-  %v:ptr<workgroup, mat2x4<f32>, read_write> = var undef
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
+  %v:ptr<workgroup, mat2x4<f32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1197,13 +1197,13 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumn) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, mat2x4<f32>, read_write> = var undef
+    %v:ptr<function, mat2x4<f32>, read_write> = var
     %5:u32 = load %dyn_index
     %6:ptr<function, vec4<f32>, read_write> = access %v, %5
     store %6, vec4<f32>(0.0f)
@@ -1218,13 +1218,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, mat2x4<f32>, read_write> = var undef
+    %v:ptr<function, mat2x4<f32>, read_write> = var
     %5:u32 = load %dyn_index
     %6:ptr<function, vec4<f32>, read_write> = access %v, %5
     switch %5 [c: (0u, $B3), c: (1u, $B4), c: (default, $B5)] {  # switch_1
@@ -1279,13 +1279,13 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, S, read_write> = var undef
+    %v:ptr<function, S, read_write> = var
     %5:u32 = load %dyn_index
     %6:ptr<function, vec4<f32>, read_write> = access %v, 0u, %5
     store %6, vec4<f32>(0.0f)
@@ -1304,13 +1304,13 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, S, read_write> = var undef
+    %v:ptr<function, S, read_write> = var
     %5:u32 = load %dyn_index
     %6:ptr<function, vec4<f32>, read_write> = access %v, 0u, %5
     %7:ptr<function, mat2x4<f32>, read_write> = access %v, 0u
@@ -1360,13 +1360,13 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumnInArray) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, array<mat2x4<f32>, 8>, read_write> = var undef
+    %v:ptr<function, array<mat2x4<f32>, 8>, read_write> = var
     %5:u32 = load %dyn_index
     %6:ptr<function, vec4<f32>, read_write> = access %v, 7u, %5
     store %6, vec4<f32>(0.0f)
@@ -1381,13 +1381,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, array<mat2x4<f32>, 8>, read_write> = var undef
+    %v:ptr<function, array<mat2x4<f32>, 8>, read_write> = var
     %5:u32 = load %dyn_index
     %6:ptr<function, vec4<f32>, read_write> = access %v, 7u, %5
     %7:ptr<function, mat2x4<f32>, read_write> = access %v, 7u
@@ -1444,13 +1444,13 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, S, read_write> = var undef
+    %v:ptr<function, S, read_write> = var
     %5:u32 = load %dyn_index
     %6:ptr<function, vec4<f32>, read_write> = access %v, 0u, 7u, %5
     store %6, vec4<f32>(0.0f)
@@ -1469,13 +1469,13 @@ S = struct @align(16) {
 }
 
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, S, read_write> = var undef
+    %v:ptr<function, S, read_write> = var
     %5:u32 = load %dyn_index
     %6:ptr<function, vec4<f32>, read_write> = access %v, 0u, 7u, %5
     %7:ptr<function, mat2x4<f32>, read_write> = access %v, 0u, 7u
@@ -1529,7 +1529,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumnByFunc) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %get_dynamic = func():u32 {
@@ -1545,7 +1545,7 @@ $B1: {  # root
 }
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B4: {
-    %v:ptr<function, mat2x4<f32>, read_write> = var undef
+    %v:ptr<function, mat2x4<f32>, read_write> = var
     %7:u32 = call %get_dynamic
     %8:ptr<function, vec4<f32>, read_write> = access %v, %7
     store %8, vec4<f32>(0.0f)
@@ -1561,7 +1561,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %get_dynamic = func():u32 {
@@ -1577,7 +1577,7 @@ $B1: {  # root
 }
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B4: {
-    %v:ptr<function, mat2x4<f32>, read_write> = var undef
+    %v:ptr<function, mat2x4<f32>, read_write> = var
     %7:u32 = call %get_dynamic
     %8:ptr<function, vec4<f32>, read_write> = access %v, %7
     switch %7 [c: (0u, $B5), c: (1u, $B6), c: (default, $B7)] {  # switch_1
@@ -1643,13 +1643,13 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumn_ViaPointer) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, mat2x4<f32>, read_write> = var undef
+    %v:ptr<function, mat2x4<f32>, read_write> = var
     %5:u32 = load %dyn_index
     %6:ptr<function, vec4<f32>, read_write> = access %v, %5
     %p0:ptr<function, vec4<f32>, read_write> = let %6
@@ -1666,13 +1666,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, mat2x4<f32>, read_write> = var undef
+    %v:ptr<function, mat2x4<f32>, read_write> = var
     %5:u32 = load %dyn_index
     %6:ptr<function, vec4<f32>, read_write> = access %v, %5
     switch %5 [c: (0u, $B3), c: (1u, $B4), c: (default, $B5)] {  # switch_1
@@ -1722,8 +1722,8 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumn_PrivateVar) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
-  %v:ptr<private, mat2x4<f32>, read_write> = var undef
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
+  %v:ptr<private, mat2x4<f32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1743,8 +1743,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
-  %v:ptr<private, mat2x4<f32>, read_write> = var undef
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
+  %v:ptr<private, mat2x4<f32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1800,8 +1800,8 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumn_StorageVar) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
-  %v:ptr<storage, mat2x4<f32>, read_write> = var undef @binding_point(0, 1)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
+  %v:ptr<storage, mat2x4<f32>, read_write> = var @binding_point(0, 1)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1846,8 +1846,8 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumn_WorkgroupVar)
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
-  %v:ptr<workgroup, mat2x4<f32>, read_write> = var undef
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
+  %v:ptr<workgroup, mat2x4<f32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1890,13 +1890,13 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumnAndElement) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, mat2x4<f32>, read_write> = var undef
+    %v:ptr<function, mat2x4<f32>, read_write> = var
     %5:u32 = load %dyn_index
     %6:ptr<function, vec4<f32>, read_write> = access %v, %5
     %7:u32 = load %dyn_index
@@ -1912,13 +1912,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, u32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
-    %v:ptr<function, mat2x4<f32>, read_write> = var undef
+    %v:ptr<function, mat2x4<f32>, read_write> = var
     %5:u32 = load %dyn_index
     %6:ptr<function, vec4<f32>, read_write> = access %v, %5
     %7:u32 = load %dyn_index
@@ -1973,13 +1973,13 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, Vector_I32Index) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, i32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, i32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:i32 = let 0i
-    %v:ptr<function, vec3<f32>, read_write> = var undef
+    %v:ptr<function, vec3<f32>, read_write> = var
     %5:i32 = load %dyn_index
     store_vector_element %v, %5, 1.0f
     store_vector_element %v, %static_index, 1.0f
@@ -1992,13 +1992,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, i32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, i32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:i32 = let 0i
-    %v:ptr<function, vec3<f32>, read_write> = var undef
+    %v:ptr<function, vec3<f32>, read_write> = var
     %5:i32 = load %dyn_index
     %6:vec3<f32> = load %v
     %7:u32 = convert %5
@@ -2032,12 +2032,12 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumn_I32Index) {
 
     auto* src = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, i32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, i32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %v:ptr<function, mat2x3<f32>, read_write> = var undef
+    %v:ptr<function, mat2x3<f32>, read_write> = var
     %4:i32 = load %dyn_index
     %5:ptr<function, vec3<f32>, read_write> = access %v, %4
     store %5, vec3<f32>(1.0f, 2.0f, 3.0f)
@@ -2050,12 +2050,12 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %dyn_index:ptr<uniform, i32, read> = var undef @binding_point(0, 0)
+  %dyn_index:ptr<uniform, i32, read> = var @binding_point(0, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %v:ptr<function, mat2x3<f32>, read_write> = var undef
+    %v:ptr<function, mat2x3<f32>, read_write> = var
     %4:i32 = load %dyn_index
     %5:ptr<function, vec3<f32>, read_write> = access %v, %4
     switch %4 [c: (0i, $B3), c: (1i, $B4), c: (default, $B5)] {  # switch_1

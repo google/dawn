@@ -122,17 +122,27 @@ void EnforceLimitSpecInvariants(CombinedLimits* limits, wgpu::FeatureLevel featu
 MaybeValError ValidateLimits(const CombinedLimits& supportedLimits,
                              const CombinedLimits& requiredLimits);
 
-// Validtate that the |chainedLimits| are valid and unpack them into |out|.
+// Validate that the |chainedLimits| are valid and unpack them into |out|.
+// When allowExperimentalChains is false, only chained limits structs that are part of Dawn's
+// stable ABI are accepted.
 MaybeValError ValidateAndUnpackLimitsIn(
     const Limits* chainedLimits,
     const std::unordered_set<wgpu::FeatureName>& supportedFeatures,
-    CombinedLimits* out);
+    CombinedLimits* out,
+    bool allowExperimentalChains);
 
 // Unpack |chainedLimits| into |out|.
 void UnpackLimitsIn(const Limits* chainedLimits, CombinedLimits* out);
 
 // Apply limit tiers to |limits|
 void ApplyLimitTiers(CombinedLimits* limits);
+
+// The number of texture image units allowed by Toggle::GLLimitTextureImageUnitsTo13.
+inline constexpr uint32_t kLimitedGLTextureImageUnits = 13;
+
+// Clamp the limits bounding the number of GL texture image units used per shader stage for
+// Toggle::GLLimitTextureImageUnitsTo13.
+void LimitGLTextureImageUnits(CombinedLimits* limits);
 
 // Returns a copy of |limits| where limit tiers are applied.
 CombinedLimits ApplyLimitTiers(const CombinedLimits& limits);
@@ -165,13 +175,17 @@ DAWN_SERIALIZABLE(struct,
 //   1. Enforce internal Dawn constants for some limits to ensure they don't go over fixed-size
 //      arrays in Dawn's internal code;
 //   2. Additional enforcement for dependent limits, e.g. maxStorageBufferBindingSize and
-//      maxUniformBufferBindingSize must not be larger than maxBufferSize.
+//      maxUniformBufferBindingSize must not be larger than maxBufferSize;
+//   3. Clamp Maximum limits below the kLimitU32Undefined and kLimitU64Undefined sentinels.
 void NormalizeLimits(CombinedLimits* limits);
 
-// Fill |outputLimits| with |supportedFeatures| and |combinedLimits|.
-MaybeError FillLimits(Limits* outputLimits,
-                      const FeaturesSet& supportedFeatures,
-                      const CombinedLimits& combinedLimits);
+// Validate that |outputLimits| has a valid chain and fill it with |supportedFeatures| and
+// |combinedLimits|. When allowExperimentalChains is false, only chained limits structs that are
+// part of Dawn's stable ABI may be requested.
+MaybeValError ValidateAndFillLimits(Limits* outputLimits,
+                                    const FeaturesSet& supportedFeatures,
+                                    const CombinedLimits& combinedLimits,
+                                    bool allowExperimentalChains);
 
 }  // namespace dawn::native
 

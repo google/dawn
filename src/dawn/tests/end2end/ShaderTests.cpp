@@ -50,6 +50,14 @@ class ShaderTests : public DawnTest {
         supported.UnlinkedCopyTo(&required);
     }
 
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> features;
+        if (SupportsFeatures({wgpu::FeatureName::ShaderF16})) {
+            features.push_back(wgpu::FeatureName::ShaderF16);
+        }
+        return features;
+    }
+
   public:
     wgpu::Buffer CreateBuffer(const std::vector<uint32_t>& data,
                               wgpu::BufferUsage usage = wgpu::BufferUsage::Storage |
@@ -3785,6 +3793,127 @@ fn main(@builtin(global_invocation_id) global_invocation_id: vec3u) {
     EXPECT_BUFFER_U32_EQ(1u, outputBuffer, 0);
     EXPECT_BUFFER_U32_EQ(0u, outputBuffer, 4);
     EXPECT_BUFFER_U32_EQ(2u, outputBuffer, 8);
+}
+
+// Test that creating and executing a compute pipeline with nested constant aggregates
+// (arrays of structs of arrays/matrices) with runtime-indexed reads succeeds without crashing.
+// See https://crbug.com/569195060
+TEST_P(ShaderTests, NestedConstantAggregates) {
+    wgpu::ComputePipeline pipeline = CreateComputePipeline(R"(
+struct Inner { v : array<vec4f, 4>, m : mat4x4f }
+struct Outer { a : array<Inner, 3>, b : array<array<f32, 4>, 4> }
+
+var<private> p0: Outer;
+var<private> p = Outer(
+    array<Inner, 3>(
+        Inner(array<vec4f, 4>(vec4f(1.0), vec4f(2.0), vec4f(3.0), vec4f(4.0)),
+            mat4x4f(vec4f(1.0, 0.0, 0.0, 0.0), vec4f(0.0, 1.0, 0.0, 0.0),
+                    vec4f(0.0, 0.0, 1.0, 0.0), vec4f(0.0, 0.0, 0.0, 1.0))),
+        Inner(array<vec4f, 4>(vec4f(5.0), vec4f(6.0), vec4f(7.0), vec4f(8.0)),
+            mat4x4f(vec4f(2.0), vec4f(2.0), vec4f(2.0), vec4f(2.0))),
+        Inner(array<vec4f, 4>(vec4f(9.0), vec4f(10.0), vec4f(11.0), vec4f(12.0)),
+            mat4x4f(vec4f(3.0), vec4f(3.0), vec4f(3.0), vec4f(3.0)))),
+    array<array<f32, 4>, 4>(
+        array<f32, 4>(0.5, 1.5, 2.5, 3.5),
+        array<f32, 4>(4.5, 5.5, 6.5, 7.5),
+        array<f32, 4>(8.5, 9.5, 10.5, 11.5),
+        array<f32, 4>(12.5, 13.5, 14.5, 15.5)));
+
+fn foo() -> Outer {
+  if (true) {
+    return p;
+  } else {
+    return p0;
+  }
+}
+
+@group(0) @binding(0) var<storage, read_write> o : array<f32, 16>;
+@compute @workgroup_size(1)
+fn main(@builtin(global_invocation_id) gid : vec3u) {
+  var f0: Outer;
+  var f = Outer(
+    array<Inner, 3>(
+      Inner(array<vec4f, 4>(vec4f(1.0), vec4f(2.0), vec4f(3.0), vec4f(4.0)),
+            mat4x4f(vec4f(1.0, 0.0, 0.0, 0.0), vec4f(0.0, 1.0, 0.0, 0.0),
+                    vec4f(0.0, 0.0, 1.0, 0.0), vec4f(0.0, 0.0, 0.0, 1.0))),
+      Inner(array<vec4f, 4>(vec4f(5.0), vec4f(6.0), vec4f(7.0), vec4f(8.0)),
+            mat4x4f(vec4f(2.0), vec4f(2.0), vec4f(2.0), vec4f(2.0))),
+      Inner(array<vec4f, 4>(vec4f(9.0), vec4f(10.0), vec4f(11.0), vec4f(12.0)),
+            mat4x4f(vec4f(3.0), vec4f(3.0), vec4f(3.0), vec4f(3.0)))),
+    array<array<f32, 4>, 4>(
+      array<f32, 4>(0.5, 1.5, 2.5, 3.5),
+      array<f32, 4>(4.5, 5.5, 6.5, 7.5),
+      array<f32, 4>(8.5, 9.5, 10.5, 11.5),
+      array<f32, 4>(12.5, 13.5, 14.5, 15.5)));
+
+  let i = gid.x % 3u;
+  let j = gid.y % 4u;
+
+  o[0] = f0.a[i].v[j].x + f0.a[i].m[j].y + f0.b[i][j];
+  o[1] = f.a[i].v[j].x + f.a[i].m[j].y + f.b[i][j];
+  o[2] = p0.a[i].v[j].x + p0.a[i].m[j].y + p0.b[i][j];
+  o[3] = p.a[i].v[j].x + p.a[i].m[j].y + p.b[i][j];
+  o[4] = foo().a[i].v[j].x + foo().a[i].m[j].y + foo().b[i][j];
+}
+)");
+
+    wgpu::Buffer buffer = CreateBuffer(16);
+
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer}});
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+    WaitForAllOperations();
+}
+
+// Regression test for crbug.com/581340668 where a function-local array with 32768 elements
+// combined with 32768 scalar stores caused a 16-bit store counter in the Arm Mali shader compiler
+// to overflow.
+TEST_P(ShaderTests, ExcessiveArraySizeWithScalarStores) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+    DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(wgpu::FeatureName::ShaderF16));
+
+    std::string shader;
+    shader.reserve(1024 * 1024);
+    shader += R"(
+enable f16;
+
+@group(0) @binding(0) var<storage, read_write> s : array<u32>;
+
+@compute @workgroup_size(1)
+fn main(@builtin(global_invocation_id) gid : vec3u) {
+    var local_data : array<f16, 32768>;
+)";
+
+    // 16,384 descending odd indices (32767 down to 1):
+    for (int i = 32767; i >= 1; i -= 2) {
+        shader += "    local_data[" + std::to_string(i) + "] = 1.0h;\n";
+    }
+
+    // 16,384 descending even indices (32766 down to 0):
+    for (int i = 32766; i >= 0; i -= 2) {
+        shader += "    local_data[" + std::to_string(i) + "] = 1.0h;\n";
+    }
+
+    shader += R"(
+    let idx = gid.x % 32768u;
+    s[0] = u32(local_data[idx]);
+}
+)";
+
+    ASSERT_DEVICE_ERROR(CreateComputePipeline(shader, "main"));
 }
 
 DAWN_INSTANTIATE_TEST(ShaderTests,

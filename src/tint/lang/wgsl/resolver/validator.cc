@@ -37,6 +37,7 @@
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/abstract_numeric.h"
 #include "src/tint/lang/core/type/atomic.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/input_attachment.h"
@@ -230,7 +231,7 @@ bool Validator::IsPlain(const core::type::Type* type) const {
     return type->IsAnyOf<core::type::Scalar, core::type::Atomic, core::type::Vector,
                          core::type::Matrix, sem::Array, core::type::Struct,
                          core::type::SubgroupMatrix>() &&
-           !type->IsAnyOf<core::type::I8, core::type::U8, core::type::U16>();
+           !type->IsAnyOf<core::type::I8, core::type::U8, core::type::U16, core::type::BF16>();
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
@@ -497,8 +498,9 @@ bool Validator::SubgroupMatrix(const core::type::SubgroupMatrix* t, const Source
     }
     if (!t->Type()
              ->IsAnyOf<core::type::F32, core::type::F16, core::type::I32, core::type::U32,
-                       core::type::I8, core::type::U8>()) {
-        AddError(source) << "subgroup_matrix element type must be f32, f16, i32, u32, i8 or u8";
+                       core::type::I8, core::type::U8, core::type::BF16>()) {
+        AddError(source)
+            << "subgroup_matrix element type must be f32, f16, i32, u32, i8, u8, or bf16";
         return false;
     }
 
@@ -2461,6 +2463,17 @@ bool Validator::CheckU8Enabled(const Source& source) const {
     return true;
 }
 
+bool Validator::CheckBF16Enabled(const Source& source) const {
+    // Validate if bf16 type is allowed.
+    if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumExperimentalSubgroupMatrix)) {
+        AddError(source) << style::Type("bf16") << " type used without "
+                         << style::Code("chromium_experimental_subgroup_matrix")
+                         << " extension enabled";
+        return false;
+    }
+    return true;
+}
+
 bool Validator::CheckChromiumPrintEnabled(const Source& source) const {
     if (!allowed_features_.features.contains(wgsl::LanguageFeature::kChromiumPrint)) {
         AddError(source) << "the 'chromium_print' language feature is not allowed in the current "
@@ -2670,7 +2683,7 @@ bool Validator::SubgroupMatrixConstructor(const ast::CallExpression* ctor,
 
 bool Validator::Vector(const core::type::Type* el_ty, const Source& source) const {
     if (!el_ty->Is<core::type::Scalar>() || el_ty->Is<core::type::I8>() ||
-        el_ty->Is<core::type::U8>()) {
+        el_ty->Is<core::type::U8>() || el_ty->Is<core::type::BF16>()) {
         AddError(source) << "vector element type must be " << style::Type("bool") << ", "
                          << style::Type("f32") << ", " << style::Type("f16") << ", "
                          << style::Type("i32") << " or " << style::Type("u32");

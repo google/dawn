@@ -187,6 +187,7 @@ TEST(ContentLessObjectCacheTest, InsertingAndFinding) {
     };
 
     std::vector<std::thread> threads;
+    threads.reserve(kNumThreads);
     for (size_t t = 0; t < kNumThreads; t++) {
         threads.emplace_back(f);
     }

@@ -36,6 +36,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::HasSubstr;
+
 class ShaderPrintTest : public DawnTest {
   public:
     void SetUp() override {
@@ -53,8 +55,7 @@ class ShaderPrintTest : public DawnTest {
         device.SetLoggingCallback(
             [](wgpu::LoggingType type, wgpu::StringView message, void* userdata) {
                 std::stringstream& output = *static_cast<std::stringstream*>(userdata);
-                std::string_view view =
-                    DAWN_UNSAFE_TODO(std::string_view(message.data, message.length));
+                std::string_view view = message;
                 switch (type) {
                     case wgpu::LoggingType::Verbose:
                         DebugLog() << view;
@@ -134,10 +135,9 @@ TEST_P(ShaderPrintTest, RenderPipeline) {
 
     RunRenderPipeline(module);
 
-    EXPECT_THAT(print_output.str(), testing::HasSubstr("[ vert vs:L3 instance=0, vertex=0 ] 42"));
-    EXPECT_THAT(
-        print_output.str(),
-        testing::HasSubstr("[ frag fs:L8 position(0.500000, 0.500000, 1.000000) ] 1,2,3,4"));
+    EXPECT_THAT(print_output.str(), HasSubstr("[ vert vs:L3 instance=0, vertex=0 ] 42"));
+    EXPECT_THAT(print_output.str(),
+                HasSubstr("[ frag fs:L8 position(0.500000, 0.500000, 1.000000) ] 1,2,3,4"));
 }
 
 TEST_P(ShaderPrintTest, ComputePipeline) {
@@ -151,22 +151,22 @@ TEST_P(ShaderPrintTest, ComputePipeline) {
     RunComputePipeline(module, 2);
 
     EXPECT_THAT(print_output.str(),
-                testing::HasSubstr("[ comp main:L4 global_invocation_id(0, 0, 0) ] 0,0,0"));
+                HasSubstr("[ comp main:L4 global_invocation_id(0, 0, 0) ] 0,0,0"));
     EXPECT_THAT(print_output.str(),
-                testing::HasSubstr("[ comp main:L4 global_invocation_id(1, 0, 0) ] 0,0,0"));
+                HasSubstr("[ comp main:L4 global_invocation_id(1, 0, 0) ] 0,0,0"));
     EXPECT_THAT(print_output.str(),
-                testing::HasSubstr("[ comp main:L4 global_invocation_id(0, 1, 0) ] 0,0,0"));
+                HasSubstr("[ comp main:L4 global_invocation_id(0, 1, 0) ] 0,0,0"));
     EXPECT_THAT(print_output.str(),
-                testing::HasSubstr("[ comp main:L4 global_invocation_id(1, 1, 0) ] 0,0,0"));
+                HasSubstr("[ comp main:L4 global_invocation_id(1, 1, 0) ] 0,0,0"));
 
     EXPECT_THAT(print_output.str(),
-                testing::HasSubstr("[ comp main:L4 global_invocation_id(2, 0, 0) ] 1,0,0"));
+                HasSubstr("[ comp main:L4 global_invocation_id(2, 0, 0) ] 1,0,0"));
     EXPECT_THAT(print_output.str(),
-                testing::HasSubstr("[ comp main:L4 global_invocation_id(3, 0, 0) ] 1,0,0"));
+                HasSubstr("[ comp main:L4 global_invocation_id(3, 0, 0) ] 1,0,0"));
     EXPECT_THAT(print_output.str(),
-                testing::HasSubstr("[ comp main:L4 global_invocation_id(2, 1, 0) ] 1,0,0"));
+                HasSubstr("[ comp main:L4 global_invocation_id(2, 1, 0) ] 1,0,0"));
     EXPECT_THAT(print_output.str(),
-                testing::HasSubstr("[ comp main:L4 global_invocation_id(3, 1, 0) ] 1,0,0"));
+                HasSubstr("[ comp main:L4 global_invocation_id(3, 1, 0) ] 1,0,0"));
 }
 
 TEST_P(ShaderPrintTest, StringLiteral) {
@@ -181,10 +181,9 @@ TEST_P(ShaderPrintTest, StringLiteral) {
     RunComputePipeline(module);
 
     EXPECT_THAT(print_output.str(),
-                testing::HasSubstr("[ comp main:L4 global_invocation_id(0, 0, 0) ] hello world"));
-    EXPECT_THAT(
-        print_output.str(),
-        testing::HasSubstr("[ comp main:L5 global_invocation_id(0, 0, 0) ] hello from backticks"));
+                HasSubstr("[ comp main:L4 global_invocation_id(0, 0, 0) ] hello world"));
+    EXPECT_THAT(print_output.str(),
+                HasSubstr("[ comp main:L5 global_invocation_id(0, 0, 0) ] hello from backticks"));
 }
 
 TEST_P(ShaderPrintTest, InterpolatedStringRenderPipeline) {
@@ -202,11 +201,10 @@ TEST_P(ShaderPrintTest, InterpolatedStringRenderPipeline) {
 
     RunRenderPipeline(module);
 
-    EXPECT_THAT(print_output.str(),
-                testing::HasSubstr("[ vert vs:L3 instance=0, vertex=0 ] vertex 42"));
-    EXPECT_THAT(print_output.str(),
-                testing::HasSubstr(
-                    "[ frag fs:L8 position(0.500000, 0.500000, 1.000000) ] fragment 1,2,3,4"));
+    EXPECT_THAT(print_output.str(), HasSubstr("[ vert vs:L3 instance=0, vertex=0 ] vertex 42"));
+    EXPECT_THAT(
+        print_output.str(),
+        HasSubstr("[ frag fs:L8 position(0.500000, 0.500000, 1.000000) ] fragment 1,2,3,4"));
 }
 
 TEST_P(ShaderPrintTest, InterpolatedStringComputePipeline) {
@@ -219,9 +217,8 @@ TEST_P(ShaderPrintTest, InterpolatedStringComputePipeline) {
 
     RunComputePipeline(module);
 
-    EXPECT_THAT(
-        print_output.str(),
-        testing::HasSubstr("[ comp main:L4 global_invocation_id(0, 0, 0) ] workgroup: 0,0,0"));
+    EXPECT_THAT(print_output.str(),
+                HasSubstr("[ comp main:L4 global_invocation_id(0, 0, 0) ] workgroup: 0,0,0"));
 }
 
 TEST_P(ShaderPrintTest, InterpolatedStringMultiple) {
@@ -237,9 +234,9 @@ TEST_P(ShaderPrintTest, InterpolatedStringMultiple) {
 
     RunComputePipeline(module);
 
-    EXPECT_THAT(print_output.str(),
-                testing::HasSubstr(
-                    "[ comp main:L7 global_invocation_id(0, 0, 0) ] a=10, b=20, c=30.500000!"));
+    EXPECT_THAT(
+        print_output.str(),
+        HasSubstr("[ comp main:L7 global_invocation_id(0, 0, 0) ] a=10, b=20, c=30.500000!"));
 }
 
 TEST_P(ShaderPrintTest, InterpolatedStringExpressions) {
@@ -253,11 +250,11 @@ TEST_P(ShaderPrintTest, InterpolatedStringExpressions) {
 
     RunComputePipeline(module);
 
+    EXPECT_THAT(
+        print_output.str(),
+        HasSubstr("[ comp main:L4 global_invocation_id(0, 0, 0) ] 100% complete: 3 / 100%"));
     EXPECT_THAT(print_output.str(),
-                testing::HasSubstr(
-                    "[ comp main:L4 global_invocation_id(0, 0, 0) ] 100% complete: 3 / 100%"));
-    EXPECT_THAT(print_output.str(),
-                testing::HasSubstr("[ comp main:L5 global_invocation_id(0, 0, 0) ] adjacent: 12"));
+                HasSubstr("[ comp main:L5 global_invocation_id(0, 0, 0) ] adjacent: 12"));
 }
 
 DAWN_INSTANTIATE_TEST(ShaderPrintTest, MetalBackend({"enable_shader_print"}));

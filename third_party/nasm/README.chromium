@@ -1,0 +1,17 @@
+Name: Netwide Assembler
+Short Name: nasm
+URL: https://github.com/netwide-assembler/nasm
+Version: N/A
+Revision: 525a09a813be0f75b646ee93fc2a31c27b87d722
+Update Mechanism: Autoroll
+License: BSD-2-Clause
+License File: LICENSE
+Security Critical: no
+Shipped: no
+CPEPrefix: unknown
+
+Description:
+This contains the source to NASM, the assembler used by BoringSSL on Windows x86/x64.
+
+Local Modifications:
+None.

@@ -52,7 +52,6 @@ class DeviceMutex : public RecursiveMutex {
 
   private:
     friend struct AutoLockBase<DeviceMutex*>;
-    friend class DeviceMutexTest;
 
     void Lock() DAWN_EXCLUSIVE_LOCK_FUNCTION;
     void Unlock() DAWN_UNLOCK_FUNCTION;

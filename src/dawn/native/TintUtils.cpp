@@ -150,9 +150,11 @@ tint::VertexStepMode ToTintVertexStepMode(wgpu::VertexStepMode mode) {
 
 tint::VertexPullingConfig BuildVertexPullingTransformConfig(
     const RenderPipelineBase& renderPipeline,
-    BindGroupIndex pullingBufferBindingSet) {
+    uint32_t pullingBufferBindGroupID) {
     tint::VertexPullingConfig cfg;
-    cfg.pulling_group = uint32_t{pullingBufferBindingSet};
+    // TODO(https://crbug.com/363031535): May no longer be needed if we can just tell Tint that
+    // these bindings are allowed to conflict.
+    cfg.pulling_group = pullingBufferBindGroupID;
 
     cfg.vertex_state.resize(uint32_t{renderPipeline.GetVertexBufferCount()});
     for (VertexBufferSlot slot : renderPipeline.GetVertexBuffersUsed()) {

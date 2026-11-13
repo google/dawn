@@ -88,8 +88,8 @@ TEST_F(GlslWriter_OffsetFirstIndexTest, NoModify_BuiltinsWithNoOffsets) {
 
     auto* src = R"(
 $B1: {  # root
-  %vertex_index:ptr<__in, u32, read> = var undef @builtin(vertex_index)
-  %instance_index:ptr<__in, u32, read> = var undef @builtin(instance_index)
+  %vertex_index:ptr<__in, u32, read> = var @builtin(vertex_index)
+  %instance_index:ptr<__in, u32, read> = var @builtin(instance_index)
 }
 
 %foo = @vertex func():vec4<f32> [@position] {
@@ -136,8 +136,8 @@ TEST_F(GlslWriter_OffsetFirstIndexTest, VertexOffset) {
 
     auto* src = R"(
 $B1: {  # root
-  %vertex_index:ptr<__in, u32, read> = var undef @builtin(vertex_index)
-  %instance_index:ptr<__in, u32, read> = var undef @builtin(instance_index)
+  %vertex_index:ptr<__in, u32, read> = var @builtin(vertex_index)
+  %instance_index:ptr<__in, u32, read> = var @builtin(instance_index)
 }
 
 %foo = @vertex func():vec4<f32> [@position] {
@@ -158,9 +158,9 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %vertex_index:ptr<__in, u32, read> = var undef @builtin(vertex_index)
-  %instance_index:ptr<__in, u32, read> = var undef @builtin(instance_index)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %vertex_index:ptr<__in, u32, read> = var @builtin(vertex_index)
+  %instance_index:ptr<__in, u32, read> = var @builtin(instance_index)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @vertex func():vec4<f32> [@position] {
@@ -211,8 +211,8 @@ TEST_F(GlslWriter_OffsetFirstIndexTest, InstanceOffset) {
 
     auto* src = R"(
 $B1: {  # root
-  %vertex_index:ptr<__in, u32, read> = var undef @builtin(vertex_index)
-  %instance_index:ptr<__in, u32, read> = var undef @builtin(instance_index)
+  %vertex_index:ptr<__in, u32, read> = var @builtin(vertex_index)
+  %instance_index:ptr<__in, u32, read> = var @builtin(instance_index)
 }
 
 %foo = @vertex func():vec4<f32> [@position] {
@@ -233,9 +233,9 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %vertex_index:ptr<__in, u32, read> = var undef @builtin(vertex_index)
-  %instance_index:ptr<__in, u32, read> = var undef @builtin(instance_index)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %vertex_index:ptr<__in, u32, read> = var @builtin(vertex_index)
+  %instance_index:ptr<__in, u32, read> = var @builtin(instance_index)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @vertex func():vec4<f32> [@position] {
@@ -286,8 +286,8 @@ TEST_F(GlslWriter_OffsetFirstIndexTest, VertexAndInstanceOffset) {
 
     auto* src = R"(
 $B1: {  # root
-  %vertex_index:ptr<__in, u32, read> = var undef @builtin(vertex_index)
-  %instance_index:ptr<__in, u32, read> = var undef @builtin(instance_index)
+  %vertex_index:ptr<__in, u32, read> = var @builtin(vertex_index)
+  %instance_index:ptr<__in, u32, read> = var @builtin(instance_index)
 }
 
 %foo = @vertex func():vec4<f32> [@position] {
@@ -309,9 +309,9 @@ tint_immediate_data_struct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %vertex_index:ptr<__in, u32, read> = var undef @builtin(vertex_index)
-  %instance_index:ptr<__in, u32, read> = var undef @builtin(instance_index)
-  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var undef
+  %vertex_index:ptr<__in, u32, read> = var @builtin(vertex_index)
+  %instance_index:ptr<__in, u32, read> = var @builtin(instance_index)
+  %tint_immediate_data:ptr<immediate, tint_immediate_data_struct, read> = var
 }
 
 %foo = @vertex func():vec4<f32> [@position] {

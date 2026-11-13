@@ -1,0 +1,29 @@
+SKIP: FAILED
+
+$B1: {  # root
+  %out0:ptr<workgroup, array<u32, 128>, read_write> = var
+  %out1:ptr<workgroup, array<vec2<i32>, 128>, read_write> = var
+  %out2:ptr<workgroup, array<vec3<f32>, 128>, read_write> = var
+  %out3:ptr<workgroup, array<vec4<u32>, 128>, read_write> = var
+  %out4:ptr<workgroup, array<f16, 128>, read_write> = var
+  %out5:ptr<workgroup, array<vec2<f16>, 128>, read_write> = var
+  %out6:ptr<workgroup, array<vec3<f16>, 128>, read_write> = var
+}
+
+%main = @compute @workgroup_size(64i, 1i, 1i) func():void {
+  $B2: {
+    %9:subgroup_matrix_result<bf16, 8, 8> = construct
+    %m:subgroup_matrix_result<bf16, 8, 8> = let %9
+    %11:void = subgroupMatrixStore<row_major> %out0, 0u, %m, 16u
+    %12:void = subgroupMatrixStore<row_major> %out1, 0u, %m, 16u
+    %13:void = subgroupMatrixStore<row_major> %out2, 0u, %m, 16u
+    %14:void = subgroupMatrixStore<row_major> %out3, 0u, %m, 16u
+    %15:void = subgroupMatrixStore<row_major> %out4, 0u, %m, 16u
+    %16:void = subgroupMatrixStore<row_major> %out5, 0u, %m, 16u
+    %17:void = subgroupMatrixStore<row_major> %out6, 0u, %m, 16u
+    ret
+  }
+}
+Failed to generate SPIR-V: bf16 is not supported by the SPIR-V backend
+
+tint executable returned error: exit status 1

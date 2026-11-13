@@ -58,24 +58,10 @@ bool SharedBufferMemoryTests::SupportsBackend() {
     return !GetRequiredFeatures().empty();
 }
 
-wgpu::Texture Create2DTexture(wgpu::Device device,
-                              uint32_t width,
-                              uint32_t height,
-                              wgpu::TextureFormat format,
-                              wgpu::TextureUsage usage) {
-    wgpu::TextureDescriptor descriptor;
-    descriptor.dimension = wgpu::TextureDimension::e2D;
-    descriptor.size.width = width;
-    descriptor.size.height = height;
-    descriptor.size.depthOrArrayLayers = 1;
-    descriptor.sampleCount = 1;
-    descriptor.format = format;
-    descriptor.mipLevelCount = 1;
-    descriptor.usage = usage;
-    return device.CreateTexture(&descriptor);
-}
-
 namespace {
+
+using ::testing::HasSubstr;
+using ::testing::Message;
 
 constexpr uint32_t kBufferData = 0x76543210;
 constexpr uint32_t kBufferData2 = 0x01234567;
@@ -86,7 +72,6 @@ constexpr wgpu::BufferUsage kMapReadUsages =
     wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
 constexpr wgpu::BufferUsage kStorageUsages =
     wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Storage;
-using ::testing::HasSubstr;
 
 // Test that it is an error to import shared buffer memory without a chained struct.
 TEST_P(SharedBufferMemoryTests, ImportSharedBufferMemoryNoChain) {
@@ -994,7 +979,7 @@ TEST_P(SharedBufferMemoryTests, CreateBufferMappedAtCreationOnSharedBufferMemory
     constexpr uint32_t kTotalBufferSize = sizeof(uint32_t) * 2;
 
     auto runScenario = [&](bool initialized, uint32_t expectedAtOffset0) {
-        SCOPED_TRACE(testing::Message() << "initialized=" << initialized);
+        SCOPED_TRACE(Message() << "initialized=" << initialized);
 
         wgpu::SharedBufferMemory memory = GetParam().mBackend->CreateSharedBufferMemory(
             device, kStorageUsages, kTotalBufferSize, kInitialData);

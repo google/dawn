@@ -32,6 +32,8 @@
 namespace dawn::native {
 namespace {
 
+using ::testing::HasSubstr;
+
 class MetalBackendTests : public DawnTest {
   private:
     void SetUp() override {
@@ -68,7 +70,7 @@ TEST_P(MetalBackendTests, WaitForCommandsToBeScheduledOnDestroyedDevice) {
 TEST_P(MetalBackendTests, CommandBufferExecutionErrorTriggersDeviceLost) {
     bool deviceLostCalled = false;
     EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
-                                          testing::HasSubstr("Metal command buffer failed")))
+                                          HasSubstr("Metal command buffer failed")))
         .WillOnce([&](auto, auto, auto) { deviceLostCalled = true; });
 
     wgpu::BufferDescriptor desc;
@@ -117,7 +119,7 @@ TEST_P(MetalBackendTests, DestroyDeviceWithInFlightExecutionError) {
 TEST_P(MetalBackendTests, OnSubmittedWorkDoneWithExecutionError) {
     bool deviceLostCalled = false;
     EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
-                                          testing::HasSubstr("Metal command buffer failed")))
+                                          HasSubstr("Metal command buffer failed")))
         .WillOnce([&](auto, auto, auto) { deviceLostCalled = true; });
 
     wgpu::BufferDescriptor desc;
@@ -152,7 +154,7 @@ TEST_P(MetalBackendTests, OnSubmittedWorkDoneWithExecutionError) {
 TEST_P(MetalBackendTests, MapAsyncOnFailedCommandBuffer) {
     bool deviceLostCalled = false;
     EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
-                                          testing::HasSubstr("Metal command buffer failed")))
+                                          HasSubstr("Metal command buffer failed")))
         .WillOnce([&](auto, auto, auto) { deviceLostCalled = true; });
 
     wgpu::BufferDescriptor dstDesc;

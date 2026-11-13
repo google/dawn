@@ -419,6 +419,107 @@ TEST_F(SpirvParserTest, OpTerminateInvocation) {
 )");
 }
 
+// OpDemoteToHelperInvocation becomes `discard` without a `return`.
+TEST_F(SpirvParserTest, OpDemoteToHelperInvocation) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability DemoteToHelperInvocation
+               OpExtension "SPV_EXT_demote_to_helper_invocation"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+       %void = OpTypeVoid
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+         %10 = OpLabel
+               OpDemoteToHelperInvocation
+               OpReturn
+               OpFunctionEnd)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    discard
+    ret
+  }
+}
+)");
+}
+
+// Code after a demote inside an `if` keeps running, so the merge block is still reached.
+TEST_F(SpirvParserTest, OpDemoteToHelperInvocation_InsideIf) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability DemoteToHelperInvocation
+               OpExtension "SPV_EXT_demote_to_helper_invocation"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+        %f32 = OpTypeFloat 32
+      %f32_1 = OpConstant %f32 1
+    %ptr_f32 = OpTypePointer Private %f32
+          %v = OpVariable %ptr_f32 Private
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+         %10 = OpLabel
+               OpSelectionMerge %30 None
+               OpBranchConditional %true %20 %30
+         %20 = OpLabel
+               OpDemoteToHelperInvocation
+               OpBranch %30
+         %30 = OpLabel
+               OpStore %v %f32_1
+               OpReturn
+               OpFunctionEnd)",
+              R"(
+$B1: {  # root
+  %1:ptr<private, f32, read_write> = var
+}
+
+%main = @fragment func():void {
+  $B2: {
+    if true [t: $B3, f: $B4] {  # if_1
+      $B3: {  # true
+        discard
+        exit_if  # if_1
+      }
+      $B4: {  # false
+        exit_if  # if_1
+      }
+    }
+    store %1, 1.0f
+    ret
+  }
+}
+)");
+}
+
+// OpIsHelperInvocationEXT is rejected because WGSL cannot query helper status.
+TEST_F(SpirvParserTest, OpIsHelperInvocationEXT) {
+    auto res = Run(R"(
+               OpCapability Shader
+               OpCapability DemoteToHelperInvocation
+               OpExtension "SPV_EXT_demote_to_helper_invocation"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+         %10 = OpLabel
+         %11 = OpIsHelperInvocationEXT %bool
+               OpReturn
+               OpFunctionEnd
+)");
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("OpIsHelperInvocationEXT is not supported: WGSL has no way to "
+                                   "query whether an invocation is a helper"));
+}
+
 TEST_F(SpirvParserTest, OpKill_TopLevel) {
     EXPECT_IR(R"(
                OpCapability Shader

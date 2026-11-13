@@ -38,20 +38,26 @@ namespace dawn::native::vulkan {
 FencedDeleter::FencedDeleter(Device* device) : mDevice(device) {}
 
 FencedDeleter::~FencedDeleter() {
-    // Flush any pending deletions.
-    UpdateCompletedSerialTo(kMaxExecutionSerial);
+    // There should be nothing left to delete by this point.
+#if defined(DAWN_ENABLE_ASSERTS)
+    mPendingDeletions.Use([&](auto pending) {
+#define X(Type, ...) DAWN_ASSERT(pending->m##Type.Empty());
+        FENCED_DELETER_TYPES(X)
+#undef X
+    });
+#endif  // defined(DAWN_ENABLE_ASSERTS)
 }
 
 #define X(Type, DeleteFn, deleteWith)                                            \
     void FencedDeleter::DeleteWhenUnused(Type handle) {                          \
         mPendingDeletions.Use([&](auto pending) {                                \
-            if (pending->mAssumeCompleted) {                                     \
+            ExecutionSerial deletionSerial = GetCurrentDeletionSerial();         \
+            if (pending->mCompletedSerial >= deletionSerial) {                   \
                 [[maybe_unused]] VkDevice device = mDevice->GetVkDevice();       \
                 [[maybe_unused]] VkInstance instance = mDevice->GetVkInstance(); \
                 mDevice->fn.DeleteFn(deleteWith, handle, nullptr);               \
                 return;                                                          \
             }                                                                    \
-            ExecutionSerial deletionSerial = GetCurrentDeletionSerial();         \
             pending->m##Type.Enqueue(handle, deletionSerial);                    \
         });                                                                      \
     }
@@ -87,11 +93,9 @@ void FencedDeleter::UpdateCompletedSerialTo(ExecutionSerial completedSerial) {
     pending->m##Type.ClearUpTo(completedSerial);
         FENCED_DELETER_TYPES(X)
 #undef X
-    });
-}
 
-void FencedDeleter::AssumeCommandsComplete() {
-    mPendingDeletions->mAssumeCompleted = true;
+        pending->mCompletedSerial = std::max(pending->mCompletedSerial, completedSerial);
+    });
 }
 
 }  // namespace dawn::native::vulkan

@@ -28,19 +28,29 @@
 set(HERMETICXCODE_DAWN_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../..")
 set(HERMETICXCODE_LLVM      "${HERMETICXCODE_DAWN_ROOT}/third_party/llvm-build/Release+Asserts/bin")
 set(HERMETICXCODE_DEVELOPER "${HERMETICXCODE_DAWN_ROOT}/build/mac_files/xcode_binaries/Contents/Developer")
+set(HERMETICXCODE_USR_BIN   "${HERMETICXCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin")
 
 set(CMAKE_C_COMPILER        "${HERMETICXCODE_LLVM}/clang")
 set(CMAKE_CXX_COMPILER      "${HERMETICXCODE_LLVM}/clang++")
 set(CMAKE_AR                "${HERMETICXCODE_LLVM}/llvm-ar")
 set(CMAKE_INSTALL_NAME_TOOL "${HERMETICXCODE_LLVM}/llvm-install-name-tool")
 
-# ranlib is just a symlink to libtool in system CommandLineTools, so we have our
-# own correctly-name symlink to make this work
+# Tools missing from the hermetic Xcode:
+# - ranlib: is normally just an alias to libtool, but needs to have the right
+#   filename. We have our own correctly-named symlink to make this work.
 set(CMAKE_RANLIB            "${CMAKE_CURRENT_LIST_DIR}/ranlib")
+# - tapi: not needed. Just set this to make sure nothing is trying to use it.
+set(CMAKE_TAPI              "/usr/bin/false")
 
-set(CMAKE_LINKER            "${HERMETICXCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld")
-set(CMAKE_NM                "${HERMETICXCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/llvm-nm")
-set(CMAKE_OBJDUMP           "${HERMETICXCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/llvm-objdump")
-set(CMAKE_STRIP             "${HERMETICXCODE_DEVELOPER}/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip")
+set(CMAKE_LINKER            "${HERMETICXCODE_USR_BIN}/ld")
+set(CMAKE_NM                "${HERMETICXCODE_USR_BIN}/llvm-nm")
+set(CMAKE_OBJDUMP           "${HERMETICXCODE_USR_BIN}/llvm-objdump")
+set(CMAKE_STRIP             "${HERMETICXCODE_USR_BIN}/strip")
 
 set(CMAKE_OSX_SYSROOT       "${HERMETICXCODE_DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk")
+
+# Clang is actually used to drive linking, rather than CMAKE_LINKER. Tell it
+# where ld (and probably other tools) live; otherwise it uses the system path.
+string(APPEND CMAKE_EXE_LINKER_FLAGS_INIT    " -B${HERMETICXCODE_USR_BIN}")
+string(APPEND CMAKE_MODULE_LINKER_FLAGS_INIT " -B${HERMETICXCODE_USR_BIN}")
+string(APPEND CMAKE_SHARED_LINKER_FLAGS_INIT " -B${HERMETICXCODE_USR_BIN}")

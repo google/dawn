@@ -50,13 +50,14 @@ namespace {
 // bindings that might be for Vulkan BindGroupLayout.
 struct VulkanStaticBindings {
     ityp::vector<BindingIndex, VkDescriptorSetLayoutBinding> bindings;
+    ityp::vector<BindingIndex, VkDescriptorUpdateTemplateEntry> updateTemplateEntries;
     absl::flat_hash_map<VkDescriptorType, uint32_t> descriptorCountPerType;
     TextureToStaticSamplerMap textureToStaticSampler;
 };
 ResultOrError<VulkanStaticBindings> ComputeVulkanStaticBindings(
     Device* device,
     const BindGroupLayoutInternalBase* layout,
-    const BindGroupLayout::StaticSamplerSpecializationMap& staticSamplerSpecializations = {}) {
+    const BindGroupLayout::StaticSamplerSpecializationMap& staticSamplerSpecializations) {
     VulkanStaticBindings res;
 
     // Build a map of texture indices to sampler indices. This maps the texture to
@@ -76,6 +77,7 @@ ResultOrError<VulkanStaticBindings> ComputeVulkanStaticBindings(
     // one entry per binding set. This could be optimized by computing continuous ranges of
     // bindings of the same type.
     res.bindings.reserve(layout->GetBindingCount());
+    res.updateTemplateEntries.reserve(layout->GetBindingCount());
 
     for (BindingIndex bindingIndex : Range(layout->GetBindingCount())) {
         const BindingInfo& bindingInfo = layout->GetBindingInfo(bindingIndex);
@@ -141,6 +143,28 @@ ResultOrError<VulkanStaticBindings> ComputeVulkanStaticBindings(
                 DAWN_CHECK(bindingInfo.arraySize == BindingIndex(1u));
                 descriptorCount = 3;
             }
+
+            if (samplerLayout.use != StaticSamplerUse::Freestanding) {
+                // Write the info of the texture at the binding index for the static sampler.
+                res.updateTemplateEntries.push_back({
+                    .dstBinding = vkBinding.binding,
+                    .dstArrayElement = 0,
+                    .descriptorCount = vkBinding.descriptorCount,
+                    .descriptorType = vkBinding.descriptorType,
+                    .offset =
+                        uint32_t{samplerLayout.sampledTextureIndex} * sizeof(DescriptorUpdateData),
+                    .stride = sizeof(DescriptorUpdateData),
+                });
+            }
+        } else {
+            res.updateTemplateEntries.push_back({
+                .dstBinding = vkBinding.binding,
+                .dstArrayElement = 0,
+                .descriptorCount = vkBinding.descriptorCount,
+                .descriptorType = vkBinding.descriptorType,
+                .offset = uint32_t{bindingIndex} * sizeof(DescriptorUpdateData),
+                .stride = sizeof(DescriptorUpdateData),
+            });
         }
 
         res.bindings.emplace_back(vkBinding);
@@ -231,7 +255,7 @@ MaybeError BindGroupLayout::Initialize() {
     Device* device = ToBackend(GetDevice());
 
     VulkanStaticBindings bindings;
-    DAWN_TRY_ASSIGN(bindings, ComputeVulkanStaticBindings(device, this));
+    DAWN_TRY_ASSIGN(bindings, ComputeVulkanStaticBindings(device, this, {}));
     mTextureToStaticSampler = std::move(bindings.textureToStaticSampler);
 
     VkDescriptorSetLayoutCreateInfo createInfo{
@@ -249,6 +273,7 @@ MaybeError BindGroupLayout::Initialize() {
     DAWN_TRY_ASSIGN(r, GetOrCreateSpecialization({}));
 
     mHandle = r.layout;
+    mDescriptorUpdateTemplate = r.descriptorUpdateTemplate;
     mDescriptorSetAllocator = r.allocator.Get();
 
     SetLabelImpl();
@@ -287,14 +312,50 @@ ResultOrError<BindGroupLayout::SpecializationResult> BindGroupLayout::GetOrCreat
                                                                  nullptr, &*specialized),
                             "CreateDescriptorSetLayout"));
 
+    // VUID-VkDescriptorUpdateTemplateCreateInfo-descriptorUpdateEntryCount-arraylength requires
+    // descriptorUpdateEntryCount to be greater than 0.
+    VkDescriptorUpdateTemplate updateTemplate = VK_NULL_HANDLE;
+    if (device->IsToggleEnabled(Toggle::VulkanUseDescriptorUpdateTemplate) &&
+        !bindings.updateTemplateEntries.empty()) {
+        VkDescriptorUpdateTemplateCreateInfo templateCreateInfo{
+            .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_CREATE_INFO,
+            .pNext = nullptr,
+            .flags = 0,
+            .descriptorUpdateEntryCount = uint32_t{bindings.updateTemplateEntries.size()},
+            .pDescriptorUpdateEntries = bindings.updateTemplateEntries.data(),
+            .templateType = VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_DESCRIPTOR_SET,
+            .descriptorSetLayout = specialized,
+            // pipelineBindPoint, pipelineLayout, and set are only used when templateType is
+            // VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_PUSH_DESCRIPTORS. For
+            // VK_DESCRIPTOR_UPDATE_TEMPLATE_TYPE_DESCRIPTOR_SET, the Vulkan spec ignores these
+            // three fields because the template only updates a standalone VkDescriptorSet, which
+            // can subsequently be bound to both graphics and compute pipelines.
+            .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+            .pipelineLayout = VkPipelineLayout(VK_NULL_HANDLE),
+            .set = 0,
+        };
+        DAWN_TRY_WITH_CLEANUP(
+            CheckVkSuccess(
+                device->fn.CreateDescriptorUpdateTemplate(
+                    device->GetVkDevice(), &templateCreateInfo, nullptr, &*updateTemplate),
+                "CreateDescriptorUpdateTemplate"),
+            {
+                device->fn.DestroyDescriptorSetLayout(device->GetVkDevice(), specialized, nullptr);
+            });
+    }
+
     Ref<DescriptorSetAllocator> allocator =
         DescriptorSetAllocator::Create(device, std::move(bindings.descriptorCountPerType));
 
     return mSpecializations.Use([&](auto specializations) -> ResultOrError<SpecializationResult> {
-        SpecializationResult result{.layout = specialized, .allocator = std::move(allocator)};
+        SpecializationResult result{.layout = specialized,
+                                    .descriptorUpdateTemplate = updateTemplate,
+                                    .allocator = std::move(allocator)};
         auto [it, inserted] = specializations->insert({specialization, result});
         if (!inserted) {
             device->fn.DestroyDescriptorSetLayout(device->GetVkDevice(), specialized, nullptr);
+            device->fn.DestroyDescriptorUpdateTemplate(device->GetVkDevice(), updateTemplate,
+                                                       nullptr);
             return it->second;
         }
         return result;
@@ -313,17 +374,21 @@ void BindGroupLayout::DestroyImpl(DestroyReason reason) {
 
     Device* device = ToBackend(GetDevice());
 
-    // mHandle is destroyed in the loop below.
+    // mHandle and mDescriptorUpdateTemplate are destroyed in the loop below.
     mHandle = VK_NULL_HANDLE;
+    mDescriptorUpdateTemplate = VK_NULL_HANDLE;
 
     mDescriptorSetAllocator = nullptr;
 
-    // DescriptorSetLayouts aren't used by execution on the GPU and can be deleted at any time,
-    // so we can destroy them immediately instead of using the FencedDeleter.
+    // DescriptorSetLayouts and DescriptorUpdateTemplates aren't used by execution on the GPU and
+    // can be deleted at any time, so we can destroy them immediately instead of using the
+    // FencedDeleter.
     mSpecializations.Use([&](auto specializations) {
         for (auto& [_, specialized] : *specializations) {
             device->fn.DestroyDescriptorSetLayout(device->GetVkDevice(), specialized.layout,
                                                   nullptr);
+            device->fn.DestroyDescriptorUpdateTemplate(
+                device->GetVkDevice(), specialized.descriptorUpdateTemplate, nullptr);
         }
         specializations->clear();
     });
@@ -331,6 +396,10 @@ void BindGroupLayout::DestroyImpl(DestroyReason reason) {
 
 VkDescriptorSetLayout BindGroupLayout::GetHandle() const {
     return mHandle;
+}
+
+VkDescriptorUpdateTemplate BindGroupLayout::GetDescriptorUpdateTemplate() const {
+    return mDescriptorUpdateTemplate;
 }
 
 ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
@@ -365,7 +434,7 @@ ResultOrError<std::unique_ptr<OwnedDescriptorSet>> BindGroupLayout::GetSpecializ
     DescriptorSetAllocation dsAllocation;
     DAWN_TRY_ASSIGN(dsAllocation, specialized.allocator->Allocate(specialized.layout));
 
-    bg->WriteDescriptorSet(dsAllocation.set, mTextureToStaticSampler);
+    bg->WriteDescriptorSet(dsAllocation.set, specialized.descriptorUpdateTemplate);
     return std::make_unique<OwnedDescriptorSet>(std::move(specialized.allocator), dsAllocation);
 }
 
@@ -375,6 +444,8 @@ const TextureToStaticSamplerMap& BindGroupLayout::GetTextureToStaticSamplerMap()
 
 void BindGroupLayout::SetLabelImpl() {
     SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_BindGroupLayout", GetLabel());
+    SetDebugName(ToBackend(GetDevice()), mDescriptorUpdateTemplate, "Dawn_DescriptorUpdateTemplate",
+                 GetLabel());
 }
 
 // OwnedDescriptorSet

@@ -56,10 +56,7 @@ Ref<PipelineCache> PipelineCache::CreateMonolithic(Device* device, const CacheKe
 }
 
 PipelineCache::PipelineCache(Device* device, const CacheKey& key, bool isMonolithicCache)
-    : PipelineCacheBase(device->GetBlobCache(), key, isMonolithicCache),
-      mDevice(device),
-      mInvalidResultWorkaround(
-          device->IsToggleEnabled(Toggle::VulkanIncompletePipelineCacheWorkaround)) {}
+    : PipelineCacheBase(device->GetBlobCache(), key, isMonolithicCache), mDevice(device) {}
 
 PipelineCache::~PipelineCache() {
     if (mHandle == VK_NULL_HANDLE) {
@@ -73,41 +70,40 @@ VkPipelineCache PipelineCache::GetHandle() const {
     return mHandle;
 }
 
-MaybeError PipelineCache::SerializeToBlobImpl(Blob* blob) {
+void PipelineCache::SerializeToBlobImpl(Blob* blob) {
     if (mHandle == VK_NULL_HANDLE) {
         // Pipeline cache isn't created successfully
-        return {};
+        return;
     }
 
     if (mSkipSerialize) {
-        return {};
+        return;
     }
 
     size_t bufferSize;
-    DAWN_TRY(CheckVkSuccess(
-        mDevice->fn.GetPipelineCacheData(mDevice->GetVkDevice(), mHandle, &bufferSize, nullptr),
-        "GetPipelineCacheData"));
+    auto result =
+        mDevice->fn.GetPipelineCacheData(mDevice->GetVkDevice(), mHandle, &bufferSize, nullptr);
+    if (result != VK_SUCCESS) {
+        // Cache failed, continue but without caching
+        mSkipSerialize = true;
+        return;
+    }
 
     if (bufferSize == 0 || bufferSize == mStoredDataSize) {
         // If current VkPipelineCache data size is same as `mStoredDataSize` assume nothing has
         // changed vs what is stored in the BlobCache.
-        return {};
+        return;
     }
     *blob = Blob::Create(bufferSize);
-    auto result = mDevice->fn.GetPipelineCacheData(mDevice->GetVkDevice(), mHandle, &bufferSize,
-                                                   blob->DataPtr());
-
-    if (result == VK_INCOMPLETE && mInvalidResultWorkaround) {
-        // Most of the time VK_INCOMPLETE is returned on Pixel 10 is due to a driver bug. The
-        // serialized data both returned here and cached in the driver is likely corrupted. Don't
-        // store it to the blob cache and don't call vkGetPipelineCacheData() since it will return
-        // corrupted data in future calls.
+    result = mDevice->fn.GetPipelineCacheData(mDevice->GetVkDevice(), mHandle, &bufferSize,
+                                              blob->DataPtr());
+    if (result != VK_SUCCESS) {
+        // We failed to retrieve the pipeline cache data, in that case, skip using the cache in
+        // general as we don't know why the data call failed.
         mSkipSerialize = true;
         *blob = {};
-        return {};
+        return;
     }
-
-    DAWN_TRY(CheckVkSuccess(result, "GetPipelineCacheData"));
 
     if (bufferSize < blob->Size()) {
         // vkGetPipelineCacheData() returned less data than expected. Shrink the blob so
@@ -116,8 +112,6 @@ MaybeError PipelineCache::SerializeToBlobImpl(Blob* blob) {
     }
 
     mStoredDataSize = bufferSize;
-
-    return {};
 }
 
 void PipelineCache::Initialize() {

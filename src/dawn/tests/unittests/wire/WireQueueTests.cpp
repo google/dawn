@@ -39,14 +39,14 @@
 namespace dawn::wire {
 namespace {
 
-using testing::_;
-using testing::EmptySizedString;
-using testing::NonEmptySizedString;
-using testing::Return;
-using testing::SaveArg;
-using testing::Sequence;
-using testing::SizedString;
-using testing::WithArg;
+using ::testing::_;
+using ::testing::EmptySizedString;
+using ::testing::NonEmptySizedString;
+using ::testing::Return;
+using ::testing::SaveArg;
+using ::testing::Sequence;
+using ::testing::SizedString;
+using ::testing::WithArg;
 
 class WireWriteBufferTests : public WireTest {};
 

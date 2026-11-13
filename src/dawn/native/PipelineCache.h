@@ -47,15 +47,15 @@ class PipelineCacheBase : public RefCounted {
     // Serializes and writes the current contents of the backend cache object into the backing
     // blob cache, potentially overwriting what is already there. Useful when we are working
     // with more monolithic-like caches where we expect overwriting sometimes.
-    MaybeError Flush();
+    void Flush();
 
     // Called after pipeline was compiled. The default implementation serializes and writes the
     // current contents of the backend cache object into the backing blob cache iff the initial read
     // from the backend cache did not result in a hit.
-    MaybeError DidCompilePipeline();
+    void DidCompilePipeline();
 
     // Trigger storing pipeline cache data in BlobCache if necessary.
-    MaybeError StoreOnIdle();
+    void StoreOnIdle();
 
   protected:
     // If `storeOnIdle` is true then pipeline cache will only stored in BlobCache when
@@ -70,7 +70,7 @@ class PipelineCacheBase : public RefCounted {
     // Backend implementation of serialization of the cache into a blob.
     // Note: given that no local cached blob should be destructed and copy elision has strict
     // requirement cached blob is passed in as a pointer to be assigned.
-    virtual MaybeError SerializeToBlobImpl(Blob* blob) = 0;
+    virtual void SerializeToBlobImpl(Blob* blob) = 0;
 
     // The blob cache is owned by the Adapter and pipeline caches are owned/created by devices
     // or adapters. Since the device owns a reference to the Instance which owns the Adapter,

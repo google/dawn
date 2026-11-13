@@ -103,6 +103,7 @@ class RenderPassCache {
         VkRenderPass renderPass = VK_NULL_HANDLE;
         uint32_t mainSubpass = 0;
         uint64_t uniqueId = 0;
+        VkExtent2D renderAreaGranularity = {};
     };
 
     ResultOrError<RenderPassInfo> GetRenderPass(const RenderPassCacheQuery& query);

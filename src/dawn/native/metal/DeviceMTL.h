@@ -45,6 +45,7 @@
 
 namespace dawn::native::metal {
 
+class FencedReferencer;
 struct KalmanInfo;
 class CounterSampleBufferAllocator;
 
@@ -62,6 +63,7 @@ class Device final : public DeviceBase {
     MaybeError TickImpl() override;
 
     id<MTLDevice> GetMTLDevice() const;
+    FencedReferencer& GetFencedReferencer() const;
 
     MaybeError CopyFromStagingToBuffer(BufferBase* source,
                                        uint64_t sourceOffset,
@@ -84,6 +86,12 @@ class Device final : public DeviceBase {
     bool UseCounterSamplingAtStageBoundary() const;
 
     bool BackendWillValidateMultiDraw() const override;
+
+    std::optional<DeviceGuard> UseGuardForCreateBindGroup() override;
+    std::optional<DeviceGuard> UseGuardForCreateBindGroupLayout() override;
+    std::optional<DeviceGuard> UseGuardForCreateBuffer() override;
+    std::optional<DeviceGuard> UseGuardForCreateSampler() override;
+    std::optional<DeviceGuard> UseGuardForCreateTexture() override;
 
     // Get a MTLBuffer that can be used as a mock in a no-op blit encoder based on filling this
     // single-byte buffer
@@ -164,6 +172,8 @@ class Device final : public DeviceBase {
     NSPRef<id<MTLBuffer>> mMockBlitMtlBuffer;
 
     std::unique_ptr<CounterSampleBufferAllocator> mCounterSampleBufferAllocator;
+
+    Ref<FencedReferencer> mFencedReferencer;
 };
 
 }  // namespace dawn::native::metal

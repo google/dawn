@@ -29,9 +29,14 @@
 
 This script acts as a thin wrapper around the litert_lm_advanced_main binary
 to support running it on Swarming with correct libraries and paths.
+
+It runs each of the workloads with the binary: the default benchmark, and
+some additional benchmarks and correctness checks. Each benchmark writes its metrics to
+<workload>.pb in the output directory.
 """
 
 import argparse
+import dataclasses
 import json
 import os
 from pathlib import Path
@@ -39,8 +44,75 @@ import shutil
 import subprocess
 import sys
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+LITERT_LM_DIR = REPO_ROOT / 'third_party' / 'litert-lm'
+GEMMA4_2B_DIR = LITERT_LM_DIR / 'models' / 'gemma4_2b'
+GEMMA4_2B_MODEL_PATH = GEMMA4_2B_DIR / 'model' / 'gemma4_2b.litertlm'
 
-def run_litert_lm(metric_proto_file_path: Path) -> subprocess.CompletedProcess:
+
+@dataclasses.dataclass
+class Workload:
+    """A single invocation of litert_lm_advanced_main."""
+
+    # Name of the workload. Benchmarks write their metrics to <name>.pb.
+    name: str
+    model_path: Path
+    args: list[str]
+
+
+DEFAULT_ARGS = ['--async=true', '--clear_kv_cache_before_prefill=true']
+DEFAULT_BENCHMARK_ARGS = DEFAULT_ARGS + [
+    '--benchmark', '--report_peak_memory_footprint'
+]
+IMAGE_PROMPT = ('--input_prompt=Describe this image: '
+                f"[image:{GEMMA4_2B_DIR / 'apple.jpg'}]")
+
+WORKLOADS = [
+    # Correctness check, fails if output of the model does not contain expected text.
+    Workload(name='correctness_text_president',
+             model_path=GEMMA4_2B_MODEL_PATH,
+             args=DEFAULT_ARGS + [
+                 '--input_prompt=Who is the first president of US? ',
+                 '--expected_output=washington',
+             ]),
+    # Benchmarking workloads.
+    Workload(name='default',
+             model_path=LITERT_LM_DIR / 'data' / 'model.litertlm',
+             args=[
+                 '--benchmark',
+                 '--benchmark_prefill_tokens=1024',
+                 '--benchmark_decode_tokens=256',
+                 '--num_iterations=6',
+             ]),
+    Workload(name='text_p1024_d256',
+             model_path=GEMMA4_2B_MODEL_PATH,
+             args=DEFAULT_BENCHMARK_ARGS + [
+                 '--benchmark_prefill_tokens=1024',
+                 '--benchmark_decode_tokens=256',
+                 '--max_num_tokens=1535',
+                 '--num_iterations=2',
+             ]),
+    Workload(name='text_p2048_d256',
+             model_path=GEMMA4_2B_MODEL_PATH,
+             args=DEFAULT_BENCHMARK_ARGS + [
+                 '--benchmark_prefill_tokens=2048',
+                 '--benchmark_decode_tokens=256',
+                 '--num_iterations=2',
+             ]),
+    Workload(name='image',
+             model_path=GEMMA4_2B_MODEL_PATH,
+             args=DEFAULT_BENCHMARK_ARGS + [
+                 IMAGE_PROMPT,
+                 '--vision_backend=gpu',
+                 '--expected_output=apple',
+                 '--num_iterations=2',
+             ]),
+]
+
+
+def run_litert_lm(
+        workload: Workload,
+        metric_proto_file_path: Path | None) -> subprocess.CompletedProcess:
     # The shared libraries (.so / .dylib) are isolated alongside the binary in the current
     # build out directory, so explicitly add them to the library path for execution on bots.
     env = os.environ.copy()
@@ -65,17 +137,12 @@ def run_litert_lm(metric_proto_file_path: Path) -> subprocess.CompletedProcess:
         except Exception as e:
             print(f"Warning: Failed to clear Metal shader cache: {e}")
 
-    repo_root = Path(__file__).resolve().parent.parent
     binary_name = ('litert_lm_advanced_main.exe'
                    if sys.platform == 'win32' else 'litert_lm_advanced_main')
     binary_path = Path.cwd() / binary_name
-    model_path = repo_root / 'third_party' / 'litert-lm' / 'data' / 'model.litertlm'
 
     cmd = [
         str(binary_path),
-        '--benchmark',
-        '--benchmark_prefill_tokens=1024',
-        '--benchmark_decode_tokens=256',
         '--backend=gpu',
         '--disable_cache=true',
         # Run pipeline compilation and weight upload synchronously during Init
@@ -85,24 +152,25 @@ def run_litert_lm(metric_proto_file_path: Path) -> subprocess.CompletedProcess:
         # a benchmark bug.
         '--num_threads_to_compile=0',
         '--num_threads_to_upload=0',
-        '--num_iterations=6',
-        f'--model_path={model_path}',
-        f'--metric_proto_file_path={metric_proto_file_path}',
-    ]
+        f'--model_path={workload.model_path}',
+    ] + workload.args
+    if metric_proto_file_path:
+        cmd.append(f'--metric_proto_file_path={metric_proto_file_path}')
 
-    print(f"Executing: {' '.join(cmd)}")
+    print(f"Executing {workload.name}: {' '.join(cmd)}")
 
     return subprocess.run(cmd, env=env, check=False)
 
 
-def generate_results_for_resultdb_ingestion(success: bool,
+def generate_results_for_resultdb_ingestion(failed_workloads: list[str],
                                             output_file: str) -> None:
     generated_test_results = {
         'failures': [],
         'valid': True,
     }
-    if not success:
-        generated_test_results['failures'].append('litert_lm_advanced_main')
+    for workload_name in failed_workloads:
+        generated_test_results['failures'].append(
+            f'litert_lm_advanced_main:{workload_name}')
 
     with open(output_file, 'w', encoding='utf-8') as outfile:
         json.dump(generated_test_results, outfile)
@@ -129,13 +197,20 @@ def main() -> None:
     else:
         output_dir = Path.cwd()
 
-    # Run the benchmark and generate metric results file.
-    metric_file = output_dir / 'litert_lm_metrics.pb'
-    proc = run_litert_lm(metric_file)
+    # Run the workloads, and generate a metric results file for each.
+    failed_workloads = []
+    for workload in WORKLOADS:
+        metric_file = None
+        if '--benchmark' in workload.args:
+            metric_file = output_dir / f'{workload.name}.pb'
+        proc = run_litert_lm(workload, metric_file)
+        if proc.returncode:
+            failed_workloads.append(workload.name)
     if args.isolated_script_test_output:
         generate_results_for_resultdb_ingestion(
-            not proc.returncode, args.isolated_script_test_output)
-    proc.check_returncode()
+            failed_workloads, args.isolated_script_test_output)
+    if failed_workloads:
+        sys.exit(f"Failed workloads: {', '.join(failed_workloads)}")
 
 
 if __name__ == '__main__':

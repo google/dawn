@@ -44,6 +44,19 @@ class Device;
 // VkDescriptorSet.
 using TextureToStaticSamplerMap = absl::flat_hash_map<BindingIndex, BindingIndex>;
 
+// Data structure used as the source for VkDescriptorUpdateTemplate updates.
+// The descriptor update template takes a packed array of these unions, with each element at index
+// `i` holding the resource for `BindingIndex(i)`. This works because `BindingIndex` values form a
+// dense `0..GetBindingCount() - 1` array, and each `VkDescriptorUpdateTemplateEntry` sets its byte
+// `offset` to `BindingIndex * sizeof(DescriptorUpdateData)`.
+union DescriptorUpdateData {
+    VkDescriptorBufferInfo buffer;
+    VkDescriptorImageInfo image;
+    // Use the raw Vulkan handle instead of Dawn's VkHandle wrapper so this union remains trivially
+    // constructible.
+    ::VkBufferView texelBufferView;
+};
+
 class BindGroup final : public BindGroupBase, public PlacementAllocated {
   public:
     static ResultOrError<Ref<BindGroup>> Create(Device* device,
@@ -55,8 +68,7 @@ class BindGroup final : public BindGroupBase, public PlacementAllocated {
 
     // Write the descriptors to the provided VkDescriptorSet, this is also used to write to new
     // allocation from specific vulkan::BindGroupLayout specializations.
-    void WriteDescriptorSet(VkDescriptorSet dsSet,
-                            const TextureToStaticSamplerMap& textureToStaticSampler) const;
+    void WriteDescriptorSet(VkDescriptorSet dsSet, VkDescriptorUpdateTemplate updateTemplate) const;
 
     VkDescriptorSet GetHandle() const;
 
@@ -66,6 +78,12 @@ class BindGroup final : public BindGroupBase, public PlacementAllocated {
     MaybeError InitializeImpl() override;
     void DestroyImpl(DestroyReason reason) override;
     void DeleteThis() override;
+
+    void WriteDescriptorSetWithTemplate(VkDescriptorSet dsSet,
+                                        VkDescriptorUpdateTemplate updateTemplate) const;
+    void WriteDescriptorSetWithoutTemplate(
+        VkDescriptorSet dsSet,
+        const TextureToStaticSamplerMap& textureToStaticSampler) const;
 
     // Dawn API
     void SetLabelImpl() override;

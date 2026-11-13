@@ -28,10 +28,17 @@
 #ifndef SRC_TINT_LANG_WGSL_RESOLVER_UNIFORMITY_H_
 #define SRC_TINT_LANG_WGSL_RESOLVER_UNIFORMITY_H_
 
+#include <unordered_map>
+
+#include "src/tint/lang/wgsl/resolver/alias_analysis_info.h"
+
 // Forward declarations.
 namespace tint::resolver {
 struct DependencyGraph;
 }  // namespace tint::resolver
+namespace tint::sem {
+class Function;
+}
 namespace tint {
 class ProgramBuilder;
 }  // namespace tint
@@ -46,9 +53,11 @@ constexpr bool kUniformityFailuresAsError = true;
 /// @param dependency_graph the dependency-ordered module-scope declarations
 /// @param subgroup_uniformity Whether subgroup_uniformity feature is supported
 /// @returns true if there are no uniformity issues, false otherwise
-bool AnalyzeUniformity(ProgramBuilder& builder,
-                       const resolver::DependencyGraph& dependency_graph,
-                       bool subgroup_uniformity = false);
+bool AnalyzeUniformity(
+    ProgramBuilder& builder,
+    const resolver::DependencyGraph& dependency_graph,
+    bool subgroup_uniformity = false,
+    const std::unordered_map<const sem::Function*, AliasAnalysisInfo>& alias_analysis_info = {});
 
 }  // namespace tint::resolver
 

@@ -47,17 +47,17 @@ class CommandBuffer final : public CommandBufferBase {
   public:
     static Ref<CommandBuffer> Create(CommandEncoder* encoder,
                                      const CommandBufferDescriptor* descriptor);
-    MaybeError Execute(const ScopedSwapStateCommandRecordingContext* commandContext);
+    MaybeError RecordCommands(const ScopedSwapStateCommandRecordingContext* commandContext);
 
   private:
     using CommandBufferBase::CommandBufferBase;
 
-    MaybeError ExecuteComputePass(const ScopedSwapStateCommandRecordingContext* commandContext,
-                                  PipelineStateTracker* pipelineStateTracker);
-    MaybeError ExecuteRenderPass(BeginRenderPassCmd* renderPass,
-                                 const ScopedSwapStateCommandRecordingContext* commandContext,
-                                 PipelineStateTracker* pipelineStateTracker,
-                                 PassIndex renderPassIndex);
+    MaybeError RecordComputePass(const ScopedSwapStateCommandRecordingContext* commandContext,
+                                 PipelineStateTracker* pipelineStateTracker);
+    MaybeError RecordRenderPass(BeginRenderPassCmd* renderPass,
+                                const ScopedSwapStateCommandRecordingContext* commandContext,
+                                PipelineStateTracker* pipelineStateTracker,
+                                PassIndex renderPassIndex);
     void HandleDebugCommands(const ScopedSwapStateCommandRecordingContext* commandContext,
                              CommandIterator* iter,
                              Command command);

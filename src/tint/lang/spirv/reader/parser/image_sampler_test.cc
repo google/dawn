@@ -50,7 +50,7 @@ TEST_F(SpirvParserTest, Type_Sampler) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, sampler, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, sampler, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -83,7 +83,7 @@ TEST_F(SpirvParserTest, Type_Image_1d) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -116,7 +116,7 @@ TEST_F(SpirvParserTest, Type_Image_2d) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -149,7 +149,7 @@ TEST_F(SpirvParserTest, Type_Image_3d) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 3d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, 3d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -182,7 +182,7 @@ TEST_F(SpirvParserTest, Type_Image_Cube) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, cube, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, cube, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -215,7 +215,7 @@ TEST_F(SpirvParserTest, Type_Image_SubpassData) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, subpass_data, not_depth, non_arrayed, single_sampled, rw_op_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, subpass_data, not_depth, non_arrayed, single_sampled, rw_op_compatible, undefined, read_write>, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -248,7 +248,7 @@ TEST_F(SpirvParserTest, Type_Image_Depth) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 1d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, 1d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -281,7 +281,7 @@ TEST_F(SpirvParserTest, Type_Image_DepthUnknown) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 2d, depth_unknown, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, 2d, depth_unknown, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -314,7 +314,7 @@ TEST_F(SpirvParserTest, Type_Image_Arrayed) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -347,7 +347,7 @@ TEST_F(SpirvParserTest, Type_Image_RW_Ops) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, rw_op_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, rw_op_compatible, undefined, read_write>, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -381,7 +381,7 @@ TEST_F(SpirvParserTest, Type_Image_TexelFormat) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, rg32float, read_write>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, rg32float, read_write>, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -415,7 +415,7 @@ TEST_F(SpirvParserTest, Type_Image_TexelFormat_R8) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, r8unorm, read_write>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, r8unorm, read_write>, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -461,8 +461,8 @@ TEST_F(SpirvParserTest, Type_SampledImage) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, sampler, read> = var undef @binding_point(5, 6)
-  %2:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, rg32float, read_write>, read> = var undef @binding_point(1, 2)
+  %1:ptr<handle, sampler, read> = var @binding_point(5, 6)
+  %2:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, rg32float, read_write>, read> = var @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -519,8 +519,8 @@ TEST_F(SpirvParserTest, Type_OpSampledImage) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var undef @binding_point(1, 2)
-  %2:ptr<handle, sampler, read> = var undef @binding_point(1, 1)
+  %1:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var @binding_point(1, 2)
+  %2:ptr<handle, sampler, read> = var @binding_point(1, 1)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -572,8 +572,8 @@ TEST_F(SpirvParserTest, Bug448679392) {
 )",
               R"(
 $B1: {  # root
-  %tex:ptr<handle, spirv.image<f32, cube, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var undef @binding_point(1, 0)
-  %sampler:ptr<handle, sampler, read> = var undef @binding_point(2, 0)
+  %tex:ptr<handle, spirv.image<f32, cube, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var @binding_point(1, 0)
+  %sampler:ptr<handle, sampler, read> = var @binding_point(2, 0)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -586,6 +586,270 @@ $B1: {  # root
   }
 }
 )");
+}
+
+// OpImageFetch keeps every image operand after the mask, in mask bit order. ConstOffset:
+// https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html#Image_Operands
+TEST_F(SpirvParserTest, ImageFetch_LodAndConstOffset) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %var_tex DescriptorSet 0
+               OpDecorate %var_tex Binding 0
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+        %int = OpTypeInt 32 1
+        %tex = OpTypeImage %float 2D 0 0 0 1 Unknown
+    %ptr_tex = OpTypePointer UniformConstant %tex
+      %v2int = OpTypeVector %int 2
+    %v4float = OpTypeVector %float 4
+      %int_1 = OpConstant %int 1
+     %int_n1 = OpConstant %int -1
+     %coords = OpConstantComposite %v2int %int_1 %int_1
+     %offset = OpConstantComposite %v2int %int_n1 %int_1
+    %var_tex = OpVariable %ptr_tex UniformConstant
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+         %im = OpLoad %tex %var_tex
+     %result = OpImageFetch %v4float %im %coords Lod|ConstOffset %int_1 %offset
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write> = load %1
+    %4:vec4<f32> = spirv.image_fetch %3, vec2<i32>(1i), 10u, 1i, vec2<i32>(-1i, 1i)
+    ret
+  }
+}
+)");
+}
+
+// The ConstOffset operand comes before the Sample operand.
+TEST_F(SpirvParserTest, ImageFetch_ConstOffsetAndSample) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %var_tex DescriptorSet 0
+               OpDecorate %var_tex Binding 0
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+        %int = OpTypeInt 32 1
+        %tex = OpTypeImage %float 2D 0 0 1 1 Unknown
+    %ptr_tex = OpTypePointer UniformConstant %tex
+      %v2int = OpTypeVector %int 2
+    %v4float = OpTypeVector %float 4
+      %int_1 = OpConstant %int 1
+      %int_2 = OpConstant %int 2
+     %int_n1 = OpConstant %int -1
+     %coords = OpConstantComposite %v2int %int_1 %int_1
+     %offset = OpConstantComposite %v2int %int_n1 %int_1
+    %var_tex = OpVariable %ptr_tex UniformConstant
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+         %im = OpLoad %tex %var_tex
+     %result = OpImageFetch %v4float %im %coords ConstOffset|Sample %offset %int_2
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, multi_sampled, sampling_compatible, undefined, read_write>, read> = var @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:spirv.image<f32, 2d, not_depth, non_arrayed, multi_sampled, sampling_compatible, undefined, read_write> = load %1
+    %4:vec4<f32> = spirv.image_fetch %3, vec2<i32>(1i), 72u, vec2<i32>(-1i, 1i), 2i
+    ret
+  }
+}
+)");
+}
+
+// WGSL only samples f32 textures (https://www.w3.org/TR/WGSL/#texturesample), while SPIR-V allows
+// OpImageSample* on integer textures. These tests check that such samples are rejected.
+struct IntegerSampleCase {
+    std::string sampled_type;
+    std::string result_type;
+    std::string sample;
+    std::string opcode;
+};
+
+std::ostream& operator<<(std::ostream& out, const IntegerSampleCase& c) {
+    return out << c.sampled_type << "_" << c.opcode;
+}
+
+using SpirvParserIntegerSampleTest = SpirvParserTestWithParam<IntegerSampleCase>;
+
+// Sampling an i32 or u32 texture fails with a message naming the instruction.
+TEST_P(SpirvParserIntegerSampleTest, Rejected) {
+    auto& params = GetParam();
+    auto res = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpDecorate %tex DescriptorSet 0
+               OpDecorate %tex Binding 0
+               OpDecorate %smp DescriptorSet 0
+               OpDecorate %smp Binding 1
+       %void = OpTypeVoid
+         %fn = OpTypeFunction %void
+        %f32 = OpTypeFloat 32
+        %i32 = OpTypeInt 32 1
+        %u32 = OpTypeInt 32 0
+      %vec2f = OpTypeVector %f32 2
+      %vec3f = OpTypeVector %f32 3
+      %vec4i = OpTypeVector %i32 4
+      %vec4u = OpTypeVector %u32 4
+      %f32_0 = OpConstant %f32 0
+    %coord2 = OpConstantComposite %vec2f %f32_0 %f32_0
+    %coord3 = OpConstantComposite %vec3f %f32_0 %f32_0 %f32_0
+        %img = OpTypeImage )" +
+                   params.sampled_type + R"( 2D 0 0 0 1 Unknown
+         %si = OpTypeSampledImage %img
+    %img_ptr = OpTypePointer UniformConstant %img
+    %sampler = OpTypeSampler
+    %smp_ptr = OpTypePointer UniformConstant %sampler
+        %tex = OpVariable %img_ptr UniformConstant
+        %smp = OpVariable %smp_ptr UniformConstant
+       %main = OpFunction %void None %fn
+      %start = OpLabel
+          %t = OpLoad %img %tex
+          %s = OpLoad %sampler %smp
+         %ts = OpSampledImage %si %t %s
+          %r = )" + params.opcode +
+                   " " + params.result_type + " %ts " + params.sample + R"(
+               OpReturn
+               OpFunctionEnd
+)");
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(params.opcode + " on a texture with sampled type " +
+                                   params.sampled_type.substr(1) + " is not supported"));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    SpirvParser,
+    SpirvParserIntegerSampleTest,
+    testing::Values(
+        IntegerSampleCase{"%i32", "%vec4i", "%coord2", "OpImageSampleImplicitLod"},
+        IntegerSampleCase{"%i32", "%vec4i", "%coord2 Lod %f32_0", "OpImageSampleExplicitLod"},
+        IntegerSampleCase{"%i32", "%vec4i", "%coord3", "OpImageSampleProjImplicitLod"},
+        IntegerSampleCase{"%i32", "%vec4i", "%coord3 Lod %f32_0", "OpImageSampleProjExplicitLod"},
+        IntegerSampleCase{"%u32", "%vec4u", "%coord2", "OpImageSampleImplicitLod"},
+        IntegerSampleCase{"%u32", "%vec4u", "%coord2 Lod %f32_0", "OpImageSampleExplicitLod"},
+        IntegerSampleCase{"%u32", "%vec4u", "%coord3", "OpImageSampleProjImplicitLod"},
+        IntegerSampleCase{"%u32", "%vec4u", "%coord3 Lod %f32_0", "OpImageSampleProjExplicitLod"}));
+
+// Vulkan memory model image operands are passed through: the mask literal is followed by the
+// scope ids. https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html#Image_Operands
+std::string MemoryModelImageModule(std::string body) {
+    return R"(
+               OpCapability Shader
+               OpCapability VulkanMemoryModel
+               OpExtension "SPV_KHR_vulkan_memory_model"
+               OpMemoryModel Logical Vulkan
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %img DescriptorSet 0
+               OpDecorate %img Binding 0
+       %void = OpTypeVoid
+         %fn = OpTypeFunction %void
+        %u32 = OpTypeInt 32 0
+        %i32 = OpTypeInt 32 1
+        %f32 = OpTypeFloat 32
+      %vec2i = OpTypeVector %i32 2
+      %vec4f = OpTypeVector %f32 4
+    %vec4f_0 = OpConstantNull %vec4f
+      %coord = OpConstantNull %vec2i
+  %workgroup = OpConstant %u32 2
+     %img_ty = OpTypeImage %f32 2D 0 0 0 2 Rgba32f
+    %img_ptr = OpTypePointer UniformConstant %img_ty
+        %img = OpVariable %img_ptr UniformConstant
+       %main = OpFunction %void None %fn
+      %start = OpLabel
+          %i = OpLoad %img_ty %img
+)" + body +
+           R"(
+               OpReturn
+               OpFunctionEnd
+)";
+}
+
+// OpImageRead emits the mask followed by the MakeTexelVisible scope id.
+TEST_F(SpirvParserTest, ImageRead_MakeTexelVisible) {
+    EXPECT_IR_SPV(MemoryModelImageModule(R"(
+          %1 = OpImageRead %vec4f %i %coord MakeTexelVisible|NonPrivateTexel %workgroup
+)"),
+                  R"(
+$B1: {  # root
+  %1:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write> = load %1
+    %4:vec4<f32> = spirv.image_read %3, vec2<i32>(0i), 1536u, 2u
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
+// OpImageWrite emits the mask followed by the MakeTexelAvailable scope id.
+TEST_F(SpirvParserTest, ImageWrite_MakeTexelAvailable) {
+    EXPECT_IR_SPV(MemoryModelImageModule(R"(
+               OpImageWrite %i %coord %vec4f_0 MakeTexelAvailable|NonPrivateTexel %workgroup
+)"),
+                  R"(
+$B1: {  # root
+  %1:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write> = load %1
+    %4:void = spirv.image_write %3, vec2<i32>(0i), vec4<f32>(0.0f), 1280u, 2u
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
+// Operands with no id, such as VolatileTexel, only change the mask.
+TEST_F(SpirvParserTest, ImageWrite_VolatileTexel) {
+    EXPECT_IR_SPV(MemoryModelImageModule(R"(
+               OpImageWrite %i %coord %vec4f_0 VolatileTexel
+)"),
+                  R"(
+$B1: {  # root
+  %1:ptr<handle, spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write>, read> = var @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, rw_op_compatible, rgba32float, read_write> = load %1
+    %4:void = spirv.image_write %3, vec2<i32>(0i), vec4<f32>(0.0f), 2048u
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
 }
 
 }  // namespace

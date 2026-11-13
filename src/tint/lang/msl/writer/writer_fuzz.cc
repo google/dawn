@@ -156,7 +156,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.non_constant_zero_offset = fuzzed_options.non_constant_zero_offset;
 
     options.bindings = GenerateBindings(module, ep_name, false, false);
-    options.immediate_binding_point = BindingPoint(0, 30);
+    options.immediate_binding_point = 30;
 
     // Add array_length_from_constants entries for all storage buffers with runtime sized arrays.
     std::unordered_set<tint::BindingPoint> storage_bindings;

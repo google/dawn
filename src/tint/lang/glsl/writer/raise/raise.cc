@@ -64,6 +64,7 @@
 #include "src/tint/lang/glsl/writer/raise/binary_polyfill.h"
 #include "src/tint/lang/glsl/writer/raise/bitcast_polyfill.h"
 #include "src/tint/lang/glsl/writer/raise/builtin_polyfill.h"
+#include "src/tint/lang/glsl/writer/raise/hoist_constant_array_initializers.h"
 #include "src/tint/lang/glsl/writer/raise/offset_first_index.h"
 #include "src/tint/lang/glsl/writer/raise/shader_io.h"
 #include "src/tint/lang/glsl/writer/raise/texture_builtins_from_uniform.h"
@@ -155,6 +156,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.pack_unpack_4x8 = true;
         core_polyfills.pack_4xu8_clamp = true;
         core_polyfills.abs_signed_int = true;
+        // crbug.com/379551588: never hand the native pack/unpack 4x8 norm builtins to drivers
+        // that miscompile them (ARM Mali). Mirrors the SPIR-V writer workaround.
+        core_polyfills.pack_unpack_4x8_norm = options.workarounds.polyfill_pack_unpack_4x8_norm;
         TINT_CHECK_RESULT(core::ir::transform::BuiltinPolyfill(module, core_polyfills));
     }
 
@@ -272,6 +276,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         core::ir::transform::ValueToLetConfig cfg;
         cfg.replace_pointer_lets = true;
         TINT_CHECK_RESULT(core::ir::transform::ValueToLet(module, cfg));
+    }
+
+    // Needs to run alongside ValueToLet, after any transform that could introduce an expression
+    // that may need to be explicitly not inlined.
+    if (options.workarounds.hoist_constant_array_initializers) {
+        TINT_CHECK_RESULT(raise::HoistConstantArrayInitializers(module));
     }
 
     return Success;

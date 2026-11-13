@@ -36,7 +36,9 @@
 namespace dawn {
 namespace {
 
-class ITypVectorTest : public testing::Test {
+using ::testing::Test;
+
+class ITypVectorTest : public Test {
   protected:
     using Key = TypedInteger<struct KeyT, uint32_t>;
     using Val = TypedInteger<struct ValT, uint32_t>;

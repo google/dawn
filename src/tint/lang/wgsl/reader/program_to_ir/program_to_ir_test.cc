@@ -389,7 +389,7 @@ TEST_F(IR_FromProgramTest, Loop_WithContinuing_BreakIf) {
 }
 
 TEST_F(IR_FromProgramTest, Loop_Continuing_Body_Scope) {
-    auto* a = Decl(Let("a", Expr(true)));
+    auto* a = Decl(Let("a", ast::Type{}, Expr(true)));
     auto* ast_break_if = BreakIf("a");
     auto* ast_loop = Loop(Block(a), Block(ast_break_if));
     WrapInFunction(ast_loop);
@@ -729,7 +729,7 @@ TEST_F(IR_FromProgramTest, For) {
   $B1: {
     loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
-        %i:ptr<function, i32, read_write> = var undef
+        %i:ptr<function, i32, read_write> = var
         next_iteration  # -> $B3
       }
       $B3: {  # body
@@ -778,7 +778,7 @@ TEST_F(IR_FromProgramTest, For_Init_NoCondOrContinuing) {
   $B1: {
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
-        %i:ptr<function, i32, read_write> = var undef
+        %i:ptr<function, i32, read_write> = var
         next_iteration  # -> $B3
       }
       $B3: {  # body
@@ -1200,7 +1200,7 @@ TEST_F(IR_FromProgramTest, OverrideNoInitializer) {
     EXPECT_EQ(m.SourceOf(override).range.begin, loc);
 
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %a:i32 = override undef @id(0)
+  %a:i32 = override @id(0)
 }
 
 )");
@@ -1265,7 +1265,7 @@ TEST_F(IR_FromProgramTest, OverrideWithShortCircuitExpressionInRHS) {
     auto m = res.Move();
 
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %b:u32 = override undef @id(0)
+  %b:u32 = override @id(0)
   %2:bool = constexpr_if false [t: $B2, f: $B3] {  # constexpr_if_1
     $B2: {  # true
       exit_if true  # constexpr_if_1
@@ -1293,8 +1293,8 @@ TEST_F(IR_FromProgramTest, OverrideWithShortCircuitExpression) {
     auto m = res.Move();
 
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %a:u32 = override undef @id(0)
-  %b:bool = override undef @id(1)
+  %a:u32 = override @id(0)
+  %b:bool = override @id(1)
   %3:bool = constexpr_if %b [t: $B2, f: $B3] {  # constexpr_if_1
     $B2: {  # true
       %4:u32 = div 1u, %a
@@ -1325,8 +1325,8 @@ TEST_F(IR_FromProgramTest, OverrideShortCircuitStatementInFunction) {
     ASSERT_EQ(1u, m.functions.Length());
 
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %a:u32 = override undef @id(0)
-  %b:bool = override undef @id(1)
+  %a:u32 = override @id(0)
+  %b:bool = override @id(1)
 }
 
 %test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1350,7 +1350,7 @@ TEST_F(IR_FromProgramTest, OverrideShortCircuitStatementInFunction) {
 
 TEST_F(IR_FromProgramTest, NonOverrideShortCircuitStatementInFunction) {
     auto* o0 = Override(Source{{1, 2}}, "a", ty.u32());
-    auto* o1 = Decl(Let("x", Expr(true)));
+    auto* o1 = Decl(Let("x", ast::Type{}, Expr(true)));
     auto* logical = LogicalAnd(o1->variable, Equal(Div(1_u, o0), 0_u));
     WrapInFunction(o1, logical);
 
@@ -1362,7 +1362,7 @@ TEST_F(IR_FromProgramTest, NonOverrideShortCircuitStatementInFunction) {
     ASSERT_EQ(1u, m.functions.Length());
 
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %a:u32 = override undef @id(0)
+  %a:u32 = override @id(0)
 }
 
 %test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1394,7 +1394,7 @@ TEST_F(IR_FromProgramTest, OverrideWithOverrideAddInitializer) {
 
     auto m = res.Move();
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %z:u32 = override undef @id(0)
+  %z:u32 = override @id(0)
   %2:u32 = add %z, 2u
   %a:u32 = override %2 @id(1)
 }
@@ -1417,7 +1417,7 @@ fn a() {
     auto m = res.Move();
     EXPECT_EQ(Dis(m), R"($B1: {  # root
   %x:i32 = override 1i @id(0)
-  %arr:ptr<workgroup, array<u32, %x>, read_write> = var undef
+  %arr:ptr<workgroup, array<u32, %x>, read_write> = var
 }
 
 %a = func():void {
@@ -1448,7 +1448,7 @@ _ = foo;
 
     auto m = res.Move();
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %cond:bool = override undef @id(0)
+  %cond:bool = override @id(0)
   %zero_i32:i32 = override 0i @id(1)
   %one_f32:f32 = override 1.0f @id(2)
   %thirty_one:u32 = override 31u @id(3)
@@ -1491,9 +1491,9 @@ fn main() {
 
     auto m = res.Move();
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %x:u32 = override undef @id(0)
+  %x:u32 = override @id(0)
   %2:u32 = mul %x, 2u
-  %arr:ptr<workgroup, array<u32, %2>, read_write> = var undef
+  %arr:ptr<workgroup, array<u32, %2>, read_write> = var
 }
 
 %main = @compute @workgroup_size(64i, 1i, 1i) func():void {
@@ -1519,7 +1519,7 @@ fn main() { }
 
     auto m = res.Move();
     EXPECT_EQ(Dis(m), R"($B1: {  # root
-  %x:u32 = override undef @id(0)
+  %x:u32 = override @id(0)
   %2:u32 = mul %x, 2u
 }
 
@@ -1550,7 +1550,7 @@ fn b() {
     auto m = res.Move();
     EXPECT_EQ(Dis(m), R"($B1: {  # root
   %x:i32 = override 1i @id(0)
-  %arr:ptr<workgroup, array<u32, %x>, read_write> = var undef
+  %arr:ptr<workgroup, array<u32, %x>, read_write> = var
 }
 
 %a = func(%p:ptr<workgroup, array<u32, %x>, read_write>):void {
@@ -1587,7 +1587,7 @@ fn bar() {
     auto m = res.Move();
     EXPECT_EQ(Dis(m), R"($B1: {  # root
   %x:i32 = override 1i @id(0)
-  %b:ptr<workgroup, buffer<%x>, read_write> = var undef
+  %b:ptr<workgroup, buffer<%x>, read_write> = var
 }
 
 %foo = func(%p:ptr<workgroup, buffer<%x>, read_write>):void {
@@ -1605,56 +1605,67 @@ fn bar() {
 }
 
 TEST_F(IR_FromProgramTest, Array_ExcessiveNumberOfElementsZeroConstructor) {
-    // array<i32, 40000u>();
-    auto* tc = Call<array<i32, 40000>>();
-    WrapInFunction(tc);
+    auto* wgsl = R"(
+@compute @workgroup_size(1)
+fn main() {
+  var a: array<i32, 40000>;
+}
+)";
 
-    auto m = Build();
+    auto m = Build(wgsl);
     ASSERT_NE(m, Success);
     EXPECT_EQ(m.Failure().reason,
-              R"(:3:42 error: let: result type size (160000) exceeds maximum allowed (65536)
-    %tint_symbol:array<i32, 40000> = let array<i32, 40000>(0i)
-                                         ^^^^^^^^^^^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:3:42 error: let: operand size (160000) exceeds maximum allowed (65536)
-    %tint_symbol:array<i32, 40000> = let array<i32, 40000>(0i)
-                                         ^^^^^^^^^^^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %tint_symbol:array<i32, 40000> = let array<i32, 40000>(0i)
-    ret
-  }
-}
+              R"(test.wgsl:4:3 error: result type size (160000) exceeds maximum allowed (32768)
+  var a: array<i32, 40000>;
+  ^^^^^^^^^^^^^^^^^^^^^^^^
 )");
 }
 
 TEST_F(IR_FromProgramTest, Array_ExcessiveNumberOfElementsExplicitConstructor) {
-    // array<i32, 40000u>(0i, 2i, 3i, ..., 39999i);
-    SetSource(Source::Location({12, 34}));
-    Vector<const ast::IntLiteralExpression*, 40000> elements;
+    std::string expr = "array<i32, 40000>(";
     for (uint32_t i = 0; i < 40000; i++) {
-        elements.Push(Expr(i32(i)));
+        expr += std::to_string(i) + ", ";
     }
-    auto* tc = Call<array<i32, 40000>>(std::move(elements));
-    WrapInFunction(tc);
+    expr += ")";
 
-    auto m = Build();
+    auto wgsl = R"(
+@compute @workgroup_size(1)
+fn main() {
+  let a = )" + expr +
+                R"(;
+}
+)";
+
+    auto m = Build(wgsl);
     ASSERT_NE(m, Success);
     // Not performing full string matching, since the failure reason includes the full 40,000
     // element constructor
     EXPECT_THAT(m.Failure().reason,
                 testing::HasSubstr(
-                    ":3:42 error: let: result type size (160000) exceeds maximum allowed (65536)"));
+                    ":4:7 error: result type size (160000) exceeds maximum allowed (32768)"));
+}
+
+TEST_F(IR_FromProgramTest, OperandTooLarge) {
+    auto* wgsl = R"(
+struct S {
+  a : array<vec4f, 2049>,
+}
+
+fn f(s : S) {}
+
+@compute @workgroup_size(1)
+fn main() {
+  f(S());
+}
+)";
+
+    auto m = Build(wgsl);
+    ASSERT_NE(m, Success);
+    EXPECT_EQ(m.Failure().reason,
+              R"(test.wgsl:10:3 error: call: operand size (32784) exceeds maximum allowed (32768)
+  f(S());
+  ^
+)");
 }
 
 }  // namespace

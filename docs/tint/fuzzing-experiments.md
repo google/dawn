@@ -36,8 +36,11 @@ Additional flags must be enabled depending on the fuzzers selected:
 - **IR Fuzzers (`tint_ir_fuzzer`, `tint_ir_mesa_fuzzer` )**: Require
   `tint_build_ir_binary = true` and `tint_has_protobuf = true`.
 - **Mesa Fuzzers (`tint_wgsl_mesa_fuzzer`, `tint_ir_mesa_fuzzer`)**:
-  Require `tint_build_mesa = true` and
-  `tint_build_fuzzer_vulkan_support = true`.
+  Require `"checkout_mesa": True` in `.gclient`, as well as
+  `tint_build_mesa = true` and `tint_build_fuzzer_vulkan_support = true`
+  in `args.gn` (only supported on Linux x64 for Vulkan; see [Building
+  Mesa fuzzers](fuzzers.md#building-mesa-fuzzers) for full setup
+  instructions and limitations).
 
 The tool will produce an error if the flags are not correctly
 configured. The tool does not support using a pre-built version of the
@@ -133,6 +136,44 @@ Full details on the various options are detailed below.
 **Note:** The number of actual runs performed will be `# of fuzzers` X
 `# of corpora` X `# of durations` X `# of iterations`
 
+### Testing Mesa Fuzzers
+
+To include `"tint_wgsl_mesa_fuzzer"` or `"tint_ir_mesa_fuzzer"` in an
+experiment, follow the [Mesa fuzzer build
+instructions](fuzzers.md#building-mesa-fuzzers) first. Keep the
+following in mind when designing and running Mesa experiments:
+
+- **Platform & `.gclient` setup:** Mesa fuzzers are only supported on
+  Linux x64 and only test Mesa's software Vulkan driver (Lavapipe).
+  Ensure `"checkout_mesa": True` is already configured in `.gclient`
+  before starting `tools/run fuzz experiment`, because the tool checks
+  out `hash` and runs `gclient sync` automatically during binary
+  preparation.
+- **Pass filtering & corpora:** `tint_wgsl_mesa_fuzzer` uses
+  `wgsl_normalization_corpus` and `wgsl_corpora`, while
+  `tint_ir_mesa_fuzzer` uses `ir_normalization_corpus` and
+  `ir_corpora`. Unlike the general Tint fuzzers, both Mesa targets
+  force `--filter=tint::spirv::writer::IRFuzzer` and validate generated
+  SPIR-V modules through Mesa's Vulkan ICD (`libvulkan_lvp.so` via
+  `lvp_icd.json`), so `tint_build_spv_writer = true` must be enabled.
+- **Execution rate & durations:** Compiling SPIR-V through Mesa's
+  Vulkan/LLVM pipeline makes per-input execution significantly slower
+  than Tint-only fuzzing. `runs`-based `durations` (such as
+  `{"runs": 100000}`) will take substantially longer in wall-clock time
+  than on `tint_wgsl_fuzzer` or `tint_ir_fuzzer`; consider smaller
+  `runs` targets or `seconds`-based `durations`.
+- **Mixing Mesa and non-Mesa fuzzers:** All fuzzers in an experiment
+  are built from the same `args.gn` and staged together in
+  `<experiment>/bin/`. When `tint_build_fuzzer_vulkan_support = true`
+  is enabled and a Mesa fuzzer copies `lvp_icd.json` into `bin/`, the
+  experiment runner automatically passes `--vk_icd` to every fuzzer in
+  that experiment. As a result, `tint_wgsl_fuzzer` and `tint_ir_fuzzer`
+  in the same `experiment.json` will also invoke Mesa Vulkan validation
+  during their SPIR-V writer pass. To benchmark `tint_wgsl_fuzzer` or
+  `tint_ir_fuzzer` without Mesa overhead, run them in a separate
+  experiment configured with `tint_build_mesa = false` and
+  `tint_build_fuzzer_vulkan_support = false`.
+
 ---
 
 ## Running an Experiment
@@ -176,11 +217,15 @@ The framework guides execution through the following phases:
 4. **Normalization**: It executes multiple normalization profiling
    runs for each fuzzer against its designated normalization corpus
    (controlled by `normalization_duration` and
-   `normalization_iterations`). The resulting average execution rate
-   (runs/sec) and standard error (SEM) are saved to
-   `normalization_scores.json` and are used to compute "Normalized CPU
-   Seconds" for each fuzzer. All individual profiling runs are
-   archived in `normalization_iterations.csv`.
+   `normalization_iterations`). Each iteration first runs the fuzzer
+   with `-runs=0` to measure the corpus initialization cost (runs and
+   elapsed seconds), then runs the timed benchmark for the discovered
+   initialization duration plus `normalization_duration`, subtracting
+   the initialization baseline to isolate the steady-state execution
+   rate (runs/sec). The resulting average execution rate and standard
+   error (SEM) are saved to `normalization_scores.json` and are used
+   to compute "Normalized CPU Seconds" for each fuzzer. All individual
+   profiling runs are archived in `normalization_iterations.csv`.
 5. **Task Execution**: It calculates the Cartesian product of
    experiments (Fuzzer × Corpus × Duration × Iteration). These are run
    concurrently across available CPU cores (configurable via
@@ -237,7 +282,7 @@ The following sections define the full configuration schema for
 | `name`                      | `string`               | A human-readable identifier for the experiment, used in the logging/reports.                                                                 |
 | `hash`                      | `string`               | The Git commit hash checkout from which the binaries should be compiled.                                                                     |
 | `fuzzers`                   | `array of strings`     | Fuzzer target names to test(Supported values: `"tint_wgsl_fuzzer"`, `"tint_ir_fuzzer"`, `"tint_wgsl_mesa_fuzzer"`, `"tint_ir_mesa_fuzzer"`). |
-| `timeout`                   | `integer` *optional*   | Timeout limit in seconds for a single fuzzer execution on a test case in libFuzzer (defaults to 5).                                          |
+| `timeout`                   | `integer` *optional*   | Timeout limit in seconds for a single fuzzer execution on a test case in libFuzzer (defaults to libFuzzer's default of 1200).                |
 | `burnin_enabled`            | `boolean` *optional*   | If true, launches parallel workloads to warm up the machine before benching (defaults to true).                                              |
 | `burnin_duration`           | `integer` *optional*   | Target duration in seconds for the initial thermal burn-in (defaults to 300).                                                                |
 | `normalization_duration`    | `integer` *optional*   | Execution duration in seconds for each iteration of the normalization microbenchmarking phase (defaults to 60).                              |

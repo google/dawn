@@ -36,6 +36,8 @@
 namespace dawn {
 namespace {
 
+using ::testing::ElementsAre;
+
 using Id = uint32_t;
 
 enum class Action {
@@ -119,9 +121,9 @@ TEST(RefBase, Acquire) {
     {
         ref.Acquire(tracker2);
     }
-    EXPECT_THAT(events, testing::ElementsAre(Event{Action::kRelease, 1},   // release ref
-                                             Event{Action::kAssign, 1, 2}  // acquire tracker2
-                                             ));
+    EXPECT_THAT(events, ElementsAre(Event{Action::kRelease, 1},   // release ref
+                                    Event{Action::kAssign, 1, 2}  // acquire tracker2
+                                    ));
 }
 
 TEST(RefBase, Detach) {
@@ -131,8 +133,8 @@ TEST(RefBase, Detach) {
 
     events.clear();
     std::ignore = ref.Detach();
-    EXPECT_THAT(events, testing::ElementsAre(Event{Action::kAssign, 1, 0}  // nullify ref
-                                             ));
+    EXPECT_THAT(events, ElementsAre(Event{Action::kAssign, 1, 0}  // nullify ref
+                                    ));
 }
 
 TEST(RefBase, Constructor) {
@@ -149,10 +151,10 @@ TEST(RefBase, ConstructDestruct) {
         Ref ref(tracker);
         events.emplace_back(Event{Action::kMarker, 10});
     }
-    EXPECT_THAT(events, testing::ElementsAre(Event{Action::kAddRef, 1},   // reference tracker
-                                             Event{Action::kMarker, 10},  //
-                                             Event{Action::kRelease, 1}   // destruct ref
-                                             ));
+    EXPECT_THAT(events, ElementsAre(Event{Action::kAddRef, 1},   // reference tracker
+                                    Event{Action::kMarker, 10},  //
+                                    Event{Action::kRelease, 1}   // destruct ref
+                                    ));
 }
 
 TEST(RefBase, CopyConstruct) {
@@ -165,10 +167,10 @@ TEST(RefBase, CopyConstruct) {
         Ref refB(refA);
         events.emplace_back(Event{Action::kMarker, 10});
     }
-    EXPECT_THAT(events, testing::ElementsAre(Event{Action::kAddRef, 1},   // reference tracker
-                                             Event{Action::kMarker, 10},  //
-                                             Event{Action::kRelease, 1}   // destruct ref
-                                             ));
+    EXPECT_THAT(events, ElementsAre(Event{Action::kAddRef, 1},   // reference tracker
+                                    Event{Action::kMarker, 10},  //
+                                    Event{Action::kRelease, 1}   // destruct ref
+                                    ));
 }
 
 TEST(RefBase, RefCopyAssignment) {
@@ -189,20 +191,20 @@ TEST(RefBase, RefCopyAssignment) {
         ref = refA;
         events.emplace_back(Event{Action::kMarker, 40});
     }
-    EXPECT_THAT(events, testing::ElementsAre(Event{Action::kMarker, 10},    //
-                                             Event{Action::kAddRef, 1},     // reference tracker1
-                                             Event{Action::kAssign, 0, 1},  // copy tracker1
-                                             Event{Action::kMarker, 20},    //
-                                             Event{Action::kAddRef, 2},     // reference tracker2
-                                             Event{Action::kRelease, 1},    // release tracker1
-                                             Event{Action::kAssign, 1, 2},  // copy tracker2
-                                             Event{Action::kMarker, 30},    //
-                                             Event{Action::kAddRef, 1},     // reference tracker1
-                                             Event{Action::kRelease, 2},    // release tracker2
-                                             Event{Action::kAssign, 2, 1},  // copy tracker1
-                                             Event{Action::kMarker, 40},    //
-                                             Event{Action::kRelease, 1}     // destruct ref
-                                             ));
+    EXPECT_THAT(events, ElementsAre(Event{Action::kMarker, 10},    //
+                                    Event{Action::kAddRef, 1},     // reference tracker1
+                                    Event{Action::kAssign, 0, 1},  // copy tracker1
+                                    Event{Action::kMarker, 20},    //
+                                    Event{Action::kAddRef, 2},     // reference tracker2
+                                    Event{Action::kRelease, 1},    // release tracker1
+                                    Event{Action::kAssign, 1, 2},  // copy tracker2
+                                    Event{Action::kMarker, 30},    //
+                                    Event{Action::kAddRef, 1},     // reference tracker1
+                                    Event{Action::kRelease, 2},    // release tracker2
+                                    Event{Action::kAssign, 2, 1},  // copy tracker1
+                                    Event{Action::kMarker, 40},    //
+                                    Event{Action::kRelease, 1}     // destruct ref
+                                    ));
 }
 
 TEST(RefBase, RefMoveAssignment) {
@@ -221,16 +223,16 @@ TEST(RefBase, RefMoveAssignment) {
         ref = std::move(refB);
         events.emplace_back(Event{Action::kMarker, 30});
     }
-    EXPECT_THAT(events, testing::ElementsAre(Event{Action::kMarker, 10},    //
-                                             Event{Action::kAssign, 1, 0},  // nullify refA
-                                             Event{Action::kAssign, 0, 1},  // move into ref
-                                             Event{Action::kMarker, 20},    //
-                                             Event{Action::kRelease, 1},    // release tracker1
-                                             Event{Action::kAssign, 2, 0},  // nullify refB
-                                             Event{Action::kAssign, 1, 2},  // move into ref
-                                             Event{Action::kMarker, 30},    //
-                                             Event{Action::kRelease, 2}     // destruct ref
-                                             ));
+    EXPECT_THAT(events, ElementsAre(Event{Action::kMarker, 10},    //
+                                    Event{Action::kAssign, 1, 0},  // nullify refA
+                                    Event{Action::kAssign, 0, 1},  // move into ref
+                                    Event{Action::kMarker, 20},    //
+                                    Event{Action::kRelease, 1},    // release tracker1
+                                    Event{Action::kAssign, 2, 0},  // nullify refB
+                                    Event{Action::kAssign, 1, 2},  // move into ref
+                                    Event{Action::kMarker, 30},    //
+                                    Event{Action::kRelease, 2}     // destruct ref
+                                    ));
 }
 
 TEST(RefBase, RefCopyAssignmentSelf) {
@@ -245,7 +247,7 @@ TEST(RefBase, RefCopyAssignmentSelf) {
         ref = self;
         ref = self;
     }
-    EXPECT_THAT(events, testing::ElementsAre());
+    EXPECT_THAT(events, ElementsAre());
 }
 
 TEST(RefBase, RefMoveAssignmentSelf) {
@@ -258,7 +260,7 @@ TEST(RefBase, RefMoveAssignmentSelf) {
     {
         ref = std::move(self);
     }
-    EXPECT_THAT(events, testing::ElementsAre());
+    EXPECT_THAT(events, ElementsAre());
 }
 
 TEST(RefBase, TCopyAssignment) {
@@ -272,8 +274,8 @@ TEST(RefBase, TCopyAssignment) {
         ref = tracker;
         ref = tracker;
     }
-    EXPECT_THAT(events, testing::ElementsAre(Event{Action::kAddRef, 1},  //
-                                             Event{Action::kAssign, 0, 1}));
+    EXPECT_THAT(events, ElementsAre(Event{Action::kAddRef, 1},  //
+                                    Event{Action::kAssign, 0, 1}));
 }
 
 TEST(RefBase, TMoveAssignment) {
@@ -285,8 +287,8 @@ TEST(RefBase, TMoveAssignment) {
     {
         ref = std::move(tracker);
     }
-    EXPECT_THAT(events, testing::ElementsAre(Event{Action::kAddRef, 1},  //
-                                             Event{Action::kAssign, 0, 1}));
+    EXPECT_THAT(events, ElementsAre(Event{Action::kAddRef, 1},  //
+                                    Event{Action::kAssign, 0, 1}));
 }
 
 TEST(RefBase, TCopyAssignmentAlternate) {
@@ -304,17 +306,17 @@ TEST(RefBase, TCopyAssignmentAlternate) {
         ref = tracker1;
         events.emplace_back(Event{Action::kMarker, 30});
     }
-    EXPECT_THAT(events, testing::ElementsAre(Event{Action::kAddRef, 1},     // reference tracker1
-                                             Event{Action::kAssign, 0, 1},  // copy tracker1
-                                             Event{Action::kMarker, 10},    //
-                                             Event{Action::kAddRef, 2},     // reference tracker2
-                                             Event{Action::kRelease, 1},    // release tracker1
-                                             Event{Action::kAssign, 1, 2},  // copy tracker2
-                                             Event{Action::kMarker, 20},    //
-                                             Event{Action::kAddRef, 1},     // reference tracker1
-                                             Event{Action::kRelease, 2},    // release tracker2
-                                             Event{Action::kAssign, 2, 1},  // copy tracker1
-                                             Event{Action::kMarker, 30}));
+    EXPECT_THAT(events, ElementsAre(Event{Action::kAddRef, 1},     // reference tracker1
+                                    Event{Action::kAssign, 0, 1},  // copy tracker1
+                                    Event{Action::kMarker, 10},    //
+                                    Event{Action::kAddRef, 2},     // reference tracker2
+                                    Event{Action::kRelease, 1},    // release tracker1
+                                    Event{Action::kAssign, 1, 2},  // copy tracker2
+                                    Event{Action::kMarker, 20},    //
+                                    Event{Action::kAddRef, 1},     // reference tracker1
+                                    Event{Action::kRelease, 2},    // release tracker2
+                                    Event{Action::kAssign, 2, 1},  // copy tracker1
+                                    Event{Action::kMarker, 30}));
 }
 
 TEST(RefBase, AssignNull) {
@@ -325,9 +327,9 @@ TEST(RefBase, AssignNull) {
     events.clear();
     ref = nullptr;
     EXPECT_EQ(ref.Get(), RefTrackerTraits::kNullValue);
-    EXPECT_THAT(events, testing::ElementsAre(Event{Action::kRelease, 1},   // release tracker
-                                             Event{Action::kAssign, 1, 0}  // assign null
-                                             ));
+    EXPECT_THAT(events, ElementsAre(Event{Action::kRelease, 1},   // release tracker
+                                    Event{Action::kAssign, 1, 0}  // assign null
+                                    ));
 }
 
 TEST(RefBase, Reset) {
@@ -338,9 +340,9 @@ TEST(RefBase, Reset) {
     events.clear();
     ref.Reset();
     EXPECT_EQ(ref.Get(), RefTrackerTraits::kNullValue);
-    EXPECT_THAT(events, testing::ElementsAre(Event{Action::kRelease, 1},   // release tracker
-                                             Event{Action::kAssign, 1, 0}  // assign null
-                                             ));
+    EXPECT_THAT(events, ElementsAre(Event{Action::kRelease, 1},   // release tracker
+                                    Event{Action::kAssign, 1, 0}  // assign null
+                                    ));
 }
 
 // Regression test for an issue where RefBase<T*> comparison would end up using operator bool

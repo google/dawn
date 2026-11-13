@@ -273,7 +273,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, ReadOnlyBuffer) {
 TEST_F(ResolverCompoundAssignmentValidationTest, LhsLet) {
     // let a = 1i;
     // a += 1i;
-    auto* a = Let(Source{{12, 34}}, "a", Expr(1_i));
+    auto* a = Let(Source{{12, 34}}, "a", ast::Type{}, Expr(1_i));
     WrapInFunction(a, CompoundAssign(Expr(Source{{56, 78}}, "a"), 1_i, core::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());
