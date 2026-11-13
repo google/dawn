@@ -440,6 +440,20 @@ violations that may be produced)",
         }
     });
 
+    // The subgroups counterpart of --allow-non-uniform-derivatives (HLSL's wave operations act on
+    // the active lanes wherever they are called; UE's desktop shaders call them in divergent
+    // control flow)
+    auto& allow_nus = options.Add<BoolOption>(
+        "allow-non-uniform-subgroups",
+        R"(Allow non-uniform subgroup operations by inserting a module-scope directive to suppress any
+subgroup uniformity violations that may be produced)",
+        Default{false});
+    TINT_DEFER({
+        if (allow_nus.value.value_or(false)) {
+            opts->wgsl_writer_options.allow_non_uniform_subgroup_operations = true;
+        }
+    });
+
     auto& ignore_unreachable = options.Add<BoolOption>(
         "disable-unreachable-code-warning",
         R"(Disable the warning for unreachable code when converting to WGSL)", Default{false});
