@@ -49,6 +49,7 @@
 #include "src/dawn/native/ResourceTable.h"
 #include "src/dawn/native/utils/NativeHelpers.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 
@@ -572,9 +573,11 @@ void ComputePassEncoder::APISetResourceUsage(ResourceTableBase* table,
         "encoding %s.SetResourceUsage(%s, %p, %s).", this, table, resource, usage);
 }
 
-void ComputePassEncoder::APISetBindGroup(uint32_t groupIndexIn,
-                                         BindGroupBase* group,
-                                         ityp::span<BindingIndex, const uint32_t> dynamicOffsets) {
+void ComputePassEncoder::APISetBindGroup(
+    uint32_t groupIndexIn,
+    BindGroupBase* group,
+    ityp::span<DynamicOffsetsIndex, const uint32_t> dynamicOffsetsIn) {
+    auto dynamicOffsets = CastIntSpan<const BufferDynamicOffset>(dynamicOffsetsIn);
     mEncodingContext->TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeValError {
@@ -658,7 +661,8 @@ void ComputePassEncoder::RestoreCommandBufferState(CommandBufferStateTracker sta
     for (auto i : Range(kMaxBindGroupsTyped)) {
         BindGroupBase* bg = state.GetBindGroup(i);
         if (bg != nullptr) {
-            APISetBindGroup(static_cast<uint32_t>(i), bg, state.GetDynamicOffsets(i));
+            APISetBindGroup(static_cast<uint32_t>(i), bg,
+                            CastIntSpan<const uint32_t>(state.GetDynamicOffsets(i)));
         }
     }
 

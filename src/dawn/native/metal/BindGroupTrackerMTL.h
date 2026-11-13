@@ -32,6 +32,7 @@
 
 #include "src/dawn/common/MatchVariant.h"
 #include "src/dawn/native/BindGroupTracker.h"
+#include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/metal/BindGroupMTL.h"
 #include "src/dawn/native/metal/BufferMTL.h"
 #include "src/dawn/native/metal/ResourceTableMTL.h"
@@ -76,12 +77,13 @@ class BindGroupTracker : public BindGroupTrackerBase<true> {
     // There is a single function that takes both encoders to factor code. Other approaches
     // like templates wouldn't work because the name of methods are different between the
     // two encoder types.
-    void ApplyBindGroupImpl(id<MTLRenderCommandEncoder> render,
-                            id<MTLComputeCommandEncoder> compute,
-                            BindGroupIndex index,
-                            BindGroup* group,
-                            const ityp::span<BindingIndex, uint32_t>& dynamicOffsets,
-                            PipelineLayout* pipelineLayout) {
+    void ApplyBindGroupImpl(
+        id<MTLRenderCommandEncoder> render,
+        id<MTLComputeCommandEncoder> compute,
+        BindGroupIndex index,
+        BindGroup* group,
+        ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets,
+        PipelineLayout* pipelineLayout) {
         // TODO(crbug.com/dawn/854): Maintain buffers and offsets arrays in BindGroup
         // so that we only have to do one setVertexBuffers and one setFragmentBuffers
         // call here.
@@ -166,8 +168,8 @@ class BindGroupTracker : public BindGroupTrackerBase<true> {
                         // TODO(crbug.com/363031535): The dynamic offsets should come from the
                         // immediate buffer.
                         if (layout.hasDynamicOffset) {
-                            // Dynamic buffers are packed at the front of BindingIndices.
-                            offset += dynamicOffsets[bindingIndex];
+                            offset += uint32_t{
+                                dynamicOffsets[BindingIndexToDynamicOffsetsIndex(bindingIndex)]};
                         }
 
                         if (hasVertStage) {

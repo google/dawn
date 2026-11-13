@@ -34,7 +34,7 @@
     "metadata": {
         "addins": {
             "compute pass encoder::set bind group::dynamic offsets": {
-                "index_type": "BindingIndex"
+                "index_type": "DynamicOffsetsIndex"
             },
             "fragment state::targets": {
                 "index_type": "ColorAttachmentIndex"
@@ -43,7 +43,7 @@
                 "index_type": "BindGroupIndex"
             },
             "render bundle encoder::set bind group::dynamic offsets": {
-                "index_type": "BindingIndex"
+                "index_type": "DynamicOffsetsIndex"
             },
             "render bundle encoder descriptor::color formats": {
                 "index_type": "ColorAttachmentIndex"
@@ -52,7 +52,7 @@
                 "index_type": "ColorAttachmentIndex"
             },
             "render pass encoder::set bind group::dynamic offsets": {
-                "index_type": "BindingIndex"
+                "index_type": "DynamicOffsetsIndex"
             },
             "shader source SPIRV::code": {
                 "spanify": false

@@ -298,7 +298,8 @@ MaybeError PipelineLayout::BuildBaseRootParameters() {
         // Resize the vector to include entries for both dynamic uniform and storage buffers, even
         // though we only write to the uniform entries, so that we can index them correctly.
         mDynamicUniformRootParameterIndices[group].resize(
-            bindGroupLayout->GetDynamicBufferCount(), kInvalidDynamicUniformBufferParameterIndex);
+            DynamicOffsetsIndexToBindingIndex(bindGroupLayout->GetDynamicBufferCount()),
+            kInvalidDynamicUniformBufferParameterIndex);
         for (BindingIndex dynamicBindingIndex : bindGroupLayout->GetDynamicBufferIndices()) {
             if (GetBindGroupLayout(group)->IsStorageBufferBinding(dynamicBindingIndex)) {
                 // Dynamic storage buffers are stored in the root descriptor table

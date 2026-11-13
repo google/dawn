@@ -41,6 +41,7 @@
 #include "src/dawn/native/ComputePassEncoder.h"
 #include "src/dawn/native/ComputePipeline.h"
 #include "src/dawn/native/Forward.h"
+#include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/PipelineLayout.h"
 #include "src/dawn/native/RenderPipeline.h"
 #include "src/utils/assert.h"
@@ -105,7 +106,7 @@ template <typename Return>
 Return FindStorageBufferBindingAliasing(
     const PipelineLayoutBase* pipelineLayout,
     const PerBindGroup<BindGroupBase*>& bindGroups,
-    const PerBindGroup<ityp::vector<BindingIndex, uint32_t>>& dynamicOffsets) {
+    const PerBindGroup<ityp::vector<DynamicOffsetsIndex, BufferDynamicOffset>>& dynamicOffsets) {
     // If true, returns detailed validation error info. Otherwise simply returns if any binding
     // aliasing is found.
     constexpr bool kProduceDetails = std::is_same_v<Return, WritableBindingAliasingResult>;
@@ -147,7 +148,8 @@ Return FindStorageBufferBindingAliasing(
             // Apply dynamic offset if any.
             if (layout.hasDynamicOffset) {
                 // SetBindGroup validation already guarantees offsets and sizes don't overflow.
-                adjustedOffset += dynamicOffsets[groupIndex][bindingIndex];
+                adjustedOffset += uint32_t{
+                    dynamicOffsets[groupIndex][BindingIndexToDynamicOffsetsIndex(bindingIndex)]};
             }
 
             storageBufferBindingsToCheck.push_back(BufferBinding{
@@ -793,7 +795,7 @@ void CommandBufferStateTracker::UnsetBindGroup(BindGroupIndex index) {
 void CommandBufferStateTracker::SetBindGroup(
     BindGroupIndex index,
     BindGroupBase* bindgroup,
-    ityp::span<BindingIndex, const uint32_t> dynamicOffsets) {
+    ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets) {
     mBindgroups[index] = bindgroup;
     mDynamicOffsets[index].assign(dynamicOffsets.begin(), dynamicOffsets.end());
     mAspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
@@ -862,8 +864,8 @@ ResourceTableBase* CommandBufferStateTracker::GetResourceTable() const {
     return mResourceTable;
 }
 
-ityp::span<BindingIndex, const uint32_t> CommandBufferStateTracker::GetDynamicOffsets(
-    BindGroupIndex index) const {
+ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset>
+CommandBufferStateTracker::GetDynamicOffsets(BindGroupIndex index) const {
     return mDynamicOffsets[index];
 }
 

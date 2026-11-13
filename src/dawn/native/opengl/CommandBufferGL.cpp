@@ -375,10 +375,11 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
         return {};
     }
 
-    MaybeError ApplyBindGroup(const OpenGLFunctions& gl,
-                              BindGroupIndex groupIndex,
-                              BindGroupBase* group,
-                              const ityp::span<BindingIndex, uint32_t>& dynamicOffsets) {
+    MaybeError ApplyBindGroup(
+        const OpenGLFunctions& gl,
+        BindGroupIndex groupIndex,
+        BindGroupBase* group,
+        ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets) {
         const auto& indices = ToBackend(mPipeline->GetLayout())->GetBindingIndexInfo()[groupIndex];
 
         for (BindingIndex bindingIndex : Range(group->GetLayout()->GetBindingCount())) {
@@ -395,8 +396,8 @@ class BindGroupTracker : public BindGroupTrackerBase<false> {
                     uint64_t offset = binding.offset;
 
                     if (layout.hasDynamicOffset) {
-                        // Dynamic buffers are packed at the front of BindingIndices.
-                        offset += uint64_t{dynamicOffsets[bindingIndex]};
+                        offset += uint32_t{
+                            dynamicOffsets[BindingIndexToDynamicOffsetsIndex(bindingIndex)]};
                     }
 
                     GLenum target;
@@ -1282,9 +1283,10 @@ MaybeError CommandBuffer::RecordComputePass(const OpenGLFunctions& gl) {
 
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
-                ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
-                if (cmd->dynamicOffsetCount != BindingIndex{0u}) {
-                    dynamicOffsets = mCommands.NextData<uint32_t>(cmd->dynamicOffsetCount);
+                ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != DynamicOffsetsIndex{0u}) {
+                    dynamicOffsets =
+                        mCommands.NextData<BufferDynamicOffset>(cmd->dynamicOffsetCount);
                 }
 
                 bindGroupTracker.OnSetBindGroup(cmd->index, cmd->group.Get(), dynamicOffsets);
@@ -1578,9 +1580,9 @@ MaybeError CommandBuffer::RecordRenderPass(BeginRenderPassCmd* renderPass,
 
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = iter->NextCommand<SetBindGroupCmd>();
-                ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
-                if (cmd->dynamicOffsetCount != BindingIndex{0u}) {
-                    dynamicOffsets = iter->NextData<uint32_t>(cmd->dynamicOffsetCount);
+                ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != DynamicOffsetsIndex{0u}) {
+                    dynamicOffsets = iter->NextData<BufferDynamicOffset>(cmd->dynamicOffsetCount);
                 }
 
                 bindGroupTracker.OnSetBindGroup(cmd->index, cmd->group.Get(), dynamicOffsets);

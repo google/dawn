@@ -627,9 +627,10 @@ MaybeError CommandBuffer::RecordComputePass(
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
 
-                ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
-                if (cmd->dynamicOffsetCount > BindingIndex{0u}) {
-                    dynamicOffsets = mCommands.NextData<uint32_t>(cmd->dynamicOffsetCount);
+                ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets;
+                if (cmd->dynamicOffsetCount > DynamicOffsetsIndex{0u}) {
+                    dynamicOffsets =
+                        mCommands.NextData<BufferDynamicOffset>(cmd->dynamicOffsetCount);
                 }
 
                 bindGroupTracker.OnSetBindGroup(cmd->index, cmd->group.Get(), dynamicOffsets);
@@ -885,9 +886,9 @@ MaybeError CommandBuffer::RecordRenderPass(
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = iter->NextCommand<SetBindGroupCmd>();
 
-                ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
-                if (cmd->dynamicOffsetCount > BindingIndex{0u}) {
-                    dynamicOffsets = iter->NextData<uint32_t>(cmd->dynamicOffsetCount);
+                ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets;
+                if (cmd->dynamicOffsetCount > DynamicOffsetsIndex{0u}) {
+                    dynamicOffsets = iter->NextData<BufferDynamicOffset>(cmd->dynamicOffsetCount);
                 }
 
                 bindGroupTracker.OnSetBindGroup(cmd->index, cmd->group.Get(), dynamicOffsets);

@@ -38,6 +38,7 @@
 #include "src/dawn/native/Commands.h"
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/Instance.h"
+#include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/PhysicalDevice.h"
 #include "src/dawn/native/ResourceTable.h"
 #include "src/dawn/native/utils/NativeHelpers.h"
@@ -146,7 +147,7 @@ MaybeValError ProgrammableEncoder::ValidateSetImmediates(uint32_t offset, size_t
 MaybeValError ProgrammableEncoder::ValidateSetBindGroup(
     BindGroupIndex index,
     BindGroupBase* group,
-    ityp::span<BindingIndex, const uint32_t> dynamicOffsets) const {
+    ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets) const {
     DAWN_INVALID_IF(index >= kMaxBindGroupsTyped, "Bind group index (%u) exceeds the maximum (%u).",
                     index, kMaxBindGroupsTyped);
 
@@ -166,8 +167,9 @@ MaybeValError ProgrammableEncoder::ValidateSetBindGroup(
         "in %s.",
         dynamicOffsets.size(), layout->GetDynamicBufferCount(), layout);
 
-    for (BindingIndex i{0u}; i < dynamicOffsets.size(); ++i) {
-        const BindingInfo& bindingInfo = layout->GetBindingInfo(i);
+    for (DynamicOffsetsIndex i{0u}; i < dynamicOffsets.size(); ++i) {
+        BindingIndex bindingIndex = DynamicOffsetsIndexToBindingIndex(i);
+        const BindingInfo& bindingInfo = layout->GetBindingInfo(bindingIndex);
 
         // BGL creation sorts bindings such that the dynamic buffer bindings are first.
         const BufferBindingInfo& bindingLayout =
@@ -190,18 +192,19 @@ MaybeValError ProgrammableEncoder::ValidateSetBindGroup(
                 DAWN_UNREACHABLE();
         }
 
-        DAWN_INVALID_IF(!IsAligned(dynamicOffsets[i], checked_cast<size_t>(requiredAlignment)),
-                        "Dynamic Offset[%u] (%u) is not %u byte aligned.", i, dynamicOffsets[i],
-                        requiredAlignment);
+        DAWN_INVALID_IF(
+            !IsAligned(uint32_t{dynamicOffsets[i]}, checked_cast<size_t>(requiredAlignment)),
+            "Dynamic Offset[%u] (%u) is not %u byte aligned.", uint32_t{i},
+            uint32_t{dynamicOffsets[i]}, requiredAlignment);
 
-        BufferBinding bufferBinding = group->GetBindingAsBufferBinding(i);
+        BufferBinding bufferBinding = group->GetBindingAsBufferBinding(bindingIndex);
 
         // During BindGroup creation, validation ensures binding offset + binding size
         // <= buffer size.
         DAWN_ASSERT(bufferBinding.buffer->GetSize() >= bufferBinding.size);
         DAWN_ASSERT(bufferBinding.buffer->GetSize() - bufferBinding.size >= bufferBinding.offset);
 
-        if ((dynamicOffsets[i] >
+        if ((uint32_t{dynamicOffsets[i]} >
              bufferBinding.buffer->GetSize() - bufferBinding.offset - bufferBinding.size)) {
             DAWN_INVALID_IF(
                 (bufferBinding.buffer->GetSize() - bufferBinding.offset) == bufferBinding.size,
@@ -209,14 +212,14 @@ MaybeValError ProgrammableEncoder::ValidateSetBindGroup(
                 "range of (offset: %u, size: %u). The binding goes to the end of the buffer "
                 "even with a dynamic offset of 0. Did you forget to specify "
                 "the binding's size?",
-                i, dynamicOffsets[i], bufferBinding.buffer, bufferBinding.buffer->GetSize(),
-                bufferBinding.offset, bufferBinding.size);
+                uint32_t{i}, uint32_t{dynamicOffsets[i]}, bufferBinding.buffer,
+                bufferBinding.buffer->GetSize(), bufferBinding.offset, bufferBinding.size);
 
             return DAWN_VALIDATION_ERROR(
                 "Dynamic Offset[%u] (%u) is out of bounds of "
                 "%s with a size of %u and a bound range of (offset: %u, size: %u).",
-                i, dynamicOffsets[i], bufferBinding.buffer, bufferBinding.buffer->GetSize(),
-                bufferBinding.offset, bufferBinding.size);
+                uint32_t{i}, uint32_t{dynamicOffsets[i]}, bufferBinding.buffer,
+                bufferBinding.buffer->GetSize(), bufferBinding.offset, bufferBinding.size);
         }
     }
 
@@ -227,15 +230,15 @@ void ProgrammableEncoder::RecordSetBindGroup(
     CommandAllocator* allocator,
     BindGroupIndex index,
     BindGroupBase* group,
-    ityp::span<BindingIndex, const uint32_t> dynamicOffsets) const {
+    ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets) const {
     SetBindGroupCmd* cmd = allocator->Allocate<SetBindGroupCmd>(Command::SetBindGroup);
     cmd->index = index;
     cmd->group = group;
     cmd->dynamicOffsetCount = dynamicOffsets.size();
 
     if (!dynamicOffsets.empty()) {
-        ityp::span<BindingIndex, uint32_t> offsets =
-            allocator->AllocateData<uint32_t>(cmd->dynamicOffsetCount);
+        ityp::span<DynamicOffsetsIndex, BufferDynamicOffset> offsets =
+            allocator->AllocateData<BufferDynamicOffset>(cmd->dynamicOffsetCount);
         // TODO(https://crbug.com/524406299): Use Span::CopyFrom.
         std::ranges::copy(dynamicOffsets, offsets.begin());
     }

@@ -105,8 +105,9 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
         utils::MakeBindGroup(device, dynamicLayout, {{0, uniformBuffer, 0, 256}});
 
     uint32_t dynamicOffset = 256;
-    ityp::vector<BindGroupIndex, uint32_t> emptyDynamicOffsets = {};
-    ityp::vector<BindGroupIndex, uint32_t> singleDynamicOffset = {dynamicOffset};
+    ityp::vector<DynamicOffsetsIndex, BufferDynamicOffset> emptyDynamicOffsets = {};
+    ityp::vector<DynamicOffsetsIndex, BufferDynamicOffset> singleDynamicOffset = {
+        BufferDynamicOffset{dynamicOffset}};
 
     // Begin encoding commands.
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -176,16 +177,16 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
                                  std::vector<uint32_t> offsets = {}) {
         return [index, bg, offsets](CommandIterator* commands) {
             auto* cmd = commands->NextCommand<SetBindGroupCmd>();
-            ityp::span<BindingIndex, const uint32_t> cmdOffsets;
-            if (cmd->dynamicOffsetCount > BindingIndex{0u}) {
-                cmdOffsets = commands->NextData<uint32_t>(cmd->dynamicOffsetCount);
+            ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> cmdOffsets;
+            if (cmd->dynamicOffsetCount > DynamicOffsetsIndex{0u}) {
+                cmdOffsets = commands->NextData<BufferDynamicOffset>(cmd->dynamicOffsetCount);
             }
 
             ASSERT_EQ(cmd->index, BindGroupIndex(index));
             ASSERT_EQ(ToAPI(cmd->group.Get()), bg.Get());
             ASSERT_EQ(uint32_t{cmdOffsets.size()}, offsets.size());
             for (auto [i, cmdOffset] : Enumerate(cmdOffsets)) {
-                ASSERT_EQ(cmdOffset, offsets[uint32_t{i}]);
+                ASSERT_EQ(uint32_t{cmdOffset}, offsets[uint32_t{i}]);
             }
         };
     };
@@ -220,7 +221,7 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
         auto* cmd = commands->NextCommand<SetBindGroupCmd>();
         ASSERT_EQ(cmd->index, BindGroupIndex(0u));
         ASSERT_NE(cmd->group.Get(), nullptr);
-        ASSERT_EQ(cmd->dynamicOffsetCount, BindingIndex{0u});
+        ASSERT_EQ(cmd->dynamicOffsetCount, DynamicOffsetsIndex{0u});
     };
 
     auto ExpectSetValidationDispatch = [&](CommandIterator* commands) {

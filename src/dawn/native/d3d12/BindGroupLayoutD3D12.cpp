@@ -155,7 +155,7 @@ BindGroupLayout::BindGroupLayout(Device* device,
 
         // For dynamic uniform buffers, Dawn uses root descriptors in the D3D12 backend. So there is
         // no need to allocate the descriptor from the descriptor heap or create descriptor ranges.
-        if (bindingIndex < GetDynamicBufferCount() && !IsStorageBufferBinding(bindingIndex)) {
+        if (IsDynamicBufferBinding(bindingIndex) && !IsStorageBufferBinding(bindingIndex)) {
             continue;
         }
 

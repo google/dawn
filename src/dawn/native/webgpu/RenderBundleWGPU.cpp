@@ -41,6 +41,7 @@
 #include "src/dawn/native/webgpu/RenderPipelineWGPU.h"
 #include "src/dawn/native/webgpu/TextureWGPU.h"
 #include "src/dawn/native/webgpu/ToWGPU.h"
+#include "src/utils/span.h"
 
 namespace dawn::native::webgpu {
 
@@ -112,13 +113,14 @@ void EncodeRenderBundleCommand(const DawnProcTable& wgpu,
 
         case Command::SetBindGroup: {
             auto cmd = commands.NextCommand<SetBindGroupCmd>();
-            ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
-            if (cmd->dynamicOffsetCount != BindingIndex{0u}) {
-                dynamicOffsets = commands.NextData<uint32_t>(cmd->dynamicOffsetCount);
+            ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets;
+            if (cmd->dynamicOffsetCount != DynamicOffsetsIndex{0u}) {
+                dynamicOffsets = commands.NextData<BufferDynamicOffset>(cmd->dynamicOffsetCount);
             }
             wgpu.renderBundleEncoderSetBindGroup(
                 encoder, static_cast<uint32_t>(cmd->index), ToBackend(cmd->group)->GetInnerHandle(),
-                uint32_t{dynamicOffsets.size()}, dynamicOffsets.data());
+                uint32_t{dynamicOffsets.size()},
+                CastIntSpan<const uint32_t>(dynamicOffsets).data());
             break;
         }
 

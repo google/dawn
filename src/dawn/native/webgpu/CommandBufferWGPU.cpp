@@ -31,6 +31,7 @@
 
 #include "src/dawn/common/StringViewUtils.h"
 #include "src/dawn/native/CommandBuffer.h"
+#include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/RenderBundle.h"
 #include "src/dawn/native/webgpu/BindGroupWGPU.h"
 #include "src/dawn/native/webgpu/BufferWGPU.h"
@@ -46,6 +47,7 @@
 #include "src/dawn/native/webgpu/ToWGPU.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn::native::webgpu {
 
@@ -146,15 +148,16 @@ void RecordComputePass(const DawnProcTable& wgpu,
 
             case Command::SetBindGroup: {
                 auto cmd = commands.NextCommand<SetBindGroupCmd>();
-                ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
-                if (cmd->dynamicOffsetCount != BindingIndex{0u}) {
-                    dynamicOffsets = commands.NextData<uint32_t>(cmd->dynamicOffsetCount);
+                ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != DynamicOffsetsIndex{0u}) {
+                    dynamicOffsets =
+                        commands.NextData<BufferDynamicOffset>(cmd->dynamicOffsetCount);
                 }
 
-                wgpu.computePassEncoderSetBindGroup(passEncoder, static_cast<uint32_t>(cmd->index),
-                                                    ToBackend(cmd->group)->GetInnerHandle(),
-                                                    uint32_t{dynamicOffsets.size()},
-                                                    dynamicOffsets.data());
+                wgpu.computePassEncoderSetBindGroup(
+                    passEncoder, static_cast<uint32_t>(cmd->index),
+                    ToBackend(cmd->group)->GetInnerHandle(), uint32_t{dynamicOffsets.size()},
+                    CastIntSpan<const uint32_t>(dynamicOffsets).data());
                 break;
             }
             case Command::InsertDebugMarker: {
@@ -390,14 +393,15 @@ void RecordRenderPass(const Device* device,
 
             case Command::SetBindGroup: {
                 auto cmd = commands.NextCommand<SetBindGroupCmd>();
-                ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
-                if (cmd->dynamicOffsetCount != BindingIndex{0u}) {
-                    dynamicOffsets = commands.NextData<uint32_t>(cmd->dynamicOffsetCount);
+                ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != DynamicOffsetsIndex{0u}) {
+                    dynamicOffsets =
+                        commands.NextData<BufferDynamicOffset>(cmd->dynamicOffsetCount);
                 }
-                wgpu.renderPassEncoderSetBindGroup(passEncoder, static_cast<uint32_t>(cmd->index),
-                                                   ToBackend(cmd->group)->GetInnerHandle(),
-                                                   uint32_t{dynamicOffsets.size()},
-                                                   dynamicOffsets.data());
+                wgpu.renderPassEncoderSetBindGroup(
+                    passEncoder, static_cast<uint32_t>(cmd->index),
+                    ToBackend(cmd->group)->GetInnerHandle(), uint32_t{dynamicOffsets.size()},
+                    CastIntSpan<const uint32_t>(dynamicOffsets).data());
                 break;
             }
 
@@ -461,8 +465,8 @@ MaybeError GatherReferencedResourcesFromComputePass(CaptureContext& captureConte
             }
             case Command::SetBindGroup: {
                 auto cmd = commands.NextCommand<SetBindGroupCmd>();
-                if (cmd->dynamicOffsetCount > BindingIndex{0u}) {
-                    commands.NextData<uint32_t>(cmd->dynamicOffsetCount);
+                if (cmd->dynamicOffsetCount > DynamicOffsetsIndex{0u}) {
+                    commands.NextData<BufferDynamicOffset>(cmd->dynamicOffsetCount);
                 }
                 usedResources.bindGroups.push_back(cmd->group.Get());
                 break;
