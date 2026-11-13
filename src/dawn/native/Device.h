@@ -42,6 +42,7 @@
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
 #include "src/dawn/common/ContentLessObjectCache.h"
+#include "src/dawn/common/LRUCache.h"
 #include "src/dawn/common/Mutex.h"
 #include "src/dawn/common/MutexProtected.h"
 #include "src/dawn/common/RefCountedWithExternalCount.h"
@@ -693,7 +694,7 @@ class DeviceBase : public ErrorSink,
 
     std::unique_ptr<ResourceTableDefaultResources> mResourceTableDefaultResources;
     std::unique_ptr<InternalPipelineStore> mInternalPipelineStore;
-    Ref<BufferBase> mTemporaryUniformBuffer;
+    LRUCache<size_t, Ref<BufferBase>> mTemporaryUniformBuffers;
 
     Ref<CallbackTaskManager> mCallbackTaskManager;
     std::unique_ptr<dawn::platform::WorkerTaskPool> mWorkerTaskPool;

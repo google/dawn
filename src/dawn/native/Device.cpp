@@ -281,7 +281,8 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
       mCallbackInfos(ToAPI(*descriptor)),
       mAdapter(adapter),
       mToggles(deviceToggles),
-      mNextPipelineCompatibilityToken(1) {
+      mNextPipelineCompatibilityToken(1),
+      mTemporaryUniformBuffers(4) {
     DAWN_CHECK(descriptor);
 
     DAWN_CHECK(mLostEvent);
@@ -602,7 +603,7 @@ void DeviceBase::Destroy(DestroyReason reason) {
     mPlaceholderSampler = nullptr;
     mInternalPipelineStore = nullptr;
     mExternalTexturePlaceholderView = nullptr;
-    mTemporaryUniformBuffer = nullptr;
+    mTemporaryUniformBuffers.Clear();
     mMemoryBlockAllocator = nullptr;
 
     // Note: mQueue is not released here since the application may still get it after calling
@@ -2734,7 +2735,7 @@ bool DeviceBase::ReduceMemoryUsage() {
     GetDynamicUploader()->Deallocate(GetQueue()->GetCompletedCommandSerial(), /*freeAll=*/true);
     mMemoryBlockAllocator->TrimMemory();
     mInternalPipelineStore->ResetScratchBuffers();
-    mTemporaryUniformBuffer = nullptr;
+    mTemporaryUniformBuffers.Clear();
 
     GetObjectTrackingList(ObjectType::BindGroupLayoutInternal)->ForEach([](ApiObjectBase* object) {
         static_cast<BindGroupLayoutInternalBase*>(object)->ReduceMemoryUsage();
@@ -2753,15 +2754,17 @@ void DeviceBase::PerformIdleTasks() {
 }
 
 ResultOrError<Ref<BufferBase>> DeviceBase::GetOrCreateTemporaryUniformBuffer(size_t size) {
-    if (!mTemporaryUniformBuffer || mTemporaryUniformBuffer->GetSize() != size) {
-        BufferDescriptor desc;
-        desc.label = "Internal_TemporaryUniform";
-        desc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
-        desc.size = size;
-        DAWN_TRY_ASSIGN(mTemporaryUniformBuffer, CreateBuffer(&desc));
-    }
-
-    return mTemporaryUniformBuffer;
+    // Cache temporary uniform buffers by exact size instead of reusing a single larger buffer.
+    // Some backends (such as D3D11) do not natively support partial uniform buffer updates, so
+    // allocating an exact-sized buffer allows full-buffer updates and performs better.
+    return mTemporaryUniformBuffers.GetOrCreate(
+        size, [this](size_t size) -> ResultOrError<Ref<BufferBase>> {
+            BufferDescriptor desc;
+            desc.label = "Internal_TemporaryUniform";
+            desc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
+            desc.size = size;
+            return CreateBuffer(&desc);
+        });
 }
 
 bool DeviceBase::HasFlexibleTextureViews() const {
