@@ -45,6 +45,7 @@ if (tint_build_unittests || tint_build_benchmarks) {
 if (tint_build_wgsl_reader || tint_build_wgsl_writer) {
   libtint_source_set("resolver") {
     sources = [
+      "alias_analysis_info.h",
       "dependency_graph.cc",
       "dependency_graph.h",
       "incomplete_type.cc",

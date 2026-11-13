@@ -185,7 +185,8 @@ bool Resolver::Resolve() {
         // Run the uniformity analysis, which requires a complete semantic module.
         const bool subgroup_uniformity =
             allowed_features_.features.contains(wgsl::LanguageFeature::kSubgroupUniformity);
-        TINT_RET_IF(!AnalyzeUniformity(b, dependencies_, subgroup_uniformity));
+        TINT_RET_IF(
+            !AnalyzeUniformity(b, dependencies_, subgroup_uniformity, alias_analysis_infos_));
     }
 
     return result;
@@ -1750,17 +1751,20 @@ bool Resolver::AliasAnalysis(const sem::Call* call) {
         if (target_info.parameter_writes.Contains(target->Parameters()[i])) {
             // Arguments that are written to can alias with any other argument or module-scope
             // variable access.
-            if (auto write = arg_writes.Get(root)) {
-                return make_error(arg, {*write, Alias::Argument, "write"});
-            }
-            if (auto read = arg_reads.Get(root)) {
-                return make_error(arg, {*read, Alias::Argument, "read"});
-            }
-            if (auto read = target_info.module_scope_reads.Get(root)) {
-                return make_error(arg, {*read, Alias::ModuleScope, "read"});
-            }
-            if (auto write = target_info.module_scope_writes.Get(root)) {
-                return make_error(arg, {*write, Alias::ModuleScope, "write"});
+            if (!allowed_features_.features.contains(
+                    wgsl::LanguageFeature::kUnrestrictedAliasing)) {
+                if (auto write = arg_writes.Get(root)) {
+                    return make_error(arg, {*write, Alias::Argument, "write"});
+                }
+                if (auto read = arg_reads.Get(root)) {
+                    return make_error(arg, {*read, Alias::Argument, "read"});
+                }
+                if (auto read = target_info.module_scope_reads.Get(root)) {
+                    return make_error(arg, {*read, Alias::ModuleScope, "read"});
+                }
+                if (auto write = target_info.module_scope_writes.Get(root)) {
+                    return make_error(arg, {*write, Alias::ModuleScope, "write"});
+                }
             }
             arg_writes.Add(root, arg);
 
@@ -1774,11 +1778,14 @@ bool Resolver::AliasAnalysis(const sem::Call* call) {
         } else if (target_info.parameter_reads.Contains(target->Parameters()[i])) {
             // Arguments that are read from can alias with arguments or module-scope variables
             // that are written to.
-            if (auto write = arg_writes.Get(root)) {
-                return make_error(arg, {*write, Alias::Argument, "write"});
-            }
-            if (auto write = target_info.module_scope_writes.Get(root)) {
-                return make_error(arg, {*write, Alias::ModuleScope, "write"});
+            if (!allowed_features_.features.contains(
+                    wgsl::LanguageFeature::kUnrestrictedAliasing)) {
+                if (auto write = arg_writes.Get(root)) {
+                    return make_error(arg, {*write, Alias::Argument, "write"});
+                }
+                if (auto write = target_info.module_scope_writes.Get(root)) {
+                    return make_error(arg, {*write, Alias::ModuleScope, "write"});
+                }
             }
             arg_reads.Add(root, arg);
 

@@ -212,6 +212,7 @@ enum class LanguageFeature : uint8_t {
     kTextureAndSamplerLet,
     kTextureFormatsTier1,
     kUniformBufferStandardLayout,
+    kUnrestrictedAliasing,
     kUnrestrictedPointerParameters,
 };
 
@@ -247,6 +248,7 @@ constexpr std::string_view kLanguageFeatureStrings[] = {
     "texture_and_sampler_let",
     "texture_formats_tier1",
     "uniform_buffer_standard_layout",
+    "unrestricted_aliasing",
     "unrestricted_pointer_parameters",
 };
 
@@ -274,6 +276,7 @@ inline constexpr LanguageFeature kAllLanguageFeatures[] = {
     LanguageFeature::kTextureAndSamplerLet,
     LanguageFeature::kTextureFormatsTier1,
     LanguageFeature::kUniformBufferStandardLayout,
+    LanguageFeature::kUnrestrictedAliasing,
     LanguageFeature::kUnrestrictedPointerParameters,
 };
 

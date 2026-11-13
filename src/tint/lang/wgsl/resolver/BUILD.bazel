@@ -53,6 +53,7 @@ cc_library(
     "validator.cc",
   ],
   hdrs = [
+    "alias_analysis_info.h",
     "dependency_graph.h",
     "incomplete_type.h",
     "resolve.h",

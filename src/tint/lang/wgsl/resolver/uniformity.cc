@@ -119,6 +119,7 @@ struct Node {
         kRegular,
         kFunctionCallArgumentValue,
         kFunctionCallArgumentContents,
+        kFunctionCallAliasedArgument,
         kFunctionCallPointerArgumentResult,
         kFunctionCallReturnValue,
         kFunctionPointerParameterContents,
@@ -348,8 +349,15 @@ class UniformityGraph {
   public:
     /// Constructor.
     /// @param builder the program to analyze
-    explicit UniformityGraph(ProgramBuilder& builder, UniformityScope scope = UniformityScope::kAll)
-        : b(builder), sem_(b.Sem()), diagnostics_(builder.Diagnostics()), scope_(scope) {}
+    explicit UniformityGraph(
+        ProgramBuilder& builder,
+        UniformityScope scope = UniformityScope::kAll,
+        const std::unordered_map<const sem::Function*, AliasAnalysisInfo>& alias_analysis_info = {})
+        : b(builder),
+          sem_(b.Sem()),
+          diagnostics_(builder.Diagnostics()),
+          scope_(scope),
+          alias_analysis_info_(alias_analysis_info) {}
 
     /// Destructor.
     ~UniformityGraph() {}
@@ -399,6 +407,7 @@ class UniformityGraph {
     const sem::Info& sem_;
     diag::List& diagnostics_;
     const UniformityScope scope_;
+    const std::unordered_map<const sem::Function*, AliasAnalysisInfo>& alias_analysis_info_;
 
     /// Map of analyzed function results.
     Hashmap<const ast::Function*, FunctionInfo, 8> functions_;
@@ -1876,6 +1885,56 @@ class UniformityGraph {
                 callsite_tag = info->callsite_tag;
                 function_tag = info->function_tag;
                 func_info = info.value;
+
+                // Check for aliased function address space parameters.
+                // Uniform is read-only so no problem.
+                // Workgroup, storage, and private are implicitly non-uniform.
+                if (auto alias_it = alias_analysis_info_.find(func);
+                    alias_it != alias_analysis_info_.end()) {
+                    auto& target_alias_info = alias_it->second;
+                    Hashmap<const sem::Variable*, Vector<size_t, 4>, 4> arg_reads;
+                    Hashmap<const sem::Variable*, size_t, 4> arg_writes;
+                    auto add_alias = [&](size_t first, size_t second) {
+                        auto* aliased_arg =
+                            CreateNode({name, "_aliased_arg_", std::to_string(first), "_",
+                                        std::to_string(second)},
+                                       call);
+                        aliased_arg->type = Node::kFunctionCallAliasedArgument;
+                        // Encode both argument indices for later diagnostics.
+                        // WGSL limits number of parameters to 255 so there's plenty of space.
+                        aliased_arg->arg_index =
+                            static_cast<uint32_t>((first & 0xffffu) | ((second & 0xffffu) << 16));
+                        aliased_arg->AddEdge(current_function_->may_be_non_uniform);
+                        args[first]->AddEdge(aliased_arg);
+                        args[second]->AddEdge(aliased_arg);
+                    };
+                    for (size_t i = 0; i < args.Length(); i++) {
+                        auto* sem_arg = sem_.GetVal(call->args[i]);
+                        auto* ptr_type = sem_arg->Type()->As<core::type::Pointer>();
+                        if (!ptr_type ||
+                            ptr_type->AddressSpace() != core::AddressSpace::kFunction) {
+                            continue;
+                        }
+                        auto* root = sem_arg->RootIdentifier();
+                        auto* param = func->Parameters()[i];
+                        if (target_alias_info.parameter_writes.Contains(param)) {
+                            if (auto write = arg_writes.Get(root)) {
+                                add_alias(*write, i);
+                            }
+                            if (auto reads = arg_reads.Get(root)) {
+                                for (auto read : *reads) {
+                                    add_alias(read, i);
+                                }
+                            }
+                            arg_writes.Add(root, i);
+                        } else if (target_alias_info.parameter_reads.Contains(param)) {
+                            if (auto write = arg_writes.Get(root)) {
+                                add_alias(*write, i);
+                            }
+                            arg_reads.GetOrAddZero(root).Push(i);
+                        }
+                    }
+                }
             },
             [&](const sem::ValueConstructor* construct) {
                 if (ContainsSubgroupMatrix(construct->ReturnType())) {
@@ -1904,6 +1963,7 @@ class UniformityGraph {
         result->AddEdge(call_node);
 
         // For each argument, add edges based on parameter tags.
+        Hashset<const sem::Variable*, 4> updated_roots;
         for (size_t i = 0; i < args.Length(); i++) {
             if (func_info) {
                 auto& param_info = func_info->parameters[i];
@@ -1939,10 +1999,23 @@ class UniformityGraph {
                 // after the call returns.
                 auto* sem_arg = sem_.GetVal(call->args[i]);
                 if (sem_arg->Type()->Is<core::type::Pointer>()) {
+                    auto* root_ident = sem_arg->RootIdentifier();
+                    TINT_ASSERT(root_ident);
+                    auto* old_value = current_function_->variables.Get(root_ident);
+
                     auto* ptr_result =
                         CreateNode({name, "_ptrarg_", std::to_string(i), "_result"}, call);
                     ptr_result->type = Node::kFunctionCallPointerArgumentResult;
                     ptr_result->arg_index = static_cast<uint32_t>(i);
+
+                    // If another argument in the same call already updated this root variable, or
+                    // if the argument is a partial pointer, link to the previous value so that a
+                    // non-uniform result is not overwritten.
+                    if ((!updated_roots.Add(root_ident) || IsPartialPointer(call->args[i])) &&
+                        old_value) {
+                        ptr_result->AddEdge(old_value);
+                    }
+
                     if (param_info.pointer_may_become_non_uniform) {
                         ptr_result->AddEdge(current_function_->may_be_non_uniform);
                     } else {
@@ -1959,17 +2032,6 @@ class UniformityGraph {
                         for (auto* source : param_info.ptr_output_source_param_contents) {
                             ptr_result->AddEdge(ptrarg_contents[source->Index()]);
                         }
-                    }
-
-                    // Update the current stored value for this pointer argument.
-                    auto* root_ident = sem_arg->RootIdentifier();
-                    TINT_ASSERT(root_ident);
-
-                    // Check if the argument is a partial pointer. If the previous contents were
-                    // non-uniform, a partial assignment will not make it uniform.
-                    auto* old_value = current_function_->variables.Get(root_ident);
-                    if (IsPartialPointer(call->args[i]) && old_value) {
-                        ptr_result->AddEdge(old_value);
                     }
 
                     current_function_->variables.Set(root_ident, ptr_result);
@@ -2215,6 +2277,16 @@ class UniformityGraph {
                             << target_name << "'";
                         break;
                     }
+                    case Node::kFunctionCallAliasedArgument: {
+                        auto* func = SemCall(c)->Target()->As<sem::Function>();
+                        auto* param1 = func->Parameters()[non_uniform_source->arg_index & 0xffffu];
+                        auto* param2 =
+                            func->Parameters()[(non_uniform_source->arg_index >> 16) & 0xffffu];
+                        diagnostics_.AddNote(c->source)
+                            << "possibly non-uniform value due to aliased parameters ("
+                            << NameFor(param1) << " and " << NameFor(param2) << ")";
+                        break;
+                    }
                     default: {
                         TINT_ICE() << "unhandled source of non-uniformity";
                     }
@@ -2365,18 +2437,20 @@ class UniformityGraph {
 
 }  // namespace
 
-bool AnalyzeUniformity(ProgramBuilder& builder,
-                       const DependencyGraph& dependency_graph,
-                       bool subgroup_uniformity) {
+bool AnalyzeUniformity(
+    ProgramBuilder& builder,
+    const DependencyGraph& dependency_graph,
+    bool subgroup_uniformity,
+    const std::unordered_map<const sem::Function*, AliasAnalysisInfo>& alias_analysis_info) {
     if (subgroup_uniformity) {
-        UniformityGraph workgroupGraph(builder, UniformityScope::kWorkgroup);
+        UniformityGraph workgroupGraph(builder, UniformityScope::kWorkgroup, alias_analysis_info);
         if (!workgroupGraph.Build(dependency_graph)) {
             return false;
         }
-        UniformityGraph subgroupGraph(builder, UniformityScope::kSubgroup);
+        UniformityGraph subgroupGraph(builder, UniformityScope::kSubgroup, alias_analysis_info);
         return subgroupGraph.Build(dependency_graph);
     } else {
-        UniformityGraph graph(builder, UniformityScope::kAll);
+        UniformityGraph graph(builder, UniformityScope::kAll, alias_analysis_info);
         return graph.Build(dependency_graph);
     }
 }

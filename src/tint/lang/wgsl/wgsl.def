@@ -121,6 +121,7 @@ enum language_feature {
   linear_indexing
   texture_formats_tier1
   multisampled_array_textures
+  unrestricted_aliasing
 
   // Non-standard language features for Chromium developers.
   chromium_print

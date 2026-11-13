@@ -48,6 +48,7 @@
     X(kLinearIndexing, LinearIndexing)                                             \
     X(kTextureFormatsTier1, TextureFormatsTier1)                                   \
     X(kMultisampledArrayTextures, MultisampledArrayTextures)                       \
+    X(kUnrestrictedAliasing, UnrestrictedAliasing)                                 \
     /* ----------------- entries below are only for testing  ------------------ */ \
     X(kChromiumTestingUnimplemented, ChromiumTestingUnimplemented)                 \
     X(kChromiumTestingUnsafeExperimental, ChromiumTestingUnsafeExperimental)       \

@@ -144,10 +144,18 @@ crbug.com/407076121 [ linux nvidia ] webgpu:shader,execution,limits:const_array_
 ################################################################################
 
 # Skip until unrestricted_aliasing lands.
+crbug.com/495899057 [ linux ] webgpu:shader,validation,functions,alias_analysis:* [ Skip ]
+crbug.com/495899057 [ android ] webgpu:shader,validation,functions,alias_analysis:* [ Skip ]
+crbug.com/495899057 [ win ] webgpu:shader,validation,functions,alias_analysis:* [ Skip ]
+crbug.com/495899057 [ mac ] webgpu:shader,validation,functions,alias_analysis:* [ Skip ]
 crbug.com/495899057 [ android ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
 crbug.com/495899057 [ mac ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
 crbug.com/495899057 [ linux ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
 crbug.com/495899057 [ win ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ android ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ mac ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ linux ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ win ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="unrestricted_aliasing" [ Skip ]
 
 # These tests are invalid under Compat and need to be modified upstream
 crbug.com/520527496 webgpu:shader,execution,memory_model,texture_intra_invocation_coherence:texture_intra_invocation_coherence:format="r32float";dim="2d-array" [ Skip ]

@@ -45,6 +45,7 @@
 #include "src/tint/lang/wgsl/allowed_features.h"
 #include "src/tint/lang/wgsl/intrinsic/dialect.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/alias_analysis_info.h"
 #include "src/tint/lang/wgsl/resolver/dependency_graph.h"
 #include "src/tint/lang/wgsl/resolver/sem_helper.h"
 #include "src/tint/lang/wgsl/resolver/validator.h"
@@ -666,19 +667,6 @@ class Resolver {
         /// The 'thing' that is imposing the contraint. e.g. "var declaration"
         /// If nullptr, then there is no constraint
         const char* constraint = nullptr;
-    };
-
-    /// AliasAnalysisInfo captures the memory accesses performed by a given function for the purpose
-    /// of determining if any two arguments alias at any callsite.
-    struct AliasAnalysisInfo {
-        /// The set of module-scope variables that are written to, and where that write occurs.
-        Hashmap<const sem::Variable*, const sem::ValueExpression*, 4> module_scope_writes;
-        /// The set of module-scope variables that are read from, and where that read occurs.
-        Hashmap<const sem::Variable*, const sem::ValueExpression*, 4> module_scope_reads;
-        /// The set of function parameters that are written to.
-        Hashset<const sem::Variable*, 4> parameter_writes;
-        /// The set of function parameters that are read from.
-        Hashset<const sem::Variable*, 4> parameter_reads;
     };
 
     // BufferViewInfo tracks info for invalid buffer sizes.

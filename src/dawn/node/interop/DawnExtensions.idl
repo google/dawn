@@ -50,6 +50,7 @@ enum WGSLLanguageFeatureName {
     "linear_indexing",
     "texture_formats_tier1",
     "multisampled_array_textures",
+    "unrestricted_aliasing",
 };
 
 // ============================================================================

@@ -204,10 +204,19 @@ crbug.com/449521989 [ intel-0x3e9b mac ] webgpu:shader,execution,expression,call
 ################################################################################
 
 # Skip until unrestricted_aliasing lands.
+# Skipped until Blink enum lands to expose unrestricted_aliasing.
+crbug.com/495899057 [ linux ] webgpu:shader,validation,functions,alias_analysis:* [ Skip ]
+crbug.com/495899057 [ android ] webgpu:shader,validation,functions,alias_analysis:* [ Skip ]
+crbug.com/495899057 [ win ] webgpu:shader,validation,functions,alias_analysis:* [ Skip ]
+crbug.com/495899057 [ mac ] webgpu:shader,validation,functions,alias_analysis:* [ Skip ]
 crbug.com/495899057 [ android ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
 crbug.com/495899057 [ mac ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
 crbug.com/495899057 [ linux ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
 crbug.com/495899057 [ win ] webgpu:shader,validation,parse,requires:have_all_language_features:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ android ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ mac ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ linux ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="unrestricted_aliasing" [ Skip ]
+crbug.com/495899057 [ win ] webgpu:shader,validation,parse,requires:wgsl_matches_api:feature="unrestricted_aliasing" [ Skip ]
 
 # SharedImage interop failures on Linux
 # Skipped instead of just Crash because of the number of failures

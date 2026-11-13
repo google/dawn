@@ -38,6 +38,10 @@ TestHelper::TestHelper()
 
 TestHelper::~TestHelper() = default;
 
+void TestHelper::SetOptions(const wgsl::AllowedFeatures& features) {
+    resolver_ = std::make_unique<Resolver>(this, features);
+}
+
 void TestHelper::ExpectError(std::string_view wgsl,
                              std::string_view error,
                              wgsl::AllowedFeatures allowed_features) {

@@ -4729,7 +4729,8 @@
             {"value": 5, "name": "sized binding array", "jsrepr": "'sized_binding_array'", "tags": ["dawn"]},
             {"value": 6, "name": "texel buffers", "jsrepr": "'texel_buffers'", "tags": ["dawn"]},
             {"value": 7, "name": "chromium print", "jsrepr": "'chromium_print'", "tags": ["dawn"]},
-            {"value": 8, "name": "multisampled array textures", "jsrepr": "'multisampled_array_textures'", "tags": ["dawn"]}
+            {"value": 8, "name": "multisampled array textures", "jsrepr": "'multisampled_array_textures'", "tags": ["dawn"]},
+            {"value": 9, "name": "unrestricted aliasing", "jsrepr": "'unrestricted_aliasing'", "tags": ["dawn"]}
         ]
     },
     "whole size" : {
