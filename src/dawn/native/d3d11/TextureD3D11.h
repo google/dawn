@@ -68,6 +68,8 @@ class Texture final : public TextureBase {
         const UnpackedPtr<TextureDescriptor>& descriptor);
     ID3D11Resource* GetD3D11Resource() const;
 
+    bool BackingMemorySupportsResolveTarget() const override;
+
     ResultOrError<ComPtr<ID3D11RenderTargetView1>> CreateD3D11RenderTargetView(
         wgpu::TextureFormat viewFormat,
         uint32_t mipLevel,
@@ -205,6 +207,7 @@ class Texture final : public TextureBase {
     const Kind mKind = Kind::Normal;
     ComPtr<ID3D11Resource> mD3d11Resource;
     Ref<d3d::KeyedMutex> mKeyedMutex;
+    bool mBackingMemorySupportsResolveTarget = true;
 
     // The internal 'R8Uint' texture for sampling stencil from depth-stencil textures.
     Ref<Texture> mTextureForStencilSampling;

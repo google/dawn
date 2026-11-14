@@ -495,6 +495,12 @@ static constexpr auto kFeatureInfo = std::to_array<FeatureEnumAndInfo>({
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "dawn_allow_undefined_load_store_op.md",
       FeatureInfo::FeatureSafety::Safe}},
+    {Feature::SharedTextureMemoryDXGIY410,
+     {"Support importing DXGI_FORMAT_Y410 textures as RGB10A2Unorm shared texture memory that can "
+      "be sampled and rendered to.",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "shared_texture_memory.md",
+      FeatureInfo::FeatureSafety::Unsafe}},
 
     // Comment to separate the } so it is clearer what to copy-paste to add a feature.
 });

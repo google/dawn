@@ -62,8 +62,17 @@ ResultOrValError<SharedTextureMemoryProperties> PropertiesFromD3D11Texture(
                     "Resource Height (%u) exceeds maxTextureDimension2D (%u).", desc.Height,
                     limits.v1.maxTextureDimension2D);
 
+    // Y410 can only be accessed through its R10G10B10A2_UNORM view alias, so it is imported as
+    // RGB10A2Unorm. D3D11 can't copy or resolve between Y410 and R10G10B10A2_UNORM resources.
+    const bool isY410 = desc.Format == DXGI_FORMAT_Y410;
     wgpu::TextureFormat wgpuFormat;
-    DAWN_TRY_ASSIGN(wgpuFormat, d3d::FromUncompressedColorDXGITextureFormat(desc.Format));
+    if (isY410) {
+        DAWN_INVALID_IF(!device->HasFeature(Feature::SharedTextureMemoryDXGIY410),
+                        "%s is not enabled.", wgpu::FeatureName::SharedTextureMemoryDXGIY410);
+        wgpuFormat = wgpu::TextureFormat::RGB10A2Unorm;
+    } else {
+        DAWN_TRY_ASSIGN(wgpuFormat, d3d::FromUncompressedColorDXGITextureFormat(desc.Format));
+    }
     if (isSharedWithHandle) {
         const Format* format = nullptr;
         DAWN_TRY_ASSIGN(format, device->GetInternalFormat(wgpuFormat));
@@ -101,8 +110,12 @@ ResultOrValError<SharedTextureMemoryProperties> PropertiesFromD3D11Texture(
                                                    ? wgpu::TextureUsage::RenderAttachment
                                                    : wgpu::TextureUsage::None;
 
-    properties.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
-                       textureBindingUsage | storageBindingUsage | renderAttachmentUsage;
+    wgpu::TextureUsage copyUsage = isY410
+                                       ? wgpu::TextureUsage::None
+                                       : wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+
+    properties.usage =
+        copyUsage | textureBindingUsage | storageBindingUsage | renderAttachmentUsage;
 
     return properties;
 }
@@ -141,7 +154,7 @@ ResultOrUnknownError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 }
 
 // static
-ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
+ResultOrUnknownError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     Device* device,
     StringView label,
     const SharedTextureMemoryD3D11Texture2DDescriptor* descriptor) {
@@ -154,7 +167,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     ComPtr<ID3D11Device> textureDevice;
     d3d11Resource->GetDevice(textureDevice.GetAddressOf());
     DAWN_INVALID_IF(textureDevice.Get() != device->GetD3D11Device(),
-                    "The D3D11 device of the texture and the D3D11 device of %s must be same.",
+                    "The D3D11 device of the texture and the D3D11 device of %s must be the same.",
                     device);
 
     SharedTextureMemoryProperties properties;

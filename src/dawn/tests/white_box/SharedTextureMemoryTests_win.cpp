@@ -45,6 +45,9 @@
 #include "dawn/native/DawnNative.h"
 #include "src/dawn/common/SystemHandle.h"
 #include "src/dawn/tests/white_box/SharedTextureMemoryTests.h"
+#include "src/dawn/utils/WGPUHelpers.h"
+#include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn {
 namespace {
@@ -201,7 +204,40 @@ class Backend : public SharedTextureMemoryTestBackend {
 
         ComPtr<ID3D11Texture2D> d3d11Texture;
         HRESULT hr = d3d11Device->CreateTexture2D(&d3dDescriptor, nullptr, &d3d11Texture);
+        DAWN_ASSERT(hr == S_OK);
 
+        return ImportD3D11Texture(device, std::move(d3d11Texture));
+    }
+
+    // Creates a 16x16 Y410 texture on the D3D11 device used for `device`'s shared texture memory,
+    // or returns nullptr if that D3D11 device can't create one with `bindFlags`.
+    ComPtr<ID3D11Texture2D> CreateY410Texture(const wgpu::Device& device, UINT bindFlags) {
+        ComPtr<ID3D11Device> d3d11Device = MakeD3D11Device(device);
+
+        D3D11_TEXTURE2D_DESC d3dDescriptor;
+        d3dDescriptor.Width = 16;
+        d3dDescriptor.Height = 16;
+        d3dDescriptor.MipLevels = 1;
+        d3dDescriptor.ArraySize = 1;
+        d3dDescriptor.Format = DXGI_FORMAT_Y410;
+        d3dDescriptor.SampleDesc.Count = 1;
+        d3dDescriptor.SampleDesc.Quality = 0;
+        d3dDescriptor.Usage = D3D11_USAGE_DEFAULT;
+        d3dDescriptor.BindFlags = bindFlags;
+        d3dDescriptor.CPUAccessFlags = 0;
+        d3dDescriptor.MiscFlags =
+            D3D11_RESOURCE_MISC_SHARED_NTHANDLE |
+            (mUseKeyedMutex ? D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX : D3D11_RESOURCE_MISC_SHARED);
+
+        ComPtr<ID3D11Texture2D> d3d11Texture;
+        if (FAILED(d3d11Device->CreateTexture2D(&d3dDescriptor, nullptr, &d3d11Texture))) {
+            return nullptr;
+        }
+        return d3d11Texture;
+    }
+
+    wgpu::SharedTextureMemory ImportD3D11Texture(const wgpu::Device& device,
+                                                 ComPtr<ID3D11Texture2D> d3d11Texture) {
         switch (mMode) {
             case Mode::D3D11Texture2D: {
                 native::d3d11::SharedTextureMemoryD3D11Texture2DDescriptor texture2DDesc;
@@ -214,7 +250,7 @@ class Backend : public SharedTextureMemoryTestBackend {
             }
             case Mode::DXGISharedHandle: {
                 ComPtr<IDXGIResource1> dxgiResource;
-                hr = d3d11Texture.As(&dxgiResource);
+                HRESULT hr = d3d11Texture.As(&dxgiResource);
                 DAWN_ASSERT(hr == S_OK);
 
                 SystemHandle sharedHandle;
@@ -226,6 +262,8 @@ class Backend : public SharedTextureMemoryTestBackend {
                 wgpu::SharedTextureMemoryDXGISharedHandleDescriptor sharedHandleDesc;
                 sharedHandleDesc.handle = sharedHandle.Get();
 
+                D3D11_TEXTURE2D_DESC d3dDescriptor;
+                d3d11Texture->GetDesc(&d3dDescriptor);
                 std::string label = LabelName(d3dDescriptor.Format, d3dDescriptor.Width);
                 wgpu::SharedTextureMemoryDescriptor desc;
                 desc.nextInChain = &sharedHandleDesc;
@@ -594,6 +632,197 @@ TEST_P(SharedTextureMemoryWithFenceDisabledTests, ErrorSharedHandleWithoutKeyedM
                                                                     /*useKeyedMutex=*/false));
 }
 
+constexpr UINT kY410BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+
+// Packs 10-bit U, Y, V and 2-bit A into a Y410 word, which has the bit layout of R10G10B10A2.
+constexpr uint32_t PackY410(uint32_t u, uint32_t y, uint32_t v, uint32_t a) {
+    return (u & 0x3FF) | ((y & 0x3FF) << 10) | ((v & 0x3FF) << 20) | ((a & 0x3) << 30);
+}
+
+// Returns the 32-bit word at (`x`, `y`) of a single-level Y410 `texture`, read through D3D11.
+uint32_t ReadY410Word(ID3D11Device* d3d11Device, ID3D11Texture2D* texture, UINT x, UINT y) {
+    D3D11_TEXTURE2D_DESC stagingDesc;
+    texture->GetDesc(&stagingDesc);
+    stagingDesc.BindFlags = 0;
+    stagingDesc.MiscFlags = 0;
+    stagingDesc.Usage = D3D11_USAGE_STAGING;
+    stagingDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    ComPtr<ID3D11Texture2D> stagingTexture;
+    if (FAILED(d3d11Device->CreateTexture2D(&stagingDesc, nullptr, &stagingTexture))) {
+        ADD_FAILURE() << "Failed to create the Y410 staging texture.";
+        return 0;
+    }
+
+    ComPtr<ID3D11DeviceContext> context;
+    d3d11Device->GetImmediateContext(&context);
+    context->CopyResource(stagingTexture.Get(), texture);
+
+    D3D11_MAPPED_SUBRESOURCE mapped;
+    if (FAILED(context->Map(stagingTexture.Get(), 0, D3D11_MAP_READ, 0, &mapped))) {
+        ADD_FAILURE() << "Failed to map the Y410 staging texture.";
+        return 0;
+    }
+    // SAFETY: The mapped texture has Height rows of Width 32-bit texels each, starting RowPitch
+    // bytes apart, and RowPitch is a multiple of the texel size.
+    Span<const uint32_t> texels = DAWN_UNSAFE_BUFFERS(Span<const uint32_t>(
+        static_cast<const uint32_t*>(mapped.pData),
+        (stagingDesc.Height - 1) * mapped.RowPitch / sizeof(uint32_t) + stagingDesc.Width));
+    uint32_t word = texels[y * mapped.RowPitch / sizeof(uint32_t) + x];
+    context->Unmap(stagingTexture.Get(), 0);
+    return word;
+}
+
+// Test that importing a Y410 texture is an error without the SharedTextureMemoryDXGIY410 feature.
+TEST_P(SharedTextureMemoryTests, Y410ImportWithoutFeature) {
+    DAWN_TEST_UNSUPPORTED_IF(!IsD3D11());
+
+    auto backend = static_cast<Backend*>(GetParam().mBackend);
+    ComPtr<ID3D11Texture2D> d3d11Texture = backend->CreateY410Texture(device, kY410BindFlags);
+    DAWN_TEST_UNSUPPORTED_IF(!d3d11Texture);
+
+    ASSERT_DEVICE_ERROR_MSG(backend->ImportD3D11Texture(device, std::move(d3d11Texture)),
+                            HasSubstr("is not enabled"));
+}
+
+class SharedTextureMemoryY410Tests : public SharedTextureMemoryTests {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> features = SharedTextureMemoryTests::GetRequiredFeatures();
+        if (SupportsFeatures({wgpu::FeatureName::SharedTextureMemoryDXGIY410})) {
+            features.push_back(wgpu::FeatureName::SharedTextureMemoryDXGIY410);
+        }
+        return features;
+    }
+
+    void SetUp() override {
+        SharedTextureMemoryTests::SetUp();
+        if (IsSkipped() || HasFatalFailure()) {
+            return;
+        }
+        DAWN_TEST_UNSUPPORTED_IF(
+            !device.HasFeature(wgpu::FeatureName::SharedTextureMemoryDXGIY410));
+    }
+};
+
+// Test that a Y410 texture is imported as RGB10A2Unorm without the copy usages.
+TEST_P(SharedTextureMemoryY410Tests, Properties) {
+    auto backend = static_cast<Backend*>(GetParam().mBackend);
+    ComPtr<ID3D11Texture2D> d3d11Texture = backend->CreateY410Texture(device, kY410BindFlags);
+    DAWN_TEST_UNSUPPORTED_IF(!d3d11Texture);
+    wgpu::SharedTextureMemory memory = backend->ImportD3D11Texture(device, d3d11Texture);
+
+    wgpu::SharedTextureMemoryProperties properties;
+    memory.GetProperties(&properties);
+    EXPECT_EQ(properties.format, wgpu::TextureFormat::RGB10A2Unorm);
+    EXPECT_EQ(properties.usage,
+              wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
+}
+
+// Test that textures created from Y410 memory can't have the copy usages, since D3D11 can't copy
+// between Y410 and R10G10B10A2_UNORM resources.
+TEST_P(SharedTextureMemoryY410Tests, CopyUsagesAreInvalid) {
+    auto backend = static_cast<Backend*>(GetParam().mBackend);
+    ComPtr<ID3D11Texture2D> d3d11Texture = backend->CreateY410Texture(device, kY410BindFlags);
+    DAWN_TEST_UNSUPPORTED_IF(!d3d11Texture);
+    wgpu::SharedTextureMemory memory = backend->ImportD3D11Texture(device, d3d11Texture);
+
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.format = wgpu::TextureFormat::RGB10A2Unorm;
+    textureDesc.size = {16, 16};
+    for (wgpu::TextureUsage copyUsage :
+         {wgpu::TextureUsage::CopySrc, wgpu::TextureUsage::CopyDst}) {
+        textureDesc.usage = wgpu::TextureUsage::TextureBinding | copyUsage;
+        ASSERT_DEVICE_ERROR(memory.CreateTexture(&textureDesc));
+    }
+}
+
+// Test that rendering to a Y410 texture writes R, G, B and A to its U, Y, V and A bits, and that
+// sampling it reads them back.
+TEST_P(SharedTextureMemoryY410Tests, RenderThenSample) {
+    auto backend = static_cast<Backend*>(GetParam().mBackend);
+    ComPtr<ID3D11Texture2D> d3d11Texture = backend->CreateY410Texture(device, kY410BindFlags);
+    DAWN_TEST_UNSUPPORTED_IF(!d3d11Texture);
+    wgpu::SharedTextureMemory memory = backend->ImportD3D11Texture(device, d3d11Texture);
+    wgpu::Texture texture = memory.CreateTexture();
+
+    wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+    beginDesc.initialized = false;
+    auto backendBeginState = backend->ChainInitialBeginState(&beginDesc);
+    memory.BeginAccess(texture, &beginDesc);
+
+    wgpu::CommandBuffer clearCommandBuffer = MakeFourColorsClearCommandBuffer(device, texture);
+    auto [checkCommandBuffer, colorTarget] = MakeCheckBySamplingCommandBuffer(device, texture);
+    wgpu::CommandBuffer commandBuffers[] = {clearCommandBuffer, checkCommandBuffer};
+    device.GetQueue().Submit(2, commandBuffers);
+
+    wgpu::SharedTextureMemoryEndAccessState endState = {};
+    auto backendEndState = backend->ChainEndState(&endState);
+    memory.EndAccess(texture, &endState);
+
+    CheckFourColors(device, wgpu::TextureFormat::RGB10A2Unorm, colorTarget);
+
+    // Read the Y410 words directly when the texture is on Dawn's D3D11 device and has no keyed
+    // mutex. The top-left quadrant is green and the top-right one is blue, both with alpha 0.501.
+    if (!backend->UseSharedHandle() && !backend->UseKeyedMutex()) {
+        ComPtr<ID3D11Device> d3d11Device = backend->MakeD3D11Device(device);
+        EXPECT_EQ(ReadY410Word(d3d11Device.Get(), d3d11Texture.Get(), 4, 4),
+                  PackY410(0, 1023, 0, 2));
+        EXPECT_EQ(ReadY410Word(d3d11Device.Get(), d3d11Texture.Get(), 12, 4),
+                  PackY410(0, 0, 1023, 2));
+    }
+}
+
+// Test that an uninitialized Y410 texture that can only be sampled is cleared to zero.
+TEST_P(SharedTextureMemoryY410Tests, UninitializedSampleOnlyTextureIsZero) {
+    auto backend = static_cast<Backend*>(GetParam().mBackend);
+    ComPtr<ID3D11Texture2D> d3d11Texture =
+        backend->CreateY410Texture(device, D3D11_BIND_SHADER_RESOURCE);
+    DAWN_TEST_UNSUPPORTED_IF(!d3d11Texture);
+    wgpu::SharedTextureMemory memory = backend->ImportD3D11Texture(device, d3d11Texture);
+    wgpu::Texture texture = memory.CreateTexture();
+
+    wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+    beginDesc.initialized = false;
+    auto backendBeginState = backend->ChainInitialBeginState(&beginDesc);
+    memory.BeginAccess(texture, &beginDesc);
+
+    auto [commandBuffer, colorTarget] = MakeCheckBySamplingCommandBuffer(device, texture);
+    device.GetQueue().Submit(1, &commandBuffer);
+
+    wgpu::SharedTextureMemoryEndAccessState endState = {};
+    auto backendEndState = backend->ChainEndState(&endState);
+    memory.EndAccess(texture, &endState);
+
+    std::vector<utils::RGBA8> expected(16 * 16, utils::RGBA8::kZero);
+    EXPECT_TEXTURE_EQ(device, expected.data(), colorTarget, {0, 0}, {16, 16});
+}
+
+// Test that a Y410 texture can't be a resolve target, since D3D11 can't resolve into it.
+TEST_P(SharedTextureMemoryY410Tests, ResolveTargetIsInvalid) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
+    auto backend = static_cast<Backend*>(GetParam().mBackend);
+    ComPtr<ID3D11Texture2D> d3d11Texture = backend->CreateY410Texture(device, kY410BindFlags);
+    DAWN_TEST_UNSUPPORTED_IF(!d3d11Texture);
+    wgpu::SharedTextureMemory memory = backend->ImportD3D11Texture(device, d3d11Texture);
+    wgpu::Texture texture = memory.CreateTexture();
+
+    wgpu::TextureDescriptor msaaDesc;
+    msaaDesc.format = wgpu::TextureFormat::RGB10A2Unorm;
+    msaaDesc.size = {16, 16};
+    msaaDesc.sampleCount = 4;
+    msaaDesc.usage = wgpu::TextureUsage::RenderAttachment;
+    wgpu::Texture msaaTexture = device.CreateTexture(&msaaDesc);
+
+    utils::ComboRenderPassDescriptor passDesc({msaaTexture.CreateView()});
+    passDesc.cColorAttachments[0].resolveTarget = texture.CreateView();
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDesc);
+    pass.End();
+    ASSERT_DEVICE_ERROR_MSG(encoder.Finish(), HasSubstr("is backed by memory"));
+}
+
 DAWN_INSTANTIATE_PREFIXED_TEST_P(D3D,
                                  SharedTextureMemoryNoFeatureTests,
                                  {D3D11Backend(), D3D11Backend({"d3d11_disable_fence"}),
@@ -637,7 +866,17 @@ DAWN_INSTANTIATE_PREFIXED_TEST_P(D3D11,
                                  {Backend::GetKeyedMutexInstance<Mode::DXGISharedHandle>()},
                                  {1});
 
+DAWN_INSTANTIATE_PREFIXED_TEST_P(D3D11,
+                                 SharedTextureMemoryY410Tests,
+                                 {D3D11Backend(), D3D11Backend({"d3d11_disable_fence"})},
+                                 {Backend::GetInstance<Mode::D3D11Texture2D>(),
+                                  Backend::GetKeyedMutexInstance<Mode::D3D11Texture2D>(),
+                                  Backend::GetInstance<Mode::DXGISharedHandle>(),
+                                  Backend::GetKeyedMutexInstance<Mode::DXGISharedHandle>()},
+                                 {1});
+
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(SharedTextureMemoryWithFenceDisabledTests);
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(SharedTextureMemoryY410Tests);
 
 }  // anonymous namespace
 }  // namespace dawn

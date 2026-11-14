@@ -1560,6 +1560,10 @@ bool TextureBase::IsMultisampledTexture() const {
     return mSampleCount > 1;
 }
 
+bool TextureBase::BackingMemorySupportsResolveTarget() const {
+    return true;
+}
+
 bool TextureBase::IsReadOnly() const {
     return IsSubset(mUsage, kReadOnlyTextureUsages);
 }

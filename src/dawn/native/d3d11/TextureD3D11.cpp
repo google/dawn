@@ -384,6 +384,17 @@ MaybeError Texture::InitializeAsExternalTexture(ComPtr<IUnknown> d3dTexture,
                                                 Ref<d3d::KeyedMutex> keyedMutex) {
     ComPtr<ID3D11Resource> d3d11Texture;
     DAWN_TRY(CheckHRESULT(d3dTexture.As(&d3d11Texture), "Query ID3D11Resource from IUnknown"));
+
+    // ResolveSubresource can't resolve into a resource that is only accessed through a view alias
+    // of a different format, such as Y410 imported as RGB10A2Unorm.
+    ComPtr<ID3D11Texture2D> d3d11Texture2D;
+    DAWN_TRY(CheckHRESULT(d3d11Texture.As(&d3d11Texture2D),
+                          "Query ID3D11Texture2D from ID3D11Resource"));
+    D3D11_TEXTURE2D_DESC desc;
+    d3d11Texture2D->GetDesc(&desc);
+    mBackingMemorySupportsResolveTarget =
+        desc.Format == d3d::DXGITextureFormat(GetDevice(), GetFormat().format);
+
     mD3d11Resource = std::move(d3d11Texture);
     mKeyedMutex = std::move(keyedMutex);
     SetLabelHelper("Dawn_ExternalTexture");
@@ -419,6 +430,10 @@ std::optional<DeviceGuard> Texture::UseDeviceGuardForDestroy() {
 
 ID3D11Resource* Texture::GetD3D11Resource() const {
     return mD3d11Resource.Get();
+}
+
+bool Texture::BackingMemorySupportsResolveTarget() const {
+    return mBackingMemorySupportsResolveTarget;
 }
 
 ResultOrError<ComPtr<ID3D11RenderTargetView1>> Texture::CreateD3D11RenderTargetView(

@@ -64,7 +64,7 @@ class SharedTextureMemory final : public d3d::SharedTextureMemory {
         StringView label,
         const SharedTextureMemoryDXGISharedHandleDescriptor* descriptor);
 
-    static ResultOrError<Ref<SharedTextureMemory>> Create(
+    static ResultOrUnknownError<Ref<SharedTextureMemory>> Create(
         Device* device,
         StringView label,
         const SharedTextureMemoryD3D11Texture2DDescriptor* descriptor);
