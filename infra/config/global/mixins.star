@@ -98,13 +98,13 @@ targets.mixin(
 targets.mixin(
     name = "enable_backend_validation",
     linux_args = [
-        "--enable-backend-validation",
+        "--enable-backend-validation=partial",
     ],
     mac_args = [
         "--enable-backend-validation=full",
     ],
     win_args = [
-        "--enable-backend-validation",
+        "--enable-backend-validation=partial",
     ],
 )
 

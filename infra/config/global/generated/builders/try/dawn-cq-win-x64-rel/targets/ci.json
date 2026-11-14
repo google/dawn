@@ -103,7 +103,7 @@
       {
         "args": [
           "--disable-toggles=use_dxc",
-          "--enable-backend-validation",
+          "--enable-backend-validation=partial",
           "--use-gpu-in-tests",
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
@@ -201,7 +201,7 @@
       },
       {
         "args": [
-          "--enable-backend-validation",
+          "--enable-backend-validation=partial",
           "--use-gpu-in-tests",
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
@@ -406,7 +406,7 @@
       {
         "args": [
           "--disable-toggles=use_dxc",
-          "--enable-backend-validation",
+          "--enable-backend-validation=partial",
           "--use-gpu-in-tests",
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
@@ -504,7 +504,7 @@
       },
       {
         "args": [
-          "--enable-backend-validation",
+          "--enable-backend-validation=partial",
           "--use-gpu-in-tests",
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
@@ -704,7 +704,7 @@
       {
         "args": [
           "--disable-toggles=use_dxc",
-          "--enable-backend-validation",
+          "--enable-backend-validation=partial",
           "--use-gpu-in-tests",
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
@@ -802,7 +802,7 @@
       },
       {
         "args": [
-          "--enable-backend-validation",
+          "--enable-backend-validation=partial",
           "--use-gpu-in-tests",
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
