@@ -310,6 +310,10 @@ struct DAWN_NATIVE_EXPORT ExternalImageExportInfo {
 
 DAWN_NATIVE_EXPORT bool CheckIsErrorForTesting(void* objectHandle);
 
+// Returns whether |buffer| is an error object returned after a failed API call.
+// A null buffer is not considered an error object.
+DAWN_NATIVE_EXPORT bool IsErrorBuffer(WGPUBuffer buffer);
+
 DAWN_NATIVE_EXPORT std::string GetObjectLabelForTesting(void* objectHandle);
 
 DAWN_NATIVE_EXPORT uint64_t GetAllocatedSizeForTesting(WGPUBuffer buffer);

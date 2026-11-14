@@ -27,6 +27,10 @@
 
 #include "src/dawn/tests/DawnNativeTest.h"
 
+#include <chrono>
+#include <future>
+#include <memory>
+#include <utility>
 #include <vector>
 
 #include "absl/strings/str_cat.h"
@@ -104,4 +108,36 @@ WGPUDevice DawnNativeTest::CreateTestDevice() {
     desc.nextInChain = &toggles;
 
     return adapter.CreateDevice(&desc);
+}
+
+TEST_F(DawnNativeTest, IsErrorBuffer) {
+    EXPECT_FALSE(dawn::native::IsErrorBuffer(nullptr));
+
+    wgpu::BufferDescriptor validDescriptor = {};
+    validDescriptor.size = 4;
+    validDescriptor.usage = wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer validBuffer = device.CreateBuffer(&validDescriptor);
+    ASSERT_TRUE(validBuffer);
+    EXPECT_FALSE(dawn::native::IsErrorBuffer(validBuffer.Get()));
+
+    wgpu::BufferDescriptor invalidDescriptor = {};
+    invalidDescriptor.size = 4;
+    invalidDescriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::Storage;
+    device.PushErrorScope(wgpu::ErrorFilter::Validation);
+    wgpu::Buffer errorBuffer = device.CreateBuffer(&invalidDescriptor);
+    ASSERT_TRUE(errorBuffer);
+    EXPECT_TRUE(dawn::native::IsErrorBuffer(errorBuffer.Get()));
+
+    auto scopeResult =
+        std::make_shared<std::promise<std::pair<wgpu::PopErrorScopeStatus, wgpu::ErrorType>>>();
+    auto scopeResultFuture = scopeResult->get_future();
+    device.PopErrorScope(
+        wgpu::CallbackMode::AllowSpontaneous,
+        [scopeResult](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, wgpu::StringView) {
+            scopeResult->set_value({status, type});
+        });
+    ASSERT_EQ(scopeResultFuture.wait_for(std::chrono::seconds(10)), std::future_status::ready);
+    const auto [status, errorType] = scopeResultFuture.get();
+    EXPECT_EQ(status, wgpu::PopErrorScopeStatus::Success);
+    EXPECT_EQ(errorType, wgpu::ErrorType::Validation);
 }

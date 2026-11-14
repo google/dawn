@@ -280,6 +280,10 @@ bool CheckIsErrorForTesting(void* objectHandle) {
     return reinterpret_cast<ErrorMonad*>(objectHandle)->IsError();
 }
 
+bool IsErrorBuffer(WGPUBuffer buffer) {
+    return buffer != nullptr && FromAPI(buffer)->IsError();
+}
+
 std::string GetObjectLabelForTesting(void* objectHandle) {
     ApiObjectBase* object = reinterpret_cast<ApiObjectBase*>(objectHandle);
     return object->GetLabel();
