@@ -896,6 +896,60 @@ struct VertexOutput {
     EXPECT_BUFFER_U32_RANGE_EQ(expected, buffer, 0, sizeof(expected) / sizeof(uint32_t));
 }
 
+// Regression test for crbug.com/576949156: Test that a storage texture with textureLoad and a
+// multisampled texture with textureNumSamples sharing the same flat binding index do not collide in
+// the OpenGL/GLES texture builtins uniform buffer.
+TEST_P(TextureShaderBuiltinTests, StorageTextureAndMultisampledTextureFlatIndexCollision) {
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageTexturesPerShaderStage < 1);
+
+    const char* shader = R"(
+@group(0) @binding(0) var msTex : texture_multisampled_2d<f32>;
+@group(0) @binding(1) var storageTex : texture_storage_2d<rgba8unorm, read>;
+@group(0) @binding(2) var<storage, read_write> dstBuf : array<u32>;
+
+@compute @workgroup_size(1) fn main() {
+    _ = textureLoad(storageTex, vec2i(0));
+    dstBuf[0] = textureNumSamples(msTex);
+}
+    )";
+
+    constexpr uint32_t kSampleCount = 4;
+    wgpu::Texture msTex = CreateTexture("msTex", 1, 1, kSampleCount);
+    wgpu::TextureView msTexView = msTex.CreateView();
+
+    wgpu::TextureDescriptor storageTexDesc = {};
+    storageTexDesc.size = {4, 4, 1};
+    storageTexDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    storageTexDesc.usage = wgpu::TextureUsage::StorageBinding;
+    wgpu::Texture storageTex = device.CreateTexture(&storageTexDesc);
+    wgpu::TextureView storageTexView = storageTex.CreateView();
+
+    wgpu::BufferDescriptor bufferDesc = {};
+    bufferDesc.size = sizeof(uint32_t);
+    bufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer dstBuffer = device.CreateBuffer(&bufferDesc);
+
+    wgpu::ComputePipelineDescriptor pipelineDesc;
+    pipelineDesc.compute.module = utils::CreateShaderModule(device, shader);
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+
+    wgpu::BindGroup bg =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                             {{0, msTexView}, {1, storageTexView}, {2, dstBuffer}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bg);
+    pass.DispatchWorkgroups(1);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_EQ(kSampleCount, dstBuffer, 0);
+}
+
 DAWN_INSTANTIATE_TEST(TextureShaderBuiltinTests,
                       D3D11Backend(),
                       D3D12Backend(),

@@ -671,9 +671,9 @@ const Inspector::EntryPointTextureMetadata& Inspector::ComputeTextureMetadata(
             case wgsl::BuiltinFn::kTextureLoad:
                 // textureLoad uses textureNumLevels to clamp the level, unless the texture type
                 // doesn't support mipmapping.
-                uses_num_levels = !texture_type->IsAnyOf<core::type::MultisampledTexture,
-                                                         core::type::DepthMultisampledTexture,
-                                                         core::type::ExternalTexture>();
+                uses_num_levels = !texture_type->IsAnyOf<
+                    core::type::MultisampledTexture, core::type::DepthMultisampledTexture,
+                    core::type::ExternalTexture, core::type::StorageTexture>();
                 uses_num_samples = texture_type->IsAnyOf<core::type::MultisampledTexture,
                                                          core::type::DepthMultisampledTexture>();
                 metadata.has_texture_load_with_depth_texture |=
