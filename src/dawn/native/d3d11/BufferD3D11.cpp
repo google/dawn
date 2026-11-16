@@ -382,7 +382,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation,
         } else {
             auto tmpCommandContext =
                 ToBackend(GetDevice()->GetQueue())
-                    ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
+                    ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Passive);
             DAWN_TRY(ClearWholeBuffer(&tmpCommandContext, 1u));
         }
     }
@@ -420,7 +420,7 @@ MaybeError Buffer::MapAtCreationImpl() {
     // to it via memcpy.
     std::optional<ScopedCommandRecordingContext> maybeCommandContext =
         ToBackend(GetDevice()->GetQueue())
-            ->TryGetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
+            ->TryGetScopedPendingCommandContext(QueueBase::SubmitMode::Passive);
     if (maybeCommandContext.has_value()) {
         return MapInternal(&maybeCommandContext.value(), mAutoMapMode | wgpu::MapMode::Write);
     }
@@ -509,7 +509,7 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
         ToBackend(GetDevice()->GetQueue())->ScheduleBufferMapping(&mMapRequest, lastUsageSerial);
     } else {
         auto commandContext = ToBackend(GetDevice()->GetQueue())
-                                  ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
+                                  ->GetScopedPendingCommandContext(QueueBase::SubmitMode::Passive);
         DAWN_TRY(TryMapNow(&commandContext, completedSerial, mode));
     }
 
