@@ -60,6 +60,7 @@
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/internal_limits.h"
 #include "src/tint/utils/macros/compiler.h"
+#include "src/tint/utils/math/math.h"
 #include "src/tint/utils/result.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/text_style.h"
@@ -1049,7 +1050,7 @@ struct Decoder {
             return mod_out_.Types().invalid();
         }
 
-        uint64_t size = element->Size();
+        uint64_t size = tint::RoundUp(element->Align(), element->Size());
         size *= count;
         if (size >= std::numeric_limits<uint32_t>::max()) {
             err_ << "array size (" << size << ") exceeds 32 bits";

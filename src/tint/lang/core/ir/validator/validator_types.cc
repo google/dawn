@@ -709,6 +709,11 @@ bool Validator::CheckBuffer(const core::type::Buffer* buf,
             diag() << "buffer size must be evenly divisible by " << divisor;
             return false;
         }
+    } else if (auto override_count = buf->Count()->As<type::ValueArrayCount>()) {
+        if (!override_count->value) {
+            diag() << "invalid override size";
+            return false;
+        }
     }
     return true;
 }
