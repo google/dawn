@@ -1798,13 +1798,19 @@ MaybeError ImportedTextureBase::EndAccess(ExternalSemaphoreHandle* handle,
         targetLayout = VK_IMAGE_LAYOUT_GENERAL;
     }
 
-    // We have to manually trigger a transition if the texture hasn't been actually used or if we
-    // need a layout transition.
-    // TODO(dawn:1509): Avoid the empty submit.
-    if (mExternalSemaphoreHandle == kNullExternalSemaphoreHandle || targetLayout != currentLayout) {
+    Queue* queue = ToBackend(GetDevice()->GetQueue());
+    bool hasPendingCommands = !GetDevice()->IsLost() && mLastSharedTextureMemoryUsageSerial >
+                                                            queue->GetLastSubmittedCommandSerial();
+
+    // We have to manually trigger a transition if the texture hasn't been actually used, if we
+    // need a layout transition, or if there are pending unsubmitted commands using the texture
+    // (such as a Queue::WriteTexture).
+    // TODO(crbug.com/42240696): Remove hasPendingCommands once WrapVulkanImage is removed, as
+    // SharedResourceMemory::EndAccessInternal already flushes pending commands.
+    if (mExternalSemaphoreHandle == kNullExternalSemaphoreHandle || targetLayout != currentLayout ||
+        hasPendingCommands) {
         mDesiredExportLayout = targetLayout;
 
-        Queue* queue = ToBackend(GetDevice()->GetQueue());
         CommandRecordingContext* recordingContext = queue->GetPendingRecordingContext();
         recordingContext->specialSyncTextures.insert(this);
         DAWN_TRY(queue->SubmitPendingCommands());
