@@ -66,6 +66,12 @@ const char* ComponentTypeToWgslType(wgpu::SubgroupMatrixComponentType c) {
             return "u8";
         case wgpu::SubgroupMatrixComponentType::I8:
             return "i8";
+        case wgpu::SubgroupMatrixComponentType::Bf16:
+            return "bf16";
+        case wgpu::SubgroupMatrixComponentType::F8_e4m3:
+            return "f8<e4m3>";
+        case wgpu::SubgroupMatrixComponentType::F8_e5m2:
+            return "f8<e5m2>";
     }
     return "<invalid>";
 }
@@ -82,6 +88,10 @@ const char* ComponentTypeToScalarShaderType(wgpu::SubgroupMatrixComponentType c)
         case wgpu::SubgroupMatrixComponentType::I32:
         case wgpu::SubgroupMatrixComponentType::I8:
             return "i32";
+        case wgpu::SubgroupMatrixComponentType::Bf16:
+        case wgpu::SubgroupMatrixComponentType::F8_e4m3:
+        case wgpu::SubgroupMatrixComponentType::F8_e5m2:
+            return "f32";
     }
     return "<invalid>";
 }
@@ -93,12 +103,32 @@ uint32_t ComponentTypeToByteSize(wgpu::SubgroupMatrixComponentType c) {
         case wgpu::SubgroupMatrixComponentType::I32:
             return 4;
         case wgpu::SubgroupMatrixComponentType::F16:
+        case wgpu::SubgroupMatrixComponentType::Bf16:
             return 2;
         case wgpu::SubgroupMatrixComponentType::U8:
         case wgpu::SubgroupMatrixComponentType::I8:
+        case wgpu::SubgroupMatrixComponentType::F8_e4m3:
+        case wgpu::SubgroupMatrixComponentType::F8_e5m2:
             return 1;
     }
     return 0;
+}
+
+bool IsFloatComponentType(wgpu::SubgroupMatrixComponentType c) {
+    switch (c) {
+        case wgpu::SubgroupMatrixComponentType::F32:
+        case wgpu::SubgroupMatrixComponentType::F16:
+        case wgpu::SubgroupMatrixComponentType::Bf16:
+        case wgpu::SubgroupMatrixComponentType::F8_e4m3:
+        case wgpu::SubgroupMatrixComponentType::F8_e5m2:
+            return true;
+        case wgpu::SubgroupMatrixComponentType::U32:
+        case wgpu::SubgroupMatrixComponentType::I32:
+        case wgpu::SubgroupMatrixComponentType::U8:
+        case wgpu::SubgroupMatrixComponentType::I8:
+            return false;
+    }
+    return false;
 }
 
 std::ostream& operator<<(std::ostream& o, const wgpu::SubgroupMatrixConfig& config) {
@@ -145,6 +175,9 @@ struct Matrix {
                 switch (component_type) {
                     case wgpu::SubgroupMatrixComponentType::F16:
                     case wgpu::SubgroupMatrixComponentType::F32:
+                    case wgpu::SubgroupMatrixComponentType::Bf16:
+                    case wgpu::SubgroupMatrixComponentType::F8_e4m3:
+                    case wgpu::SubgroupMatrixComponentType::F8_e5m2:
                         SetFloat(kFloatValues[index], c, r);
                         break;
                     case wgpu::SubgroupMatrixComponentType::I32:
@@ -174,6 +207,9 @@ struct Matrix {
                 return GetValue<int8_t>(c, r);
             case wgpu::SubgroupMatrixComponentType::F32:
             case wgpu::SubgroupMatrixComponentType::F16:
+            case wgpu::SubgroupMatrixComponentType::Bf16:
+            case wgpu::SubgroupMatrixComponentType::F8_e4m3:
+            case wgpu::SubgroupMatrixComponentType::F8_e5m2:
                 break;
         }
         abort();
@@ -185,6 +221,13 @@ struct Matrix {
                 return GetValue<float>(c, r);
             case wgpu::SubgroupMatrixComponentType::F16:
                 return Float16ToFloat32(GetValue<uint16_t>(c, r));
+            case wgpu::SubgroupMatrixComponentType::Bf16:
+                // TODO(582791374): implement this.
+                break;
+            case wgpu::SubgroupMatrixComponentType::F8_e4m3:
+            case wgpu::SubgroupMatrixComponentType::F8_e5m2:
+                // TODO(583490405): implement this.
+                break;
             case wgpu::SubgroupMatrixComponentType::U32:
             case wgpu::SubgroupMatrixComponentType::I32:
             case wgpu::SubgroupMatrixComponentType::U8:
@@ -210,6 +253,9 @@ struct Matrix {
                 return;
             case wgpu::SubgroupMatrixComponentType::F32:
             case wgpu::SubgroupMatrixComponentType::F16:
+            case wgpu::SubgroupMatrixComponentType::Bf16:
+            case wgpu::SubgroupMatrixComponentType::F8_e4m3:
+            case wgpu::SubgroupMatrixComponentType::F8_e5m2:
                 break;
         }
         abort();
@@ -223,6 +269,13 @@ struct Matrix {
             case wgpu::SubgroupMatrixComponentType::F16:
                 SetValue(Float32ToFloat16(value), c, r);
                 return;
+            case wgpu::SubgroupMatrixComponentType::Bf16:
+                // TODO(582791374): implement this.
+                break;
+            case wgpu::SubgroupMatrixComponentType::F8_e4m3:
+            case wgpu::SubgroupMatrixComponentType::F8_e5m2:
+                // TODO(583490405): implement this.
+                break;
             case wgpu::SubgroupMatrixComponentType::U32:
             case wgpu::SubgroupMatrixComponentType::I32:
             case wgpu::SubgroupMatrixComponentType::U8:
@@ -270,8 +323,7 @@ void GenerateReferenceMatrixMultiply(Matrix& expected,
                                      const Matrix& rhs,
                                      const Matrix& acc,
                                      uint32_t blockSize) {
-    const bool is_float = expected.component_type == wgpu::SubgroupMatrixComponentType::F16 ||
-                          expected.component_type == wgpu::SubgroupMatrixComponentType::F32;
+    const bool is_float = IsFloatComponentType(expected.component_type);
     for (uint32_t r = 0; r < expected.rows; r++) {
         for (uint32_t c = 0; c < expected.cols; c++) {
             if (is_float) {
@@ -902,8 +954,7 @@ if sgid != 0 {
     }
 
     void GenerateReferenceResult(Matrix& expected, const Matrix& lhs, MatrixOp op) {
-        const bool is_float = expected.component_type == wgpu::SubgroupMatrixComponentType::F16 ||
-                              expected.component_type == wgpu::SubgroupMatrixComponentType::F32;
+        const bool is_float = IsFloatComponentType(expected.component_type);
         for (uint32_t r = 0; r < expected.rows; r++) {
             for (uint32_t c = 0; c < expected.cols; c++) {
                 if (is_float) {
@@ -1628,8 +1679,7 @@ fn main() {
     }
 
     void GenerateReferenceResult(Matrix& expected, bool withArgument) {
-        const bool is_float = expected.component_type == wgpu::SubgroupMatrixComponentType::F16 ||
-                              expected.component_type == wgpu::SubgroupMatrixComponentType::F32;
+        const bool is_float = IsFloatComponentType(expected.component_type);
         for (uint32_t r = 0; r < expected.rows; r++) {
             for (uint32_t c = 0; c < expected.cols; c++) {
                 if (is_float) {

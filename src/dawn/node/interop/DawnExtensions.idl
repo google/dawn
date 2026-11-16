@@ -74,6 +74,9 @@ enum GPUSubgroupMatrixComponentType {
   "i32",
   "u8",
   "i8",
+  "bf16",
+  "f8_e4m3",
+  "f8_e5m2",
 };
 
 interface GPUSubgroupMatrixConfig {
@@ -82,6 +85,8 @@ interface GPUSubgroupMatrixConfig {
   readonly attribute unsigned long M;
   readonly attribute unsigned long N;
   readonly attribute unsigned long K;
+  readonly attribute unsigned long minSubgroupSize;
+  readonly attribute unsigned long maxSubgroupSize;
 };
 
 interface GPUAdapterInfo {
