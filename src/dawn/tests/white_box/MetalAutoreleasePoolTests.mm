@@ -59,7 +59,9 @@ TEST_P(MetalAutoreleasePoolTests, CommandBufferOutlivesAutorelease) {
     }
 
     // Submitting the command buffer should succeed.
-    ASSERT_TRUE(mMtlQueue->SubmitPendingCommandBuffer().IsSuccess());
+    ResultOrError<bool> submitted = mMtlQueue->TrySubmitPendingCommandBuffer();
+    ASSERT_TRUE(submitted.IsSuccess());
+    EXPECT_TRUE(submitted.AcquireSuccess());
 }
 
 // Test that the MTLBlitCommandEncoder owned by the pending command context
@@ -74,7 +76,9 @@ TEST_P(MetalAutoreleasePoolTests, EncoderOutlivesAutorelease) {
 
     // Submitting the command buffer should succeed.
     mMtlQueue->GetPendingCommandContext()->EndBlit();
-    ASSERT_TRUE(mMtlQueue->SubmitPendingCommandBuffer().IsSuccess());
+    ResultOrError<bool> submitted = mMtlQueue->TrySubmitPendingCommandBuffer();
+    ASSERT_TRUE(submitted.IsSuccess());
+    EXPECT_TRUE(submitted.AcquireSuccess());
 }
 
 DAWN_INSTANTIATE_TEST(MetalAutoreleasePoolTests, MetalBackend());

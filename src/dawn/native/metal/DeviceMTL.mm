@@ -27,6 +27,8 @@
 
 #include "src/dawn/native/metal/DeviceMTL.h"
 
+#include <tuple>
+
 #include "dawn/platform/DawnPlatform.h"
 #include "src/dawn/common/GPUInfo.h"
 #include "src/dawn/native/Adapter.h"
@@ -307,7 +309,9 @@ ResultOrUnknownError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
 }
 
 MaybeError Device::TickImpl() {
-    DAWN_TRY(ToBackend(GetQueue())->SubmitPendingCommandBuffer());
+    // Commands held while submissions are suspended (see Queue::SetSubmissionSuspended) stay
+    // pending on purpose, until the resume.
+    DAWN_TRY_ASSIGN(std::ignore, ToBackend(GetQueue())->TrySubmitPendingCommandBuffer());
 
     // Just run timestamp period estimation when timestamp feature is enabled and timestamp
     // conversion is not disabled and the estimation is not disabled.
