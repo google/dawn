@@ -47,6 +47,7 @@
 #include "src/dawn/native/BindGroup.h"
 #include "src/dawn/native/BlitBufferToDepthStencil.h"
 #include "src/dawn/native/Buffer.h"
+#include "src/dawn/native/BufferTextureCopyOversizedRow.h"
 #include "src/dawn/native/CommandBuffer.h"
 #include "src/dawn/native/CommandEncoder.h"
 #include "src/dawn/native/CommandValidation.h"
@@ -369,10 +370,31 @@ MaybeUnknownError QueueBase::WriteTextureInternal(const TexelCopyTextureInfo* de
         return {};
     }
 
-    const TexelBlockInfo& blockInfo = GetBlockInfo(destination);
+    const TypedTexelBlockInfo& blockInfo = GetBlockInfo(destination);
     TexelCopyBufferLayout layout = dataLayout;
-    ApplyDefaultTexelCopyBufferLayoutOptions(&layout, blockInfo, *writeSize);
-    DAWN_TRY(WriteTextureImpl(destination, data, layout, *writeSize));
+    ApplyDefaultTexelCopyBufferLayoutOptions(&layout, blockInfo.ToTexelBlockInfo(), *writeSize);
+
+    const BlockExtent3D blockWriteSize = blockInfo.ToBlock(*writeSize);
+    const uint32_t compactBytesPerRow =
+        checked_cast<uint32_t>(blockInfo.ToBytes(blockWriteSize.width));
+    const uint32_t compactRowsPerImage = dchecked_cast<uint32_t>(blockWriteSize.height);
+
+    // Clamp unused strides on single-layer or single-row writes so arbitrary large values (valid
+    // per WebGPU when unused) do not cause integer overflows during upload.
+    if (blockWriteSize.depthOrArrayLayers == BlockCount{1u}) {
+        layout.rowsPerImage = compactRowsPerImage;
+        if (blockWriteSize.height == BlockCount{1u}) {
+            layout.bytesPerRow = compactBytesPerRow;
+        }
+    }
+
+    if (!GetDevice()->SupportsPersistentlyMappedStagingBuffer() &&
+        !NeedsBufferTextureCopySplitForOversizedRow(layout, blockWriteSize, blockInfo)) [[likely]] {
+        DAWN_TRY(WriteTextureImpl(destination, data, layout, *writeSize));
+        return {};
+    }
+
+    DAWN_TRY(WriteTextureUsingStagingBuffer(destination, data, layout, *writeSize));
     return {};
 }
 
@@ -380,6 +402,13 @@ MaybeError QueueBase::WriteTextureImpl(const TexelCopyTextureInfo& destination,
                                        Span<const std::byte> data,
                                        const TexelCopyBufferLayout& dataLayout,
                                        const Extent3D& writeSizePixel) {
+    DAWN_UNREACHABLE();
+}
+
+MaybeError QueueBase::WriteTextureUsingStagingBuffer(const TexelCopyTextureInfo& destination,
+                                                     Span<const std::byte> data,
+                                                     const TexelCopyBufferLayout& dataLayout,
+                                                     const Extent3D& writeSizePixel) {
     const TypedTexelBlockInfo& blockInfo = GetBlockInfo(destination);
     BlockExtent3D writeSize = blockInfo.ToBlock(writeSizePixel);
 

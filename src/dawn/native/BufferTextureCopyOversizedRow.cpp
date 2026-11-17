@@ -87,14 +87,28 @@ void SplitBufferTextureCopyByRow(const BufferCopy& bufferCopy,
 bool NeedsBufferTextureCopySplitForOversizedRow(const BufferCopy& bufferCopy,
                                                 const BlockExtent3D& copySize,
                                                 const TypedTexelBlockInfo& blockInfo) {
-    const bool exceedsMaxBytesPerRow =
-        blockInfo.ToBytes(bufferCopy.blocksPerRow) >= kMaxBytesPerRow;
+    const uint64_t bytesPerRow = blockInfo.ToBytes(bufferCopy.blocksPerRow);
+    const bool exceedsMaxBytesPerRow = bytesPerRow >= kMaxBytesPerRow;
     const bool exceedsMaxTexelsPerRow =
         static_cast<uint64_t>(blockInfo.ToTexelWidth(bufferCopy.blocksPerRow)) >= kMaxTexelsPerRow;
     const bool exceedsMaxBytesPerImage =
         copySize.depthOrArrayLayers > BlockCount{1u} &&
         blockInfo.ToBytes(bufferCopy.blocksPerRow * bufferCopy.rowsPerImage) >= kMaxBytesPerImage;
     return exceedsMaxBytesPerRow || exceedsMaxTexelsPerRow || exceedsMaxBytesPerImage;
+}
+
+bool NeedsBufferTextureCopySplitForOversizedRow(const TexelCopyBufferLayout& layout,
+                                                const BlockExtent3D& copySize,
+                                                const TypedTexelBlockInfo& blockInfo) {
+    // `layout.bytesPerRow` is not required to be a multiple of `blockInfo.byteSize` (e.g. in
+    // `Queue::WriteTexture`), so round up to a whole block count before `BytesToBlocks` (which
+    // asserts divisibility).
+    BufferCopy bufferCopy;
+    bufferCopy.offset = layout.offset;
+    bufferCopy.blocksPerRow =
+        blockInfo.BytesToBlocks(RoundUp(uint64_t{layout.bytesPerRow}, blockInfo.byteSize));
+    bufferCopy.rowsPerImage = BlockCount{layout.rowsPerImage};
+    return NeedsBufferTextureCopySplitForOversizedRow(bufferCopy, copySize, blockInfo);
 }
 
 void SplitCopyTextureToBufferForOversizedRow(CommandAllocator* allocator,

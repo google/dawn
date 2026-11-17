@@ -41,7 +41,9 @@
 #include "src/dawn/native/d3d/d3d_platform.h"
 
 namespace dawn::native {
+struct BufferCopy;
 struct CopyTextureToTextureCmd;
+struct TextureCopy;
 }  // namespace dawn::native
 
 namespace dawn::native::d3d {
@@ -103,6 +105,10 @@ class Texture final : public TextureBase {
                     ReadCallback callback);
     static MaybeError Copy(const ScopedCommandRecordingContext* commandContext,
                            CopyTextureToTextureCmd* copy);
+    static MaybeError CopyFromBuffer(const ScopedCommandRecordingContext* commandContext,
+                                     const BufferCopy& src,
+                                     const TextureCopy& dst,
+                                     const TexelExtent3D& copySize);
 
     // Returns a Span of mappedResource with the correct size:
     // totalBytes = (depth - 1) × DepthPitch + (heightInBlocks - 1) × RowPitch + bytesPerRow

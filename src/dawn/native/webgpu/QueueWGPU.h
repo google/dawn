@@ -53,6 +53,7 @@ class Queue final : public QueueBase, public ObjectWGPU<WGPUQueue> {
     ResultOrError<Ref<SharedFence>> GetOrCreateSharedFence(WGPUSharedFence innerFence);
 
   private:
+    friend class Device;
     Queue(Device* device, const QueueDescriptor* descriptor);
     MaybeError SubmitImpl(Span<CommandBufferBase* const> commands) override;
     MaybeError WriteBufferImpl(BufferBase* buffer,

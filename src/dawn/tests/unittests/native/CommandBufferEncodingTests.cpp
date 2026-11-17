@@ -569,5 +569,52 @@ TEST(BufferTextureCopyOversizedRowTests, NeedsSplit) {
                                                            kMultiSlice, kRGBA8));
 }
 
+// Directly test the `TexelCopyBufferLayout` overload of
+// `NeedsBufferTextureCopySplitForOversizedRow`, including non-block-aligned `bytesPerRow`.
+TEST(BufferTextureCopyOversizedRowTests, NeedsSplitLayout) {
+    constexpr TypedTexelBlockInfo kBlock32B{32, TexelCount{1u}, TexelCount{1u}};
+    constexpr TypedTexelBlockInfo kRGBA32{16, TexelCount{1u}, TexelCount{1u}};
+    constexpr TypedTexelBlockInfo kRGBA8{4, TexelCount{1u}, TexelCount{1u}};
+    constexpr TypedTexelBlockInfo kR8{1, TexelCount{1u}, TexelCount{1u}};
+    constexpr BlockExtent3D kSingleSlice{BlockCount{2u}, BlockCount{2u}, BlockCount{1u}};
+    constexpr BlockExtent3D kMultiSlice{BlockCount{2u}, BlockCount{2u}, BlockCount{2u}};
+
+    auto MakeLayout = [](uint32_t bytesPerRow, uint32_t rowsPerImage) {
+        TexelCopyBufferLayout layout = {};
+        layout.bytesPerRow = bytesPerRow;
+        layout.rowsPerImage = rowsPerImage;
+        return layout;
+    };
+
+    // bytesPerRow (256 KiB == 1u << 18) and texelsPerRow (16384, including non-block-aligned
+    // `16383 * 4 + 1` which rounds up to 16384 RGBA8 blocks).
+    EXPECT_FALSE(NeedsBufferTextureCopySplitForOversizedRow(MakeLayout((1u << 18) - 32, 2),
+                                                            kSingleSlice, kBlock32B));
+    EXPECT_TRUE(NeedsBufferTextureCopySplitForOversizedRow(MakeLayout((1u << 18) - 31, 2),
+                                                           kSingleSlice, kBlock32B));
+    EXPECT_FALSE(NeedsBufferTextureCopySplitForOversizedRow(MakeLayout((1u << 18) - 16, 2),
+                                                            kSingleSlice, kRGBA32));
+    EXPECT_TRUE(
+        NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(1u << 18, 2), kSingleSlice, kRGBA32));
+    EXPECT_FALSE(
+        NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(16383, 2), kSingleSlice, kR8));
+    EXPECT_TRUE(
+        NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(16384, 2), kSingleSlice, kR8));
+    EXPECT_FALSE(
+        NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(16383 * 4, 2), kSingleSlice, kRGBA8));
+    EXPECT_TRUE(NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(16383 * 4 + 1, 2),
+                                                           kSingleSlice, kRGBA8));
+
+    // Multi-slice bytesPerImage threshold (256 MiB == 256 * 2^20) and max `uint32_t` strides.
+    EXPECT_FALSE(NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(256, 0x0010'0000),
+                                                            kSingleSlice, kRGBA8));
+    EXPECT_FALSE(NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(256, 0x000F'FFFF),
+                                                            kMultiSlice, kRGBA8));
+    EXPECT_TRUE(NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(256, 0x0010'0000),
+                                                           kMultiSlice, kRGBA8));
+    EXPECT_TRUE(NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(0xFFFF'FFFFu, 0xFFFF'FFFFu),
+                                                           kMultiSlice, kRGBA8));
+}
+
 }  // anonymous namespace
 }  // namespace dawn::native

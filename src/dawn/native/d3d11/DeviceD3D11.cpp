@@ -36,6 +36,7 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "src/dawn/common/GPUInfo.h"
 #include "src/dawn/native/ChainUtils.h"
+#include "src/dawn/native/CommandValidation.h"
 #include "src/dawn/native/DynamicUploader.h"
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/d3d/D3DError.h"
@@ -392,6 +393,7 @@ MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
                                            uint64_t destinationOffset,
                                            uint64_t size) {
     // D3D11 requires that buffers are unmapped before being used in a copy.
+    // TODO(crbug.com/586941722): Make Unmap/UseInternal happen automatically.
     DAWN_TRY(source->Unmap());
 
     auto scopedUseBuffer = source->UseInternal();
@@ -406,7 +408,21 @@ MaybeError Device::CopyFromStagingToTextureImpl(BufferBase* source,
                                                 const TexelCopyBufferLayout& src,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
-    return DAWN_UNIMPLEMENTED_ERROR("CopyFromStagingToTextureImpl");
+    // D3D11 requires that buffers are unmapped before being used in a copy.
+    // TODO(crbug.com/586941722): Make Unmap/UseInternal happen automatically.
+    DAWN_TRY(source->Unmap());
+    auto scopedUseBuffer = source->UseInternal();
+
+    const TypedTexelBlockInfo& blockInfo = GetBlockInfo(dst);
+    BufferCopy bufferCopy;
+    bufferCopy.buffer = source;
+    bufferCopy.offset = src.offset;
+    bufferCopy.blocksPerRow = blockInfo.BytesToBlocks(src.bytesPerRow);
+    bufferCopy.rowsPerImage = BlockCount{src.rowsPerImage};
+
+    auto commandContext =
+        ToBackend(GetQueue())->GetScopedPendingCommandContext(QueueBase::SubmitMode::Normal);
+    return Texture::CopyFromBuffer(&commandContext, bufferCopy, dst, copySizePixels);
 }
 
 const DeviceInfo& Device::GetDeviceInfo() const {
