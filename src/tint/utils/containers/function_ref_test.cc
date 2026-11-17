@@ -111,6 +111,19 @@ static_assert(std::is_constructible_v<FunctionRef<const Base&()>, decltype([]() 
                                           return d;
                                       })>);
 
+// The constraints are concepts, so can be checked directly.
+static_assert(detail::FunctionRefCanReturn<int, int>);
+static_assert(detail::FunctionRefCanReturn<int, int&>);
+static_assert(detail::FunctionRefCanReturn<const int&, int&>);
+static_assert(detail::FunctionRefCanReturn<const Base&, Derived&>);
+static_assert(!detail::FunctionRefCanReturn<const int&, int>);
+static_assert(!detail::FunctionRefCanReturn<const int64_t&, const int&>);
+static_assert(detail::FunctionRefCallable<IntLambda, int, int>);
+static_assert(!detail::FunctionRefCallable<IntLambda, int, std::string>);
+// A type that cannot be called does not satisfy the concept, instead of being a hard error from
+// computing its result type.
+static_assert(!detail::FunctionRefCallable<int, int>);
+
 // Assigning a callable would leave the FunctionRef referencing a destroyed temporary.
 static_assert(std::is_copy_assignable_v<IntToInt>);
 static_assert(!std::is_assignable_v<IntToInt&, IntLambda>);

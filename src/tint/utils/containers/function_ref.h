@@ -40,14 +40,21 @@ class FunctionRef;
 
 namespace detail {
 
-/// Is true if a callable returning `RESULT` can be called by a FunctionRef returning `R`.
-/// If `R` is a reference, `RESULT` must be a reference that binds to it without creating a
-/// temporary, as the temporary would be destroyed before the FunctionRef returns the reference.
+/// FunctionRefCanReturn is satisfied if a callable returning `RESULT` can be called by a
+/// FunctionRef returning `R`. If `R` is a reference, `RESULT` must be a reference that binds to it
+/// without creating a temporary, as the temporary would be destroyed before the FunctionRef returns
+/// the reference.
 template <typename R, typename RESULT>
-inline constexpr bool kFunctionRefCanReturn =
+concept FunctionRefCanReturn =
     !std::is_reference_v<R> ||
     (std::is_reference_v<RESULT> &&
      std::is_convertible_v<std::remove_reference_t<RESULT>*, std::remove_reference_t<R>*>);
+
+/// FunctionRefCallable is satisfied if the callable `F` can be called with `ARGS`, and its result
+/// can be returned by a FunctionRef returning `R`.
+template <typename F, typename R, typename... ARGS>
+concept FunctionRefCallable = std::is_invocable_r_v<R, F&, ARGS...> &&
+                              FunctionRefCanReturn<R, std::invoke_result_t<F&, ARGS...>>;
 
 }  // namespace detail
 
@@ -75,8 +82,7 @@ class FunctionRef<R(ARGS...)> {
         requires(!std::is_same_v<std::remove_cvref_t<F>, FunctionRef> &&
                  !std::is_function_v<std::remove_reference_t<F>> &&
                  !std::is_pointer_v<std::remove_cvref_t<F>> &&
-                 std::is_invocable_r_v<R, F&, ARGS...> &&
-                 detail::kFunctionRefCanReturn<R, std::invoke_result_t<F&, ARGS...>>)
+                 detail::FunctionRefCallable<F, R, ARGS...>)
     explicit(false) FunctionRef(F&& obj)
         // The const is restored by the cast in call_, so the object is never modified through a
         // non-const path if it was const.
