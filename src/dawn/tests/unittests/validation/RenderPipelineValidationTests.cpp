@@ -3679,30 +3679,5 @@ TEST_F(RG11B10UfloatRenderablePipelineTest, MultisampleSupportWithFeatureEnabled
     device.CreateRenderPipeline(&descriptor);
 }
 
-class AlphaToCoverageBlendableRequirementKillSwitchTest : public RenderPipelineValidationTest {
-    std::vector<const char*> GetEnabledToggles() override {
-        // Disable the AllowUnsafeAPIs toggles in device toggles descriptor to override the
-        // inheritance and create a device disallowing unsafe apis.
-        return {"allow_alpha_to_coverage_not_blendable"};
-    }
-};
-
-// Tests when alphaToCoverageEnabled is true, targets[0] must be blendable.
-TEST_F(AlphaToCoverageBlendableRequirementKillSwitchTest, KillSwitchAllowsNonBlendable) {
-    utils::ComboRenderPipelineDescriptor descriptor;
-    descriptor.vertex.module = vsModule;
-    descriptor.cFragment.module = fsModule;
-    descriptor.multisample.count = 4;
-    descriptor.multisample.alphaToCoverageEnabled = true;
-
-    // Control case: blendable with alpha.
-    descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
-    device.CreateRenderPipeline(&descriptor);
-
-    // Success case: not blendable with alpha is allowed with the killswitch
-    descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA32Float;
-    device.CreateRenderPipeline(&descriptor);
-}
-
 }  // anonymous namespace
 }  // namespace dawn

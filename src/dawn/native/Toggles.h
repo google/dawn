@@ -204,7 +204,6 @@ enum class Toggle {
     VulkanReplaceUnsignedCompareZero,
     VulkanUseCooperativeMatrixRobustBufferAccess,
     MetalEnableTensors,
-    AllowAlphaToCoverageNotBlendable,
     GLHoistConstantArrayInitializers,
     UseSpirvMaximalReconvergence,
     UseSpirvSubgroupUniformControlFlow,
