@@ -10,7 +10,6 @@
           "--test-launcher-batch-limit=512",
           "--no-xvfb"
         ],
-        "ci_only": true,
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
@@ -43,7 +42,6 @@
           "--test-launcher-batch-limit=512",
           "--no-xvfb"
         ],
-        "ci_only": true,
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
@@ -76,7 +74,6 @@
           "--test-launcher-batch-limit=512",
           "--no-xvfb"
         ],
-        "ci_only": true,
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
@@ -108,7 +105,6 @@
           "--test-launcher-batch-limit=512",
           "--no-xvfb"
         ],
-        "ci_only": true,
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
@@ -141,7 +137,6 @@
           "--test-launcher-batch-limit=512",
           "--no-xvfb"
         ],
-        "ci_only": true,
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
@@ -174,7 +169,6 @@
           "--test-launcher-batch-limit=512",
           "--no-xvfb"
         ],
-        "ci_only": true,
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
@@ -207,7 +201,6 @@
           "--perf-results-file=${ISOLATED_OUTDIR}/dawn_perf_results.json",
           "--no-xvfb"
         ],
-        "ci_only": true,
         "merge": {
           "script": "//scripts/merge_scripts/merge_dawn_perf_tests_results.py"
         },
