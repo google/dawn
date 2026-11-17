@@ -25,8 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <cstring>
-#include <memory>
+#include <algorithm>
+#include <span>
+#include <vector>
 
 #include "dawn/wire/WireClient.h"
 #include "gmock/gmock.h"
@@ -68,16 +69,17 @@ TEST_F(WireWriteBufferTests, WriteBufferChunkedCommands) {
         .RetiresOnSaturation();
     FlushClient();
 
-    auto expected = std::make_unique<uint8_t[]>(kLargeAllocationSize);
-    DAWN_UNSAFE_TODO(std::memset(expected.get(), 0b10101010, kLargeAllocationSize));
-    queue.WriteBuffer(buffer, 0, expected.get(), kLargeAllocationSize);
+    std::vector<uint8_t> expected(kLargeAllocationSize, 0b10101010);
+    queue.WriteBuffer(buffer, 0, expected.data(), expected.size());
 
-    DAWN_UNSAFE_TODO(
-        EXPECT_CALL(api, QueueWriteBuffer(
-                             apiQueue, apiBuffer, 0, MatchesLambda([&](void const* actual) {
-                                 return !std::memcmp(expected.get(), actual, kLargeAllocationSize);
-                             }),
-                             kLargeAllocationSize)))
+    EXPECT_CALL(api,
+                QueueWriteBuffer(apiQueue, apiBuffer, 0, MatchesLambda([&](void const* actual) {
+                                     // SAFETY: The write size is expected.size().
+                                     auto actualData = DAWN_UNSAFE_BUFFERS(std::span(
+                                         static_cast<const uint8_t*>(actual), expected.size()));
+                                     return std::ranges::equal(expected, actualData);
+                                 }),
+                                 expected.size()))
         .Times(1);
     FlushClient();
 }

@@ -185,9 +185,8 @@ class WireMemoryTransferServiceTestBase : public WireTest, public WithParamInter
             return sizeof(mSerializeCreateInfo);
         });
         EXPECT_CALL(*clientHandle, SerializeCreate)
-            .WillOnce(WithArg<0>([&](std::span<std::byte> serializeBuffer) {
-                // TODO(https://crbug.com/524406299) use copy_from.
-                DAWN_UNSAFE_TODO(memcpy(serializeBuffer.data(), &mSerializeCreateInfo, kDataSize));
+            .WillOnce(WithArg<0>([&](Span<std::byte> serializeBuffer) {
+                serializeBuffer.CopyPrefixFrom(ByteSpanFromRef(mSerializeCreateInfo));
             }));
     }
 
@@ -208,9 +207,8 @@ class WireMemoryTransferServiceTestBase : public WireTest, public WithParamInter
 
         EXPECT_CALL(*clientHandle, GetSerializeDataUpdateSize).WillOnce(Return(kBufferSize));
         EXPECT_CALL(*clientHandle, SerializeDataUpdate)
-            .WillOnce(WithArg<0>([&](std::span<std::byte> serializeSpan) {
-                // TODO(https://crbug.com/524406299) use copy_from.
-                DAWN_UNSAFE_TODO(memcpy(serializeSpan.data(), &mClientBufferContent, kBufferSize));
+            .WillOnce(WithArg<0>([&](Span<std::byte> serializeSpan) {
+                serializeSpan.CopyPrefixFrom(ByteSpanFromRef(mClientBufferContent));
             }));
     }
     void ExpectServerSerializeData(MockServerMemoryHandle* serverHandle) {
@@ -218,9 +216,8 @@ class WireMemoryTransferServiceTestBase : public WireTest, public WithParamInter
 
         EXPECT_CALL(*serverHandle, GetSerializeDataUpdateSize).WillOnce(Return(kBufferSize));
         EXPECT_CALL(*serverHandle, SerializeDataUpdate)
-            .WillOnce(WithArg<0>([&](std::span<std::byte> serializeSpan) {
-                // TODO(https://crbug.com/524406299) use copy_from.
-                DAWN_UNSAFE_TODO(memcpy(serializeSpan.data(), &mServerBufferContent, kBufferSize));
+            .WillOnce(WithArg<0>([&](Span<std::byte> serializeSpan) {
+                serializeSpan.CopyPrefixFrom(ByteSpanFromRef(mServerBufferContent));
             }));
     }
 
@@ -234,9 +231,7 @@ class WireMemoryTransferServiceTestBase : public WireTest, public WithParamInter
                                                          static_cast<size_t>(0u), kBufferSize))
             .WillOnce(WithArg<0>([&, success](std::span<const std::byte> deserializeSpan) {
                 if (success) {
-                    // TODO(https://crbug.com/524406299) use copy_from.
-                    DAWN_UNSAFE_TODO(
-                        memcpy(&mClientBufferContent, deserializeSpan.data(), kBufferSize));
+                    ByteSpanFromRef(mClientBufferContent).CopyFrom(deserializeSpan);
                 }
                 return success;
             }));
@@ -256,9 +251,7 @@ class WireMemoryTransferServiceTestBase : public WireTest, public WithParamInter
                 }))))
             .WillOnce(WithArg<0>([&, success](std::span<const std::byte> deserializePointer) {
                 if (success) {
-                    // TODO(https://crbug.com/524406299) use copy_from.
-                    DAWN_UNSAFE_TODO(memcpy(&mServerBufferContent, deserializePointer.data(),
-                                            deserializePointer.size()));
+                    ByteSpanFromRef(mServerBufferContent).CopyFrom(deserializePointer);
                 }
                 return success;
             }));
@@ -403,7 +396,6 @@ class WireMemoryTransferServiceTestBase : public WireTest, public WithParamInter
     static constexpr size_t kBufferSize = sizeof(uint32_t);
 
     uint32_t mSerializeCreateInfo = kDataGenerator++;
-    static constexpr size_t kDataSize = sizeof(uint32_t);
 
     StrictMock<MockCppCallback<wgpu::BufferMapCallback<void>*>> mMapAsyncCb;
 

@@ -25,7 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
+#include <array>
+#include <span>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -151,8 +155,8 @@ class EGLImageTestBase : public DawnTest {
     }
 
     bool HasExtension(const char* string) {
-        return DAWN_UNSAFE_TODO(strstr(egl.QueryString(egl.GetCurrentDisplay(), EGL_EXTENSIONS),
-                                       string)) != nullptr;
+        return std::string_view(egl.QueryString(egl.GetCurrentDisplay(), EGL_EXTENSIONS))
+                   .find(string) != std::string_view::npos;
     }
 
     void SetUp() override {
@@ -324,8 +328,7 @@ class EGLImageUsageTests : public EGLImageTestBase {
                      wgpu::TextureFormat format,
                      GLenum glFormat,
                      GLenum glType,
-                     void* data,
-                     size_t dataSize) {
+                     std::span<const uint8_t> data) {
         native::opengl::Device* openglDevice =
             native::opengl::ToBackend(native::FromAPI(device.Get()));
 
@@ -360,7 +363,7 @@ class EGLImageUsageTests : public EGLImageTestBase {
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
-        std::vector<uint8_t> result(dataSize);
+        std::vector<uint8_t> result(data.size());
 
         auto ignoreResult = openglDevice->ExecuteGL(
             native::ExecutionQueueBase::SubmitMode::Passive,
@@ -377,7 +380,7 @@ class EGLImageUsageTests : public EGLImageTestBase {
                 gl.DeleteFramebuffers(1, &fbo);
                 return {};
             });
-        DAWN_UNSAFE_TODO(ASSERT_EQ(0, memcmp(result.data(), data, dataSize)));
+        ASSERT_TRUE(std::ranges::equal(result, data));
     }
 
     template <class T>
@@ -467,9 +470,9 @@ TEST_P(EGLImageUsageTests, ClearR8EGLImage) {
     DAWN_SUPPRESS_TEST_IF(IsImgTec());
     ScopedEGLImage eglImage = CreateEGLImage(1, 1, GL_R8, GL_RED, GL_UNSIGNED_BYTE, nullptr);
 
-    uint8_t data = 0x01;
+    std::array<uint8_t, 1> data = {1};
     DoClearTest(eglImage.getImage(), eglImage.getTexture(), wgpu::TextureFormat::R8Unorm, GL_RED,
-                GL_UNSIGNED_BYTE, &data, sizeof(data));
+                GL_UNSIGNED_BYTE, data);
 }
 
 // Test clearing a RG8 EGLImage
@@ -478,9 +481,9 @@ TEST_P(EGLImageUsageTests, ClearRG8EGLImage) {
     DAWN_SUPPRESS_TEST_IF(IsImgTec());
     ScopedEGLImage eglImage = CreateEGLImage(1, 1, GL_RG8, GL_RG, GL_UNSIGNED_BYTE, nullptr);
 
-    uint16_t data = 0x0201;
+    std::array<uint8_t, 2> data = {1, 2};
     DoClearTest(eglImage.getImage(), eglImage.getTexture(), wgpu::TextureFormat::RG8Unorm, GL_RG,
-                GL_UNSIGNED_BYTE, &data, sizeof(data));
+                GL_UNSIGNED_BYTE, data);
 }
 
 // Test clearing an RGBA8 EGLImage
@@ -489,9 +492,9 @@ TEST_P(EGLImageUsageTests, ClearRGBA8EGLImage) {
     DAWN_SUPPRESS_TEST_IF(IsImgTec());
     ScopedEGLImage eglImage = CreateEGLImage(1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-    uint32_t data = 0x04030201;
+    std::array<uint8_t, 4> data = {1, 2, 3, 4};
     DoClearTest(eglImage.getImage(), eglImage.getTexture(), wgpu::TextureFormat::RGBA8Unorm,
-                GL_RGBA, GL_UNSIGNED_BYTE, &data, sizeof(data));
+                GL_RGBA, GL_UNSIGNED_BYTE, data);
 }
 
 // Test sampling an imported R8 GL texture
