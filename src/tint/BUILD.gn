@@ -273,22 +273,6 @@ if (tint_build_fuzzers && tint_build_fuzztest) {
     public = [ "//testing/libfuzzer/fuzzers/tint_wgsl_fuzzer_grammar.h" ]
     public_deps = [ ":fuzztest" ]
   }
-
-  executable("tint_stub_fuzztest") {
-    testonly = true
-    sources = [ "cmd/fuzz/stub_fuzztest.cc" ]
-    deps = [
-      ":fuzztest",
-      ":gmock_and_gtest",
-      ":tint_wgsl_fuzzer_grammar",
-      "${tint_src_dir}/utils/macros",
-    ]
-    configs += [
-      ":tint_common_config",
-      ":tint_public_config",
-      ":tint_unittests_config",
-    ]
-  }
 }
 
 source_set("winsock") {
@@ -353,7 +337,7 @@ group("fuzzers") {
       }
     }
     if (tint_build_fuzztest) {
-      data_deps += [ ":tint_stub_fuzztest" ]
+      data_deps += [ "${tint_src_dir}/cmd/fuzz/stub_fuzztest" ]
     }
   }
 }

@@ -244,3 +244,60 @@ template("tint_fuzzer_test") {
     }
   }
 }
+
+template("tint_fuzztest_fuzzer") {
+  # Match tint_fuzzer_test's handling of 'output_name': create the executable
+  # using 'output_name' as the GN target name so Ninja can build it directly by
+  # binary name, and expose a proxy group under 'target_name' so directory
+  # labels also resolve.
+  # Unlike tint_fuzzer_test, this uses executable() rather than fuzzer_test() so
+  # it does not link libFuzzer's main() or //testing/libfuzzer:is_a_fuzz_target
+  # (keeping prototype FuzzTest binaries off ClusterFuzz).
+  if (defined(invoker.output_name)) {
+    fuzzer_name = invoker.output_name
+  } else {
+    fuzzer_name = target_name
+  }
+
+  executable(fuzzer_name) {
+    forward_variables_from(invoker,
+                           "*",
+                           [
+                             "configs",
+                             "output_name",
+                           ])
+
+    testonly = true
+
+    if (defined(invoker.configs)) {
+      configs += invoker.configs
+    }
+
+    configs += [
+      "//testing/libfuzzer:fuzzer_test_config",
+      "//testing/libfuzzer:no_clusterfuzz",
+      "${tint_src_dir}:tint_unittests_config",
+    ]
+
+    if (build_with_chromium) {
+      configs -= [ "//build/config/compiler:chromium_code" ]
+      configs += [ "//build/config/compiler:no_chromium_code" ]
+    }
+
+    if (!defined(invoker.deps)) {
+      deps = []
+    }
+
+    deps += [
+      "${tint_src_dir}:fuzztest",
+      "${tint_src_dir}:gmock_and_gtest",
+    ]
+  }
+
+  if (fuzzer_name != target_name) {
+    group(target_name) {
+      testonly = true
+      data_deps = [ ":${fuzzer_name}" ]
+    }
+  }
+}

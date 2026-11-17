@@ -37,5 +37,6 @@
 include(cmd/fuzz/common/BUILD.cmake)
 include(cmd/fuzz/ir/BUILD.cmake)
 include(cmd/fuzz/ir_mesa/BUILD.cmake)
+include(cmd/fuzz/stub_fuzztest/BUILD.cmake)
 include(cmd/fuzz/wgsl/BUILD.cmake)
 include(cmd/fuzz/wgsl_mesa/BUILD.cmake)
