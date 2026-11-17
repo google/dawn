@@ -486,6 +486,11 @@ TEST_F(RenderPipelineValidationTest, WriteMaskMustBeZeroForColorTargetWithNoShad
     // Error case: the writeMask is not 0.
     descriptor.cTargets[1].writeMask = wgpu::ColorWriteMask::Red;
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+
+    // Error case: the writeMask on a target with shader output has invalid high 32-bit bits set.
+    descriptor.cTargets[1].writeMask = wgpu::ColorWriteMask::None;
+    descriptor.cTargets[0].writeMask = static_cast<wgpu::ColorWriteMask>(1ull << 32);
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 }
 
 // Tests that the color formats must be renderable.

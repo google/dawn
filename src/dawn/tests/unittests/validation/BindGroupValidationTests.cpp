@@ -1461,6 +1461,23 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutVisibilityNone) {
     device.CreateBindGroupLayout(&descriptor);
 }
 
+// Check that invalid ShaderStage bitmask values (including high 32-bit bits) are rejected.
+TEST_F(BindGroupLayoutValidationTest, InvalidVisibilityBitmask) {
+    wgpu::BindGroupLayoutEntry entry;
+    entry.binding = 0;
+    entry.buffer.type = wgpu::BufferBindingType::Uniform;
+
+    wgpu::BindGroupLayoutDescriptor descriptor;
+    descriptor.entryCount = 1;
+    descriptor.entries = &entry;
+
+    entry.visibility = static_cast<wgpu::ShaderStage>(1u << 3);
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
+
+    entry.visibility = static_cast<wgpu::ShaderStage>(1ull << 32);
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
+}
+
 // This test verifies that binding with none visibility in bind group layout can be supported in
 // bind group
 TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutVisibilityNoneExpectsBindGroupEntry) {
