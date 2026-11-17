@@ -49,8 +49,8 @@ Result<SuccessType> MultiplanarExternalTextureFuzzer(Module& ir,
 
     tint::transform::multiplanar::BindingsMap multiplanar_map;
     for (const auto& iter : input_map) {
-        if (existing_bindings.Contains(iter.second.params) ||
-            existing_bindings.Contains(iter.second.plane_1)) {
+        if (!existing_bindings.Add(iter.second.params) ||
+            !existing_bindings.Add(iter.second.plane_1)) {
             return Failure{"new bindings conflict with existing bindings"};
         }
 
