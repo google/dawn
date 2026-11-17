@@ -71,7 +71,7 @@ struct Pending {
 
 }  // namespace
 
-void Validator::CheckType(const core::type::Type* root, std::function<diag::Diagnostic&()> diag) {
+void Validator::CheckType(const core::type::Type* root, FunctionRef<diag::Diagnostic&()> diag) {
     if (root == nullptr) {
         return;
     }
@@ -174,7 +174,7 @@ void Validator::CheckType(const core::type::Type* root, std::function<diag::Diag
 }
 
 bool Validator::CheckNestDepth(const core::type::Type* type,
-                               std::function<diag::Diagnostic&()> diag) {
+                               FunctionRef<diag::Diagnostic&()> diag) {
     if (type == nullptr) {
         return true;
     }
@@ -236,8 +236,7 @@ bool Validator::CheckNestDepth(const core::type::Type* type,
     return true;
 }
 
-bool Validator::CheckStruct(const core::type::Struct* str,
-                            std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckStruct(const core::type::Struct* str, FunctionRef<diag::Diagnostic&()> diag) {
     uint32_t cur_offset = 0;
     for (auto* member : str->Members()) {
         if (member->Type()->Is<core::type::Void>()) {
@@ -360,7 +359,7 @@ bool Validator::CheckStruct(const core::type::Struct* str,
 }
 
 bool Validator::CheckStructMemberAttributes(const core::type::StructMember* member,
-                                            std::function<diag::Diagnostic&()> make_diag) {
+                                            FunctionRef<diag::Diagnostic&()> make_diag) {
     const auto checkers = IOAttributeCheckersFor(member->Attributes(), /*skip_builtins*/ false);
     for (const auto* checker : checkers) {
         auto res = checker->check(member->Type(), member->Attributes(), ir_.properties,
@@ -397,7 +396,7 @@ bool Validator::CheckStructMemberAttributes(const core::type::StructMember* memb
 }
 
 bool Validator::CheckRef(const core::type::Reference* ref,
-                         std::function<diag::Diagnostic&()>& diag,
+                         FunctionRef<diag::Diagnostic&()> diag,
                          const core::type::Type* root) {
     if (ref->StoreType()->Is<core::type::Void>()) {
         diag() << "references to void are not permitted";
@@ -417,7 +416,7 @@ bool Validator::CheckRef(const core::type::Reference* ref,
     return true;
 }
 
-bool Validator::CheckPtr(const core::type::Pointer* ptr, std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckPtr(const core::type::Pointer* ptr, FunctionRef<diag::Diagnostic&()> diag) {
     if (ptr->StoreType()->Is<core::type::Void>()) {
         diag() << "pointers to void are not permitted";
         return false;
@@ -472,7 +471,7 @@ bool Validator::CheckPtr(const core::type::Pointer* ptr, std::function<diag::Dia
 
 // 8-bit integer types are guarded by the Allow8BitIntegers property.
 // They can be used as the component type of a subgroup matrix without the property.
-bool Validator::Check8BitInteger(std::function<diag::Diagnostic&()>& diag,
+bool Validator::Check8BitInteger(FunctionRef<diag::Diagnostic&()> diag,
                                  const core::type::Type* parent) {
     if (!Is<core::type::SubgroupMatrix>(parent) &&
         !ir_.properties.Contains(Property::kAllow8BitIntegers)) {
@@ -484,7 +483,7 @@ bool Validator::Check8BitInteger(std::function<diag::Diagnostic&()>& diag,
 
 // 16-bit bfloat types are guarded by the Allow16BitBFloats property.
 // They can be used as the component type of a subgroup matrix without the property.
-bool Validator::Check16BitBFloat(std::function<diag::Diagnostic&()>& diag,
+bool Validator::Check16BitBFloat(FunctionRef<diag::Diagnostic&()> diag,
                                  const core::type::Type* parent) {
     if (!Is<core::type::SubgroupMatrix>(parent)) {
         diag() << "bf16 types are not permitted";
@@ -494,7 +493,7 @@ bool Validator::Check16BitBFloat(std::function<diag::Diagnostic&()>& diag,
 }
 
 // 16-bit integer types are guarded by the Allow16BitIntegers property.
-bool Validator::Check16BitInteger(std::function<diag::Diagnostic&()>& diag) {
+bool Validator::Check16BitInteger(FunctionRef<diag::Diagnostic&()> diag) {
     if (!ir_.properties.Contains(Property::kAllow16BitIntegers)) {
         diag() << "16-bit integer types are not permitted";
         return false;
@@ -503,7 +502,7 @@ bool Validator::Check16BitInteger(std::function<diag::Diagnostic&()>& diag) {
 }
 
 // 64-bit integer types are guarded by the Allow64BitIntegers property.
-bool Validator::Check64BitInteger(std::function<diag::Diagnostic&()>& diag) {
+bool Validator::Check64BitInteger(FunctionRef<diag::Diagnostic&()> diag) {
     if (!ir_.properties.Contains(Property::kAllow64BitIntegers)) {
         diag() << "64-bit integer types are not permitted";
         return false;
@@ -512,7 +511,7 @@ bool Validator::Check64BitInteger(std::function<diag::Diagnostic&()>& diag) {
 }
 
 // 16-bit float types are guarded by the Allow16BitFloats property.
-bool Validator::Check16BitFloat(std::function<diag::Diagnostic&()>& diag) {
+bool Validator::Check16BitFloat(FunctionRef<diag::Diagnostic&()> diag) {
     if (!ir_.properties.Contains(Property::kAllow16BitFloats)) {
         diag() << "16-bit float types are not permitted";
         return false;
@@ -520,7 +519,7 @@ bool Validator::Check16BitFloat(std::function<diag::Diagnostic&()>& diag) {
     return true;
 }
 
-bool Validator::CheckArray(const core::type::Array* arr, std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckArray(const core::type::Array* arr, FunctionRef<diag::Diagnostic&()> diag) {
     if (!arr->ElemType()->HasCreationFixedFootprint() &&
         !ir_.properties.Contains(Property::kAllowPointerAndHandleInAggregates)) {
         diag() << "array elements, " << NameOf(arr) << ", must have creation-fixed footprint";
@@ -561,8 +560,7 @@ bool Validator::CheckArray(const core::type::Array* arr, std::function<diag::Dia
     return true;
 }
 
-bool Validator::CheckVector(const core::type::Vector* vec,
-                            std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckVector(const core::type::Vector* vec, FunctionRef<diag::Diagnostic&()> diag) {
     if (!vec->Type()->IsScalar()) {
         diag() << "vector elements, " << NameOf(vec) << ", must be scalars";
         return false;
@@ -570,8 +568,7 @@ bool Validator::CheckVector(const core::type::Vector* vec,
     return true;
 }
 
-bool Validator::CheckMatrix(const core::type::Matrix* mat,
-                            std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckMatrix(const core::type::Matrix* mat, FunctionRef<diag::Diagnostic&()> diag) {
     if (!mat->Type()->IsFloatScalar()) {
         diag() << "matrix elements, " << NameOf(mat) << ", must be float scalars";
         return false;
@@ -579,8 +576,7 @@ bool Validator::CheckMatrix(const core::type::Matrix* mat,
     return true;
 }
 
-bool Validator::CheckAtomic(const core::type::Atomic* atom,
-                            std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckAtomic(const core::type::Atomic* atom, FunctionRef<diag::Diagnostic&()> diag) {
     // Prior to lowering we allow for atomic operations on vec2u to support the
     // AtomicVec2UMinMax feature.
     if (auto* vec = atom->Type()->As<core::type::Vector>()) {
@@ -597,7 +593,7 @@ bool Validator::CheckAtomic(const core::type::Atomic* atom,
 }
 
 bool Validator::CheckSampledTexture(const core::type::SampledTexture* s,
-                                    std::function<diag::Diagnostic&()>& diag) {
+                                    FunctionRef<diag::Diagnostic&()> diag) {
     if (!s->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
         diag() << "invalid sampled texture sample type: " << NameOf(s->Type());
         return false;
@@ -606,7 +602,7 @@ bool Validator::CheckSampledTexture(const core::type::SampledTexture* s,
 }
 
 bool Validator::CheckMultisampledTexture(const core::type::MultisampledTexture* ms,
-                                         std::function<diag::Diagnostic&()>& diag) {
+                                         FunctionRef<diag::Diagnostic&()> diag) {
     if (!ms->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
         diag() << "invalid multisampled texture sample type: " << NameOf(ms->Type());
         return false;
@@ -625,7 +621,7 @@ bool Validator::CheckMultisampledTexture(const core::type::MultisampledTexture* 
 }
 
 bool Validator::CheckStorageTexture(const core::type::StorageTexture* storage,
-                                    std::function<diag::Diagnostic&()>& diag) {
+                                    FunctionRef<diag::Diagnostic&()> diag) {
     switch (storage->Dim()) {
         case core::type::TextureDimension::kCube:
         case core::type::TextureDimension::kCubeArray:
@@ -642,7 +638,7 @@ bool Validator::CheckStorageTexture(const core::type::StorageTexture* storage,
 }
 
 bool Validator::CheckInputAttachment(const core::type::InputAttachment* ia,
-                                     std::function<diag::Diagnostic&()>& diag) {
+                                     FunctionRef<diag::Diagnostic&()> diag) {
     if (!ia->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
         diag() << "invalid input attachment component type: " << NameOf(ia->Type());
         return false;
@@ -651,7 +647,7 @@ bool Validator::CheckInputAttachment(const core::type::InputAttachment* ia,
 }
 
 bool Validator::CheckSubgroupMatrix(const core::type::SubgroupMatrix* m,
-                                    std::function<diag::Diagnostic&()>& diag,
+                                    FunctionRef<diag::Diagnostic&()> diag,
                                     core::AddressSpace addrspace) {
     if (!m->Type()
              ->IsAnyOf<core::type::F16, core::type::F32, core::type::I8, core::type::I32,
@@ -667,7 +663,7 @@ bool Validator::CheckSubgroupMatrix(const core::type::SubgroupMatrix* m,
 }
 
 bool Validator::CheckBindingArray(const core::type::BindingArray* ba,
-                                  std::function<diag::Diagnostic&()>& diag,
+                                  FunctionRef<diag::Diagnostic&()> diag,
                                   core::AddressSpace addrspace) {
     if (!ba->Count()->Is<core::type::ConstantArrayCount>()) {
         diag() << "binding_array count must be a constant expression";
@@ -695,8 +691,7 @@ bool Validator::CheckBindingArray(const core::type::BindingArray* ba,
     return true;
 }
 
-bool Validator::CheckBuffer(const core::type::Buffer* buf,
-                            std::function<diag::Diagnostic&()>& diag) {
+bool Validator::CheckBuffer(const core::type::Buffer* buf, FunctionRef<diag::Diagnostic&()> diag) {
     if (!ir_.properties.Contains(Property::kAllowBufferTypes)) {
         diag() << "buffer types are not allowed in this context";
         return false;
@@ -719,7 +714,7 @@ bool Validator::CheckBuffer(const core::type::Buffer* buf,
 }
 
 bool Validator::CheckSwizzleView(const core::type::SwizzleView* sv,
-                                 std::function<diag::Diagnostic&()>& diag) {
+                                 FunctionRef<diag::Diagnostic&()> diag) {
     if (!ir_.properties.Contains(Property::kAllowSwizzleView)) {
         diag() << "swizzle view is not allowed in this module";
         return false;
