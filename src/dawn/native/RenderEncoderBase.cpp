@@ -749,7 +749,7 @@ void RenderEncoderBase::APISetImmediates(uint32_t offset, Span<const std::byte> 
             }
 
             RecordSetImmediates(allocator, offset, data);
-            mCommandBufferState.SetImmediateData(offset, data.size());
+            mCommandBufferState.SetImmediateData(offset, data);
             return {};
         },
         "encoding %s.SetImmediates(%u, %u, ...).", this, offset, data.size());

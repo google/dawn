@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
+#include <array>
 #include <utility>
 #include <vector>
 
@@ -324,6 +326,55 @@ TEST_F(CommandBufferEncodingTests, StateNotLeakedAfterRestore) {
 
     // Expect no pipeline
     EXPECT_FALSE(stateTracker->HasPipeline());
+}
+
+// Restoring state replays owned immediate values, including partial updates and sparse ranges.
+TEST_F(CommandBufferEncodingTests, RestoreUserImmediates) {
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+
+    std::array<uint32_t, kMaxImmediateDataBytes / sizeof(uint32_t)> expectedData = {0, 25, 128, 240,
+                                                                                    255};
+    expectedData.back() = 99;
+    pass.SetImmediates(sizeof(uint32_t), &expectedData[1], 4 * sizeof(uint32_t));
+    expectedData[2] = 73;
+    pass.SetImmediates(2 * sizeof(uint32_t), &expectedData[2], sizeof(uint32_t));
+    pass.SetImmediates(kMaxImmediateDataBytes - sizeof(uint32_t), &expectedData.back(),
+                       sizeof(uint32_t));
+
+    CommandBufferStateTracker snapshot =
+        *FromAPI(pass.Get())->GetCommandBufferStateTrackerForTesting();
+
+    std::array<uint32_t, kMaxImmediateDataBytes / sizeof(uint32_t)> actualData = {};
+    ByteSpanFromRef(actualData).CopyFrom(snapshot.GetImmediateData());
+    EXPECT_EQ(actualData, expectedData);
+
+    std::array<uint32_t, kMaxImmediateDataBytes / sizeof(uint32_t)> internalData;
+    internalData.fill(0xDEADBEEF);
+    pass.SetImmediates(0, internalData.data(), sizeof(internalData));
+    FromAPI(pass.Get())->RestoreCommandBufferStateForTesting(std::move(snapshot));
+    ByteSpanFromRef(actualData)
+        .CopyFrom(
+            FromAPI(pass.Get())->GetCommandBufferStateTrackerForTesting()->GetImmediateData());
+    EXPECT_EQ(actualData, expectedData);
+    pass.End();
+
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    CommandIterator* commands = FromAPI(commandBuffer.Get())->GetCommandIteratorForTesting();
+    Command command;
+    while (commands->NextCommandId(&command)) {
+        if (command == Command::SetImmediates) {
+            const auto* cmd = commands->NextCommand<SetImmediatesCmd>();
+            auto data = commands->NextData<const std::byte>(cmd->size);
+            ByteSpanFromRef(actualData).subspan(cmd->offset, cmd->size).CopyFrom(data);
+        } else {
+            SkipCommand(commands, command);
+        }
+    }
+
+    expectedData.front() = internalData.front();
+    std::fill(expectedData.begin() + 5, expectedData.end() - 1, internalData.front());
+    EXPECT_EQ(actualData, expectedData);
 }
 
 // Regression test for crbug.com/405316877.

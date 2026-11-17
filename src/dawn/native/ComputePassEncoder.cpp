@@ -610,7 +610,7 @@ void ComputePassEncoder::APISetImmediates(uint32_t offset, Span<const std::byte>
             }
 
             RecordSetImmediates(allocator, offset, data);
-            mCommandBufferState.SetImmediateData(offset, data.size());
+            mCommandBufferState.SetImmediateData(offset, data);
             return {};
         },
         "encoding %s.SetImmediates(%u, %u, ...).", this, offset, data.size());
@@ -654,7 +654,7 @@ void ComputePassEncoder::AddDispatchSyncScope(DispatchResourceUsageTracker scope
 }
 
 void ComputePassEncoder::RestoreCommandBufferState(CommandBufferStateTracker state) {
-    // Encode commands for the backend to restore the pipeline and bind groups.
+    // Encode commands for the backend to restore the pipeline, bind groups, and immediates.
     if (state.HasPipeline()) {
         APISetPipeline(state.GetComputePipeline());
     }
@@ -664,6 +664,14 @@ void ComputePassEncoder::RestoreCommandBufferState(CommandBufferStateTracker sta
             APISetBindGroup(static_cast<uint32_t>(i), bg,
                             CastIntSpan<const uint32_t>(state.GetDynamicOffsets(i)));
         }
+    }
+
+    // TODO(crbug.com/435317394): Restore the resource table as well.
+
+    for (auto [offset, size] : IterateRanges(state.GetImmediateDataMask())) {
+        uint32_t byteOffset = static_cast<uint32_t>(offset) * kImmediateElementByteSize;
+        APISetImmediates(byteOffset, state.GetImmediateData().subspan(
+                                         byteOffset, size * kImmediateElementByteSize));
     }
 
     // Restore the frontend state tracking information.

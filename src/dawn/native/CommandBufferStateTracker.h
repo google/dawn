@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_COMMANDBUFFERSTATETRACKER_H_
 #define SRC_DAWN_NATIVE_COMMANDBUFFERSTATETRACKER_H_
 
+#include <array>
+#include <cstddef>
 #include <vector>
 
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
@@ -78,7 +80,7 @@ class CommandBufferStateTracker {
                         uint64_t size);
     void UnsetVertexBuffer(VertexBufferSlot slot);
     void SetVertexBuffer(VertexBufferSlot slot, uint64_t size);
-    void SetImmediateData(uint32_t offset, size_t size);
+    void SetImmediateData(uint32_t offset, Span<const std::byte> data);
     void End();
 
     static constexpr size_t kNumAspects = 6;
@@ -98,6 +100,8 @@ class CommandBufferStateTracker {
     wgpu::IndexFormat GetIndexFormat() const;
     uint64_t GetIndexBufferSize() const;
     uint64_t GetIndexBufferOffset() const;
+    Span<const std::byte, kMaxImmediateDataBytes> GetImmediateData() const;
+    const ImmediateMask& GetImmediateDataMask() const;
 
   private:
     MaybeValError ValidateOperation(ValidationAspects requiredAspects);
@@ -129,6 +133,7 @@ class CommandBufferStateTracker {
     RAW_PTR_EXCLUSION const RequiredBufferSizes* mMinBufferSizes = nullptr;
 
     ImmediateMask mImmediateDataMask;
+    std::array<std::byte, kMaxImmediateDataBytes> mImmediateData = {};
 };
 
 }  // namespace dawn::native

@@ -833,14 +833,18 @@ void CommandBufferStateTracker::SetVertexBuffer(VertexBufferSlot slot, uint64_t 
     mVertexBufferSizes[slot] = size;
 }
 
-void CommandBufferStateTracker::SetImmediateData(uint32_t offset, size_t size) {
+void CommandBufferStateTracker::SetImmediateData(uint32_t offset, Span<const std::byte> data) {
     // Both offset and size should be small numbers that fit in a uint32_t.
     DAWN_ASSERT(offset <= kMaxImmediateDataBytes);
-    DAWN_ASSERT(size <= kMaxImmediateDataBytes);
+    DAWN_ASSERT(data.size() <= kMaxImmediateDataBytes);
+
+    Span<std::byte, kMaxImmediateDataBytes>(mImmediateData)
+        .subspan(offset, data.size())
+        .CopyFrom(data);
 
     static_assert(ImmediateMask{}.size() <= 64);
     uint32_t startSlot = offset / kImmediateElementByteSize;
-    uint32_t slotCount = static_cast<uint32_t>(size) / kImmediateElementByteSize;
+    uint32_t slotCount = static_cast<uint32_t>(data.size()) / kImmediateElementByteSize;
 
     mImmediateDataMask |= ImmediateMask(((1u << slotCount) - 1u) << startSlot);
 }
@@ -909,6 +913,14 @@ uint64_t CommandBufferStateTracker::GetIndexBufferSize() const {
 
 uint64_t CommandBufferStateTracker::GetIndexBufferOffset() const {
     return mIndexBufferOffset;
+}
+
+Span<const std::byte, kMaxImmediateDataBytes> CommandBufferStateTracker::GetImmediateData() const {
+    return mImmediateData;
+}
+
+const ImmediateMask& CommandBufferStateTracker::GetImmediateDataMask() const {
+    return mImmediateDataMask;
 }
 
 void CommandBufferStateTracker::End() {
