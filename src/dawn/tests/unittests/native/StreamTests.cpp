@@ -215,7 +215,7 @@ TEST(SerializeTests, StdWStringViews) {
 // Test that ByteVectorSink serializes Blobs as expected.
 TEST(SerializeTests, Blob) {
     uint8_t data[] = "dawn native Blob";
-    Blob blob = DAWN_UNSAFE_TODO(Blob::UnsafeCreateWithDeleter(data, sizeof(data), [] {}));
+    Blob blob = Blob::UnsafeCreateWithDeleter(std::as_writable_bytes(std::span(data)), [] {});
 
     ByteVectorSink expected;
     StreamIn(&expected, sizeof(data));

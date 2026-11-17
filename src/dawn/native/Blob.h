@@ -36,7 +36,6 @@
 #include <vector>
 
 #include "partition_alloc/pointers/raw_ptr.h"
-#include "src/utils/compiler.h"
 #include "src/utils/span.h"
 
 namespace dawn::native {
@@ -59,19 +58,13 @@ class Blob {
     {
         // Move the vector into a new allocation so we can destruct it in the deleter.
         auto* wrapped_vec = new std::vector<T>(std::move(vec));
-
-        uint8_t* data = reinterpret_cast<uint8_t*>(wrapped_vec->data());
-        size_t size = wrapped_vec->size() * sizeof(T);
-
-        return DAWN_UNSAFE_TODO(
-            Blob::UnsafeCreateWithDeleter(data, size, [wrapped_vec] { delete wrapped_vec; }));
+        return Blob::UnsafeCreateWithDeleter(std::as_writable_bytes(std::span(*wrapped_vec)),
+                                             [wrapped_vec] { delete wrapped_vec; });
     }
 
     // This function is used to create Blob with actual data.
     // Make sure the creation and deleter handles the data ownership and lifetime correctly.
-    DAWN_UNSAFE_BUFFER_USAGE static Blob UnsafeCreateWithDeleter(uint8_t* data,
-                                                                 size_t size,
-                                                                 std::function<void()> deleter);
+    static Blob UnsafeCreateWithDeleter(dawn::Span<std::byte> data, std::function<void()> deleter);
 
     Blob();
     ~Blob();

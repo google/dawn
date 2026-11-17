@@ -42,8 +42,10 @@ namespace dawn::native {
 // static
 Blob Blob::Create(size_t size) {
     if (size > 0) {
-        uint8_t* ptr = new uint8_t[size];
-        return DAWN_UNSAFE_TODO(Blob::UnsafeCreateWithDeleter(ptr, size, [=] { delete[] ptr; }));
+        std::byte* ptr = new std::byte[size];
+        // SAFETY: `ptr` was just allocated with `size` bytes.
+        auto data = DAWN_UNSAFE_BUFFERS(dawn::Span<std::byte>(ptr, size));
+        return Blob::UnsafeCreateWithDeleter(data, [=] { delete[] ptr; });
     } else {
         return Blob();
     }
@@ -61,8 +63,8 @@ Blob Blob::Create(Blob&& original, size_t offset, size_t extent) {
 }
 
 // static
-Blob Blob::UnsafeCreateWithDeleter(uint8_t* data, size_t size, std::function<void()> deleter) {
-    return Blob(dawn::Span<std::byte>(reinterpret_cast<std::byte*>(data), size), deleter);
+Blob Blob::UnsafeCreateWithDeleter(dawn::Span<std::byte> data, std::function<void()> deleter) {
+    return Blob(data, std::move(deleter));
 }
 
 Blob::Blob() : mData({}), mDeleter({}) {}
