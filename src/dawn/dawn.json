@@ -2598,7 +2598,8 @@
             {"value": 63, "name": "adapter properties drm", "tags": ["dawn", "native"]},
             {"value": 64, "name": "dawn allow undefined load store op", "tags": ["dawn", "native"]},
             {"value": 65, "name": "buffer map write extended usages", "tags": ["dawn"]},
-            {"value": 66, "name": "shared buffer memory host pointer", "tags": ["dawn", "native"]}
+            {"value": 66, "name": "shared buffer memory host pointer", "tags": ["dawn", "native"]},
+            {"value": 67, "name": "shared texture memory DXGI Y410", "tags": ["dawn", "native"]}
         ]
     },
     "filter mode": {
@@ -4968,7 +4969,10 @@
             {"value": 3, "name": "u32", "jsrepr": "'u32'"},
             {"value": 4, "name": "i32", "jsrepr": "'i32'"},
             {"value": 5, "name": "u8", "jsrepr": "'u8'"},
-            {"value": 6, "name": "i8", "jsrepr": "'i8'"}
+            {"value": 6, "name": "i8", "jsrepr": "'i8'"},
+            {"value": 7, "name": "bf16", "jsrepr": "'bf16'"},
+            {"value": 8, "name": "f8_e4m3", "jsrepr": "'f8_e4m3'"},
+            {"value": 9, "name": "f8_e5m2", "jsrepr": "'f8_e5m2'"}
         ]
     },
     "subgroup matrix config": {

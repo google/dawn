@@ -43,6 +43,7 @@
 #include "src/dawn/native/ToBackend.h"
 #include "src/dawn/native/d3d/D3DError.h"
 #include "src/dawn/native/d3d/UtilsD3D.h"
+#include "src/dawn/native/d3d11/BufferD3D11.h"
 #include "src/dawn/native/d3d11/CommandRecordingContextD3D11.h"
 #include "src/dawn/native/d3d11/DeviceD3D11.h"
 #include "src/dawn/native/d3d11/Forward.h"
@@ -384,6 +385,17 @@ MaybeError Texture::InitializeAsExternalTexture(ComPtr<IUnknown> d3dTexture,
                                                 Ref<d3d::KeyedMutex> keyedMutex) {
     ComPtr<ID3D11Resource> d3d11Texture;
     DAWN_TRY(CheckHRESULT(d3dTexture.As(&d3d11Texture), "Query ID3D11Resource from IUnknown"));
+
+    // ResolveSubresource can't resolve into a resource that is only accessed through a view alias
+    // of a different format, such as Y410 imported as RGB10A2Unorm.
+    ComPtr<ID3D11Texture2D> d3d11Texture2D;
+    DAWN_TRY(CheckHRESULT(d3d11Texture.As(&d3d11Texture2D),
+                          "Query ID3D11Texture2D from ID3D11Resource"));
+    D3D11_TEXTURE2D_DESC desc;
+    d3d11Texture2D->GetDesc(&desc);
+    mBackingMemorySupportsResolveTarget =
+        desc.Format == d3d::DXGITextureFormat(GetDevice(), GetFormat().format);
+
     mD3d11Resource = std::move(d3d11Texture);
     mKeyedMutex = std::move(keyedMutex);
     SetLabelHelper("Dawn_ExternalTexture");
@@ -419,6 +431,10 @@ std::optional<DeviceGuard> Texture::UseDeviceGuardForDestroy() {
 
 ID3D11Resource* Texture::GetD3D11Resource() const {
     return mD3d11Resource.Get();
+}
+
+bool Texture::BackingMemorySupportsResolveTarget() const {
+    return mBackingMemorySupportsResolveTarget;
 }
 
 ResultOrError<ComPtr<ID3D11RenderTargetView1>> Texture::CreateD3D11RenderTargetView(
@@ -1149,6 +1165,62 @@ MaybeError Texture::Copy(const ScopedCommandRecordingContext* commandContext,
     DAWN_TRY(CopyInternal(commandContext, copy));
 
     return {};
+}
+
+// static
+MaybeError Texture::CopyFromBuffer(const ScopedCommandRecordingContext* commandContext,
+                                   const BufferCopy& src,
+                                   const TextureCopy& dst,
+                                   const TexelExtent3D& copySize) {
+    DAWN_ASSERT(!copySize.IsEmpty());
+
+    Device* device = ToBackend(dst.texture->GetDevice());
+    ExecutionSerial pendingSerial = device->GetQueue()->GetPendingCommandSerial();
+
+    Buffer* buffer = ToBackend(src.buffer.Get());
+    DAWN_TRY(buffer->TrackUsage(commandContext, pendingSerial));
+
+    uint64_t bufferOffset = src.offset;
+    Ref<BufferBase> stagingBuffer;
+    const TypedTexelBlockInfo& blockInfo = GetBlockInfo(dst);
+
+    // If the buffer is not CPU-readable (e.g. CopySrc | MapWrite buffers > kMaxCPUUploadBufferSize
+    // are backed by write-only D3D11_USAGE_DYNAMIC memory), copy the data into a staging buffer.
+    std::optional<BufferBase::ScopedUseBuffer> use;
+    if (!buffer->IsCPUReadable()) {
+        // TODO(dawn:1768): use compute shader to copy data from buffer to texture.
+        BufferDescriptor desc;
+        desc.size = ComputeRequiredBytesInCopy(blockInfo, blockInfo.ToBlock(copySize),
+                                               src.blocksPerRow, src.rowsPerImage);
+        desc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead;
+        {
+            IgnoreLazyClearCountScope scope(device);
+            DAWN_TRY_ASSIGN(stagingBuffer, Buffer::Create(device, Unpack(&desc), commandContext));
+        }
+        use = stagingBuffer->UseInternal();
+        DAWN_TRY(Buffer::Copy(commandContext, buffer, src.offset,
+                              checked_cast<size_t>(stagingBuffer->GetSize()),
+                              ToBackend(stagingBuffer.Get()), 0));
+        buffer = ToBackend(stagingBuffer.Get());
+        bufferOffset = 0;
+    }
+
+    Buffer::ScopedMap scopedMap;
+    DAWN_TRY_ASSIGN(scopedMap,
+                    Buffer::ScopedMap::Create(commandContext, buffer, wgpu::MapMode::Read));
+    DAWN_TRY(buffer->EnsureDataInitialized(commandContext));
+
+    Texture* texture = ToBackend(dst.texture.Get());
+    DAWN_TRY(texture->SynchronizeTextureBeforeUse(commandContext));
+    SubresourceRange subresources = GetSubresourcesAffectedByCopy(dst, copySize);
+
+    DAWN_ASSERT(!scopedMap.GetMappedData().empty());
+    Span<const std::byte> data =
+        scopedMap.GetMappedData().subspan(checked_cast<size_t>(bufferOffset));
+    uint64_t bytesPerRow = blockInfo.ToBytes(src.blocksPerRow);
+    return texture->Write(commandContext, subresources, dst.origin.ToOrigin3D(),
+                          copySize.ToExtent3D(), data, dchecked_cast<uint32_t>(bytesPerRow),
+                          dchecked_cast<uint32_t>(src.rowsPerImage));
 }
 
 // static

@@ -550,6 +550,39 @@ function(tint_target_add_external_dependencies TARGET KIND)
       if(TINT_BUILD_FUZZERS AND DAWN_USE_BUILT_DXC) # TODO: and target arch is not x86
         target_link_libraries(${TARGET} PRIVATE dxcompiler)
       endif()
+    elseif(${DEPENDENCY} STREQUAL "fuzztest")
+      if(NOT TINT_BUILD_FUZZTEST)
+        message(FATAL_ERROR "unexpected external dependency ${DEPENDENCY} w/o enabling TINT_BUILD_FUZZTEST")
+      endif()
+      target_link_libraries(${TARGET} PRIVATE fuzztest)
+      if(NOT MSVC)
+        target_compile_options(${TARGET} PRIVATE
+          -Wno-global-constructors
+          -Wno-exit-time-destructors
+          -Wno-weak-vtables
+        )
+      endif()
+      if((${KIND} STREQUAL fuzz_cmd) AND ("${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS}" STREQUAL ""))
+        # FuzzTest executables define their own main() and link Clang's
+        # fuzzer_no_main runtime via the fuzztest target; replace -fsanitize=fuzzer
+        # from tint_fuzz_cmd_compile_options with -fsanitize=fuzzer-no-link so
+        # libFuzzer's FuzzerMain.cpp is not linked.
+        get_target_property(_link_opts ${TARGET} LINK_OPTIONS)
+        if(_link_opts)
+          list(TRANSFORM _link_opts REPLACE "^-fsanitize=fuzzer$" "-fsanitize=fuzzer-no-link")
+          set_target_properties(${TARGET} PROPERTIES LINK_OPTIONS "${_link_opts}")
+        endif()
+        get_target_property(_iface_link_opts ${TARGET} INTERFACE_LINK_OPTIONS)
+        if(_iface_link_opts)
+          list(TRANSFORM _iface_link_opts REPLACE "^-fsanitize=fuzzer$" "-fsanitize=fuzzer-no-link")
+          set_target_properties(${TARGET} PROPERTIES INTERFACE_LINK_OPTIONS "${_iface_link_opts}")
+        endif()
+      endif()
+    elseif(${DEPENDENCY} STREQUAL "fuzztest_wgsl_grammar")
+      if(NOT TINT_BUILD_FUZZTEST)
+        message(FATAL_ERROR "unexpected external dependency ${DEPENDENCY} w/o enabling TINT_BUILD_FUZZTEST")
+      endif()
+      target_link_libraries(${TARGET} PRIVATE fuzztest)
     elseif(${DEPENDENCY} STREQUAL "glslang")
       target_link_libraries(${TARGET} PRIVATE glslang)
       if(NOT MSVC)

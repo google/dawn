@@ -51,6 +51,9 @@ class bitset;
 
 namespace dawn::native {
 
+// Offset of a dynamic buffer binding.
+using BufferDynamicOffset = TypedInteger<struct BufferDynamicOffsetT, uint32_t>;
+
 // Binding numbers in the shader and BindGroup/BindGroupLayoutDescriptors
 using BindingNumber = TypedInteger<struct BindingNumberT, uint32_t>;
 constexpr BindingNumber kMaxBindingsPerBindGroupTyped = BindingNumber(kMaxBindingsPerBindGroup);
@@ -60,6 +63,17 @@ constexpr BindingNumber kMaxBindingsPerBindGroupTyped = BindingNumber(kMaxBindin
 // BindGroupLayoutInternal class for more details.
 using APIBindingIndex = TypedInteger<struct APIBindingIndexT, uint32_t>;
 using BindingIndex = TypedInteger<struct BindingIndexT, uint32_t>;
+
+// Index in a dynamic offsets array (either a per-bindgroup one like in the API, or a combined one)
+using DynamicOffsetsIndex = TypedInteger<struct DynamicOffsetsIndexT, uint32_t>;
+// Dynamic buffer bindings are packed at the front of a BindGroupLayout starting at BindingIndex(0),
+// so a per-bindgroup DynamicOffsetsIndex equals its BindingIndex.
+inline constexpr BindingIndex DynamicOffsetsIndexToBindingIndex(DynamicOffsetsIndex index) {
+    return BindingIndex{uint32_t{index}};
+}
+inline constexpr DynamicOffsetsIndex BindingIndexToDynamicOffsetsIndex(BindingIndex bindingIndex) {
+    return DynamicOffsetsIndex{uint32_t{bindingIndex}};
+}
 
 // Bind group indinces represent the index in the SetBindGroup, the index in
 // wgpu::PipelineLayoutDescriptor::bindGroupLayouts and friends.

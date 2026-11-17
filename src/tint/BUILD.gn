@@ -251,6 +251,30 @@ if (tint_build_benchmarks) {
   }
 }
 
+if (tint_build_fuzzers && tint_build_fuzztest) {
+  config("tint_fuzztest_config") {
+    configs = [ "//build/config/compiler:no_exit_time_destructors" ]
+    if (is_clang) {
+      cflags = [ "-Wno-global-constructors" ]
+    }
+  }
+
+  group("fuzztest") {
+    testonly = true
+    public_deps = [
+      "//third_party/fuzztest",
+      "//third_party/fuzztest:init_fuzztest",
+    ]
+    public_configs = [ ":tint_fuzztest_config" ]
+  }
+
+  source_set("tint_wgsl_fuzzer_grammar") {
+    testonly = true
+    public = [ "//testing/libfuzzer/fuzzers/tint_wgsl_fuzzer_grammar.h" ]
+    public_deps = [ ":fuzztest" ]
+  }
+}
+
 source_set("winsock") {
   libs = [ "ws2_32.lib" ]
 }
@@ -311,6 +335,9 @@ group("fuzzers") {
           tint_build_wgsl_reader) {
         data_deps += [ "${tint_src_dir}/cmd/fuzz/ir_mesa" ]
       }
+    }
+    if (tint_build_fuzztest) {
+      data_deps += [ "${tint_src_dir}/cmd/fuzz/stub_fuzztest" ]
     }
   }
 }

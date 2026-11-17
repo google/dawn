@@ -724,6 +724,8 @@ var externalDependencyBazelTargets = map[string]string{
 	// and we can omit a block if it only contains unsupported deps.
 	"dl":                    "",
 	"dxcompiler-for-fuzzer": "",
+	"fuzztest":              "",
+	"fuzztest_wgsl_grammar": "",
 	"glslang-res-limits":    "",
 	"glslang":               "",
 	"mesa":                  "",

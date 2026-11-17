@@ -416,20 +416,13 @@ MaybeError Device::CopyFromStagingToTextureImpl(BufferBase* source,
                                                 const TexelCopyBufferLayout& src,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
-    WGPUTexelCopyBufferLayout innerSource = ToWGPU(src);
-    WGPUTexelCopyTextureInfo innerDestination = ToWGPU(dst);
-    size_t bufferSize = checked_cast<size_t>(source->GetSize());
-    WGPUExtent3D size = ToWGPU(copySizePixels);
-    wgpu->queueWriteTexture(
-        ToBackend(GetQueue())->GetInnerHandle(), &innerDestination,
-        // The staging buffers in the DynamicUploader are assumed in Dawn to be persistently mapped
-        // buffers that always have the mapped pointer accessible. n the WebGPU backend, to use the
-        // buffers in a copyB2T we would need to unmap them but the DynamicUploader doesn't support
-        // that. Instead keep the buffers mapped and use queueWriteTexture to read directly from the
-        // mapped staging memory.
-        wgpu->bufferGetConstMappedRange(ToBackend(source)->GetInnerHandle(), 0, bufferSize),
-        bufferSize, &innerSource, &size);
-    return {};
+    TexelCopyTextureInfo destination = {};
+    destination.texture = dst.texture.Get();
+    destination.mipLevel = dst.mipLevel;
+    destination.origin = dst.origin.ToOrigin3D();
+    destination.aspect = FromAPI(ToWGPU(dst.aspect));
+    return ToBackend(GetQueue())
+        ->WriteTextureImpl(destination, source->GetMappedRange(), src, copySizePixels);
 }
 
 MaybeError Device::TickImpl() {

@@ -80,8 +80,8 @@ TEST(BlobTests, UnsafeCreateWithDeleter) {
     StrictMock<MockFunction<void()>> mockDeleter;
     {
         // Make a blob with a mock deleter.
-        Blob b = DAWN_UNSAFE_TODO(
-            Blob::UnsafeCreateWithDeleter(data, sizeof(data), [&] { mockDeleter.Call(); }));
+        Blob b = Blob::UnsafeCreateWithDeleter(std::as_writable_bytes(std::span(data)),
+                                               [&] { mockDeleter.Call(); });
         // Check the contents.
         EXPECT_FALSE(b.Empty());
         EXPECT_EQ(b.Size(), sizeof(data));
@@ -100,8 +100,8 @@ TEST(BlobTests, UnsafeCreateWithDeleterZeroSize) {
     StrictMock<MockFunction<void()>> mockDeleter;
     {
         // Make a blob with a mock deleter.
-        Blob b =
-            DAWN_UNSAFE_TODO(Blob::UnsafeCreateWithDeleter(data, 0, [&] { mockDeleter.Call(); }));
+        Blob b = Blob::UnsafeCreateWithDeleter(std::as_writable_bytes(std::span(data)).first(0),
+                                               [&] { mockDeleter.Call(); });
         // Check the contents.
         EXPECT_TRUE(b.Empty());
         EXPECT_EQ(b.Size(), 0u);
@@ -119,8 +119,7 @@ TEST(BlobTests, UnsafeCreateWithDeleterEmpty) {
     StrictMock<MockFunction<void()>> mockDeleter;
     {
         // Make a blob with a mock deleter.
-        Blob b = DAWN_UNSAFE_TODO(
-            Blob::UnsafeCreateWithDeleter(nullptr, 0, [&] { mockDeleter.Call(); }));
+        Blob b = Blob::UnsafeCreateWithDeleter({}, [&] { mockDeleter.Call(); });
         // Check the contents.
         EXPECT_TRUE(b.Empty());
         EXPECT_EQ(b.Size(), 0u);
@@ -175,8 +174,7 @@ TEST(BlobTests, MoveAssignOver) {
 
     // Create another blob with a mock deleter.
     StrictMock<MockFunction<void()>> mockDeleter;
-    Blob b2 =
-        DAWN_UNSAFE_TODO(Blob::UnsafeCreateWithDeleter(nullptr, 0, [&] { mockDeleter.Call(); }));
+    Blob b2 = Blob::UnsafeCreateWithDeleter({}, [&] { mockDeleter.Call(); });
 
     // Move b1 into b2, replacing b2's contents, and expect the deleter to be called.
     EXPECT_CALL(mockDeleter, Call());
@@ -196,8 +194,8 @@ TEST(BlobTests, OffsetMoveConstructor) {
     StrictMock<MockFunction<void()>> mockDeleter;
 
     // Make a blob with a mock deleter.
-    Blob b1 = DAWN_UNSAFE_TODO(
-        Blob::UnsafeCreateWithDeleter(data.data(), sizeof(data), [&] { mockDeleter.Call(); }));
+    Blob b1 = Blob::UnsafeCreateWithDeleter(std::as_writable_bytes(std::span(data)),
+                                            [&] { mockDeleter.Call(); });
     EXPECT_FALSE(b1.Empty());
     EXPECT_EQ(b1.Size(), 13u);
     EXPECT_EQ(b1.DataPtr(), reinterpret_cast<std::byte*>(data.data()));

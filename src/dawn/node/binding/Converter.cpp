@@ -1821,6 +1821,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::SharedTextureMemoryD3D11Texture2D:
         case wgpu::FeatureName::SharedTextureMemoryDmaBuf:
         case wgpu::FeatureName::SharedTextureMemoryDXGISharedHandle:
+        case wgpu::FeatureName::SharedTextureMemoryDXGIY410:
         case wgpu::FeatureName::SharedTextureMemoryEGLImage:
         case wgpu::FeatureName::SharedTextureMemoryIOSurface:
         case wgpu::FeatureName::SharedTextureMemoryOpaqueFD:

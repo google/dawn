@@ -43,6 +43,7 @@ tint_add_target(tint_utils_containers lib
   utils/containers/containers.cc
   utils/containers/enum_set.h
   utils/containers/filtered_iterator.h
+  utils/containers/function_ref.h
   utils/containers/hashmap.h
   utils/containers/hashmap_base.h
   utils/containers/hashset.h
@@ -76,6 +77,7 @@ tint_add_target(tint_utils_containers_test test
   utils/containers/bitset_test.cc
   utils/containers/enum_set_test.cc
   utils/containers/filtered_iterator_test.cc
+  utils/containers/function_ref_test.cc
   utils/containers/hashmap_test.cc
   utils/containers/hashset_test.cc
   utils/containers/map_test.cc

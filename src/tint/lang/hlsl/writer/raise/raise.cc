@@ -209,10 +209,10 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         TINT_CHECK_RESULT(core::ir::transform::PreventInfiniteLoops(module));
     }
 
-    if (options.resource_table.has_value()) {
+    {
         hlsl::writer::raise::ResourceTableHelper helper;
         TINT_CHECK_RESULT(
-            core::ir::transform::ResourceTable(module, options.resource_table.value(), &helper));
+            core::ir::transform::ResourceTable(module, options.resource_table, &helper));
     }
 
     {

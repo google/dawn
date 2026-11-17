@@ -908,10 +908,10 @@ BindingIndex BindGroupLayoutInternalBase::GetBindingCount() const {
     return GetBindingTypeStart(BindingTypeOrder_ExternalTexture);
 }
 
-BindingIndex BindGroupLayoutInternalBase::GetDynamicBufferCount() const {
+DynamicOffsetsIndex BindGroupLayoutInternalBase::GetDynamicBufferCount() const {
     DAWN_CHECK(!IsError());
-    return GetBindingTypeEnd(BindingTypeOrder_DynamicBuffer) -
-           GetBindingTypeStart(BindingTypeOrder_DynamicBuffer);
+    return DynamicOffsetsIndex{uint32_t{GetBindingTypeEnd(BindingTypeOrder_DynamicBuffer) -
+                                        GetBindingTypeStart(BindingTypeOrder_DynamicBuffer)}};
 }
 
 uint32_t BindGroupLayoutInternalBase::GetDynamicStorageBufferCount() const {
@@ -1064,6 +1064,12 @@ bool BindGroupLayoutInternalBase::IsStorageBufferBinding(BindingIndex bindingInd
             break;
     }
     DAWN_UNREACHABLE();
+}
+
+bool BindGroupLayoutInternalBase::IsDynamicBufferBinding(BindingIndex bindingIndex) const {
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(GetBindingTypeStart(BindingTypeOrder_DynamicBuffer) == BindingIndex{0u});
+    return bindingIndex < GetBindingTypeEnd(BindingTypeOrder_DynamicBuffer);
 }
 
 bool BindGroupLayoutInternalBase::IsExternalTextureBinding(APIBindingIndex bindingIndex) const {

@@ -27,8 +27,8 @@
 
 #include <algorithm>
 #include <array>
-#include <cstring>
 #include <iomanip>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <span>
@@ -182,8 +182,7 @@ TEST(SerializeTests, StdWStrings) {
     ByteVectorSink expected;
 
     StreamIn(&expected, str.length());
-    size_t bytes = str.length() * sizeof(wchar_t);
-    DAWN_UNSAFE_TODO(memcpy(expected.GetSpace(bytes).data(), str.data(), bytes));
+    std::ranges::copy(std::as_bytes(std::span(str)), std::back_inserter(expected));
 
     EXPECT_CACHE_KEY_EQ(str, expected);
 }
@@ -206,8 +205,7 @@ TEST(SerializeTests, StdWStringViews) {
 
     ByteVectorSink expected;
     StreamIn(&expected, str.length());
-    size_t bytes = str.length() * sizeof(wchar_t);
-    DAWN_UNSAFE_TODO(memcpy(expected.GetSpace(bytes).data(), str.data(), bytes));
+    std::ranges::copy(std::as_bytes(std::span(str)), std::back_inserter(expected));
 
     EXPECT_CACHE_KEY_EQ(str, expected);
 }
@@ -215,7 +213,7 @@ TEST(SerializeTests, StdWStringViews) {
 // Test that ByteVectorSink serializes Blobs as expected.
 TEST(SerializeTests, Blob) {
     uint8_t data[] = "dawn native Blob";
-    Blob blob = DAWN_UNSAFE_TODO(Blob::UnsafeCreateWithDeleter(data, sizeof(data), [] {}));
+    Blob blob = Blob::UnsafeCreateWithDeleter(std::as_writable_bytes(std::span(data)), [] {});
 
     ByteVectorSink expected;
     StreamIn(&expected, sizeof(data));

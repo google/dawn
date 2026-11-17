@@ -31,6 +31,7 @@
 #include "src/dawn/native/Buffer.h"
 #include "src/dawn/native/CommandAllocator.h"
 #include "src/dawn/native/ComputePipeline.h"
+#include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/QuerySet.h"
 #include "src/dawn/native/RenderBundle.h"
 #include "src/dawn/native/RenderPipeline.h"
@@ -212,8 +213,8 @@ void FreeCommands(CommandIterator* commands) {
             }
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = commands->NextCommand<SetBindGroupCmd>();
-                if (cmd->dynamicOffsetCount > BindingIndex{0u}) {
-                    commands->NextData<uint32_t>(cmd->dynamicOffsetCount);
+                if (cmd->dynamicOffsetCount > DynamicOffsetsIndex{0u}) {
+                    commands->NextData<BufferDynamicOffset>(cmd->dynamicOffsetCount);
                 }
                 cmd->~SetBindGroupCmd();
                 break;
@@ -396,8 +397,8 @@ void SkipCommand(CommandIterator* commands, Command type) {
 
         case Command::SetBindGroup: {
             SetBindGroupCmd* cmd = commands->NextCommand<SetBindGroupCmd>();
-            if (cmd->dynamicOffsetCount > BindingIndex{0u}) {
-                commands->NextData<uint32_t>(cmd->dynamicOffsetCount);
+            if (cmd->dynamicOffsetCount > DynamicOffsetsIndex{0u}) {
+                commands->NextData<BufferDynamicOffset>(cmd->dynamicOffsetCount);
             }
             break;
         }

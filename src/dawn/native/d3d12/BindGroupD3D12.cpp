@@ -79,9 +79,8 @@ MaybeError BindGroup::InitializeImpl() {
             continue;
         }
 
-        // Skip dynamic uniform buffers. Since dynamic buffers are packed at the front, we know the
-        // binding is dynamic if the index is less than the number of dynamic buffers.
-        const bool isDynamic = bindingIndex < bgl->GetDynamicBufferCount();
+        // Skip dynamic uniform buffers.
+        const bool isDynamic = bgl->IsDynamicBufferBinding(bindingIndex);
         if (isDynamic && !bgl->IsStorageBufferBinding(bindingIndex)) {
             continue;
         }

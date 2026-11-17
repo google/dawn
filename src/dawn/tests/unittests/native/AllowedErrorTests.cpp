@@ -124,7 +124,7 @@ TEST_F(AllowedErrorTests, QueueWriteTexture) {
     wgpu::Texture texture = wgpu::Texture::Acquire(ToAPI(ReturnToAPI(std::move(textureMock))));
 
     std::unique_ptr<UnrecoverableError> err = DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage);
-    EXPECT_CALL(*(mDeviceMock->GetQueueMock()), WriteTextureImpl)
+    EXPECT_CALL(*mDeviceMock, CopyFromStagingToTextureImpl)
         .WillOnce(Return(ByMove(std::move(err))));
 
     // Expect the device lost because of the error.

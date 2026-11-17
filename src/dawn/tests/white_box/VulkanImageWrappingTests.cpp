@@ -1023,6 +1023,72 @@ TEST_P(VulkanImageWrappingUsageTests, SRGBReinterpretation) {
 
     IgnoreSignalSemaphore(texture);
 }
+
+// Regression test for crbug.com/584071084: exporting a wrapped texture after a submitted render
+// pass with StoreOp::Discard (which populates an export semaphore while leaving the texture
+// uninitialized) followed by a partial Queue::WriteTexture (which records a lazy zero-clear and
+// copy into the recording context without submitting) must flush the pending context so
+// that both the lazy clear and the upload execute before export.
+TEST_P(VulkanImageWrappingUsageTests, WriteTextureAfterDiscardedRenderPassThenExport) {
+    // Use a 2x1 texture so the 1x1 Queue::WriteTexture below is a partial write that requires a
+    // lazy zero-clear of pixel (1, 0) when the texture is uninitialized.
+    wgpu::TextureDescriptor descriptor = defaultDescriptor;
+    descriptor.size = {2, 1, 1};
+
+    std::unique_ptr<ExternalTexture> externalTexture = mBackend->CreateTexture(
+        descriptor.size.width, descriptor.size.height, descriptor.format, descriptor.usage);
+
+    wgpu::Texture wrappedTexture =
+        WrapVulkanImage(secondDevice, &descriptor, externalTexture.get(), {},
+                        VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    ASSERT_NE(wrappedTexture.Get(), nullptr);
+
+    // Clear to a known value, different from the one for the WriteTexture below.
+    ClearImage(secondDevice, wrappedTexture, {1.0f, 0.0f, 1.0f, 1.0f});
+
+    // ClearImage marks the texture initialized. Submit a LoadOp::Load + StoreOp::Discard render
+    // pass so that an export semaphore remains populated while Dawn's subresource tracking marks
+    // the texture uninitialized again, forcing the partial Queue::WriteTexture below to record a
+    // lazy zero-clear for pixel (1, 0) and flip the texture back to initialized at record time.
+    {
+        utils::ComboRenderPassDescriptor renderPass({wrappedTexture.CreateView()});
+        renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Load;
+        renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
+
+        wgpu::CommandEncoder encoder = secondDevice.CreateCommandEncoder();
+        encoder.BeginRenderPass(&renderPass).End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+        secondDevice.GetQueue().Submit(1, &commands);
+    }
+
+    // Record a 1x1 Queue::WriteTexture at (0, 0) without calling Submit().
+    utils::RGBA8 writtenPixel(17, 34, 51, 255);
+    wgpu::TexelCopyTextureInfo dst = {.texture = wrappedTexture};
+    wgpu::TexelCopyBufferLayout dataLayout = {};
+    wgpu::Extent3D writeSize = {1, 1, 1};
+    secondDevice.GetQueue().WriteTexture(&dst, &writtenPixel, sizeof(writtenPixel), &dataLayout,
+                                         &writeSize);
+
+    ExternalImageExportInfoVkForTesting exportInfo = GetExternalImageExportInfo();
+    ASSERT_TRUE(mBackend->ExportImage(wrappedTexture, &exportInfo));
+    EXPECT_TRUE(exportInfo.isInitialized);
+    EXPECT_EQ(exportInfo.releasedOldLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    EXPECT_EQ(exportInfo.releasedNewLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    EXPECT_EQ(exportInfo.semaphores.size(), 1u);
+
+    // Import onto |device| as initialized (trusting exportInfo.isInitialized) and verify that
+    // pixel (0, 0) holds the written value and pixel (1, 0) was zero-cleared.
+    wgpu::Texture nextWrappedTexture = WrapVulkanImage(
+        device, &descriptor, externalTexture.get(), std::move(exportInfo.semaphores),
+        exportInfo.releasedOldLayout, exportInfo.releasedNewLayout, exportInfo.isInitialized);
+    ASSERT_NE(nextWrappedTexture.Get(), nullptr);
+
+    EXPECT_PIXEL_RGBA8_EQ(writtenPixel, nextWrappedTexture, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 0, 0, 0), nextWrappedTexture, 1, 0);
+
+    IgnoreSignalSemaphore(nextWrappedTexture);
+}
+
 class VulkanImageWrappingMultithreadTests : public VulkanImageWrappingUsageTests {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {

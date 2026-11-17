@@ -256,13 +256,13 @@ void GenerateTextureBuiltinFromUniformData(
 
         // Tint uses post-remapping binding points for textureBuiltinFromUniform options.
         tint::BindingPoint wgslBindPoint = {.group = query.group, .binding = query.binding};
+        tint::BindingPoint remappedBinding = bindings.texture.at(wgslBindPoint);
 
-        tint::BindingPoint remappedBinding;
-        if (bindings.texture.contains(wgslBindPoint)) {
-            remappedBinding = bindings.texture.at(wgslBindPoint);
-        } else {
-            remappedBinding = bindings.storage_texture.at(wgslBindPoint);
-        }
+        // Only sampled textures can have emulated queries for now.
+        // Storage textures share the 0-based FlatBindingIndex space and would collide, so we would
+        // need to do additional work to distinguish them.
+        DAWN_ASSERT(bindings.texture.contains(wgslBindPoint));
+
         textureBuiltinsFromUniform->ubo_contents.push_back({
             .offset = offset,
             .count = 1,

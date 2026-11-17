@@ -172,13 +172,13 @@ std::unordered_map<uint32_t, tint::msl::writer::ArgumentBufferInfo> GenerateArgu
     for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
 
-        uint32_t argumentBufferIdx, dynamicOffsetsBufferIdx;
+        MetalBufferIndex argumentBufferIdx, dynamicOffsetsBufferIdx;
         std::tie(argumentBufferIdx, dynamicOffsetsBufferIdx) =
-            BindGroupSlotToArgumentBufferID(group);
+            BindGroupIndexToArgumentBufferIndex(group);
 
         tint::msl::writer::ArgumentBufferInfo argumentBufferInfo{
-            .id = argumentBufferIdx,
-            .dynamic_buffer_id = dynamicOffsetsBufferIdx,
+            .id = uint32_t{argumentBufferIdx},
+            .dynamic_buffer_id = uint32_t{dynamicOffsetsBufferIdx},
         };
         bgl->FillTintArgumentBufferInfo(argumentBufferInfo);
 
@@ -209,7 +209,7 @@ ResultOrUnknownError<CacheResult<MslCompilation>> TranslateToMSL(
         }
         return tint::BindingPoint{
             .group = 0,
-            .binding = layout->GetBindingIndexInfo(stage)[group][index],
+            .binding = uint32_t{layout->GetBindingIndexInfo(stage)[group][index]},
         };
     };
 
@@ -229,8 +229,8 @@ ResultOrUnknownError<CacheResult<MslCompilation>> TranslateToMSL(
         for (VertexBufferSlot slot : renderPipeline->GetVertexBuffersUsed()) {
             arrayLengthFromConstants.bindpoint_to_size_index.emplace(
                 tint::BindingPoint{kPullingBufferBindGroupID,
-                                   VertexBufferSlotToMetalBufferIndex(slot)},
-                VertexBufferSlotToLengthArrayIndex(slot));
+                                   uint32_t{VertexBufferSlotToMetalBufferIndex(slot)}},
+                uint32_t{VertexBufferSlotToLengthArrayIndex(slot)});
         }
     }
 
@@ -257,8 +257,8 @@ ResultOrUnknownError<CacheResult<MslCompilation>> TranslateToMSL(
     if (layout->UsesResourceTable()) {
         auto bindingTypeOrder = ResourceTableDefaultResources::GetOrder();
         resourceTableConfig = tint::ResourceTableConfig{
-            .resource_table_binding{kPlaceholderBindGroupID, kResourceTableBindingSlot},
-            .storage_buffer_binding{kPlaceholderBindGroupID, kResourceTableStorageSlot},
+            .resource_table_binding{kPlaceholderBindGroupID, uint32_t{kResourceTableBindingSlot}},
+            .storage_buffer_binding{kPlaceholderBindGroupID, uint32_t{kResourceTableStorageSlot}},
             .default_binding_type_order = {bindingTypeOrder.begin(), bindingTypeOrder.end()},
             .binding_to_resource_type = GenerateBindingToResourceType(layout, ToMSLBindPoint),
         };
@@ -290,7 +290,7 @@ ResultOrUnknownError<CacheResult<MslCompilation>> TranslateToMSL(
     req.tintOptions.emit_vertex_point_size =
         stage == SingleShaderStage::Vertex &&
         renderPipeline->GetPrimitiveTopology() == wgpu::PrimitiveTopology::PointList;
-    req.tintOptions.immediate_binding_point = kImmediateBlockBufferSlot;
+    req.tintOptions.immediate_binding_point = uint32_t{kImmediateBlockBufferSlot};
     req.tintOptions.array_length_from_constants = std::move(arrayLengthFromConstants);
     req.tintOptions.pixel_local_attachments = std::move(pixelLocalAttachments);
     req.tintOptions.bindings = std::move(bindings);

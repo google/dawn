@@ -486,6 +486,11 @@ TEST_F(RenderPipelineValidationTest, WriteMaskMustBeZeroForColorTargetWithNoShad
     // Error case: the writeMask is not 0.
     descriptor.cTargets[1].writeMask = wgpu::ColorWriteMask::Red;
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+
+    // Error case: the writeMask on a target with shader output has invalid high 32-bit bits set.
+    descriptor.cTargets[1].writeMask = wgpu::ColorWriteMask::None;
+    descriptor.cTargets[0].writeMask = static_cast<wgpu::ColorWriteMask>(1ull << 32);
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 }
 
 // Tests that the color formats must be renderable.
@@ -3671,31 +3676,6 @@ TEST_F(RG11B10UfloatRenderablePipelineTest, MultisampleSupportWithFeatureEnabled
     descriptor.cFragment.module = fsModule;
     descriptor.cTargets[0].format = wgpu::TextureFormat::RG11B10Ufloat;
     descriptor.multisample.count = 4;
-    device.CreateRenderPipeline(&descriptor);
-}
-
-class AlphaToCoverageBlendableRequirementKillSwitchTest : public RenderPipelineValidationTest {
-    std::vector<const char*> GetEnabledToggles() override {
-        // Disable the AllowUnsafeAPIs toggles in device toggles descriptor to override the
-        // inheritance and create a device disallowing unsafe apis.
-        return {"allow_alpha_to_coverage_not_blendable"};
-    }
-};
-
-// Tests when alphaToCoverageEnabled is true, targets[0] must be blendable.
-TEST_F(AlphaToCoverageBlendableRequirementKillSwitchTest, KillSwitchAllowsNonBlendable) {
-    utils::ComboRenderPipelineDescriptor descriptor;
-    descriptor.vertex.module = vsModule;
-    descriptor.cFragment.module = fsModule;
-    descriptor.multisample.count = 4;
-    descriptor.multisample.alphaToCoverageEnabled = true;
-
-    // Control case: blendable with alpha.
-    descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
-    device.CreateRenderPipeline(&descriptor);
-
-    // Success case: not blendable with alpha is allowed with the killswitch
-    descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA32Float;
     device.CreateRenderPipeline(&descriptor);
 }
 

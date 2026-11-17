@@ -29,6 +29,7 @@
 // Strong checks are enabled only in debug.
 
 #include "src/utils/typed_integer.h"
+#include "src/utils/underlying_type.h"
 
 namespace dawn {
 
@@ -37,45 +38,75 @@ using MyU32 = TypedInteger<struct MyU32T, uint32_t>;
 
 using MyOtherI32 = TypedInteger<struct MyOtherI32T, int32_t>;
 
-static uint8_t v = 3;
-static MyI32 i{3};
-static MyU32 u{3u};
+// Helper for getting a *runtime* value of the given type.
+template <typename T>
+T value() {
+    volatile UnderlyingType<T> val = 3;
+    return T{val};
+}
 
 // Construction of TypedInteger from other things.
 void TestConstruction() {
     // Cannot construct from a distinct but otherwise identical type.
-    (void) MyI32{MyI32{v}};       // (control case)
-    (void) MyI32{MyOtherI32{v}};  // expected-error {{no matching constructor for initialization of}}
+    std::ignore = MyI32(value<MyI32>());       // (control case)
+    std::ignore = MyI32(value<MyOtherI32>());  // expected-error {{no matching conversion for functional-style cast from}}
+    std::ignore = MyI32{value<MyOtherI32>()};  // expected-error {{no matching constructor for initialization of}}
 
     // Cannot convert to narrower types.
-    (void) MyI32{int32_t{v}};   // (control case)
-    (void) MyI32{int64_t{v}};   // expected-error {{no matching constructor for initialization of}}
-    (void) MyI32{uint32_t{v}};  // expected-error {{no matching constructor for initialization of}}
-    (void) MyU32{uint64_t{v}};  // expected-error {{no matching constructor for initialization of}}
-    (void) MyU32{int16_t{v}};   // expected-error {{no matching constructor for initialization of}}
-    (void) MyU32{int32_t{v}};   // expected-error {{no matching constructor for initialization of}}
+    std::ignore = MyI32(value<int32_t>());   // (control case)
+    std::ignore = MyI32(value<int64_t>());   // expected-error {{implicit conversion loses integer precision}}
+    std::ignore = MyI32(value<uint32_t>());  // expected-error {{implicit conversion changes signedness}}
+    std::ignore = MyU32(value<uint64_t>());  // expected-error {{implicit conversion loses integer precision}}
+    std::ignore = MyU32(value<int16_t>());   // expected-error {{implicit conversion changes signedness}}
+    std::ignore = MyU32(value<int32_t>());   // expected-error {{implicit conversion changes signedness}}
+    // Braces are stricter than parentheses (-Wc++11-narrowing).
+    std::ignore = MyI32{value<int32_t>()};   // (control case)
+    std::ignore = MyI32{value<int64_t>()};   // expected-error {{non-constant-expression cannot be narrowed}} expected-error {{implicit conversion loses integer precision}}
+    std::ignore = MyI32{value<uint32_t>()};  // expected-error {{non-constant-expression cannot be narrowed}} expected-error {{implicit conversion changes signedness}}
+
+    // In constexpr, only the actual value matters, not the type.
+    std::ignore = MyI32(0x7fff'ffffU);
+    std::ignore = MyI32(uint32_t{0x7fff'ffff});
+    std::ignore = MyI32(0x8000'0000U);           // expected-error {{implicit conversion changes signedness}}
+    std::ignore = MyI32(uint32_t{0x8000'0000});  // expected-error {{implicit conversion changes signedness}}
+    std::ignore = MyU32(0);
+    std::ignore = MyU32(-1);                     // expected-error {{implicit conversion changes signedness}}
+    std::ignore = MyU32(int32_t{0});
+    std::ignore = MyU32(int32_t{-1});            // expected-error {{implicit conversion changes signedness}}
+    std::ignore = MyU32(uint64_t{0});
+    std::ignore = MyU32(0x1'0000'0000ULL);       // expected-error {{changes value}}
+    // Braces are stricter than parentheses (-Wc++11-narrowing).
+    std::ignore = MyI32{0x7fff'ffffU};
+    std::ignore = MyI32{0x8000'0000U};           // expected-error {{constant expression evaluates to}} expected-error {{implicit conversion changes signedness}}
+    std::ignore = MyU32{0x1'0000'0000ULL};       // expected-error {{constant expression evaluates to}} expected-error {{changes value from}}
 }
 
 // Assignment to TypedInteger from other things.
 void TestAssignmentToTyped() {
-    { [[maybe_unused]] MyI32 x = MyI32{v}; }       // (control case.)
-    { [[maybe_unused]] MyI32 x = int32_t{v}; }     // expected-error {{no viable conversion from}}
-    { [[maybe_unused]] MyI32 x = MyOtherI32{v}; }  // expected-error {{no viable conversion from}}
+    // Construction by assignment does NOT allow type conversions.
+    { [[maybe_unused]] MyI32 x = value<MyI32>(); }       // (control case.)
+    { [[maybe_unused]] MyI32 x = value<int32_t>(); }     // expected-error {{no viable conversion from}}
+    { [[maybe_unused]] MyI32 x = value<MyOtherI32>(); }  // expected-error {{no viable conversion from}}
+
+    // Same with assignment operator.
+    { [[maybe_unused]] MyI32 x; x = value<MyI32>(); }       // (control case.)
+    { [[maybe_unused]] MyI32 x; x = value<int32_t>(); }     // expected-error {{no viable overloaded '='}}
+    { [[maybe_unused]] MyI32 x; x = value<MyOtherI32>(); }  // expected-error {{no viable overloaded '='}}
 }
 
 // Casts from TypedInteger to primitive.
 void TestCastToPrimitive() {
     // Cannot convert to narrower types.
-    std::ignore = int32_t{i};   // (control case.)
-    std::ignore = int16_t{i};   // expected-error {{no viable conversion from}}
-    std::ignore = uint32_t{i};  // expected-error {{no viable conversion from}}
-    std::ignore = int32_t{u};   // expected-error {{no viable conversion from}}
+    std::ignore = int32_t{value<MyI32>()};   // (control case.)
+    std::ignore = int16_t{value<MyI32>()};   // expected-error {{no viable conversion from}}
+    std::ignore = uint32_t{value<MyI32>()};  // expected-error {{no viable conversion from}}
+    std::ignore = int32_t{value<MyU32>()};   // expected-error {{no viable conversion from}}
 }
 
 // Assignment to primitive from TypedInteger.
 void TestAssignmentToPrimitive() {
-    { [[maybe_unused]] int32_t x = int32_t{v}; }  // (control case.)
-    { [[maybe_unused]] int32_t x = MyI32{v}; }    // expected-error {{no viable conversion from}}
+    { [[maybe_unused]] int32_t x = value<int32_t>(); }  // (control case.)
+    { [[maybe_unused]] int32_t x = value<MyI32>(); }    // expected-error {{no viable conversion from}}
 }
 
 }

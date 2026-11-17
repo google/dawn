@@ -518,6 +518,10 @@ MaybeValError ValidateResolveTarget(const DeviceBase* device,
         !resolveTarget->GetFormat().SupportsResolveTarget(),
         "The resolve target %s format (%s) does not support being used as resolve target.",
         resolveTarget, resolveTargetFormat);
+    DAWN_INVALID_IF(!resolveTarget->GetTexture()->BackingMemorySupportsResolveTarget(),
+                    "The resolve target %s is backed by memory that does not support being used "
+                    "as resolve target.",
+                    resolveTarget);
 
     // TODO(450506641): Precompute allowed usages of texture views (including swizzle identity
     // check) instead of recomputing.

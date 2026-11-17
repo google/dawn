@@ -23,6 +23,18 @@
     "dxcompiler-for-fuzzer": {
         "Condition": "tint_build_hlsl_writer"
     },
+    "fuzztest": {
+        "IncludePatterns": [
+            "fuzztest/**"
+        ],
+        "Condition": "tint_build_fuzztest"
+    },
+    "fuzztest_wgsl_grammar": {
+        "IncludePatterns": [
+            "testing/libfuzzer/fuzzers/tint_wgsl_fuzzer_grammar.h"
+        ],
+        "Condition": "tint_build_fuzztest"
+    },
     "google-benchmark": {
         "IncludePatterns": [
             "benchmark/benchmark.h"

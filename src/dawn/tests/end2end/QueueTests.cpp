@@ -33,6 +33,8 @@
 #include "src/dawn/utils/TestUtils.h"
 #include "src/dawn/utils/TextureUtils.h"
 #include "src/dawn/utils/WGPUHelpers.h"
+#include "src/utils/heap_array.h"
+#include "src/utils/numeric.h"
 #include "src/utils/span.h"
 
 namespace dawn {
@@ -852,6 +854,11 @@ DAWN_INSTANTIATE_TEST_P(QueueWriteTextureTests,
 
 class QueueWriteTextureSimpleTests : public DawnTest {
   protected:
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        required.maxTextureDimension2D = supported.maxTextureDimension2D;
+    }
+
     void DoSimpleWriteTextureTest(uint32_t width, uint32_t height) {
         constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
         constexpr uint32_t kPixelSize = 4;
@@ -877,6 +884,57 @@ class QueueWriteTextureSimpleTests : public DawnTest {
                                        &texelCopyBufferLayout, &copyExtent);
 
         EXPECT_TEXTURE_EQ(data.data(), texture, {0, 0}, {width, height});
+    }
+
+    void TestLargeStride(uint32_t bytesPerRow,
+                         uint32_t rowsPerImage,
+                         wgpu::Extent3D writeSize,
+                         wgpu::TextureDimension dimension = wgpu::TextureDimension::e2D) {
+        constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
+        const uint64_t dataSize =
+            utils::RequiredBytesInCopy(bytesPerRow, rowsPerImage, writeSize, kFormat);
+
+        // Skip when Dawn wire cannot serialize `dataSize` (or on 32-bit wire where allocating both
+        // `data` and the wire transfer buffer can exhaust the 32-bit address space).
+        DAWN_TEST_UNSUPPORTED_IF(UsesWire() &&
+                                 (DAWN_PLATFORM_IS(32_BIT) || dataSize >= 0x80000000ull));
+
+        // SAFETY: Only the initialized row prefixes of `data` are read by `WriteTexture`.
+        auto data = DAWN_UNSAFE_BUFFERS(
+            HeapArray<std::byte>::Uninit(checked_cast<size_t>(dataSize), std::nothrow));
+        DAWN_TEST_UNSUPPORTED_IF(!data);
+
+        const uint64_t bytesPerImage = uint64_t{bytesPerRow} * rowsPerImage;
+        std::vector<utils::RGBA8> expected(size_t{writeSize.width} * writeSize.height *
+                                           writeSize.depthOrArrayLayers);
+        for (uint32_t z = 0; z < writeSize.depthOrArrayLayers; ++z) {
+            for (uint32_t y = 0; y < writeSize.height; ++y) {
+                const size_t expectedRowOffset =
+                    (size_t{z} * writeSize.height + y) * writeSize.width;
+                for (uint32_t x = 0; x < writeSize.width; ++x) {
+                    expected[expectedRowOffset + x] = utils::RGBA8(x + 1, y + 10, z + 20, 0xFF);
+                }
+                const size_t srcRowOffset =
+                    checked_cast<size_t>(z * bytesPerImage + uint64_t{y} * bytesPerRow);
+                data.subspan(srcRowOffset)
+                    .CopyPrefixFrom(SpanAsBytes(Span<const utils::RGBA8>(expected).subspan(
+                        expectedRowOffset, writeSize.width)));
+            }
+        }
+
+        wgpu::TextureDescriptor descriptor = {};
+        descriptor.dimension = dimension;
+        descriptor.size = writeSize;
+        descriptor.format = kFormat;
+        descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+        wgpu::Texture texture = device.CreateTexture(&descriptor);
+
+        wgpu::TexelCopyTextureInfo dst = utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferLayout layout =
+            utils::CreateTexelCopyBufferLayout(0, bytesPerRow, rowsPerImage);
+        queue.WriteTexture(&dst, data.data(), data.size(), &layout, &writeSize);
+
+        EXPECT_TEXTURE_EQ(expected.data(), texture, {0, 0, 0}, writeSize);
     }
 };
 
@@ -1040,6 +1098,93 @@ TEST_P(QueueWriteTextureSimpleTests, WriteStencilAspectAfterOtherQueueWriteTextu
                       wgpu::TextureAspect::StencilOnly);
 }
 
+// Regression test: single-row, single-layer WriteTexture allows arbitrarily large bytesPerRow and
+// rowsPerImage (>= 2^31) with a tiny payload, which previously overflowed signed GLint in
+// glPixelStorei(GL_UNPACK_ROW_LENGTH / GL_UNPACK_IMAGE_HEIGHT).
+TEST_P(QueueWriteTextureSimpleTests, UnusedOversizedStridesOnSingleRowSingleLayer) {
+    for (wgpu::TextureDimension dimension :
+         {wgpu::TextureDimension::e2D, wgpu::TextureDimension::e3D}) {
+        wgpu::TextureDescriptor descriptor = {};
+        descriptor.dimension = dimension;
+        descriptor.size = {2, 1, 2};
+        descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+        descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+        wgpu::Texture texture = device.CreateTexture(&descriptor);
+
+        const std::array<utils::RGBA8, 2> expected = {utils::RGBA8::kRed, utils::RGBA8::kGreen};
+        wgpu::TexelCopyTextureInfo dst = utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 1});
+        wgpu::TexelCopyBufferLayout layout =
+            utils::CreateTexelCopyBufferLayout(0, 0x80000000u, 0x80000000u);
+        wgpu::Extent3D writeSize = {2, 1, 1};
+        queue.WriteTexture(&dst, expected.data(), sizeof(expected), &layout, &writeSize);
+
+        EXPECT_TEXTURE_EQ(expected.data(), texture, {0, 0, 1}, writeSize);
+    }
+}
+
+// Test both unpadded (bytesPerRow == 16384) and padded (bytesPerRow == 16384 + 256) multi-row
+// WriteTexture with writeSize.width == 16384 (kMaxTexelsPerRow).
+TEST_P(QueueWriteTextureSimpleTests, LargeRowWidth) {
+    // TODO(crbug.com/585633190): Fails to copy past x = 8192 on Mac AMD Radeon Pro 555X / 560X.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsAMD());
+
+    constexpr wgpu::Extent3D kWriteSize = {16384, 2, 1};
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxTextureDimension2D < kWriteSize.width);
+
+    std::vector<uint8_t> expected(size_t{kWriteSize.width} * kWriteSize.height);
+    FillData(expected);
+
+    for (uint32_t bytesPerRow : {kWriteSize.width, kWriteSize.width + 256}) {
+        std::vector<uint8_t> data(size_t{bytesPerRow} * kWriteSize.height, 0);
+        for (uint32_t y = 0; y < kWriteSize.height; ++y) {
+            Span<uint8_t>(data)
+                .subspan(size_t{y} * bytesPerRow)
+                .CopyPrefixFrom(Span<const uint8_t>(expected).subspan(size_t{y} * kWriteSize.width,
+                                                                      kWriteSize.width));
+        }
+
+        wgpu::TextureDescriptor descriptor = {};
+        descriptor.size = kWriteSize;
+        descriptor.format = wgpu::TextureFormat::R8Unorm;
+        descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+        wgpu::Texture texture = device.CreateTexture(&descriptor);
+
+        wgpu::TexelCopyTextureInfo dst = utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferLayout layout =
+            utils::CreateTexelCopyBufferLayout(0, bytesPerRow, kWriteSize.height);
+        queue.WriteTexture(&dst, data.data(), data.size(), &layout, &kWriteSize);
+
+        EXPECT_TEXTURE_EQ(expected.data(), texture, {0, 0, 0}, kWriteSize);
+    }
+}
+
+// Regression test for crbug.com/584005138: multi-row WriteTexture with bytesPerRow >= 256 MiB
+// (both block-aligned and non-block-aligned) must not wrap 32-bit bit strides in OpenGLES drivers.
+TEST_P(QueueWriteTextureSimpleTests, LargeBytesPerRow256MiB) {
+    TestLargeStride(0x10000000u, 2, {2, 2, 1});
+    TestLargeStride(0x10000001u, 2, {2, 2, 1});
+}
+
+TEST_P(QueueWriteTextureSimpleTests, LargeBytesPerRow2GiB) {
+    TestLargeStride(0x80000000u, 2, {2, 2, 1});
+}
+
+TEST_P(QueueWriteTextureSimpleTests, LargeBytesPerImage256MiB_2DArray) {
+    TestLargeStride(256, 0x00100000u, {2, 2, 2}, wgpu::TextureDimension::e2D);
+}
+
+TEST_P(QueueWriteTextureSimpleTests, LargeBytesPerImage256MiB_3D) {
+    TestLargeStride(256, 0x00100000u, {2, 2, 2}, wgpu::TextureDimension::e3D);
+}
+
+TEST_P(QueueWriteTextureSimpleTests, LargeBytesPerImage2GiB_2DArray) {
+    TestLargeStride(256, 0x00800000u, {2, 2, 2}, wgpu::TextureDimension::e2D);
+}
+
+TEST_P(QueueWriteTextureSimpleTests, LargeBytesPerImage2GiB_3D) {
+    TestLargeStride(256, 0x00800000u, {2, 2, 2}, wgpu::TextureDimension::e3D);
+}
+
 DAWN_INSTANTIATE_TEST(QueueWriteTextureSimpleTests,
                       D3D11Backend(),
                       D3D11Backend({"d3d11_use_unmonitored_fence"}),
@@ -1049,6 +1194,7 @@ DAWN_INSTANTIATE_TEST(QueueWriteTextureSimpleTests,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
+                      OpenGLESBackend({"gl_defer"}),
                       VulkanBackend(),
                       WebGPUBackend());
 

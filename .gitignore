@@ -32,6 +32,7 @@
 /third_party/fadec/src
 /third_party/fast_float/src
 /third_party/fp16/src
+/third_party/fuzztest/src
 /third_party/glfw3/src
 /third_party/glslang/src/
 /third_party/google_benchmark/src
@@ -60,6 +61,7 @@
 /third_party/node-api-headers
 /third_party/partition_alloc
 /third_party/protobuf
+/third_party/re2/src
 /third_party/simdutf/src
 /third_party/siso/cipd/
 /third_party/spirv-headers/src/

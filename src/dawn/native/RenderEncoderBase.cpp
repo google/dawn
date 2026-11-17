@@ -40,8 +40,10 @@
 #include "src/dawn/native/CommandValidation.h"
 #include "src/dawn/native/Commands.h"
 #include "src/dawn/native/Device.h"
+#include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/RenderPipeline.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn::native {
 
@@ -710,9 +712,11 @@ void RenderEncoderBase::APISetVertexBuffer(uint32_t slot,
         "encoding %s.SetVertexBuffer(%u, %s, %u, %u).", this, slot, buffer, offset, size);
 }
 
-void RenderEncoderBase::APISetBindGroup(uint32_t groupIndexIn,
-                                        BindGroupBase* group,
-                                        ityp::span<BindingIndex, const uint32_t> dynamicOffsets) {
+void RenderEncoderBase::APISetBindGroup(
+    uint32_t groupIndexIn,
+    BindGroupBase* group,
+    ityp::span<DynamicOffsetsIndex, const uint32_t> dynamicOffsetsIn) {
+    auto dynamicOffsets = CastIntSpan<const BufferDynamicOffset>(dynamicOffsetsIn);
     mEncodingContext->TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeValError {
@@ -745,7 +749,7 @@ void RenderEncoderBase::APISetImmediates(uint32_t offset, Span<const std::byte> 
             }
 
             RecordSetImmediates(allocator, offset, data);
-            mCommandBufferState.SetImmediateData(offset, data.size());
+            mCommandBufferState.SetImmediateData(offset, data);
             return {};
         },
         "encoding %s.SetImmediates(%u, %u, ...).", this, offset, data.size());

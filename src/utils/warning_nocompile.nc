@@ -28,15 +28,22 @@
 // Tests for warnings. Note this code should ONLY trigger warnings (no other hard errors),
 // otherwise the compiler suppresses the warnings in favor of the errors.
 
-#include <stdint.h>
-
 #include <array>
+#include <cstdint>
 #include <span>
 
 #include "src/utils/heap_array.h"
 #include "src/utils/span.h"
+#include "src/utils/underlying_type.h"
 
 namespace dawn {
+
+// Helper for getting a *runtime* value of the given type.
+template <typename T>
+T value() {
+    volatile UnderlyingType<T> val = 3;
+    return T{val};
+}
 
 // Verify that warnings that are part of -Weverything but not -Wall -Wextra
 // are enabled. This test runs only when `dawn_weverything = true`.
@@ -45,12 +52,19 @@ void TestWeverything() {
     [[maybe_unused]] void* p = 0; // expected-error {{zero as null pointer constant}}
 }
 
-// Verify that warnings suppressions limited to specific file with --warning-suppression-mappings
-// are enabled to other code.
-void TestWarningSuppressionMappings() {
-    // -Wold-style-cast is one such warning.
-    int x = 0;
-    std::ignore = (float)x; // expected-error {{use of old-style cast}}
+// Test some basic C-style integer casts are not allowed.
+// This warning is also disabled in some files with --warning-suppression-mappings so this also
+// verifies that that doesn't disable the warning in other code.
+void TestCStyleCasts() {
+    std::ignore = float{0};
+    std::ignore = static_cast<float>(value<int>());
+    std::ignore = (float)value<int>();  // expected-error {{use of old-style cast}}
+    std::ignore = float(value<int>());  // Does NOT warn, only clang-tidy catches this
+
+    std::ignore = uint32_t{0ULL};
+    std::ignore = static_cast<uint32_t>(value<uint64_t>());
+    std::ignore = (uint32_t)value<uint64_t>();  // expected-error {{use of old-style cast}}
+    std::ignore = uint32_t(value<uint64_t>());  // Does NOT warn, only clang-tidy catches this
 }
 
 // -Wunsafe-buffer-usage: operator[] on T*

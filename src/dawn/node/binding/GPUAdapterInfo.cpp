@@ -59,6 +59,12 @@ interop::GPUSubgroupMatrixComponentType SubgroupMatrixComponentType(
             return interop::GPUSubgroupMatrixComponentType::kU8;
         case SubgroupMatrixComponentType::I8:
             return interop::GPUSubgroupMatrixComponentType::kI8;
+        case SubgroupMatrixComponentType::Bf16:
+            return interop::GPUSubgroupMatrixComponentType::kBf16;
+        case SubgroupMatrixComponentType::F8_e4m3:
+            return interop::GPUSubgroupMatrixComponentType::kF8E4M3;
+        case SubgroupMatrixComponentType::F8_e5m2:
+            return interop::GPUSubgroupMatrixComponentType::kF8E5M2;
     }
     DAWN_ASSERT(false);
     return interop::GPUSubgroupMatrixComponentType::kF32;
@@ -70,13 +76,17 @@ struct GPUSubgroupMatrixConfig : public interop::GPUSubgroupMatrixConfig {
     uint32_t M;
     uint32_t N;
     uint32_t K;
+    uint32_t minSubgroupSize;
+    uint32_t maxSubgroupSize;
 
     explicit GPUSubgroupMatrixConfig(const wgpu::SubgroupMatrixConfig& config)
         : componentType(SubgroupMatrixComponentType(config.componentType)),
           resultComponentType(SubgroupMatrixComponentType(config.resultComponentType)),
           M(config.M),
           N(config.N),
-          K(config.K) {}
+          K(config.K),
+          minSubgroupSize(config.minSubgroupSize),
+          maxSubgroupSize(config.maxSubgroupSize) {}
 
     interop::GPUSubgroupMatrixComponentType getComponentType(Napi::Env) override {
         return componentType;
@@ -87,6 +97,8 @@ struct GPUSubgroupMatrixConfig : public interop::GPUSubgroupMatrixConfig {
     uint32_t getM(Napi::Env) override { return M; }
     uint32_t getN(Napi::Env) override { return N; }
     uint32_t getK(Napi::Env) override { return K; }
+    uint32_t getMinSubgroupSize(Napi::Env) override { return minSubgroupSize; }
+    uint32_t getMaxSubgroupSize(Napi::Env) override { return maxSubgroupSize; }
 };
 
 // Normalize according to https://gpuweb.github.io/gpuweb/#normalized-identifier-string

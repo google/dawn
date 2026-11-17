@@ -127,7 +127,9 @@ SYNCED_GCS_DEPS = {
 # Chromium file path (if different).
 SYNCED_TEXT_FILES = {
     'third_party/cpu_features/BUILD.gn': None,
+    'third_party/fuzztest/BUILD.gn': None,
     'third_party/jdk/BUILD.gn': None,
+    'third_party/re2/BUILD.gn': None,
 }
 
 # Repos that are independently synced by Chromium and Dawn. A map from Dawn
@@ -152,6 +154,7 @@ SYNCED_REPOS = {
     'third_party/catapult': None,
     'third_party/clang-format/script': None,
     'third_party/depot_tools': None,
+    'third_party/fuzztest/src': None,
     # third_party/directx-headers/src is technically used by both Chromium and
     # Dawn, but for different purposes and on non-overlapping platforms. Thus,
     # there is no need to sync their revisions.
@@ -164,6 +167,7 @@ SYNCED_REPOS = {
     'third_party/libdrm/src': None,
     'third_party/libFuzzer/src': None,
     'third_party/perfetto': None,
+    'third_party/re2/src': None,
     # third_party/vulkan_memory_allocator is shared with Chromium, but is
     # manually rolled since it typically requires additional code changes in
     # the repo.

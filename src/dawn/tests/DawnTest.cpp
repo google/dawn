@@ -433,19 +433,16 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
         argLen = sizeof(kEnableBackendValidationSwitch) - 1;
         if (strncmp(argv[i], kEnableBackendValidationSwitch, argLen) == 0) {
             const char* level = argv[i] + argLen;
-            if (level[0] != '\0') {
-                if (strcmp(level, "=full") == 0) {
-                    mBackendValidationLevel = native::BackendValidationLevel::Full;
-                } else if (strcmp(level, "=partial") == 0) {
-                    mBackendValidationLevel = native::BackendValidationLevel::Partial;
-                } else if (strcmp(level, "=disabled") == 0) {
-                    mBackendValidationLevel = native::BackendValidationLevel::Disabled;
-                } else {
-                    ErrorLog() << "Invalid backend validation level" << level;
-                    DAWN_UNREACHABLE();
-                }
-            } else {
+            if (strcmp(level, "=full") == 0) {
+                mBackendValidationLevel = native::BackendValidationLevel::Full;
+            } else if (strcmp(level, "=partial") == 0) {
                 mBackendValidationLevel = native::BackendValidationLevel::Partial;
+            } else if (strcmp(level, "=disabled") == 0) {
+                mBackendValidationLevel = native::BackendValidationLevel::Disabled;
+            } else {
+                ErrorLog() << "Invalid backend validation level '" << level
+                           << "' (must be =full, =partial, or =disabled)";
+                DAWN_UNREACHABLE();
             }
             continue;
         }
@@ -594,7 +591,7 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                    "    [--enable-toggles=toggles] [--disable-toggles=toggles]\n"
                    "    [--backend=x[,y...]]\n"
                    "    [--adapter-vendor-id=x] "
-                   "[--enable-backend-validation[=full,partial,disabled]]\n"
+                   "[--enable-backend-validation=(full|partial|disabled)]\n"
                    "    [--exclusive-device-type-preference=integrated,cpu,discrete]\n\n"
                    "  -w, --use-wire: Run the tests through the wire (defaults to no wire)\n"
                    "  -s, --enable-implicit-device-sync: Run the tests with implicit device "

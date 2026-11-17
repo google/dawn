@@ -44,6 +44,7 @@
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/Forward.h"
+#include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/ObjectBase.h"
 #include "src/dawn/native/dawn_platform.h"
 #include "src/utils/span.h"
@@ -135,13 +136,13 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
 
     // Returns the number of internal bindings, excluding things like ExternalTexture.
     BindingIndex GetBindingCount() const;
-    // Returns |BindingIndex| because dynamic buffers are packed at the front.
-    BindingIndex GetDynamicBufferCount() const;
+    DynamicOffsetsIndex GetDynamicBufferCount() const;
     uint32_t GetDynamicStorageBufferCount() const;
     uint32_t GetUnverifiedBufferCount() const;
     uint32_t GetAPIStaticSamplerCount() const;
     uint32_t GetStaticSamplerCount() const;
     bool IsStorageBufferBinding(BindingIndex bindingIndex) const;
+    bool IsDynamicBufferBinding(BindingIndex bindingIndex) const;
     bool IsExternalTextureBinding(APIBindingIndex bindingIndex) const;
 
     uint32_t GetExternalTextureCount() const;

@@ -106,7 +106,7 @@ class BindGroupTracker : public BindGroupTrackerBase</*CanInheritBindGroups=*/tr
         BindGroupBase* group,
         BindingIndex bindingIndex,
         const BufferBindingInfo& layout,
-        const ityp::span<BindingIndex, uint32_t>& dynamicOffsets);
+        ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets);
 
     ID3D11SamplerState* GetSamplerState(BindGroupBase* group, BindingIndex bindingIndex);
 

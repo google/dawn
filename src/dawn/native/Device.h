@@ -440,6 +440,9 @@ class DeviceBase : public ErrorSink,
     // Whether the backend needs to validate the indirect buffer on GPU.
     virtual bool NeedsIndirectGPUValidation() const;
 
+    // Whether DynamicUploader can keep staging ring buffers persistently mapped across GPU copies.
+    virtual bool SupportsPersistentlyMappedStagingBuffer() const { return true; }
+
     // Whether the GPU is known to be a tile-based (deferred) renderer, based on vendor/device ID.
     bool IsTileBasedRenderer() const;
 

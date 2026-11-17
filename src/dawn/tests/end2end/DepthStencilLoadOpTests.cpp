@@ -206,9 +206,10 @@ class DepthStencilLoadOpTests : public DawnTestWithParams<DepthStencilLoadOpTest
 TEST_P(DepthStencilLoadOpTests, ClearMip0) {
     // TODO(crbug.com/519296892): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
     // TODO(crbug.com/dawn/1828): depth16unorm broken on Apple GPUs.
     DAWN_SUPPRESS_TEST_IF(IsApple() && GetParam().mFormat == wgpu::TextureFormat::Depth16Unorm);
+    // TODO(crbug.com/477645284): Fails on Mac Intel with Metal Shader Validation.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsFullBackendValidationEnabled());
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.BeginRenderPass(&renderPassDescriptors[0]).End();
@@ -222,6 +223,8 @@ TEST_P(DepthStencilLoadOpTests, ClearMip0) {
 TEST_P(DepthStencilLoadOpTests, ClearMip1) {
     // TODO(crbug.com/519296892): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
+    // TODO(crbug.com/477645284): Fails on Mac Intel with Metal Shader Validation.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsFullBackendValidationEnabled());
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.BeginRenderPass(&renderPassDescriptors[1]).End();
@@ -235,9 +238,10 @@ TEST_P(DepthStencilLoadOpTests, ClearMip1) {
 TEST_P(DepthStencilLoadOpTests, ClearBothMip0Then1) {
     // TODO(crbug.com/519296892): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
     // TODO(crbug.com/dawn/1828): depth16unorm broken on Apple GPUs.
     DAWN_SUPPRESS_TEST_IF(IsApple() && GetParam().mFormat == wgpu::TextureFormat::Depth16Unorm);
+    // TODO(crbug.com/477645284): Fails on Mac Intel with Metal Shader Validation.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsFullBackendValidationEnabled());
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.BeginRenderPass(&renderPassDescriptors[0]).End();
@@ -253,10 +257,10 @@ TEST_P(DepthStencilLoadOpTests, ClearBothMip0Then1) {
 TEST_P(DepthStencilLoadOpTests, ClearBothMip1Then0) {
     // TODO(crbug.com/519296892): Produces incorrect result on Pixel 10.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan());
-
     // TODO(crbug.com/dawn/1828): depth16unorm broken on Apple GPUs.
     DAWN_SUPPRESS_TEST_IF(IsApple() && GetParam().mFormat == wgpu::TextureFormat::Depth16Unorm);
-
+    // TODO(crbug.com/477645284): Fails on Mac Intel with Metal Shader Validation.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsFullBackendValidationEnabled());
     // TODO(42242119): fail on Qualcomm Adreno X1.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm() &&
                           GetDriverVersion() < gpu_info::DriverVersion({31, 0, 170, 0}));

@@ -211,7 +211,7 @@ void BindGroup::WriteDescriptorSetWithoutTemplate(
         // as the amount of dynamic offsets need to stay the same as WebGPU's so we can passthrough
         // the dynamic offsets.
         if (bindingInfo.visibility == wgpu::ShaderStage::None &&
-            bindingIndex >= layout->GetDynamicBufferCount()) {
+            !layout->IsDynamicBufferBinding(bindingIndex)) {
             return;
         }
 

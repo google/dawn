@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_COMMANDBUFFERSTATETRACKER_H_
 #define SRC_DAWN_NATIVE_COMMANDBUFFERSTATETRACKER_H_
 
+#include <array>
+#include <cstddef>
 #include <vector>
 
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
@@ -69,7 +71,7 @@ class CommandBufferStateTracker {
     void UnsetBindGroup(BindGroupIndex index);
     void SetBindGroup(BindGroupIndex index,
                       BindGroupBase* bindgroup,
-                      ityp::span<BindingIndex, const uint32_t> dynamicOffsets);
+                      ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets);
     void SetResourceTable(ResourceTableBase* resourceTable);
     void SetRenderBundleHasResourceTable();
     void SetIndexBuffer(BufferBase* buffer,
@@ -78,7 +80,7 @@ class CommandBufferStateTracker {
                         uint64_t size);
     void UnsetVertexBuffer(VertexBufferSlot slot);
     void SetVertexBuffer(VertexBufferSlot slot, uint64_t size);
-    void SetImmediateData(uint32_t offset, size_t size);
+    void SetImmediateData(uint32_t offset, Span<const std::byte> data);
     void End();
 
     static constexpr size_t kNumAspects = 6;
@@ -86,7 +88,8 @@ class CommandBufferStateTracker {
 
     BindGroupBase* GetBindGroup(BindGroupIndex index) const;
     ResourceTableBase* GetResourceTable() const;
-    ityp::span<BindingIndex, const uint32_t> GetDynamicOffsets(BindGroupIndex index) const;
+    ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> GetDynamicOffsets(
+        BindGroupIndex index) const;
     bool HasPipeline() const;
     bool HasResourceTable() const;
     bool IndexBufferSet() const;
@@ -97,6 +100,8 @@ class CommandBufferStateTracker {
     wgpu::IndexFormat GetIndexFormat() const;
     uint64_t GetIndexBufferSize() const;
     uint64_t GetIndexBufferOffset() const;
+    Span<const std::byte, kMaxImmediateDataBytes> GetImmediateData() const;
+    const ImmediateMask& GetImmediateDataMask() const;
 
   private:
     MaybeValError ValidateOperation(ValidationAspects requiredAspects);
@@ -119,7 +124,7 @@ class CommandBufferStateTracker {
     // various objects referenced by the object graph of the CommandBuffer so they cannot be
     // freed from underneath this class.
     RAW_PTR_EXCLUSION PerBindGroup<BindGroupBase*> mBindgroups = {};
-    PerBindGroup<ityp::vector<BindingIndex, uint32_t>> mDynamicOffsets;
+    PerBindGroup<ityp::vector<DynamicOffsetsIndex, BufferDynamicOffset>> mDynamicOffsets;
     RAW_PTR_EXCLUSION ResourceTableBase* mResourceTable = nullptr;
     bool mHasResourceTable = false;
 
@@ -128,6 +133,7 @@ class CommandBufferStateTracker {
     RAW_PTR_EXCLUSION const RequiredBufferSizes* mMinBufferSizes = nullptr;
 
     ImmediateMask mImmediateDataMask;
+    std::array<std::byte, kMaxImmediateDataBytes> mImmediateData = {};
 };
 
 }  // namespace dawn::native

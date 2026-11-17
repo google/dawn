@@ -115,13 +115,22 @@ TEST_F(BufferValidationTest, CreationMaxBufferSize) {
     }
 }
 
-// Test restriction on usages must not be None (0)
+// Test restriction on usages must not be None (0) or contain invalid bits
 TEST_F(BufferValidationTest, CreationMapUsageNotZero) {
     // Zero (None) usage is an error
     {
         wgpu::BufferDescriptor descriptor;
         descriptor.size = 4;
         descriptor.usage = wgpu::BufferUsage::None;
+
+        ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
+    }
+
+    // Invalid usage bits (including high 32-bit bits) are an error
+    {
+        wgpu::BufferDescriptor descriptor;
+        descriptor.size = 4;
+        descriptor.usage = wgpu::BufferUsage::Uniform | static_cast<wgpu::BufferUsage>(1ull << 32);
 
         ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
     }

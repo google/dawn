@@ -41,7 +41,9 @@
 #include "src/dawn/native/d3d/d3d_platform.h"
 
 namespace dawn::native {
+struct BufferCopy;
 struct CopyTextureToTextureCmd;
+struct TextureCopy;
 }  // namespace dawn::native
 
 namespace dawn::native::d3d {
@@ -67,6 +69,8 @@ class Texture final : public TextureBase {
         SharedTextureMemory* memory,
         const UnpackedPtr<TextureDescriptor>& descriptor);
     ID3D11Resource* GetD3D11Resource() const;
+
+    bool BackingMemorySupportsResolveTarget() const override;
 
     ResultOrError<ComPtr<ID3D11RenderTargetView1>> CreateD3D11RenderTargetView(
         wgpu::TextureFormat viewFormat,
@@ -101,6 +105,10 @@ class Texture final : public TextureBase {
                     ReadCallback callback);
     static MaybeError Copy(const ScopedCommandRecordingContext* commandContext,
                            CopyTextureToTextureCmd* copy);
+    static MaybeError CopyFromBuffer(const ScopedCommandRecordingContext* commandContext,
+                                     const BufferCopy& src,
+                                     const TextureCopy& dst,
+                                     const TexelExtent3D& copySize);
 
     // Returns a Span of mappedResource with the correct size:
     // totalBytes = (depth - 1) × DepthPitch + (heightInBlocks - 1) × RowPitch + bytesPerRow
@@ -205,6 +213,7 @@ class Texture final : public TextureBase {
     const Kind mKind = Kind::Normal;
     ComPtr<ID3D11Resource> mD3d11Resource;
     Ref<d3d::KeyedMutex> mKeyedMutex;
+    bool mBackingMemorySupportsResolveTarget = true;
 
     // The internal 'R8Uint' texture for sampling stencil from depth-stencil textures.
     Ref<Texture> mTextureForStencilSampling;

@@ -710,14 +710,15 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
                         const PipelineLayout* pipelineLayout,
                         BindGroupIndex index,
                         BindGroup* group,
-                        const ityp::span<BindingIndex, uint32_t>& dynamicOffsets) {
+                        ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets) {
         DAWN_ASSERT(dynamicOffsets.size() == group->GetLayout()->GetDynamicBufferCount());
 
         // Usually, the application won't set the same offsets many times,
         // so always try to apply dynamic offsets even if the offsets stay the same.
         BindGroupLayout* bgl = ToBackend(group->GetLayout());
         std::vector<uint32_t> storageBufferDynamicOffsets;
-        for (BindingIndex bindingIndex{0u}; bindingIndex < dynamicOffsets.size(); ++bindingIndex) {
+        for (DynamicOffsetsIndex i{0u}; i < dynamicOffsets.size(); ++i) {
+            BindingIndex bindingIndex = DynamicOffsetsIndexToBindingIndex(i);
             // Note that the order of indices in dynamicOffsets corresponds to the order of
             // dynamic resource bindings in the BGL by binding number. Because the BGL packs
             // (uniform and storage) dynamic buffers at the front, and are sorted by binding
@@ -733,7 +734,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
                 // Dynamic storage buffers are already bound to the root descriptor table, and
                 // only need the dynamic offsets updated in the immediate data.
                 // Collect the offsets so we can update the immediates after the loop.
-                storageBufferDynamicOffsets.push_back(dynamicOffsets[bindingIndex]);
+                storageBufferDynamicOffsets.push_back(uint32_t{dynamicOffsets[i]});
             } else {
                 // Set dynamic uniform buffer root descriptor
                 uint32_t parameterIndex =
@@ -742,7 +743,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false> {
 
                 // Calculate buffer locations that root descriptors links to. The location
                 // is (base buffer location + initial offset + dynamic offset)
-                uint64_t dynamicOffset = dynamicOffsets[bindingIndex];
+                uint64_t dynamicOffset = uint32_t{dynamicOffsets[i]};
                 uint64_t offset = binding.offset + dynamicOffset;
                 D3D12_GPU_VIRTUAL_ADDRESS bufferLocation =
                     ToBackend(binding.buffer)->GetVA() + offset;
@@ -1579,9 +1580,10 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
                 BindGroup* group = ToBackend(cmd->group.Get());
-                ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
-                if (cmd->dynamicOffsetCount != BindingIndex{0u}) {
-                    dynamicOffsets = mCommands.NextData<uint32_t>(cmd->dynamicOffsetCount);
+                ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != DynamicOffsetsIndex{0u}) {
+                    dynamicOffsets =
+                        mCommands.NextData<BufferDynamicOffset>(cmd->dynamicOffsetCount);
                 }
 
                 bindingTracker->OnSetBindGroup(cmd->index, group, dynamicOffsets);
@@ -2062,9 +2064,9 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
             case Command::SetBindGroup: {
                 SetBindGroupCmd* cmd = iter->NextCommand<SetBindGroupCmd>();
                 BindGroup* group = ToBackend(cmd->group.Get());
-                ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
-                if (cmd->dynamicOffsetCount != BindingIndex{0u}) {
-                    dynamicOffsets = iter->NextData<uint32_t>(cmd->dynamicOffsetCount);
+                ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets;
+                if (cmd->dynamicOffsetCount != DynamicOffsetsIndex{0u}) {
+                    dynamicOffsets = iter->NextData<BufferDynamicOffset>(cmd->dynamicOffsetCount);
                 }
 
                 bindingTracker->OnSetBindGroup(cmd->index, group, dynamicOffsets);

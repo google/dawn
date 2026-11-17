@@ -30,6 +30,7 @@
 
 #include <limits>
 
+#include "src/dawn/common/Constants.h"
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/RenderPipeline.h"
 #include "src/dawn/native/metal/ComputePipelineMTL.h"
@@ -38,6 +39,9 @@
 #include "src/dawn/native/metal/RenderPipelineMTL.h"
 
 namespace dawn::native::metal {
+
+// Size of a buffer binding as passed to the shader. Currently buffer bindings are limited to <4GiB.
+using BufferBindingSize32 = TypedInteger<struct BufferBindingSize32T, uint32_t>;
 
 // Metal buffer pointers do not expose their length, so Tint receives storage buffer lengths
 // through immediate data for arrayLength().
@@ -51,8 +55,8 @@ struct StorageBufferLengthTracker {
     wgpu::ShaderStage dirtyStages = wgpu::ShaderStage::None;
 
     // Tint expects one uint32_t length per possible buffer binding.
-    static constexpr size_t MaxBufferCount = kGenericMetalBufferSlots;
-    PerStage<std::array<uint32_t, MaxBufferCount>> data;
+    PerStage<ityp::array<PerStageBufferIndex, BufferBindingSize32, size_t{kBufferLengthArraySize}>>
+        data;
     // Number of bytes to upload for each shader stage.
     PerStage<uint32_t> dataSize{0u};
 
@@ -78,17 +82,18 @@ struct StorageBufferLengthTracker {
     // to avoid uploading unused data.
     void Apply(RenderPipeline* pipeline) {
         if (dirtyStages & wgpu::ShaderStage::Vertex) {
-            uint32_t bufferCount =
+            PerStageBufferIndex bufferCount =
                 ToBackend(pipeline->GetLayout())->GetBufferBindingCount(SingleShaderStage::Vertex);
             DAWN_ASSERT(bufferCount <= data[SingleShaderStage::Vertex].size());
-            dataSize[SingleShaderStage::Vertex] = sizeof(uint32_t) * bufferCount;
+            dataSize[SingleShaderStage::Vertex] = sizeof(uint32_t) * uint32_t{bufferCount};
         }
 
         if (dirtyStages & wgpu::ShaderStage::Fragment) {
-            uint32_t bufferCount = ToBackend(pipeline->GetLayout())
-                                       ->GetBufferBindingCount(SingleShaderStage::Fragment);
+            PerStageBufferIndex bufferCount =
+                ToBackend(pipeline->GetLayout())
+                    ->GetBufferBindingCount(SingleShaderStage::Fragment);
             DAWN_ASSERT(bufferCount <= data[SingleShaderStage::Fragment].size());
-            dataSize[SingleShaderStage::Fragment] = sizeof(uint32_t) * bufferCount;
+            dataSize[SingleShaderStage::Fragment] = sizeof(uint32_t) * uint32_t{bufferCount};
         }
     }
 
@@ -99,10 +104,10 @@ struct StorageBufferLengthTracker {
             return;
         }
 
-        uint32_t bufferCount =
+        PerStageBufferIndex bufferCount =
             ToBackend(pipeline->GetLayout())->GetBufferBindingCount(SingleShaderStage::Compute);
         DAWN_ASSERT(bufferCount <= data[SingleShaderStage::Compute].size());
-        dataSize[SingleShaderStage::Compute] = sizeof(uint32_t) * bufferCount;
+        dataSize[SingleShaderStage::Compute] = sizeof(uint32_t) * uint32_t{bufferCount};
     }
 
     size_t mLastImmediateCounts = 0;

@@ -38,56 +38,85 @@
 #include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/PerStage.h"
 #include "src/dawn/native/PipelineLayout.h"
+#include "src/utils/typed_integer.h"
 
 namespace dawn::native::metal {
 
 class Device;
 
-// The number of Metal buffers usable by applications in general
-inline constexpr size_t kMetalBufferTableSize = 31;
+namespace detail {
+
+// This struct is not used directly, it's just an ergonomic way of writing out the layout of buffers
+// in the 31 Metal buffer slots.
+struct BufferSlots {
+    char mVertexBuffers[kMaxVertexBuffers];
+
+    // This layout is for when Argument Buffers are enabled. When disabled, this block of 22 gets
+    // reused as space for uniform + storage buffer bindings. (Except, when Argument Buffers are
+    // disabled *and* ResourceTables are enabled, there's an effective limit of just 20
+    // uniform+storage buffer bindings despite our advertised limits.)
+    char mPadding[12];
+    char mArgumentBuffersAndDynamicOffsetBuffers[kMaxBindGroups * 2];
+    char mResourceTableStorage;
+    char mResourceTableBinding;
+
+    char mImmediates;
+};
+static_assert(sizeof(BufferSlots) == 31);
+
+}  // namespace detail
+
+// Metal buffer index: [[buffer(n)]].
+using MetalBufferIndex = TypedInteger<struct MetalBufferIndexT, uint32_t>;
+
 // Immediate blocks contain pipeline immediates followed by tightly packed storage buffer sizes.
-inline constexpr size_t kImmediateBlockBufferSlot = kMetalBufferTableSize - 1;
+inline constexpr MetalBufferIndex kImmediateBlockBufferSlot{
+    offsetof(detail::BufferSlots, mImmediates)};
 
-// Note, the kResourceTable*Slot's can conflict with kGenericMetalBufferSlots but we choose to allow
-// the conflict while experimenting with resource tables. The conflict will be resolved when
-// argument buffers are enabled.
-inline constexpr size_t kResourceTableBindingSlot = kImmediateBlockBufferSlot - 1;
-inline constexpr size_t kResourceTableStorageSlot = kResourceTableBindingSlot - 1;
+// Note, the kResourceTable*Slot's can conflict with buffer bindings from bindgroups (when not using
+// argument buffers - see kMaxVertexStageBuffersWithResourceTableWithoutArgBufs).
+// TODO(crbug.com/363031535): Update when the ResourceTable + non-argbufs path is removed.
+inline constexpr MetalBufferIndex kResourceTableBindingSlot{
+    offsetof(detail::BufferSlots, mResourceTableBinding)};
+inline constexpr MetalBufferIndex kResourceTableStorageSlot{
+    offsetof(detail::BufferSlots, mResourceTableStorage)};
 
-// The number of Metal buffers Dawn can use in a generic way (i.e. that aren't reserved)
-//
-// Note, this needs to match the value in PhysicalDeviceMTL for maxBuffersPerStage.
-inline constexpr size_t kGenericMetalBufferSlots = kImmediateBlockBufferSlot;
-
-// TODO(crbug.com/363031535): Remove when the non-argbufs path is removed.
-inline constexpr uint32_t kMaxVertexStageBufferCountWithResourceTableWithoutArgBufs =
-    kResourceTableStorageSlot;
-
-// Get the [[buffer()]] number for an argument buffer and its dynamic offset buffer,
-// from the SetBindGroup() slot number.
-// TODO(crbug.com/363031535): The dynamic offsets should all be in a single grouping
-// which is in the immediates buffer. Then this will just return a single uint32_t.
-inline std::pair<uint32_t, uint32_t> BindGroupSlotToArgumentBufferID(BindGroupIndex slot) {
-    // The last buffer slot to be used by argument buffers
-    constexpr uint32_t kArgumentBufferSlotMax = kResourceTableStorageSlot - 1;
-
+// Get the [[buffer()]] number for an argument buffer from the SetBindGroup() slot number.
+inline std::pair<MetalBufferIndex, MetalBufferIndex> BindGroupIndexToArgumentBufferIndex(
+    BindGroupIndex slot) {
+    constexpr MetalBufferIndex kArgumentBufferSlot0{
+        offsetof(detail::BufferSlots, mArgumentBuffersAndDynamicOffsetBuffers[0])};
     // Maps slots as follows (AB = Argument Buffer, DOB = Dynamic Offset Buffer):
-    // AB3 DOB3 AB2 DOB2 AB1 DOB1 AB0 DOB0
-    // TODO(crbug.com/363031535): After removing DOBs, decide on a more compact layout for bindings,
-    // e.g. [immediate buffer, BG0, BG1, BG2, BG3, ... all the vertex buffers].
-    uint32_t index = kArgumentBufferSlotMax - uint32_t{slot} * 2;
-    return {index - 1, index};
+    // AB0 DOB0 AB1 DOB1 AB2 DOB2 AB3 DOB3
+    // TODO(crbug.com/363031535): Simplify after removing DOBs.
+    DAWN_CHECK(slot < kMaxBindGroupsTyped);
+    return {
+        kArgumentBufferSlot0 + MetalBufferIndex{uint32_t{slot} * 2},
+        kArgumentBufferSlot0 + MetalBufferIndex{uint32_t{slot} * 2 + 1},
+    };
 }
 
 // Get the [[buffer()]] number for a vertex buffer from the SetVertexBuffer() slot number.
-inline uint32_t VertexBufferSlotToMetalBufferIndex(VertexBufferSlot slot) {
+inline MetalBufferIndex VertexBufferSlotToMetalBufferIndex(VertexBufferSlot slot) {
+    constexpr MetalBufferIndex kVertexBufferSlot0{offsetof(detail::BufferSlots, mVertexBuffers[0])};
     DAWN_ASSERT(slot < kMaxVertexBuffersTyped);
-    return uint32_t{slot};
+    return kVertexBufferSlot0 + MetalBufferIndex{uint32_t{slot}};
 }
 
-inline uint32_t VertexBufferSlotToLengthArrayIndex(VertexBufferSlot slot) {
-    DAWN_ASSERT(slot < kMaxVertexBuffersTyped);
-    return uint32_t{slot};
+// Index type for when we pack buffers (vertex+uniform+storage) into a per-stage array:
+// - Buffer length array for robustness
+// - Metal buffer slots (when not using Argument Buffers)
+using PerStageBufferIndex = TypedInteger<struct PerStageBufferIndexT, uint32_t>;
+inline constexpr PerStageBufferIndex kBufferLengthArraySize{
+    kMaxVertexBuffers + kMaxUniformBuffersPerShaderStage + kMaxStorageBuffersPerShaderStage};
+// When using ResourceTable we are limited in how many buffers we can bind directly to the shader.
+// TODO(crbug.com/363031535): Remove when the non-argbufs path is removed.
+inline constexpr PerStageBufferIndex kMaxVertexStageBufferCountWithResourceTableWithoutArgBufs{
+    uint32_t{kResourceTableStorageSlot}};
+
+inline PerStageBufferIndex VertexBufferSlotToLengthArrayIndex(VertexBufferSlot slot) {
+    DAWN_CHECK(slot < kMaxVertexBuffersTyped);
+    return PerStageBufferIndex{uint32_t{slot}};
 }
 
 inline uint32_t GetImmediateBufferSizesByteOffset(ImmediateMask pipelineImmediateMask) {
@@ -115,13 +144,15 @@ class PipelineLayout final : public PipelineLayoutBase {
     const BindingIndexInfo& GetBindingIndexInfo(SingleShaderStage stage) const;
 
     // The number of Metal vertex stage buffers used for the whole pipeline layout.
-    uint32_t GetBufferBindingCount(SingleShaderStage stage) const;
+    PerStageBufferIndex GetBufferBindingCount(SingleShaderStage stage) const;
 
   private:
     PipelineLayout(Device* device, const UnpackedPtr<PipelineLayoutDescriptor>& descriptor);
     ~PipelineLayout() override;
+
+    // TODO(https://crbug.com/363031535): Simplify when removing non-argument-buffers code.
     PerStage<BindingIndexInfo> mIndexInfo;
-    PerStage<uint32_t> mBufferBindingCount;
+    PerStage<PerStageBufferIndex> mBufferBindingCount;
 };
 
 }  // namespace dawn::native::metal

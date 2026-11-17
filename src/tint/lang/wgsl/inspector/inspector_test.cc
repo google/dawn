@@ -5143,6 +5143,7 @@ TEST_F(InspectorTextureTest, TextureLoadMultipleInEP) {
 @group(1) @binding(4) var tex2: texture_multisampled_2d<f32>;
 @group(0) @binding(1) var tex3: texture_2d<f32>;
 @group(0) @binding(8) var tex4: texture_external;
+@group(0) @binding(9) var tex5: texture_storage_2d<rgba8unorm, read>;
 
 @compute @workgroup_size(1)
 fn main() {
@@ -5150,6 +5151,7 @@ fn main() {
   let num2 = textureLoad(tex2, vec2(0, 0), 0);
   let num3 = textureLoad(tex3, vec2(0, 0), 0);
   let num4 = textureLoad(tex4, vec2(0, 0));
+  let num5 = textureLoad(tex5, vec2(0, 0));
 })";
 
     Inspector& inspector = Initialize(shader);

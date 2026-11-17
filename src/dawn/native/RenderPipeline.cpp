@@ -740,15 +740,10 @@ ResultOrValError<ShaderModuleEntryPoint> ValidateFragmentState(
             !format->HasAlphaChannel(),
             "alphaToCoverageEnabled is true when target[0].format (%s) has no alpha channel.",
             format->format);
-
-        // TODO(https://crbug.com/561839163): Remove this toggle and the associated test once the
-        // additional validation has been landed with no breakage.
-        if (!device->IsToggleEnabled(Toggle::AllowAlphaToCoverageNotBlendable)) {
-            DAWN_INVALID_IF(
-                !format->IsBlendable(),
-                "alphaToCoverageEnabled is true when target[0].format (%s) is not blendable.",
-                format->format);
-        }
+        DAWN_INVALID_IF(
+            !format->IsBlendable(),
+            "alphaToCoverageEnabled is true when target[0].format (%s) is not blendable.",
+            format->format);
     }
 
     if (device->IsCompatibilityMode()) {

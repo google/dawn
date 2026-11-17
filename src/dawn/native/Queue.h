@@ -130,6 +130,10 @@ class QueueBase : public ExecutionQueueBase, public WeakRefSupport<QueueBase> {
                                            Span<const std::byte> data,
                                            const TexelCopyBufferLayout& dataLayout,
                                            const Extent3D* writeSize);
+    MaybeError WriteTextureUsingStagingBuffer(const TexelCopyTextureInfo& destination,
+                                              Span<const std::byte> data,
+                                              const TexelCopyBufferLayout& dataLayout,
+                                              const Extent3D& writeSize);
     MaybeUnknownError CopyTextureForBrowserInternal(const TexelCopyTextureInfo* source,
                                                     const TexelCopyTextureInfo* destination,
                                                     const Extent3D* copySize,

@@ -1141,6 +1141,8 @@ TEST_P(CopyTextureForBrowser_Basic, VerifyCopyFromLargeTexture) {
     // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
     DAWN_SUPPRESS_TEST_IF(IsImgTec());
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
+    // TODO(crbug.com/477645284): Fails on Mac Intel with Metal Shader Validation.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsFullBackendValidationEnabled());
 
     DoBasicCopyTest({899, 999});
 }
@@ -1149,6 +1151,8 @@ TEST_P(CopyTextureForBrowser_Basic, VerifyFlipY) {
     // TODO(crbug.com/40238674): Fails on Pixel 10 gles.
     DAWN_SUPPRESS_TEST_IF(IsImgTec());
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
+    // TODO(crbug.com/477645284): Fails on Mac Intel with Metal Shader Validation.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsFullBackendValidationEnabled());
 
     wgpu::CopyTextureForBrowserOptions options = {};
     options.flipY = true;

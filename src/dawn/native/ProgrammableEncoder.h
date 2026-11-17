@@ -67,11 +67,12 @@ class ProgrammableEncoder : public ApiObjectBase {
     MaybeValError ValidateSetBindGroup(
         BindGroupIndex index,
         BindGroupBase* group,
-        ityp::span<BindingIndex, const uint32_t> dynamicOffsetsIn) const;
-    void RecordSetBindGroup(CommandAllocator* allocator,
-                            BindGroupIndex index,
-                            BindGroupBase* group,
-                            ityp::span<BindingIndex, const uint32_t> dynamicOffsets) const;
+        ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsetsIn) const;
+    void RecordSetBindGroup(
+        CommandAllocator* allocator,
+        BindGroupIndex index,
+        BindGroupBase* group,
+        ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets) const;
 
     // Construct an "error" programmable pass encoder.
     ProgrammableEncoder(DeviceBase* device,

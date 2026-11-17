@@ -116,12 +116,12 @@ class ImmediateTracker : public T {
     // vec4-class members).
     static constexpr size_t kSetBytesAlignment = 16;
 
-    static constexpr size_t MaxBufferCount = StorageBufferLengthTracker::MaxBufferCount;
     static constexpr size_t kImmediateStructU32 = kIsRenderImmediates
                                                       ? sizeof(RenderImmediates) / sizeof(uint32_t)
                                                       : sizeof(UserImmediates) / sizeof(uint32_t);
     static constexpr size_t kMaxImmediateBlockSize =
-        Align(kImmediateStructU32 + MaxBufferCount, kSetBytesAlignment / kImmediateElementByteSize);
+        Align(kImmediateStructU32 + size_t{kBufferLengthArraySize},
+              kSetBytesAlignment / kImmediateElementByteSize);
 
     // Writes data to the immediate block content for the specified shader stages.
     // This is used for both immediates and storage buffer length data.
@@ -142,14 +142,14 @@ class ImmediateTracker : public T {
         if (dirtyStages & wgpu::ShaderStage::Vertex) {
             [renderEncoder setVertexBytes:mImmediateBlockContent[SingleShaderStage::Vertex].data()
                                    length:dirtySize[SingleShaderStage::Vertex]
-                                  atIndex:kImmediateBlockBufferSlot];
+                                  atIndex:uint32_t{kImmediateBlockBufferSlot}];
         }
 
         if (dirtyStages & wgpu::ShaderStage::Fragment) {
             [renderEncoder
                 setFragmentBytes:mImmediateBlockContent[SingleShaderStage::Fragment].data()
                           length:dirtySize[SingleShaderStage::Fragment]
-                         atIndex:kImmediateBlockBufferSlot];
+                         atIndex:uint32_t{kImmediateBlockBufferSlot}];
         }
 
         // Reset dirty stage.
@@ -164,7 +164,7 @@ class ImmediateTracker : public T {
 
         [computeEncoder setBytes:mImmediateBlockContent[SingleShaderStage::Compute].data()
                           length:dirtySize[SingleShaderStage::Compute]
-                         atIndex:kImmediateBlockBufferSlot];
+                         atIndex:uint32_t{kImmediateBlockBufferSlot}];
 
         // Reset dirty stage.
         dirtyStages = wgpu::ShaderStage::None;

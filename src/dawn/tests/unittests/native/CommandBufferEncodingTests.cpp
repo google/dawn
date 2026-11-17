@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
+#include <array>
 #include <utility>
 #include <vector>
 
@@ -105,8 +107,9 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
         utils::MakeBindGroup(device, dynamicLayout, {{0, uniformBuffer, 0, 256}});
 
     uint32_t dynamicOffset = 256;
-    ityp::vector<BindGroupIndex, uint32_t> emptyDynamicOffsets = {};
-    ityp::vector<BindGroupIndex, uint32_t> singleDynamicOffset = {dynamicOffset};
+    ityp::vector<DynamicOffsetsIndex, BufferDynamicOffset> emptyDynamicOffsets = {};
+    ityp::vector<DynamicOffsetsIndex, BufferDynamicOffset> singleDynamicOffset = {
+        BufferDynamicOffset{dynamicOffset}};
 
     // Begin encoding commands.
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -176,16 +179,16 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
                                  std::vector<uint32_t> offsets = {}) {
         return [index, bg, offsets](CommandIterator* commands) {
             auto* cmd = commands->NextCommand<SetBindGroupCmd>();
-            ityp::span<BindingIndex, const uint32_t> cmdOffsets;
-            if (cmd->dynamicOffsetCount > BindingIndex{0u}) {
-                cmdOffsets = commands->NextData<uint32_t>(cmd->dynamicOffsetCount);
+            ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> cmdOffsets;
+            if (cmd->dynamicOffsetCount > DynamicOffsetsIndex{0u}) {
+                cmdOffsets = commands->NextData<BufferDynamicOffset>(cmd->dynamicOffsetCount);
             }
 
             ASSERT_EQ(cmd->index, BindGroupIndex(index));
             ASSERT_EQ(ToAPI(cmd->group.Get()), bg.Get());
             ASSERT_EQ(uint32_t{cmdOffsets.size()}, offsets.size());
             for (auto [i, cmdOffset] : Enumerate(cmdOffsets)) {
-                ASSERT_EQ(cmdOffset, offsets[uint32_t{i}]);
+                ASSERT_EQ(uint32_t{cmdOffset}, offsets[uint32_t{i}]);
             }
         };
     };
@@ -220,7 +223,7 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
         auto* cmd = commands->NextCommand<SetBindGroupCmd>();
         ASSERT_EQ(cmd->index, BindGroupIndex(0u));
         ASSERT_NE(cmd->group.Get(), nullptr);
-        ASSERT_EQ(cmd->dynamicOffsetCount, BindingIndex{0u});
+        ASSERT_EQ(cmd->dynamicOffsetCount, DynamicOffsetsIndex{0u});
     };
 
     auto ExpectSetValidationDispatch = [&](CommandIterator* commands) {
@@ -323,6 +326,55 @@ TEST_F(CommandBufferEncodingTests, StateNotLeakedAfterRestore) {
 
     // Expect no pipeline
     EXPECT_FALSE(stateTracker->HasPipeline());
+}
+
+// Restoring state replays owned immediate values, including partial updates and sparse ranges.
+TEST_F(CommandBufferEncodingTests, RestoreUserImmediates) {
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+
+    std::array<uint32_t, kMaxImmediateDataBytes / sizeof(uint32_t)> expectedData = {0, 25, 128, 240,
+                                                                                    255};
+    expectedData.back() = 99;
+    pass.SetImmediates(sizeof(uint32_t), &expectedData[1], 4 * sizeof(uint32_t));
+    expectedData[2] = 73;
+    pass.SetImmediates(2 * sizeof(uint32_t), &expectedData[2], sizeof(uint32_t));
+    pass.SetImmediates(kMaxImmediateDataBytes - sizeof(uint32_t), &expectedData.back(),
+                       sizeof(uint32_t));
+
+    CommandBufferStateTracker snapshot =
+        *FromAPI(pass.Get())->GetCommandBufferStateTrackerForTesting();
+
+    std::array<uint32_t, kMaxImmediateDataBytes / sizeof(uint32_t)> actualData = {};
+    ByteSpanFromRef(actualData).CopyFrom(snapshot.GetImmediateData());
+    EXPECT_EQ(actualData, expectedData);
+
+    std::array<uint32_t, kMaxImmediateDataBytes / sizeof(uint32_t)> internalData;
+    internalData.fill(0xDEADBEEF);
+    pass.SetImmediates(0, internalData.data(), sizeof(internalData));
+    FromAPI(pass.Get())->RestoreCommandBufferStateForTesting(std::move(snapshot));
+    ByteSpanFromRef(actualData)
+        .CopyFrom(
+            FromAPI(pass.Get())->GetCommandBufferStateTrackerForTesting()->GetImmediateData());
+    EXPECT_EQ(actualData, expectedData);
+    pass.End();
+
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    CommandIterator* commands = FromAPI(commandBuffer.Get())->GetCommandIteratorForTesting();
+    Command command;
+    while (commands->NextCommandId(&command)) {
+        if (command == Command::SetImmediates) {
+            const auto* cmd = commands->NextCommand<SetImmediatesCmd>();
+            auto data = commands->NextData<const std::byte>(cmd->size);
+            ByteSpanFromRef(actualData).subspan(cmd->offset, cmd->size).CopyFrom(data);
+        } else {
+            SkipCommand(commands, command);
+        }
+    }
+
+    expectedData.front() = internalData.front();
+    std::fill(expectedData.begin() + 5, expectedData.end() - 1, internalData.front());
+    EXPECT_EQ(actualData, expectedData);
 }
 
 // Regression test for crbug.com/405316877.
@@ -514,6 +566,53 @@ TEST(BufferTextureCopyOversizedRowTests, NeedsSplit) {
     EXPECT_TRUE(
         NeedsBufferTextureCopySplitForOversizedRow(MakeCopy(64, 0x0010'0000), kMultiSlice, kRGBA8));
     EXPECT_TRUE(NeedsBufferTextureCopySplitForOversizedRow(MakeCopy(0xFFFF'FFFFu / 4, 0xFFFF'FFFFu),
+                                                           kMultiSlice, kRGBA8));
+}
+
+// Directly test the `TexelCopyBufferLayout` overload of
+// `NeedsBufferTextureCopySplitForOversizedRow`, including non-block-aligned `bytesPerRow`.
+TEST(BufferTextureCopyOversizedRowTests, NeedsSplitLayout) {
+    constexpr TypedTexelBlockInfo kBlock32B{32, TexelCount{1u}, TexelCount{1u}};
+    constexpr TypedTexelBlockInfo kRGBA32{16, TexelCount{1u}, TexelCount{1u}};
+    constexpr TypedTexelBlockInfo kRGBA8{4, TexelCount{1u}, TexelCount{1u}};
+    constexpr TypedTexelBlockInfo kR8{1, TexelCount{1u}, TexelCount{1u}};
+    constexpr BlockExtent3D kSingleSlice{BlockCount{2u}, BlockCount{2u}, BlockCount{1u}};
+    constexpr BlockExtent3D kMultiSlice{BlockCount{2u}, BlockCount{2u}, BlockCount{2u}};
+
+    auto MakeLayout = [](uint32_t bytesPerRow, uint32_t rowsPerImage) {
+        TexelCopyBufferLayout layout = {};
+        layout.bytesPerRow = bytesPerRow;
+        layout.rowsPerImage = rowsPerImage;
+        return layout;
+    };
+
+    // bytesPerRow (256 KiB == 1u << 18) and texelsPerRow (16384, including non-block-aligned
+    // `16383 * 4 + 1` which rounds up to 16384 RGBA8 blocks).
+    EXPECT_FALSE(NeedsBufferTextureCopySplitForOversizedRow(MakeLayout((1u << 18) - 32, 2),
+                                                            kSingleSlice, kBlock32B));
+    EXPECT_TRUE(NeedsBufferTextureCopySplitForOversizedRow(MakeLayout((1u << 18) - 31, 2),
+                                                           kSingleSlice, kBlock32B));
+    EXPECT_FALSE(NeedsBufferTextureCopySplitForOversizedRow(MakeLayout((1u << 18) - 16, 2),
+                                                            kSingleSlice, kRGBA32));
+    EXPECT_TRUE(
+        NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(1u << 18, 2), kSingleSlice, kRGBA32));
+    EXPECT_FALSE(
+        NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(16383, 2), kSingleSlice, kR8));
+    EXPECT_TRUE(
+        NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(16384, 2), kSingleSlice, kR8));
+    EXPECT_FALSE(
+        NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(16383 * 4, 2), kSingleSlice, kRGBA8));
+    EXPECT_TRUE(NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(16383 * 4 + 1, 2),
+                                                           kSingleSlice, kRGBA8));
+
+    // Multi-slice bytesPerImage threshold (256 MiB == 256 * 2^20) and max `uint32_t` strides.
+    EXPECT_FALSE(NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(256, 0x0010'0000),
+                                                            kSingleSlice, kRGBA8));
+    EXPECT_FALSE(NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(256, 0x000F'FFFF),
+                                                            kMultiSlice, kRGBA8));
+    EXPECT_TRUE(NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(256, 0x0010'0000),
+                                                           kMultiSlice, kRGBA8));
+    EXPECT_TRUE(NeedsBufferTextureCopySplitForOversizedRow(MakeLayout(0xFFFF'FFFFu, 0xFFFF'FFFFu),
                                                            kMultiSlice, kRGBA8));
 }
 

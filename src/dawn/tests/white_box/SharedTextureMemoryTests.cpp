@@ -1173,6 +1173,11 @@ TEST_P(SharedTextureMemoryTests, EndAccessAfterFailedSubmitThenDeviceDestroyed) 
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia() &&
                           GetParam().mBackend->Name().find("dma buf") != std::string::npos);
 
+    // TODO(crbug.com/413053623): DeviceWGPU registers its inner deviceLostCallbackInfo with
+    // WGPUCallbackMode_AllowProcessEvents and never calls instanceProcessEvents on its inner
+    // instance, so inner device loss is never forwarded to the outer WebGPU device.
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::Device testDevice = CreateDevice();
     // Only use memories that can be rendered to so that the submit uses them. Skip multiplanar
     // formats since they must be initialized on BeginAccess and rendering to them requires
@@ -1217,8 +1222,11 @@ TEST_P(SharedTextureMemoryTests, EndAccessAfterFailedSubmitThenDeviceDestroyed) 
     // used by the failed submit, but never had an export semaphore/fence created for them.
     native::EnableErrorInjector();
     native::InjectErrorAt(0u);
-    EXPECT_DEVICE_LOSS_ON(
-        testDevice, testDevice.GetQueue().Submit(commandBuffers.size(), commandBuffers.data()));
+    EXPECT_DEVICE_LOSS_ON(testDevice, {
+        testDevice.GetQueue().Submit(commandBuffers.size(), commandBuffers.data());
+        // QueueMTL injects errors asynchronously in CompletedHandler rather than during Submit().
+        WaitForAllOperations();
+    });
     native::DisableErrorInjector();
     native::ClearErrorInjector();
     EXPECT_TRUE(memories[0].IsDeviceLost());

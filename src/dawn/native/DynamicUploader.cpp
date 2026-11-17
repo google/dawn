@@ -50,8 +50,9 @@ ResultOrError<UploadReservation> DynamicUploader::Reserve(uint64_t allocationSiz
     DAWN_ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
     uint64_t alignedAllocationSize = Align(allocationSize, 8);
 
-    // Disable further sub-allocation should the request be too large.
-    if (allocationSize > kRingBufferSize) {
+    // Disable further sub-allocation should the request be too large or if the backend does not
+    // support persistently mapped staging ring buffers.
+    if (allocationSize > kRingBufferSize || !mDevice->SupportsPersistentlyMappedStagingBuffer()) {
         BufferDescriptor bufferDesc = {};
         bufferDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
         bufferDesc.size = alignedAllocationSize;

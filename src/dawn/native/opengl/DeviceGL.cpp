@@ -507,8 +507,37 @@ MaybeError Device::CopyFromStagingToTextureImpl(BufferBase* source,
                                                 const TexelCopyBufferLayout& src,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
-    // If implemented, be sure to call SynchronizeTextureBeforeUse on the destination texture.
-    return DAWN_UNIMPLEMENTED_ERROR("Device unable to copy from staging buffer to texture.");
+    // TODO(crbug.com/586941722): Make Unmap/UseInternal happen automatically.
+    DAWN_TRY(source->Unmap());
+    auto scopedUseBuffer = source->UseInternal();
+    ToBackend(source)->TrackUsage();
+
+    Texture* texture = ToBackend(dst.texture.Get());
+    DAWN_TRY(texture->SynchronizeTextureBeforeUse());
+
+    SubresourceRange range = GetSubresourcesAffectedByCopy(dst, copySizePixels);
+    bool ensureInitialized = false;
+    if (IsCompleteSubresourceCopiedTo(texture, copySizePixels, dst.mipLevel, dst.aspect)) {
+        texture->SetIsSubresourceContentInitialized(true, range);
+    } else {
+        ensureInitialized = true;
+    }
+
+    return EnqueueGL([ensureInitialized, buffer = Ref<Buffer>(ToBackend(source)),
+                      texture = Ref<Texture>(texture), range, dst, src,
+                      copySizePixels](const OpenGLFunctions& gl) -> MaybeError {
+        if (ensureInitialized) {
+            DAWN_TRY(texture->EnsureSubresourceContentInitialized(gl, range));
+        }
+        DAWN_GL_TRY(gl, BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->GetHandle()));
+        TexelCopyBufferLayout dataLayout = src;
+        dataLayout.offset = 0;
+        DAWN_TRY(DoTexSubImage(gl, dst,
+                               reinterpret_cast<const void*>(static_cast<uintptr_t>(src.offset)),
+                               dataLayout, copySizePixels));
+        DAWN_GL_TRY(gl, BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0));
+        return {};
+    });
 }
 
 void Device::DestroyImpl(DestroyReason reason) {

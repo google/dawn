@@ -417,7 +417,7 @@ struct SetBindGroupCmd {
 
     BindGroupIndex index = BindGroupIndex(0u);
     Ref<BindGroupBase> group;
-    BindingIndex dynamicOffsetCount = BindingIndex{0u};
+    DynamicOffsetsIndex dynamicOffsetCount{};
 };
 
 struct SetImmediatesCmd {

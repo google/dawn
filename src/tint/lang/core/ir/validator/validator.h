@@ -77,6 +77,7 @@
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/swizzle_view.h"
 #include "src/tint/lang/core/type/type.h"
+#include "src/tint/utils/containers/function_ref.h"
 #include "src/tint/utils/containers/hashset.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result.h"
@@ -373,43 +374,42 @@ class Validator {
 
     /// NOTE: Expects to be called on a 'root' type, i.e. the type of a variable declaration or a
     ///       function param, not in the middle a walk of elements of a composite.
-    void CheckType(const core::type::Type* root, std::function<diag::Diagnostic&()> diag);
-    bool CheckStruct(const core::type::Struct* str, std::function<diag::Diagnostic&()>& diag);
+    void CheckType(const core::type::Type* root, FunctionRef<diag::Diagnostic&()> diag);
+    bool CheckStruct(const core::type::Struct* str, FunctionRef<diag::Diagnostic&()> diag);
     bool CheckRef(const core::type::Reference* ref,
-                  std::function<diag::Diagnostic&()>& diag,
+                  FunctionRef<diag::Diagnostic&()> diag,
                   const core::type::Type* root);
-    bool CheckPtr(const core::type::Pointer* ptr, std::function<diag::Diagnostic&()>& diag);
-    bool CheckSwizzleView(const core::type::SwizzleView* sv,
-                          std::function<diag::Diagnostic&()>& diag);
-    bool CheckArray(const core::type::Array* arr, std::function<diag::Diagnostic&()>& diag);
-    bool CheckVector(const core::type::Vector* vec, std::function<diag::Diagnostic&()>& diag);
-    bool CheckMatrix(const core::type::Matrix* mat, std::function<diag::Diagnostic&()>& diag);
-    bool CheckAtomic(const core::type::Atomic* atom, std::function<diag::Diagnostic&()>& diag);
+    bool CheckPtr(const core::type::Pointer* ptr, FunctionRef<diag::Diagnostic&()> diag);
+    bool CheckSwizzleView(const core::type::SwizzleView* sv, FunctionRef<diag::Diagnostic&()> diag);
+    bool CheckArray(const core::type::Array* arr, FunctionRef<diag::Diagnostic&()> diag);
+    bool CheckVector(const core::type::Vector* vec, FunctionRef<diag::Diagnostic&()> diag);
+    bool CheckMatrix(const core::type::Matrix* mat, FunctionRef<diag::Diagnostic&()> diag);
+    bool CheckAtomic(const core::type::Atomic* atom, FunctionRef<diag::Diagnostic&()> diag);
     bool CheckSampledTexture(const core::type::SampledTexture* s,
-                             std::function<diag::Diagnostic&()>& diag);
+                             FunctionRef<diag::Diagnostic&()> diag);
     bool CheckMultisampledTexture(const core::type::MultisampledTexture* ms,
-                                  std::function<diag::Diagnostic&()>& diag);
+                                  FunctionRef<diag::Diagnostic&()> diag);
     bool CheckStorageTexture(const core::type::StorageTexture* storage,
-                             std::function<diag::Diagnostic&()>& diag);
+                             FunctionRef<diag::Diagnostic&()> diag);
     bool CheckInputAttachment(const core::type::InputAttachment* ia,
-                              std::function<diag::Diagnostic&()>& diag);
+                              FunctionRef<diag::Diagnostic&()> diag);
     bool CheckSubgroupMatrix(const core::type::SubgroupMatrix* m,
-                             std::function<diag::Diagnostic&()>& diag,
+                             FunctionRef<diag::Diagnostic&()> diag,
                              core::AddressSpace addrspace);
     bool CheckBindingArray(const core::type::BindingArray* ba,
-                           std::function<diag::Diagnostic&()>& diag,
+                           FunctionRef<diag::Diagnostic&()> diag,
                            core::AddressSpace addrspace);
-    bool CheckBuffer(const core::type::Buffer* buf, std::function<diag::Diagnostic&()>& diag);
+    bool CheckBuffer(const core::type::Buffer* buf, FunctionRef<diag::Diagnostic&()> diag);
 
-    bool Check8BitInteger(std::function<diag::Diagnostic&()>& diag, const core::type::Type* parent);
-    bool Check16BitInteger(std::function<diag::Diagnostic&()>& diag);
-    bool Check64BitInteger(std::function<diag::Diagnostic&()>& diag);
-    bool Check16BitFloat(std::function<diag::Diagnostic&()>& diag);
-    bool Check16BitBFloat(std::function<diag::Diagnostic&()>& diag, const core::type::Type* parent);
+    bool Check8BitInteger(FunctionRef<diag::Diagnostic&()> diag, const core::type::Type* parent);
+    bool Check16BitInteger(FunctionRef<diag::Diagnostic&()> diag);
+    bool Check64BitInteger(FunctionRef<diag::Diagnostic&()> diag);
+    bool Check16BitFloat(FunctionRef<diag::Diagnostic&()> diag);
+    bool Check16BitBFloat(FunctionRef<diag::Diagnostic&()> diag, const core::type::Type* parent);
 
     /// NOTE: Expects to be called by CheckType, i.e. on a 'root' type, not in the middle a walk of
     ///       elements of a composite..
-    bool CheckNestDepth(const core::type::Type* type, std::function<diag::Diagnostic&()> diag);
+    bool CheckNestDepth(const core::type::Type* type, FunctionRef<diag::Diagnostic&()> diag);
 
     void CheckRootBlock(const Block* blk);
     void CheckOnlyUsedInRootBlock(const Instruction* inst);
@@ -437,7 +437,7 @@ class Validator {
                                      const IOAttributes& attr,
                                      ShaderIOKind kind);
     bool CheckStructMemberAttributes(const core::type::StructMember* member,
-                                     std::function<diag::Diagnostic&()> make_diag);
+                                     FunctionRef<diag::Diagnostic&()> make_diag);
 
     void CheckNotBool(const Value* msg_anchor, const core::type::Type* ty, const std::string& err);
     void CheckPositionPresentForVertexOutput(const Function* ep);

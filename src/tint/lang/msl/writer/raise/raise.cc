@@ -251,6 +251,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
                 cfg.skip_bindings.insert(bp);
             }
         }
+        if (options.resource_table) {
+            cfg.skip_bindings.insert(options.resource_table->resource_table_binding);
+            cfg.skip_bindings.insert(options.resource_table->storage_buffer_binding);
+        }
         TINT_CHECK_RESULT(raise::ArgumentBuffers(module, cfg));
     }
 

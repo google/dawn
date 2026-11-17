@@ -202,6 +202,11 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
 
     bool IsMultisampledTexture() const;
 
+    // Whether the memory backing this texture can be used as a resolve target. Backends may not
+    // be able to resolve into imported memory whose native format differs from the texture's
+    // format.
+    virtual bool BackingMemorySupportsResolveTarget() const;
+
     // Returns true if the size covers the whole subresource.
     bool CoversFullSubresource(uint32_t mipLevel, Aspect aspect, const TexelExtent3D& size) const;
 

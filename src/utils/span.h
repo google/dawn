@@ -662,6 +662,23 @@ constexpr auto ReinterpretSpan(detail::SpanBase<ByteType, size_t, PtrType, ByteE
     return detail::ReinterpretSpanImpl<T, Index>(s);
 }
 
+// CastIntSpan<DstElementType>(span) safely converts between a span of TypedInteger<Tag, T> and a
+// span of its underlying type T.
+template <typename Dst, typename Src, typename Index, typename PtrType, Index Extent>
+    requires(
+        // - Both types have the same underlying integer type.
+        std::is_same_v<UnderlyingType<std::remove_cv_t<Src>>,
+                       UnderlyingType<std::remove_cv_t<Dst>>> &&
+        // - Exactly one of the types is an actual integer.
+        std::integral<std::remove_cv_t<Src>> != std::integral<std::remove_cv_t<Dst>>)
+constexpr auto CastIntSpan(detail::SpanBase<Src, Index, PtrType, Extent> s) {
+    if constexpr (std::is_const_v<Dst>) {
+        return ReinterpretSpan<Dst, Index>(SpanAsBytes(s));
+    } else {
+        return ReinterpretSpan<Dst, Index>(SpanAsWritableBytes(s));
+    }
+}
+
 // Converts a `[const] T&` to a `Span<[const] T, 1>`.
 // Mirrors Chromium's base::span_from_ref.
 template <typename Index = size_t, typename T>

@@ -111,13 +111,14 @@ bool CheckAllSlotsAreEmpty(const ScopedSwapStateCommandRecordingContext* command
     return true;
 }
 
-BufferBinding ExtractBufferBindingInfo(BindGroupBase* group,
-                                       BindingIndex bindingIndex,
-                                       const BufferBindingInfo& layout,
-                                       const ityp::span<BindingIndex, uint32_t>& dynamicOffsets) {
+BufferBinding ExtractBufferBindingInfo(
+    BindGroupBase* group,
+    BindingIndex bindingIndex,
+    const BufferBindingInfo& layout,
+    ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets) {
     BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
     if (layout.hasDynamicOffset) {
-        binding.offset += dynamicOffsets[bindingIndex];
+        binding.offset += uint32_t{dynamicOffsets[BindingIndexToDynamicOffsetsIndex(bindingIndex)]};
     }
 
     return binding;
@@ -331,7 +332,7 @@ ResultOrError<std::tuple<ID3D11Buffer*, UINT, UINT>> BindGroupTracker::GetConsta
     BindGroupBase* group,
     BindingIndex bindingIndex,
     const BufferBindingInfo& layout,
-    const ityp::span<BindingIndex, uint32_t>& dynamicOffsets) {
+    ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets) {
     BufferBinding binding = ExtractBufferBindingInfo(group, bindingIndex, layout, dynamicOffsets);
 
     ID3D11Buffer* d3d11Buffer;
@@ -367,7 +368,8 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
     constexpr wgpu::ShaderStage kVisibleCompute = wgpu::ShaderStage::Compute & kVisibleStage;
 
     BindGroupBase* group = mBindGroups[index];
-    const ityp::span<BindingIndex, uint32_t>& dynamicOffsets = GetDynamicOffsets(index);
+    ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets =
+        GetDynamicOffsets(index);
     const auto& indices = ToBackend(mPipeline->GetLayout())->GetBindingTableIndexMap()[index];
 
     for (BindingIndex bindingIndex : Range(group->GetLayout()->GetBindingCount())) {
@@ -675,7 +677,8 @@ MaybeError RenderPassBindGroupTracker::Apply() {
 
     for (BindGroupIndex index : uavBindGroups) {
         BindGroupBase* group = mBindGroups[index];
-        const ityp::span<BindingIndex, uint32_t>& dynamicOffsets = GetDynamicOffsets(index);
+        ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets =
+            GetDynamicOffsets(index);
         const auto& indices = pipelineLayout->GetBindingTableIndexMap()[index];
 
         // D3D11 uav slot allocated in reverse order.

@@ -35,7 +35,6 @@
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -249,12 +248,12 @@ TEST_P(GLTextureValidationTests, InvalidHeight) {
 class GLTextureUsageTests : public GLTextureTestBase {
   public:
     // Test that clearing using BeginRenderPass writes correct data in the GL texture.
+    template <class T>
     void DoClearTest(GLuint texture,
                      wgpu::TextureFormat format,
                      GLenum glFormat,
                      GLenum glType,
-                     void* data,
-                     size_t dataSize) {
+                     T data) {
         const native::opengl::OpenGLFunctions& gl = mSecondDeviceGL->GetGL();
 
         // Get a texture view for the GL texture.
@@ -289,16 +288,16 @@ class GLTextureUsageTests : public GLTextureTestBase {
         queue.Submit(1, &commands);
 
         // Check the correct data was written
-        std::vector<uint8_t> result(dataSize);
+        T result;
         GLuint fbo;
         gl.GenFramebuffers(1, &fbo);
         gl.BindFramebuffer(GL_FRAMEBUFFER, fbo);
         gl.FramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture,
                                 0);
-        gl.ReadPixels(0, 0, 1, 1, glFormat, glType, result.data());
+        gl.ReadPixels(0, 0, 1, 1, glFormat, glType, &result);
         gl.BindFramebuffer(GL_FRAMEBUFFER, 0);
         gl.DeleteFramebuffers(1, &fbo);
-        DAWN_UNSAFE_TODO(ASSERT_EQ(0, memcmp(result.data(), data, dataSize)));
+        ASSERT_EQ(data, result);
     }
 
     template <class T>
@@ -387,8 +386,7 @@ TEST_P(GLTextureUsageTests, ClearR8GLTexture) {
     ScopedGLTexture glTexture = CreateGLTexture(1, 1, GL_R8, GL_RED, GL_UNSIGNED_BYTE, nullptr);
 
     uint8_t data = 0x01;
-    DoClearTest(glTexture.Get(), wgpu::TextureFormat::R8Unorm, GL_RED, GL_UNSIGNED_BYTE, &data,
-                sizeof(data));
+    DoClearTest(glTexture.Get(), wgpu::TextureFormat::R8Unorm, GL_RED, GL_UNSIGNED_BYTE, data);
 }
 
 // Test clearing a RG8 GL texture
@@ -396,8 +394,7 @@ TEST_P(GLTextureUsageTests, ClearRG8GLTexture) {
     ScopedGLTexture glTexture = CreateGLTexture(1, 1, GL_RG8, GL_RG, GL_UNSIGNED_BYTE, nullptr);
 
     uint16_t data = 0x0201;
-    DoClearTest(glTexture.Get(), wgpu::TextureFormat::RG8Unorm, GL_RG, GL_UNSIGNED_BYTE, &data,
-                sizeof(data));
+    DoClearTest(glTexture.Get(), wgpu::TextureFormat::RG8Unorm, GL_RG, GL_UNSIGNED_BYTE, data);
 }
 
 // Test clearing an RGBA8 GL texture
@@ -405,8 +402,7 @@ TEST_P(GLTextureUsageTests, ClearRGBA8GLTexture) {
     ScopedGLTexture glTexture = CreateGLTexture(1, 1, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
     uint32_t data = 0x04030201;
-    DoClearTest(glTexture.Get(), wgpu::TextureFormat::RGBA8Unorm, GL_RGBA, GL_UNSIGNED_BYTE, &data,
-                sizeof(data));
+    DoClearTest(glTexture.Get(), wgpu::TextureFormat::RGBA8Unorm, GL_RGBA, GL_UNSIGNED_BYTE, data);
 }
 
 // Test sampling an imported R8 GL texture

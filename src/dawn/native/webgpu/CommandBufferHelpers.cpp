@@ -31,6 +31,7 @@
 
 #include "src/dawn/native/CommandAllocator.h"
 #include "src/dawn/native/Commands.h"
+#include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/webgpu/BindGroupWGPU.h"
 #include "src/dawn/native/webgpu/BufferWGPU.h"
 #include "src/dawn/native/webgpu/CaptureContext.h"
@@ -38,6 +39,7 @@
 #include "src/dawn/native/webgpu/RenderBundleWGPU.h"
 #include "src/dawn/native/webgpu/RenderPipelineWGPU.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn::native::webgpu {
 
@@ -45,17 +47,17 @@ void CaptureSharedCommand(CaptureContext& captureContext, CommandIterator& comma
     switch (type) {
         case Command::SetBindGroup: {
             const auto& cmd = *commands.NextCommand<SetBindGroupCmd>();
-            ityp::span<BindingIndex, const uint32_t> dynamicOffsets;
-            if (cmd.dynamicOffsetCount != BindingIndex{0u}) {
-                dynamicOffsets = commands.NextData<uint32_t>(cmd.dynamicOffsetCount);
+            ityp::span<DynamicOffsetsIndex, const BufferDynamicOffset> dynamicOffsets;
+            if (cmd.dynamicOffsetCount != DynamicOffsetsIndex{0u}) {
+                dynamicOffsets = commands.NextData<BufferDynamicOffset>(cmd.dynamicOffsetCount);
             }
 
+            auto rawOffsets = CastIntSpan<const uint32_t>(dynamicOffsets);
             schema::CommandBufferCommandSetBindGroupCmd data{{
                 .data = {{
                     .index = uint32_t{cmd.index},
                     .bindGroupId = captureContext.GetId(cmd.group),
-                    .dynamicOffsets =
-                        std::vector<uint32_t>(dynamicOffsets.begin(), dynamicOffsets.end()),
+                    .dynamicOffsets = std::vector<uint32_t>(rawOffsets.begin(), rawOffsets.end()),
                 }},
             }};
             Serialize(captureContext, data);
@@ -234,8 +236,8 @@ MaybeError GatherReferencedResourcesFromRenderCommand(CaptureContext& captureCon
         }
         case Command::SetBindGroup: {
             auto cmd = commands.NextCommand<SetBindGroupCmd>();
-            if (cmd->dynamicOffsetCount > BindingIndex{0u}) {
-                commands.NextData<uint32_t>(cmd->dynamicOffsetCount);
+            if (cmd->dynamicOffsetCount > DynamicOffsetsIndex{0u}) {
+                commands.NextData<BufferDynamicOffset>(cmd->dynamicOffsetCount);
             }
             usedResources.bindGroups.push_back(cmd->group.Get());
             break;

@@ -101,6 +101,14 @@ TEST_F(TextureValidationTest, UsageNonZero) {
 
         ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
     }
+
+    // It is an error to create a texture with invalid usage bits (including high 32-bit bits)
+    {
+        descriptor.usage =
+            wgpu::TextureUsage::RenderAttachment | static_cast<wgpu::TextureUsage>(1ull << 32);
+
+        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    }
 }
 
 // Test the validation of sample count

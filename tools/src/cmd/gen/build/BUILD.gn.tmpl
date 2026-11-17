@@ -75,7 +75,11 @@ test("{{$.OutputName}}") {
 test("bench_cmd") {
   testonly = true
 {{- else if $.Kind.IsFuzzCmd -}}
+{{-   if $.Dependencies.ContainsExternal "fuzztest" -}}
+tint_fuzztest_fuzzer("{{$.Directory.Name}}") {
+{{-   else -}}
 tint_fuzzer_test("{{$.Directory.Name}}") {
+{{-   end -}}
 {{- else }}{{Error $.Kind}}
 {{- end  }}
 {{- if $.OutputName }}
@@ -192,6 +196,8 @@ tint_fuzzer_test("{{$.Directory.Name}}") {
 {{-   else if eq $.Name "dl"                             -}}"${tint_src_dir}:dl",
 {{-   else if eq $.Name "dxc-include"                    -}}"${tint_src_dir}:dxc-include",
 {{-   else if eq $.Name "dxcompiler-for-fuzzer"          -}}"${tint_src_dir}:dxcompiler-for-fuzzer",
+{{-   else if eq $.Name "fuzztest"                       -}}"${tint_src_dir}:fuzztest",
+{{-   else if eq $.Name "fuzztest_wgsl_grammar"          -}}"${tint_src_dir}:tint_wgsl_fuzzer_grammar",
 {{-   else if eq $.Name "glslang-res-limits"             -}}"${tint_glslang_dir}:glslang_default_resource_limits_sources",
 {{-   else if eq $.Name "glslang"                        -}}"${tint_glslang_dir}:glslang_lib_sources",
 {{-   else if eq $.Name "google-benchmark"               -}}"${tint_src_dir}:google_benchmark",

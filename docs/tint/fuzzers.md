@@ -92,6 +92,34 @@ fuzzing pass and passing it to Mesa's software Vulkan driver
      but setting both explicitly is required by tools such as
      `tools/run fuzz experiment`).
 
+### Building FuzzTest prototype fuzzers
+
+Tint includes experimental [FuzzTest](https://github.com/google/fuzztest)
+prototype targets built in libFuzzer compatibility mode alongside the existing
+libFuzzer binaries. These targets are disabled by default and are not run on
+ClusterFuzz.
+
+1. Ensure dependencies are synced (for example via `gclient sync`).
+
+2. Enable the FuzzTest prototype build flag in addition to the base fuzzer
+   flags above:
+
+   - CMake: Define `TINT_BUILD_FUZZTEST=1` alongside `TINT_BUILD_FUZZERS=1`
+     (pass `-DTINT_BUILD_FUZZERS=1 -DTINT_BUILD_FUZZTEST=1` to `cmake`;
+     requires the Clang toolchain).
+   - GN: Define `tint_build_fuzztest = true` alongside `use_libfuzzer = true` in
+     `args.gn`.
+
+3. Build and verify the prototype FuzzTest binary (`tint_stub_fuzztest`):
+
+   ```bash
+   # List available fuzz tests in the binary:
+   out/Fuzzer/tint_stub_fuzztest --list_fuzz_tests=true
+
+   # Run a specific fuzz test in libFuzzer compatibility mode:
+   out/Fuzzer/tint_stub_fuzztest --fuzz=StubFuzzTest.WgslGrammar -runs=100
+   ```
+
 ## Running fuzzers
 
 ### Local fuzzing

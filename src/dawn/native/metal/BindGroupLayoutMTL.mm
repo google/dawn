@@ -31,6 +31,7 @@
 
 #include "src/dawn/common/MatchVariant.h"
 #include "src/dawn/native/Device.h"
+#include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/TintUtils.h"
 #include "src/dawn/native/metal/BindGroupMTL.h"
 #include "src/dawn/native/metal/DeviceMTL.h"
@@ -129,7 +130,7 @@ MutexProtected<NSPRef<id<MTLArgumentEncoder>>>& BindGroupLayout::GetArgumentEnco
 
 void BindGroupLayout::FillTintArgumentBufferInfo(
     tint::msl::writer::ArgumentBufferInfo& info) const {
-    uint32_t curDynamicOffset = 0;
+    DynamicOffsetsIndex curDynamicOffsetsIndex;
 
     for (const BindingIndex bindingIndex : Range(GetBindingCount())) {
         const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
@@ -141,7 +142,7 @@ void BindGroupLayout::FillTintArgumentBufferInfo(
         if (const auto* binding = std::get_if<BufferBindingInfo>(&bindingInfo.bindingLayout)) {
             if (binding->hasDynamicOffset) {
                 info.binding_info_to_offset_index.insert(
-                    {uint32_t(bindingIndex), curDynamicOffset++});
+                    {uint32_t{bindingIndex}, uint32_t{curDynamicOffsetsIndex++}});
             }
         }
         info.struct_members.push_back({

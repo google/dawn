@@ -83,6 +83,7 @@ class Device final : public d3d::Device {
                                             const TexelCopyBufferLayout& src,
                                             const TextureCopy& dst,
                                             const Extent3D& copySizePixels) override;
+    bool SupportsPersistentlyMappedStagingBuffer() const override { return false; }
     uint32_t GetOptimalBytesPerRowAlignment() const override;
     uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;
     float GetTimestampPeriodInNS() const override;
