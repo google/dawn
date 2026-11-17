@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "src/utils/platform.h"
+
 #if !DAWN_PLATFORM_IS(EMSCRIPTEN)
 #error "This file is only valid when compiling with Emscripten."
 #endif
