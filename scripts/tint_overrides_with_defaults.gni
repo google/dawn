@@ -158,6 +158,11 @@ declare_args() {
     tint_build_fuzzers = use_fuzzing_engine
   }
 
+  # Enable building prototype FuzzTest fuzzers
+  if (!defined(tint_build_fuzztest)) {
+    tint_build_fuzztest = false
+  }
+
   # Enable building Mesa as part of Tint fuzzers
   if (!defined(tint_build_mesa)) {
     tint_build_mesa = false

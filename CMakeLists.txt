@@ -197,6 +197,8 @@ set_if_not_defined(DAWN_KHRONOS_DIR "${DAWN_THIRD_PARTY_DIR}/khronos" "Directory
 set_if_not_defined(DAWN_SWIFTSHADER_DIR "${DAWN_THIRD_PARTY_DIR}/swiftshader" "Directory in which to find swiftshader")
 set_if_not_defined(DAWN_PROTOBUF_DIR "${DAWN_THIRD_PARTY_DIR}/protobuf" "Directory in which to find protobuf")
 set_if_not_defined(DAWN_LPM_DIR "${DAWN_THIRD_PARTY_DIR}/libprotobuf-mutator/src" "Directory in which to find libprotobuf")
+set_if_not_defined(DAWN_FUZZTEST_DIR "${DAWN_THIRD_PARTY_DIR}/fuzztest/src" "Directory in which to find fuzztest")
+set_if_not_defined(DAWN_RE2_DIR "${DAWN_THIRD_PARTY_DIR}/re2/src" "Directory in which to find re2")
 set_if_not_defined(DAWN_EMDAWNWEBGPU_DIR "${DAWN_THIRD_PARTY_DIR}/emdawnwebgpu" "Directory in which to find Dawn specific Emscripten bindings")
 set_if_not_defined(DAWN_GOOGLETEST_DIR "${DAWN_THIRD_PARTY_DIR}/googletest/src" "Directory in which to find googletest")
 set_if_not_defined(DAWN_EGL_REGISTRY_DIR "${DAWN_THIRD_PARTY_DIR}/EGL-Registry/src" "Directory in which to find EGL-Registry")
@@ -259,6 +261,7 @@ option(TINT_BUILD_NULL_WRITER "Build the NULL output writer" ${DAWN_ENABLE_NULL}
 
 option(TINT_BUILD_IR_BINARY "Build IR binary format support" ${DAWN_BUILD_PROTOBUF})
 option(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
+option(TINT_BUILD_FUZZTEST "Build prototype FuzzTest fuzzers" OFF)
 option(TINT_BUILD_FUZZER_VULKAN_SUPPORT "Build fuzzing Vulkan drivers" OFF)
 option(TINT_BUILD_BENCHMARKS "Build Tint benchmarks" OFF)
 option(TINT_BUILD_TESTS "Build tests" ON)
@@ -353,6 +356,7 @@ message(STATUS "Tint build command line executable tools: ${TINT_BUILD_CMD_TOOLS
 message(STATUS "Tint install: ${TINT_ENABLE_INSTALL}")
 message(STATUS "Tint build IR binary: ${TINT_BUILD_IR_BINARY}")
 message(STATUS "Tint build fuzzers: ${TINT_BUILD_FUZZERS}")
+message(STATUS "Tint build FuzzTest fuzzers: ${TINT_BUILD_FUZZTEST}")
 message(STATUS "Tint build fuzzing vulkan drivers: ${TINT_BUILD_FUZZER_VULKAN_SUPPORT}")
 message(STATUS "Tint build benchmarks: ${TINT_BUILD_BENCHMARKS}")
 message(STATUS "Tint build tests: ${TINT_BUILD_TESTS}")
@@ -388,6 +392,14 @@ message(STATUS "")
 
 if (TINT_BUILD_FUZZER_VULKAN_SUPPORT AND NOT TINT_BUILD_FUZZERS)
     message(FATAL_ERROR "Cannot enable TINT_BUILD_FUZZER_VULKAN_SUPPORT without enabling TINT_BUILD_FUZZERS")
+endif()
+
+if (TINT_BUILD_FUZZTEST AND NOT TINT_BUILD_FUZZERS)
+    message(FATAL_ERROR "Cannot enable TINT_BUILD_FUZZTEST without enabling TINT_BUILD_FUZZERS")
+endif()
+
+if (TINT_BUILD_FUZZTEST AND NOT DAWN_BUILD_PROTOBUF)
+    message(FATAL_ERROR "Cannot enable TINT_BUILD_FUZZTEST without enabling DAWN_BUILD_PROTOBUF")
 endif()
 
 # Much of the backend code is shared among desktop OpenGL and OpenGL ES

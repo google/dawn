@@ -324,6 +324,21 @@ function(tint_fuzz_cmd_compile_options TARGET)
   target_link_libraries(${TARGET} PRIVATE "tint_api_sanitize_fuzzer")
 endfunction()
 
+function(tint_fuzztest_cmd_compile_options TARGET)
+  tint_fuzz_compile_options(${TARGET})
+
+  if(NOT "${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS}" STREQUAL "")
+    target_link_options(${TARGET} PUBLIC ${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS})
+  else()
+    # FuzzTest targets provide their own main() and link Clang's fuzzer_no_main
+    # runtime via the fuzztest target.
+    target_link_options(${TARGET} PUBLIC -fsanitize=fuzzer-no-link -fsanitize-coverage=trace-cmp)
+  endif()
+
+  # Link the version of tint_api with -sanitize=fuzzer enabled
+  target_link_libraries(${TARGET} PRIVATE "tint_api_sanitize_fuzzer")
+endfunction()
+
 # TODO(crbug.com/tint/2223): Remove this when fuzzers are fully migrated to gen build
 function(tint_fuzzer_compile_options TARGET)
   tint_fuzz_cmd_compile_options(${TARGET})
@@ -725,6 +740,25 @@ endif()
 ################################################################################
 if(MSVC)
   target_sources(tint_api PRIVATE tint.natvis)
+endif()
+
+if(TINT_BUILD_FUZZERS AND TINT_BUILD_FUZZTEST)
+  add_executable(tint_stub_fuzztest cmd/fuzz/stub_fuzztest.cc)
+  tint_default_compile_options(tint_stub_fuzztest)
+  tint_fuzztest_cmd_compile_options(tint_stub_fuzztest)
+  target_include_directories(tint_stub_fuzztest PRIVATE ${gtest_SOURCE_DIR}/include)
+  target_link_libraries(tint_stub_fuzztest PRIVATE
+    dawn_shared_utils
+    fuzztest
+    gtest
+  )
+  if(NOT MSVC)
+    target_compile_options(tint_stub_fuzztest PRIVATE
+      -Wno-global-constructors
+      -Wno-exit-time-destructors
+      -Wno-weak-vtables
+    )
+  endif()
 endif()
 
 

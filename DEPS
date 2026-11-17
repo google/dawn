@@ -692,6 +692,16 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
+  'third_party/fuzztest/src': {
+    'url': '{chromium_git}/external/github.com/google/fuzztest.git@a2d3cb097f07a91dd26768db7d9f0898cd42b0f0',
+    'condition': 'dawn_standalone',
+  },
+
+  'third_party/re2/src': {
+    'url': '{chromium_git}/external/github.com/google/re2.git@2da0056814cf180480a19f5cf811e7e1c054bf6d',
+    'condition': 'dawn_standalone',
+  },
+
   # Dependencies for PartitionAlloc.
   # Doc: https://docs.google.com/document/d/1wz45t0alQthsIU9P7_rQcfQyqnrBMXzrOjSzdQo-V-A
   'third_party/partition_alloc': {
