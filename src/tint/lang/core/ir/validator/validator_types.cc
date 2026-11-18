@@ -485,7 +485,8 @@ bool Validator::Check8BitInteger(FunctionRef<diag::Diagnostic&()> diag,
 // They can be used as the component type of a subgroup matrix without the property.
 bool Validator::Check16BitBFloat(FunctionRef<diag::Diagnostic&()> diag,
                                  const core::type::Type* parent) {
-    if (!Is<core::type::SubgroupMatrix>(parent)) {
+    if (!Is<core::type::SubgroupMatrix>(parent) &&
+        !ir_.properties.Contains(Property::kAllow16BitBFloats)) {
         diag() << "bf16 types are not permitted";
         return false;
     }

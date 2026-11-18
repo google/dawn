@@ -404,6 +404,11 @@ class Builder {
     /// @returns the new constant
     ir::Constant* Constant(core::f16 v) { return Constant(ConstantValue(v)); }
 
+    /// Creates a ir::Constant for a bf16 Scalar
+    /// @param v the value
+    /// @returns the new constant
+    ir::Constant* Constant(core::bf16 v) { return Constant(ConstantValue(v)); }
+
     /// Creates a ir::Constant for a bool Scalar
     /// @param v the value
     /// @returns the new constant
@@ -466,6 +471,11 @@ class Builder {
     /// @param v the value
     /// @returns the new constant
     const core::constant::Value* ConstantValue(core::f16 v) { return ir.constant_values.Get(v); }
+
+    /// Creates a core::constant::Value for a bf16 Scalar
+    /// @param v the value
+    /// @returns the new constant
+    const core::constant::Value* ConstantValue(core::bf16 v) { return ir.constant_values.Get(v); }
 
     /// Creates a core::constant::Value for a bool Scalar
     /// @param v the value

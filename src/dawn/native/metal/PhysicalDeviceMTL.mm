@@ -1099,7 +1099,8 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
             }
 
             // TODO(553457823): decide which other matrix configurations to expose.
-            auto configs = HeapArray<SubgroupMatrixConfig>(1);
+            auto configs = HeapArray<SubgroupMatrixConfig>(2);
+
             configs[0].componentType = wgpu::SubgroupMatrixComponentType::F16;
             configs[0].resultComponentType = wgpu::SubgroupMatrixComponentType::F16;
             configs[0].M = 32;
@@ -1108,11 +1109,21 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
             configs[0].minSubgroupSize = GetSubgroupMinSize();
             configs[0].maxSubgroupSize = GetSubgroupMaxSize();
 
+            configs[1].componentType = wgpu::SubgroupMatrixComponentType::Bf16;
+            configs[1].resultComponentType = wgpu::SubgroupMatrixComponentType::Bf16;
+            configs[1].M = 32;
+            configs[1].N = 32;
+            configs[1].K = 32;
+            configs[1].minSubgroupSize = GetSubgroupMinSize();
+            configs[1].maxSubgroupSize = GetSubgroupMaxSize();
+
+            // TODO(555369543): Should we expose bf16 -> f32?
+
             subgroupMatrixConfigs->configs = std::move(configs).MoveToSpan();
         } else {
             DAWN_ASSERT([*mDevice supportsFamily:MTLGPUFamilyApple7]);
 
-            auto configs = HeapArray<SubgroupMatrixConfig>(2);
+            auto configs = HeapArray<SubgroupMatrixConfig>(3);
 
             configs[0].componentType = wgpu::SubgroupMatrixComponentType::F32;
             configs[0].resultComponentType = wgpu::SubgroupMatrixComponentType::F32;
@@ -1129,6 +1140,14 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
             configs[1].K = 8;
             configs[1].minSubgroupSize = GetSubgroupMinSize();
             configs[1].maxSubgroupSize = GetSubgroupMaxSize();
+
+            configs[2].componentType = wgpu::SubgroupMatrixComponentType::Bf16;
+            configs[2].resultComponentType = wgpu::SubgroupMatrixComponentType::Bf16;
+            configs[2].M = 8;
+            configs[2].N = 8;
+            configs[2].K = 8;
+            configs[2].minSubgroupSize = GetSubgroupMinSize();
+            configs[2].maxSubgroupSize = GetSubgroupMaxSize();
 
             subgroupMatrixConfigs->configs = std::move(configs).MoveToSpan();
         }

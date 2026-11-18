@@ -89,6 +89,8 @@ See:
 @group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : array<i32, 1024>;
 {{-     else if eq "u8" $return_element_type -}}
 @group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : array<u32, 1024>;
+{{-     else if eq "bf16" $return_element_type -}}
+@group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : array<f32, 1024>;
 {{-     else -}}
 @group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : array<{{ElementType $overload.ReturnType}}, 1024>;
 {{-     end -}}
@@ -340,6 +342,8 @@ fn vertex_main() -> VertexOutput {
 // [msl] flags: --msl-version 3.2
 {{    else if or (HasPrefix $builtin_name "atomicStoreMax") (HasPrefix $builtin_name "atomicStoreMin") }}
 // [msl] flags: --msl-version 2.4
+{{    else if OverloadUsesType $overload "bf16" }}
+// [msl] flags: --msl-version 3.2
 {{    end -}}
 
 {{- end -}}

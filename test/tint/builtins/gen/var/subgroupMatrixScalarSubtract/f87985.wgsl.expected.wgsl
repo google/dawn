@@ -1,0 +1,15 @@
+enable chromium_experimental_subgroup_matrix, subgroups;
+
+@group(0) @binding(0) var<storage, read_write> prevent_dce : array<f32, 1024>;
+
+fn subgroupMatrixScalarSubtract_f87985() -> subgroup_matrix_right<bf16, 8, 8> {
+  var arg_0 = subgroup_matrix_right<bf16, 8, 8>();
+  var arg_1 = 8.0f;
+  var res : subgroup_matrix_right<bf16, 8, 8> = subgroupMatrixScalarSubtract(arg_0, arg_1);
+  return res;
+}
+
+@compute @workgroup_size(1)
+fn compute_main() {
+  subgroupMatrixStore<row_major>(&(prevent_dce), 0, subgroupMatrixScalarSubtract_f87985(), 16);
+}

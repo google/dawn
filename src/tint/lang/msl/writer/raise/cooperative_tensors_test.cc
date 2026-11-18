@@ -54,6 +54,7 @@ TEST_F(MslWriter_CooperativeTensorsTest, Construct_ZeroValue) {
         b.Construct(ty.subgroup_matrix_result(ty.f16(), 32, 32));
         b.Construct(ty.subgroup_matrix_result(ty.f32(), 16, 32));
         b.Construct(ty.subgroup_matrix_result(ty.u8(), 32, 16));
+        b.Construct(ty.subgroup_matrix_result(ty.bf16(), 32, 16));
         b.Return(ep);
     });
 
@@ -63,6 +64,7 @@ TEST_F(MslWriter_CooperativeTensorsTest, Construct_ZeroValue) {
     %2:subgroup_matrix_result<f16, 32, 32> = construct
     %3:subgroup_matrix_result<f32, 16, 32> = construct
     %4:subgroup_matrix_result<u8, 32, 16> = construct
+    %5:subgroup_matrix_result<bf16, 32, 16> = construct
     ret
   }
 }
@@ -78,6 +80,8 @@ TEST_F(MslWriter_CooperativeTensorsTest, Construct_ZeroValue) {
     %5:void = msl.fill_cooperative_tensor %4, 0.0f
     %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, u8, u8>, read_write> = var undef
     %7:void = msl.fill_cooperative_tensor %6, 0u8
+    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, bf16, bf16>, read_write> = var undef
+    %9:void = msl.fill_cooperative_tensor %8, 0.0bf
     ret
   }
 }
@@ -94,6 +98,7 @@ TEST_F(MslWriter_CooperativeTensorsTest, Construct_WithValue) {
         b.Construct(ty.subgroup_matrix_result(ty.f16(), 32, 32), 1.0_h);
         b.Construct(ty.subgroup_matrix_result(ty.f32(), 16, 32), 2.0_f);
         b.Construct(ty.subgroup_matrix_result(ty.u8(), 32, 16), u8(3));
+        b.Construct(ty.subgroup_matrix_result(ty.bf16(), 32, 16), 1_f);
         b.Return(ep);
     });
 
@@ -103,6 +108,7 @@ TEST_F(MslWriter_CooperativeTensorsTest, Construct_WithValue) {
     %2:subgroup_matrix_result<f16, 32, 32> = construct 1.0h
     %3:subgroup_matrix_result<f32, 16, 32> = construct 2.0f
     %4:subgroup_matrix_result<u8, 32, 16> = construct 3u8
+    %5:subgroup_matrix_result<bf16, 32, 16> = construct 1.0f
     ret
   }
 }
@@ -118,6 +124,9 @@ TEST_F(MslWriter_CooperativeTensorsTest, Construct_WithValue) {
     %5:void = msl.fill_cooperative_tensor %4, 2.0f
     %6:ptr<function, msl.cooperative_tensor_result<16, 32, 32, u8, u8>, read_write> = var undef
     %7:void = msl.fill_cooperative_tensor %6, 3u8
+    %8:ptr<function, msl.cooperative_tensor_result<16, 32, 32, bf16, bf16>, read_write> = var undef
+    %9:bf16 = convert 1.0f
+    %10:void = msl.fill_cooperative_tensor %8, %9
     ret
   }
 }
@@ -2556,6 +2565,63 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_CooperativeTensorsTest, SubgroupMatrixStore_RowMajor_Stride_I32) {
+    auto* buffer = b.Var("buffer", ty.ptr<storage, array<f32>, read_write>());
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* mat = b.Construct(ty.subgroup_matrix_left(ty.f32(), 8, 8));
+        auto* stride = b.Let("stride", 64_i);
+        b.CallExplicit(ty.void_(), core::BuiltinFn::kSubgroupMatrixStore,
+                       Vector<core::ir::TemplateParameter, 1>{core::Majorness::kRowMajor}, buffer,
+                       0_u, mat, stride);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<f32>, read_write> = var @binding_point(0, 0)
+}
+
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:subgroup_matrix_left<f32, 8, 8> = construct
+    %stride:i32 = let 64i
+    %5:void = subgroupMatrixStore<row_major> %buffer, 0u, %3, %stride
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<f32>, read_write> = var @binding_point(0, 0)
+}
+
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<function, msl.cooperative_tensor_left<8, 32, 8, f32, f32>, read_write> = var undef
+    %4:void = msl.fill_cooperative_tensor %3, 0.0f
+    %stride:i32 = let 64i
+    %6:u32 = bitcast<u32> %stride
+    %7:ptr<storage, f32, read_write> = access %buffer, 0u
+    %8:msl.tensor_inline = msl.make_tensor_inline %7, vec2<u32>(8u), %6
+    %tint_dst_tensor:msl.tensor_inline = let %8
+    %10:msl.cooperative_tensor_left<8, 32, 8, f32, f32> = load %3
+    %11:void = %10.store %tint_dst_tensor
+    ret
+  }
+}
+)";
+
+    Run(CooperativeTensors);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_CooperativeTensorsTest, DISABLED_SubgroupMatrixStore_ColMajor) {
     auto* buffer = b.Var("buffer", ty.ptr<storage, array<f32>, read_write>());
     buffer->SetBindingPoint(0, 0);
@@ -2910,6 +2976,64 @@ $B1: {  # root
     %x:ptr<function, msl.cooperative_tensor_left<8, 32, 8, f32, f32>, read_write> = var undef
     %7:msl.cooperative_tensor_left<8, 32, 8, f32, f32> = load %x
     %8:void = %7.load %tint_src_tensor
+    ret
+  }
+}
+)";
+
+    Run(CooperativeTensors);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_CooperativeTensorsTest, SubgroupMatrixLoad_RowMajor_Stride_I32) {
+    auto* buffer = b.Var("buffer", ty.ptr<storage, array<f32>, core::Access::kRead>());
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* ep = b.ComputeFunction("entry");
+    b.Append(ep->Block(), [&] {
+        auto* mat_ty = ty.subgroup_matrix_left(ty.f32(), 8, 8);
+        auto* stride = b.Let("stride", 64_i);
+        auto* mat = b.CallExplicit(
+            mat_ty, core::BuiltinFn::kSubgroupMatrixLoad,
+            Vector<core::ir::TemplateParameter, 2>{mat_ty, core::Majorness::kRowMajor}, buffer, 0_u,
+            stride);
+        b.Let("x", mat);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<f32>, read> = var @binding_point(0, 0)
+}
+
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %stride:i32 = let 64i
+    %4:subgroup_matrix_left<f32, 8, 8> = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, row_major> %buffer, 0u, %stride
+    %x:subgroup_matrix_left<f32, 8, 8> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<f32>, read> = var @binding_point(0, 0)
+}
+
+%entry = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %stride:i32 = let 64i
+    %4:u32 = bitcast<u32> %stride
+    %5:ptr<storage, f32, read> = access %buffer, 0u
+    %6:msl.tensor_inline = msl.make_tensor_inline %5, vec2<u32>(8u), %4
+    %tint_src_tensor:msl.tensor_inline = let %6
+    %x:ptr<function, msl.cooperative_tensor_left<8, 32, 8, f32, f32>, read_write> = var undef
+    %9:msl.cooperative_tensor_left<8, 32, 8, f32, f32> = load %x
+    %10:void = %9.load %tint_src_tensor
     ret
   }
 }

@@ -236,6 +236,7 @@ match fiu32: f32 | i32 | u32
 match fi32_f16: f32 | i32 | f16
 match fi32: f32 | i32
 match f32_f16: f32 | f16
+match f32_bf16: f32 | bf16
 match iu32: i32 | u32
 match iu32_iu8: i32 | u32 | i8 | u8
 match iu8: i8 | u8
@@ -1700,6 +1701,10 @@ match uniform_or_storage
   fn subgroupMatrixMultiply<TR: f32_f16>(subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
                                          subgroup_matrix<subgroup_matrix_kind_right, T, C, K>)
       -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
+@must_use @stage("compute") implicit(T: bf16, C: num, R: num, K: num)
+  fn subgroupMatrixMultiply<TR: f32_bf16>(subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
+                                         subgroup_matrix<subgroup_matrix_kind_right, T, C, K>)
+      -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
 @must_use @stage("compute") implicit(T: f32, C: num, R: num, K: num)
   fn subgroupMatrixMultiply<TR: f32>(subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
                                      subgroup_matrix<subgroup_matrix_kind_right, T, C, K>)
@@ -1713,6 +1718,11 @@ match uniform_or_storage
                                       subgroup_matrix<subgroup_matrix_kind_right, T, C, K>)
       -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
 @must_use @stage("compute") implicit(T: f16, TR: f32_f16, C: num, R: num, K: num)
+  fn subgroupMatrixMultiplyAccumulate(subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
+                                      subgroup_matrix<subgroup_matrix_kind_right, T, C, K>,
+                                      subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>)
+      -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
+@must_use @stage("compute") implicit(T: bf16, TR: f32_bf16, C: num, R: num, K: num)
   fn subgroupMatrixMultiplyAccumulate(subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
                                       subgroup_matrix<subgroup_matrix_kind_right, T, C, K>,
                                       subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>)
@@ -1742,6 +1752,9 @@ match uniform_or_storage
 @must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
   fn subgroupMatrixScalarAdd(m: subgroup_matrix<K, u8, C, R>,
                              @test_value(8) s: u32) -> subgroup_matrix<K, u8, C, R>
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
+  fn subgroupMatrixScalarAdd(m: subgroup_matrix<K, bf16, C, R>,
+                             @test_value(8) s: f32) -> subgroup_matrix<K, bf16, C, R>
 
 @must_use @stage("compute") implicit(K: subgroup_matrix_kind, T: fiu32_f16, C: num, R: num)
   fn subgroupMatrixScalarSubtract(m: subgroup_matrix<K, T, C, R>,
@@ -1752,6 +1765,9 @@ match uniform_or_storage
 @must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
   fn subgroupMatrixScalarSubtract(m: subgroup_matrix<K, u8, C, R>,
                                   @test_value(8) s: u32) -> subgroup_matrix<K, u8, C, R>
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
+  fn subgroupMatrixScalarSubtract(m: subgroup_matrix<K, bf16, C, R>,
+                                  @test_value(8) s: f32) -> subgroup_matrix<K, bf16, C, R>
 
 @must_use @stage("compute") implicit(K: subgroup_matrix_kind, T: fiu32_f16, C: num, R: num)
   fn subgroupMatrixScalarMultiply(m: subgroup_matrix<K, T, C, R>,
@@ -1762,6 +1778,9 @@ match uniform_or_storage
 @must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
   fn subgroupMatrixScalarMultiply(m: subgroup_matrix<K, u8, C, R>,
                                   @test_value(8) s: u32) -> subgroup_matrix<K, u8, C, R>
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
+  fn subgroupMatrixScalarMultiply(m: subgroup_matrix<K, bf16, C, R>,
+                                  @test_value(8) s: f32) -> subgroup_matrix<K, bf16, C, R>
 
 
 //////////////////////////////////////////

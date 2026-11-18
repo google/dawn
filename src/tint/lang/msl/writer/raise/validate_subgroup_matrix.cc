@@ -72,16 +72,17 @@ struct State {
                     break;
                 }
 
-                if (i.type != SubgroupMatrixType::kF32 && i.type != SubgroupMatrixType::kF16) {
-                    diagnostics_.AddError(Source{}) << "subgroup_matrix requires a type of `f32` "
-                                                       "or `f16` for the selected device";
+                if (i.type != SubgroupMatrixType::kF32 && i.type != SubgroupMatrixType::kF16 &&
+                    i.type != SubgroupMatrixType::kBF16) {
+                    diagnostics_.AddError(Source{}) << "subgroup_matrix requires a type of `f32`, "
+                                                       "`f16` or `bf16` for the selected device";
                     break;
                 }
             }
         }
 
         for (auto& i : info.multiplies) {
-            if (i.input_type != i.output_type) {
+            if (!enable_tensors && i.input_type != i.output_type) {
                 diagnostics_.AddError(Source{})
                     << "Mixed precision subgroup matrix multiply is not supported by the device";
                 break;

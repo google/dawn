@@ -68,9 +68,6 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
                 return res.Failure();
             }
         }
-        if (ty->Is<core::type::BF16>()) {
-            return Failure("bf16 is not supported by the MSL backend");
-        }
     }
 
     // Check for unsupported shader IO builtins.

@@ -3148,9 +3148,14 @@ fn ep() {
 TEST_F(InspectorGetResourceBindingsTest, SubgroupMatrix_Direct) {
     auto* src = R"(
 enable chromium_experimental_subgroup_matrix;
-@group(0) @binding(0) var<storage> v : array<f32>;
+enable f16;
+@group(0) @binding(0) var<storage> v1 : array<f32>;
+@group(0) @binding(1) var<storage> v2 : array<f32>;
+@group(0) @binding(2) var<storage> v3 : array<f32>;
 @compute @workgroup_size(16) fn ep() {
-  _ = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, col_major>(&v, 0, 8);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<f32, 8, 8>, col_major>(&v1, 0, 8);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<f16, 8, 8>, col_major>(&v2, 0, 4);
+  _ = subgroupMatrixLoad<subgroup_matrix_left<bf16, 8, 8>, col_major>(&v3, 0, 4);
 }
     )";
 
@@ -3158,9 +3163,13 @@ enable chromium_experimental_subgroup_matrix;
     auto result = inspector.GetResourceBindings("ep");
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-    ASSERT_EQ(1u, result.size());
+    ASSERT_EQ(3u, result.size());
     EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[0].resource_type);
     EXPECT_EQ(256u, result[0].size);
+    EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[1].resource_type);
+    EXPECT_EQ(128u, result[1].size);
+    EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer, result[2].resource_type);
+    EXPECT_EQ(128u, result[2].size);
 }
 
 TEST_F(InspectorGetResourceBindingsTest, SubgroupMatrix_Indirect) {

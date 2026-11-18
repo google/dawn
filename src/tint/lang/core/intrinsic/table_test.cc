@@ -698,9 +698,10 @@ TEST_F(CoreIntrinsicTableTest, MismatchUnaryOp) {
     ASSERT_NE(result, Success);
     EXPECT_EQ(result.Failure().Plain(), R"(no matching overload for 'operator - (bool)'
 
-2 candidate operators:
+3 candidate operators:
  • 'operator - (T  ✗ ) -> T' where:
       ✗  'T' is 'f32', 'i32' or 'f16'
+ • 'operator - (bf16  ✗ ) -> bf16'
  • 'operator - (vecN<T>  ✗ ) -> vecN<T>' where:
       ✗  'T' is 'f32', 'i32' or 'f16'
 )");

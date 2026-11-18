@@ -35,14 +35,7 @@
 
 namespace tint {
 
-enum class SubgroupMatrixType : uint8_t {
-    kF16 = 0,
-    kF32,
-    kU8,
-    kI8,
-    kU32,
-    kI32,
-};
+enum class SubgroupMatrixType : uint8_t { kF16 = 0, kF32, kU8, kI8, kU32, kI32, kBF16 };
 TINT_REFLECT_ENUM_RANGE(tint::SubgroupMatrixType, kF16, kI32);
 
 struct SubgroupMatrixMultiply {

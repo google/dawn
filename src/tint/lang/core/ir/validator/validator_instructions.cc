@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/ir/validator/validator.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
@@ -45,6 +46,7 @@
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/scalar.h"
 #include "src/tint/lang/core/type/string.h"
+#include "src/tint/lang/core/type/u16.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/u8.h"
@@ -933,14 +935,10 @@ void Validator::CheckConstruct(const Construct* construct) {
         }
 
         // 8-bit integer matrices use 32-bit shader scalar types in WGSL.
+        // bfloat16 matrices use f32 shader scalar types in WGSL.
         // Some backends may support 8-bit integers, in which case they would pass an 8-bit
         // type for the constructor value instead.
-        const core::type::Type* scalar_ty = sg_mat->Type();
-        if (scalar_ty->Is<core::type::I8>()) {
-            scalar_ty = type_mgr_.i32();
-        } else if (scalar_ty->Is<core::type::U8>()) {
-            scalar_ty = type_mgr_.u32();
-        }
+        const core::type::Type* scalar_ty = type_mgr_.ShaderScalarType(sg_mat);
         if (args[0]->Type() != scalar_ty && args[0]->Type() != sg_mat->Type()) {
             AddError(construct) << "subgroup matrix construct argument type "
                                 << NameOf(args[0]->Type())
@@ -1012,11 +1010,13 @@ void Validator::CheckConvert(const Convert* convert) {
     Vector<TemplateParameter, 1> template_type;
     tint::Switch(
         result_type,                                                             //
+        [&](const core::type::U16*) { conv_ty = intrinsic::CtorConv::kU16; },    //
         [&](const core::type::I32*) { conv_ty = intrinsic::CtorConv::kI32; },    //
         [&](const core::type::U32*) { conv_ty = intrinsic::CtorConv::kU32; },    //
         [&](const core::type::U64*) { conv_ty = intrinsic::CtorConv::kU64; },    //
         [&](const core::type::F32*) { conv_ty = intrinsic::CtorConv::kF32; },    //
         [&](const core::type::F16*) { conv_ty = intrinsic::CtorConv::kF16; },    //
+        [&](const core::type::BF16*) { conv_ty = intrinsic::CtorConv::kBf16; },  //
         [&](const core::type::Bool*) { conv_ty = intrinsic::CtorConv::kBool; },  //
         [&](const core::type::Vector* v) {
             conv_ty = intrinsic::VectorCtorConv(v->Width());

@@ -326,6 +326,32 @@ TEST(Math, IsFloat16NaN) {
     ASSERT_TRUE(IsFloat16NaN(0xFFFF));
 }
 
+// Tests for float32 <-> bfloat16 conversion
+TEST(Math, Float32ToBFloat16) {
+    ASSERT_EQ(Float32ToBFloat16(0.0f), 0x0000);
+    ASSERT_EQ(Float32ToBFloat16(-0.0f), 0x8000);
+
+    ASSERT_EQ(Float32ToBFloat16(INFINITY), 0x7F80);
+    ASSERT_EQ(Float32ToBFloat16(-INFINITY), 0xFF80);
+
+    // Check that NaN is converted to a value in one of the bfloat16 NaN ranges
+    uint16_t nan16 = Float32ToBFloat16(NAN);
+    ASSERT_TRUE((nan16 & 0x7FFF) > 0x7F80);
+    ASSERT_TRUE(std::isnan(BFloat16ToFloat32(nan16)));
+
+    ASSERT_EQ(Float32ToBFloat16(1.0f), 0x3F80);
+    ASSERT_EQ(BFloat16ToFloat32(0x3F80), 1.0f);
+
+    // Check round-to-nearest-even (RTE) behavior on halfway values in [16, 32) where 1 ULP = 0.125:
+    // 25.0625 sits halfway between 25.0 (0x41C8, even) and 25.125 (0x41C9, odd) -> rounds to 25.0.
+    ASSERT_EQ(Float32ToBFloat16(25.0625f), 0x41C8);
+    ASSERT_EQ(BFloat16ToFloat32(Float32ToBFloat16(25.0625f)), 25.0f);
+    // 25.1875 sits halfway between 25.125 (0x41C9, odd) and 25.25 (0x41CA, even) -> rounds
+    // to 25.25.
+    ASSERT_EQ(Float32ToBFloat16(25.1875f), 0x41CA);
+    ASSERT_EQ(BFloat16ToFloat32(Float32ToBFloat16(25.1875f)), 25.25f);
+}
+
 // Tests for FloatToUnorm
 TEST(Math, FloatToUnorm) {
     std::vector<float> kTestFloatValues = {0.0f, 0.4f, 0.5f, 1.0f};

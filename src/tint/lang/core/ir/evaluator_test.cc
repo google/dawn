@@ -86,9 +86,10 @@ TEST_F(IR_EvaluatorTest, InvalidExpression) {
 
     EXPECT_EQ(res.Failure().reason.Str(), R"(2:3 error: no matching overload for 'operator - (u32)'
 
-2 candidate operators:
+3 candidate operators:
  • 'operator - (T  ✗ ) -> T' where:
       ✗  'T' is 'f32', 'i32' or 'f16'
+ • 'operator - (bf16  ✗ ) -> bf16'
  • 'operator - (vecN<T>  ✗ ) -> vecN<T>' where:
       ✗  'T' is 'f32', 'i32' or 'f16'
 )");

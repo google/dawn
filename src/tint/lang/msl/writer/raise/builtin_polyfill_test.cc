@@ -4174,6 +4174,55 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_bf16) {
+    auto* mat = ty.subgroup_matrix_result(ty.bf16(), 8, 8);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("v", ty.ptr(function, mat, read_write));
+        b.Let("r", b.Call(mat, core::BuiltinFn::kSubgroupMatrixScalarAdd, b.Load(v), 3_f));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %v:ptr<function, subgroup_matrix_result<bf16, 8, 8>, read_write> = var
+    %3:subgroup_matrix_result<bf16, 8, 8> = load %v
+    %4:subgroup_matrix_result<bf16, 8, 8> = subgroupMatrixScalarAdd %3, 3.0f
+    %r:subgroup_matrix_result<bf16, 8, 8> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %v:ptr<function, subgroup_matrix_result<bf16, 8, 8>, read_write> = var
+    %3:subgroup_matrix_result<bf16, 8, 8> = load %v
+    %4:bf16 = convert 3.0f
+    %5:ptr<function, subgroup_matrix_result<bf16, 8, 8>, read_write> = var
+    %6:subgroup_matrix_left<bf16, 8, 8> = msl.convert<subgroup_matrix_left<bf16, 8, 8>> %3
+    %7:subgroup_matrix_right<bf16, 8, 8> = msl.make_diagonal_simdgroup_matrix<subgroup_matrix_right<bf16, 8, 8>> 1.0bf
+    %8:subgroup_matrix_result<bf16, 8, 8> = msl.make_filled_simdgroup_matrix<subgroup_matrix_result<bf16, 8, 8>> %4
+    %9:subgroup_matrix_result<bf16, 8, 8> = load %5
+    %10:void = msl.simdgroup_multiply_accumulate %9, %6, %7, %8
+    %11:subgroup_matrix_result<bf16, 8, 8> = load %5
+    %12:subgroup_matrix_result<bf16, 8, 8> = msl.convert<subgroup_matrix_result<bf16, 8, 8>> %11
+    %r:subgroup_matrix_result<bf16, 8, 8> = let %12
+    ret
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract) {
     auto* mat = ty.subgroup_matrix_result(ty.f32(), 8, 8);
 
@@ -4211,6 +4260,56 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract) {
     %10:subgroup_matrix_result<f32, 8, 8> = load %4
     %11:subgroup_matrix_result<f32, 8, 8> = msl.convert<subgroup_matrix_result<f32, 8, 8>> %10
     %r:subgroup_matrix_result<f32, 8, 8> = let %11
+    ret
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract_bf16) {
+    auto* mat = ty.subgroup_matrix_result(ty.bf16(), 8, 8);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("v", ty.ptr(function, mat, read_write));
+        b.Let("r", b.Call(mat, core::BuiltinFn::kSubgroupMatrixScalarSubtract, b.Load(v), 3_f));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %v:ptr<function, subgroup_matrix_result<bf16, 8, 8>, read_write> = var
+    %3:subgroup_matrix_result<bf16, 8, 8> = load %v
+    %4:subgroup_matrix_result<bf16, 8, 8> = subgroupMatrixScalarSubtract %3, 3.0f
+    %r:subgroup_matrix_result<bf16, 8, 8> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %v:ptr<function, subgroup_matrix_result<bf16, 8, 8>, read_write> = var
+    %3:subgroup_matrix_result<bf16, 8, 8> = load %v
+    %4:bf16 = convert 3.0f
+    %5:ptr<function, subgroup_matrix_result<bf16, 8, 8>, read_write> = var
+    %6:subgroup_matrix_left<bf16, 8, 8> = msl.convert<subgroup_matrix_left<bf16, 8, 8>> %3
+    %7:subgroup_matrix_right<bf16, 8, 8> = msl.make_diagonal_simdgroup_matrix<subgroup_matrix_right<bf16, 8, 8>> 1.0bf
+    %8:bf16 = negation %4
+    %9:subgroup_matrix_result<bf16, 8, 8> = msl.make_filled_simdgroup_matrix<subgroup_matrix_result<bf16, 8, 8>> %8
+    %10:subgroup_matrix_result<bf16, 8, 8> = load %5
+    %11:void = msl.simdgroup_multiply_accumulate %10, %6, %7, %9
+    %12:subgroup_matrix_result<bf16, 8, 8> = load %5
+    %13:subgroup_matrix_result<bf16, 8, 8> = msl.convert<subgroup_matrix_result<bf16, 8, 8>> %12
+    %r:subgroup_matrix_result<bf16, 8, 8> = let %13
     ret
   }
 }
@@ -5387,6 +5486,131 @@ TEST_F(MslWriter_BuiltinPolyfillTest, AddSat_MulSat_Vec2U) {
 %foo = func(%x:vec2<u32>, %y:vec2<u32>, %z:vec2<u32>):void {
   $B1: {
     %5:vec2<u32> = msl.madsat %x, %y, %z
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrix_Construct_f32) {
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        b.Construct(ty.subgroup_matrix_left(ty.f32(), 8, 8));
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+%foo = func():void {
+  $B1: {
+    %2:subgroup_matrix_left<f32, 8, 8> = construct
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func():void {
+  $B1: {
+    %2:subgroup_matrix_left<f32, 8, 8> = msl.make_filled_simdgroup_matrix<subgroup_matrix_left<f32, 8, 8>> 0.0f
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrix_Construct_Arg_f32) {
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        b.Construct(ty.subgroup_matrix_left(ty.f32(), 8, 8), 1_f);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+%foo = func():void {
+  $B1: {
+    %2:subgroup_matrix_left<f32, 8, 8> = construct 1.0f
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func():void {
+  $B1: {
+    %2:subgroup_matrix_left<f32, 8, 8> = msl.make_filled_simdgroup_matrix<subgroup_matrix_left<f32, 8, 8>> 1.0f
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrix_Construct_bf16) {
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        b.Construct(ty.subgroup_matrix_left(ty.bf16(), 8, 8));
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+%foo = func():void {
+  $B1: {
+    %2:subgroup_matrix_left<bf16, 8, 8> = construct
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func():void {
+  $B1: {
+    %2:subgroup_matrix_left<bf16, 8, 8> = msl.make_filled_simdgroup_matrix<subgroup_matrix_left<bf16, 8, 8>> 0.0bf
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, BuiltinPolyfillConfig{});
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrix_Construct_Arg_bf16) {
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        b.Construct(ty.subgroup_matrix_left(ty.bf16(), 8, 8), 1_f);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+%foo = func():void {
+  $B1: {
+    %2:subgroup_matrix_left<bf16, 8, 8> = construct 1.0f
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func():void {
+  $B1: {
+    %2:bf16 = convert 1.0f
+    %3:subgroup_matrix_left<bf16, 8, 8> = msl.make_filled_simdgroup_matrix<subgroup_matrix_left<bf16, 8, 8>> %2
     ret
   }
 }

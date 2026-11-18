@@ -98,6 +98,8 @@ TEST_P(IR_SubgroupMatrixAnalysisTypeTest, Config_Type_Left) {
         subtype = ty.u32();
     } else if (p.type_name == "i32") {
         subtype = ty.i32();
+    } else if (p.type_name == "bf16") {
+        subtype = ty.bf16();
     } else {
         ASSERT_FALSE(true) << "invalid typename " << p.type_name;
     }
@@ -149,6 +151,8 @@ TEST_P(IR_SubgroupMatrixAnalysisTypeTest, Config_Type_Right) {
         subtype = ty.u32();
     } else if (p.type_name == "i32") {
         subtype = ty.i32();
+    } else if (p.type_name == "bf16") {
+        subtype = ty.bf16();
     } else {
         ASSERT_FALSE(true) << "invalid typename " << p.type_name;
     }
@@ -201,6 +205,8 @@ TEST_P(IR_SubgroupMatrixAnalysisTypeTest, Config_Type_Result) {
         subtype = ty.u32();
     } else if (p.type_name == "i32") {
         subtype = ty.i32();
+    } else if (p.type_name == "bf16") {
+        subtype = ty.bf16();
     } else {
         ASSERT_FALSE(true) << "invalid typename " << p.type_name;
     }
@@ -280,6 +286,13 @@ INSTANTIATE_TEST_SUITE_P(,
                                  .N = 32242,
                                  .K = 2048,
                                  .result_type = SubgroupMatrixType::kU32,
+                             },
+                             TypeInfo{
+                                 .type_name = "bf16",
+                                 .M = 8,
+                                 .N = 16,
+                                 .K = 16,
+                                 .result_type = SubgroupMatrixType::kBF16,
                              }));
 
 TEST_F(IR_SubgroupMatrixAnalysis, Config_Multiple) {
@@ -289,6 +302,7 @@ TEST_F(IR_SubgroupMatrixAnalysis, Config_Multiple) {
         b.Var("v2", ty.ptr(function, ty.subgroup_matrix_result(ty.f16(), 32u, 64u)));
         b.Var("v3", ty.ptr(function, ty.subgroup_matrix_right(ty.f32(), 8u, 8u)));
         b.Var("v4", ty.ptr(function, ty.subgroup_matrix_right(ty.i8(), 8u, 8u)));
+        b.Var("v5", ty.ptr(function, ty.subgroup_matrix_left(ty.bf16(), 8u, 8u)));
 
         b.Var("v1_dup", ty.ptr(function, ty.subgroup_matrix_left(ty.i8(), 2u, 8u)));
         b.Return(func);
@@ -301,6 +315,7 @@ TEST_F(IR_SubgroupMatrixAnalysis, Config_Multiple) {
     %v2:ptr<function, subgroup_matrix_result<f16, 32, 64>, read_write> = var
     %v3:ptr<function, subgroup_matrix_right<f32, 8, 8>, read_write> = var
     %v4:ptr<function, subgroup_matrix_right<i8, 8, 8>, read_write> = var
+    %v5:ptr<function, subgroup_matrix_left<bf16, 8, 8>, read_write> = var
     %v1_dup:ptr<function, subgroup_matrix_left<i8, 2, 8>, read_write> = var
     ret
   }
@@ -311,7 +326,7 @@ TEST_F(IR_SubgroupMatrixAnalysis, Config_Multiple) {
 
     auto res = GatherSubgroupMatrixInfo(mod);
     EXPECT_TRUE(res.multiplies.empty());
-    ASSERT_EQ(5u, res.configs.size());
+    ASSERT_EQ(6u, res.configs.size());
 
     auto cfgs = std::vector(res.configs.begin(), res.configs.end());
     std::sort(cfgs.begin(), cfgs.end(), SortConfig);
@@ -340,6 +355,11 @@ TEST_F(IR_SubgroupMatrixAnalysis, Config_Multiple) {
     EXPECT_EQ(8u, cfgs[4].K);
     EXPECT_EQ(SubgroupMatrixType::kI8, cfgs[4].type);
     EXPECT_EQ(SubgroupMatrixDirection::kRight, cfgs[4].direction);
+
+    EXPECT_EQ(8u, cfgs[5].M);
+    EXPECT_EQ(8u, cfgs[5].K);
+    EXPECT_EQ(SubgroupMatrixType::kBF16, cfgs[5].type);
+    EXPECT_EQ(SubgroupMatrixDirection::kLeft, cfgs[5].direction);
 }
 
 TEST_F(IR_SubgroupMatrixAnalysis, Config_InControlFlow) {

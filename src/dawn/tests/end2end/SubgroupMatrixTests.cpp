@@ -79,6 +79,9 @@ const char* ComponentTypeToWgslType(wgpu::SubgroupMatrixComponentType c) {
 const char* ComponentTypeToScalarShaderType(wgpu::SubgroupMatrixComponentType c) {
     switch (c) {
         case wgpu::SubgroupMatrixComponentType::F32:
+        case wgpu::SubgroupMatrixComponentType::Bf16:
+        case wgpu::SubgroupMatrixComponentType::F8_e4m3:
+        case wgpu::SubgroupMatrixComponentType::F8_e5m2:
             return "f32";
         case wgpu::SubgroupMatrixComponentType::F16:
             return "f16";
@@ -88,10 +91,6 @@ const char* ComponentTypeToScalarShaderType(wgpu::SubgroupMatrixComponentType c)
         case wgpu::SubgroupMatrixComponentType::I32:
         case wgpu::SubgroupMatrixComponentType::I8:
             return "i32";
-        case wgpu::SubgroupMatrixComponentType::Bf16:
-        case wgpu::SubgroupMatrixComponentType::F8_e4m3:
-        case wgpu::SubgroupMatrixComponentType::F8_e5m2:
-            return "f32";
     }
     return "<invalid>";
 }
@@ -222,8 +221,7 @@ struct Matrix {
             case wgpu::SubgroupMatrixComponentType::F16:
                 return Float16ToFloat32(GetValue<uint16_t>(c, r));
             case wgpu::SubgroupMatrixComponentType::Bf16:
-                // TODO(582791374): implement this.
-                break;
+                return BFloat16ToFloat32(GetValue<uint16_t>(c, r));
             case wgpu::SubgroupMatrixComponentType::F8_e4m3:
             case wgpu::SubgroupMatrixComponentType::F8_e5m2:
                 // TODO(583490405): implement this.
@@ -270,8 +268,8 @@ struct Matrix {
                 SetValue(Float32ToFloat16(value), c, r);
                 return;
             case wgpu::SubgroupMatrixComponentType::Bf16:
-                // TODO(582791374): implement this.
-                break;
+                SetValue(Float32ToBFloat16(value), c, r);
+                return;
             case wgpu::SubgroupMatrixComponentType::F8_e4m3:
             case wgpu::SubgroupMatrixComponentType::F8_e5m2:
                 // TODO(583490405): implement this.
@@ -379,6 +377,9 @@ void GenerateReferenceMatrixMultiplyInner(Matrix& expected,
                         if constexpr (std::is_same_v<T, float>) {
                             if (expected.component_type == wgpu::SubgroupMatrixComponentType::F16) {
                                 ref[r][c] = Float16ToFloat32(Float32ToFloat16(ref[r][c]));
+                            } else if (expected.component_type ==
+                                       wgpu::SubgroupMatrixComponentType::Bf16) {
+                                ref[r][c] = BFloat16ToFloat32(Float32ToBFloat16(ref[r][c]));
                             }
                         }
                     }
@@ -760,6 +761,8 @@ class SubgroupMatrix_MatrixMatrixArithmeticTest : public SubgroupMatrixArithmeti
         if (config.componentType == wgpu::SubgroupMatrixComponentType::U8 ||
             config.componentType == wgpu::SubgroupMatrixComponentType::I8) {
             shader << "/4";
+        } else if (config.componentType == wgpu::SubgroupMatrixComponentType::Bf16) {
+            shader << "/2";
         }
         shader << ";\n";
 
@@ -767,6 +770,8 @@ class SubgroupMatrix_MatrixMatrixArithmeticTest : public SubgroupMatrixArithmeti
         if (config.resultComponentType == wgpu::SubgroupMatrixComponentType::U8 ||
             config.resultComponentType == wgpu::SubgroupMatrixComponentType::I8) {
             shader << "/4";
+        } else if (config.resultComponentType == wgpu::SubgroupMatrixComponentType::Bf16) {
+            shader << "/2";
         }
         shader << ";\n";
 
@@ -774,24 +779,32 @@ class SubgroupMatrix_MatrixMatrixArithmeticTest : public SubgroupMatrixArithmeti
         if (config.componentType == wgpu::SubgroupMatrixComponentType::U8 ||
             config.componentType == wgpu::SubgroupMatrixComponentType::I8) {
             shader << "/4";
+        } else if (config.componentType == wgpu::SubgroupMatrixComponentType::Bf16) {
+            shader << "/2";
         }
         shader << ";\n";
         shader << "const kLeftStride = " << (columnMajor ? "M" : "K");
         if (config.componentType == wgpu::SubgroupMatrixComponentType::U8 ||
             config.componentType == wgpu::SubgroupMatrixComponentType::I8) {
             shader << "/4";
+        } else if (config.componentType == wgpu::SubgroupMatrixComponentType::Bf16) {
+            shader << "/2";
         }
         shader << ";\n";
         shader << "const kRightStride = " << (columnMajor ? "K" : "N");
         if (config.componentType == wgpu::SubgroupMatrixComponentType::U8 ||
             config.componentType == wgpu::SubgroupMatrixComponentType::I8) {
             shader << "/4";
+        } else if (config.componentType == wgpu::SubgroupMatrixComponentType::Bf16) {
+            shader << "/2";
         }
         shader << ";\n";
         shader << "const kResultStride = " << (columnMajor ? "M" : "N");
         if (config.resultComponentType == wgpu::SubgroupMatrixComponentType::U8 ||
             config.resultComponentType == wgpu::SubgroupMatrixComponentType::I8) {
             shader << "/4";
+        } else if (config.resultComponentType == wgpu::SubgroupMatrixComponentType::Bf16) {
+            shader << "/2";
         }
         shader << ";\n";
         shader << "const SubgroupMaxSize = " << subgroupMaxSize << ";\n";
@@ -910,6 +923,9 @@ TEST_P(SubgroupMatrix_MatrixMatrixArithmeticTest, MatrixMultiply) {
     MatrixOp op = GetParam().mMatrixOp;
     bool columnMajor = GetParam().mColumnMajor;
 
+    // TODO(457429347): cooperative tensors don't support column major yet.
+    DAWN_SUPPRESS_TEST_IF(IsApple() && HasToggleEnabled("metal_enable_tensors") && columnMajor);
+
     // Query the supported subgroup matrix configurations.
     wgpu::AdapterInfo info;
     wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
@@ -970,6 +986,8 @@ class SubgroupMatrix_MatrixScalarArithmeticTest : public SubgroupMatrixArithmeti
         if (config.componentType == wgpu::SubgroupMatrixComponentType::U8 ||
             config.componentType == wgpu::SubgroupMatrixComponentType::I8) {
             shader << "/4";
+        } else if (config.componentType == wgpu::SubgroupMatrixComponentType::Bf16) {
+            shader << "/2";
         }
         shader << ";\n";
 
@@ -977,6 +995,8 @@ class SubgroupMatrix_MatrixScalarArithmeticTest : public SubgroupMatrixArithmeti
         if (config.componentType == wgpu::SubgroupMatrixComponentType::U8 ||
             config.componentType == wgpu::SubgroupMatrixComponentType::I8) {
             shader << "/4";
+        } else if (config.resultComponentType == wgpu::SubgroupMatrixComponentType::Bf16) {
+            shader << "/2";
         }
         shader << ";\n";
 
@@ -1115,8 +1135,14 @@ TEST_P(SubgroupMatrix_MatrixScalarArithmeticTest, MatrixScalar) {
     // TODO(crbug.com/566128737): Remove once Agility SDK and WARP support retail LinAlg.
     DAWN_SUPPRESS_TEST_IF(IsWARP());
 
+    // TODO(457429347): cooperative tensors don't support scalar operations yet.
+    DAWN_SUPPRESS_TEST_IF(IsApple() && HasToggleEnabled("metal_enable_tensors"));
+
     MatrixOp op = GetParam().mMatrixOp;
     bool columnMajor = GetParam().mColumnMajor;
+
+    // TODO(457429347): cooperative tensors don't support column major yet.
+    DAWN_SUPPRESS_TEST_IF(IsApple() && HasToggleEnabled("metal_enable_tensors") && columnMajor);
 
     // Query the supported subgroup matrix configurations.
     wgpu::AdapterInfo info;
@@ -1310,6 +1336,10 @@ TEST_P(SubgroupMatrix_MatrixStoreTest, MatrixStoreWithOffset) {
     // TODO(crbug.com/566128737): Remove once Agility SDK and WARP support retail LinAlg.
     DAWN_SUPPRESS_TEST_IF(IsWARP());
 
+    // TODO(457429347): cooperative tensors don't support column major yet.
+    DAWN_SUPPRESS_TEST_IF(IsApple() && HasToggleEnabled("metal_enable_tensors") &&
+                          GetParam().mInputColumnMajor);
+
     // Query the supported subgroup matrix configurations.
     wgpu::AdapterInfo info;
     wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
@@ -1389,19 +1419,32 @@ class SubgroupMatrix_OutOfBoundsTest : public DawnTestWithParams<MatrixOutOfBoun
         if (NeedsF16(config)) {
             shader << "enable f16;\n";
         }
+
+        std::string div = "";
+        if (config.componentType == wgpu::SubgroupMatrixComponentType::I8 ||
+            config.componentType == wgpu::SubgroupMatrixComponentType::U8) {
+            div = " / 4";
+        } else if (config.componentType == wgpu::SubgroupMatrixComponentType::Bf16) {
+            div = " / 2";
+        }
+
         shader << "\nalias ComponentType = " << ComponentTypeToWgslType(config.componentType)
+               << ";\n";
+        shader << "alias ArrayType = " << ComponentTypeToScalarShaderType(config.componentType)
                << ";\n";
         shader << "alias InputType = subgroup_matrix_left<ComponentType, K, M>;\n";
         shader << "const K = " << config.K << ";\n";
         shader << "const M = " << config.M << ";\n";
-        shader << "const naturalStride = " << (inputColumnMajor ? config.M : config.K) << ";\n";
+        shader << "const ArraySize = K * M" << div << ";\n";
+        shader << "const naturalStride = " << (inputColumnMajor ? config.M : config.K) << div
+               << ";\n";
         // A stride well beyond the natural minimum makes the store's accessed range extend past
         // the bound sub-range of `output`, forcing a dynamic out-of-bounds access.
         shader << "const oobStride = naturalStride * 2;\n";
         shader << "const SubgroupMaxSize = " << subgroupMaxSize << ";\n";
         shader << R"(
-@group(0) @binding(0) var<storage, read>       input : array<ComponentType, K * M>;
-@group(0) @binding(1) var<storage, read_write> output : array<ComponentType>;
+@group(0) @binding(0) var<storage, read>       input : array<ArrayType, ArraySize>;
+@group(0) @binding(1) var<storage, read_write> output : array<ArrayType>;
 
 @compute @workgroup_size(SubgroupMaxSize)
 fn main() {
@@ -1423,20 +1466,32 @@ fn main() {
         if (NeedsF16(config)) {
             shader << "enable f16;\n";
         }
+
+        std::string div = "";
+        if (config.componentType == wgpu::SubgroupMatrixComponentType::I8 ||
+            config.componentType == wgpu::SubgroupMatrixComponentType::U8) {
+            div = " / 4";
+        } else if (config.componentType == wgpu::SubgroupMatrixComponentType::Bf16) {
+            div = " / 2";
+        }
+
         shader << "\nalias ComponentType = " << ComponentTypeToWgslType(config.componentType)
+               << ";\n";
+        shader << "alias ArrayType = " << ComponentTypeToScalarShaderType(config.componentType)
                << ";\n";
         shader << "alias InputType = subgroup_matrix_left<ComponentType, K, M>;\n";
         shader << "const K = " << config.K << ";\n";
         shader << "const M = " << config.M << ";\n";
-        shader << "const naturalStride = " << (inputColumnMajor ? config.M : config.K) << ";\n";
+        shader << "const naturalStride = " << (inputColumnMajor ? config.M : config.K) << div
+               << ";\n";
         // A stride well beyond the natural minimum makes the load's accessed range extend past
         // the bound sub-range of `input`, forcing a dynamic out-of-bounds access.
         shader << "const oobStride = naturalStride * 2;\n";
-        shader << "const kStoreOffset = K * M;\n";
+        shader << "const kStoreOffset = K * M" << div << ";\n";
         shader << "const SubgroupMaxSize = " << subgroupMaxSize << ";\n";
         shader << R"(
-@group(0) @binding(0) var<storage, read>       input : array<ComponentType>;
-@group(0) @binding(1) var<storage, read_write> output : array<ComponentType, kStoreOffset * 2>;
+@group(0) @binding(0) var<storage, read>       input : array<ArrayType>;
+@group(0) @binding(1) var<storage, read_write> output : array<ArrayType, kStoreOffset * 2>;
 
 @compute @workgroup_size(SubgroupMaxSize)
 fn main() {
@@ -1572,6 +1627,10 @@ TEST_P(SubgroupMatrix_OutOfBoundsTest, StoreOutOfBoundsDoesNotAffectDataOutsideR
     // TODO(crbug.com/566128737): Remove once Agility SDK and WARP support retail LinAlg.
     DAWN_SUPPRESS_TEST_IF(IsWARP());
 
+    // TODO(457429347): cooperative tensors don't support column major yet.
+    DAWN_SUPPRESS_TEST_IF(IsApple() && HasToggleEnabled("metal_enable_tensors") &&
+                          GetParam().mInputColumnMajor);
+
     wgpu::AdapterInfo info;
     wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
     info.nextInChain = &subgroupMatrixConfigs;
@@ -1597,6 +1656,10 @@ TEST_P(SubgroupMatrix_OutOfBoundsTest, LoadOutOfBoundsDoesNotAffectDataOutsideRa
 
     // TODO(crbug.com/566128737): Remove once Agility SDK and WARP support retail LinAlg.
     DAWN_SUPPRESS_TEST_IF(IsWARP());
+
+    // TODO(457429347): cooperative tensors don't support column major yet.
+    DAWN_SUPPRESS_TEST_IF(IsApple() && HasToggleEnabled("metal_enable_tensors") &&
+                          GetParam().mInputColumnMajor);
 
     wgpu::AdapterInfo info;
     wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
@@ -1672,6 +1735,8 @@ class SubgroupMatrix_MatrixConstructorTest : public DawnTestWithParams<MatrixCon
         if (config.componentType == wgpu::SubgroupMatrixComponentType::U8 ||
             config.componentType == wgpu::SubgroupMatrixComponentType::I8) {
             shader << "/4";
+        } else if (config.componentType == wgpu::SubgroupMatrixComponentType::Bf16) {
+            shader << "/2";
         }
         shader << ";\n";
 
@@ -1679,6 +1744,8 @@ class SubgroupMatrix_MatrixConstructorTest : public DawnTestWithParams<MatrixCon
         if (config.componentType == wgpu::SubgroupMatrixComponentType::U8 ||
             config.componentType == wgpu::SubgroupMatrixComponentType::I8) {
             shader << "/4";
+        } else if (config.componentType == wgpu::SubgroupMatrixComponentType::Bf16) {
+            shader << "/2";
         }
         shader << ";\n";
 
@@ -1891,6 +1958,8 @@ TEST_P(SubgroupMatrix_TiledMatrixMultiplyTest, MatrixMultiply) {
                                config.componentType == wgpu::SubgroupMatrixComponentType::I8;
         const bool res_8bit = config.resultComponentType == wgpu::SubgroupMatrixComponentType::U8 ||
                               config.resultComponentType == wgpu::SubgroupMatrixComponentType::I8;
+        const bool comp_bf16 = config.componentType == wgpu::SubgroupMatrixComponentType::Bf16;
+        const bool res_bf16 = config.resultComponentType == wgpu::SubgroupMatrixComponentType::Bf16;
 
         // Generate a shader that performs a matrix multiplication that matches the config.
         std::ostringstream shader;
@@ -1925,14 +1994,32 @@ TEST_P(SubgroupMatrix_TiledMatrixMultiplyTest, MatrixMultiply) {
         shader << "const kInputArraySize = (kMatrixK*kMatrixRows + kMatrixCols*kMatrixK)";
         if (comp_8bit) {
             shader << "/4";
+        } else if (comp_bf16) {
+            shader << "/2";
         }
         shader << ";\n";
 
         shader << "const kResultArraySize = (kMatrixCols*kMatrixRows)";
         if (res_8bit) {
             shader << "/4";
+        } else if (res_bf16) {
+            shader << "/2";
         }
         shader << ";\n";
+
+        std::string comp_div = "";
+        if (comp_8bit) {
+            comp_div = "/4";
+        } else if (comp_bf16) {
+            comp_div = "/2";
+        }
+
+        std::string res_div = "";
+        if (res_8bit) {
+            res_div = "/4";
+        } else if (res_bf16) {
+            res_div = "/2";
+        }
 
         shader << R"(
 @group(0) @binding(0) var<storage, read>       inputs : array<InputArrayType, kInputArraySize>;
@@ -1970,14 +2057,14 @@ fn main(@builtin(subgroup_id) sgid: u32,
     for (var r = sgid; r < kTileDim; r += num_subgroups) {
       for (var c = 0u; c < kTileDim; c++) {
         let lhs_offset = (k + r*M*kMatrixK))" +
-                      std::string(comp_8bit ? "/4" : "") + R"(;
+                      comp_div + R"(;
         let lhs_stride = kMatrixK)" +
-                      std::string(comp_8bit ? "/4" : "") + R"(;
+                      comp_div + R"(;
         let lhs = subgroupMatrixLoad<LeftType, row_major>(&inputs,  lhs_offset, lhs_stride);
         let rhs_offset = (c*N + k*kMatrixCols + kRhsBase))" +
-                      std::string(comp_8bit ? "/4" : "") + R"(;
+                      comp_div + R"(;
         let rhs_stride = kMatrixCols)" +
-                      std::string(comp_8bit ? "/4" : "") + R"(;
+                      comp_div + R"(;
         let rhs = subgroupMatrixLoad<RightType, row_major>(&inputs, rhs_offset, rhs_stride);
         acc[r][c] = subgroupMatrixMultiplyAccumulate(lhs, rhs, acc[r][c]);
       }
@@ -1988,9 +2075,9 @@ fn main(@builtin(subgroup_id) sgid: u32,
   for (var r = sgid; r < kTileDim; r += num_subgroups) {
     for (var c = 0u; c < kTileDim; c++) {
       let res_offset = (c*N + r*M*kMatrixCols))" +
-                      std::string(res_8bit ? "/4" : "") + R"(;
+                      res_div + R"(;
       let res_stride = kMatrixCols)" +
-                      std::string(res_8bit ? "/4" : "") + R"(;
+                      res_div + R"(;
       subgroupMatrixStore<row_major>(&output, res_offset, acc[r][c], res_stride);
     }
   }
@@ -2136,6 +2223,8 @@ class SubgroupMatrix_WorkgroupLoadStoreTest : public DawnTestWithParams<MatrixSt
         shader << "const kArraySize = K * M";
         if (Is8Bit(config.componentType)) {
             shader << " / 4";
+        } else if (config.componentType == wgpu::SubgroupMatrixComponentType::Bf16) {
+            shader << " / 2";
         }
         shader << ";\n";
 
@@ -2144,6 +2233,8 @@ class SubgroupMatrix_WorkgroupLoadStoreTest : public DawnTestWithParams<MatrixSt
         shader << "const kStride = " << (columnMajor ? "M" : "K");
         if (Is8Bit(config.componentType)) {
             shader << " / 4";
+        } else if (config.componentType == wgpu::SubgroupMatrixComponentType::Bf16) {
+            shader << " / 2";
         }
         shader << ";\n";
 
@@ -2234,6 +2325,10 @@ TEST_P(SubgroupMatrix_WorkgroupLoadStoreTest, WorkgroupLoadStore) {
 
     // TODO(crbug.com/566128737): Remove once Agility SDK and WARP support retail LinAlg.
     DAWN_SUPPRESS_TEST_IF(IsWARP());
+
+    // TODO(457429347): cooperative tensors don't support column major yet.
+    DAWN_SUPPRESS_TEST_IF(IsApple() && HasToggleEnabled("metal_enable_tensors") &&
+                          GetParam().mInputColumnMajor);
 
     bool columnMajor = GetParam().mInputColumnMajor;
 

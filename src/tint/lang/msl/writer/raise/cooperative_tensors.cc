@@ -314,7 +314,7 @@ struct State {
                 ReplaceSubgroupMatrixMultiplyAccumulate(c);
                 break;
             default:
-                TINT_IR_UNREACHABLE(ir);
+                TINT_IR_UNREACHABLE(ir) << c->FriendlyName();
         }
         c->Destroy();
     }
@@ -336,6 +336,9 @@ struct State {
                     // Declare a local variable to hold the result of the construct and then use a
                     // helper to fill it with the constructor value.
                     auto* var = MakeLocalTensorVar(c->Result()->Type(), c);
+                    if (value->Type() != sm_ty->Type()) {
+                        value = b.Convert(sm_ty->Type(), value);
+                    }
                     b.Call<ir::BuiltinCall>(ty.void_(), BuiltinFn::kFillCooperativeTensor, var,
                                             value);
                     c->Destroy();
@@ -554,7 +557,6 @@ struct State {
     void ReplaceSubgroupMatrixLoad(core::ir::CoreBuiltinCall* c) {
         auto* p = c->Args()[0];
         auto* offset = c->Args()[1];
-        auto* stride = b.InsertBitcastIfNeeded(ty.u32(), c->Args()[2]);
 
         auto majorness = std::get<core::Majorness>(c->ExplicitTemplateParams()[1]);
         if (majorness == core::Majorness::kColMajor) {
@@ -568,6 +570,7 @@ struct State {
             auto* sm_ty = c->Result()->Type()->As<core::type::SubgroupMatrix>();
 
             auto* tensor = ToCooperativeTensor(sm_ty);
+            auto* stride = b.InsertBitcastIfNeeded(ty.u32(), c->Args()[2]);
             auto* tensor_inline = MakeTensorInline("tint_src_tensor", p, offset, stride, tensor);
 
             // Declare a local variable to hold the loaded cooperative_tensor.
@@ -583,7 +586,6 @@ struct State {
         auto* p = c->Args()[0];
         auto* offset = c->Args()[1];
         auto* value = c->Args()[2];
-        auto* stride = b.InsertBitcastIfNeeded(ty.u32(), c->Args()[3]);
 
         auto majorness = std::get<core::Majorness>(c->ExplicitTemplateParams()[0]);
         if (majorness == core::Majorness::kColMajor) {
@@ -596,6 +598,7 @@ struct State {
                            std::holds_alternative<core::Majorness>(c->ExplicitTemplateParams()[0]));
 
             auto* tensor = value->Type()->UnwrapPtr()->As<type::CooperativeTensor>();
+            auto* stride = b.InsertBitcastIfNeeded(ty.u32(), c->Args()[3]);
             auto* tensor_inline = MakeTensorInline("tint_dst_tensor", p, offset, stride, tensor);
 
             // Store the cooperative_tensor value to the tensor_inline.
@@ -656,6 +659,8 @@ Result<SuccessType> CooperativeTensors(core::ir::Module& ir) {
 
     ir.properties.Add(core::ir::Property::kAllowNonCoreTypes);
     ir.properties.Add(core::ir::Property::kAllowPointerAndHandleInAggregates);
+    ir.properties.Add(core::ir::Property::kAllow16BitBFloats);
+    ir.properties.Add(core::ir::Property::kAllow16BitIntegers);
 
     return Success;
 }

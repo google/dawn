@@ -212,6 +212,9 @@ TEST_F(MslWriterTensorTest, MultipleGeometries) {
         b.Var("lhs_32x16x16", ty.ptr(function, ty.subgroup_matrix_left(ty.f16(), 16, 32)));
         b.Var("rhs_32x16x16", ty.ptr(function, ty.subgroup_matrix_right(ty.f16(), 16, 16)));
         b.Var("acc_32x16x16", ty.ptr(function, ty.subgroup_matrix_result(ty.f16(), 16, 32)));
+        b.Var("lhs_16x16x32", ty.ptr(function, ty.subgroup_matrix_result(ty.bf16(), 32, 16)));
+        b.Var("rhs_16x16x32", ty.ptr(function, ty.subgroup_matrix_result(ty.bf16(), 16, 32)));
+        b.Var("acc_16x16x32", ty.ptr(function, ty.subgroup_matrix_result(ty.bf16(), 16, 16)));
         b.Return(ep);
     });
 
@@ -277,6 +280,36 @@ using tint_destination_32_16_32_half_half =
   decltype(declval<thread tint_matmul2d_operation<32, 16, 32>>()
              .get_destination_cooperative_tensor<tint_left_input_32_16_32_half_half, tint_right_input_32_16_32_half_half, half>());
 
+using tint_left_input_16_32_32_bfloat_bfloat =
+  decltype(declval<thread tint_matmul2d_operation<16, 32, 32>>()
+             .get_left_input_cooperative_tensor<bfloat, bfloat, bfloat>());
+using tint_right_input_16_32_32_bfloat_bfloat =
+  decltype(declval<thread tint_matmul2d_operation<16, 32, 32>>()
+             .get_right_input_cooperative_tensor<bfloat, bfloat, bfloat>());
+using tint_destination_16_32_32_bfloat_bfloat =
+  decltype(declval<thread tint_matmul2d_operation<16, 32, 32>>()
+             .get_destination_cooperative_tensor<tint_left_input_16_32_32_bfloat_bfloat, tint_right_input_16_32_32_bfloat_bfloat, bfloat>());
+
+using tint_left_input_32_16_32_bfloat_bfloat =
+  decltype(declval<thread tint_matmul2d_operation<32, 16, 32>>()
+             .get_left_input_cooperative_tensor<bfloat, bfloat, bfloat>());
+using tint_right_input_32_16_32_bfloat_bfloat =
+  decltype(declval<thread tint_matmul2d_operation<32, 16, 32>>()
+             .get_right_input_cooperative_tensor<bfloat, bfloat, bfloat>());
+using tint_destination_32_16_32_bfloat_bfloat =
+  decltype(declval<thread tint_matmul2d_operation<32, 16, 32>>()
+             .get_destination_cooperative_tensor<tint_left_input_32_16_32_bfloat_bfloat, tint_right_input_32_16_32_bfloat_bfloat, bfloat>());
+
+using tint_left_input_16_16_32_bfloat_bfloat =
+  decltype(declval<thread tint_matmul2d_operation<16, 16, 32>>()
+             .get_left_input_cooperative_tensor<bfloat, bfloat, bfloat>());
+using tint_right_input_16_16_32_bfloat_bfloat =
+  decltype(declval<thread tint_matmul2d_operation<16, 16, 32>>()
+             .get_right_input_cooperative_tensor<bfloat, bfloat, bfloat>());
+using tint_destination_16_16_32_bfloat_bfloat =
+  decltype(declval<thread tint_matmul2d_operation<16, 16, 32>>()
+             .get_destination_cooperative_tensor<tint_left_input_16_16_32_bfloat_bfloat, tint_right_input_16_16_32_bfloat_bfloat, bfloat>());
+
 [[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   tint_left_input_32_32_32_half_half lhs_32x32x32;
@@ -291,6 +324,12 @@ kernel void entry() {
   (tint_fill_cooperative_tensor((&rhs_32x16x16), 0.0h));
   tint_destination_32_16_32_half_half acc_32x16x16;
   (tint_fill_cooperative_tensor((&acc_32x16x16), 0.0h));
+  tint_destination_16_32_32_bfloat_bfloat lhs_16x16x32;
+  (tint_fill_cooperative_tensor((&lhs_16x16x32), as_type<bfloat>(ushort(0))));
+  tint_destination_32_16_32_bfloat_bfloat rhs_16x16x32;
+  (tint_fill_cooperative_tensor((&rhs_16x16x32), as_type<bfloat>(ushort(0))));
+  tint_destination_16_16_32_bfloat_bfloat acc_16x16x32;
+  (tint_fill_cooperative_tensor((&acc_16x16x32), as_type<bfloat>(ushort(0))));
 }
 )");
 }

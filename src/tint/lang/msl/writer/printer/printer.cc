@@ -76,6 +76,7 @@
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
@@ -93,6 +94,7 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/string.h"
 #include "src/tint/lang/core/type/texture.h"
+#include "src/tint/lang/core/type/u16.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/u64.h"
 #include "src/tint/lang/core/type/u8.h"
@@ -1630,16 +1632,18 @@ class Printer : public tint::TextGenerator {
     /// @param ty the type to emit
     void EmitType(StringStream& out, const core::type::Type* ty) {
         tint::Switch(
-            ty,                                               //
-            [&](const core::type::Bool*) { out << "bool"; },  //
-            [&](const core::type::Void*) { out << "void"; },  //
-            [&](const core::type::F32*) { out << "float"; },  //
-            [&](const core::type::F16*) { out << "half"; },   //
-            [&](const core::type::I32*) { out << "int"; },    //
-            [&](const core::type::U32*) { out << "uint"; },   //
-            [&](const core::type::U64*) { out << "ulong"; },  //
-            [&](const core::type::I8*) { out << "char"; },    //
-            [&](const core::type::U8*) { out << "uchar"; },   //
+            ty,                                                 //
+            [&](const core::type::Bool*) { out << "bool"; },    //
+            [&](const core::type::Void*) { out << "void"; },    //
+            [&](const core::type::F32*) { out << "float"; },    //
+            [&](const core::type::F16*) { out << "half"; },     //
+            [&](const core::type::BF16*) { out << "bfloat"; },  //
+            [&](const core::type::I32*) { out << "int"; },      //
+            [&](const core::type::U16*) { out << "ushort"; },   //
+            [&](const core::type::U32*) { out << "uint"; },     //
+            [&](const core::type::U64*) { out << "ulong"; },    //
+            [&](const core::type::I8*) { out << "char"; },      //
+            [&](const core::type::U8*) { out << "uchar"; },     //
             [&](const core::type::Array* arr) { EmitArrayType(out, arr); },
             [&](const core::type::Vector* vec) { EmitVectorType(out, vec); },
             [&](const core::type::Matrix* mat) { EmitMatrixType(out, mat); },
@@ -1677,7 +1681,9 @@ class Printer : public tint::TextGenerator {
             },
             [&](const msl::type::TensorInline*) { out << "auto"; },  //
             [&](const core::type::SubgroupMatrix* sm) {
-                TINT_IR_ASSERT(ir_, (sm->Type()->IsAnyOf<core::type::F32, core::type::F16>()));
+                TINT_IR_ASSERT(
+                    ir_,
+                    (sm->Type()->IsAnyOf<core::type::F32, core::type::F16, core::type::BF16>()));
                 TINT_IR_ASSERT(ir_, sm->Columns() == 8);
                 TINT_IR_ASSERT(ir_, sm->Rows() == 8);
 
@@ -2188,6 +2194,12 @@ class Printer : public tint::TextGenerator {
         EmitConstant(out, c->Value());
     }
 
+    // MSL doesn't allow implicit conversions to bfloat and doesn't have a suffix for bfloat so
+    // instead we emit values as a pair of bitcasts.
+    void PrintBF16(StringStream& out, bf16 value) {
+        out << "as_type<bfloat>(ushort(" << value.BitsRepresentation() << "))";
+    }
+
     /// Handles core::constant::Value values
     /// @param out the stream to write the constant too
     /// @param c the constant to emit
@@ -2211,6 +2223,7 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::U64*) { out << c->ValueAs<u64>() << "ul"; },
             [&](const core::type::F32*) { PrintF32(out, c->ValueAs<f32>()); },
             [&](const core::type::F16*) { PrintF16(out, c->ValueAs<f16>()); },
+            [&](const core::type::BF16*) { PrintBF16(out, c->ValueAs<bf16>()); },
             [&](const core::type::Vector* v) {
                 EmitType(out, v);
 
@@ -2275,6 +2288,7 @@ class Printer : public tint::TextGenerator {
             ty, [&](const core::type::Bool*) { out << "false"; },                     //
             [&](const core::type::F16*) { out << "0.0h"; },                           //
             [&](const core::type::F32*) { out << "0.0f"; },                           //
+            [&](const core::type::BF16*) { PrintBF16(out, bf16(0)); },                //
             [&](const core::type::I32*) { out << "0"; },                              //
             [&](const core::type::U32*) { out << "0u"; },                             //
             [&](const core::type::U64*) { out << "0u"; },                             //

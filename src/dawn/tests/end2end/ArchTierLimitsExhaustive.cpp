@@ -673,6 +673,7 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, SemiExhaustiveTestSubgroupMatrixConfigs
             }, "Vulkan_Intel_R__Iris_R__Xe_Graphics__TGL_GT2");
   AddDevice({{F32, F32, 8, 8, 8, 32, 32},
             {F16, F16, 8, 8, 8, 32, 32},
+            {Bf16, Bf16, 8, 8, 8, 32, 32},
             }, "Metal_Apple_M2");
   AddDevice({{F16, F32, 16, 16, 16, 32, 64},
             {F16, F16, 16, 16, 16, 32, 64},

@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/bf16.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
@@ -71,6 +72,7 @@ struct State {
         return tint::Switch(
             ty,  //
             [&](const core::type::F16*) { return SubgroupMatrixType::kF16; },
+            [&](const core::type::BF16*) { return SubgroupMatrixType::kBF16; },
             [&](const core::type::F32*) { return SubgroupMatrixType::kF32; },
             [&](const core::type::U8*) { return SubgroupMatrixType::kU8; },
             [&](const core::type::I8*) { return SubgroupMatrixType::kI8; },

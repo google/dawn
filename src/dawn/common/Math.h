@@ -152,9 +152,13 @@ DAWN_FORCE_INLINE const T* AlignPtr(const T* ptr, size_t alignment) {
                                       ~(alignment - 1));
 }
 
+// Float32ToFloat16 and Float32ToBFloat16 use round-to-nearest-even (RTE) rounding.
 uint16_t Float32ToFloat16(float fp32);
 float Float16ToFloat32(uint16_t fp16);
 bool IsFloat16NaN(uint16_t fp16);
+
+uint16_t Float32ToBFloat16(float fp32);
+float BFloat16ToFloat32(uint16_t bf16);
 
 template <typename T>
 T FloatToUnorm(float value) {

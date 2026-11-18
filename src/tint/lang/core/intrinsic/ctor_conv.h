@@ -70,6 +70,7 @@ enum class CtorConv : uint8_t {
     kSubgroup_matrix_result,
     kU16,
     kU64,
+    kBf16,
     kNone,
 };
 

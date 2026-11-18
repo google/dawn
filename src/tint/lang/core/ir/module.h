@@ -64,6 +64,8 @@ enum class Property : uint8_t {
     kAllow64BitIntegers,
     /// Allows use of 16-bit floats.
     kAllow16BitFloats,
+    /// Allows use of 16-bit bfloats.
+    kAllow16BitBFloats,
     /// Allows input_attachment_index to be associated with any type
     kAllowAnyInputAttachmentIndexType,
     /// Allows lets to have any type.
@@ -152,6 +154,7 @@ auto& operator<<(STREAM& out, Property p) {
         CASE(AllowVectorElementPointer);
         CASE(AllowBufferTypes);
         CASE(Allow16BitFloats);
+        CASE(Allow16BitBFloats);
         CASE(DisallowVectorMinMaxClamp);
         CASE(AllowSwizzleView);
     }

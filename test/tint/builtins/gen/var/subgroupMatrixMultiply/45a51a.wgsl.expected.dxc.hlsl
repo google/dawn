@@ -1,0 +1,30 @@
+SKIP: FAILED
+
+$B1: {  # root
+  %prevent_dce:ptr<storage, array<f32, 1024>, read_write> = var @binding_point(0, 0)
+}
+
+%subgroupMatrixMultiply_45a51a = func():subgroup_matrix_result<f32, 8, 8> {
+  $B2: {
+    %3:subgroup_matrix_left<bf16, 8, 8> = construct
+    %arg_0:ptr<function, subgroup_matrix_left<bf16, 8, 8>, read_write> = var %3
+    %5:subgroup_matrix_right<bf16, 8, 8> = construct
+    %arg_1:ptr<function, subgroup_matrix_right<bf16, 8, 8>, read_write> = var %5
+    %7:subgroup_matrix_left<bf16, 8, 8> = load %arg_0
+    %8:subgroup_matrix_right<bf16, 8, 8> = load %arg_1
+    %9:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixMultiply<f32> %7, %8
+    %res:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var %9
+    %11:subgroup_matrix_result<f32, 8, 8> = load %res
+    ret %11
+  }
+}
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func():void {
+  $B3: {
+    %13:subgroup_matrix_result<f32, 8, 8> = call %subgroupMatrixMultiply_45a51a
+    %14:void = subgroupMatrixStore<row_major> %prevent_dce, 0i, %13, 16i
+    ret
+  }
+}
+Failed to generate: bf16 is not supported by the HLSL backend
+
+tint executable returned error: exit status 1

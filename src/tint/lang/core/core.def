@@ -389,6 +389,7 @@ match fiu32: f32 | i32 | u32
 match fi32_f16: f32 | i32 | f16
 match fi32: f32 | i32
 match f32_f16: f32 | f16
+match f32_bf16: f32 | bf16
 match iu32: i32 | u32
 match iu32_iu8: i32 | u32 | i8 | u8
 match iu8: i8 | u8
@@ -578,6 +579,17 @@ match workgroup_uniform_storage
 
 @must_use @const
   fn bitcast<T: u64>(vec2<u32>) -> T
+
+@must_use @const
+  fn bitcast<T: bf16>(bf16) -> T
+@must_use @const
+  fn bitcast<T: u16>(bf16) -> T
+@must_use @const
+  fn bitcast<T: bf16>(u16) -> T
+@must_use @const
+  fn bitcast<T: f16>(bf16) -> T
+@must_use @const
+  fn bitcast<T: bf16>(f16) -> T
 
 @must_use @const implicit(T: f32_f16)
   fn ceil(@test_value(1.5) T) -> T
@@ -1806,6 +1818,10 @@ type u64
   fn subgroupMatrixMultiply<TR: f32_f16>(subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
                                          subgroup_matrix<subgroup_matrix_kind_right, T, C, K>)
       -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
+@must_use @stage("compute") implicit(T: bf16, C: num, R: num, K: num)
+  fn subgroupMatrixMultiply<TR: f32_bf16>(subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
+                                         subgroup_matrix<subgroup_matrix_kind_right, T, C, K>)
+      -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
 @must_use @stage("compute") implicit(T: f32, C: num, R: num, K: num)
   fn subgroupMatrixMultiply<TR: f32>(subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
                                      subgroup_matrix<subgroup_matrix_kind_right, T, C, K>)
@@ -1820,6 +1836,11 @@ type u64
       -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
 
 @must_use @stage("compute") implicit(T: f16, TR: f32_f16, C: num, R: num, K: num)
+  fn subgroupMatrixMultiplyAccumulate(subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
+                                      subgroup_matrix<subgroup_matrix_kind_right, T, C, K>,
+                                      subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>)
+      -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
+@must_use @stage("compute") implicit(T: bf16, TR: f32_bf16, C: num, R: num, K: num)
   fn subgroupMatrixMultiplyAccumulate(subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
                                       subgroup_matrix<subgroup_matrix_kind_right, T, C, K>,
                                       subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>)
@@ -1846,6 +1867,8 @@ type u64
   fn subgroupMatrixScalarAdd(m: subgroup_matrix<K, i8, C, R>, s: i32) -> subgroup_matrix<K, i8, C, R>
 @must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
   fn subgroupMatrixScalarAdd(m: subgroup_matrix<K, u8, C, R>, s: u32) -> subgroup_matrix<K, u8, C, R>
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
+  fn subgroupMatrixScalarAdd(m: subgroup_matrix<K, bf16, C, R>, s: f32) -> subgroup_matrix<K, bf16, C, R>
 
 @must_use @stage("compute") implicit(K: subgroup_matrix_kind, T: fiu32_f16, C: num, R: num)
   fn subgroupMatrixScalarSubtract(m: subgroup_matrix<K, T, C, R>, s: T) -> subgroup_matrix<K, T, C, R>
@@ -1853,6 +1876,8 @@ type u64
   fn subgroupMatrixScalarSubtract(m: subgroup_matrix<K, i8, C, R>, s: i32) -> subgroup_matrix<K, i8, C, R>
 @must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
   fn subgroupMatrixScalarSubtract(m: subgroup_matrix<K, u8, C, R>, s: u32) -> subgroup_matrix<K, u8, C, R>
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
+  fn subgroupMatrixScalarSubtract(m: subgroup_matrix<K, bf16, C, R>, s: f32) -> subgroup_matrix<K, bf16, C, R>
 
 @must_use @stage("compute") implicit(K: subgroup_matrix_kind, T: fiu32_f16, C: num, R: num)
   fn subgroupMatrixScalarMultiply(m: subgroup_matrix<K, T, C, R>, s: T) -> subgroup_matrix<K, T, C, R>
@@ -1860,6 +1885,8 @@ type u64
   fn subgroupMatrixScalarMultiply(m: subgroup_matrix<K, i8, C, R>, s: i32) -> subgroup_matrix<K, i8, C, R>
 @must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
   fn subgroupMatrixScalarMultiply(m: subgroup_matrix<K, u8, C, R>, s: u32) -> subgroup_matrix<K, u8, C, R>
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
+  fn subgroupMatrixScalarMultiply(m: subgroup_matrix<K, bf16, C, R>, s: f32) -> subgroup_matrix<K, bf16, C, R>
 
 ////////////////////////////////////////
 // Buffer view
@@ -2060,7 +2087,7 @@ ctor mat4x4<T: f32_f16>(T, T, T, T,
 ////////////////////////////////////////////////////////////////////////////////
 @must_use @const implicit(T: scalar_no_f32) conv f32(T) -> f32
 @must_use @const implicit(T: scalar_no_f16) conv f16(T) -> f16
-@must_use @const implicit(T: scalar_no_u16) conv u16(T) -> i32
+@must_use @const implicit(T: scalar_no_u16) conv u16(T) -> u16
 @must_use @const implicit(T: scalar_no_i32) conv i32(T) -> i32
 @must_use @const implicit(T: scalar_no_u32) conv u32(T) -> u32
 @must_use @const implicit(T: scalar_no_bool) conv bool(T) -> bool
@@ -2106,6 +2133,7 @@ ctor mat4x4<T: f32_f16>(T, T, T, T,
 @must_use @const conv mat4x4<T: f32>(mat4x4<f16>) -> mat4x4<T>
 
 @must_use @const conv u64(u32) -> u64
+@must_use @const conv bf16(f32) -> bf16
 
 ////////////////////////////////////////////////////////////////////////////////
 // Unary Operators                                                            //
@@ -2116,6 +2144,7 @@ ctor mat4x4<T: f32_f16>(T, T, T, T,
 @must_use @const implicit(T: iu32) op ~ (T) -> T
 @must_use @const implicit(T: iu32, N: num) op ~ (vec<N, T>) -> vec<N, T>
 
+@must_use @const("UnaryMinus") op - (bf16) -> bf16
 @must_use @const("UnaryMinus") implicit(T: fi32_f16) op - (T) -> T
 @must_use @const("UnaryMinus") implicit(T: fi32_f16, N: num) op - (vec<N, T>) -> vec<N, T>
 

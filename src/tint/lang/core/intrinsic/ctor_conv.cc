@@ -88,6 +88,8 @@ const char* str(CtorConv i) {
             return "u16";
         case CtorConv::kU64:
             return "u64";
+        case CtorConv::kBf16:
+            return "bf16";
     }
     return "<unknown>";
 }

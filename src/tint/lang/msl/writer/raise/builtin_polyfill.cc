@@ -364,6 +364,9 @@ struct State {
         }
 
         b.InsertBefore(construct, [&] {
+            if (value->Type() != sm_ty->Type()) {
+                value = b.Convert(sm_ty->Type(), value);
+            }
             b.CallExplicitWithResult<msl::ir::BuiltinCall>(
                 construct->DetachResult(), msl::BuiltinFn::kMakeFilledSimdgroupMatrix,
                 Vector<core::ir::TemplateParameter, 1>{sm_ty}, value);
@@ -1335,7 +1338,13 @@ struct State {
     }
 
     core::ir::Value* One(const core::type::SubgroupMatrix* sm_ty) {
-        return sm_ty->DeepestElement()->Is<core::type::F32>() ? b.Constant(1_f) : b.Constant(1_h);
+        if (sm_ty->Type()->Is<core::type::F32>()) {
+            return b.Constant(1_f);
+        } else if (sm_ty->Type()->Is<core::type::F16>()) {
+            return b.Constant(1_h);
+        } else {
+            return b.Constant(bf16(1));
+        }
     }
 
     /// Replace a subgroupMatrixScalarAdd builtin.
@@ -1347,6 +1356,9 @@ struct State {
 
             auto* sm_ty = mat->Type()->As<core::type::SubgroupMatrix>();
             TINT_ASSERT(sm_ty);
+            if (scalar->Type() != sm_ty->Type()) {
+                scalar = b.Convert(sm_ty->Type(), scalar);
+            }
 
             auto* result_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kResult, sm_ty->Type(),
                                                  sm_ty->Columns(), sm_ty->Rows());
@@ -1381,6 +1393,9 @@ struct State {
 
             auto* sm_ty = mat->Type()->As<core::type::SubgroupMatrix>();
             TINT_ASSERT(sm_ty);
+            if (scalar->Type() != sm_ty->Type()) {
+                scalar = b.Convert(sm_ty->Type(), scalar);
+            }
 
             auto* result_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kResult, sm_ty->Type(),
                                                  sm_ty->Columns(), sm_ty->Rows());
@@ -1415,6 +1430,9 @@ struct State {
 
             auto* sm_ty = mat->Type()->As<core::type::SubgroupMatrix>();
             TINT_ASSERT(sm_ty);
+            if (scalar->Type() != sm_ty->Type()) {
+                scalar = b.Convert(sm_ty->Type(), scalar);
+            }
 
             auto* result_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kResult, sm_ty->Type(),
                                                  sm_ty->Columns(), sm_ty->Rows());
@@ -1542,6 +1560,8 @@ Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, const BuiltinPolyfillC
     State{ir, config}.Process();
 
     ir.properties.Add(core::ir::Property::kAllowNonCoreTypes);
+    ir.properties.Add(core::ir::Property::kAllow16BitBFloats);
+    ir.properties.Add(core::ir::Property::kAllow16BitIntegers);
 
     return Success;
 }

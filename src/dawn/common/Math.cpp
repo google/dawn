@@ -99,6 +99,19 @@ bool IsFloat16NaN(uint16_t fp16) {
     return (fp16 & 0x7FFF) > 0x7C00;
 }
 
+uint16_t Float32ToBFloat16(float fp32) {
+    uint32_t fp32i = std::bit_cast<uint32_t>(fp32);
+    if ((fp32i & 0x7FFFFFFFu) > 0x7F800000u) {  // NaN
+        return static_cast<uint16_t>((fp32i >> 16) | 0x0040u);
+    }
+    uint32_t roundingBias = 0x00007FFFu + ((fp32i >> 16) & 1u);
+    return static_cast<uint16_t>((fp32i + roundingBias) >> 16);
+}
+
+float BFloat16ToFloat32(uint16_t bf16) {
+    return std::bit_cast<float>(static_cast<uint32_t>(bf16) << 16);
+}
+
 // Based on the Khronos Data Format Specification 1.2 Section 13.3 sRGB transfer functions
 float SRGBToLinear(float srgb) {
     // sRGB is always used in unsigned normalized formats so clamp to [0.0, 1.0]
