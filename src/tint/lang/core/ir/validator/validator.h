@@ -80,6 +80,7 @@
 #include "src/tint/utils/containers/function_ref.h"
 #include "src/tint/utils/containers/hashset.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/result.h"
 #include "src/tint/utils/rtti/castable.h"
 #include "src/tint/utils/text/styled_text.h"
@@ -207,18 +208,39 @@ class Validator {
         uint32_t pointer_size{};
     };
 
-    /// ScopeStack holds a stack of values that are currently in scope
+    /// ScopeStack holds a stack of values that are currently in scope.
+    /// Popped scopes are cleared and kept, so their sets' storage is reused by later scopes
+    /// instead of being freed and reallocated for every block.
     struct ScopeStack {
-        void Push() { stack_.Push({}); }
-        void Pop() { stack_.Pop(); }
-        void Add(const Value* value) { stack_.Back().Add(value); }
-        bool Contains(const Value* value) {
-            return stack_.Any([&](auto& v) { return v.Contains(value); });
+        void Push() {
+            if (depth_ == stack_.Length()) {
+                stack_.Push({});
+            } else {
+                stack_[depth_].Clear();
+            }
+            depth_++;
         }
-        bool IsEmpty() const { return stack_.IsEmpty(); }
+        void Pop() {
+            TINT_ASSERT(depth_ > 0);
+            depth_--;
+        }
+        void Add(const Value* value) {
+            TINT_ASSERT(depth_ > 0);
+            stack_[depth_ - 1].Add(value);
+        }
+        bool Contains(const Value* value) {
+            for (size_t i = 0; i < depth_; i++) {
+                if (stack_[i].Contains(value)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        bool IsEmpty() const { return depth_ == 0; }
 
       private:
         Vector<Hashset<const Value*, 8>, 4> stack_;
+        size_t depth_ = 0;
     };
 
     // Returns true if we're validating in the context of WGSL. The other option is we're validating

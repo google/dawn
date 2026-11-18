@@ -1854,6 +1854,86 @@ TEST_F(IR_ValidatorTest, Scoping_UseAfterNestedDecl_InTerminator) {
 )")) << res.Failure();
 }
 
+// A value declared in a block is not in scope in a later sibling block at the same depth.
+TEST_F(IR_ValidatorTest, Scoping_UseDeclFromSiblingBlock) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        Let* decl = nullptr;
+        auto* first = b.If(true);
+        b.Append(first->True(), [&] {
+            decl = b.Let("decl", 42_u);
+            b.ExitIf(first);
+        });
+        auto* second = b.If(true);
+        b.Append(second->True(), [&] {
+            b.Let("use", decl);
+            b.ExitIf(second);
+        });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:11:24 error: let: %decl is not in scope
+        %use:u32 = let %decl
+                       ^^^^^
+)")) << res.Failure();
+}
+
+// As Scoping_UseDeclFromSiblingBlock, but with the blocks nested under different parents.
+TEST_F(IR_ValidatorTest, Scoping_UseDeclFromNestedSiblingBlock) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        Let* decl = nullptr;
+        auto* first = b.If(true);
+        b.Append(first->True(), [&] {
+            auto* inner = b.If(true);
+            b.Append(inner->True(), [&] {
+                decl = b.Let("decl", 42_u);
+                b.ExitIf(inner);
+            });
+            b.ExitIf(first);
+        });
+        auto* second = b.If(true);
+        b.Append(second->True(), [&] {
+            auto* inner = b.If(true);
+            b.Append(inner->True(), [&] {
+                b.Let("use", decl);
+                b.ExitIf(inner);
+            });
+            b.ExitIf(second);
+        });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:18:28 error: let: %decl is not in scope
+            %use:u32 = let %decl
+                           ^^^^^
+)")) << res.Failure();
+}
+
+// A value declared in an outer block stays in scope in each of a sequence of sibling blocks.
+TEST_F(IR_ValidatorTest, Scoping_UseOuterDeclInSiblingBlocks) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* outer = b.Let("outer", 42_u);
+        for (int i = 0; i < 3; i++) {
+            auto* if_ = b.If(true);
+            b.Append(if_->True(), [&] {
+                auto* inner = b.Let(b.Add(outer, 1_u));
+                b.Let(b.Add(inner, 1_u));
+                b.ExitIf(if_);
+            });
+        }
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Scoping_UseBeforeDecl_InControlFlow) {
     auto* f = b.Function("my_func", ty.void_());
     auto* decl = b.Let("decl", 42_u);
