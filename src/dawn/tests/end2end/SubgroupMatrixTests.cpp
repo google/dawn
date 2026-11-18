@@ -318,35 +318,97 @@ struct Matrix {
     }
 };
 
+template <typename T>
+void GenerateReferenceMatrixMultiplyInner(Matrix& expected,
+                                          const Matrix& lhs,
+                                          const Matrix& rhs,
+                                          const Matrix& acc,
+                                          uint32_t kBlockSize) {
+    constexpr uint32_t kMaxBlockSize = 64;
+
+    // Loop over blocks of the result.
+    for (uint32_t r_blk = 0; r_blk < expected.rows; r_blk += kMaxBlockSize) {
+        for (uint32_t c_blk = 0; c_blk < expected.cols; c_blk += kMaxBlockSize) {
+            const uint32_t r_blk_size = std::min(kMaxBlockSize, expected.rows - r_blk);
+            const uint32_t c_blk_size = std::min(kMaxBlockSize, expected.cols - c_blk);
+
+            // Initialize block with accumulator values.
+            T ref[kMaxBlockSize][kMaxBlockSize];
+            for (uint32_t r = 0; r < r_blk_size; r++) {
+                for (uint32_t c = 0; c < c_blk_size; c++) {
+                    if constexpr (std::is_same_v<T, float>) {
+                        ref[r][c] = acc.GetFloat(c_blk + c, r_blk + r);
+                    } else {
+                        ref[r][c] = acc.GetInt(c_blk + c, r_blk + r);
+                    }
+                }
+            }
+
+            // Inner loop within the block.
+            for (uint32_t k_blk = 0; k_blk < lhs.cols; k_blk += kBlockSize) {
+                T block_result[kMaxBlockSize][kMaxBlockSize] = {};
+                for (uint32_t k = k_blk; k < k_blk + kBlockSize; k++) {
+                    // Load a row of the RHS matrix.
+                    T rhs_row[kMaxBlockSize];
+                    for (uint32_t c = 0; c < c_blk_size; c++) {
+                        if constexpr (std::is_same_v<T, float>) {
+                            rhs_row[c] = rhs.GetFloat(c_blk + c, k);
+                        } else {
+                            rhs_row[c] = rhs.GetInt(c_blk + c, k);
+                        }
+                    }
+
+                    // Loop over LHS columns and multiply each of them by the RHS row.
+                    for (uint32_t r = 0; r < r_blk_size; r++) {
+                        T a;
+                        if constexpr (std::is_same_v<T, float>) {
+                            a = lhs.GetFloat(k, r_blk + r);
+                        } else {
+                            a = lhs.GetInt(k, r_blk + r);
+                        }
+
+                        for (uint32_t c = 0; c < c_blk_size; c++) {
+                            block_result[r][c] += a * rhs_row[c];
+                        }
+                    }
+                }
+
+                for (uint32_t r = 0; r < r_blk_size; r++) {
+                    for (uint32_t c = 0; c < c_blk_size; c++) {
+                        ref[r][c] += block_result[r][c];
+                        if constexpr (std::is_same_v<T, float>) {
+                            if (expected.component_type == wgpu::SubgroupMatrixComponentType::F16) {
+                                ref[r][c] = Float16ToFloat32(Float32ToFloat16(ref[r][c]));
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Write block to final result.
+            for (uint32_t r = 0; r < r_blk_size; r++) {
+                for (uint32_t c = 0; c < c_blk_size; c++) {
+                    if constexpr (std::is_same_v<T, float>) {
+                        expected.SetFloat(ref[r][c], c_blk + c, r_blk + r);
+                    } else {
+                        expected.SetInt(ref[r][c], c_blk + c, r_blk + r);
+                    }
+                }
+            }
+        }
+    }
+}
+
 void GenerateReferenceMatrixMultiply(Matrix& expected,
                                      const Matrix& lhs,
                                      const Matrix& rhs,
                                      const Matrix& acc,
-                                     uint32_t blockSize) {
+                                     uint32_t kBlockSize) {
     const bool is_float = IsFloatComponentType(expected.component_type);
-    for (uint32_t r = 0; r < expected.rows; r++) {
-        for (uint32_t c = 0; c < expected.cols; c++) {
-            if (is_float) {
-                float ref = acc.GetFloat(c, r);
-                for (uint32_t block = 0; block < lhs.cols; block += blockSize) {
-                    float blockResult = 0.0f;
-                    for (uint32_t k = 0; k < blockSize; k++) {
-                        blockResult += lhs.GetFloat(block + k, r) * rhs.GetFloat(c, block + k);
-                    }
-                    ref += blockResult;
-                    if (expected.component_type == wgpu::SubgroupMatrixComponentType::F16) {
-                        ref = Float16ToFloat32(Float32ToFloat16(ref));
-                    }
-                }
-                expected.SetFloat(ref, c, r);
-            } else {
-                int64_t ref = acc.GetInt(c, r);
-                for (uint32_t k = 0; k < lhs.cols; k++) {
-                    ref += lhs.GetInt(k, r) * rhs.GetInt(c, k);
-                }
-                expected.SetInt(ref, c, r);
-            }
-        }
+    if (is_float) {
+        GenerateReferenceMatrixMultiplyInner<float>(expected, lhs, rhs, acc, kBlockSize);
+    } else {
+        GenerateReferenceMatrixMultiplyInner<int64_t>(expected, lhs, rhs, acc, kBlockSize);
     }
 }
 
