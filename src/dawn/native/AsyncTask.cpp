@@ -33,12 +33,12 @@
 
 namespace dawn::native {
 
-AsyncTask::State::State(AsyncTaskFunction task) : task(task) {
-    DAWN_ASSERT(task);
+AsyncTask::State::State(AsyncTaskFunction task) : task(std::move(task)) {
+    DAWN_ASSERT(this->task);
 }
 
 AsyncTask::AsyncTask(AsyncTaskManager* taskManager, AsyncTaskFunction task)
-    : mTaskManager(taskManager), mState(task) {
+    : mTaskManager(taskManager), mState(std::move(task)) {
     DAWN_ASSERT(mTaskManager);
 }
 

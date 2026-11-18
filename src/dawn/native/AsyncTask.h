@@ -35,6 +35,7 @@
 #include <vector>
 
 #include "absl/container/flat_hash_set.h"
+#include "absl/functional/any_invocable.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "src/dawn/common/MutexProtected.h"
 #include "src/dawn/common/Ref.h"
@@ -63,7 +64,7 @@ enum class AsyncTaskState : uint8_t {
     CompletedCallbacks = 2,
 };
 
-using AsyncTaskFunction = std::function<void()>;
+using AsyncTaskFunction = absl::AnyInvocable<void()>;
 using AsyncTaskCompletionCallback = std::function<void()>;
 
 class AsyncTask : public RefCounted {
