@@ -69,11 +69,11 @@ static_library("wgpu_utils") {
   ]
 
   public_deps = [
+    ":dawn_utils_gen",
     "${dawn_abseil_dir}:absl",
     "${dawn_root}/include/dawn:cpp_headers",
     "${dawn_root}/src/dawn/common",
   ]
-  deps = [ ":dawn_utils_gen" ]
 }
 
 static_library("test_utils") {

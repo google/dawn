@@ -193,7 +193,6 @@ if (dawn_standalone && (dawn_enable_d3d11 || dawn_enable_d3d12)) {
 source_set("sources") {
   deps = [
     ":headers",
-    ":utils_gen",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/utils:system_utils",
     "${dawn_root}/src/tint/api",
@@ -220,6 +219,7 @@ source_set("sources") {
   # FooBackend.cpp need to be public deps so they are propagated to the
   # dawn native target
   public_deps = [
+    ":utils_gen",
     "${dawn_abseil_dir}:absl",
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
     "${dawn_root}/src/dawn/platform",

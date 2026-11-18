@@ -232,8 +232,8 @@ dawn_nocompile_source_set("nocompile_sources") {
 }
 
 dawn_test("dawn_unittests") {
+  public_deps = [ ":mock_webgpu_gen" ]
   deps = [
-    ":mock_webgpu_gen",
     ":native_mocks_sources",
     ":nocompile_sources",
     ":partition_alloc_support",

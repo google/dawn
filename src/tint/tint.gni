@@ -51,6 +51,11 @@ template("libtint_source_set") {
       deps = []
     }
 
+    if (!defined(invoker.public_deps)) {
+      public_deps = []
+    }
+    public_deps += [ "${tint_src_dir}:generate_sources" ]
+
     if (defined(invoker.configs)) {
       configs += invoker.configs
     }
@@ -177,6 +182,11 @@ template("tint_fuzz_source_set") {
     if (!defined(invoker.deps)) {
       deps = []
     }
+
+    if (!defined(invoker.public_deps)) {
+      public_deps = []
+    }
+    public_deps += [ "${tint_src_dir}:generate_sources" ]
 
     if (defined(invoker.configs)) {
       configs += invoker.configs

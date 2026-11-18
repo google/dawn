@@ -96,7 +96,6 @@ dawn_json_generator("gen") {
 
 source_set("common_sources") {
   deps = [
-    ":gen",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/tint/lang/wgsl",
   ]
@@ -125,6 +124,7 @@ source_set("common_sources") {
   ]
 
   public_deps = [
+    ":gen",
     ":headers",
     "${dawn_abseil_dir}:absl",
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
@@ -133,7 +133,6 @@ source_set("common_sources") {
 
 source_set("client_sources") {
   deps = [
-    ":gen",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/tint/lang/wgsl",
   ]
@@ -179,6 +178,7 @@ source_set("client_sources") {
 
   public_deps = [
     ":common_sources",
+    ":gen",
     ":headers",
     "${dawn_abseil_dir}:absl",
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
@@ -187,7 +187,6 @@ source_set("client_sources") {
 
 source_set("server_sources") {
   deps = [
-    ":gen",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/tint/lang/wgsl",
   ]
@@ -215,6 +214,7 @@ source_set("server_sources") {
 
   public_deps = [
     ":common_sources",
+    ":gen",
     ":headers",
     "${dawn_abseil_dir}:absl",
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
