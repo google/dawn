@@ -31,6 +31,7 @@
 #include "src/dawn/native/ComputePipeline.h"
 #include "src/dawn/native/CreatePipelineAsyncEvent.h"
 #include "src/dawn/native/d3d/d3d_platform.h"
+#include "src/dawn/native/d3d11/CreateShaderTaskD3D11.h"
 
 namespace dawn::native::d3d11 {
 
@@ -44,9 +45,9 @@ class ComputePipeline final : public ComputePipelineBase {
         Device* device,
         const UnpackedPtr<ComputePipelineDescriptor>& descriptor);
 
-    void ApplyNow(PipelineStateTracker* tracker);
+    MaybeError ApplyNow(PipelineStateTracker* tracker);
 
-    ID3D11ComputeShader* GetD3D11ComputeShaderForTesting();
+    ComPtr<ID3D11ComputeShader> GetD3D11ComputeShaderForTesting();
 
     bool UsesNumWorkgroups() const;
 
@@ -57,6 +58,7 @@ class ComputePipeline final : public ComputePipelineBase {
 
     void SetLabelImpl() override;
 
+    Ref<FutureComPtr<ID3D11ComputeShader>> mComputeShaderFuture;
     ComPtr<ID3D11ComputeShader> mComputeShader;
 };
 

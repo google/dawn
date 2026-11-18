@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <limits>
 #include <sstream>
+#include <string>
 #include <utility>
 
 #include "dawn/native/D3D11Backend.h"
@@ -50,6 +51,7 @@
 #include "src/dawn/native/d3d11/CommandBufferD3D11.h"
 #include "src/dawn/native/d3d11/CommandRecordingContextD3D11.h"
 #include "src/dawn/native/d3d11/ComputePipelineD3D11.h"
+#include "src/dawn/native/d3d11/CreateShaderTaskD3D11.h"
 #include "src/dawn/native/d3d11/PhysicalDeviceD3D11.h"
 #include "src/dawn/native/d3d11/PipelineLayoutD3D11.h"
 #include "src/dawn/native/d3d11/PlatformFunctionsD3D11.h"
@@ -720,43 +722,63 @@ void Device::ReturnStagingBuffer(Ref<BufferBase>&& buffer) {
     }
 }
 
-ResultOrError<ComPtr<ID3D11VertexShader>> Device::GetOrCreateVertexShader(
-    const d3d::CompiledShader& args) {
-    return mVertexShaderCache.GetOrCreate(
-        args.sha3, [&](const Sha3_256::Output&) -> ResultOrError<ComPtr<ID3D11VertexShader>> {
-            ComPtr<ID3D11VertexShader> vs;
-            DAWN_TRY(
-                CheckHRESULT(mD3d11Device->CreateVertexShader(args.shaderBlob.DataPtr(),
-                                                              args.shaderBlob.Size(), nullptr, &vs),
-                             "D3D11 create vertex shader"));
-            return vs;
+template <SingleShaderStage kShaderStage>
+auto Device::GetOrCreateShader(d3d::CompiledShader args, const std::string& label) {
+    using ShaderComType = typename detail::CreateShaderTaskTraits<kShaderStage>::ComType;
+
+    ShaderObjectCache<ShaderComType>* cache = nullptr;
+    if constexpr (kShaderStage == SingleShaderStage::Vertex) {
+        cache = &mVertexShaderCache;
+    } else if constexpr (kShaderStage == SingleShaderStage::Fragment) {
+        cache = &mPixelShaderCache;
+    } else if constexpr (kShaderStage == SingleShaderStage::Compute) {
+        cache = &mComputeShaderCache;
+    } else {
+        DAWN_UNREACHABLE();
+    }
+
+    auto result = cache->GetOrCreate(
+        args.sha3, [&](const Sha3_256::Output&) -> ResultOrError<Ref<FutureComPtr<ShaderComType>>> {
+            Ref<FutureComPtr<ShaderComType>> future = AcquireRef(new FutureComPtr<ShaderComType>());
+
+            auto task = CreateShaderTask<kShaderStage>(mD3d11Device, GetPlatform(), std::move(args),
+                                                       future, label);
+
+            if (!IsToggleEnabled(Toggle::D3D11AsyncShaderCreations) || mIsDebugLayerEnabled) {
+                // Disable async shader creation when the toggle is disabled or the D3D11 debug
+                // layer is enabled. The debug layer uses a mutex that can cause a deadlock if we
+                // wait for shader compilation inside Queue::Submit(). See
+                // https://crbug.com/459978952
+                // Note: we cannot set D3D11AsyncShaderCreations toggle before creating this
+                // device instance because users can enable the debug layer externally via control
+                // panel. So the existence of a debug layer is only known after we create a D3D11
+                // device.
+                task();
+            } else {
+                GetAsyncTaskManager()->PostTask<AsyncTask>(std::move(task));
+            }
+
+            return future;
         });
+
+    // It is not expected for the FutureComPtr creation to fail.
+    DAWN_ASSERT(result.IsSuccess());
+    return result.AcquireSuccess();
 }
 
-ResultOrError<ComPtr<ID3D11PixelShader>> Device::GetOrCreatePixelShader(
-    const d3d::CompiledShader& args) {
-    return mPixelShaderCache.GetOrCreate(
-        args.sha3, [&](const Sha3_256::Output&) -> ResultOrError<ComPtr<ID3D11PixelShader>> {
-            ComPtr<ID3D11PixelShader> ps;
-            DAWN_TRY(
-                CheckHRESULT(mD3d11Device->CreatePixelShader(args.shaderBlob.DataPtr(),
-                                                             args.shaderBlob.Size(), nullptr, &ps),
-                             "D3D11 create pixel shader"));
-            return ps;
-        });
+Ref<FutureComPtr<ID3D11VertexShader>> Device::GetOrCreateVertexShader(d3d::CompiledShader args,
+                                                                      const std::string& label) {
+    return GetOrCreateShader<SingleShaderStage::Vertex>(std::move(args), label);
 }
 
-ResultOrError<ComPtr<ID3D11ComputeShader>> Device::GetOrCreateComputeShader(
-    const d3d::CompiledShader& args) {
-    return mComputeShaderCache.GetOrCreate(
-        args.sha3, [&](const Sha3_256::Output&) -> ResultOrError<ComPtr<ID3D11ComputeShader>> {
-            ComPtr<ID3D11ComputeShader> cs;
-            DAWN_TRY(
-                CheckHRESULT(mD3d11Device->CreateComputeShader(
-                                 args.shaderBlob.DataPtr(), args.shaderBlob.Size(), nullptr, &cs),
-                             "D3D11 create compute shader"));
-            return cs;
-        });
+Ref<FutureComPtr<ID3D11PixelShader>> Device::GetOrCreatePixelShader(d3d::CompiledShader args,
+                                                                    const std::string& label) {
+    return GetOrCreateShader<SingleShaderStage::Fragment>(std::move(args), label);
+}
+
+Ref<FutureComPtr<ID3D11ComputeShader>> Device::GetOrCreateComputeShader(d3d::CompiledShader args,
+                                                                        const std::string& label) {
+    return GetOrCreateShader<SingleShaderStage::Compute>(std::move(args), label);
 }
 
 }  // namespace dawn::native::d3d11
