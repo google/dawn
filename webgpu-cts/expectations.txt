@@ -588,7 +588,7 @@ crbug.com/407133969 [ intel-0x3e9b mac ] webgpu:web_platform,external_texture,vi
 crbug.com/407133969 [ apple mac webgpu-adapter-swiftshader ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-vp9-bt601-rotate-90.mp4";* [ Failure ]
 
 # D3D debug layer bug which reports that the same subresource of a 3d texture cannot be written twice.
-crbug.com/42241218 [ arch-arm64 dawn-backend-validation qualcomm-0x36334330 renderer-skia-gl webgpu-dxc-enabled win11 ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_mip_level:format="*";sameTexture=true [ Failure ]
+crbug.com/42241218 [ arch-arm64 dawn-backend-validation qualcomm-0x36334330 webgpu-dxc-enabled win11 ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_mip_level:format="*";sameTexture=true [ Failure ]
 crbug.com/42241218 [ arch-x86_64 dawn-backend-validation release-x64 renderer-graphite-dawn-d3d11 win10 ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_mip_level:format="*";sameTexture=true [ Failure ]
 
 # crbug.com/360916910:
