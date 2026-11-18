@@ -50,13 +50,10 @@ if (tint_build_fuzzer_vulkan_support && tint_build_fuzzers &&
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/cmd/fuzz/common",
       "${tint_src_dir}/cmd/fuzz/ir:fuzz",
-      "${tint_src_dir}/cmd/fuzz/wgsl:fuzz",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/ir",
       "${tint_src_dir}/lang/core/ir/binary",
-      "${tint_src_dir}/lang/core/ir/binary:fuzz",
-      "${tint_src_dir}/lang/core/ir/transform:fuzz",
       "${tint_src_dir}/lang/core/ir/validator",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/utils",
@@ -73,31 +70,8 @@ if (tint_build_fuzzer_vulkan_support && tint_build_fuzzers &&
       "${tint_src_dir}/utils/text",
     ]
 
-    if (tint_build_glsl_writer) {
-      deps += [ "${tint_src_dir}/lang/glsl/writer:fuzz" ]
-    }
-
-    if (tint_build_hlsl_writer) {
-      deps += [
-        "${tint_src_dir}:dxcompiler-for-fuzzer",
-        "${tint_src_dir}/lang/hlsl/writer:fuzz",
-        "${tint_src_dir}/lang/hlsl/writer/raise:fuzz",
-      ]
-    }
-
-    if (tint_build_msl_writer) {
-      deps += [ "${tint_src_dir}/lang/msl/writer:fuzz" ]
-    }
-
     if (tint_build_spv_writer) {
       deps += [ "${tint_src_dir}/lang/spirv/writer:fuzz" ]
-    }
-
-    if (tint_build_wgsl_writer) {
-      deps += [
-        "${tint_src_dir}/lang/wgsl/writer:fuzz",
-        "${tint_src_dir}/lang/wgsl/writer/raise:fuzz",
-      ]
     }
   }
 }

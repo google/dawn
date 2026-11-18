@@ -1,0 +1,42 @@
+# UBSan ignorelist for Mesa.
+#
+# Mesa is explicitly not UBSAN clean, but makes a best effort to
+# attempt to resolve findings.
+#
+# Upstream Mesa's `debian-x86_64-ubsan` CI job builds llvmpipe/swrast
+# with `-D b_sanitize=undefined` but sets `RUN_MESON_TESTS: "false"`,
+# so these runtime UBSan patterns are not caught or suppressed
+# upstream.
+
+[null]
+# `LIST_FOR_EACH_ENTRY` / `LIST_FOR_EACH_ENTRY_SAFE` (in
+# `src/util/list.h`) follow an intrusive linked list pattern which is
+# known to trigger UBSAN. Specifically it computes a container pointer
+# from the list head sentinel via `offsetof` on loop termination,
+# triggering `-fsanitize=null`.
+src:*third_party/mesa/src/src/util/u_queue.c
+src:*third_party/mesa/src/src/util/u_shader_variant_cache.c
+fun:util_queue_killall_threads_locked
+
+# `lp_fence_reference` (in `lp_fence.h`) passes `&old->reference` /
+# `&f->reference` to `pipe_reference()` when `old` or `f` may be
+# `NULL`, relying on `reference` being at offset `0` and
+# `pipe_reference()` checking for `NULL` internally, which triggers
+# `-fsanitize=null`.
+fun:lp_fence_reference
+
+[object-size]
+# Need to replicate the [null] suppressions here, because depending on
+# optimizations being applied, they may also trigger [object-size].
+# The error message confusingly will point to the first finding found,
+# even if it is suppressed, if any of the found findings trigger.
+src:*third_party/mesa/src/src/util/u_queue.c
+src:*third_party/mesa/src/src/util/u_shader_variant_cache.c
+fun:util_queue_killall_threads_locked
+fun:lp_fence_reference
+
+[nonnull-attribute]
+# `memset(scene->tiles, 0, sizeof(struct cmd_bin) *
+# scene->num_alloced_tiles)` passes `NULL` with size `0` when no tiles
+# were allocated, triggering `-fsanitize=nonnull-attribute`.
+src:*third_party/mesa/src/src/gallium/drivers/llvmpipe/lp_scene.c

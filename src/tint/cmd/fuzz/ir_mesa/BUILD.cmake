@@ -48,13 +48,10 @@ tint_target_add_dependencies(tint_cmd_fuzz_ir_mesa_fuzz_cmd fuzz_cmd
   tint_api_common
   tint_cmd_fuzz_common
   tint_cmd_fuzz_ir_fuzz
-  tint_cmd_fuzz_wgsl_fuzz
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_ir
   tint_lang_core_ir_binary
-  tint_lang_core_ir_binary_fuzz
-  tint_lang_core_ir_transform_fuzz
   tint_lang_core_ir_validator
   tint_lang_core_type
   tint_utils
@@ -77,40 +74,11 @@ tint_target_add_external_dependencies(tint_cmd_fuzz_ir_mesa_fuzz_cmd fuzz_cmd
   "src_utils"
 )
 
-if(TINT_BUILD_GLSL_WRITER)
-  tint_target_add_dependencies(tint_cmd_fuzz_ir_mesa_fuzz_cmd fuzz_cmd
-    tint_lang_glsl_writer_fuzz
-  )
-endif(TINT_BUILD_GLSL_WRITER)
-
-if(TINT_BUILD_HLSL_WRITER)
-  tint_target_add_dependencies(tint_cmd_fuzz_ir_mesa_fuzz_cmd fuzz_cmd
-    tint_lang_hlsl_writer_raise_fuzz
-    tint_lang_hlsl_writer_fuzz
-  )
-  tint_target_add_external_dependencies(tint_cmd_fuzz_ir_mesa_fuzz_cmd fuzz_cmd
-    "dxcompiler-for-fuzzer"
-  )
-endif(TINT_BUILD_HLSL_WRITER)
-
-if(TINT_BUILD_MSL_WRITER)
-  tint_target_add_dependencies(tint_cmd_fuzz_ir_mesa_fuzz_cmd fuzz_cmd
-    tint_lang_msl_writer_fuzz
-  )
-endif(TINT_BUILD_MSL_WRITER)
-
 if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_cmd_fuzz_ir_mesa_fuzz_cmd fuzz_cmd
     tint_lang_spirv_writer_fuzz
   )
 endif(TINT_BUILD_SPV_WRITER)
-
-if(TINT_BUILD_WGSL_WRITER)
-  tint_target_add_dependencies(tint_cmd_fuzz_ir_mesa_fuzz_cmd fuzz_cmd
-    tint_lang_wgsl_writer_raise_fuzz
-    tint_lang_wgsl_writer_fuzz
-  )
-endif(TINT_BUILD_WGSL_WRITER)
 
 tint_target_set_output_name(tint_cmd_fuzz_ir_mesa_fuzz_cmd fuzz_cmd "tint_ir_mesa_fuzzer")
 

@@ -27,6 +27,7 @@
 
 import("//build/config/clang/clang.gni")
 import("//build/config/coverage/coverage.gni")
+import("//build/config/sanitizers/sanitizers.gni")
 import("../../scripts/dawn_overrides_with_defaults.gni")
 import("mesa_overrides_with_defaults.gni")
 import("mesa_sources.gni")
@@ -923,6 +924,11 @@ config("mesa_common_config") {
   cflags = mesa_common_cflags +
            [ "-isystem" +
              rebase_path("${mesa_llvm_dev_dir}/include", root_build_dir) ]
+  if (is_ubsan) {
+    cflags += [ "-fsanitize-ignorelist=" +
+                rebase_path("ubsan_ignorelist.txt", root_build_dir) ]
+    inputs = [ "ubsan_ignorelist.txt" ]
+  }
   cflags_c = mesa_common_cflags_c
   cflags_cc = mesa_common_cflags_cc
 
@@ -987,11 +993,21 @@ template("_mesa_source_set") {
       "//build/config/clang:unsafe_buffers",
       "//build/config/compiler:chromium_code",
       "//build/config/compiler:runtime_library",
+
+      # Bypass default_sanitizer_flags because it enables ubsan_vptr_flags
+      # (incompatible with -fno-rtti and prebuilt libstdc++ libLLVM*.a) as
+      # well as unsupported sanitizers; re-enable only the supported ASan,
+      # non-vptr UBSan, and coverage configs below.
       "//build/config/sanitizers:default_sanitizer_flags",
     ]
     configs += [
       "//build/config/compiler:no_chromium_code",
       "//build/config/posix:runtime_library",
+      "//build/config/sanitizers:common_sanitizer_flags",
+      "//build/config/sanitizers:coverage_flags",
+      "//build/config/sanitizers:asan_flags",
+      "//build/config/sanitizers:ubsan_flags",
+      "//build/config/sanitizers:ubsan_no_recover",
       ":mesa_common_config",
     ]
 
@@ -1197,6 +1213,25 @@ shared_library("vulkan_lvp") {
     "-Wl,--exclude-libs,ALL",
     "-Wl,-rpath,\$ORIGIN",
   ]
+
+  # asan_flags, ubsan_flags, and coverage_flags used above only
+  # populate cflags and are normally used in conjunction with
+  # default_sanitizer_ldflags to set the correct ldflags, but since
+  # that pulls in flags that are not supported by the Mesa target need
+  # to manually specify the missing ldflags.
+  if (is_asan) {
+    ldflags += [ "-fsanitize=address" ]
+  }
+  if (is_ubsan) {
+    ldflags += [ "-fsanitize=undefined" ]
+  }
+  if (use_sanitizer_coverage) {
+    if (use_libfuzzer) {
+      ldflags += [ "-fsanitize=fuzzer-no-link" ]
+    } else {
+      ldflags += [ "-fsanitize-coverage=$sanitizer_coverage_flags" ]
+    }
+  }
   if (use_clang_coverage) {
     ldflags += [
       "-fprofile-instr-generate",

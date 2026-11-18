@@ -918,6 +918,34 @@ function(_mesa_source_set target_name)
             "$<$<COMPILE_LANGUAGE:C,CXX>:-fprofile-instr-generate;-fcoverage-mapping>"
         )
     endif()
+    if(DAWN_ENABLE_ASAN)
+        target_compile_options(${target_name} PRIVATE
+            "$<$<COMPILE_LANGUAGE:C,CXX>:-fsanitize=address>"
+        )
+        if(COMPILER_IS_CLANG)
+            target_compile_options(${target_name} PRIVATE
+                "$<$<COMPILE_LANGUAGE:C,CXX>:-fno-sanitize-address-globals-dead-stripping>"
+            )
+        endif()
+    endif()
+    if(DAWN_ENABLE_UBSAN)
+        target_compile_options(${target_name} PRIVATE
+            "$<$<COMPILE_LANGUAGE:C,CXX>:-fsanitize=undefined;-fno-sanitize=vptr>"
+        )
+        if(COMPILER_IS_CLANG)
+            target_compile_options(${target_name} PRIVATE
+                "$<$<COMPILE_LANGUAGE:C,CXX>:-fsanitize-ignorelist=${CMAKE_CURRENT_SOURCE_DIR}/ubsan_ignorelist.txt>"
+            )
+            set_property(SOURCE ${_resolved_sources} APPEND PROPERTY
+                OBJECT_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/ubsan_ignorelist.txt"
+            )
+        endif()
+    endif()
+    if(TINT_BUILD_FUZZERS AND COMPILER_IS_CLANG)
+        target_compile_options(${target_name} PRIVATE
+            "$<$<COMPILE_LANGUAGE:C,CXX>:-fsanitize=fuzzer-no-link>"
+        )
+    endif()
 
     add_dependencies(${target_name} mesa_all_codegen)
     if(ARG_DEPS)
@@ -1117,8 +1145,11 @@ if(_mesa_lld)
     target_link_options(vulkan_lvp PRIVATE "-fuse-ld=lld")
 endif()
 
+if(NOT DAWN_ENABLE_ASAN AND NOT DAWN_ENABLE_UBSAN AND NOT (TINT_BUILD_FUZZERS AND COMPILER_IS_CLANG))
+    target_link_options(vulkan_lvp PRIVATE "-Wl,--no-undefined")
+endif()
+
 target_link_options(vulkan_lvp PRIVATE
-    "-Wl,--no-undefined"
     "-Wl,-Bsymbolic"
     "-Wl,-z,nodelete"
     "-Wl,--gc-sections"
@@ -1126,6 +1157,15 @@ target_link_options(vulkan_lvp PRIVATE
     "-Wl,-rpath,\$ORIGIN"
 )
 
+if(DAWN_ENABLE_ASAN)
+    target_link_options(vulkan_lvp PRIVATE "-fsanitize=address")
+endif()
+if(DAWN_ENABLE_UBSAN)
+    target_link_options(vulkan_lvp PRIVATE "-fsanitize=undefined")
+endif()
+if(TINT_BUILD_FUZZERS AND COMPILER_IS_CLANG)
+    target_link_options(vulkan_lvp PRIVATE "-fsanitize=fuzzer-no-link")
+endif()
 if(DAWN_EMIT_COVERAGE AND (COMPILER_IS_CLANG OR COMPILER_IS_CLANG_CL))
     target_link_options(vulkan_lvp PRIVATE
         "-fprofile-instr-generate"
