@@ -1077,6 +1077,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // modifies other components of a vector when one of the components is nan.
         deviceToggles->Default(Toggle::ScalarizeMaxMinClamp, true);
 
+        // crbug.com/584989425: Adreno 7xx fails to link shaders that store the entire ClipDistance
+        // output array at once. Work around the driver bug by storing each element separately.
+        deviceToggles->Default(Toggle::VulkanScalarizeClipDistances, IsAdreno7xx());
+
         // Qualcomm's shader compiler returns an internal error when binding_array<texture*> is
         // passed by argument to functions.
         deviceToggles->Default(Toggle::VulkanDirectVariableAccessTransformHandle, true);

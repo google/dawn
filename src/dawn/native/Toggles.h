@@ -240,6 +240,7 @@ enum class Toggle {
     D3D12DisableRelaxedBufferTextureCopyAlignmentForCompressedFormats,
     GLLimitTextureImageUnitsTo13,
     ClearDepthWithDraw,
+    VulkanScalarizeClipDistances,
 
     EnumCount,
     InvalidEnum = EnumCount,

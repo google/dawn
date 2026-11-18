@@ -154,6 +154,10 @@ struct Options {
         /// select-based whole vector write operation.
         bool polyfill_bool_vec_dynamic_store = false;
 
+        /// Set to `true` to store each element of the clip_distances output separately.
+        /// Works around a shader linking bug in Qualcomm's proprietary Adreno 7xx driver.
+        bool scalarize_clip_distances = false;
+
         TINT_REFLECT(Workarounds,
                      polyfill_case_switch,
                      scalarize_max_min_clamp,
@@ -172,7 +176,8 @@ struct Options {
                      collapse_subgroup_min_max,
                      replace_workgroup_atomic_store_with_exchange,
                      replace_unsigned_compare_zero,
-                     polyfill_bool_vec_dynamic_store);
+                     polyfill_bool_vec_dynamic_store,
+                     scalarize_clip_distances);
     };
 
     /// Any options which are controlled by the presence/absence of a vulkan extension.

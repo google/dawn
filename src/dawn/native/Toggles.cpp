@@ -1009,6 +1009,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Use Draw instead of backend clear to clear depth attachments. Works around flickering "
       "bugs on D3D11.",
       "https://crbug.com/568041933", ToggleStage::Device}},
+    {Toggle::VulkanScalarizeClipDistances,
+     {"vulkan_scalarize_clip_distances",
+      "Store each clip distance output element separately to work around a shader linking bug in "
+      "Qualcomm's proprietary Adreno 7xx Vulkan driver.",
+      "https://crbug.com/584989425", ToggleStage::Device}},
 
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};

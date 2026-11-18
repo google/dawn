@@ -270,6 +270,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
                     .polyfill_f16_io = !options.extensions.use_storage_input_output_16,
                     .polyfill_pixel_center = options.polyfill_pixel_center,
                     .multisampled_framebuffer_fetch = options.multisampled_framebuffer_fetch,
+                    .scalarize_clip_distances = options.workarounds.scalarize_clip_distances,
                 }));
 
     // Immediate data is decomposed after ShaderIO because ShaderIO can introduce new accesses

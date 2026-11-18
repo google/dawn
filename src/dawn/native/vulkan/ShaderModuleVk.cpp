@@ -343,6 +343,8 @@ ResultOrUnknownError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpi
         GetDevice()->IsToggleEnabled(Toggle::VulkanPolyfillSwitchWithIf);
     req.tintOptions.workarounds.scalarize_max_min_clamp =
         GetDevice()->IsToggleEnabled(Toggle::ScalarizeMaxMinClamp);
+    req.tintOptions.workarounds.scalarize_clip_distances =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanScalarizeClipDistances);
 
     req.tintOptions.workarounds.polyfill_saturate_as_min_max_f16 =
         GetDevice()->IsToggleEnabled(Toggle::SaturateAsMinMaxF16);

@@ -57,6 +57,8 @@ struct ShaderIOConfig {
     std::optional<uint32_t> polyfill_pixel_center = std::nullopt;
     /// true if the framebuffer fetch should be multisampled
     bool multisampled_framebuffer_fetch = false;
+    /// true if clip_distances output stores should be scalarized to work around a driver bug
+    bool scalarize_clip_distances = false;
 };
 
 /// ShaderIO is a transform that moves each entry point function's parameters and return value to

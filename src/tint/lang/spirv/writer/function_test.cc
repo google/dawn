@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <tuple>
+
 #include "src/tint/lang/spirv/writer/common/helper_test.h"
 
 namespace tint::spirv::writer {
@@ -374,6 +376,71 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_VertexPointSize) {
                OpFunctionEnd
 )");
 }
+
+using SpirvWriterClipDistancesTest = SpirvWriterTestWithParam<std::tuple<uint32_t, bool, bool>>;
+TEST_P(SpirvWriterClipDistancesTest, Function_ShaderIO_ClipDistances) {
+    auto [array_size, scalarize, clip_distances_first] = GetParam();
+    auto* clip_distances_type = ty.array(ty.f32(), array_size);
+    core::type::Manager::StructMemberDesc clip_distances_member{
+        mod.symbols.New("clip_distances"),
+        clip_distances_type,
+        core::IOAttributes{.builtin = core::BuiltinValue::kClipDistances},
+    };
+    core::type::Manager::StructMemberDesc position_member{
+        mod.symbols.New("position"),
+        ty.vec4f(),
+        core::IOAttributes{.builtin = core::BuiltinValue::kPosition},
+    };
+    auto* outputs = ty.Struct(mod.symbols.New("Outputs"),
+                              {clip_distances_first ? clip_distances_member : position_member,
+                               clip_distances_first ? position_member : clip_distances_member});
+    auto* func = b.Function("main", outputs, core::ir::Function::PipelineStage::kVertex);
+    b.Append(func->Block(), [&] {
+        Vector<core::ir::Value*, 8> values;
+        for (uint32_t i = 0; i < array_size; ++i) {
+            values.Push(b.Constant(f32(i + 1)));
+        }
+        auto* clip_distances = b.Construct(clip_distances_type, values);
+        auto* position = b.Construct(ty.vec4f(), 0_f, 0_f, 0_f, 1_f);
+        b.Return(func, b.Construct(outputs, clip_distances_first ? clip_distances : position,
+                                   clip_distances_first ? position : clip_distances));
+    });
+
+    Options options;
+    options.workarounds.scalarize_clip_distances = scalarize;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("OpCapability ClipDistance");
+    EXPECT_INST("OpDecorate %main_clip_distances_Output BuiltIn ClipDistance");
+    EXPECT_INST("OpStore %main_position_Output ");
+    EXPECT_INST("OpStore %main___point_size_Output %float_1 ");
+
+    if (scalarize) {
+        EXPECT_THAT(output_,
+                    testing::Not(testing::HasSubstr("OpStore %main_clip_distances_Output ")));
+        for (uint32_t i = 0; i < array_size; ++i) {
+            EXPECT_INST("OpAccessChain %_ptr_Output_float %main_clip_distances_Output %uint_" +
+                        std::to_string(i));
+        }
+    } else {
+        EXPECT_INST("OpStore %main_clip_distances_Output ");
+        EXPECT_THAT(output_, testing::Not(testing::HasSubstr(
+                                 "OpAccessChain %_ptr_Output_float %main_clip_distances_Output ")));
+    }
+
+    // The wrapper stores the position and point size in addition to the clip distances.
+    uint32_t store_count = 0;
+    for (size_t pos = output_.find("OpStore "); pos != std::string::npos;
+         pos = output_.find("OpStore ", pos + 1)) {
+        ++store_count;
+    }
+    EXPECT_EQ(store_count, scalarize ? array_size + 2 : 3u) << output_;
+}
+INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
+                         SpirvWriterClipDistancesTest,
+                         testing::Combine(testing::Range(1u, 9u),
+                                          testing::Bool(),
+                                          testing::Bool()));
 
 TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Input_WithCapability) {
     auto* input = b.FunctionParam("input", ty.vec4h());

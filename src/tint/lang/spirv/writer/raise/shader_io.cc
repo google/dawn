@@ -406,6 +406,24 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         auto* ptr = ty.ptr(core::AddressSpace::kOut, output.type, core::Access::kWrite);
         core::ir::Value* to = output_vars[idx]->Result();
 
+        // Work around a shader linking bug in Qualcomm's proprietary Adreno 7xx driver, which
+        // rejects whole-array stores to the ClipDistance output. See crbug.com/584989425.
+        if (config.scalarize_clip_distances &&
+            output.attributes.builtin == core::BuiltinValue::kClipDistances) {
+            auto* array = output.type->As<core::type::Array>();
+            TINT_IR_ASSERT(ir, array && array->ConstantCount().has_value());
+            auto* element_type = array->ElemType();
+            auto* element_ptr =
+                ty.ptr(core::AddressSpace::kOut, element_type, core::Access::kWrite);
+            for (uint32_t i = 0; i < array->ConstantCount().value(); ++i) {
+                auto* index = builder.Constant(u32(i));
+                auto* element = builder.Access(element_type, value, index);
+                auto* destination = builder.Access(element_ptr, to, index);
+                builder.Store(destination, element);
+            }
+            return;
+        }
+
         // SampleMask becomes an array for SPIR-V, so store to the first element.
         if (output.attributes.builtin == core::BuiltinValue::kSampleMask) {
             to = builder.Access(ptr, to, 0_u);
