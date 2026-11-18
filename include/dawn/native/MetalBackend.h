@@ -46,6 +46,17 @@ namespace dawn::native::metal {
 // TODO(crbug.com/444702048): Remove after migrating Chromium to commands scheduled futures.
 DAWN_NATIVE_EXPORT void WaitForCommandsToBeScheduled(WGPUDevice device);
 
+// Holds (suspended) or resumes the commit of command buffers on the device's queue. Suspending
+// first commits the pending commands and waits for them to be scheduled, which is what Apple asks
+// of an iOS application before it returns from applicationDidEnterBackground: command buffers
+// scheduled by then may complete, later ones are refused and would lose the device. While
+// suspended, submitted work is encoded into the pending command buffer but not committed, so it
+// completes (and its callbacks run) only once resumed, and presents are dropped. Resuming commits
+// what was held. Thread-safe. The metal_suspend_submissions_in_background toggle does this from
+// the application's own notifications.
+DAWN_NATIVE_EXPORT void SetSubmissionSuspended(WGPUDevice device, bool suspended);
+DAWN_NATIVE_EXPORT bool IsSubmissionSuspended(WGPUDevice device);
+
 #if defined(__OBJC__)
 // Return the MTLDevice corresponding to the WGPUDevice.
 DAWN_NATIVE_EXPORT id<MTLDevice> GetMTLDevice(WGPUDevice device);

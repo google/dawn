@@ -112,6 +112,7 @@ enum class Toggle {
     VulkanPolyfillFloatNegation,
     VulkanPolyfillFloatAbs,
     MetalFillEmptyOcclusionQueriesWithZero,
+    MetalSuspendSubmissionsInBackground,
     UseBlitForBufferToDepthTextureCopy,
     UseBlitForBufferToStencilTextureCopy,
     UseBlitForStencilTextureWrite,
