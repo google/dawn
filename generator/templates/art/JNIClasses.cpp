@@ -27,10 +27,167 @@
 {% from 'art/api_jni_types.cpp' import jni_signature with context %}
 #include "JNIClasses.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+
+#if defined(__ANDROID__)
+#include <android/set_abort_message.h>
+#endif
+
 #include "src/utils/assert.h"
 #include "src/utils/log.h"
 
 namespace dawn::kotlin_api {
+namespace {
+
+template <typename T = jobject>
+class ScopedLocalRef {
+  public:
+    ScopedLocalRef() = default;
+    ScopedLocalRef(JNIEnv* env, T ref) : mEnv(env), mRef(ref) {}
+    ~ScopedLocalRef() { Reset(); }
+
+    ScopedLocalRef(const ScopedLocalRef&) = delete;
+    ScopedLocalRef& operator=(const ScopedLocalRef&) = delete;
+
+    ScopedLocalRef(ScopedLocalRef&& other) noexcept : mEnv(other.mEnv), mRef(other.Release()) {}
+    ScopedLocalRef& operator=(ScopedLocalRef&& other) noexcept {
+        if (this != &other) {
+            Reset();
+            mEnv = other.mEnv;
+            mRef = other.Release();
+        }
+        return *this;
+    }
+
+    void Reset(JNIEnv* env = nullptr, T ref = nullptr) {
+        if (mRef != nullptr) {
+            mEnv->DeleteLocalRef(mRef);
+        }
+        mEnv = env;
+        mRef = ref;
+    }
+
+    T Get() const { return mRef; }
+    explicit operator bool() const { return mRef != nullptr; }
+    T Release() noexcept {
+        T ref = mRef;
+        mRef = nullptr;
+        return ref;
+    }
+
+  private:
+    JNIEnv* mEnv = nullptr;
+    T mRef = nullptr;
+};
+
+enum class UncaughtDispatchStatus {
+    kHandled,
+    kUnhandled,
+    kHandlerThrew,
+};
+
+struct UncaughtDispatchResult {
+    UncaughtDispatchStatus status = UncaughtDispatchStatus::kUnhandled;
+    ScopedLocalRef<jthrowable> handlerFailure;
+};
+
+bool LogAndClearPendingException(JNIEnv* env) {
+    if (!env->ExceptionCheck()) {
+        return false;
+    }
+    env->ExceptionDescribe();
+    env->ExceptionClear();
+    return true;
+}
+
+void LogThrowable(JNIEnv* env, jthrowable throwable) {
+    if (throwable != nullptr && env->Throw(throwable) == JNI_OK) {
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+    }
+}
+
+std::string DescribeThrowable(JNIEnv* env, jmethodID objectToString, jthrowable throwable) {
+    auto rawDescription = static_cast<jstring>(env->CallObjectMethod(throwable, objectToString));
+    if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+        return "<Throwable.toString() failed>";
+    }
+    ScopedLocalRef<jstring> description(env, rawDescription);
+    if (!description) {
+        return "<Throwable.toString() returned null>";
+    }
+    const char* utfChars = env->GetStringUTFChars(description.Get(), nullptr);
+    if (utfChars == nullptr) {
+        LogAndClearPendingException(env);
+        return "<GetStringUTFChars failed>";
+    }
+    std::string result(utfChars);
+    env->ReleaseStringUTFChars(description.Get(), utfChars);
+    return result;
+}
+
+UncaughtDispatchResult TryDispatchUncaughtException(JNIEnv* env,
+                                                    const JNIClasses& classes,
+                                                    jthrowable pending) {
+    jobject rawThread =
+        env->CallStaticObjectMethod(classes.javaThread, classes.threadCurrentThread);
+    if (LogAndClearPendingException(env)) {
+        return {};
+    }
+    ScopedLocalRef<jobject> thread(env, rawThread);
+    if (!thread) {
+        return {};
+    }
+
+    jobject rawHandler =
+        env->CallObjectMethod(thread.Get(), classes.threadGetUncaughtExceptionHandler);
+    if (LogAndClearPendingException(env)) {
+        return {};
+    }
+    ScopedLocalRef<jobject> handler(env, rawHandler);
+
+    bool useDefaultHandler = !handler;
+    if (!useDefaultHandler) {
+        jobject rawThreadGroup = env->CallObjectMethod(thread.Get(), classes.threadGetThreadGroup);
+        if (LogAndClearPendingException(env)) {
+            return {};
+        }
+        ScopedLocalRef<jobject> threadGroup(env, rawThreadGroup);
+        useDefaultHandler =
+            threadGroup && env->IsSameObject(handler.Get(), threadGroup.Get()) == JNI_TRUE;
+    }
+
+    if (useDefaultHandler) {
+        handler.Reset();
+        jobject rawDefaultHandler = env->CallStaticObjectMethod(
+            classes.javaThread, classes.threadGetDefaultUncaughtExceptionHandler);
+        if (LogAndClearPendingException(env)) {
+            return {};
+        }
+        handler.Reset(env, rawDefaultHandler);
+        if (!handler) {
+            return {};
+        }
+    }
+
+    // Invoking uncaughtException() directly bypasses Thread.dispatchUncaughtException(), so
+    // Android's uncaughtExceptionPreHandler does not run unless the handler itself invokes it
+    // (as Android's RuntimeInit.KillApplicationHandler does via ensureLogging()).
+    env->CallVoidMethod(handler.Get(), classes.uncaughtExceptionHandlerUncaughtException,
+                        thread.Get(), pending);
+    if (jthrowable rawFailure = env->ExceptionOccurred()) {
+        env->ExceptionClear();
+        return {UncaughtDispatchStatus::kHandlerThrew,
+                ScopedLocalRef<jthrowable>(env, rawFailure)};
+    }
+    return {UncaughtDispatchStatus::kHandled, {}};
+}
+
+}  // namespace
+
 JNIClasses* JNIClasses::getInstance(JNIEnv* env) {
   static JNIClasses instance(env);
   return &instance;
@@ -126,9 +283,16 @@ JNIClasses::JNIClasses(JNIEnv* env) {
     gpuHardwareBufferTextureCtor = getMethodID(gpuHardwareBufferTexture, "<init>", "(JLandroidx/webgpu/GPUTexture;)V");
     javaIllegalStateException = findGlobalClass("java/lang/IllegalStateException");
     javaUnsupportedOperationException = findGlobalClass("java/lang/UnsupportedOperationException");
+    jclass objectClz = findLocalClass("java/lang/Object");
+    objectToString = getMethodID(objectClz, "toString", "()Ljava/lang/String;");
+    env->DeleteLocalRef(objectClz);
     javaThread = findGlobalClass("java/lang/Thread");
     threadCurrentThread = getStaticMethodID(javaThread, "currentThread", "()Ljava/lang/Thread;");
     threadGetUncaughtExceptionHandler = getMethodID(javaThread, "getUncaughtExceptionHandler", "()Ljava/lang/Thread$UncaughtExceptionHandler;");
+    threadGetThreadGroup = getMethodID(javaThread, "getThreadGroup", "()Ljava/lang/ThreadGroup;");
+    threadGetDefaultUncaughtExceptionHandler = getStaticMethodID(
+        javaThread, "getDefaultUncaughtExceptionHandler",
+        "()Ljava/lang/Thread$UncaughtExceptionHandler;");
     jclass uncaughtExceptionHandlerClz = findLocalClass("java/lang/Thread$UncaughtExceptionHandler");
     uncaughtExceptionHandlerUncaughtException = getMethodID(uncaughtExceptionHandlerClz, "uncaughtException", "(Ljava/lang/Thread;Ljava/lang/Throwable;)V");
     env->DeleteLocalRef(uncaughtExceptionHandlerClz);
@@ -138,46 +302,42 @@ JNIClasses::JNIClasses(JNIEnv* env) {
 }
 
 void JNIClasses::DispatchPendingException(JNIEnv* env) const {
-    jthrowable pending = env->ExceptionOccurred();
+    ScopedLocalRef<jthrowable> pending(env, env->ExceptionOccurred());
     if (!pending) {
         return;
     }
     env->ExceptionClear();
 
-    bool dispatched = false;
-    jobject thread = env->CallStaticObjectMethod(javaThread, threadCurrentThread);
-    if (env->ExceptionCheck()) {
-        env->ExceptionDescribe();
-        env->ExceptionClear();
-    } else if (thread != nullptr) {
-        jobject handler = env->CallObjectMethod(thread, threadGetUncaughtExceptionHandler);
-        if (env->ExceptionCheck()) {
-            env->ExceptionDescribe();
-            env->ExceptionClear();
-        } else if (handler != nullptr) {
-            env->CallVoidMethod(
-                handler, uncaughtExceptionHandlerUncaughtException, thread, pending);
-            if (env->ExceptionCheck()) {
-                env->ExceptionDescribe();
-                env->ExceptionClear();
-            } else {
-                dispatched = true;
-            }
-        }
-        if (handler != nullptr) {
-            env->DeleteLocalRef(handler);
-        }
+    UncaughtDispatchResult dispatch = TryDispatchUncaughtException(env, *this, pending.Get());
+    if (dispatch.status == UncaughtDispatchStatus::kHandled) {
+        return;
     }
 
-    if (!dispatched) {
-        env->Throw(pending);
-        env->ExceptionDescribe();
-        env->ExceptionClear();
+    // If no UncaughtExceptionHandler is configured or dispatching to the handler failed, log the
+    // exception and abort natively rather than continuing on a faulted callback worker thread.
+    LogThrowable(env, pending.Get());
+
+    std::string abortMessage = "Uncaught exception in WebGPU callback: " +
+                               DescribeThrowable(env, objectToString, pending.Get());
+    if (dispatch.status == UncaughtDispatchStatus::kHandlerThrew && dispatch.handlerFailure) {
+        LogThrowable(env, dispatch.handlerFailure.Get());
+        abortMessage +=
+            " (UncaughtExceptionHandler threw: " +
+            DescribeThrowable(env, objectToString, dispatch.handlerFailure.Get()) + ")";
     }
-    if (thread != nullptr) {
-        env->DeleteLocalRef(thread);
-    }
-    env->DeleteLocalRef(pending);
+    dispatch.handlerFailure.Reset();
+    pending.Reset();
+
+    dawn::ErrorLog() << abortMessage;
+#if defined(__ANDROID__)
+    // Write the exact abort line to stderr for the dalvikvm subprocess tests in AsyncHelperTest,
+    // which capture stdout/stderr and assert on this string (dawn::ErrorLog writes only to logcat
+    // on Android).
+    std::fprintf(stderr, "%s\n", abortMessage.c_str());
+    std::fflush(stderr);
+    android_set_abort_message(abortMessage.c_str());
+#endif
+    std::abort();
 }
 
 }  // namespace dawn::kotlin_api

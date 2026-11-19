@@ -53,6 +53,13 @@ class ScopedJVMAttachment {
 class JNIClasses {
     public:
          static JNIClasses* getInstance(JNIEnv* env);
+         // Forwards any pending JNI exception on `env` (must be non-null) to the current thread's
+         // UncaughtExceptionHandler, falling back to Thread.getDefaultUncaughtExceptionHandler()
+         // when the thread uses its ThreadGroup or returns no handler. Unlike JVM
+         // Thread.dispatchUncaughtException(), which ignores exceptions thrown by
+         // uncaughtException() on a terminating Java thread, this deliberately calls std::abort()
+         // if no handler is configured or if the handler itself throws, so execution does not
+         // return into Dawn's native worker loop.
          void DispatchPendingException(JNIEnv* env) const;
         {% for entity in has_kotlin_classes %}
             {% if entity.category != 'structure' or entity.needs_n2k %}
@@ -89,8 +96,11 @@ class JNIClasses {
         jclass javaIllegalStateException;
         jclass javaUnsupportedOperationException;
         jclass javaThread;
+        jmethodID objectToString;
         jmethodID threadCurrentThread;
         jmethodID threadGetUncaughtExceptionHandler;
+        jmethodID threadGetThreadGroup;
+        jmethodID threadGetDefaultUncaughtExceptionHandler;
         jmethodID uncaughtExceptionHandlerUncaughtException;
         jmethodID pfdGetFd;
         // Special handling for GPUImportedHardwareBuffer, to prevent lookup on every frame.
