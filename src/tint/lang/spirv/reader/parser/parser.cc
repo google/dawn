@@ -3528,11 +3528,12 @@ class Parser {
 
     void EmitImage(const spvtools::opt::Instruction& inst) {
         auto* si = Value(inst.GetSingleWordInOperand(0));
+        auto* img_type = si->Type()->As<spirv::type::SampledImage>()->Image();
+        // Use `si`'s image type instead of `inst.type_id()`, whose Depth may differ after
+        // `EmitSampledImage` normalizes it to the input image's type.
         Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(
-                 Type(inst.type_id()), spirv::BuiltinFn::kOpImage,
-                 Vector<core::ir::TemplateParameter, 1>{
-                     si->Type()->As<spirv::type::SampledImage>()->Image()},
-                 Args(inst, 2)),
+                 img_type, spirv::BuiltinFn::kOpImage,
+                 Vector<core::ir::TemplateParameter, 1>{img_type}, Args(inst, 2)),
              inst.result_id());
     }
 
@@ -3542,9 +3543,11 @@ class Parser {
         TINT_ASSERT(img_type);
         TINT_ASSERT(img_type->GetMultisampled() != type::Multisampled::kMultisampled)
             << "Creating an OpTypeSampledImage from a multisampled image is not supported";
+        // OpSampledImage allows the result's image type to have a different Depth than `img_type`:
+        // https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html#OpSampledImage
         Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(
-                 Type(inst.type_id()), spirv::BuiltinFn::kOpSampledImage,
-                 Vector<core::ir::TemplateParameter, 1>{tex->Type()}, Args(inst, 2)),
+                 ty_.Get<type::SampledImage>(img_type), spirv::BuiltinFn::kOpSampledImage,
+                 Vector<core::ir::TemplateParameter, 1>{img_type}, Args(inst, 2)),
              inst.result_id());
     }
 

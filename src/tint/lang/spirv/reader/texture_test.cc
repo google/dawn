@@ -4482,5 +4482,113 @@ $B1: {  # root
 )");
 }
 
+// A non-depth image combined via OpSampledImage with a depth OpTypeSampledImage and sampled with a
+// Dref instruction lowers to a depth texture and comparison sampler.
+TEST_F(SpirvReaderTest, SampledImage_DepthMismatch_Dref) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpDecorate %tex DescriptorSet 0
+               OpDecorate %tex Binding 0
+               OpDecorate %sam DescriptorSet 0
+               OpDecorate %sam Binding 1
+       %void = OpTypeVoid
+         %fn = OpTypeFunction %void
+      %float = OpTypeFloat 32
+         %v3 = OpTypeVector %float 3
+      %image = OpTypeImage %float 2D 0 1 0 1 Unknown
+      %depth = OpTypeImage %float 2D 1 1 0 1 Unknown
+    %sampled = OpTypeSampledImage %depth
+    %samtype = OpTypeSampler
+   %ptrimage = OpTypePointer UniformConstant %image
+     %ptrsam = OpTypePointer UniformConstant %samtype
+        %tex = OpVariable %ptrimage UniformConstant
+        %sam = OpVariable %ptrsam UniformConstant
+       %zero = OpConstant %float 0
+       %half = OpConstant %float 0.5
+      %coord = OpConstantComposite %v3 %half %half %zero
+       %main = OpFunction %void None %fn
+      %entry = OpLabel
+         %im = OpLoad %image %tex
+         %sa = OpLoad %samtype %sam
+         %si = OpSampledImage %sampled %im %sa
+        %val = OpImageSampleDrefExplicitLod %float %si %coord %half Lod %zero
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    %4:texture_depth_2d_array = load %1
+    %5:sampler_comparison = load %2
+    %6:f32 = textureSampleCompareLevel %4, %5, vec2<f32>(0.5f), 0i, 0.5f
+    ret
+  }
+}
+)");
+}
+
+// Extracting an image with OpImage from an OpSampledImage whose Depth differs from its image
+// operand lowers to the underlying texture.
+TEST_F(SpirvReaderTest, SampledImage_DepthMismatch_OpImage) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability ImageQuery
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpDecorate %tex DescriptorSet 0
+               OpDecorate %tex Binding 0
+               OpDecorate %sam DescriptorSet 0
+               OpDecorate %sam Binding 1
+       %void = OpTypeVoid
+         %fn = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+      %float = OpTypeFloat 32
+      %image = OpTypeImage %float 2D 0 0 0 1 Unknown
+      %depth = OpTypeImage %float 2D 1 0 0 1 Unknown
+    %sampled = OpTypeSampledImage %depth
+    %samtype = OpTypeSampler
+   %ptrimage = OpTypePointer UniformConstant %image
+     %ptrsam = OpTypePointer UniformConstant %samtype
+        %tex = OpVariable %ptrimage UniformConstant
+        %sam = OpVariable %ptrsam UniformConstant
+      %int_0 = OpConstant %int 0
+       %main = OpFunction %void None %fn
+      %entry = OpLabel
+         %im = OpLoad %image %tex
+         %sa = OpLoad %samtype %sam
+         %si = OpSampledImage %sampled %im %sa
+         %ex = OpImage %depth %si
+         %sz = OpImageQuerySizeLod %v2int %ex %int_0
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    %4:texture_2d<f32> = load %1
+    %5:sampler = load %2
+    %6:vec2<u32> = textureDimensions %4, 0i
+    %7:vec2<i32> = convert %6
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

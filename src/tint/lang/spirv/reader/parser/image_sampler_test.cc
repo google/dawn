@@ -852,5 +852,62 @@ $B1: {  # root
                   SPV_ENV_VULKAN_1_1);
 }
 
+// OpSampledImage normalizes the result's image type to the input image's type when their Depth
+// operands differ, and OpImage uses that same image type:
+// https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html#OpSampledImage
+TEST_F(SpirvParserTest, SampledImage_DepthMismatch) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpDecorate %tex DescriptorSet 0
+               OpDecorate %tex Binding 0
+               OpDecorate %sam DescriptorSet 0
+               OpDecorate %sam Binding 1
+       %void = OpTypeVoid
+         %fn = OpTypeFunction %void
+      %float = OpTypeFloat 32
+         %v3 = OpTypeVector %float 3
+      %image = OpTypeImage %float 2D 0 1 0 1 Unknown
+      %depth = OpTypeImage %float 2D 1 1 0 1 Unknown
+    %sampled = OpTypeSampledImage %depth
+    %samtype = OpTypeSampler
+   %ptrimage = OpTypePointer UniformConstant %image
+     %ptrsam = OpTypePointer UniformConstant %samtype
+        %tex = OpVariable %ptrimage UniformConstant
+        %sam = OpVariable %ptrsam UniformConstant
+       %zero = OpConstant %float 0
+       %half = OpConstant %float 0.5
+      %coord = OpConstantComposite %v3 %half %half %zero
+       %main = OpFunction %void None %fn
+      %entry = OpLabel
+         %im = OpLoad %image %tex
+         %sa = OpLoad %samtype %sam
+         %si = OpSampledImage %sampled %im %sa
+        %val = OpImageSampleDrefExplicitLod %float %si %coord %half Lod %zero
+         %ex = OpImage %depth %si
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:ptr<handle, spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    %4:spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write> = load %1
+    %5:sampler = load %2
+    %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %4, %5
+    %7:f32 = spirv.image_sample_dref_explicit_lod %6, vec3<f32>(0.5f, 0.5f, 0.0f), 0.5f, 2u, 0.0f
+    %8:spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write> = spirv.op_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %6
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
