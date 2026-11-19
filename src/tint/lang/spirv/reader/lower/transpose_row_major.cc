@@ -34,6 +34,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/core/type/matrix.h"
+#include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/spirv/type/explicit_layout_array.h"
 
 namespace tint::spirv::reader::lower {
@@ -799,12 +800,30 @@ struct State {
     }
 };
 
+/// @returns true if a structure type in @p ir has a row-major member. Without one, RewriteType
+/// maps every type to itself, so no constant or result type changes and no instruction is
+/// processed or removed.
+bool HasRowMajorMember(const core::ir::Module& ir) {
+    for (auto* type : ir.Types()) {
+        if (auto* str = type->As<core::type::Struct>()) {
+            for (auto* member : str->Members()) {
+                if (member->RowMajor()) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 }  // namespace
 
 Result<SuccessType> TransposeRowMajor(core::ir::Module& ir) {
     AssertValid(ir, "before spirv.TransposeRowMajor");
 
-    State{ir}.Process();
+    if (HasRowMajorMember(ir)) {
+        State{ir}.Process();
+    }
 
     return Success;
 }

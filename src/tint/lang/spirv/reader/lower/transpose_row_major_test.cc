@@ -4910,5 +4910,56 @@ $B1: {  # root
     EXPECT_EQ(after, str());
 }
 
+TEST_F(SpirvReader_TransposeRowMajorTest, NoRowMajorMember) {
+    // struct S {
+    //   m : mat2x3<f32>,
+    // };
+    // @group(0) @binding(0) var<uniform> s : S;
+    //
+    // @compute @workgroup_size(1)
+    // fn f() {
+    //   let x : mat2x3<f32> = s.m;
+    // }
+
+    auto* matrix_member = ty.Get<core::type::StructMember>(mod.symbols.New("m"), ty.mat2x3<f32>(),
+                                                           0u, 0u, 16u, 32u, core::IOAttributes{});
+
+    auto* strct = ty.Struct(mod.symbols.New("S"), Vector{matrix_member});
+
+    auto* var = b.Var("s", ty.ptr<uniform>(strct));
+    var->SetBindingPoint(0, 0);
+    mod.root_block->Append(var);
+
+    auto* f = b.ComputeFunction("f");
+    b.Append(f->Block(), [&] {
+        b.Let("x", b.Load(b.Access<ptr<uniform, mat2x3<f32>>>(var, 0_u)));
+        b.Return(f);
+    });
+
+    auto* before = R"(
+S = struct @align(16) {
+  m:mat2x3<f32> @offset(0)
+}
+
+$B1: {  # root
+  %s:ptr<uniform, S, read> = var @binding_point(0, 0)
+}
+
+%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<uniform, mat2x3<f32>, read> = access %s, 0u
+    %4:mat2x3<f32> = load %3
+    %x:mat2x3<f32> = let %4
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(before, str());
+
+    Run(TransposeRowMajor);
+    EXPECT_EQ(before, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower
