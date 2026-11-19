@@ -1223,6 +1223,40 @@ $B1: {  # root
     ASSERT_EQ(after, str());
 }
 
+TEST_F(SpirvReader_DecomposeStridedArrayTest, NoExplicitLayoutArray) {
+    auto* var = b.Var("var", ty.ptr(storage, ty.array<u32, 8>(), read_write));
+    var->SetBindingPoint(0, 0);
+    mod.root_block->Append(var);
+
+    auto* f = b.ComputeFunction("foo");
+    b.Append(f->Block(), [&] {
+        auto* access = b.Access<ptr<storage, u32, read_write>>(var, 4_u);
+        b.Let("value", b.Load(access));
+        b.Store(access, 1_u);
+        b.Return(f);
+    });
+
+    auto* before = R"(
+$B1: {  # root
+  %var:ptr<storage, array<u32, 8>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<storage, u32, read_write> = access %var, 4u
+    %4:u32 = load %3
+    %value:u32 = let %4
+    store %3, 1u
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(before, str());
+    Run(DecomposeStridedArray);
+    ASSERT_EQ(before, str());
+}
+
 TEST_F(SpirvReader_DecomposeStridedArrayTest, PreserveIOAttributes) {
     auto* array_type = Array(ty.f32(), 4, 4);
     auto* struct_ty = ty.Struct(

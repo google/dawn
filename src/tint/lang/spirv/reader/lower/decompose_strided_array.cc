@@ -250,12 +250,26 @@ struct State {
     }
 };
 
+/// @returns true if @p ir has an explicitly laid out array type. Without one, RewriteType maps
+/// every type to itself and creates no padded structure, so no constant, result, parameter or
+/// return type changes, no construct is wrapped, and every access gets back the operands it had.
+bool HasExplicitLayoutArray(const core::ir::Module& ir) {
+    for (auto* type : ir.Types()) {
+        if (type->Is<spirv::type::ExplicitLayoutArray>()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 }  // namespace
 
 Result<SuccessType> DecomposeStridedArray(core::ir::Module& ir) {
     core::ir::AssertValid(ir, "before spirv.DecomposeStridedArray");
 
-    State{ir}.Process();
+    if (HasExplicitLayoutArray(ir)) {
+        State{ir}.Process();
+    }
 
     return Success;
 }
