@@ -28,6 +28,11 @@
 
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 
+#include <algorithm>
+#include <array>
+#include <string_view>
+
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/control_instruction.h"
 #include "src/tint/lang/core/ir/convert.h"
@@ -48,14 +53,30 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/hashset.h"
-#include "src/tint/utils/containers/reverse.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/rtti/switch.h"
-#include "src/tint/utils/text/string.h"
 
 namespace tint::core::ir::transform {
 
 namespace {
+
+/// @returns the identifier of the vector type with @p width elements
+std::string_view VectorName(uint32_t width) {
+    static constexpr std::array<std::string_view, 3> kNames{"vec2", "vec3", "vec4"};
+    TINT_ASSERT(width >= 2 && width <= 4);
+    return kNames[width - 2];
+}
+
+/// @returns the identifier of the matrix type with @p columns columns and @p rows rows
+std::string_view MatrixName(uint32_t columns, uint32_t rows) {
+    static constexpr std::array<std::array<std::string_view, 3>, 3> kNames{{
+        {"mat2x2", "mat2x3", "mat2x4"},
+        {"mat3x2", "mat3x3", "mat3x4"},
+        {"mat4x2", "mat4x3", "mat4x4"},
+    }};
+    TINT_ASSERT(columns >= 2 && columns <= 4 && rows >= 2 && rows <= 4);
+    return kNames[columns - 2][rows - 2];
+}
 
 /// PIMPL state for the transform, for a single function.
 struct State {
@@ -66,8 +87,8 @@ struct State {
     /// Processes the module, renaming all declarations that would prevent an identifier resolving
     /// to the correct declaration.
     void Process() {
-        scopes.Push(Scope{});
-        TINT_DEFER(scopes.Clear());
+        PushScope();
+        TINT_DEFER(PopScope());
 
         RegisterModuleScopeDecls();
 
@@ -83,8 +104,8 @@ struct State {
 
         // Process the functions
         for (core::ir::Function* fn : ir.functions) {
-            scopes.Push(Scope{});
-            TINT_DEFER(scopes.Pop());
+            PushScope();
+            TINT_DEFER(PopScope());
             for (auto* param : fn->Params()) {
                 EnsureResolvable(param->Type());
                 if (auto symbol = ir.NameOf(param); symbol.IsValid()) {
@@ -96,15 +117,43 @@ struct State {
     }
 
   private:
-    /// Map of identifier to declaration.
-    /// The declarations may be one of an core::ir::Value or core::type::Struct.
-    using Scope = Hashmap<std::string_view, CastableBase*, 8>;
-
     /// The IR module.
     core::ir::Module& ir;
 
-    /// Stack of scopes
-    Vector<Scope, 8> scopes{};
+    /// A declaration and the scope that it was added to.
+    struct Declaration {
+        /// The declaration: a core::ir::Value or a core::type::Struct.
+        CastableBase* thing = nullptr;
+        /// The identifier of the scope that the declaration was added to.
+        uint32_t scope = 0;
+    };
+
+    /// Map of identifier to the last declaration with that name.
+    /// The declaration is only in scope while its scope is in #active_scopes. Declare() renames a
+    /// declaration that would shadow another, so there is at most one declaration in scope for
+    /// each name.
+    Hashmap<std::string_view, Declaration, 64> declarations{};
+
+    /// The identifiers of the active scopes, in ascending order.
+    Vector<uint32_t, 8> active_scopes{};
+
+    /// The identifier of the next scope.
+    uint32_t next_scope = 0;
+
+    /// Begins a new scope.
+    void PushScope() { active_scopes.Push(next_scope++); }
+
+    /// Ends the innermost scope.
+    void PopScope() { active_scopes.Pop(); }
+
+    /// @returns the declaration in scope with the name @p name, or nullptr if there is none
+    Declaration* Lookup(std::string_view name) {
+        auto decl = declarations.Get(name);
+        if (decl && std::ranges::binary_search(active_scopes, decl->scope)) {
+            return &*decl;
+        }
+        return nullptr;
+    }
 
     /// Registers all the module-scope declarations in the root-scope.
     /// Duplicate declarations with the same name will renamed.
@@ -159,17 +208,17 @@ struct State {
             inst,  //
             [&](core::ir::Loop* loop) {
                 // Initializer's scope encompasses the body and continuing
-                scopes.Push(Scope{});
-                TINT_DEFER(scopes.Pop());
+                PushScope();
+                TINT_DEFER(PopScope());
                 Process(loop->Initializer());
                 {
                     // Body's scope encompasses the continuing
-                    scopes.Push(Scope{});
-                    TINT_DEFER(scopes.Pop());
+                    PushScope();
+                    TINT_DEFER(PopScope());
                     Process(loop->Body());
                     {
-                        scopes.Push(Scope{});
-                        TINT_DEFER(scopes.Pop());
+                        PushScope();
+                        TINT_DEFER(PopScope());
                         Process(loop->Continuing());
                     }
                 }
@@ -177,8 +226,8 @@ struct State {
             [&](core::ir::ControlInstruction* ctrl) {
                 // Traverse into the control instruction's blocks
                 ctrl->ForeachBlock([&](core::ir::Block* block) {
-                    scopes.Push(Scope{});
-                    TINT_DEFER(scopes.Pop());
+                    PushScope();
+                    TINT_DEFER(PopScope());
                     Process(block);
                 });
             },
@@ -200,8 +249,7 @@ struct State {
             },
             [&](core::ir::CoreBuiltinCall* call) {
                 // Ensure builtin of a builtin call is resolvable
-                auto name = tint::ToString(call->Func());
-                EnsureResolvesToBuiltin(name);
+                EnsureResolvesToBuiltin(core::str(call->Func()));
             });
 
         // Register new operands and check their types can resolve
@@ -222,12 +270,11 @@ struct State {
                     return nullptr;
                 },
                 [&](const core::type::Vector* v) {
-                    EnsureResolvesToBuiltin("vec" + tint::ToString(v->Width()));
+                    EnsureResolvesToBuiltin(VectorName(v->Width()));
                     return v->Type();
                 },
                 [&](const core::type::Matrix* m) {
-                    EnsureResolvesToBuiltin("mat" + tint::ToString(m->Columns()) + "x" +
-                                            tint::ToString(m->Rows()));
+                    EnsureResolvesToBuiltin(MatrixName(m->Columns(), m->Rows()));
                     return m->Type();
                 },
                 [&](const core::type::Array* a) -> const core::type::Type* {
@@ -235,8 +282,8 @@ struct State {
                     return a->ElemType();
                 },
                 [&](const core::type::Pointer* p) {
-                    EnsureResolvesToBuiltin(tint::ToString(p->Access()));
-                    EnsureResolvesToBuiltin(tint::ToString(p->AddressSpace()));
+                    EnsureResolvesToBuiltin(core::ToString(p->Access()));
+                    EnsureResolvesToBuiltin(core::ToString(p->AddressSpace()));
                     return p->StoreType();
                 },
                 [&](const core::type::Struct* s) {
@@ -261,12 +308,11 @@ struct State {
 
     /// Ensures that the identifier @p identifier resolves to a builtin symbol.
     void EnsureResolvesToBuiltin(std::string_view identifier) {
-        for (auto& scope : tint::Reverse(scopes)) {
-            if (auto decl = scope.Get(identifier)) {
-                // Operand is shadowed
-                scope.Remove(identifier);
-                Rename(*decl, identifier);
-            }
+        if (auto* decl = Lookup(identifier)) {
+            // Operand is shadowed
+            auto* thing = decl->thing;
+            declarations.Remove(identifier);
+            Rename(thing, identifier);
         }
     }
 
@@ -276,19 +322,15 @@ struct State {
     void Declare(CastableBase* thing, Symbol name) {
         // Check if the declaration would shadow another declaration in the current scope or any
         // parent scope, and rename it if so.
-        for (auto& scope : tint::Reverse(scopes)) {
-            if (auto decl = scope.Get(name.NameView())) {
-                if (*decl.value != thing) {
-                    name = Rename(thing, name.NameView());
-                    break;
-                }
+        if (auto* decl = Lookup(name.NameView())) {
+            if (decl->thing == thing) {
+                return;  // Already declared
             }
+            name = Rename(thing, name.NameView());
         }
-
-        // Add the declaration to the current scope, and make sure that it was either successfully
-        // added or has already been added.
-        auto add = scopes.Back().Add(name.NameView(), thing);
-        TINT_IR_ASSERT(ir, add || add.value == thing);
+        // Add the declaration to the current scope. This replaces any declaration with the same
+        // name that is no longer in scope.
+        declarations.Replace(name.NameView(), Declaration{thing, active_scopes.Back()});
     }
 
     /// Rename changes the name of @p thing with the old name of @p old_name

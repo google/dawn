@@ -1134,5 +1134,69 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinStruct_ShadowedBy_RootBlockVar) {
+    auto* s = ty.Struct(b.ir.symbols.Register("__s"), {
+                                                          {b.ir.symbols.Register("f"), ty.f32()},
+                                                      });
+
+    b.Append(mod.root_block, [&] {  //
+        b.ir.SetName(b.Var(ty.ptr<private_>(s)), "__s");
+    });
+
+    auto* src = R"(
+__s = struct @align(4) {
+  f:f32 @offset(0)
+}
+
+$B1: {  # root
+  %__s:ptr<private, __s, read_write> = var
+}
+
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+__s = struct @align(4) {
+  f:f32 @offset(0)
+}
+
+$B1: {  # root
+  %__s_1:ptr<private, __s, read_write> = var
+}
+
+)";
+
+    Run(RenameConflicts);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinHandleAddressSpace_ShadowedBy_RootBlockVar) {
+    b.Append(mod.root_block, [&] {
+        auto* v = b.Var(ty.ptr(handle, ty.sampler(), read));
+        v->SetBindingPoint(0, 0);
+        b.ir.SetName(v, "handle");
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %handle:ptr<handle, sampler, read> = var @binding_point(0, 0)
+}
+
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %handle_1:ptr<handle, sampler, read> = var @binding_point(0, 0)
+}
+
+)";
+
+    Run(RenameConflicts);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::core::ir::transform
