@@ -242,6 +242,7 @@ enum class Toggle {
     GLLimitTextureImageUnitsTo13,
     ClearDepthWithDraw,
     VulkanScalarizeClipDistances,
+    MetalPolyfillExtractBits,
 
     EnumCount,
     InvalidEnum = EnumCount,

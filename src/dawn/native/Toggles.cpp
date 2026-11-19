@@ -1020,6 +1020,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Store each clip distance output element separately to work around a shader linking bug in "
       "Qualcomm's proprietary Adreno 7xx Vulkan driver.",
       "https://crbug.com/584989425", ToggleStage::Device}},
+    {Toggle::MetalPolyfillExtractBits,
+     {"metal_polyfill_extract_bits",
+      "Use the full polyfill for extractBits() instead of clamping to work around an Apple Metal "
+      "compiler bug.",
+      "https://crbug.com/587021111", ToggleStage::Device}},
 
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};

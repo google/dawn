@@ -150,6 +150,9 @@ struct Options {
         /// select-based whole vector write operation.
         bool polyfill_bool_vec_dynamic_store = false;
 
+        /// Set to `true` to use the full polyfill for `extractBits()` instead of clamping.
+        bool polyfill_extract_bits = false;
+
         TINT_REFLECT(Workarounds,
                      scalarize_max_min_clamp,
                      disable_module_constant_f16,
@@ -161,7 +164,8 @@ struct Options {
                      replace_workgroup_bool_with_u32,
                      collapse_subgroup_min_max,
                      fix_u32_div_mod,
-                     polyfill_bool_vec_dynamic_store);
+                     polyfill_bool_vec_dynamic_store,
+                     polyfill_extract_bits);
         TINT_REFLECT_HASH_CODE(Workarounds);
 
         bool operator==(const Workarounds&) const = default;

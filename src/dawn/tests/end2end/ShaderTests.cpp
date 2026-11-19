@@ -3916,6 +3916,54 @@ fn main(@builtin(global_invocation_id) gid : vec3u) {
     ASSERT_DEVICE_ERROR(CreateComputePipeline(shader, "main"));
 }
 
+// Regression test for Metal robustness bypass where extractBits(x, 32u, 0u) inside an
+// out-of-bounds branch caused Apple's Metal compiler to treat the branch as unreachable and
+// eliminate the robustness clamp on another buffer access (crbug.com/587021111).
+TEST_P(ShaderTests, ExtractBitsInDeadBranchRobustness) {
+    constexpr uint32_t kWriteIndex = 16;
+    constexpr uint32_t kWriteVal = 0xE7E7E7E7u;
+
+    const char* shader = R"(
+@group(0) @binding(0) var<uniform> U : vec4<u32>;
+@group(0) @binding(1) var<storage, read_write> output : array<u32, 16>;
+@compute @workgroup_size(1) fn main() {
+  let i = U.y;
+  if (i > 15u) {
+    output[extractBits(U.x, 32u, 0u)] = 42u;
+  }
+  output[i] = U.z;
+}
+)";
+
+    // Output buffer: 128 bytes (32 u32s), filled with zeros. Only the first 64 bytes (16 u32s) are
+    // bound to the shader.
+    wgpu::Buffer output = CreateBuffer(
+        32, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc);
+
+    wgpu::Buffer bufU = CreateBuffer({5, kWriteIndex, kWriteVal, 0},
+                                     wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst);
+
+    wgpu::ComputePipeline pipeline = CreateComputePipeline(shader, "main");
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+        device, pipeline.GetBindGroupLayout(0), {{0, bufU}, {1, output, 0, 16 * sizeof(uint32_t)}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bindGroup);
+    pass.DispatchWorkgroups(1);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // Make sure the write inside the branch is executed.
+    uint32_t expectedFirst = 42;
+    EXPECT_BUFFER_U32_RANGE_EQ(&expectedFirst, output, 0, 1);
+    // With robustness enabled, the unbound portion of `output` must remain untouched.
+    std::vector<uint32_t> expectedUnbound(16, 0);
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedUnbound.data(), output, 16 * sizeof(uint32_t), 16);
+}
+
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D11Backend(),
                       D3D12Backend(),

@@ -173,7 +173,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
             .clamp_float = options.workarounds.polyfill_clamp_float,
             .abs_signed_int = true,
             .degrees = true,
-            .extract_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck,
+            .extract_bits = options.workarounds.polyfill_extract_bits
+                                ? core::ir::transform::BuiltinPolyfillLevel::kFull
+                                : core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck,
             .fwidth_fine = true,
             .insert_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck,
             .radians = true,

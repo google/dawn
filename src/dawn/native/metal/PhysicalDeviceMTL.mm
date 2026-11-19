@@ -585,6 +585,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         if (!IsMacOSVersionAtLeast(26, 6, 1)) {
             deviceToggles->Default(Toggle::MetalFixU32DivMod, true);
         }
+
+        // Workaround for Apple Metal compiler bug with extract_bits(x, 32, 0) causing UB
+        // (crbug.com/587021111).
+        deviceToggles->Default(Toggle::MetalPolyfillExtractBits, true);
     }
 
     // Local testing shows the workaround is needed on AMD Radeon HD 8870M (gcn-1) MacOS 12.1;

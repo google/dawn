@@ -338,6 +338,8 @@ ResultOrUnknownError<CacheResult<MslCompilation>> TranslateToMSL(
         device->IsToggleEnabled(Toggle::MetalFixU32DivMod);
     req.tintOptions.workarounds.polyfill_bool_vec_dynamic_store =
         device->IsToggleEnabled(Toggle::PolyfillBoolVecDynamicStore);
+    req.tintOptions.workarounds.polyfill_extract_bits =
+        device->IsToggleEnabled(Toggle::MetalPolyfillExtractBits);
 
     req.tintOptions.extensions.disable_demote_to_helper =
         device->IsToggleEnabled(Toggle::DisableDemoteToHelper);

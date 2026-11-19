@@ -66,6 +66,7 @@ struct FuzzedOptions {
     bool fix_u32_div_mod;
     bool polyfill_bool_vec_dynamic_store;
     uint32_t non_constant_zero_offset;
+    bool polyfill_extract_bits;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(FuzzedOptions,
@@ -91,7 +92,8 @@ struct FuzzedOptions {
                  collapse_subgroup_min_max,
                  fix_u32_div_mod,
                  polyfill_bool_vec_dynamic_store,
-                 non_constant_zero_offset);
+                 non_constant_zero_offset,
+                 polyfill_extract_bits);
     TINT_REFLECT_HASH_CODE(FuzzedOptions);
 };
 
@@ -154,6 +156,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.workarounds.polyfill_bool_vec_dynamic_store =
         fuzzed_options.polyfill_bool_vec_dynamic_store;
     options.non_constant_zero_offset = fuzzed_options.non_constant_zero_offset;
+    options.workarounds.polyfill_extract_bits = fuzzed_options.polyfill_extract_bits;
 
     options.bindings = GenerateBindings(module, ep_name, false, false);
     options.immediate_binding_point = 30;
