@@ -50,6 +50,7 @@ if (tint_build_fuzzer_vulkan_support && tint_build_fuzzers &&
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/cmd/fuzz/common",
       "${tint_src_dir}/cmd/fuzz/ir:fuzz",
+      "${tint_src_dir}/cmd/fuzz/wgsl:fuzz",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/ir",
