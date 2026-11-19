@@ -39,6 +39,7 @@
 #include "src/tint/lang/core/type/invalid.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/void.h"
+#include "src/tint/utils/containers/function_ref.h"
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/text/string_stream.h"
@@ -77,7 +78,7 @@ constexpr const size_t kNumFixedCandidates = 8;
 using Candidates = Vector<Candidate, kNumFixedCandidates>;
 
 /// Callback function when no overloads match.
-using OnNoMatch = std::function<StyledText(VectorRef<Candidate>)>;
+using OnNoMatch = FunctionRef<StyledText(VectorRef<Candidate>)>;
 
 /// Sorts the candidates based on their score, with the lowest (best-ranking) scores first.
 static inline void SortCandidates(Candidates& candidates) {
@@ -133,7 +134,7 @@ Result<Overload, StyledText> MatchIntrinsic(Context& context,
                                             VectorRef<const core::type::Type*> args,
                                             EvaluationStage earliest_eval_stage,
                                             bool member_function,
-                                            const OnNoMatch& on_no_match);
+                                            OnNoMatch on_no_match);
 
 /// The scoring mode for ScoreOverload()
 enum class ScoreMode {
@@ -215,12 +216,11 @@ Result<Overload, StyledText> MatchIntrinsic(Context& context,
                                             VectorRef<const core::type::Type*> args,
                                             EvaluationStage earliest_eval_stage,
                                             bool member_function,
-                                            const OnNoMatch& on_no_match) {
+                                            OnNoMatch on_no_match) {
     const size_t num_overloads = static_cast<size_t>(intrinsic.num_overloads);
-    size_t num_matched = 0;
-    size_t match_idx = 0;
-    Vector<Candidate, kNumFixedCandidates> candidates;
-    candidates.Reserve(intrinsic.num_overloads);
+
+    // Only the matching candidates are kept, as ResolveCandidate ignores the others.
+    Candidates candidates;
     for (size_t overload_idx = 0; overload_idx < num_overloads; overload_idx++) {
         auto& overload = context.data[intrinsic.overloads + overload_idx];
 
@@ -232,16 +232,15 @@ Result<Overload, StyledText> MatchIntrinsic(Context& context,
         auto candidate = ScoreOverload<ScoreMode::kEarlyReject>(context, overload, template_args,
                                                                 args, earliest_eval_stage);
         if (candidate.score == 0) {
-            match_idx = candidates.Length();
-            num_matched++;
+            candidates.Push(std::move(candidate));
         }
-        candidates.Push(std::move(candidate));
     }
 
     // How many candidates matched?
-    if (DAWN_UNLIKELY(num_matched == 0)) {
-        // Perform the full scoring of each overload
-        size_t candidate_idx = 0;
+    if (DAWN_UNLIKELY(candidates.IsEmpty())) {
+        // The error lists every overload, so perform the full scoring of each
+        Candidates all;
+        all.Reserve(num_overloads);
         for (size_t overload_idx = 0; overload_idx < num_overloads; overload_idx++) {
             auto& overload = context.data[intrinsic.overloads + overload_idx];
 
@@ -250,18 +249,18 @@ Result<Overload, StyledText> MatchIntrinsic(Context& context,
                 continue;
             }
 
-            candidates[candidate_idx++] = ScoreOverload<ScoreMode::kFull>(
-                context, overload, template_args, args, earliest_eval_stage);
+            all.Push(ScoreOverload<ScoreMode::kFull>(context, overload, template_args, args,
+                                                     earliest_eval_stage));
         }
         // Sort the candidates with the most promising first
-        SortCandidates(candidates);
-        return on_no_match(std::move(candidates));
+        SortCandidates(all);
+        return on_no_match(std::move(all));
     }
 
     Candidate match;
 
-    if (num_matched == 1) {
-        match = std::move(candidates[match_idx]);
+    if (candidates.Length() == 1) {
+        match = std::move(candidates[0]);
     } else {
         TINT_CHECK_RESULT_UNWRAP(result, ResolveCandidate(context, std::move(candidates),
                                                           intrinsic_name, template_args, args));
