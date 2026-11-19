@@ -1215,16 +1215,20 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // chromium:448873316: Non-scalar (vector) saturate from uniform fails.
         deviceToggles->Default(Toggle::SaturateAsMinMaxF16, true);
 
-        if (gpu_info::IsIntelGen12LP(GetVendorId(), GetDeviceId())) {
-            // dawn:1688: Intel Mesa driver has a bug about reusing the VkDeviceMemory that was
-            // previously bound to a 2D VkImage. To work around that bug we have to disable the
-            // resource sub-allocation for 2D textures with CopyDst or RenderAttachment usage.
+        if (gpu_info::IsIntelGen9(GetVendorId(), GetDeviceId()) ||
+            gpu_info::IsIntelGen12LP(GetVendorId(), GetDeviceId())) {
+            // dawn:1688, crbug.com/586761510: Intel Mesa driver has a bug about reusing the
+            // VkDeviceMemory that was previously bound to a 2D VkImage. To work around that bug we
+            // have to disable the resource sub-allocation for 2D textures with CopyDst or
+            // RenderAttachment usage.
             const gpu_info::DriverVersion kBuggyDriverVersion = {21, 3, 6, 0};
             if (GetDriverVersion() >= kBuggyDriverVersion) {
                 deviceToggles->Default(
                     Toggle::DisableSubAllocationFor2DTextureWithCopyDstOrRenderAttachment, true);
             }
+        }
 
+        if (gpu_info::IsIntelGen12LP(GetVendorId(), GetDeviceId())) {
             // chromium:1361662: Mesa driver has a bug clearing R8 mip-leveled textures on Intel
             // Gen12 GPUs. Work around it by clearing the whole texture as soon as they are created.
             const gpu_info::DriverVersion kFixedDriverVersion = {23, 1, 0, 0};
