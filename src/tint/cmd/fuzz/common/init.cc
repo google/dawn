@@ -54,6 +54,7 @@ int ParseFuzzerOptions(FuzzerType type, int* argc, char*** argv, Options* option
         std::cerr << "Custom fuzzer options:" << '\n';
         opts.ShowHelp(std::cerr, true);
         std::cerr << '\n';
+#if !defined(TINT_FUZZER_USE_LIBFUZZER) || TINT_FUZZER_USE_LIBFUZZER
         // Change args to show libfuzzer help
         std::cerr << "Standard libfuzzer ";  // libfuzzer will print 'Usage:'
         static char help[] = "-help=1";
@@ -61,6 +62,17 @@ int ParseFuzzerOptions(FuzzerType type, int* argc, char*** argv, Options* option
         // SAFETY: `*argv` is guaranteed by the program entry point to have at least 2 valid
         // elements.
         DAWN_UNSAFE_BUFFERS((*argv)[1]) = help;
+#else
+        std::cerr << "For fuzzing engine options, invoke the engine directly (e.g., "
+                     "`centipede --help`).\n";
+        // Clear all arguments past argv[0] so non-libFuzzer drivers do not treat remaining
+        // entries as input paths, while preserving the standard argv[argc] == nullptr sentinel.
+        for (int i = 1; i < *argc; i++) {
+            // SAFETY: `i` is bounded by `[1, *argc)` and `*argv` has at least `*argc` elements.
+            DAWN_UNSAFE_BUFFERS((*argv)[i]) = nullptr;
+        }
+        *argc = 1;
+#endif
     };
 
     auto& opt_help = opts.Add<tint::cli::BoolOption>("help", "shows the usage");
@@ -89,7 +101,8 @@ int ParseFuzzerOptions(FuzzerType type, int* argc, char*** argv, Options* option
 
     tint::cli::ParseOptions parse_opts;
     parse_opts.ignore_unknown = true;
-    if (auto res = opts.Parse(arguments, parse_opts); res != tint::Success) {
+    auto res = opts.Parse(arguments, parse_opts);
+    if (res != tint::Success) {
         show_help();
         std::cerr << res.Failure();
         return 1;
@@ -99,6 +112,35 @@ int ParseFuzzerOptions(FuzzerType type, int* argc, char*** argv, Options* option
         show_help();
         return 0;
     }
+
+    // Compact argv in-place to remove Tint-consumed options while preserving argv[0],
+    // unknown engine flags, and positional arguments (e.g., corpus paths or testcase files).
+    const auto& unconsumed = res.Get();
+    int new_argc = 1;
+    size_t unconsumed_idx = 0;
+    for (int i = 1; i < *argc; i++) {
+        // SAFETY: `i` is bounded by `[1, *argc)` and `*argv` has at least `*argc` elements.
+        char* arg = DAWN_UNSAFE_BUFFERS((*argv)[i]);
+        for (size_t k = unconsumed_idx; k < unconsumed.Length(); k++) {
+            if (arg == unconsumed[k].data()) {
+                // SAFETY: `new_argc <= i < *argc` because `new_argc` increments at most once per
+                // outer-loop iteration.
+                DAWN_UNSAFE_BUFFERS((*argv)[new_argc++]) = arg;
+                unconsumed_idx = k + 1;
+                break;
+            }
+        }
+    }
+    // Per the C/C++ standard ([basic.start.main]), argv has argc + 1 elements with
+    // argv[argc] == nullptr as a sentinel that some flag parsers rely on. Null out all
+    // trailing slots in [new_argc, old_argc) to preserve argv[new_argc] == nullptr when
+    // arguments are removed, avoid stale pointers, and stay within [0, old_argc) even if
+    // a test harness passes a non-null-terminated argv.
+    for (int i = new_argc; i < *argc; i++) {
+        // SAFETY: `i` is bounded by `[new_argc, *argc)` and `*argv` has at least `*argc` elements.
+        DAWN_UNSAFE_BUFFERS((*argv)[i]) = nullptr;
+    }
+    *argc = new_argc;
 
     options->filter = opt_filter.value.value_or("");
     options->run_concurrently = opt_concurrent.value.value_or(false);

@@ -145,44 +145,49 @@ Result<OptionSet::Unconsumed> OptionSet::Parse(VectorRef<std::string_view> argum
         }
     }
 
-    // Canonicalize arguments by splitting '--foo=x' into '--foo' 'x'.
-    std::deque<std::string_view> arguments;
-    for (auto arg : arguments_raw) {
-        if (arg.starts_with('-')) {
-            if (auto eq_idx = arg.find('='); eq_idx != std::string_view::npos) {
-                arguments.push_back(arg.substr(0, eq_idx));
-                arguments.push_back(arg.substr(eq_idx + 1));
-                continue;
-            }
-        }
-        arguments.push_back(arg);
-    }
-
-    Hashset<Option*, 8> options_parsed;
+    // Copy arguments into a deque. Split '--foo=x' lazily only when 'foo' matches
+    // a registered option so unknown flags (e.g., '-max_len=1000') remain intact
+    // in `unconsumed` when `ignore_unknown` is true.
+    std::deque<std::string_view> arguments(arguments_raw.begin(), arguments_raw.end());
 
     Unconsumed unconsumed;
     while (!arguments.empty()) {
         auto arg = std::move(arguments.front());
         arguments.pop_front();
-        auto name = TrimLeft(arg, [](char c) { return c == '-'; });
-        if (arg == name || name.length() == 0) {
+
+        std::string_view flag_part = arg;
+        std::optional<std::string_view> eq_value;
+        if (arg.starts_with('-')) {
+            if (auto eq_idx = arg.find('='); eq_idx != std::string_view::npos) {
+                flag_part = arg.substr(0, eq_idx);
+                eq_value = arg.substr(eq_idx + 1);
+            }
+        }
+
+        auto name = TrimLeft(flag_part, [](char c) { return c == '-'; });
+        if (flag_part == name || name.length() == 0) {
             unconsumed.Push(arg);
             continue;
         }
         if (auto opt = options_by_name.Get(name)) {
+            if (eq_value.has_value()) {
+                arguments.push_front(*eq_value);
+            }
             if (auto err = (*opt)->Parse(arguments); !err.empty()) {
                 return Failure{err};
             }
-        } else if (!parse_options.ignore_unknown) {
+        } else if (parse_options.ignore_unknown) {
+            unconsumed.Push(arg);
+        } else {
             StyledText err;
-            err << "unknown flag: " << arg << "\n";
+            err << "unknown flag: " << flag_part << "\n";
             auto names = options_by_name.Keys();
             auto alternatives =
                 Transform(names, [&](const std::string& s) { return std::string_view(s); });
             tint::SuggestAlternativeOptions opts;
             opts.prefix = "--";
             opts.list_possible_values = false;
-            SuggestAlternatives(arg, alternatives.AsSpan(), err, opts);
+            SuggestAlternatives(flag_part, alternatives.AsSpan(), err, opts);
             return Failure{err.Plain()};
         }
     }

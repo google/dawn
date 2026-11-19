@@ -29,7 +29,9 @@ The `tint_wgsl_fuzzer` target can be built with either CMake or GN:
 
 - CMake: Define `TINT_BUILD_FUZZERS=1` (pass `-DTINT_BUILD_FUZZERS=1`
   to `cmake`)
-- GN: Define `use_libfuzzer = true` in `args.gn`.
+- GN: Define `use_libfuzzer = true` (or `use_centipede = true` to use
+  the [Centipede](https://github.com/google/fuzztest/tree/main/centipede)
+  fuzzing engine) in `args.gn`.
 
 Building `tint_ir_fuzzer` requires additional flags to be set:
 
@@ -107,8 +109,8 @@ ClusterFuzz.
    - CMake: Define `TINT_BUILD_FUZZTEST=1` alongside `TINT_BUILD_FUZZERS=1`
      (pass `-DTINT_BUILD_FUZZERS=1 -DTINT_BUILD_FUZZTEST=1` to `cmake`;
      requires the Clang toolchain).
-   - GN: Define `tint_build_fuzztest = true` alongside `use_libfuzzer = true` in
-     `args.gn`.
+   - GN: Define `tint_build_fuzztest = true` alongside `use_libfuzzer = true` or
+     `use_centipede = true` in `args.gn`.
 
 3. Build and verify the prototype FuzzTest binary (`tint_stub_fuzztest`):
 
@@ -171,6 +173,49 @@ is currently no facility to detect that an explicit input directory
 contains .wgsl files that need converting to .tirb files.
 
 See below for how to generate the corpus locally
+
+### Fuzzing with Centipede (GN only)
+
+> **Note:** Centipede support is currently GN-only; building or running Tint
+> fuzzers with Centipede in CMake is not implemented.
+
+In standalone GN builds, Tint fuzzers can be built and run with
+[Centipede](https://github.com/google/fuzztest/tree/main/centipede) instead of
+libFuzzer by setting `use_centipede = true` in `args.gn` (instead of
+`use_libfuzzer = true`). Building any fuzzer target also builds the `centipede`
+coordinator executable in the output directory:
+
+```bash
+autoninja -C out/Centipede fuzzers
+```
+
+To fuzz out-of-process with the `centipede` coordinator:
+
+```bash
+# WGSL fuzzer:
+out/Centipede/centipede \
+  --binary=out/Centipede/tint_wgsl_fuzzer \
+  --workdir=out/Centipede/workdir_wgsl \
+  --corpus_dir=out/Centipede/wgsl_corpus \
+  --dictionary=src/tint/cmd/fuzz/wgsl/dictionary.txt
+
+# IR fuzzer:
+out/Centipede/centipede \
+  --binary=out/Centipede/tint_ir_fuzzer \
+  --workdir=out/Centipede/workdir_ir \
+  --corpus_dir=out/Centipede/ir_corpus
+```
+
+Tint's custom fuzzer flags (such as `--filter=...` or `--verbose`) can be passed
+inside the `--binary` string (for example,
+`--binary="out/Centipede/tint_wgsl_fuzzer --filter=hlsl"`).
+
+To replay individual testcase files directly without the `centipede`
+coordinator:
+
+```bash
+out/Centipede/tint_wgsl_fuzzer --verbose path/to/testcase.wgsl
+```
 
 ### Generating fuzzer corpora
 

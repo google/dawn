@@ -202,6 +202,20 @@ TEST_F(CLITest, UnknownFlag_Ignored) {
     auto res = opts.Parse(Split("--myoption false", " "), parse_opts);
     ASSERT_EQ(res, Success);
     EXPECT_EQ(opt.value, std::nullopt);
+    EXPECT_THAT(ToStringList(res.Get()), testing::ElementsAre("--myoption", "false"));
+}
+
+TEST_F(CLITest, UnknownFlagWithEquals_IgnoredPreservesToken) {
+    OptionSet opts;
+    auto& opt = opts.Add<BoolOption>("my_option", "a boolean value");
+
+    ParseOptions parse_opts;
+    parse_opts.ignore_unknown = true;
+
+    auto res = opts.Parse(Split("-max_len=1000 --my_option input.wgsl", " "), parse_opts);
+    ASSERT_EQ(res, Success);
+    EXPECT_EQ(opt.value, true);
+    EXPECT_THAT(ToStringList(res.Get()), testing::ElementsAre("-max_len=1000", "input.wgsl"));
 }
 
 TEST_F(CLITest, ParseBool_Flag) {

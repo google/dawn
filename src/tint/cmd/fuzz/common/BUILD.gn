@@ -91,7 +91,10 @@ if (tint_build_fuzzers) {
 if (tint_build_unittests) {
   if (tint_build_fuzzers) {
     tint_unittests_source_set("unittests") {
-      sources = [ "fuzzer_decoder_test.cc" ]
+      sources = [
+        "fuzzer_decoder_test.cc",
+        "init_test.cc",
+      ]
       deps = [
         "${dawn_root}/src/utils",
         "${tint_src_dir}:gmock_and_gtest",

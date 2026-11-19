@@ -159,10 +159,16 @@ config("tint_public_config") {
     defines += [ "TINT_ENABLE_IR_DUMPING=0" ]
   }
 
-  if (tint_enable_ir_validation_asserts || use_libfuzzer) {
+  if (tint_enable_ir_validation_asserts || use_fuzzing_engine) {
     defines += [ "TINT_ENABLE_IR_VALIDATION_ASSERTS=1" ]
   } else {
     defines += [ "TINT_ENABLE_IR_VALIDATION_ASSERTS=0" ]
+  }
+
+  if (use_libfuzzer) {
+    defines += [ "TINT_FUZZER_USE_LIBFUZZER=1" ]
+  } else {
+    defines += [ "TINT_FUZZER_USE_LIBFUZZER=0" ]
   }
 
   include_dirs = [

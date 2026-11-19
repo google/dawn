@@ -94,6 +94,7 @@ cc_library(
   alwayslink = True,
   srcs = [
     "fuzzer_decoder_test.cc",
+    "init_test.cc",
   ],
   deps = [
     "//src/tint/cmd/fuzz/common",

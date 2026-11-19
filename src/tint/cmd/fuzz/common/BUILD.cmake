@@ -98,6 +98,7 @@ if(TINT_BUILD_FUZZERS)
 ################################################################################
 tint_add_target(tint_cmd_fuzz_common_test test
   cmd/fuzz/common/fuzzer_decoder_test.cc
+  cmd/fuzz/common/init_test.cc
 )
 
 tint_target_add_dependencies(tint_cmd_fuzz_common_test test

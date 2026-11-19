@@ -54,6 +54,10 @@ fuzzer_test("dawn_wire_server_and_frontend_fuzzer") {
   deps = [ ":dawn_wire_server_fuzzer_common" ]
 
   additional_configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
+
+  # Needed because default Chromium fuzztest adaptor depends on C++23
+  # features
+  is_fuzztest_compatible = false
 }
 
 if (is_win) {
@@ -63,6 +67,10 @@ if (is_win) {
     deps = [ ":dawn_wire_server_fuzzer_common" ]
 
     additional_configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
+
+    # Needed because default Chromium fuzztest adaptor depends on
+    # C++23 features
+    is_fuzztest_compatible = false
   }
 }
 
@@ -72,6 +80,10 @@ fuzzer_test("dawn_wire_server_and_vulkan_backend_fuzzer") {
   deps = [ ":dawn_wire_server_fuzzer_common" ]
 
   additional_configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
+
+  # Needed because default Chromium fuzztest adaptor depends on C++23
+  # features
+  is_fuzztest_compatible = false
 }
 
 # A group target to build all the fuzzers

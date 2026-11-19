@@ -50,8 +50,8 @@ if (current_toolchain == default_toolchain) {
       # Can't build fuzzers for Windows without ASan. If you need this, use
       # dawn_maximal="sanitizers" use_libfuzzer=true is_asan=true.
       assert(
-          use_libfuzzer,
-          "Fuzzer targets are available on this config, so dawn_maximal requires them. Set use_libfuzzer=true")
+          use_fuzzing_engine,
+          "Fuzzer targets are available on this config, so dawn_maximal requires them. Set use_libfuzzer=true or use_centipede=true")
     }
   } else if (dawn_maximal == "sanitizers") {
     # Note this disables RawPtrTests.
@@ -59,8 +59,8 @@ if (current_toolchain == default_toolchain) {
     assert(!(is_mac && host_os == "linux"),
            "Building for Mac on Linux is not supported with sanitizers")
     assert(
-        use_libfuzzer,
-        "Fuzzer targets are available on this config, so dawn_maximal requires them. Set use_libfuzzer=true")
+        use_fuzzing_engine,
+        "Fuzzer targets are available on this config, so dawn_maximal requires them. Set use_libfuzzer=true or use_centipede=true")
   }
 }
 
