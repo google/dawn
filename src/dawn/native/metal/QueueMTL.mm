@@ -27,6 +27,8 @@
 
 #include "src/dawn/native/metal/QueueMTL.h"
 
+#include <Metal/Metal.h>
+
 #include "absl/strings/str_format.h"
 #include "dawn/native/MetalBackend.h"
 #include "dawn/platform/DawnPlatform.h"
@@ -44,7 +46,9 @@
 #include "src/dawn/native/metal/CommandBufferMTL.h"
 #include "src/dawn/native/metal/DeviceMTL.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
+#include "src/utils/assert.h"
 #include "src/utils/compiler.h"
+#include "src/utils/log.h"
 
 namespace dawn::native::metal {
 
@@ -284,16 +288,36 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
                        deviceState == DeviceBase::State::Disconnecting);
         }
 
+        std::string executionError;
         MTLCommandBufferStatus status =
             INJECT_ERROR_OR_RUN(commandBuffer.status, MTLCommandBufferStatusError);
         if (status == MTLCommandBufferStatusError) [[unlikely]] {
             NSError* error = commandBuffer.error;
-            std::string message =
+            executionError =
                 error ? absl::StrFormat("Metal command buffer failed: %s (domain=%s, code=%ld)",
                                         [[error localizedDescription] UTF8String],
                                         [[error domain] UTF8String], error.code)
                       : "Metal command buffer failed (with unspecified error)";
-            queue->SetExecutionError(message);  // Thread-safe.
+        } else {
+            for (id<MTLFunctionLog> log in commandBuffer.logs) [[unlikely]] {
+                if (log.type != MTLFunctionLogTypeValidation) {
+                    // "Validation" is currently the only log type. Guard against Metal adding
+                    // something like "Warning" that we wouldn't want to lose the device over.
+                    DAWN_ASSERT(false);
+                    continue;
+                }
+
+                // This seems to show the same text as MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1.
+                executionError =
+                    absl::StrFormat("Metal command buffer had validation log: (((\n%s\n)))",
+                                    [[log description] UTF8String]);
+                // One log message is enough (they're typically really verbose).
+                break;
+            }
+        }
+
+        if (!executionError.empty()) [[unlikely]] {
+            queue->SetExecutionError(executionError);  // Thread-safe.
 
             // Since we're not holding any lock here, we need to set the device as lost immediately
             // *before* updating the serial (as well as before any subsequent command buffers update

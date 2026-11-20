@@ -62,7 +62,6 @@ Backend::Backend(InstanceBase* instance) : BackendConnection(instance, wgpu::Bac
         case dawn::native::BackendValidationLevel::Full:
             // See `man MetalValidation` for docs.
             setenv("MTL_SHADER_VALIDATION", "1", 1);
-            setenv("MTL_SHADER_VALIDATION_REPORT_TO_STDERR", "1", 1);
             [[fallthrough]];
         case dawn::native::BackendValidationLevel::Partial:
             setenv("METAL_DEVICE_WRAPPER_TYPE", "1", 1);

@@ -28,6 +28,7 @@
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/MetalBackend.h"
 #include "src/dawn/tests/DawnTest.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 
 namespace dawn::native {
 namespace {
@@ -219,6 +220,60 @@ TEST_P(MetalBackendTests, MapAsyncOnFailedCommandBuffer) {
 #endif  // defined(DAWN_ENABLE_ERROR_INJECTION)
 
 DAWN_INSTANTIATE_TEST(MetalBackendTests, MetalBackend());
+
+class MetalShaderValidationTests : public DawnTest {
+  protected:
+    void SetUp() override {
+        DawnTest::SetUp();
+        // Full backend validation = Metal API Validation + Metal Shader Validation
+        DAWN_TEST_UNSUPPORTED_IF(!IsFullBackendValidationEnabled());
+
+        // For some reason on our AMD bots, Shader Validation doesn't work (it doesn't print
+        // "Metal GPU Validation Enabled" like on other platforms).
+        DAWN_SUPPRESS_TEST_IF(IsAMD());
+    }
+};
+
+// Test that a Metal shader validation error (e.g. out-of-bounds access with robustness disabled)
+// triggers an unrecoverable execution error and loses the device.
+TEST_P(MetalShaderValidationTests, ShaderValidationErrorTriggersDeviceLost) {
+    bool deviceLostCalled = false;
+    EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
+                                          HasSubstr("Metal command buffer had validation log")))
+        .WillOnce([&](auto, auto, auto) { deviceLostCalled = true; });
+
+    wgpu::ComputePipelineDescriptor pipelineDesc;
+    pipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var<storage, read_write> data : array<u32>;
+
+        @compute @workgroup_size(1)
+        fn main() {
+            var idx = 1000u;
+            data[idx] = 42u;
+        }
+    )");
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+
+    wgpu::Buffer buf = utils::CreateBufferFromData(device, wgpu::BufferUsage::Storage, {0u});
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buf}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bindGroup);
+    pass.DispatchWorkgroups(1);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+
+    queue.Submit(1, &commands);
+
+    while (!deviceLostCalled) {
+        WaitABit();
+    }
+}
+
+DAWN_INSTANTIATE_TEST(MetalShaderValidationTests, MetalBackend({"disable_robustness"}));
 
 }  // anonymous namespace
 }  // namespace dawn::native
