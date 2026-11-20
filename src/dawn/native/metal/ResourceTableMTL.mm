@@ -170,12 +170,7 @@ MaybeError ResourceTable::UpdateResourceBindings(const std::vector<ResourceDiff>
                     mTextureViews[diff.slot] = nullptr;
                 },
                 [&](Ref<TextureViewBase> textureView) {
-                    // Skip updating the descriptor if the texture is already destroyed; the
-                    // slot is marked as empty in the metadata buffer and the partially-bound
-                    // descriptor array does not require a valid descriptor for unused slots.
-                    if (textureView->GetTexture()->IsDestroyed()) {
-                        return;
-                    }
+                    DAWN_ASSERT(!textureView->GetTexture()->IsDestroyed());
 
                     Ref<TextureView> handle = ToBackend(textureView);
                     DAWN_CHECK(handle != nullptr);

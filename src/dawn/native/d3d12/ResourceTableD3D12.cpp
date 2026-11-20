@@ -417,12 +417,7 @@ MaybeError ResourceTable::UpdateResourceBindings(const std::vector<ResourceDiff>
                 return {};
             },
             [&](Ref<TextureViewBase> textureView) -> MaybeError {
-                // Skip updating the descriptor if the texture is already destroyed; the slot is
-                // marked as empty in the metadata buffer and the partially-bound descriptor array
-                // does not require a valid descriptor for unused slots.
-                if (textureView->GetTexture()->IsDestroyed()) {
-                    return {};
-                }
+                DAWN_ASSERT(!textureView->GetTexture()->IsDestroyed());
 
                 auto view = ToBackend(textureView);
                 ID3D12Resource* resource = ToBackend(view->GetTexture())->GetD3D12Resource();

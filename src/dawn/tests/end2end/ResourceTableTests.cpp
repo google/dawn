@@ -730,12 +730,20 @@ TEST_P(ResourceTableTests, HasResourceUpdateWithTextureAlreadyDestroyed) {
         .size = {1, 1},
         .format = wgpu::TextureFormat::R8Unorm,
     };
-    wgpu::Texture tex = device.CreateTexture(&tDesc);
-    tex.Destroy();
+    wgpu::ResourceTable table = MakeResourceTable(1);
+    {
+        wgpu::Texture tex = device.CreateTexture(&tDesc);
+        tex.Destroy();
 
-    wgpu::ResourceTable table = MakeResourceTable(1, {{0, {.textureView = tex.CreateView()}}});
+        wgpu::BindingResource resource = {.textureView = tex.CreateView()};
+        EXPECT_EQ(wgpu::Status::Success, table.Update(0, &resource));
+        TestHasResource(table, {false});
 
-    TestHasResource(table, {false});
+        // Removing the slot and dropping the last reference to the already-destroyed texture must
+        // not leave a dangling pointer in the table when the table is later destroyed.
+        EXPECT_EQ(wgpu::Status::Success, table.Remove(0));
+    }
+    table.Destroy();
 }
 
 // Test that removing a slot that was never filled, then using the table, works.

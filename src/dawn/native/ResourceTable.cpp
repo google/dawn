@@ -57,8 +57,8 @@ Ref<T> GetRef(Variant&& variant) {
 }
 
 bool IsVisible(const TextureBase* texture, wgpu::ResourceTableUsage usage) {
-    return !texture->IsDestroyed() && texture->HasAccess() &&
-           usage == wgpu::ResourceTableUsage::ReadOnly;
+    DAWN_ASSERT(!texture->IsDestroyed());
+    return texture->HasAccess() && usage == wgpu::ResourceTableUsage::ReadOnly;
 }
 
 MaybeValError ValidateBindingResource(const DeviceBase* device, const BindingResource* resource) {
@@ -354,30 +354,7 @@ void ResourceTableBase::SetResourceUsage(const UsageBindingResource* resource,
         return;
     }
 
-    auto iter = mTextureState.find(texture);
-
-    // Special-case ReadOnly to not track textures that have no slots since it is the default
-    // state. This avoids keeping around references to textures that may never be put in the
-    // resource table.
-    if (usage == wgpu::ResourceTableUsage::ReadOnly) {
-        if (iter == mTextureState.end()) {
-            return;
-        }
-        if (iter->second.slots.empty()) {
-            texture->RemoveResourceTableUse(this);
-            mTextureState.erase(iter);
-            return;
-        }
-    }
-
-    // Track textures with non-default usage even if they are not currently in the resource
-    // table, so that their usage state is remembered if they are inserted later.
-    if (iter == mTextureState.end()) {
-        iter = mTextureState.emplace(texture, TextureState{}).first;
-        texture->AddResourceTableUse(this);
-    }
-
-    TextureState& textureState = iter->second;
+    TextureState& textureState = GetOrCreateTextureState(texture);
     if (textureState.usage != usage) {
         textureState.usage = usage;
         OnTextureStateChange(texture);
@@ -573,9 +550,14 @@ void ResourceTableBase::SetEntry(ResourceTableSlot slot, const BindingResource* 
     DAWN_CHECK(contents->buffer == nullptr);
     SlotState& state = mSlots[slot];
 
+    TextureViewBase* inputView = contents->textureView;
+    if (inputView != nullptr && inputView->GetTexture()->IsDestroyed()) {
+        inputView = nullptr;
+    }
+
     // Check the current state. If it's already set to the input value, early out.
     if (auto currView = GetRef<TextureViewBase>(state.resource)) {
-        if (currView == contents->textureView) {
+        if (currView == inputView) {
             return;
         }
 
@@ -585,15 +567,7 @@ void ResourceTableBase::SetEntry(ResourceTableSlot slot, const BindingResource* 
             TextureState& textureState = mTextureState[currTexture];
             [[maybe_unused]] const bool erased = textureState.slots.erase(slot);
             DAWN_ASSERT(erased);
-            // If it's the last slot, stop tracking dirty state for this texture, and remove it
-            // from mTextureState if it has default usage (ReadOnly). Otherwise, keep the
-            // mTextureState entry so its non-default usage is remembered if it is added back to
-            // the table.
             if (textureState.slots.empty()) {
-                if (textureState.usage == wgpu::ResourceTableUsage::ReadOnly) {
-                    currTexture->RemoveResourceTableUse(this);
-                    mTextureState.erase(currTexture);
-                }
                 mDirtyStateTextures.erase(currTexture);
             }
         }
@@ -607,18 +581,12 @@ void ResourceTableBase::SetEntry(ResourceTableSlot slot, const BindingResource* 
     state.resource = {};
     // Note: state.lastResource is only updated by ApplyDirtySlotUpdatesWith
 
-    if (TextureViewBase* inputView = contents->textureView) {
+    if (inputView != nullptr) {
         TextureBase* inputTexture = inputView->GetTexture();
-        // Add to mTextureState
-        auto [iter, added] = mTextureState.try_emplace(inputTexture);
-        TextureState& textureState = iter->second;
-        if (added) {
-            // Add the mapping to this table on the texture
-            inputTexture->AddResourceTableUse(this);
-        }
+        TextureState& textureState = GetOrCreateTextureState(inputTexture);
         // If inputTexture is being (re-)added to its first slot, mark it dirty so its visibility
         // and transition are evaluated before the next use. Note that we check `slots.empty()`
-        // rather than `added` because an entry may already exist with non-default usage.
+        // because an entry may already exist in mTextureState.
         if (textureState.slots.empty()) {
             mDirtyStateTextures.insert(inputTexture);
         }
@@ -759,6 +727,15 @@ void ResourceTableBase::MarkStateDirty(ResourceTableSlot slot) {
         mDirtySlots.push_back(slot);
         mSlots[slot].metadataDirty = true;
     }
+}
+
+ResourceTableBase::TextureState& ResourceTableBase::GetOrCreateTextureState(TextureBase* texture) {
+    DAWN_ASSERT(!texture->IsDestroyed());
+    auto [iter, added] = mTextureState.try_emplace(texture);
+    if (added) {
+        texture->AddResourceTableUse(this);
+    }
+    return iter->second;
 }
 
 void ResourceTableBase::OnTextureStateChange(TextureBase* texture) {

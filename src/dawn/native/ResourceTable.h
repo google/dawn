@@ -193,7 +193,8 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
     // The list of slots that need to be updated before the next use of the resource table.
     std::vector<ResourceTableSlot> mDirtySlots;
 
-    // The state of textures in the table
+    // Non-destroyed textures (`!texture->IsDestroyed()`) that have been added to or configured on
+    // this table. Entries are retained until either the texture or the table is destroyed.
     struct TextureState {
         wgpu::ResourceTableUsage usage = wgpu::ResourceTableUsage::ReadOnly;
         bool visible = false;
@@ -201,6 +202,7 @@ class ResourceTableBase : public ApiObjectBase, public WeakRefSupport<ResourceTa
         absl::flat_hash_set<ResourceTableSlot> slots;
     };
     absl::flat_hash_map<TextureBase*, TextureState> mTextureState;
+    TextureState& GetOrCreateTextureState(TextureBase* texture);
 
     // Bound textures (`!slots.empty()`) whose visibility or backend state needs evaluation before
     // the next draw/dispatch. Handled by ApplyDirtySlotUpdatesWith.
