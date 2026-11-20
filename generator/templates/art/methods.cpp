@@ -45,28 +45,13 @@ namespace dawn::kotlin_api {
 
 jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     if (!address) {
-      JNIClasses* classes = JNIClasses::getInstance(env);
-      env->ThrowNew(classes->dawnException, "Invalid byte buffer.");
-      return nullptr;
+        JNIClasses* classes = JNIClasses::getInstance(env);
+        env->ThrowNew(classes->dawnException, "Invalid byte buffer.");
+        return nullptr;
     }
-    jclass byteBufferClass = env->FindClass("java/nio/ByteBuffer");
-
-    //* Dawn always uses little endian format, so we pre-convert for the client's convenience.
-    jclass byteOrderClass = env->FindClass("java/nio/ByteOrder");
-    jobject littleEndian = env->GetStaticObjectField(
-            byteOrderClass, env->GetStaticFieldID(byteOrderClass, "LITTLE_ENDIAN",
-                                                  "Ljava/nio/ByteOrder;"));
-
-    jobject byteBuffer = env->NewDirectByteBuffer(const_cast<void *>(address), size);
-
-    env->CallObjectMethod(
-            byteBuffer, env->GetMethodID(byteBufferClass, "order",
-                                         "(Ljava/nio/ByteOrder;)Ljava/nio/ByteBuffer;"),
-            littleEndian);
-
-    env->DeleteLocalRef(byteOrderClass);
-    env->DeleteLocalRef(littleEndian);
-    return byteBuffer;
+    // NewDirectByteBuffer returns a big-endian ByteBuffer. Dawn uses little endian, so the Kotlin
+    // wrapper calls order(ByteOrder.LITTLE_ENDIAN) on the result.
+    return env->NewDirectByteBuffer(const_cast<void *>(address), size);
 }
 
 {% macro render_method(method, object) %}
@@ -119,7 +104,16 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     {% if _kotlin_return and (_kotlin_return.type.category == 'object' or (_kotlin_return.length == 'size_t' and (_kotlin_return.type.category == 'structure' or _kotlin_return.type.name.get() == 'char'))) %}
         JNIClasses* classes = JNIClasses::getInstance(env);
     {% endif %}
-    {% if _kotlin_args or (_kotlin_return and _kotlin_return.length == 'size_t') %}
+    {% set ns = namespace(needs_context = (_kotlin_return and _kotlin_return.length == 'size_t'), has_byte_buffer = false) %}
+    {% for arg in _kotlin_args %}
+        {% if member_needs_context(arg) %}
+            {% set ns.needs_context = true %}
+        {% endif %}
+        {% if member_is_byte_buffer(arg) %}
+            {% set ns.has_byte_buffer = true %}
+        {% endif %}
+    {% endfor %}
+    {% if ns.needs_context %}
         JNIContext c(env);
     {% endif %}
 
@@ -130,10 +124,13 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
             kotlinRecord.{{ as_varName(arg.name) }} = _{{ as_varName(arg.name) }};
         {% endfor %}
         {{ArgsStruct}} args;
-        ConvertInternal(&c, kotlinRecord, &args);
-        if (env->ExceptionCheck()) {
-            return{{ ' 0' if _kotlin_return }};
-        }
+        ConvertInternal({{ '&c' if ns.needs_context else 'nullptr' }}, env, kotlinRecord, &args);
+        //* Conversions that allocate on the JNIContext or read a ByteBuffer can throw.
+        {% if ns.needs_context or ns.has_byte_buffer %}
+            if (env->ExceptionCheck()) {
+                return{{ ' 0' if _kotlin_return }};
+            }
+        {% endif %}
     {% elif method.arguments %}
         {{ArgsStruct}} args = {};
     {% endif %}
@@ -198,7 +195,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
             }
         {% endif %}
     {% endif %}
-    {% if object and object.name.get() == 'device' and _kotlin_args %}
+    {% if object and object.name.get() == 'device' and ns.needs_context %}
         // Note: We intentionally only register recurring callbacks for WGPUDevice, as it is
         // the only object in Dawn with a terminal lifecycle event (device lost callback)
         // that guarantees safe cleanup. Instance does not have recurring callbacks in dawn.json.
@@ -215,7 +212,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
                 }
             {% endif %}
         {% endif %}
-        {% if object and method.name.get() == 'create device' and _kotlin_args %}
+        {% if object and method.name.get() == 'create device' and ns.needs_context %}
             if (result != nullptr) {
                 // Transfer callbacks to the newly created device.
                 RegisterDeviceCallbacks(result, c.recurringCallbacks);

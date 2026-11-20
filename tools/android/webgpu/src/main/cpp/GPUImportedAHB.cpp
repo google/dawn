@@ -40,7 +40,6 @@
 #include <vector>
 
 #include "JNIClasses.h"
-#include "JNIContext.h"
 #include "src/dawn/common/ColorSpace.h"
 #include "src/dawn/common/ExternalTextureParams.h"
 #include "structures.h"
@@ -205,7 +204,6 @@ Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createTextureNative(JNI
                                                                              jobject deviceObj,
                                                                              jobject hardwareBuffer,
                                                                              jint usage) {
-    JNIContext c(env);
     JNIClasses* classes = JNIClasses::getInstance(env);
     wgpu::Device device = nullptr;
     AHardwareBuffer* ahb = nullptr;
@@ -293,7 +291,6 @@ Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createExternalTextureNa
     jobject deviceObj,
     jobject hardwareBuffer,
     jobject descriptorObj) {
-    JNIContext c(env);
     JNIClasses* classes = JNIClasses::getInstance(env);
     if (!descriptorObj) {
         env->ThrowNew(classes->javaIllegalStateException,

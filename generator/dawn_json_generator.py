@@ -351,6 +351,24 @@ def compute_kotlin_params(loaded_json,
 
             yield member
 
+    # Returns whether this member is converted from a direct ByteBuffer. The
+    # conversion only needs a JNIEnv and throws IllegalArgumentException when
+    # the buffer is not direct.
+    def member_is_byte_buffer(member):
+        return (not getattr(member, 'kotlin_only', False)
+                and bool(member.length) and member.length != 'constant'
+                and member.type.name.get() == 'void')
+
+    # Returns whether converting this member requires a JNIContext. methods.cpp
+    # passes nullptr to ConvertInternal when no member needs one.
+    def member_needs_context(member):
+        if getattr(member, 'kotlin_only', False):
+            return False
+        if member_is_byte_buffer(member):
+            return False
+        return (member.type.category in ['callback function', 'structure']
+                or bool(member.length and member.constant_length != 1))
+
     # Calculate if we should, and can, provide a Kotlin default value for a given argument.
     # This will affect its order in the method parameter and structure field lists.
     def kotlin_default(arg):
@@ -537,6 +555,8 @@ def compute_kotlin_params(loaded_json,
     params_kotlin['include_structure'] = include_structure
     params_kotlin['include_enum'] = include_enum
     params_kotlin['kotlin_record_members'] = kotlin_record_members
+    params_kotlin['member_is_byte_buffer'] = member_is_byte_buffer
+    params_kotlin['member_needs_context'] = member_needs_context
     params_kotlin['jni_name'] = jni_name
     params_kotlin['include_callback'] = include_callback
 

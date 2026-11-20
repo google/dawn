@@ -344,6 +344,7 @@ class BufferTest {
           buffer.unmap()
 
           assertEquals(bufferSize, byteBuffer.capacity().toLong())
+          assertEquals(ByteOrder.LITTLE_ENDIAN, byteBuffer.order())
         }
       }
     }
@@ -369,6 +370,7 @@ class BufferTest {
 
           val expectedSize = bufferSize - offset
           assertEquals(expectedSize, byteBuffer.capacity().toLong())
+          assertEquals(ByteOrder.LITTLE_ENDIAN, byteBuffer.order())
         }
       }
     }
@@ -393,6 +395,7 @@ class BufferTest {
           buffer.unmap()
 
           assertEquals(size, byteBuffer.capacity().toLong())
+          assertEquals(ByteOrder.LITTLE_ENDIAN, byteBuffer.order())
         }
       }
     }
@@ -415,6 +418,7 @@ class BufferTest {
           buffer.unmap()
 
           assertEquals(bufferSize, byteBuffer.capacity().toLong())
+          assertEquals(ByteOrder.LITTLE_ENDIAN, byteBuffer.order())
         }
       }
     }
@@ -440,6 +444,7 @@ class BufferTest {
 
           val expectedSize = bufferSize - offset
           assertEquals(expectedSize, byteBuffer.capacity().toLong())
+          assertEquals(ByteOrder.LITTLE_ENDIAN, byteBuffer.order())
         }
       }
     }

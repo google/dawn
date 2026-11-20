@@ -271,7 +271,7 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
                 {% endfor %}
 
                 //* Fill all struct members from the Kotlin record.
-                ConvertInternal(c, kotlinRecord, converted);
+                ConvertInternal(c, env, kotlinRecord, converted);
                 //* `string view` (jstring) local references are intentionally kept alive here
                 //* because JNIContext retains them until ~JNIContext() releases their pinned
                 //* buffers.

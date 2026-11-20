@@ -21,6 +21,13 @@ package {{ kotlin_package }}
 
 import dalvik.annotation.optimization.FastNative
 import java.nio.ByteBuffer
+{% for method in obj.methods if include_method(method) %}
+    {% set _ret = kotlin_return(method) %}
+    {% if _ret and _ret.type.name.get() in ['void const *', 'void *'] %}
+        import java.nio.ByteOrder
+        {% break %}
+    {% endif %}
+{% endfor %}
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -90,7 +97,7 @@ public class {{ kotlin_name(obj) }} private constructor(public val handle: Long)
                 {%- else -%}
                     {{- as_varName(arg.name) }}{{- ('?.handle ?: 0L' if kotlin_is_nullable(arg) else '.handle') if (arg.type.category == 'object' and not arg.length) else '' -}}
                 {%- endif -%}
-            {%- endfor -%})
+            {%- endfor -%}){{ '.order(ByteOrder.LITTLE_ENDIAN)' if (_kotlin_return and _kotlin_return.type.name.get() in ['void const *', 'void *']) else '' }}
 
         {% if method.name.chunks[0] == 'get' and not method.arguments %}
             //* For the Kotlin getter, strip word 'get' from name and convert the remainder to

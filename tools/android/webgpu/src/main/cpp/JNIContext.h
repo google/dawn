@@ -55,7 +55,9 @@ class JNIContext : dawn::NonMovable {
 
     // Public members for convenience.
     JNIEnv* const env;
-    JavaVM* jvm;
+
+    // Returns the process JavaVM. The lookup runs once per process.
+    static JavaVM* GetJavaVM(JNIEnv* env);
 
     const char* GetStringUTFChars(jstring s);
 

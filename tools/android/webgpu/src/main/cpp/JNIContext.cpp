@@ -30,12 +30,21 @@
 #include <algorithm>
 
 #include "JNIClasses.h"
+#include "src/utils/assert.h"
 #include "structures.h"
 
 namespace dawn::kotlin_api {
 
-JNIContext::JNIContext(JNIEnv* env) : env(env) {
-    env->GetJavaVM(&jvm);
+JNIContext::JNIContext(JNIEnv* env) : env(env) {}
+
+JavaVM* JNIContext::GetJavaVM(JNIEnv* env) {
+    static JavaVM* sJvm = [env]() {
+        JavaVM* vm = nullptr;
+        jint result = env->GetJavaVM(&vm);
+        DAWN_CHECK(result == JNI_OK && vm != nullptr);
+        return vm;
+    }();
+    return sJvm;
 }
 
 JNIContext::~JNIContext() {

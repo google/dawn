@@ -44,19 +44,14 @@
 {% endmacro %}
 
 {% macro define_kotlin_to_struct_conversion(function_name, kotlin_name, struct_name, members, is_structure_converter=False, unwrap_objects=False) %}
-    inline void {{function_name}}(JNIContext* c, const {{kotlin_name}}& inStruct, {{struct_name}}* outStruct) {
-        {% set ns = namespace(needs_env=false, needs_classes=false) %}
+    //* `c` is nullptr when no member needs a JNIContext (see member_needs_context).
+    inline void {{function_name}}(JNIContext* c, JNIEnv* env, const {{kotlin_name}}& inStruct, {{struct_name}}* outStruct) {
+        {% set ns = namespace(needs_classes=false) %}
         {% for member in kotlin_record_members(members) if not member.kotlin_only %}
             {% if member.type.category == 'object' and ((member.length and member.length != 'constant') or (not member.length and not unwrap_objects)) %}
                 {% set ns.needs_classes = true %}
-                {% set ns.needs_env = true %}
-            {% elif member.type.category in ['callback function', 'structure'] or (member.length and member.constant_length != 1) %}
-                {% set ns.needs_env = true %}
             {% endif %}
         {% endfor %}
-        {% if ns.needs_env %}
-            JNIEnv* env = c->env;
-        {% endif %}
         {% if ns.needs_classes %}
             JNIClasses* classes = JNIClasses::getInstance(env);
         {% endif %}
@@ -214,14 +209,14 @@
                         auto newUserDataShared = std::make_shared<UserData>();
                         newUserDataShared->callback = env->NewGlobalRef(inStruct.{{member.name.camelCase()}});
                         newUserDataShared->executor = env->NewGlobalRef(inStruct.{{as_varName(member.name)}}Executor);
-                        newUserDataShared->jvm = c->jvm;
+                        newUserDataShared->jvm = JNIContext::GetJavaVM(env);
                         c->recurringCallbacks.push_back(newUserDataShared);
                         callbackInfo.{{ userdata }} = newUserDataShared.get();
                         {% else %}
                         UserData* newUserData = new UserData();
                         newUserData->callback = env->NewGlobalRef(inStruct.{{member.name.camelCase()}});
                         newUserData->executor = env->NewGlobalRef(inStruct.{{as_varName(member.name)}}Executor);
-                        newUserData->jvm = c->jvm;
+                        newUserData->jvm = JNIContext::GetJavaVM(env);
                         {% if member.type.name.get() == 'request device callback' %}
                         newUserData->recurringCallbacks = std::move(c->recurringCallbacks);
                         {% endif %}
