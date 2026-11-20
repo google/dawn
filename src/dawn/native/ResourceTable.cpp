@@ -717,17 +717,17 @@ MaybeError ResourceTableBase::ApplyDirtySlotUpdatesWith(
         }
         state.resourceDirty = false;
 
-        ResourceDiff update{
+        // The slot may have been changed and changed back since the backend was last updated, for
+        // example filled then removed. Skip the update if it holds what the backend already has.
+        if (state.lastResource == state.resource) {
+            continue;
+        }
+
+        resourceDiffs.push_back({
             .slot = dirtySlot,
             .removed = state.lastResource,
             .added = state.resource,
-        };
-
-        // At least one of removed and added must be set
-        DAWN_ASSERT(!(std::holds_alternative<std::monostate>(update.removed) &&
-                      std::holds_alternative<std::monostate>(update.added)));
-
-        resourceDiffs.push_back(update);
+        });
 
         // Update the last resource for future slot updates
         state.lastResource = state.resource;

@@ -738,6 +738,35 @@ TEST_P(ResourceTableTests, HasResourceUpdateWithTextureAlreadyDestroyed) {
     TestHasResource(table, {false});
 }
 
+// Test that removing a slot that was never filled, then using the table, works.
+TEST_P(ResourceTableTests, RemoveEmptySlotThenUse) {
+    // TODO(473444514): Re-enable when compute shaders support ResourceTable on metal
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
+
+    wgpu::ResourceTable table = MakeResourceTable(1);
+    EXPECT_EQ(wgpu::Status::Success, table.Remove(0));
+
+    TestHasResource(table, {false});
+}
+
+// Test that filling a slot and removing it before the table is first used works.
+TEST_P(ResourceTableTests, UpdateThenRemoveBeforeFirstUse) {
+    // TODO(473444514): Re-enable when compute shaders support ResourceTable on metal
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R8Unorm,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    wgpu::ResourceTable table = MakeResourceTable(1, {{0, {.textureView = tex.CreateView()}}});
+    EXPECT_EQ(wgpu::Status::Success, table.Remove(0));
+
+    TestHasResource(table, {false});
+}
+
 // Test that a texture used in multiple resource tables has its availability correctly updated.
 // Note: Similar tests for EndAccess are implemented in SharedTextureMemoryResourceTableTests.
 TEST_P(ResourceTableTests, HasResourceSameTextureMultipleTables) {
