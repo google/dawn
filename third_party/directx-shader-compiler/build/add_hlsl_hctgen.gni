@@ -38,15 +38,19 @@ template("add_hlsl_hctgen") {
       # TODO(amaiorano): See HCT.cmake
     }
 
-    script = "${invoker.dawn_dxc_dir}/utils/hct/hctgen.py"
+    script = "${invoker.dawn_dxc_gn_dir}/build/run_hctgen.py"
     inputs = [
+      "${invoker.dawn_dxc_dir}/utils/hct/CodeTags.py",
       "${invoker.dawn_dxc_dir}/utils/hct/gen_intrin_main.txt",
       "${invoker.dawn_dxc_dir}/utils/hct/hctdb.py",
       "${invoker.dawn_dxc_dir}/utils/hct/hctdb_instrhelp.py",
+      "${invoker.dawn_dxc_dir}/utils/hct/hctgen.py",
     ]
     gen_output = "$target_gen_dir" + invoker.output
     outputs = [ gen_output ]
     args = [
+      rebase_path("${invoker.dawn_dxc_dir}/utils/hct/hctgen.py",
+                  root_build_dir),
       "--force-lf",  # Always?
       "${invoker.mode}",
       "--output",
