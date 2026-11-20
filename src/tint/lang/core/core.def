@@ -2134,6 +2134,7 @@ ctor mat4x4<T: f32_f16>(T, T, T, T,
 
 @must_use @const conv u64(u32) -> u64
 @must_use @const conv bf16(f32) -> bf16
+@must_use @const conv f32(bf16) -> f32
 
 ////////////////////////////////////////////////////////////////////////////////
 // Unary Operators                                                            //

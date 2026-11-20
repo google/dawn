@@ -114,6 +114,9 @@ bool VKComponentTypeToWGPUSubgroupMatrixComponentType(
         case VK_COMPONENT_TYPE_SINT8_KHR:
             *wgpuComponentType = wgpu::SubgroupMatrixComponentType::I8;
             return true;
+        case VK_COMPONENT_TYPE_BFLOAT16_KHR:
+            *wgpuComponentType = wgpu::SubgroupMatrixComponentType::Bf16;
+            return true;
         default:
             return false;
     }

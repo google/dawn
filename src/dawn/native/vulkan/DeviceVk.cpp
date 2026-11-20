@@ -806,6 +806,14 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
             }
         }
 
+        // If bfloat16 is available for cooperative matrices, enable it.
+        if (mDeviceInfo.bfloat16Features.shaderBFloat16Type == VK_TRUE &&
+            mDeviceInfo.bfloat16Features.shaderBFloat16CooperativeMatrix == VK_TRUE) {
+            usedKnobs.bfloat16Features.shaderBFloat16Type = VK_TRUE;
+            usedKnobs.bfloat16Features.shaderBFloat16CooperativeMatrix = VK_TRUE;
+            featuresChain.Add(&usedKnobs.bfloat16Features);
+        }
+
         // If robustBufferAccess2 is enabled and cooperativeMatrixRobustBufferAccess is available,
         // enable it.
         if (IsRobustnessEnabled() && IsToggleEnabled(Toggle::VulkanUseBufferRobustAccess2) &&

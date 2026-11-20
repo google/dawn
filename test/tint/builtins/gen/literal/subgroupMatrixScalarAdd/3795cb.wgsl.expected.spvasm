@@ -1,8 +1,118 @@
-SKIP: FAILED
-
-<dawn>/test/tint/builtins/gen/literal/subgroupMatrixScalarAdd/3795cb.wgsl:42:68 error: bf16 cannot be used as an element type of an array
-@group(0) @binding(0) var<storage, read_write> prevent_dce : array<bf16, 1024>;
-                                                                   ^^^^
-
-
-tint executable returned error: exit status 1
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 68
+; Schema: 0
+               OpCapability Shader
+               OpCapability VulkanMemoryModel
+               OpCapability VulkanMemoryModelDeviceScope
+               OpCapability CooperativeMatrixKHR
+               OpCapability BFloat16CooperativeMatrixKHR
+               OpExtension "SPV_KHR_vulkan_memory_model"
+               OpExtension "SPV_KHR_cooperative_matrix"
+               OpExtension "SPV_KHR_bfloat16"
+         %59 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical Vulkan
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpMemberName %prevent_dce_block_tint_explicit_layout 0 "inner"
+               OpName %prevent_dce_block_tint_explicit_layout "prevent_dce_block_tint_explicit_layout"
+               OpName %subgroupMatrixScalarAdd_3795cb "subgroupMatrixScalarAdd_3795cb"
+               OpName %res "res"
+               OpName %compute_main "compute_main"
+               OpName %subgroup_matrix_left_bf16_8_8_add "subgroup_matrix_left_bf16_8_8_add"
+               OpName %mat "mat"
+               OpName %s "s"
+               OpName %v "v"
+               OpName %idx "idx"
+               OpDecorate %_arr_float_uint_1024 ArrayStride 4
+               OpMemberDecorate %prevent_dce_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %prevent_dce_block_tint_explicit_layout Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+      %float = OpTypeFloat 32
+       %uint = OpTypeInt 32 0
+  %uint_1024 = OpConstant %uint 1024
+%_arr_float_uint_1024 = OpTypeArray %float %uint_1024
+%prevent_dce_block_tint_explicit_layout = OpTypeStruct %_arr_float_uint_1024
+%_ptr_StorageBuffer_prevent_dce_block_tint_explicit_layout = OpTypePointer StorageBuffer %prevent_dce_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block_tint_explicit_layout StorageBuffer
+     %uint_3 = OpConstant %uint 3
+     %uint_8 = OpConstant %uint 8
+   %bfloat16 = OpTypeFloat 16 BFloat16KHR
+     %uint_0 = OpConstant %uint 0
+          %9 = OpTypeCooperativeMatrixKHR %bfloat16 %uint_3 %uint_8 %uint_8 %uint_0
+         %14 = OpTypeFunction %9
+         %16 = OpConstantNull %9
+    %float_8 = OpConstant %float 8
+%_ptr_Function_9 = OpTypePointer Function %9
+       %void = OpTypeVoid
+         %25 = OpTypeFunction %void
+%_ptr_StorageBuffer__arr_float_uint_1024 = OpTypePointer StorageBuffer %_arr_float_uint_1024
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+        %int = OpTypeInt 32 1
+     %int_16 = OpConstant %int 16
+         %37 = OpTypeFunction %9 %9 %float
+%_ptr_Function_uint = OpTypePointer Function %uint
+       %bool = OpTypeBool
+%_ptr_Function_bfloat16 = OpTypePointer Function %bfloat16
+%float_n3_38953139e_38 = OpConstant %float -3.38953139e+38
+%float_3_38953139e_38 = OpConstant %float 3.38953139e+38
+     %uint_1 = OpConstant %uint 1
+%subgroupMatrixScalarAdd_3795cb = OpFunction %9 None %14
+         %15 = OpLabel
+        %res = OpVariable %_ptr_Function_9 Function
+         %17 = OpFunctionCall %9 %subgroup_matrix_left_bf16_8_8_add %16 %float_8
+               OpStore %res %17
+         %22 = OpLoad %9 %res None
+               OpReturnValue %22
+               OpFunctionEnd
+%compute_main = OpFunction %void None %25
+         %26 = OpLabel
+         %27 = OpFunctionCall %9 %subgroupMatrixScalarAdd_3795cb
+         %28 = OpAccessChain %_ptr_StorageBuffer__arr_float_uint_1024 %1 %uint_0
+         %30 = OpAccessChain %_ptr_StorageBuffer_float %28 %uint_0
+               OpCooperativeMatrixStoreKHR %30 %27 %uint_0 %int_16 NonPrivatePointer
+               OpReturn
+               OpFunctionEnd
+%subgroup_matrix_left_bf16_8_8_add = OpFunction %9 None %37
+        %mat = OpFunctionParameter %9
+          %s = OpFunctionParameter %float
+         %38 = OpLabel
+          %v = OpVariable %_ptr_Function_9 Function %16
+        %idx = OpVariable %_ptr_Function_uint Function
+               OpStore %v %mat None
+         %40 = OpCooperativeMatrixLengthKHR %uint %9
+               OpBranch %41
+         %41 = OpLabel
+               OpStore %idx %uint_0
+               OpBranch %44
+         %44 = OpLabel
+               OpLoopMerge %45 %43 None
+               OpBranch %42
+         %42 = OpLabel
+         %49 = OpLoad %uint %idx None
+         %50 = OpUGreaterThanEqual %bool %49 %40
+               OpSelectionMerge %52 None
+               OpBranchConditional %50 %53 %52
+         %53 = OpLabel
+               OpBranch %45
+         %52 = OpLabel
+         %54 = OpAccessChain %_ptr_Function_bfloat16 %v %49
+         %56 = OpLoad %bfloat16 %54 None
+         %57 = OpFConvert %float %56
+         %58 = OpExtInst %float %59 NClamp %s %float_n3_38953139e_38 %float_3_38953139e_38
+         %62 = OpFAdd %float %57 %58
+         %63 = OpExtInst %float %59 NClamp %62 %float_n3_38953139e_38 %float_3_38953139e_38
+         %64 = OpFConvert %bfloat16 %63
+               OpStore %54 %64 None
+               OpBranch %43
+         %43 = OpLabel
+         %65 = OpLoad %uint %idx None
+         %66 = OpIAdd %uint %65 %uint_1
+               OpStore %idx %66 None
+               OpBranch %44
+         %45 = OpLabel
+         %46 = OpLoad %9 %v None
+               OpReturnValue %46
+               OpFunctionEnd

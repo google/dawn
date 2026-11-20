@@ -189,6 +189,9 @@ struct State {
     /// Module-scoped variable for the last active subgroup id.
     core::ir::Var* subgroup_last_id_ = nullptr;
 
+    Hashmap<std::pair<const core::type::Type*, core::BinaryOp>, core::ir::Function*, 8>
+        subgroup_matrix_scalar_funcs_{};
+
     /// Process the module.
     void Process() {
         // Find the builtins that need replacing.
@@ -347,7 +350,7 @@ struct State {
             }
             if (auto* construct = inst->As<core::ir::Construct>()) {
                 if (auto* sm = construct->Result()->Type()->As<core::type::SubgroupMatrix>()) {
-                    if (sm->Type()->IsAnyOf<core::type::I8, core::type::U8>() &&
+                    if (sm->Type()->IsAnyOf<core::type::I8, core::type::U8, core::type::BF16>() &&
                         construct->Args().size() > 0) {
                         subgroup_matrix_constructors.Push(construct);
                     }
@@ -372,14 +375,16 @@ struct State {
                     value = b.CallExplicit<spirv::ir::BuiltinCall>(
                                  ty.i8(), spirv::BuiltinFn::kSConvert,
                                  Vector<core::ir::TemplateParameter, 1>{ty.i8()},
-                                 b.Clamp(value, -128_i, 127_i))
+                                 ClampSubgroupMatrixScalar(ty.i8(), value))
                                 ->Result();
                 } else if (sm_ty->Type()->Is<core::type::U8>()) {
                     value = b.CallExplicit<spirv::ir::BuiltinCall>(
                                  ty.u8(), spirv::BuiltinFn::kUConvert,
                                  Vector<core::ir::TemplateParameter, 1>{ty.u8()},
-                                 b.Clamp(value, 0_u, 255_u))
+                                 ClampSubgroupMatrixScalar(ty.u8(), value))
                                 ->Result();
+                } else if (sm_ty->Type()->Is<core::type::BF16>()) {
+                    value = b.Convert(ty.bf16(), ClampSubgroupMatrixScalar(ty.bf16(), value));
                 }
             });
             construct->SetArg(0, value);
@@ -399,6 +404,18 @@ struct State {
                 }
             }
         }
+    }
+
+    core::ir::Value* ClampSubgroupMatrixScalar(const core::type::Type* ele_ty,
+                                               core::ir::Value* value) {
+        if (ele_ty->Is<core::type::I8>()) {
+            return b.Clamp(value, -128_i, 127_i);
+        } else if (ele_ty->Is<core::type::U8>()) {
+            return b.Clamp(value, 0_u, 255_u);
+        } else if (ele_ty->Is<core::type::BF16>()) {
+            return b.Clamp(value, -0x1.fep+127_f, 0x1.fep+127_f);
+        }
+        return value;
     }
 
     /// Set the subgroup_invocation_id variable from an entry point.
@@ -1644,27 +1661,95 @@ struct State {
         builtin->Destroy();
     }
 
+    /// Create a function to perform a decomposed subgroup matrix scalar operation.
+    /// Needed for types that do not support arithmetic (e.g. bf16 and f8).
+    /// Loops over invocation private elements and performs a scalar operation.
+    ///
+    /// This could be improved by using SPV_EXT_cooperative_matrix_maintenance1.
+    /// @param sm_ty the subgroup matrix type
+    /// @param op the binary operation
+    /// @returns the function for the operation
+    core::ir::Function* MakeSubgroupMatrixScalarOp(const core::type::SubgroupMatrix* sm_ty,
+                                                   core::BinaryOp op) {
+        return subgroup_matrix_scalar_funcs_
+            .GetOrAddEntry(
+                std::make_pair(sm_ty, op),
+                [&] {
+                    StringStream name_str;
+                    name_str << sm_ty->IdentifierName() << "_";
+                    switch (op) {
+                        case core::BinaryOp::kAdd:
+                            name_str << "add";
+                            break;
+                        case core::BinaryOp::kSubtract:
+                            name_str << "sub";
+                            break;
+                        case core::BinaryOp::kMultiply:
+                            name_str << "mul";
+                            break;
+                        default:
+                            TINT_ICE() << "unsupported binary operator: " << op;
+                    }
+                    auto* scalar_ty = ty.ShaderScalarType(sm_ty);
+                    auto* func = b.Function(name_str.str(), sm_ty);
+                    auto* mat = b.FunctionParam("mat", sm_ty);
+                    auto* s = b.FunctionParam("s", scalar_ty);
+                    func->SetParams({mat, s});
+                    b.Append(func->Block(), [&] {
+                        auto* var = b.Var("v", ty.ptr(function, sm_ty));
+                        b.Store(var, mat);
+                        auto* len = b.CallExplicit<spirv::ir::BuiltinCall>(
+                            ty.u32(), spirv::BuiltinFn::kCooperativeMatrixLength,
+                            Vector<core::ir::TemplateParameter, 1>{sm_ty});
+                        b.LoopRange(0_u, len, 1_u, [&](core::ir::Value* index) {
+                            auto* access = b.Access(ty.ptr(function, sm_ty->Type()), var, index);
+                            auto* ld = b.Load(access);
+                            auto* up = b.Convert(scalar_ty, ld);
+                            auto* bin = b.Binary(op, scalar_ty, up,
+                                                 ClampSubgroupMatrixScalar(sm_ty->Type(), s));
+                            auto* clamp = ClampSubgroupMatrixScalar(sm_ty->Type(), bin);
+                            auto* down = b.Convert(sm_ty->Type(), clamp);
+                            b.Store(access, down);
+                        });
+                        auto* ld_mat = b.Load(var);
+                        b.Return(func, ld_mat);
+                    });
+                    return func;
+                })
+            .value;
+    }
+
     /// Replace a subgroupMatrixScalar builtin.
     /// @param builtin the builtin call instruction
     /// @param op the operation to perform
     void SubgroupMatrixScalar(core::ir::CoreBuiltinCall* builtin, core::BinaryOp op) {
-        b.InsertBefore(builtin, [&] {
-            auto* mat = builtin->Args()[0];
-            auto* scalar = builtin->Args()[1];
+        auto* mat = builtin->Args()[0];
+        auto* scalar = builtin->Args()[1];
 
-            auto* sm_ty = mat->Type()->As<core::type::SubgroupMatrix>();
+        auto* sm_ty = mat->Type()->As<core::type::SubgroupMatrix>();
+        core::ir::Function* looper = nullptr;
+        if (sm_ty->Type()->Is<core::type::BF16>()) {
+            looper = MakeSubgroupMatrixScalarOp(sm_ty, op);
+        }
+        b.InsertBefore(builtin, [&] {
             if (sm_ty->Type()->Is<core::type::I8>()) {
                 scalar = b.CallExplicit<spirv::ir::BuiltinCall>(
                               ty.i8(), spirv::BuiltinFn::kSConvert,
                               Vector<core::ir::TemplateParameter, 1>{ty.i8()},
-                              b.Clamp(scalar, -128_i, 127_i))
+                              ClampSubgroupMatrixScalar(ty.i8(), scalar))
                              ->Result();
             } else if (sm_ty->Type()->Is<core::type::U8>()) {
                 scalar = b.CallExplicit<spirv::ir::BuiltinCall>(
                               ty.u8(), spirv::BuiltinFn::kUConvert,
                               Vector<core::ir::TemplateParameter, 1>{ty.u8()},
-                              b.Clamp(scalar, 0_u, 255_u))
+                              ClampSubgroupMatrixScalar(ty.u8(), scalar))
                              ->Result();
+            } else if (sm_ty->Type()->Is<core::type::BF16>()) {
+                // Arithmetic operators are not permitted for this type. Instead call a function
+                // perform the operation.
+                // TODO(583490405): fp8 types will fall into this case too.
+                b.CallWithResult(builtin->DetachResult(), looper, mat, scalar);
+                return;
             }
 
             auto* scalar_mat = b.Construct(sm_ty, scalar);
@@ -1717,6 +1802,7 @@ Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, PolyfillConfig config)
 
     ir.properties.Add(core::ir::Property::kAllow8BitIntegers);
     ir.properties.Add(core::ir::Property::kAllowNonCoreTypes);
+    ir.properties.Add(core::ir::Property::kAllow16BitBFloats);
 
     return Success;
 }

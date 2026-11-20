@@ -995,7 +995,7 @@ class SubgroupMatrix_MatrixScalarArithmeticTest : public SubgroupMatrixArithmeti
         if (config.componentType == wgpu::SubgroupMatrixComponentType::U8 ||
             config.componentType == wgpu::SubgroupMatrixComponentType::I8) {
             shader << "/4";
-        } else if (config.resultComponentType == wgpu::SubgroupMatrixComponentType::Bf16) {
+        } else if (config.componentType == wgpu::SubgroupMatrixComponentType::Bf16) {
             shader << "/2";
         }
         shader << ";\n";

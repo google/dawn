@@ -376,6 +376,11 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_PROPERTIES_KHR);
     }
 
+    if (info.extensions[DeviceExt::ShaderBfloat16]) {
+        featuresChain.Add(&info.bfloat16Features,
+                          VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_BFLOAT16_FEATURES_KHR);
+    }
+
     if (info.extensions[DeviceExt::DescriptorIndexing]) {
         featuresChain.Add(&info.descriptorIndexingFeatures,
                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES);

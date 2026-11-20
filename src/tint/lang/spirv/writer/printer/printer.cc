@@ -481,6 +481,11 @@ class Printer {
                         spv::Op::OpConstant,
                         {Type(ty), id, U32Operand(constant->ValueAs<f16>().BitsRepresentation())});
                 },
+                [&](const core::type::BF16*) {
+                    module_.PushType(
+                        spv::Op::OpConstant,
+                        {Type(ty), id, U32Operand(constant->ValueAs<bf16>().BitsRepresentation())});
+                },
                 [&](const core::type::U16*) {
                     module_.PushType(spv::Op::OpConstant,
                                      {Type(ty), id, U32Operand(constant->ValueAs<u16>())});
@@ -580,6 +585,13 @@ class Printer {
                     module_.PushCapability(SpvCapabilityFloat16);
                     module_.PushCapability(SpvCapabilityStorageBuffer16BitAccess);
                     module_.PushType(spv::Op::OpTypeFloat, {id, 16u});
+                },
+                [&](const core::type::BF16*) {
+                    // If we ever support bfloat16 dot products, this needs updated.
+                    module_.PushExtension("SPV_KHR_bfloat16");
+                    module_.PushCapability(SpvCapabilityBFloat16CooperativeMatrixKHR);
+                    module_.PushType(spv::Op::OpTypeFloat,
+                                     {id, 16u, U32Operand(spv::FPEncoding::BFloat16KHR)});
                 },
                 [&](const core::type::Vector* vec) {
                     module_.PushType(spv::Op::OpTypeVector, {id, Type(vec->Type()), vec->Width()});
@@ -1707,6 +1719,12 @@ class Printer {
                 break;
             case spirv::BuiltinFn::kCooperativeMatrixStore:
                 op = spv::Op::OpCooperativeMatrixStoreKHR;
+                break;
+            case spirv::BuiltinFn::kCooperativeMatrixLength:
+                op = spv::Op::OpCooperativeMatrixLengthKHR;
+                // OpCooperativeMatrixLengthKHR takes the type as an operand.
+                operands.push_back(*types_.Get(
+                    std::get<const core::type::Type*>(builtin->ExplicitTemplateParams()[0])));
                 break;
             case spirv::BuiltinFn::kBitCount:
                 op = spv::Op::OpBitCount;

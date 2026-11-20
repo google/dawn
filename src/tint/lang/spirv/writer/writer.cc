@@ -75,9 +75,6 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
                 return res.Failure();
             }
         }
-        if (ty->Is<core::type::BF16>()) {
-            return Failure("bf16 is not supported by the SPIR-V backend");
-        }
     }
 
     // If a remapped entry point name is provided, it must not be empty, and must not contain

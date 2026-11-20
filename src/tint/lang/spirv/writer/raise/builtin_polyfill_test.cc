@@ -6094,6 +6094,86 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_i8) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_bf16) {
+    auto* mat = ty.subgroup_matrix_result(ty.bf16(), 8, 8);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("v", ty.ptr(function, mat, read_write));
+        b.Let("r", b.Call(mat, core::BuiltinFn::kSubgroupMatrixScalarAdd, b.Load(v), 3_f));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %v:ptr<function, subgroup_matrix_result<bf16, 8, 8>, read_write> = var
+    %3:subgroup_matrix_result<bf16, 8, 8> = load %v
+    %4:subgroup_matrix_result<bf16, 8, 8> = subgroupMatrixScalarAdd %3, 3.0f
+    %r:subgroup_matrix_result<bf16, 8, 8> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %v:ptr<function, subgroup_matrix_result<bf16, 8, 8>, read_write> = var
+    %3:subgroup_matrix_result<bf16, 8, 8> = load %v
+    %4:subgroup_matrix_result<bf16, 8, 8> = call %subgroup_matrix_result_bf16_8_8_add, %3, 3.0f
+    %r:subgroup_matrix_result<bf16, 8, 8> = let %4
+    ret
+  }
+}
+%subgroup_matrix_result_bf16_8_8_add = func(%mat:subgroup_matrix_result<bf16, 8, 8>, %s:f32):subgroup_matrix_result<bf16, 8, 8> {
+  $B2: {
+    %v_1:ptr<function, subgroup_matrix_result<bf16, 8, 8>, read_write> = var  # %v_1: 'v'
+    store %v_1, %mat
+    %10:u32 = spirv.cooperative_matrix_length<subgroup_matrix_result<bf16, 8, 8>>
+    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
+      $B3: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B4
+      }
+      $B4: {  # body
+        %12:u32 = load %idx
+        %13:bool = gte %12, %10
+        if %13 [t: $B6] {  # if_1
+          $B6: {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %14:ptr<function, bf16, read_write> = access %v_1, %12
+        %15:bf16 = load %14
+        %16:f32 = convert %15
+        %17:f32 = clamp %s, -338953138925153547590470800371487866880.0f, 338953138925153547590470800371487866880.0f
+        %18:f32 = add %16, %17
+        %19:f32 = clamp %18, -338953138925153547590470800371487866880.0f, 338953138925153547590470800371487866880.0f
+        %20:bf16 = convert %19
+        store %14, %20
+        continue  # -> $B5
+      }
+      $B5: {  # continuing
+        %21:u32 = load %idx
+        %22:u32 = add %21, 1u
+        store %idx, %22
+        next_iteration  # -> $B4
+      }
+    }
+    %23:subgroup_matrix_result<bf16, 8, 8> = load %v_1
+    ret %23
+  }
+}
+)";
+
+    PolyfillConfig config{.use_vulkan_memory_model = true};
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract) {
     auto* mat = ty.subgroup_matrix_result(ty.i32(), 8, 8);
 
@@ -6274,6 +6354,185 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarMultiply_u8) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalar_bf16) {
+    auto* mat = ty.subgroup_matrix_result(ty.bf16(), 8, 8);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("v", ty.ptr(function, mat, read_write));
+        b.Let("r", b.Call(mat, core::BuiltinFn::kSubgroupMatrixScalarAdd, b.Load(v), 3_f));
+        b.Let("s", b.Call(mat, core::BuiltinFn::kSubgroupMatrixScalarSubtract, b.Load(v), 3_f));
+        b.Let("t", b.Call(mat, core::BuiltinFn::kSubgroupMatrixScalarMultiply, b.Load(v), 3_f));
+        b.Let("t2", b.Call(mat, core::BuiltinFn::kSubgroupMatrixScalarMultiply, b.Load(v), 3_f));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %v:ptr<function, subgroup_matrix_result<bf16, 8, 8>, read_write> = var
+    %3:subgroup_matrix_result<bf16, 8, 8> = load %v
+    %4:subgroup_matrix_result<bf16, 8, 8> = subgroupMatrixScalarAdd %3, 3.0f
+    %r:subgroup_matrix_result<bf16, 8, 8> = let %4
+    %6:subgroup_matrix_result<bf16, 8, 8> = load %v
+    %7:subgroup_matrix_result<bf16, 8, 8> = subgroupMatrixScalarSubtract %6, 3.0f
+    %s:subgroup_matrix_result<bf16, 8, 8> = let %7
+    %9:subgroup_matrix_result<bf16, 8, 8> = load %v
+    %10:subgroup_matrix_result<bf16, 8, 8> = subgroupMatrixScalarMultiply %9, 3.0f
+    %t:subgroup_matrix_result<bf16, 8, 8> = let %10
+    %12:subgroup_matrix_result<bf16, 8, 8> = load %v
+    %13:subgroup_matrix_result<bf16, 8, 8> = subgroupMatrixScalarMultiply %12, 3.0f
+    %t2:subgroup_matrix_result<bf16, 8, 8> = let %13
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %v:ptr<function, subgroup_matrix_result<bf16, 8, 8>, read_write> = var
+    %3:subgroup_matrix_result<bf16, 8, 8> = load %v
+    %4:subgroup_matrix_result<bf16, 8, 8> = call %subgroup_matrix_result_bf16_8_8_add, %3, 3.0f
+    %r:subgroup_matrix_result<bf16, 8, 8> = let %4
+    %7:subgroup_matrix_result<bf16, 8, 8> = load %v
+    %8:subgroup_matrix_result<bf16, 8, 8> = call %subgroup_matrix_result_bf16_8_8_sub, %7, 3.0f
+    %s:subgroup_matrix_result<bf16, 8, 8> = let %8
+    %11:subgroup_matrix_result<bf16, 8, 8> = load %v
+    %12:subgroup_matrix_result<bf16, 8, 8> = call %subgroup_matrix_result_bf16_8_8_mul, %11, 3.0f
+    %t:subgroup_matrix_result<bf16, 8, 8> = let %12
+    %15:subgroup_matrix_result<bf16, 8, 8> = load %v
+    %16:subgroup_matrix_result<bf16, 8, 8> = call %subgroup_matrix_result_bf16_8_8_mul, %15, 3.0f
+    %t2:subgroup_matrix_result<bf16, 8, 8> = let %16
+    ret
+  }
+}
+%subgroup_matrix_result_bf16_8_8_add = func(%mat:subgroup_matrix_result<bf16, 8, 8>, %s_1:f32):subgroup_matrix_result<bf16, 8, 8> {  # %s_1: 's'
+  $B2: {
+    %v_1:ptr<function, subgroup_matrix_result<bf16, 8, 8>, read_write> = var  # %v_1: 'v'
+    store %v_1, %mat
+    %21:u32 = spirv.cooperative_matrix_length<subgroup_matrix_result<bf16, 8, 8>>
+    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
+      $B3: {  # initializer
+        %idx:ptr<function, u32, read_write> = var 0u
+        next_iteration  # -> $B4
+      }
+      $B4: {  # body
+        %23:u32 = load %idx
+        %24:bool = gte %23, %21
+        if %24 [t: $B6] {  # if_1
+          $B6: {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %25:ptr<function, bf16, read_write> = access %v_1, %23
+        %26:bf16 = load %25
+        %27:f32 = convert %26
+        %28:f32 = clamp %s_1, -338953138925153547590470800371487866880.0f, 338953138925153547590470800371487866880.0f
+        %29:f32 = add %27, %28
+        %30:f32 = clamp %29, -338953138925153547590470800371487866880.0f, 338953138925153547590470800371487866880.0f
+        %31:bf16 = convert %30
+        store %25, %31
+        continue  # -> $B5
+      }
+      $B5: {  # continuing
+        %32:u32 = load %idx
+        %33:u32 = add %32, 1u
+        store %idx, %33
+        next_iteration  # -> $B4
+      }
+    }
+    %34:subgroup_matrix_result<bf16, 8, 8> = load %v_1
+    ret %34
+  }
+}
+%subgroup_matrix_result_bf16_8_8_sub = func(%mat_1:subgroup_matrix_result<bf16, 8, 8>, %s_2:f32):subgroup_matrix_result<bf16, 8, 8> {  # %mat_1: 'mat', %s_2: 's'
+  $B7: {
+    %v_2:ptr<function, subgroup_matrix_result<bf16, 8, 8>, read_write> = var  # %v_2: 'v'
+    store %v_2, %mat_1
+    %38:u32 = spirv.cooperative_matrix_length<subgroup_matrix_result<bf16, 8, 8>>
+    loop [i: $B8, b: $B9, c: $B10] {  # loop_2
+      $B8: {  # initializer
+        %idx_1:ptr<function, u32, read_write> = var 0u  # %idx_1: 'idx'
+        next_iteration  # -> $B9
+      }
+      $B9: {  # body
+        %40:u32 = load %idx_1
+        %41:bool = gte %40, %38
+        if %41 [t: $B11] {  # if_2
+          $B11: {  # true
+            exit_loop  # loop_2
+          }
+        }
+        %42:ptr<function, bf16, read_write> = access %v_2, %40
+        %43:bf16 = load %42
+        %44:f32 = convert %43
+        %45:f32 = clamp %s_2, -338953138925153547590470800371487866880.0f, 338953138925153547590470800371487866880.0f
+        %46:f32 = sub %44, %45
+        %47:f32 = clamp %46, -338953138925153547590470800371487866880.0f, 338953138925153547590470800371487866880.0f
+        %48:bf16 = convert %47
+        store %42, %48
+        continue  # -> $B10
+      }
+      $B10: {  # continuing
+        %49:u32 = load %idx_1
+        %50:u32 = add %49, 1u
+        store %idx_1, %50
+        next_iteration  # -> $B9
+      }
+    }
+    %51:subgroup_matrix_result<bf16, 8, 8> = load %v_2
+    ret %51
+  }
+}
+%subgroup_matrix_result_bf16_8_8_mul = func(%mat_2:subgroup_matrix_result<bf16, 8, 8>, %s_3:f32):subgroup_matrix_result<bf16, 8, 8> {  # %mat_2: 'mat', %s_3: 's'
+  $B12: {
+    %v_3:ptr<function, subgroup_matrix_result<bf16, 8, 8>, read_write> = var  # %v_3: 'v'
+    store %v_3, %mat_2
+    %55:u32 = spirv.cooperative_matrix_length<subgroup_matrix_result<bf16, 8, 8>>
+    loop [i: $B13, b: $B14, c: $B15] {  # loop_3
+      $B13: {  # initializer
+        %idx_2:ptr<function, u32, read_write> = var 0u  # %idx_2: 'idx'
+        next_iteration  # -> $B14
+      }
+      $B14: {  # body
+        %57:u32 = load %idx_2
+        %58:bool = gte %57, %55
+        if %58 [t: $B16] {  # if_3
+          $B16: {  # true
+            exit_loop  # loop_3
+          }
+        }
+        %59:ptr<function, bf16, read_write> = access %v_3, %57
+        %60:bf16 = load %59
+        %61:f32 = convert %60
+        %62:f32 = clamp %s_3, -338953138925153547590470800371487866880.0f, 338953138925153547590470800371487866880.0f
+        %63:f32 = mul %61, %62
+        %64:f32 = clamp %63, -338953138925153547590470800371487866880.0f, 338953138925153547590470800371487866880.0f
+        %65:bf16 = convert %64
+        store %59, %65
+        continue  # -> $B15
+      }
+      $B15: {  # continuing
+        %66:u32 = load %idx_2
+        %67:u32 = add %66, 1u
+        store %idx_2, %67
+        next_iteration  # -> $B14
+      }
+    }
+    %68:subgroup_matrix_result<bf16, 8, 8> = load %v_3
+    ret %68
+  }
+}
+)";
+
+    PolyfillConfig config{.use_vulkan_memory_model = true};
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixConstruct_i8) {
     auto* mat = ty.subgroup_matrix_result(ty.i8(), 8, 8);
 
@@ -6303,6 +6562,46 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixConstruct_i8) {
     %4:i8 = spirv.s_convert<i8> %3
     %5:subgroup_matrix_result<i8, 8, 8> = construct %4
     %r:subgroup_matrix_result<i8, 8, 8> = let %5
+    ret
+  }
+}
+)";
+
+    PolyfillConfig config{.use_vulkan_memory_model = true};
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixConstruct_bf16) {
+    auto* mat = ty.subgroup_matrix_result(ty.bf16(), 8, 8);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        b.Let("r", b.Construct(mat, b.Let("l", 1_f)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %l:f32 = let 1.0f
+    %3:subgroup_matrix_result<bf16, 8, 8> = construct %l
+    %r:subgroup_matrix_result<bf16, 8, 8> = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %l:f32 = let 1.0f
+    %3:f32 = clamp %l, -338953138925153547590470800371487866880.0f, 338953138925153547590470800371487866880.0f
+    %4:bf16 = convert %3
+    %5:subgroup_matrix_result<bf16, 8, 8> = construct %4
+    %r:subgroup_matrix_result<bf16, 8, 8> = let %5
     ret
   }
 }

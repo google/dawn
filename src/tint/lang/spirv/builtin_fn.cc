@@ -244,6 +244,8 @@ const char* str(BuiltinFn i) {
             return "cooperative_matrix_store";
         case BuiltinFn::kCooperativeMatrixMulAdd:
             return "cooperative_matrix_mul_add";
+        case BuiltinFn::kCooperativeMatrixLength:
+            return "cooperative_matrix_length";
         case BuiltinFn::kGroupNonUniformBallotFindMsb:
             return "group_non_uniform_ballot_find_msb";
         case BuiltinFn::kGroupNonUniformBroadcast:
@@ -399,6 +401,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kUConvert:
         case BuiltinFn::kAddCarry:
         case BuiltinFn::kUmulExtended:
+        case BuiltinFn::kCooperativeMatrixLength:
             break;
     }
     return core::ir::Instruction::Accesses{};

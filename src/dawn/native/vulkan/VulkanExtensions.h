@@ -122,6 +122,7 @@ enum class DeviceExt : uint32_t {
     SubgroupUniformControlFlow,
     LoadStoreOpNoneEXT,
     RenderPassStoreOpsQCOM,
+    ShaderBfloat16,
 
     // External* extensions
     ExternalMemoryAndroidHardwareBuffer,

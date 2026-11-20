@@ -163,6 +163,7 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
     {DeviceExt::SubgroupUniformControlFlow, "VK_KHR_shader_subgroup_uniform_control_flow"},
     {DeviceExt::LoadStoreOpNoneEXT, "VK_EXT_load_store_op_none"},
     {DeviceExt::RenderPassStoreOpsQCOM, "VK_QCOM_render_pass_store_ops"},
+    {DeviceExt::ShaderBfloat16, "VK_KHR_shader_bfloat16"},
 
     {DeviceExt::ExternalMemoryAndroidHardwareBuffer,
      "VK_ANDROID_external_memory_android_hardware_buffer"},
@@ -247,6 +248,7 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
             case DeviceExt::ExtendedDynamicState:
             case DeviceExt::MaximalReconvergence:
             case DeviceExt::SubgroupUniformControlFlow:
+            case DeviceExt::ShaderBfloat16:
                 hasDependencies = true;
                 break;
 

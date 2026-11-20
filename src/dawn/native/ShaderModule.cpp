@@ -1710,7 +1710,9 @@ MaybeValError ValidateSubgroupMatrixConfiguration(const tint::SubgroupMatrixInfo
                (wgpu_type == wgpu::SubgroupMatrixComponentType::I32 &&
                 tint_type == tint::SubgroupMatrixType::kI32) ||
                (wgpu_type == wgpu::SubgroupMatrixComponentType::U32 &&
-                tint_type == tint::SubgroupMatrixType::kU32);
+                tint_type == tint::SubgroupMatrixType::kU32) ||
+               (wgpu_type == wgpu::SubgroupMatrixComponentType::Bf16 &&
+                tint_type == tint::SubgroupMatrixType::kBF16);
     };
 
     auto SubgroupTypeToString = [](tint::SubgroupMatrixType type) -> std::string {
@@ -1727,6 +1729,8 @@ MaybeValError ValidateSubgroupMatrixConfiguration(const tint::SubgroupMatrixInfo
                 return "i32";
             case tint::SubgroupMatrixType::kU32:
                 return "u32";
+            case tint::SubgroupMatrixType::kBF16:
+                return "bf16";
             default:
                 DAWN_UNREACHABLE();
         }
