@@ -256,6 +256,9 @@
                         if (in != nullptr) {
                             auto converted = c->Alloc<{{as_cType(member.type.name)}}>();
                             ToNative(c, env, in, converted);
+                            if (env->ExceptionCheck()) {
+                                return;
+                            }
                             out = converted;
                         }
                     {% elif member.type.name.get() == 'void' %}
@@ -267,49 +270,94 @@
                     {% if member.length != 'constant' %}
                         auto& outLength = outStruct->{{member.length.name.camelCase()}};
                         //* Convert container, including the length field.
-                        {% if member.type.name.get() == 'uint32_t' or member.type.category in ['bitmask', 'enum'] %}
-                            out = reinterpret_cast<const {{ as_cType(member.type.name) }}*>(c->GetIntArrayElements(in));
-                            outLength = env->GetArrayLength(in);
-                        {% elif member.type.name.get() == 'void' %}
-                            out = env->GetDirectBufferAddress(in);
-                            outLength = env->GetDirectBufferCapacity(in);
-                        {% elif member.type.name.get() == 'char' %}
-                            outLength = env->GetArrayLength(in);
-                            auto array = c->AllocArray<const char*>(outLength);
-                            for (int idx = 0; idx != outLength; idx++) {
-                                jstring element = static_cast<jstring>(env->GetObjectArrayElement(in, idx));
-                                array[idx] = c->GetStringUTFChars(element);
+                        //* *outStruct = {} already zero-initializes (out, outLength) to
+                        //* (nullptr, 0), so empty containers skip JNI allocation on hot paths
+                        //* such as setBindGroup dynamicOffsets. Empty SPIR-V code is invalid
+                        //* regardless of pointer value (ShaderModuleBase copies the span into an
+                        //* empty std::vector whose data() is nullptr).
+                        {% if member.type.name.get() in ['int', 'int32_t', 'uint32_t'] or member.type.category == 'enum' %}
+                            static_assert(sizeof({{ as_cType(member.type.name) }}) == sizeof(jint));
+                            jsize length = in ? env->GetArrayLength(in) : 0;
+                            if (length > 0) {
+                                auto* array = c->AllocArray<{{ as_cType(member.type.name) }}>(length, /*zeroInit=*/false);
+                                if (!array) {
+                                    return;
+                                }
+                                env->GetIntArrayRegion(in, 0, length, reinterpret_cast<jint*>(array));
+                                out = array;
+                                outLength = length;
                             }
-                            out = array;
+                        {% elif member.type.name.get() == 'void' %}
+                            void* address = in ? env->GetDirectBufferAddress(in) : nullptr;
+                            jlong capacity = in ? env->GetDirectBufferCapacity(in) : 0;
+                            // GetDirectBufferCapacity returns -1 for a non-direct buffer on API 31+.
+                            // On API 24-30 it returns the buffer size while GetDirectBufferAddress
+                            // returns nullptr. Checking both rejects non-direct buffers on every API
+                            // level and still accepts 0-byte direct buffers.
+                            if (capacity < 0 || (capacity > 0 && !address)) {
+                                env->ThrowNew(JNIClasses::getInstance(env)->javaIllegalArgumentException,
+                                              "Direct ByteBuffer required");
+                                return;
+                            }
+                            if (capacity > 0) {
+                                out = address;
+                                outLength = static_cast<size_t>(capacity);
+                            }
+                        {% elif member.type.name.get() == 'char' %}
+                            jsize length = in ? env->GetArrayLength(in) : 0;
+                            if (length > 0) {
+                                auto array = c->AllocArray<const char*>(length);
+                                if (!array) {
+                                    return;
+                                }
+                                for (int idx = 0; idx != length; idx++) {
+                                    jstring element = static_cast<jstring>(env->GetObjectArrayElement(in, idx));
+                                    array[idx] = c->GetStringUTFChars(element);
+                                }
+                                out = array;
+                                outLength = length;
+                            }
                         {% else %}
                             //* These container types are represented in Kotlin as arrays of objects.
-                            outLength = env->GetArrayLength(in);
-                            auto array = c->AllocArray<{{ as_cType(member.type.name) }}>(outLength);
-                            out = array;
+                            jsize length = in ? env->GetArrayLength(in) : 0;
+                            if (length > 0) {
+                                auto array = c->AllocArray<{{ as_cType(member.type.name) }}>(length);
+                                if (!array) {
+                                    return;
+                                }
+                                out = array;
+                                outLength = length;
 
-                            {% if member.type.category == 'object' %}
-                                jfieldID handleField = classes->{{ member.type.name.camelCase() }}Handle;
-                                for (int idx = 0; idx != outLength; idx++) {
-                                    jobject element = env->GetObjectArrayElement(in, idx);
-                                    array[idx] = element ? reinterpret_cast<{{ as_cType(member.type.name) }}>(
-                                            env->GetLongField(element, handleField)) : nullptr;
-                                    env->DeleteLocalRef(element);
-                                }
-                            {% elif member.type.category == 'structure' %}
-                                for (int idx = 0; idx != outLength; idx++) {
-                                    jobject element = env->GetObjectArrayElement(in, idx);
-                                    ToNative(c, env, element, &array[idx]);
-                                    env->DeleteLocalRef(element);
-                                }
-                            {% else %}
-                                {{ unreachable_code() }}
-                            {% endif %}
+                                {% if member.type.category == 'object' %}
+                                    jfieldID handleField = classes->{{ member.type.name.camelCase() }}Handle;
+                                    for (int idx = 0; idx != length; idx++) {
+                                        jobject element = env->GetObjectArrayElement(in, idx);
+                                        array[idx] = element ? reinterpret_cast<{{ as_cType(member.type.name) }}>(
+                                                env->GetLongField(element, handleField)) : nullptr;
+                                        env->DeleteLocalRef(element);
+                                    }
+                                {% elif member.type.category == 'structure' %}
+                                    for (int idx = 0; idx != length; idx++) {
+                                        jobject element = env->GetObjectArrayElement(in, idx);
+                                        ToNative(c, env, element, &array[idx]);
+                                        env->DeleteLocalRef(element);
+                                        if (env->ExceptionCheck()) {
+                                            return;
+                                        }
+                                    }
+                                {% else %}
+                                    {{ unreachable_code() }}
+                                {% endif %}
+                            }
                         {% endif %}
                     {% else %}
                         {% if member.type.name.get() == 'float' %}
                             jsize arrayLength = env->GetArrayLength(static_cast<jarray>(in));
                             if (arrayLength == {{ member.constant_length }}) {
-                                auto array = c->AllocArray<float>({{ member.constant_length }});
+                                auto array = c->AllocArray<float>({{ member.constant_length }}, /*zeroInit=*/false);
+                                if (!array) {
+                                    return;
+                                }
                                 env->GetFloatArrayRegion(static_cast<jfloatArray>(in), 0, {{ member.constant_length }}, array);
                                 out = array;
                             } else {
@@ -340,6 +388,9 @@
                 {% elif member.type.category == 'structure' %}
                     //* Mandatory structure.
                     ToNative(c, env, in, &out);
+                    if (env->ExceptionCheck()) {
+                        return;
+                    }
                 {% elif member.name.get() == "window" and member.type.name.get() == "void *" %}
                     //* HACK: Hardcode that ANativeWindow is a jlong instead of an actual pointer. Instead
                     //* of this, we should have manually written method that directly creates the

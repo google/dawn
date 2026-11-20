@@ -281,6 +281,7 @@ JNIClasses::JNIClasses(JNIEnv* env) {
     gpuHardwareBufferExternalTextureCtor = getMethodID(gpuHardwareBufferExternalTexture, "<init>", "(JLandroidx/webgpu/GPUExternalTexture;)V");
     gpuHardwareBufferTexture = findGlobalClass("androidx/webgpu/GPUHardwareBufferTexture");
     gpuHardwareBufferTextureCtor = getMethodID(gpuHardwareBufferTexture, "<init>", "(JLandroidx/webgpu/GPUTexture;)V");
+    javaIllegalArgumentException = findGlobalClass("java/lang/IllegalArgumentException");
     javaIllegalStateException = findGlobalClass("java/lang/IllegalStateException");
     javaUnsupportedOperationException = findGlobalClass("java/lang/UnsupportedOperationException");
     jclass objectClz = findLocalClass("java/lang/Object");

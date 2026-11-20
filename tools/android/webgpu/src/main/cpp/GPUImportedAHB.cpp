@@ -35,6 +35,7 @@
 #include <unistd.h>
 #include <webgpu/webgpu_cpp.h>
 
+#include <iterator>
 #include <memory>
 #include <vector>
 
@@ -513,10 +514,14 @@ Java_androidx_webgpu_GPUHardwareBufferWrapper_nativeBeginAccess(JNIEnv* env,
     if (fences != nullptr) {
         jsize len = env->GetArrayLength(fences);
         if (len > 0) {
-            jint* fds = env->GetIntArrayElements(fences, nullptr);
-            if (!fds) {
-                return;
+            jint inlineFds[4];
+            std::vector<jint> heapFds;
+            jint* fds = inlineFds;
+            if (static_cast<size_t>(len) > std::size(inlineFds)) {
+                heapFds.resize(len);
+                fds = heapFds.data();
             }
+            env->GetIntArrayRegion(fences, 0, len, fds);
             for (int i = 0; i < len; ++i) {
                 int fd = fds[i];
                 if (fd >= 0) {
@@ -532,7 +537,6 @@ Java_androidx_webgpu_GPUHardwareBufferWrapper_nativeBeginAccess(JNIEnv* env,
 
                     wgpu::SharedFence fence = wrapper->device.ImportSharedFence(&fenceDesc);
                     if (env->ExceptionCheck()) {
-                        env->ReleaseIntArrayElements(fences, fds, JNI_ABORT);
                         return;
                     }
                     if (fence) {
@@ -540,7 +544,6 @@ Java_androidx_webgpu_GPUHardwareBufferWrapper_nativeBeginAccess(JNIEnv* env,
                     }
                 }
             }
-            env->ReleaseIntArrayElements(fences, fds, JNI_ABORT);
         }
     }
 

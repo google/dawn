@@ -131,6 +131,9 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
         {% endfor %}
         {{ArgsStruct}} args;
         ConvertInternal(&c, kotlinRecord, &args);
+        if (env->ExceptionCheck()) {
+            return{{ ' 0' if _kotlin_return }};
+        }
     {% elif method.arguments %}
         {{ArgsStruct}} args = {};
     {% endif %}

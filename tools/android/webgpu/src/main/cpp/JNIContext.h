@@ -58,7 +58,6 @@ class JNIContext : dawn::NonMovable {
     JavaVM* jvm;
 
     const char* GetStringUTFChars(jstring s);
-    const jint* GetIntArrayElements(jintArray a);
 
     template <typename T>
     T* Alloc() {
@@ -68,18 +67,17 @@ class JNIContext : dawn::NonMovable {
     }
 
     template <typename T>
-    T* AllocArray(size_t count) {
+    T* AllocArray(size_t count, bool zeroInit = true) {
         static_assert(std::is_trivially_destructible_v<T>);
         static_assert(std::is_trivially_constructible_v<T>);
 
         if (count > std::numeric_limits<size_t>::max() / sizeof(T)) {
-            env->ThrowNew(env->FindClass("java/lang/IllegalArgumentException"),
-                          "Array size overflow");
+            ThrowIllegalArgumentException("Array size overflow");
             return nullptr;
         }
 
         T* ptr = static_cast<T*>(AllocateRaw(sizeof(T) * count, alignof(T)));
-        if (ptr != nullptr) {
+        if (zeroInit && ptr != nullptr) {
             std::memset(ptr, 0, sizeof(T) * count);
         }
         return ptr;
@@ -89,9 +87,9 @@ class JNIContext : dawn::NonMovable {
 
   private:
     void* AllocateRaw(size_t size, size_t alignment);
+    void ThrowIllegalArgumentException(const char* message);
 
     std::vector<std::pair<jstring, const char*>> mStringsToRelease;
-    std::vector<std::pair<jintArray, jint*>> mIntArraysToRelease;
 
     static constexpr size_t kInlineBufferSize = 512;
     alignas(std::max_align_t) std::byte mInlineBuffer[kInlineBufferSize];

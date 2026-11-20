@@ -93,6 +93,7 @@ class JNIClasses {
         jmethodID gpuHardwareBufferExternalTextureCtor;
         jclass gpuHardwareBufferTexture;
         jmethodID gpuHardwareBufferTextureCtor;
+        jclass javaIllegalArgumentException;
         jclass javaIllegalStateException;
         jclass javaUnsupportedOperationException;
         jclass javaThread;

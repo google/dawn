@@ -29,6 +29,7 @@
 
 #include <algorithm>
 
+#include "JNIClasses.h"
 #include "structures.h"
 
 namespace dawn::kotlin_api {
@@ -41,24 +42,12 @@ JNIContext::~JNIContext() {
     for (auto [s, utf] : mStringsToRelease) {
         env->ReleaseStringUTFChars(s, utf);
     }
-
-    // Free int arrays with JNI_ABORT because we never modify their contents and don't need to copy
-    // modifications back in the JVM's array (if a copy was done in GetIntArrayElements).
-    for (auto [array, ints] : mIntArraysToRelease) {
-        env->ReleaseIntArrayElements(array, ints, JNI_ABORT);
-    }
 }
 
 const char* JNIContext::GetStringUTFChars(jstring s) {
     const char* utf = env->GetStringUTFChars(s, nullptr);
     mStringsToRelease.emplace_back(s, utf);
     return utf;
-}
-
-const jint* JNIContext::GetIntArrayElements(jintArray a) {
-    jint* ints = env->GetIntArrayElements(a, nullptr);
-    mIntArraysToRelease.emplace_back(a, ints);
-    return ints;
 }
 
 void* JNIContext::AllocateRaw(size_t size, size_t alignment) {
@@ -82,8 +71,7 @@ void* JNIContext::AllocateRaw(size_t size, size_t alignment) {
     }
 
     if (size > std::numeric_limits<size_t>::max() - (alignment - 1)) {
-        env->ThrowNew(env->FindClass("java/lang/IllegalArgumentException"),
-                      "Allocation size overflow");
+        ThrowIllegalArgumentException("Allocation size overflow");
         return nullptr;
     }
 
@@ -96,6 +84,10 @@ void* JNIContext::AllocateRaw(size_t size, size_t alignment) {
     std::align(alignment, size, ptr, space);  // Guaranteed to succeed
     block.offset = block.size - space + size;
     return ptr;
+}
+
+void JNIContext::ThrowIllegalArgumentException(const char* message) {
+    env->ThrowNew(JNIClasses::getInstance(env)->javaIllegalArgumentException, message);
 }
 
 }  // namespace dawn::kotlin_api

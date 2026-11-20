@@ -507,4 +507,101 @@ class RenderPassEncoderTest {
       }
     }
   }
+
+  @Test
+  fun testSetBindGroupWithDynamicOffsets() {
+    runBlocking {
+      webGpu!!.execute<Unit> {
+        val uniformBuffer = device.createBuffer(
+          GPUBufferDescriptor(size = 260, usage = BufferUsage.Uniform)
+        )
+        val bindGroupLayout = device.createBindGroupLayout(
+          GPUBindGroupLayoutDescriptor(
+            entries = arrayOf(
+              GPUBindGroupLayoutEntry(
+                binding = 0,
+                visibility = ShaderStage.Fragment,
+                buffer = GPUBufferBindingLayout(
+                  type = BufferBindingType.Uniform,
+                  hasDynamicOffset = true,
+                  minBindingSize = 4
+                )
+              )
+            )
+          )
+        )
+        val bindGroup = device.createBindGroup(
+          GPUBindGroupDescriptor(
+            layout = bindGroupLayout,
+            entries = arrayOf(
+              GPUBindGroupEntry(binding = 0, buffer = uniformBuffer, offset = 0, size = 4)
+            )
+          )
+        )
+        val dynamicLayout = device.createPipelineLayout(
+          GPUPipelineLayoutDescriptor(bindGroupLayouts = arrayOf(bindGroupLayout))
+        )
+        val dynamicShader = device.createShaderModule(
+          GPUShaderModuleDescriptor(
+            shaderSourceWGSL = GPUShaderSourceWGSL(
+              """
+              @group(0) @binding(0) var<uniform> uValue: f32;
+              @vertex fn vsMain() -> @builtin(position) vec4<f32> {
+                return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+              }
+              @fragment fn fsMain() -> @location(0) vec4<f32> {
+                return vec4<f32>(uValue, 0.0, 0.0, 1.0);
+              }
+              """.trimIndent()
+            )
+          )
+        )
+        val dynamicPipeline = device.createRenderPipeline(
+          GPURenderPipelineDescriptor(
+            layout = dynamicLayout,
+            vertex = GPUVertexState(module = dynamicShader, entryPoint = "vsMain"),
+            fragment = GPUFragmentState(
+              module = dynamicShader,
+              entryPoint = "fsMain",
+              targets = arrayOf(GPUColorTargetState(format = TextureFormat.RGBA8Unorm))
+            ),
+            primitive = GPUPrimitiveState(topology = PrimitiveTopology.TriangleList)
+          )
+        )
+
+        // Valid 256-byte aligned dynamic offset within the 260-byte buffer.
+        val validEncoder = device.createCommandEncoder()
+        val validPass = beginDefaultRenderPass(validEncoder)
+        validPass.setPipeline(dynamicPipeline)
+        validPass.setBindGroup(0, bindGroup, intArrayOf(256))
+        validPass.draw(3)
+        validPass.end()
+
+        device.pushErrorScope(ErrorFilter.Validation)
+        validEncoder.finish().close()
+        assertEquals(ErrorType.NoError, device.popErrorScope())
+
+        // Out-of-bounds dynamic offset (512 + 4 > 260) proves dynamicOffsets values were copied.
+        val invalidEncoder = device.createCommandEncoder()
+        val invalidPass = beginDefaultRenderPass(invalidEncoder)
+        invalidPass.setPipeline(dynamicPipeline)
+        invalidPass.setBindGroup(0, bindGroup, intArrayOf(512))
+        invalidPass.draw(3)
+        invalidPass.end()
+
+        device.pushErrorScope(ErrorFilter.Validation)
+        invalidEncoder.finish().close()
+        assertThrowsSuspend(ValidationException::class.java) {
+          device.popErrorScope()
+        }
+
+        dynamicPipeline.close()
+        dynamicShader.close()
+        dynamicLayout.close()
+        bindGroup.close()
+        bindGroupLayout.close()
+        uniformBuffer.destroy()
+      }
+    }
+  }
 }

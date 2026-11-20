@@ -33,7 +33,7 @@
             jobjectArray
         {%- elif arg.type.name.get() == 'void' -%}
             jobject
-        {%- elif arg.type.category in ['bitmask', 'enum'] or arg.type.name.get() in ['int', 'int32_t', 'uint32_t'] -%}
+        {%- elif arg.type.category == 'enum' or arg.type.name.get() in ['int', 'int32_t', 'uint32_t'] -%}
             jintArray
         {%- elif arg.type.name.get() == 'float' -%}
             jfloatArray
@@ -106,7 +106,7 @@
                 env->SetObjectArrayElement({{ output }}, idx, element);
                 env->DeleteLocalRef(element);
             }
-        {% elif member.type.category in ['bitmask', 'enum'] or member.type.name.get() in ['int', 'int32_t', 'uint32_t'] %}
+        {% elif member.type.category == 'enum' or member.type.name.get() in ['int', 'int32_t', 'uint32_t'] %}
             jintArray {{ output }} = env->NewIntArray({{ size }});
             {{'    '}}env->SetIntArrayRegion({{ output }}, 0, {{ size }}, reinterpret_cast<const jint *>({{ input }}));
         {% elif member.type.name.get() == 'float' %}

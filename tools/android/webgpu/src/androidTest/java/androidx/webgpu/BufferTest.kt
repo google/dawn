@@ -444,4 +444,32 @@ class BufferTest {
       }
     }
   }
+
+  @SmallTest
+  @Test
+  fun nonDirectByteBufferThrowsIllegalArgumentException() {
+    runBlocking {
+      webGpu.execute<Unit> {
+        val heapBuffer = ByteBuffer.allocate(16)
+        device.createBuffer(
+          GPUBufferDescriptor(
+            usage = BufferUsage.CopyDst,
+            size = 16,
+            mappedAtCreation = true
+          )
+        ).use { buffer ->
+          assertThrows(IllegalArgumentException::class.java) {
+            buffer.writeMappedRange(0, heapBuffer)
+          }
+          assertThrows(IllegalArgumentException::class.java) {
+            buffer.readMappedRange(0, heapBuffer)
+          }
+          buffer.unmap()
+          assertThrows(IllegalArgumentException::class.java) {
+            device.getQueue().writeBuffer(buffer, 0, heapBuffer)
+          }
+        }
+      }
+    }
+  }
 }

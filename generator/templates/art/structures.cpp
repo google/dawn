@@ -272,14 +272,21 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
 
                 //* Fill all struct members from the Kotlin record.
                 ConvertInternal(c, kotlinRecord, converted);
-                //* `string view` (jstring) and jintArray local references are intentionally kept
-                //* alive here because JNIContext retains them until ~JNIContext() releases their
-                //* pinned buffers.
+                //* `string view` (jstring) local references are intentionally kept alive here
+                //* because JNIContext retains them until ~JNIContext() releases their pinned
+                //* buffers.
                 {% for member in _kotlin_members %}
-                    {% if member.type.name.get() != 'string view' and (member.type.category in ['object', 'structure', 'callback function', 'function pointer', 'kotlin type'] or (member.length and (member.length != 'constant' or member.constant_length != 1) and member.type.name.get() in ['char', 'float', 'void'])) %}
+                    {% if member.type.name.get() != 'string view' and (member.type.category in ['object', 'structure', 'callback function', 'function pointer', 'kotlin type'] or (member.length and (member.length != 'constant' or member.constant_length != 1) and (member.type.category == 'enum' or member.type.name.get() in ['char', 'float', 'void', 'int', 'int32_t', 'uint32_t']))) %}
                         env->DeleteLocalRef(kotlinRecord.{{as_varName(member.name)}});
                     {% endif %}
                 {% endfor %}
+                {% if chain_children[structure.name.get()] %}
+                    //* The chain getters below are JNI calls, which must not run with a pending
+                    //* exception.
+                    if (env->ExceptionCheck()) {
+                        return;
+                    }
+                {% endif %}
             {% else %}
                 *converted = {};
             {% endif %}
@@ -293,9 +300,12 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
                     if (child) {
                         auto out = c->Alloc<{{ as_cType(child.name) }}>();
                         ToNative(c, env, child, out);
+                        env->DeleteLocalRef(child);
+                        if (env->ExceptionCheck()) {
+                            return;
+                        }
                         out->chain.next = converted->nextInChain;
                         converted->nextInChain = &out->chain;
-                        env->DeleteLocalRef(child);
                     }
                 }
             {% endfor %}
