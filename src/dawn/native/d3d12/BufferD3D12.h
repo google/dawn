@@ -43,6 +43,10 @@ class CommandRecordingContext;
 class Device;
 class SharedBufferMemory;
 
+// Number of bytes at the start of a persistently mapped resource that are zeroed right before it is
+// unmapped and released, see `Toggle::D3D12PersistentlyMapBuffersAndClearBufferBeforeDestroy`.
+constexpr size_t kPersistentMappingBytesToZeroBeforeUnmap = 16;
+
 class Buffer final : public BufferBase {
   public:
     static ResultOrError<Ref<Buffer>> Create(Device* device,
@@ -107,6 +111,13 @@ class Buffer final : public BufferBase {
 
     D3D12_RANGE mWrittenMappedRange = {0, 0};
     Span<std::byte> mMappedData;
+
+    // With Toggle::D3D12PersistentlyMapBuffersAndClearBufferBeforeDestroy, the D3D12 resource of a
+    // CPU-accessible buffer is mapped and locked resident from its first map until its deferred
+    // destruction completes, and mMappedData stays valid during that time even while the buffer is
+    // unmapped by the frontend. Note that `mUsePersistentMapping` keeps these buffers from being
+    // evicted under memory pressure.
+    bool mUsePersistentMapping = false;
 
     std::unique_ptr<Heap> mHostMappedHeap;
     wgpu::Callback mHostMappedDisposeCallback = nullptr;

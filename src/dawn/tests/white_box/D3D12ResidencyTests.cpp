@@ -247,13 +247,15 @@ TEST_P(D3D12ResourceResidencyTests, AsyncMappedBufferRead) {
     EXPECT_TRUE(CheckIfBufferIsResident(buffer));
 
     // Unmap the buffer, allocate and touch enough resources such that the entire budget is used.
-    // This should evict the mappable buffer.
+    // This should evict the mappable buffer, unless it stays mapped and locked resident until it
+    // is destroyed.
     buffer.Unmap();
     std::vector<wgpu::Buffer> bufferSet2 = AllocateBuffers(
         kDirectlyAllocatedResourceSize, kRestrictedBudgetSize / kDirectlyAllocatedResourceSize,
         kMapReadBufferUsage);
     TouchBuffers(0, bufferSet2.size(), bufferSet2);
-    EXPECT_FALSE(CheckIfBufferIsResident(buffer));
+    EXPECT_EQ(CheckIfBufferIsResident(buffer),
+              HasToggleEnabled("d3d12_persistently_map_buffers_and_clear_buffer_before_destroy"));
 }
 
 // Check that calling MapAsync for writing makes the buffer resident and keeps it locked resident.
@@ -292,13 +294,15 @@ TEST_P(D3D12ResourceResidencyTests, AsyncMappedBufferWrite) {
     EXPECT_TRUE(CheckIfBufferIsResident(buffer));
 
     // Unmap the buffer, allocate and touch enough resources such that the entire budget is used.
-    // This should evict the mappable buffer.
+    // This should evict the mappable buffer, unless it stays mapped and locked resident until it
+    // is destroyed.
     buffer.Unmap();
     std::vector<wgpu::Buffer> bufferSet2 = AllocateBuffers(
         kDirectlyAllocatedResourceSize, kRestrictedBudgetSize / kDirectlyAllocatedResourceSize,
         kMapReadBufferUsage);
     TouchBuffers(0, bufferSet2.size(), bufferSet2);
-    EXPECT_FALSE(CheckIfBufferIsResident(buffer));
+    EXPECT_EQ(CheckIfBufferIsResident(buffer),
+              HasToggleEnabled("d3d12_persistently_map_buffers_and_clear_buffer_before_destroy"));
 }
 
 // Check that overcommitting in a single submit works, then make sure the budget is enforced after.
@@ -429,7 +433,10 @@ TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
     EXPECT_FALSE(allocator->IsLastShaderVisibleHeapInLRUForTesting());
 }
 
-DAWN_INSTANTIATE_TEST(D3D12ResourceResidencyTests, D3D12Backend());
+DAWN_INSTANTIATE_TEST(
+    D3D12ResourceResidencyTests,
+    D3D12Backend({"d3d12_persistently_map_buffers_and_clear_buffer_before_destroy"}),
+    D3D12Backend({}, {"d3d12_persistently_map_buffers_and_clear_buffer_before_destroy"}));
 DAWN_INSTANTIATE_TEST(D3D12DescriptorResidencyTests,
                       D3D12Backend({"use_d3d12_small_shader_visible_heap"}));
 
