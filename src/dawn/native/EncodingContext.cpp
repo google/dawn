@@ -102,14 +102,20 @@ void EncodingContext::HandleError(std::unique_ptr<UnknownError> error) {
     if (mDevice->IsImmediateErrorHandlingEnabled()) {
         deferErrors = false;
     }
+    // Only validation errors may be deferred. Any other error type (internal, out-of-memory,
+    // backend device loss) comes from the backend, and must reach the device right away. Otherwise
+    // if the encoder is never finished the deferred error would be dropped and the device wouldn't
+    // be lost as it should be.
+    if (!error->IsVal()) {
+        // TODO(crbug.com/42240579): ASSERT that encoding only generates validation errors.
+        deferErrors = false;
+    }
 
     if (deferErrors) {
-        // TODO(crbug.com/42240579): ASSERT that encoding only generates validation errors.
-
         // If the encoding context is not finished, errors are deferred until
         // Finish() is called.
         if (mError == nullptr) {
-            mError = std::move(error);
+            mError = ValidationError::Create(error->ReleaseData());
         }
     } else {
         // EncodingContext is unprotected from multiple threads by default, but this code will
@@ -239,7 +245,7 @@ void EncodingContext::PopDebugGroupLabel() {
     mDebugGroupLabels.pop_back();
 }
 
-MaybeUnknownError EncodingContext::Finish() {
+MaybeValError EncodingContext::Finish() {
     CommitCommands(std::move(mPendingCommands));
 
     switch (mStatus) {

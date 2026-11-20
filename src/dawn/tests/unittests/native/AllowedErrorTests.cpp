@@ -209,6 +209,68 @@ TEST_F(AllowedErrorTests, QueueCopyExternalTextureForBrowserOomBuffer) {
     device.GetQueue().CopyExternalTextureForBrowser(&src, &dst, &size, &options);
 }
 
+// OOM error during command encoding should immediately cause a device loss rather than being
+// deferred until Finish(), even if the encoder is never finished.
+TEST_F(AllowedErrorTests, CommandEncoderOomBuffer) {
+    Ref<ShaderModuleMock> csModule = ShaderModuleMock::Create(mDeviceMock, kComputeShader.data());
+
+    ComputePipelineDescriptor pipelineDesc = {};
+    pipelineDesc.compute.module = csModule.Get();
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(ToCppAPI(&pipelineDesc));
+
+    wgpu::BufferDescriptor bufferDesc = {};
+    bufferDesc.size = 16;
+    bufferDesc.usage = wgpu::BufferUsage::Indirect;
+    wgpu::Buffer indirectBuffer = device.CreateBuffer(&bufferDesc);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+
+    // Indirect dispatch validation internally allocates a buffer which we will cause to fail here.
+    std::unique_ptr<UnrecoverableError> err = DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage);
+    EXPECT_CALL(*mDeviceMock, CreateBufferImpl).WillOnce(Return(ByMove(std::move(err))));
+
+    // Expect the device lost immediately during encoding, without calling Finish().
+    EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
+                                          SizedStringMatches(HasSubstr(kOomErrorMessage))))
+        .Times(1);
+    pass.DispatchWorkgroupsIndirect(indirectBuffer, 0);
+}
+
+// Finishing an encoder after an OOM error during encoding already caused an immediate device loss
+// should not trigger additional device loss or uncaptured error callbacks.
+TEST_F(AllowedErrorTests, CommandEncoderOomBufferThenFinish) {
+    Ref<ShaderModuleMock> csModule = ShaderModuleMock::Create(mDeviceMock, kComputeShader.data());
+
+    ComputePipelineDescriptor pipelineDesc = {};
+    pipelineDesc.compute.module = csModule.Get();
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(ToCppAPI(&pipelineDesc));
+
+    wgpu::BufferDescriptor bufferDesc = {};
+    bufferDesc.size = 16;
+    bufferDesc.usage = wgpu::BufferUsage::Indirect;
+    wgpu::Buffer indirectBuffer = device.CreateBuffer(&bufferDesc);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+
+    // Indirect dispatch validation internally allocates a buffer which we will cause to fail here.
+    std::unique_ptr<UnrecoverableError> err = DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage);
+    EXPECT_CALL(*mDeviceMock, CreateBufferImpl).WillOnce(Return(ByMove(std::move(err))));
+
+    // Expect the device lost immediately during encoding, before End() or Finish() is called.
+    EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
+                                          SizedStringMatches(HasSubstr(kOomErrorMessage))))
+        .Times(1);
+    pass.DispatchWorkgroupsIndirect(indirectBuffer, 0);
+    testing::Mock::VerifyAndClearExpectations(&mDeviceLostCallback);
+
+    pass.End();
+    encoder.Finish();
+}
+
 // OOM error from synchronously initializing a compute pipeline should result in a device loss.
 TEST_F(AllowedErrorTests, CreateComputePipeline) {
     Ref<ShaderModuleMock> csModule = ShaderModuleMock::Create(mDeviceMock, kComputeShader.data());

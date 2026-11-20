@@ -96,7 +96,7 @@ class EncodingContext {
                                      CommandEncoder* commandEncoder,
                                      IndirectDrawMetadata indirectDrawMetadata);
     void ExitComputePass(const ApiObjectBase* passEncoder, ComputePassResourceUsage usages);
-    MaybeUnknownError Finish();
+    MaybeValError Finish();
 
     // Called when a pass encoder is deleted. Provides an opportunity to clean up if it's the
     // mCurrentEncoder.
@@ -226,7 +226,7 @@ class EncodingContext {
     std::vector<std::string_view> mDebugGroupLabels;
 
     Status mStatus = Status::Open;
-    std::unique_ptr<UnknownError> mError;
+    std::unique_ptr<ValidationError> mError;
 };
 
 }  // namespace dawn::native
