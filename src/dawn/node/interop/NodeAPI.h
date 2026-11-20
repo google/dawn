@@ -28,7 +28,10 @@
 #ifndef SRC_DAWN_NODE_INTEROP_NODEAPI_H_
 #define SRC_DAWN_NODE_INTEROP_NODEAPI_H_
 
+#include <cstdint>
+
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 // Dawn is built with exceptions disabled.
 #define NAPI_DISABLE_CPP_EXCEPTIONS
@@ -51,5 +54,25 @@
 #if DAWN_COMPILER_IS_CLANG
 #pragma clang diagnostic pop
 #endif  // DAWN_COMPILER_IS_CLANG
+
+namespace wgpu::interop {
+
+inline dawn::Span<uint8_t> AsSpan(Napi::ArrayBuffer buf) {
+    // SAFETY: Node-API guarantees Data() points to ByteLength() bytes.
+    return DAWN_UNSAFE_BUFFERS(
+        dawn::Span<uint8_t>(static_cast<uint8_t*>(buf.Data()), buf.ByteLength()));
+}
+
+inline dawn::Span<uint8_t> AsBytes(Napi::TypedArray arr) {
+    return AsSpan(arr.ArrayBuffer()).subspan(arr.ByteOffset(), arr.ByteLength());
+}
+
+template <typename T>
+inline dawn::Span<T> AsSpan(Napi::TypedArrayOf<T> arr) {
+    // SAFETY: Node-API guarantees Data() points to ElementLength() elements.
+    return DAWN_UNSAFE_BUFFERS(dawn::Span<T>(arr.Data(), arr.ElementLength()));
+}
+
+}  // namespace wgpu::interop
 
 #endif  // SRC_DAWN_NODE_INTEROP_NODEAPI_H_

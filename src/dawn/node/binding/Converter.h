@@ -45,6 +45,7 @@
 #include "src/dawn/node/interop/NodeAPI.h"
 #include "src/dawn/node/interop/WebGPU.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace wgpu::binding {
 
@@ -130,8 +131,7 @@ class Converter {
 
     // BufferSource is the converted type of interop::BufferSource.
     struct BufferSource {
-        void* data;
-        size_t size;             // in bytes
+        dawn::Span<const uint8_t> data;
         size_t bytesPerElement;  // 1 for ArrayBuffers
     };
 

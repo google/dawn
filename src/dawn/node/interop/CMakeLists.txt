@@ -77,6 +77,7 @@ target_include_directories(dawn_node_interop SYSTEM
 
 target_link_libraries(dawn_node_interop
     PUBLIC
+        dawn::partition_alloc
         dawn_shared_utils
     PRIVATE
         dawncpp

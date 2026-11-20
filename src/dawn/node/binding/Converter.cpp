@@ -179,20 +179,14 @@ bool Converter::Convert(BufferSource& out, interop::BufferSource in) {
     if (auto* view = std::get_if<interop::ArrayBufferView>(&in)) {
         std::visit(
             [&](auto&& v) {
-                // SAFETY: Node-API does not expose a span directly. ByteOffset() and
-                // ByteLength() represent the view into the backing ArrayBuffer, guaranteeing
-                // the buffer provides storage of at least ByteOffset() + ByteLength() bytes.
-                out.data = DAWN_UNSAFE_BUFFERS(static_cast<uint8_t*>(v.ArrayBuffer().Data()) +
-                                               v.ByteOffset());
-                out.size = v.ByteLength();
+                out.data = interop::AsBytes(v);
                 out.bytesPerElement = v.ElementSize();
             },
             *view);
         return true;
     }
     if (auto* arr = std::get_if<interop::ArrayBuffer>(&in)) {
-        out.data = arr->Data();
-        out.size = arr->ByteLength();
+        out.data = interop::AsSpan(*arr);
         out.bytesPerElement = 1;
         return true;
     }
@@ -2117,18 +2111,17 @@ bool ConvertDataElementsToSpan(Napi::Env env,
     }
 
     // The offset is in elements.
-    if (data_offset_elements > uint64_t{src.size / src.bytesPerElement}) {
+    if (data_offset_elements > uint64_t{src.data.size() / src.bytesPerElement}) {
         binding::Errors::OperationError(env, "dataOffset is larger than data's size.")
             .ThrowAsJavaScriptException();
         return false;
     }
     uint64_t data_offset = data_offset_elements * src.bytesPerElement;
-    src.data = DAWN_UNSAFE_TODO(reinterpret_cast<uint8_t*>(src.data) + data_offset);
-    src.size -= data_offset;
+    src.data = src.data.subspan(static_cast<size_t>(data_offset));
 
     // Size defaults to dataSize - dataOffset. Instead of computing in elements, we directly
     // use it in bytes, and convert the provided value, if any, in bytes.
-    uint64_t size64 = uint64_t{src.size};
+    uint64_t size64 = uint64_t{src.data.size()};
     if (size_elements.has_value()) {
         if (size_elements.value() > std::numeric_limits<uint64_t>::max() / src.bytesPerElement) {
             binding::Errors::OperationError(env, "size overflows.").ThrowAsJavaScriptException();
@@ -2137,15 +2130,14 @@ bool ConvertDataElementsToSpan(Napi::Env env,
         size64 = size_elements.value() * src.bytesPerElement;
     }
 
-    if (size64 > uint64_t{src.size}) {
+    if (size64 > uint64_t{src.data.size()}) {
         binding::Errors::OperationError(env, "size + dataOffset is larger than data's size.")
             .ThrowAsJavaScriptException();
         return false;
     }
 
     DAWN_ASSERT(size64 <= std::numeric_limits<size_t>::max());
-    *out = DAWN_UNSAFE_TODO(std::span<const uint8_t>(reinterpret_cast<const uint8_t*>(src.data),
-                                                     static_cast<size_t>(size64)));
+    *out = src.data.first(static_cast<size_t>(size64));
 
     return true;
 }
@@ -2155,13 +2147,14 @@ bool ConvertDynamicOffsetsToSpan(Napi::Env env,
                                  interop::Uint32Array data,
                                  interop::GPUSize64 data_start,
                                  interop::GPUSize32 data_length) {
-    if (data_start > data.ElementLength()) {
+    auto span = interop::AsSpan(data);
+    if (data_start > span.size()) {
         Napi::RangeError::New(env, "dynamicOffsetsDataStart is out of bound of dynamicOffsetData")
             .ThrowAsJavaScriptException();
         return false;
     }
 
-    if (data_length > data.ElementLength() - data_start) {
+    if (data_length > span.size() - data_start) {
         Napi::RangeError::New(env,
                               "dynamicOffsetsDataLength + dynamicOffsetsDataStart is out of "
                               "bound of dynamicOffsetData")
@@ -2169,8 +2162,6 @@ bool ConvertDynamicOffsetsToSpan(Napi::Env env,
         return false;
     }
 
-    // SAFETY: data provides storage of data.ElementLength() elements.
-    auto span = DAWN_UNSAFE_BUFFERS(std::span{data.Data(), data.ElementLength()});
     *out = span.subspan(static_cast<size_t>(data_start), data_length);
     return true;
 }

@@ -113,7 +113,7 @@ void GPUQueue::writeTexture(Napi::Env env,
         return;
     }
 
-    queue_.WriteTexture(&dst, src.data, src.size, &layout, &sz);
+    queue_.WriteTexture(&dst, src.data.data(), src.data.size(), &layout, &sz);
 }
 
 void GPUQueue::copyExternalImageToTexture(Napi::Env env,
