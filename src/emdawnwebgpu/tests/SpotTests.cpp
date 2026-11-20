@@ -165,6 +165,46 @@ TEST_P(SpotTests, BufferGetMapState) {
     EXPECT_EQ(buffer.GetMapState(), wgpu::BufferMapState::Unmapped);
 }
 
+TEST_P(SpotTests, DebugMarkers) {
+    // These methods pass StringView by value. If we are missing pointer signatures, that will
+    // cause BigInt/Number exceptions in the JS bindings when built with MEMORY64.
+    auto testDebugMarkers = [](const auto& encoder) {
+        for (wgpu::StringView label : {wgpu::StringView("debug marker"),
+                                       wgpu::StringView("debug marker trailing text", 12)}) {
+            encoder.PushDebugGroup(label);
+            encoder.InsertDebugMarker(label);
+            encoder.PopDebugGroup();
+        }
+    };
+
+    auto encoder = mDevice.CreateCommandEncoder();
+    testDebugMarkers(encoder);
+    {
+        auto pass = encoder.BeginComputePass();
+        testDebugMarkers(pass);
+        pass.End();
+    }
+    {
+        auto renderPass = utils::CreateBasicRenderPass(mDevice, 1, 1);
+        auto pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        testDebugMarkers(pass);
+        pass.End();
+    }
+
+    wgpu::TextureFormat colorFormat = wgpu::TextureFormat::RGBA8Unorm;
+    wgpu::RenderBundleEncoderDescriptor bundleDesc{
+        .colorFormatCount = 1,
+        .colorFormats = &colorFormat,
+    };
+    auto bundleEncoder = mDevice.CreateRenderBundleEncoder(&bundleDesc);
+    testDebugMarkers(bundleEncoder);
+    ASSERT_TRUE(bundleEncoder.Finish());
+
+    auto commandBuffer = encoder.Finish();
+    ASSERT_TRUE(commandBuffer);
+    mDevice.GetQueue().Submit(1, &commandBuffer);
+}
+
 TEST_P(SpotTests, GetCompilationInfo) {
     for (bool valid : {true, false}) {
         wgpu::ShaderSourceWGSL wgslDesc{};

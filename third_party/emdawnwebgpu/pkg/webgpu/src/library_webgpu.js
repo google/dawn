@@ -1924,6 +1924,7 @@ var LibraryWebGPU = {
     return ptr;
   },
 
+  emwgpuDeviceDestroy__sig: 'vp',
   emwgpuDeviceDestroy: (devicePtr) => {
     const device = WebGPU.getJsObject(devicePtr);
     // Remove the onuncapturederror handler which holds a pointer to the WGPUDevice.
@@ -2812,3 +2813,13 @@ moveDeps(LibraryWebGPU.$WebGPU, LibraryWebGPU.$WebGPU__deps)
 autoAddDeps(LibraryWebGPU, '$WebGPU');
 autoAddDeps(LibraryWebGPU, '$readI53FromI64');
 mergeInto(LibraryManager.library, LibraryWebGPU);
+
+// Every C function implemented in JS needs a signature, including for MEMORY64
+// pointer conversions. For webgpu.h functions, signatures are generated in
+// library_webgpu_generated_sig_info.js, but for others like the emwgpu* functions,
+// we need to specify it explicitly. Check at compile time so missing signatures
+// fail to build.
+for (const key of Object.keys(LibraryWebGPU)) {
+  if (typeof LibraryWebGPU[key] !== 'function' || key.startsWith('$')) continue;
+  assert(LibraryManager.library[key + '__sig'], 'Missing __sig for ' + key);
+}
