@@ -107,6 +107,30 @@ class AdapterCreationTest : public TestWithParam<wgpu::CallbackMode> {
         }
     }
 
+    void ExpectFallbackAdapter() {
+        wgpu::RequestAdapterOptions options = {};
+        options.forceFallbackAdapter = true;
+
+        wgpu::Adapter adapter;
+        if (swiftShaderAvailable) {
+            EXPECT_CALL(mMockCb, Call(wgpu::RequestAdapterStatus::Success, _, EmptySizedString()))
+                .WillOnce(WithArg<1>([&](wgpu::Adapter result) { adapter = std::move(result); }));
+        } else {
+            EXPECT_CALL(mMockCb, Call(wgpu::RequestAdapterStatus::Unavailable, IsNull(), _))
+                .WillOnce(WithArg<1>([&](wgpu::Adapter result) { adapter = std::move(result); }));
+        }
+        RequestAdapter(instance, &options);
+
+        EXPECT_EQ(adapter != nullptr, swiftShaderAvailable);
+        if (adapter != nullptr) {
+            wgpu::AdapterInfo info;
+            adapter.GetInfo(&info);
+
+            EXPECT_EQ(info.adapterType, wgpu::AdapterType::CPU);
+            EXPECT_TRUE(gpu_info::IsGoogleSwiftshader(info.vendorID, info.deviceID));
+        }
+    }
+
     wgpu::Instance instance;
     StrictMock<MockRequestAdapterCallback> mMockCb;
     bool anyAdapterAvailable = false;
@@ -152,27 +176,30 @@ TEST_P(AdapterCreationTest, NullGivesDefaultAdapter) {
 
 // Test that requesting the fallback adapter returns SwiftShader.
 TEST_P(AdapterCreationTest, FallbackAdapter) {
-    wgpu::RequestAdapterOptions options = {};
-    options.forceFallbackAdapter = true;
+    ExpectFallbackAdapter();
+}
 
-    wgpu::Adapter adapter;
-    if (swiftShaderAvailable) {
-        EXPECT_CALL(mMockCb, Call(wgpu::RequestAdapterStatus::Success, _, EmptySizedString()))
-            .WillOnce(WithArg<1>([&](wgpu::Adapter result) { adapter = std::move(result); }));
-    } else {
-        EXPECT_CALL(mMockCb, Call(wgpu::RequestAdapterStatus::Unavailable, IsNull(), _))
-            .WillOnce(WithArg<1>([&](wgpu::Adapter result) { adapter = std::move(result); }));
+// Test that requesting the fallback adapter returns SwiftShader or nothing after an earlier
+// default request on the same instance has populated the backend's physical device cache.
+TEST_P(AdapterCreationTest, FallbackAdapterAfterDefaultAdapter) {
+    {
+        wgpu::RequestAdapterOptions options = {};
+        wgpu::Adapter defaultAdapter;
+        if (anyAdapterAvailable) {
+            EXPECT_CALL(mMockCb, Call(wgpu::RequestAdapterStatus::Success, _, EmptySizedString()))
+                .WillOnce(
+                    WithArg<1>([&](wgpu::Adapter result) { defaultAdapter = std::move(result); }));
+        } else {
+            EXPECT_CALL(mMockCb, Call(wgpu::RequestAdapterStatus::Unavailable, IsNull(), _))
+                .WillOnce(
+                    WithArg<1>([&](wgpu::Adapter result) { defaultAdapter = std::move(result); }));
+        }
+        RequestAdapter(instance, &options);
+        EXPECT_EQ(defaultAdapter != nullptr, anyAdapterAvailable);
+        testing::Mock::VerifyAndClearExpectations(&mMockCb);
     }
-    RequestAdapter(instance, &options);
 
-    EXPECT_EQ(adapter != nullptr, swiftShaderAvailable);
-    if (adapter != nullptr) {
-        wgpu::AdapterInfo info;
-        adapter.GetInfo(&info);
-
-        EXPECT_EQ(info.adapterType, wgpu::AdapterType::CPU);
-        EXPECT_TRUE(gpu_info::IsGoogleSwiftshader(info.vendorID, info.deviceID));
-    }
+    ExpectFallbackAdapter();
 }
 
 // Test that requesting a high performance GPU works

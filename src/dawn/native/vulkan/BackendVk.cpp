@@ -575,15 +575,16 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
                 if (instance->ConsumedErrorAndWarnOnce(physicalDevice->Initialize())) {
                     continue;
                 }
-                if (options->forceFallbackAdapter && !IsFallbackAdapter(physicalDevice.Get())) {
-                    continue;
-                }
-                // This loop can't filter adapters based on SupportsFeatureLevel() since the results
-                // are cached for subsequent calls that might have a different feature level.
+                // This loop can't filter adapters based on forceFallbackAdapter or
+                // SupportsFeatureLevel() since the results are cached for subsequent calls that
+                // might have different options.
                 mPhysicalDevices[icd].push_back(std::move(physicalDevice));
             }
         }
         for (auto& physicalDevice : mPhysicalDevices[icd]) {
+            if (options->forceFallbackAdapter && !IsFallbackAdapter(physicalDevice.Get())) {
+                continue;
+            }
             if (auto* uuidOptions = options.Get<RequestAdapterOptionsVulkanUUIDs>()) {
                 const VkPhysicalDeviceIDProperties& idProps =
                     physicalDevice->GetDeviceInfo().idProperties;
