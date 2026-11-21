@@ -864,6 +864,9 @@ TEST_P(MaxLimitTests, MaxBufferSizes) {
     EXPECT_LE(baseLimits.maxStorageBufferBindingSize, baseLimits.maxBufferSize);
     EXPECT_LE(baseLimits.maxUniformBufferBindingSize, baseLimits.maxBufferSize);
     EXPECT_EQ(baseLimits.maxStorageBufferBindingSize % 4, 0u);
+    if (IsVulkan()) {
+        EXPECT_EQ(baseLimits.maxBufferSize % 4, 0u);
+    }
 
     // Base limits with tiering.
     GetAdapter().SetUseTieredLimits(true);
