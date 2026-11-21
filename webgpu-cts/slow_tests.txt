@@ -149,3 +149,6 @@ crbug.com/565370020 webgpu:api,validation,capability_checks,limits,maxStorageBuf
 crbug.com/565370020 webgpu:api,validation,capability_checks,limits,maxStorageTexturesInFragmentStage:createPipeline,at_over:* [ Slow ]
 crbug.com/565370020 webgpu:api,validation,capability_checks,limits,maxStorageTexturesInVertexStage:createPipeline,at_over:* [ Slow ]
 crbug.com/565370020 webgpu:api,validation,capability_checks,limits,maxStorageTexturesPerShaderStage:createPipeline,at_over:* [ Slow ]
+
+# Times out when the shader cache is disabled as a workaround for this bug.
+crbug.com/588514727 [ mac arch-arm64 ] webgpu:api,validation,capability_checks,features,texture_component_swizzle:compatibility_mode: [ Slow ]
