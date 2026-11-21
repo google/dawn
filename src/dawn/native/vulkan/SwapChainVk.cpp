@@ -72,6 +72,11 @@ uint32_t MinImageCountForPresentMode(VkPresentModeKHR mode) {
     switch (mode) {
         case VK_PRESENT_MODE_FIFO_KHR:
         case VK_PRESENT_MODE_FIFO_RELAXED_KHR:
+#if DAWN_PLATFORM_IS(ANDROID)
+            // Android's loader lets the app dequeue minImageCount - 1 buffers at once, so with two
+            // images each frame waits for the compositor to release the one shown before.
+            return 3;
+#endif
         case VK_PRESENT_MODE_IMMEDIATE_KHR:
             return 2;
         case VK_PRESENT_MODE_MAILBOX_KHR:
