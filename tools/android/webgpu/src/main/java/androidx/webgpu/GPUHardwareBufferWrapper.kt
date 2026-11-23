@@ -32,7 +32,11 @@ public abstract class GPUHardwareBufferWrapper(
    * @param fences Array of GPUSyncFence objects to wait on before accessing the buffer.
    */
   public fun beginAccess(fences: Array<GPUSyncFence>?) {
-    val fds = fences?.mapNotNull { it.getParcelFileDescriptor().fd }?.toIntArray()
+    val fds = if (fences.isNullOrEmpty()) {
+      null
+    } else {
+      IntArray(fences.size) { i -> fences[i].getParcelFileDescriptor().fd }
+    }
     nativeBeginAccess(handle, fds)
   }
 

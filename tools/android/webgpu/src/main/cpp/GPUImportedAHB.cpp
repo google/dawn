@@ -61,6 +61,7 @@ struct AhbTextureWrapper {
     wgpu::ExternalTexture externalTexture;
     AHardwareBuffer* ahb = nullptr;
     wgpu::Device device;
+    bool isVulkan = false;
 };
 
 struct UniqueFd {
@@ -137,6 +138,12 @@ void ReleaseAHardwareBuffer(AHardwareBuffer* ahb) {
             release(ahb);
         }
     }
+}
+
+bool IsVulkanDevice(const wgpu::Device& device) {
+    wgpu::AdapterInfo adapterInfo = {};
+    return device.GetAdapterInfo(&adapterInfo) == wgpu::Status::Success &&
+           adapterInfo.backendType == wgpu::BackendType::Vulkan;
 }
 
 }  // namespace
@@ -268,6 +275,7 @@ Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createTextureNative(JNI
     wrapper->stm = std::move(stm);
     wrapper->texture = std::move(texture);
     wrapper->ahb = ahb;
+    wrapper->isVulkan = IsVulkanDevice(device);
     wrapper->device = std::move(device);
 
     jlong wrapPtr = reinterpret_cast<jlong>(wrapper.get());
@@ -477,6 +485,7 @@ Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createExternalTextureNa
     wrapper->view = std::move(view);
     wrapper->externalTexture = std::move(externalTexture);
     wrapper->ahb = ahb;
+    wrapper->isVulkan = IsVulkanDevice(device);
     wrapper->device = std::move(device);
 
     jlong wrapPtr = reinterpret_cast<jlong>(wrapper.get());
@@ -537,7 +546,10 @@ Java_androidx_webgpu_GPUHardwareBufferWrapper_nativeBeginAccess(JNIEnv* env,
                         return;
                     }
                     if (fence) {
-                        importedFences.push_back(fence);
+                        if (importedFences.empty()) {
+                            importedFences.reserve(len);
+                        }
+                        importedFences.push_back(std::move(fence));
                     }
                 }
             }
@@ -554,12 +566,7 @@ Java_androidx_webgpu_GPUHardwareBufferWrapper_nativeBeginAccess(JNIEnv* env,
     beginDesc.initialized = true;
 
     wgpu::SharedTextureMemoryVkImageLayoutBeginState beginLayout = {};
-    wgpu::AdapterInfo adapterInfo;
-    wrapper->device.GetAdapterInfo(&adapterInfo);
-    if (env->ExceptionCheck()) {
-        return;
-    }
-    if (adapterInfo.backendType == wgpu::BackendType::Vulkan) {
+    if (wrapper->isVulkan) {
         beginLayout.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
         beginLayout.newLayout = VK_IMAGE_LAYOUT_GENERAL;
         beginDesc.nextInChain = &beginLayout;
@@ -585,12 +592,7 @@ JNIEXPORT jint JNICALL Java_androidx_webgpu_GPUHardwareBufferWrapper_nativeEndAc
 
     wgpu::SharedTextureMemoryEndAccessState endState = {};
     wgpu::SharedTextureMemoryVkImageLayoutEndState endLayout = {};
-    wgpu::AdapterInfo adapterInfo;
-    wrapper->device.GetAdapterInfo(&adapterInfo);
-    if (env->ExceptionCheck()) {
-        return -1;
-    }
-    if (adapterInfo.backendType == wgpu::BackendType::Vulkan) {
+    if (wrapper->isVulkan) {
         endLayout.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
         endLayout.newLayout = VK_IMAGE_LAYOUT_GENERAL;
         endState.nextInChain = &endLayout;
