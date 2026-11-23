@@ -89,10 +89,6 @@ class MultithreadTests : public DawnTest {
         // TODO(crbug.com/dawn/1678): DawnWire doesn't support thread safe API yet.
         if (!UsesWire()) {
             features.push_back(wgpu::FeatureName::ImplicitDeviceSynchronization);
-
-            if (SupportsFeatures({wgpu::FeatureName::D3D11MultithreadProtected})) {
-                features.push_back(wgpu::FeatureName::D3D11MultithreadProtected);
-            }
         }
         return features;
     }

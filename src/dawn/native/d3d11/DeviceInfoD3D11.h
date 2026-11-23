@@ -52,7 +52,6 @@ struct DeviceInfo {
     bool supportsMapOnDefaultBuffer = false;
     bool supportsMapNoOverwriteDynamicBuffers = false;
     bool supportsPartialConstantBufferUpdate = false;
-    bool supportsConcurrentCreates = false;
 };
 
 ResultOrError<DeviceInfo> GatherDeviceInfo(const ComPtr<IDXGIAdapter3>& adapter,

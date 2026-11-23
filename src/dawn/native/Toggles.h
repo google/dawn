@@ -227,7 +227,6 @@ enum class Toggle {
     D3D11DisableFence,
     D3D11DelayFlushToGPU,
     D3D11UseDiscardView,
-    D3D11AsyncShaderCreations,
     IgnoreImportedAHardwareBufferVulkanImageSize,
     GLAllowContextOnMultiThreads,
     GLDefer,

@@ -86,36 +86,31 @@ ResultOrUnknownError<Extent3D> ComputePipeline::InitializeImpl() {
                     ToBackend(programmableStage.module)
                         ->Compile(programmableStage, SingleShaderStage::Compute,
                                   ToBackend(GetLayout()), compileFlags, GetImmediateMask()));
-    Extent3D workgroupSize = compiledShader.workgroupSize;
-    mComputeShaderFuture = device->GetOrCreateComputeShader(std::move(compiledShader), GetLabel());
+    {
+        TRACE_EVENT(DAWN_TRACE_CATEGORY(), "ComputePipelineD3D11::CreateComputeShader");
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "D3D11.CreateComputeShaderUs");
+        DAWN_TRY_ASSIGN(mComputeShader, device->GetOrCreateComputeShader(compiledShader));
+    }
+
     SetLabelImpl();
 
-    return {workgroupSize};
+    return {compiledShader.workgroupSize};
 }
 
 void ComputePipeline::SetLabelImpl() {
     SetDebugName(ToBackend(GetDevice()), mComputeShader.Get(), "Dawn_ComputePipeline", GetLabel());
 }
 
-MaybeError ComputePipeline::ApplyNow(PipelineStateTracker* tracker) {
-    if (DAWN_UNLIKELY(!mComputeShader)) {
-        DAWN_TRY_ASSIGN(mComputeShader, mComputeShaderFuture->TryGet());
-        SetLabelImpl();
-    }
-
+void ComputePipeline::ApplyNow(PipelineStateTracker* tracker) {
     tracker->CSSetShader(mComputeShader.Get());
-
-    return {};
 }
 
 bool ComputePipeline::UsesNumWorkgroups() const {
     return GetStage(SingleShaderStage::Compute).metadata->usesNumWorkgroups;
 }
 
-ComPtr<ID3D11ComputeShader> ComputePipeline::GetD3D11ComputeShaderForTesting() {
-    ResultOrError<ComPtr<ID3D11ComputeShader>> result = mComputeShaderFuture->TryGet();
-    DAWN_ASSERT(result.IsSuccess());
-    return result.AcquireSuccess();
+ID3D11ComputeShader* ComputePipeline::GetD3D11ComputeShaderForTesting() {
+    return mComputeShader.Get();
 }
 
 }  // namespace dawn::native::d3d11

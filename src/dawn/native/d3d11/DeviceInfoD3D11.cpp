@@ -53,14 +53,6 @@ ResultOrError<DeviceInfo> GatherDeviceInfo(const ComPtr<IDXGIAdapter3>& adapter,
         info.supportsMapOnDefaultBuffer = options1.MapOnDefaultBuffers != 0;
     }
 
-    D3D11_FEATURE_DATA_THREADING optionsThreading = {};
-    if (SUCCEEDED(device->CheckFeatureSupport(D3D11_FEATURE_THREADING, &optionsThreading,
-                                              sizeof(optionsThreading)))) {
-        info.supportsConcurrentCreates = optionsThreading.DriverConcurrentCreates != 0;
-    } else {
-        info.supportsConcurrentCreates = false;
-    }
-
     // TODO(405401229): Return error if the device doesn't support binding constant buffers with
     // non-zero offsets.
     DAWN_INVALID_IF(!options.ConstantBufferOffsetting, "ConstantBufferOffsetting is not supported");
