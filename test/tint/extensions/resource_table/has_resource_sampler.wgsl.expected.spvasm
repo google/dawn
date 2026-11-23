@@ -11,6 +11,8 @@
                OpExecutionMode %fs OriginUpperLeft
                OpMemberName %o_block 0 "inner"
                OpName %o_block "o_block"
+               OpName %tint_resource_table "tint_resource_table"
+               OpName %tint_resource_table_0 "tint_resource_table"
                OpMemberName %tint_resource_table_metadata_struct_tint_explicit_layout 0 "array_length"
                OpMemberName %tint_resource_table_metadata_struct_tint_explicit_layout 1 "bindings"
                OpName %tint_resource_table_metadata_struct_tint_explicit_layout "tint_resource_table_metadata_struct_tint_explicit_layout"
@@ -23,10 +25,10 @@
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
-               OpDecorate %5 DescriptorSet 4
-               OpDecorate %5 Binding 28
-               OpDecorate %9 DescriptorSet 4
-               OpDecorate %9 Binding 28
+               OpDecorate %tint_resource_table DescriptorSet 4
+               OpDecorate %tint_resource_table Binding 28
+               OpDecorate %tint_resource_table_0 DescriptorSet 4
+               OpDecorate %tint_resource_table_0 Binding 28
                OpMemberDecorate %tint_resource_table_metadata_struct_tint_explicit_layout 0 Offset 0
                OpDecorate %_runtimearr_uint ArrayStride 4
                OpMemberDecorate %tint_resource_table_metadata_struct_tint_explicit_layout 1 Offset 4
@@ -41,10 +43,10 @@
           %8 = OpTypeSampler
 %_runtimearr_8 = OpTypeRuntimeArray %8
 %_ptr_UniformConstant__runtimearr_8 = OpTypePointer UniformConstant %_runtimearr_8
-          %5 = OpVariable %_ptr_UniformConstant__runtimearr_8 UniformConstant
+%tint_resource_table = OpVariable %_ptr_UniformConstant__runtimearr_8 UniformConstant
 %_runtimearr_8_0 = OpTypeRuntimeArray %8
 %_ptr_UniformConstant__runtimearr_8_0 = OpTypePointer UniformConstant %_runtimearr_8_0
-          %9 = OpVariable %_ptr_UniformConstant__runtimearr_8_0 UniformConstant
+%tint_resource_table_0 = OpVariable %_ptr_UniformConstant__runtimearr_8_0 UniformConstant
 %_runtimearr_uint = OpTypeRuntimeArray %uint
 %tint_resource_table_metadata_struct_tint_explicit_layout = OpTypeStruct %uint %_runtimearr_uint
 %_ptr_StorageBuffer_tint_resource_table_metadata_struct_tint_explicit_layout = OpTypePointer StorageBuffer %tint_resource_table_metadata_struct_tint_explicit_layout

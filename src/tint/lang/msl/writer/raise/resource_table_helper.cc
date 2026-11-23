@@ -43,8 +43,8 @@ Hashmap<const core::type::Type*, core::ir::Var*, 4> ResourceTableHelper::Generat
     const std::vector<ResourceType>& types) const {
     b.ir.properties.Add(core::ir::Property::kAllow64BitIntegers);
 
-    auto* v = b.Var(b.ir.Types().ptr(uniform, b.ir.Types().u64(), core::Access::kRead));
-    b.ir.SetName(v, "tint_resource_table");
+    auto* v = b.Var("tint_resource_table",
+                    b.ir.Types().ptr(uniform, b.ir.Types().u64(), core::Access::kRead));
     v->SetBindingPoint(bp.group, bp.binding);
 
     Hashmap<const core::type::Type*, core::ir::Var*, 4> res;

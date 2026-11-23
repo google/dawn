@@ -1,5 +1,5 @@
 
-Texture2D<int4> tint_resource_table_array[] : register(t28, space4);
+Texture2D<int4> tint_resource_table[] : register(t28, space4);
 ByteAddressBuffer tint_resource_table_metadata : register(t29, space5);
 void fs() {
   bool v = false;

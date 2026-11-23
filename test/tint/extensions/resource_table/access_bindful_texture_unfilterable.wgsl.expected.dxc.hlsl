@@ -4,9 +4,9 @@ struct fs_outputs {
 
 
 Texture2D<float4> t : register(t0);
-Texture2D<float4> tint_resource_table_array[] : register(t28, space4);
-Texture2D tint_resource_table_array_1[] : register(t28, space6);
-SamplerState tint_resource_table_array_2[] : register(s28, space7);
+Texture2D<float4> tint_resource_table[] : register(t28, space4);
+Texture2D tint_resource_table_1[] : register(t28, space6);
+SamplerState tint_resource_table_2[] : register(s28, space7);
 ByteAddressBuffer tint_resource_table_metadata : register(t29, space5);
 float4 fs_inner() {
   bool v = false;
@@ -38,7 +38,7 @@ float4 fs_inner() {
   }
   float4 v_4 = (0.0f).xxxx;
   if (v_3) {
-    v_4 = t.Sample(tint_resource_table_array_2[item_idx], (0.0f).xx);
+    v_4 = t.Sample(tint_resource_table_2[item_idx], (0.0f).xx);
   } else {
     v_4 = (0.0f).xxxx;
   }

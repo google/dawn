@@ -9,6 +9,7 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fs "fs"
                OpExecutionMode %fs OriginUpperLeft
+               OpName %tint_resource_table "tint_resource_table"
                OpMemberName %tint_resource_table_metadata_struct_tint_explicit_layout 0 "array_length"
                OpMemberName %tint_resource_table_metadata_struct_tint_explicit_layout 1 "bindings"
                OpName %tint_resource_table_metadata_struct_tint_explicit_layout "tint_resource_table_metadata_struct_tint_explicit_layout"
@@ -16,8 +17,8 @@
                OpName %fs "fs"
                OpName %tint_storage_metadata_length "tint_storage_metadata_length"
                OpName %t "t"
-               OpDecorate %1 DescriptorSet 4
-               OpDecorate %1 Binding 28
+               OpDecorate %tint_resource_table DescriptorSet 4
+               OpDecorate %tint_resource_table Binding 28
                OpMemberDecorate %tint_resource_table_metadata_struct_tint_explicit_layout 0 Offset 0
                OpDecorate %_runtimearr_uint ArrayStride 4
                OpMemberDecorate %tint_resource_table_metadata_struct_tint_explicit_layout 1 Offset 4
@@ -29,7 +30,7 @@
           %4 = OpTypeImage %int 2D 0 0 0 1 Unknown
 %_runtimearr_4 = OpTypeRuntimeArray %4
 %_ptr_UniformConstant__runtimearr_4 = OpTypePointer UniformConstant %_runtimearr_4
-          %1 = OpVariable %_ptr_UniformConstant__runtimearr_4 UniformConstant
+%tint_resource_table = OpVariable %_ptr_UniformConstant__runtimearr_4 UniformConstant
        %uint = OpTypeInt 32 0
 %_runtimearr_uint = OpTypeRuntimeArray %uint
 %tint_resource_table_metadata_struct_tint_explicit_layout = OpTypeStruct %uint %_runtimearr_uint

@@ -52,7 +52,7 @@ Hashmap<const core::type::Type*, core::ir::Var*, 4> ResourceTableHelper::Generat
         }
 
         auto* spv_ty = b.ir.Types().Get<core::type::ResourceTable>(t);
-        auto* v = b.Var(b.ir.Types().ptr(handle, spv_ty));
+        auto* v = b.Var("tint_resource_table", b.ir.Types().ptr(handle, spv_ty));
         v->SetBindingPoint(bp.group, bp.binding);
         res.Add(t, v);
     }

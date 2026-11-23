@@ -1,5 +1,5 @@
 
-Texture1D<float4> tint_resource_table_array[] : register(t28, space4);
+Texture1D<float4> tint_resource_table[] : register(t28, space4);
 ByteAddressBuffer tint_resource_table_metadata : register(t29, space5);
 void fs() {
   bool v = false;
@@ -15,6 +15,6 @@ void fs() {
     v_1 = (0u + tint_resource_table_metadata.Load(0u));
   }
   uint item_idx = v_1;
-  float4 texture_load = tint_resource_table_array[item_idx].Load((int(0)).xx);
+  float4 texture_load = tint_resource_table[item_idx].Load((int(0)).xx);
 }
 

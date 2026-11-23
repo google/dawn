@@ -9,6 +9,9 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fs "fs" %fs_loc0_Output
                OpExecutionMode %fs OriginUpperLeft
+               OpName %tint_resource_table "tint_resource_table"
+               OpName %tint_resource_table_0 "tint_resource_table"
+               OpName %tint_resource_table_1 "tint_resource_table"
                OpMemberName %tint_resource_table_metadata_struct_tint_explicit_layout 0 "array_length"
                OpMemberName %tint_resource_table_metadata_struct_tint_explicit_layout 1 "bindings"
                OpName %tint_resource_table_metadata_struct_tint_explicit_layout "tint_resource_table_metadata_struct_tint_explicit_layout"
@@ -25,12 +28,12 @@
                OpName %item_idx_0 "item_idx"
                OpName %texture_sampler_combo_valid "texture_sampler_combo_valid"
                OpName %fs "fs"
-               OpDecorate %1 DescriptorSet 4
-               OpDecorate %1 Binding 28
-               OpDecorate %6 DescriptorSet 4
-               OpDecorate %6 Binding 28
-               OpDecorate %9 DescriptorSet 4
-               OpDecorate %9 Binding 28
+               OpDecorate %tint_resource_table DescriptorSet 4
+               OpDecorate %tint_resource_table Binding 28
+               OpDecorate %tint_resource_table_0 DescriptorSet 4
+               OpDecorate %tint_resource_table_0 Binding 28
+               OpDecorate %tint_resource_table_1 DescriptorSet 4
+               OpDecorate %tint_resource_table_1 Binding 28
                OpMemberDecorate %tint_resource_table_metadata_struct_tint_explicit_layout 0 Offset 0
                OpDecorate %_runtimearr_uint ArrayStride 4
                OpMemberDecorate %tint_resource_table_metadata_struct_tint_explicit_layout 1 Offset 4
@@ -43,14 +46,14 @@
           %4 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_runtimearr_4 = OpTypeRuntimeArray %4
 %_ptr_UniformConstant__runtimearr_4 = OpTypePointer UniformConstant %_runtimearr_4
-          %1 = OpVariable %_ptr_UniformConstant__runtimearr_4 UniformConstant
+%tint_resource_table = OpVariable %_ptr_UniformConstant__runtimearr_4 UniformConstant
 %_runtimearr_4_0 = OpTypeRuntimeArray %4
 %_ptr_UniformConstant__runtimearr_4_0 = OpTypePointer UniformConstant %_runtimearr_4_0
-          %6 = OpVariable %_ptr_UniformConstant__runtimearr_4_0 UniformConstant
+%tint_resource_table_0 = OpVariable %_ptr_UniformConstant__runtimearr_4_0 UniformConstant
          %12 = OpTypeSampler
 %_runtimearr_12 = OpTypeRuntimeArray %12
 %_ptr_UniformConstant__runtimearr_12 = OpTypePointer UniformConstant %_runtimearr_12
-          %9 = OpVariable %_ptr_UniformConstant__runtimearr_12 UniformConstant
+%tint_resource_table_1 = OpVariable %_ptr_UniformConstant__runtimearr_12 UniformConstant
        %uint = OpTypeInt 32 0
 %_runtimearr_uint = OpTypeRuntimeArray %uint
 %tint_resource_table_metadata_struct_tint_explicit_layout = OpTypeStruct %uint %_runtimearr_uint
@@ -127,7 +130,7 @@
                OpBranch %43
          %43 = OpLabel
    %item_idx = OpPhi %uint %uint_2 %44 %47 %45
-         %48 = OpAccessChain %_ptr_UniformConstant_4 %1 %item_idx
+         %48 = OpAccessChain %_ptr_UniformConstant_4 %tint_resource_table %item_idx
          %50 = OpLoad %4 %48 None
 %tint_storage_metadata_length_0 = OpAccessChain %_ptr_StorageBuffer_uint %tint_resource_table_metadata %uint_0
          %52 = OpLoad %uint %tint_storage_metadata_length_0 None
@@ -166,7 +169,7 @@
                OpBranch %66
          %66 = OpLabel
  %item_idx_0 = OpPhi %uint %uint_3 %67 %70 %68
-         %71 = OpAccessChain %_ptr_UniformConstant_12 %9 %item_idx_0
+         %71 = OpAccessChain %_ptr_UniformConstant_12 %tint_resource_table_1 %item_idx_0
          %73 = OpLoad %12 %71 None
          %74 = OpIEqual %bool %texture_kind %uint_6
          %75 = OpIEqual %bool %sampler_kind %uint_40

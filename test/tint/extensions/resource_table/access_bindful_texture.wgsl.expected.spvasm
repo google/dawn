@@ -10,6 +10,9 @@
                OpEntryPoint Fragment %fs "fs" %fs_loc0_Output
                OpExecutionMode %fs OriginUpperLeft
                OpName %t "t"
+               OpName %tint_resource_table "tint_resource_table"
+               OpName %tint_resource_table_0 "tint_resource_table"
+               OpName %tint_resource_table_1 "tint_resource_table"
                OpMemberName %tint_resource_table_metadata_struct_tint_explicit_layout 0 "array_length"
                OpMemberName %tint_resource_table_metadata_struct_tint_explicit_layout 1 "bindings"
                OpName %tint_resource_table_metadata_struct_tint_explicit_layout "tint_resource_table_metadata_struct_tint_explicit_layout"
@@ -23,12 +26,12 @@
                OpName %fs "fs"
                OpDecorate %t DescriptorSet 0
                OpDecorate %t Binding 0
-               OpDecorate %5 DescriptorSet 4
-               OpDecorate %5 Binding 28
-               OpDecorate %8 DescriptorSet 4
-               OpDecorate %8 Binding 28
-               OpDecorate %11 DescriptorSet 4
-               OpDecorate %11 Binding 28
+               OpDecorate %tint_resource_table DescriptorSet 4
+               OpDecorate %tint_resource_table Binding 28
+               OpDecorate %tint_resource_table_0 DescriptorSet 4
+               OpDecorate %tint_resource_table_0 Binding 28
+               OpDecorate %tint_resource_table_1 DescriptorSet 4
+               OpDecorate %tint_resource_table_1 Binding 28
                OpMemberDecorate %tint_resource_table_metadata_struct_tint_explicit_layout 0 Offset 0
                OpDecorate %_runtimearr_uint ArrayStride 4
                OpMemberDecorate %tint_resource_table_metadata_struct_tint_explicit_layout 1 Offset 4
@@ -43,14 +46,14 @@
           %t = OpVariable %_ptr_UniformConstant_3 UniformConstant
 %_runtimearr_3 = OpTypeRuntimeArray %3
 %_ptr_UniformConstant__runtimearr_3 = OpTypePointer UniformConstant %_runtimearr_3
-          %5 = OpVariable %_ptr_UniformConstant__runtimearr_3 UniformConstant
+%tint_resource_table = OpVariable %_ptr_UniformConstant__runtimearr_3 UniformConstant
 %_runtimearr_3_0 = OpTypeRuntimeArray %3
 %_ptr_UniformConstant__runtimearr_3_0 = OpTypePointer UniformConstant %_runtimearr_3_0
-          %8 = OpVariable %_ptr_UniformConstant__runtimearr_3_0 UniformConstant
+%tint_resource_table_0 = OpVariable %_ptr_UniformConstant__runtimearr_3_0 UniformConstant
          %14 = OpTypeSampler
 %_runtimearr_14 = OpTypeRuntimeArray %14
 %_ptr_UniformConstant__runtimearr_14 = OpTypePointer UniformConstant %_runtimearr_14
-         %11 = OpVariable %_ptr_UniformConstant__runtimearr_14 UniformConstant
+%tint_resource_table_1 = OpVariable %_ptr_UniformConstant__runtimearr_14 UniformConstant
        %uint = OpTypeInt 32 0
 %_runtimearr_uint = OpTypeRuntimeArray %uint
 %tint_resource_table_metadata_struct_tint_explicit_layout = OpTypeStruct %uint %_runtimearr_uint
@@ -117,7 +120,7 @@
                OpBranch %45
          %45 = OpLabel
    %item_idx = OpPhi %uint %uint_0 %46 %49 %47
-         %50 = OpAccessChain %_ptr_UniformConstant_14 %11 %item_idx
+         %50 = OpAccessChain %_ptr_UniformConstant_14 %tint_resource_table_1 %item_idx
          %52 = OpLoad %14 %50 None
          %53 = OpSampledImage %54 %26 %52
          %55 = OpImageSampleImplicitLod %v4float %53 %56 None

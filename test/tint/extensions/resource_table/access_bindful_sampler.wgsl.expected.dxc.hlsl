@@ -4,9 +4,9 @@ struct fs_outputs {
 
 
 SamplerState s : register(s0);
-Texture2D<float4> tint_resource_table_array[] : register(t28, space4);
-Texture2D tint_resource_table_array_1[] : register(t28, space6);
-SamplerState tint_resource_table_array_2[] : register(s28, space7);
+Texture2D<float4> tint_resource_table[] : register(t28, space4);
+Texture2D tint_resource_table_1[] : register(t28, space6);
+SamplerState tint_resource_table_2[] : register(s28, space7);
 ByteAddressBuffer tint_resource_table_metadata : register(t29, space5);
 float4 fs_inner() {
   bool v = false;
@@ -29,7 +29,7 @@ float4 fs_inner() {
     v_2 = (0u + tint_resource_table_metadata.Load(0u));
   }
   uint item_idx = v_2;
-  return tint_resource_table_array[item_idx].Sample(s, (0.0f).xx);
+  return tint_resource_table[item_idx].Sample(s, (0.0f).xx);
 }
 
 fs_outputs fs() {

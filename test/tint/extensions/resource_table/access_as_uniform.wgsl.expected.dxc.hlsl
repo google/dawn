@@ -2,7 +2,7 @@
 cbuffer cbuffer_index : register(b0, space1) {
   uint4 index[1];
 };
-Texture3D<float4> tint_resource_table_array[] : register(t28, space4);
+Texture3D<float4> tint_resource_table[] : register(t28, space4);
 ByteAddressBuffer tint_resource_table_metadata : register(t29, space5);
 void fs() {
   uint v = index[0u].x;
@@ -19,6 +19,6 @@ void fs() {
     v_2 = (0u + tint_resource_table_metadata.Load(0u));
   }
   uint item_idx = v_2;
-  float4 texture_load = tint_resource_table_array[item_idx].Load((int(0)).xxxx);
+  float4 texture_load = tint_resource_table[item_idx].Load((int(0)).xxxx);
 }
 
