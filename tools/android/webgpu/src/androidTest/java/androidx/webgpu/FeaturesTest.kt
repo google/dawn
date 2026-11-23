@@ -15,62 +15,112 @@
  */
 package androidx.webgpu
 
+import android.annotation.SuppressLint
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.webgpu.helper.createWebGpu
+import androidx.webgpu.helper.initLibrary
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class FeaturesTest {
-  private val dispatcher: CoroutineDispatcher = Executors.newSingleThreadExecutor { runnable ->
-    Thread(runnable, "Test-WebGPU-Thread")
-  }.asCoroutineDispatcher()
-  private val testScope = CoroutineScope(dispatcher)
-
   /**
    * Test that the features requested match the features in the adapter are present on the device.
    */
   @Test
   fun featuresTest() {
-    val requiredFeatures = intArrayOf(FeatureName.TextureCompressionASTC)
-    runBlocking {
-      val webGpu =
-        createWebGpu(
-          dispatcher = dispatcher,
-          deviceDescriptor = GPUDeviceDescriptor(
-            requiredFeatures = requiredFeatures,
-            deviceLostCallback = null,
-            deviceLostCallbackExecutor = Executor(Runnable::run),
-            uncapturedErrorCallback = null,
-            uncapturedErrorCallbackExecutor = Executor(Runnable::run)
+    Executors.newSingleThreadExecutor { runnable ->
+      Thread(runnable, "Test-WebGPU-Thread")
+    }.asCoroutineDispatcher().use { dispatcher ->
+      val testScope = CoroutineScope(dispatcher)
+      val requiredFeatures = intArrayOf(FeatureName.TextureCompressionASTC)
+      runBlocking {
+        val webGpu =
+          createWebGpu(
+            dispatcher = dispatcher,
+            deviceDescriptor = GPUDeviceDescriptor(
+              requiredFeatures = requiredFeatures,
+              deviceLostCallback = null,
+              deviceLostCallbackExecutor = Executor(Runnable::run),
+              uncapturedErrorCallback = null,
+              uncapturedErrorCallbackExecutor = Executor(Runnable::run)
+            )
           )
-        )
-      val device = webGpu.device
-      val job = testScope.launch {
-        webGpu.processEventsLoop()
-      }
-      try {
-        webGpu.execute {
-          val deviceFeatures = device.getFeatures().features
-          requiredFeatures.forEach {
-            assert(deviceFeatures.contains(it)) { "Requested feature $it available on device" }
-          }
+        val device = webGpu.device
+        val job = testScope.launch {
+          webGpu.processEventsLoop()
         }
-      } finally {
-        webGpu.close()
-        job.cancel()
-        (dispatcher as? ExecutorCoroutineDispatcher)?.close()
+        try {
+          webGpu.execute {
+            val deviceFeatures = device.getFeatures().features
+            requiredFeatures.forEach {
+              assert(deviceFeatures.contains(it)) { "Requested feature $it available on device" }
+            }
+          }
+        } finally {
+          webGpu.close()
+          job.cancel()
+        }
       }
     }
+  }
+
+  @Test
+  fun instanceFeaturesAndLimitsTest() {
+    initLibrary()
+    val instanceFeatures = GPU.getInstanceFeatures().features
+    assertTrue(instanceFeatures.isNotEmpty())
+    assertTrue(InstanceFeatureName.TimedWaitAny in instanceFeatures)
+    for (feature in instanceFeatures) {
+      assertTrue(GPU.hasInstanceFeature(feature))
+    }
+
+    val instanceLimits = GPU.getInstanceLimits()
+    // Dawn's kTimedWaitAnyMaxCountDefault is 64.
+    assertTrue(instanceLimits.timedWaitAnyMaxCount >= 64L)
+
+    val defaultInstance = GPU.createGPUInstance()
+    try {
+      assertNotEquals(0L, defaultInstance.handle)
+      defaultInstance.processEvents()
+    } finally {
+      if (defaultInstance.handle != 0L) {
+        defaultInstance.close()
+      }
+    }
+
+    val instance = GPU.createGPUInstance(
+      GPUInstanceDescriptor(
+        requiredFeatures = intArrayOf(InstanceFeatureName.TimedWaitAny),
+        requiredLimits = instanceLimits,
+      )
+    )
+    try {
+      assertNotEquals(0L, instance.handle)
+      instance.processEvents()
+    } finally {
+      if (instance.handle != 0L) {
+        instance.close()
+      }
+    }
+  }
+
+  @SuppressLint("WrongConstant")
+  @Test
+  fun hasInstanceFeatureInvalidTest() {
+    initLibrary()
+    assertFalse(GPU.hasInstanceFeature(0))
+    assertFalse(GPU.hasInstanceFeature(-1))
   }
 }

@@ -32,14 +32,16 @@ public object GPU {
         {% set main_doc = function_info.doc if function_info else "" %}
         {% set return_doc = function_info.returns_doc if function_info else "" %}
         {% set arg_docs_map = function_info.args if function_info else {} %}
-        {% set function_args = function.arguments | list %}
+        {% set function_args = kotlin_record_members(function.arguments) | list %}
         {% if check_if_doc_present(main_doc, return_doc, arg_docs_map, function_args) == 'True' %}
             {{ generate_kdoc(main_doc, return_doc, arg_docs_map, function_args , line_wrap_prefix = "\n * ") }}
 
         {%- endif %}
-        {% if function.has_default %}
-            @JvmOverloads
-        {% endif %}
+        {% for arg in function_args %}
+            {% if kotlin_default(arg) is not none %}
+                @JvmOverloads
+            {% break %}{% endif %}
+        {% endfor %}
         {% set experimental = kotlin_member_optin(function) -%}
         {% if experimental %}
             //* Requires opt-in if the function, its return type, or any argument is experimental.
@@ -50,7 +52,7 @@ public object GPU {
             @Throws({{"WebGpuException::class"}})
         {% endif %}
         {{ kotlin_annotation(_kotlin_return) if _kotlin_return else '' }} public external fun {{ kotlin_name(function) }}(
-            {%- for arg in function.arguments -%}
+            {%- for arg in function_args -%}
                 {{- kotlin_annotation(arg) }} {{ as_varName(arg.name) }}: {{ kotlin_definition(arg) }},{{' '}}
             {%- endfor %}): {{ kotlin_declaration(_kotlin_return) if _kotlin_return else 'Unit' }}
 {% endfor %}}

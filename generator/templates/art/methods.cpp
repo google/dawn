@@ -86,17 +86,18 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
 
     //*  A JNI-external method is built with the JNI signature expected to match the host Kotlin.
     //*  Object methods bind to the top-level static native on {{ kotlin_name(object) }}Kt, receiving the handle as a jlong.
+    //*  Global functions bind to instance methods on the GPU object singleton, receiving jobject.
     static {{ arg_to_jni_type(_kotlin_return) }}
     {% if object %}
         {{ kotlin_name(object) }}_native{{ method.name.CamelCase() }}
                 (JNIEnv *env, jclass clazz, jlong _handle
     {%- else %}
         {{ FunctionSuffix }}
-                (JNIEnv *env, jclass clazz
+                (JNIEnv *env, jobject obj
     {%- endif -%}
 
     //* Make the signature for each argument in turn.
-    {%- for arg in (_kotlin_args if object else method.arguments) %},
+    {%- for arg in _kotlin_args %},
         {{ 'jlong' if (unwrap_objs and arg.type.category == 'object' and not arg.length) else arg_to_jni_type(arg) }} _{{ as_varName(arg.name) }}
     {%- endfor %}) {
 
@@ -259,7 +260,7 @@ static const JNINativeMethod kGPUMethods[] = {
     {% for function in by_category['function'] if include_method(function) %}
         {% set _ret = kotlin_return(function) %}
         {const_cast<char*>("{{ kotlin_name(function) }}"),
-         const_cast<char*>("({%- for arg in function.arguments -%}{{ jni_signature(arg) }}{%- endfor -%}){{ jni_signature(_ret) if _ret else 'V' }}"),
+         const_cast<char*>("({%- for arg in kotlin_record_members(function.arguments) -%}{{ jni_signature(arg) }}{%- endfor -%}){{ jni_signature(_ret) if _ret else 'V' }}"),
          reinterpret_cast<void*>(GPU_{{ kotlin_name(function) }})},
     {% endfor %}
 };
