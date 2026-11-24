@@ -768,13 +768,12 @@ struct State {
                 // Incoming offset in terms of base array type.
                 auto* byte_idx = OffsetToValue(offset);
                 auto* incoming_offset = b.Divide(byte_idx, u32(BaseEleType()->Size()));
+                call_offset = b.InsertBitcastIfNeeded(ty.u32(), call_offset);
 
                 // Access offset adjusted to base array type.
                 TINT_IR_ASSERT(ir, BaseEleType()->Size() <= array_ty->ImplicitStride());
                 if (array_ty->ImplicitStride() != BaseEleType()->Size()) {
-                    auto* u32_offset_arg = b.InsertBitcastIfNeeded(ty.u32(), call_offset);
-                    auto* offset_bytes =
-                        b.Multiply(u32_offset_arg, u32(array_ty->ImplicitStride()));
+                    auto* offset_bytes = b.Multiply(call_offset, u32(array_ty->ImplicitStride()));
                     call_offset = b.Divide(offset_bytes, u32(BaseEleType()->Size()));
                 }
 
