@@ -340,8 +340,6 @@ _mesa_action(mesa_vk_dispatch_table
         "${_mesa_gen_dir}/src/vulkan/util/vk_dispatch_table.c"
         "--out-h"
         "${_mesa_gen_dir}/src/vulkan/util/vk_dispatch_table.h"
-        "--beta"
-        "false"
 )
 
 _mesa_action(mesa_vk_enum_to_str
@@ -360,8 +358,6 @@ _mesa_action(mesa_vk_enum_to_str
         "${_mesa_gen_dir}/src/vulkan/util/vk_enum_to_str.h"
         "--out-d"
         "${_mesa_gen_dir}/src/vulkan/util/vk_enum_defines.h"
-        "--beta"
-        "false"
 )
 
 _mesa_action(mesa_vk_struct_type_cast
@@ -373,8 +369,6 @@ _mesa_action(mesa_vk_struct_type_cast
         "${_vk_xml}"
         "--out"
         "${_mesa_gen_dir}/src/vulkan/util/vk_struct_type_cast.h"
-        "--beta"
-        "false"
 )
 
 _mesa_action(mesa_vk_extensions
@@ -409,8 +403,6 @@ _mesa_action(mesa_vk_common_entrypoints
         "${_mesa_gen_dir}/src/vulkan/runtime/vk_common_entrypoints.c"
         "--prefix"
         "vk_common"
-        "--beta"
-        "false"
 )
 
 _mesa_action(mesa_vk_cmd_queue
@@ -426,8 +418,6 @@ _mesa_action(mesa_vk_cmd_queue
         "${_mesa_gen_dir}/src/vulkan/runtime/vk_cmd_queue.c"
         "--out-h"
         "${_mesa_gen_dir}/src/vulkan/runtime/vk_cmd_queue.h"
-        "--beta"
-        "false"
 )
 
 _mesa_action(mesa_vk_cmd_enqueue_entrypoints
@@ -449,8 +439,6 @@ _mesa_action(mesa_vk_cmd_enqueue_entrypoints
         "vk_cmd_enqueue"
         "--prefix"
         "vk_cmd_enqueue_unless_primary"
-        "--beta"
-        "false"
 )
 
 _mesa_action(mesa_vk_dispatch_trampolines
@@ -466,8 +454,6 @@ _mesa_action(mesa_vk_dispatch_trampolines
         "${_mesa_gen_dir}/src/vulkan/runtime/vk_dispatch_trampolines.c"
         "--out-h"
         "${_mesa_gen_dir}/src/vulkan/runtime/vk_dispatch_trampolines.h"
-        "--beta"
-        "false"
 )
 
 _mesa_action(mesa_vk_physical_device_features
@@ -483,8 +469,6 @@ _mesa_action(mesa_vk_physical_device_features
         "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_features.c"
         "--out-h"
         "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_features.h"
-        "--beta"
-        "false"
 )
 
 _mesa_action(mesa_vk_physical_device_properties
@@ -500,8 +484,6 @@ _mesa_action(mesa_vk_physical_device_properties
         "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_properties.c"
         "--out-h"
         "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_properties.h"
-        "--beta"
-        "false"
 )
 
 _mesa_action(mesa_vk_physical_device_spirv_caps
@@ -515,8 +497,6 @@ _mesa_action(mesa_vk_physical_device_spirv_caps
         "${_vk_xml}"
         "--out-c"
         "${_mesa_gen_dir}/src/vulkan/runtime/vk_physical_device_spirv_caps.c"
-        "--beta"
-        "false"
 )
 
 _mesa_action(mesa_vk_synchronization_helpers
@@ -528,8 +508,6 @@ _mesa_action(mesa_vk_synchronization_helpers
         "${_vk_xml}"
         "--out-c"
         "${_mesa_gen_dir}/src/vulkan/runtime/vk_synchronization_helpers.c"
-        "--beta"
-        "false"
 )
 
 _mesa_action(mesa_vk_format_info
@@ -688,8 +666,6 @@ _mesa_action(mesa_wsi_entrypoints
         "${_mesa_gen_dir}/src/vulkan/wsi/wsi_common_entrypoints.c"
         "--prefix"
         "wsi"
-        "--beta"
-        "false"
 )
 
 _mesa_action(mesa_tr_util
@@ -805,8 +781,6 @@ _mesa_action(mesa_lvp_entrypoints
         "${_mesa_gen_dir}/src/gallium/frontends/lavapipe/lvp_entrypoints.c"
         "--prefix"
         "lvp"
-        "--beta"
-        "false"
 )
 
 _mesa_action(mesa_icd_json

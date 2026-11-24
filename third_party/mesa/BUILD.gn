@@ -321,8 +321,6 @@ _mesa_action("mesa_vk_dispatch_table") {
     rebase_path(outputs[0], root_build_dir),
     "--out-h",
     rebase_path(outputs[1], root_build_dir),
-    "--beta",
-    "false",
   ]
 }
 
@@ -343,8 +341,6 @@ _mesa_action("mesa_vk_enum_to_str") {
     rebase_path(outputs[1], root_build_dir),
     "--out-d",
     rebase_path(outputs[2], root_build_dir),
-    "--beta",
-    "false",
   ]
 }
 
@@ -357,8 +353,6 @@ _mesa_action("mesa_vk_struct_type_cast") {
     rebase_path(_vk_xml, root_build_dir),
     "--out",
     rebase_path(outputs[0], root_build_dir),
-    "--beta",
-    "false",
   ]
 }
 
@@ -397,8 +391,6 @@ _mesa_action("mesa_vk_common_entrypoints") {
     rebase_path(outputs[1], root_build_dir),
     "--prefix",
     "vk_common",
-    "--beta",
-    "false",
   ]
 }
 
@@ -416,8 +408,6 @@ _mesa_action("mesa_vk_cmd_queue") {
     rebase_path(outputs[0], root_build_dir),
     "--out-h",
     rebase_path(outputs[1], root_build_dir),
-    "--beta",
-    "false",
   ]
 }
 
@@ -441,8 +431,6 @@ _mesa_action("mesa_vk_cmd_enqueue_entrypoints") {
     "vk_cmd_enqueue",
     "--prefix",
     "vk_cmd_enqueue_unless_primary",
-    "--beta",
-    "false",
   ]
 }
 
@@ -460,8 +448,6 @@ _mesa_action("mesa_vk_dispatch_trampolines") {
     rebase_path(outputs[0], root_build_dir),
     "--out-h",
     rebase_path(outputs[1], root_build_dir),
-    "--beta",
-    "false",
   ]
 }
 
@@ -479,8 +465,6 @@ _mesa_action("mesa_vk_physical_device_features") {
     rebase_path(outputs[0], root_build_dir),
     "--out-h",
     rebase_path(outputs[1], root_build_dir),
-    "--beta",
-    "false",
   ]
 }
 
@@ -498,8 +482,6 @@ _mesa_action("mesa_vk_physical_device_properties") {
     rebase_path(outputs[0], root_build_dir),
     "--out-h",
     rebase_path(outputs[1], root_build_dir),
-    "--beta",
-    "false",
   ]
 }
 
@@ -514,8 +496,6 @@ _mesa_action("mesa_vk_physical_device_spirv_caps") {
     rebase_path(_vk_xml, root_build_dir),
     "--out-c",
     rebase_path(outputs[0], root_build_dir),
-    "--beta",
-    "false",
   ]
 }
 
@@ -529,8 +509,6 @@ _mesa_action("mesa_vk_synchronization_helpers") {
     rebase_path(_vk_xml, root_build_dir),
     "--out-c",
     rebase_path(outputs[0], root_build_dir),
-    "--beta",
-    "false",
   ]
 }
 
@@ -706,8 +684,6 @@ _mesa_action("mesa_wsi_entrypoints") {
     rebase_path(outputs[1], root_build_dir),
     "--prefix",
     "wsi",
-    "--beta",
-    "false",
   ]
 }
 
@@ -836,8 +812,6 @@ _mesa_action("mesa_lvp_entrypoints") {
     rebase_path(outputs[1], root_build_dir),
     "--prefix",
     "lvp",
-    "--beta",
-    "false",
   ]
 }
 
