@@ -139,7 +139,7 @@
       },
       {
         "args": [
-          "--enable-backend-validation=partial",
+          "--enable-backend-validation",
           "--use-gpu-in-tests",
           "--exclusive-device-type-preference=discrete,integrated",
           "--test-launcher-retry-limit=0",
