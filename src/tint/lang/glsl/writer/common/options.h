@@ -153,8 +153,15 @@ struct Options {
         /// `unpack4x8snorm` and `unpack4x8unorm` (crbug.com/379551588).
         bool polyfill_pack_unpack_4x8_norm = false;
 
+        /// Set to `true` to polyfill dynamic component loads on boolean vectors with constant
+        /// element extractions and a branchless scalar select chain.
+        bool polyfill_bool_vec_dynamic_load = false;
+
         /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-        TINT_REFLECT(Workarounds, hoist_constant_array_initializers, polyfill_pack_unpack_4x8_norm);
+        TINT_REFLECT(Workarounds,
+                     hoist_constant_array_initializers,
+                     polyfill_pack_unpack_4x8_norm,
+                     polyfill_bool_vec_dynamic_load);
         TINT_REFLECT_HASH_CODE(Workarounds);
 
         bool operator==(const Workarounds&) const = default;

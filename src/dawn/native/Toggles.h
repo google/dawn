@@ -233,6 +233,7 @@ enum class Toggle {
     GLDefer,
     DisableTransientAttachment,
     AutoMapBackendBuffer,
+    PolyfillBoolVecDynamicLoad,
     PolyfillBoolVecDynamicStore,
     VulkanRelaxMaxInterStageShaderVariables,
     Limit3DTexturePotFootprintTo4GB,

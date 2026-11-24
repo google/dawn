@@ -54,6 +54,7 @@ struct FuzzedOptions {
     bool has_gl_ext_conservative_depth;
     bool hoist_constant_array_initializers;
     bool polyfill_pack_unpack_4x8_norm;
+    bool polyfill_bool_vec_dynamic_load;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(FuzzedOptions,
@@ -67,7 +68,8 @@ struct FuzzedOptions {
                  substitute_overrides_config,
                  has_gl_ext_conservative_depth,
                  hoist_constant_array_initializers,
-                 polyfill_pack_unpack_4x8_norm);
+                 polyfill_pack_unpack_4x8_norm,
+                 polyfill_bool_vec_dynamic_load);
     TINT_REFLECT_HASH_CODE(FuzzedOptions);
 };
 
@@ -115,6 +117,8 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
         fuzzed_options.hoist_constant_array_initializers;
     options.workarounds.polyfill_pack_unpack_4x8_norm =
         fuzzed_options.polyfill_pack_unpack_4x8_norm;
+    options.workarounds.polyfill_bool_vec_dynamic_load =
+        fuzzed_options.polyfill_bool_vec_dynamic_load;
 
     options.version = Version(Version::Standard::kES, 3, 1);
 

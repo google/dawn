@@ -1095,6 +1095,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
 #endif
         // crbug.com/469328925
         deviceToggles->Default(Toggle::VulkanSampleCompare2DWorkaround, true);
+
+        // crbug.com/587337006: Qualcomm's shader compiler fails on some dynamically indexed reads
+        // of boolean vectors.
+        // TODO(crbug.com/587337006): Gate this on driver version once a fixed driver is available.
+        deviceToggles->Default(Toggle::PolyfillBoolVecDynamicLoad, true);
     }
 
     if (MayBeImaginationProprietary()) {

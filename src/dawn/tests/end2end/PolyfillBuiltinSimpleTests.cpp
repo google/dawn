@@ -520,6 +520,58 @@ TEST_P(PolyfillBuiltinSimpleTests, BoolVectorDynamicIndexStore) {
     EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), outputBuffer, 0, 3);
 }
 
+// Regression test for crbug.com/587337006.
+TEST_P(PolyfillBuiltinSimpleTests, BoolVectorDynamicIndexLoad) {
+    // TODO(crbug.com/588514168): These drivers return wrong values for dynamically indexed reads of
+    // boolean vectors and don't enable the polyfill by default yet.
+    DAWN_SUPPRESS_TEST_IF((IsMetal() || IsWebGPUOn(wgpu::BackendType::Metal)) && IsIntel());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && (IsIntel() || IsNvidia()));
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && ((IsWindows() && IsIntel()) || IsImgTec()));
+
+    std::string shader = R"(
+        @group(0) @binding(0) var<storage, read> input : array<u32, 3>;
+        @group(0) @binding(1) var<storage, read_write> output : array<u32, 4>;
+
+        @compute @workgroup_size(3) fn main(@builtin(local_invocation_index) lane : u32) {
+            let i = firstTrailingBit(-65537);
+            let v = vec3(input[0] == 0u);
+            let splatIndexed = !(vec3(all(v))[i]);
+
+            let runtimeIndexed = vec3<bool>(true, false, true)[input[lane]];
+
+            output[lane] = select(0u, 1u, runtimeIndexed);
+            if (lane == 0u) {
+                output[3] = select(0u, 1u, splatIndexed);
+            }
+        }
+    )";
+
+    wgpu::ComputePipeline pipeline = CreateComputePipeline(shader.c_str(), "main");
+
+    // input[lane] selects lane 2, 1, 0 of <true, false, true>. input[0] != 0 so v is all false.
+    std::vector<uint32_t> inputData = {2u, 1u, 0u};
+    wgpu::Buffer inputBuffer = CreateBuffer(inputData, wgpu::BufferUsage::Storage);
+    wgpu::Buffer outputBuffer = CreateBuffer(4);
+
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {{0, inputBuffer}, {1, outputBuffer}});
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+        commands = encoder.Finish();
+    }
+    queue.Submit(1, &commands);
+
+    std::vector<uint32_t> expected = {1u, 0u, 1u, 1u};
+    EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), outputBuffer, 0, 4);
+}
+
 DAWN_INSTANTIATE_TEST(PolyfillBuiltinSimpleTests,
                       D3D12Backend(),
                       D3D11Backend(),
@@ -530,11 +582,13 @@ DAWN_INSTANTIATE_TEST(PolyfillBuiltinSimpleTests,
                       MetalBackend({"scalarize_max_min_clamp"}),
                       MetalBackend({"polyfill_bool_vec_dynamic_store"}),
                       VulkanBackend({"scalarize_max_min_clamp"}),
+                      VulkanBackend({"polyfill_bool_vec_dynamic_load"}),
                       VulkanBackend({"polyfill_bool_vec_dynamic_store"}),
                       VulkanBackend({"vulkan_polyfill_switch_with_if"}),
                       VulkanBackend({"spirv_polyfill_float_negation", "spirv_polyfill_float_abs"}),
                       D3D11Backend({"scalarize_max_min_clamp"}),
-                      OpenGLESBackend());
+                      OpenGLESBackend(),
+                      OpenGLESBackend({"polyfill_bool_vec_dynamic_load"}));
 
 }  // anonymous namespace
 }  // namespace dawn

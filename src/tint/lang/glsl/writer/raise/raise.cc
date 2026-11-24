@@ -41,6 +41,7 @@
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/direct_variable_access.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
+#include "src/tint/lang/core/ir/transform/polyfill_bool_vector_dynamic_loads.h"
 #include "src/tint/lang/core/ir/transform/prepare_immediate_data.h"
 #include "src/tint/lang/core/ir/transform/preserve_padding.h"
 #include "src/tint/lang/core/ir/transform/prevent_infinite_loops.h"
@@ -233,6 +234,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     // DemoteToHelper must come before any transform that introduces non-core instructions.
     TINT_CHECK_RESULT(core::ir::transform::DemoteToHelper(module));
+
+    // PolyfillBoolVectorDynamicLoads must come after Robustness, so the select chain uses the
+    // clamped index, and before BuiltinPolyfill.
+    if (options.workarounds.polyfill_bool_vec_dynamic_load) {
+        TINT_CHECK_RESULT(core::ir::transform::PolyfillBoolVectorDynamicLoads(module));
+    }
 
     TINT_CHECK_RESULT(raise::BinaryPolyfill(module));
     // Must come after zero-init as it will add builtins

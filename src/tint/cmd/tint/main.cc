@@ -152,6 +152,7 @@ struct Options {
 
     bool rename_all = false;
     bool enable_robustness = true;
+    bool polyfill_bool_vec_dynamic_load = false;
 
     bool dump_ir = false;
     bool enable_ir_validation_asserts = true;
@@ -350,6 +351,12 @@ If not provided, will be inferred from input filename extension:
 
     auto& rename_all = options.Add<BoolOption>("rename-all", "Renames all symbols", Default{false});
     TINT_DEFER(opts->rename_all = *rename_all.value);
+
+    auto& polyfill_bool_vec_dynamic_load = options.Add<BoolOption>(
+        "polyfill-bool-vec-dynamic-load",
+        "Polyfill dynamically indexed reads of boolean vectors (SPIR-V and GLSL only)",
+        Default{false});
+    TINT_DEFER(opts->polyfill_bool_vec_dynamic_load = *polyfill_bool_vec_dynamic_load.value);
 
 #if TINT_BUILD_WGSL_WRITER
     auto& minify = options.Add<BoolOption>("minify", "Minify the output WGSL", Default{false});
@@ -1137,6 +1144,7 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.extensions.use_storage_input_output_16 = options.use_storage_input_output_16;
     gen_options.spirv_version = options.spirv_version;
+    gen_options.workarounds.polyfill_bool_vec_dynamic_load = options.polyfill_bool_vec_dynamic_load;
 
     auto entry_point = inspector.GetEntryPoint(options.ep_name);
 
@@ -1580,6 +1588,7 @@ tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::cor
     gen_options.entry_point_name = options.ep_name;
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.has_gl_ext_conservative_depth = options.glsl_has_conservative_depth;
+    gen_options.workarounds.polyfill_bool_vec_dynamic_load = options.polyfill_bool_vec_dynamic_load;
 
     // Run SubstituteOverrides to replace override instructions with constants.
     // This needs to run after SingleEntryPoint which removes unused overrides.

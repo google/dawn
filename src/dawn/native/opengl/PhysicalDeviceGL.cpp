@@ -538,6 +538,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // is the default WebGPU compat adapter on Android 10/11 Mali devices.
     deviceToggles->Default(Toggle::PolyfillPackUnpack4x8Norm, gpu_info::IsARM(mVendorId));
 
+    // crbug.com/587337006: Qualcomm's shader compiler fails on some dynamically indexed reads of
+    // boolean vectors.
+    // TODO(crbug.com/587337006): Gate this on driver version once a fixed driver is available.
+    deviceToggles->Default(Toggle::PolyfillBoolVecDynamicLoad, gpu_info::IsQualcommPCI(mVendorId));
+
     // Enable the integer range analysis for shader robustness by default if the corresponding
     // platform feature is enabled.
     deviceToggles->Default(

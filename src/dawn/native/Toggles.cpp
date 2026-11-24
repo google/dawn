@@ -968,6 +968,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Backend will automatically map the buffer when it's not in use by GPU, to allow "
       "front-end's MapAsync and Unmap calls to become cheap without acquiring any lock internally.",
       "https://crbug.com/dawn/481158754", ToggleStage::Device}},
+    {Toggle::PolyfillBoolVecDynamicLoad,
+     {"polyfill_bool_vec_dynamic_load",
+      "Work around a driver bug on some Qualcomm GPUs where dynamic component loads on "
+      "boolean vectors fail.",
+      "https://crbug.com/587337006", ToggleStage::Device}},
     {Toggle::PolyfillBoolVecDynamicStore,
      {"polyfill_bool_vec_dynamic_store",
       "Workaround a driver bug on some Intel GPUs where dynamic component stores on "

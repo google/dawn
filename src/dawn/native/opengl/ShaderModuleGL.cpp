@@ -435,6 +435,8 @@ ResultOrUnknownError<std::string> ShaderModule::CompileShader(
         GetDevice()->IsToggleEnabled(Toggle::GLHoistConstantArrayInitializers);
     req.tintOptions.workarounds.polyfill_pack_unpack_4x8_norm =
         GetDevice()->IsToggleEnabled(Toggle::PolyfillPackUnpack4x8Norm);
+    req.tintOptions.workarounds.polyfill_bool_vec_dynamic_load =
+        GetDevice()->IsToggleEnabled(Toggle::PolyfillBoolVecDynamicLoad);
 
     // If the size or alignment of the vertex and fragment stage immediate variables differ (e.g.,
     // the vertex shader immediates contain a vec4 and the fragment shader do not), the generated

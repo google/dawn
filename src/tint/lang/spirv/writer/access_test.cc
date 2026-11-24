@@ -545,6 +545,37 @@ TEST_F(SpirvWriterTest, StoreVectorElement_DynamicIndex_Bool_Polyfill) {
 )");
 }
 
+TEST_F(SpirvWriterTest, Access_Vector_Value_DynamicIndex_Bool_Polyfill) {
+    auto* vec = b.FunctionParam("vec", ty.vec3<bool>());
+    auto* idx = b.FunctionParam("idx", ty.u32());
+    auto* func = b.Function("foo", ty.bool_());
+    func->SetParams({vec, idx});
+    b.Append(func->Block(), [&] { b.Return(func, b.Access(ty.bool_(), vec, idx)); });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.vec3<bool>()), 0_u);
+        b.Return(eb);
+    });
+
+    Options options;
+    options.workarounds.polyfill_bool_vec_dynamic_load = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_THAT(output_, testing::Not(testing::HasSubstr("OpVectorExtractDynamic")));
+    EXPECT_INST(R"(
+          %9 = OpExtInst %uint %10 UMin %idx %uint_2
+         %12 = OpCompositeExtract %bool %vec 0
+         %13 = OpCompositeExtract %bool %vec 1
+         %14 = OpIEqual %bool %9 %uint_1
+         %16 = OpSelect %bool %14 %13 %12
+         %17 = OpCompositeExtract %bool %vec 2
+         %18 = OpIEqual %bool %9 %uint_2
+         %19 = OpSelect %bool %18 %17 %16
+               OpReturnValue %19
+)");
+}
+
 TEST_F(SpirvWriterTest, Access_Array_Value_ConstantOOBIndex_NoRobustness) {
     auto* arr_val = b.FunctionParam("arr", ty.array(ty.i32(), 4));
     auto* func = b.Function("foo", ty.i32());

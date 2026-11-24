@@ -1,0 +1,59 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 36
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %main_num_workgroups_Input
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main_num_workgroups_Input "main_num_workgroups_Input"
+               OpName %main_inner "main_inner"
+               OpName %n "n"
+               OpName %i "i"
+               OpName %v "v"
+               OpName %b "b"
+               OpName %main "main"
+               OpDecorate %main_num_workgroups_Input BuiltIn NumWorkgroups
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%main_num_workgroups_Input = OpVariable %_ptr_Input_v3uint Input
+       %void = OpTypeVoid
+          %8 = OpTypeFunction %void %v3uint
+        %int = OpTypeInt 32 1
+          %i = OpConstant %int 0
+       %bool = OpTypeBool
+     %v3bool = OpTypeVector %bool 3
+       %true = OpConstantTrue %bool
+          %v = OpConstantComposite %v3bool %true %true %true
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+         %32 = OpTypeFunction %void
+ %main_inner = OpFunction %void None %8
+          %n = OpFunctionParameter %v3uint
+          %9 = OpLabel
+         %16 = OpAll %bool %v
+         %17 = OpCompositeConstruct %v3bool %16 %16 %16
+         %18 = OpBitcast %uint %i
+         %19 = OpCompositeExtract %bool %17 0
+         %20 = OpCompositeExtract %bool %17 1
+         %21 = OpIEqual %bool %18 %uint_1
+         %23 = OpSelect %bool %21 %20 %19
+         %24 = OpCompositeExtract %bool %17 2
+         %25 = OpIEqual %bool %18 %uint_2
+         %27 = OpSelect %bool %25 %24 %23
+          %b = OpLogicalNot %bool %27
+               OpSelectionMerge %30 None
+               OpSwitch %i %29
+         %29 = OpLabel
+               OpBranch %30
+         %30 = OpLabel
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %32
+         %33 = OpLabel
+         %34 = OpLoad %v3uint %main_num_workgroups_Input None
+         %35 = OpFunctionCall %void %main_inner %34
+               OpReturn
+               OpFunctionEnd

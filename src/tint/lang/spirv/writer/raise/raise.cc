@@ -41,6 +41,7 @@
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/direct_variable_access.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
+#include "src/tint/lang/core/ir/transform/polyfill_bool_vector_dynamic_loads.h"
 #include "src/tint/lang/core/ir/transform/polyfill_bool_vector_dynamic_stores.h"
 #include "src/tint/lang/core/ir/transform/prepare_immediate_data.h"
 #include "src/tint/lang/core/ir/transform/preserve_padding.h"
@@ -212,6 +213,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     if (options.workarounds.collapse_subgroup_min_max) {
         TINT_CHECK_RESULT(core::ir::transform::CollapseSubgroupMinMax(module));
+    }
+
+    // PolyfillBoolVectorDynamicLoads must come after Robustness, so the select chain uses the
+    // clamped index, and before BuiltinPolyfill.
+    if (options.workarounds.polyfill_bool_vec_dynamic_load) {
+        TINT_CHECK_RESULT(core::ir::transform::PolyfillBoolVectorDynamicLoads(module));
     }
 
     if (options.workarounds.polyfill_bool_vec_dynamic_store) {

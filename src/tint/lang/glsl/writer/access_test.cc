@@ -2683,5 +2683,33 @@ TEST_F(GlslWriterTest, AccessRuntimeArray_ConstantNegativeIndex_NoRobustness) {
     EXPECT_THAT(output_.glsl, testing::HasSubstr("sb.a[0u]"));
 }
 
+TEST_F(GlslWriterTest, AccessVector_DynamicIndex_Bool_Polyfill) {
+    auto* vec = b.FunctionParam("vec", ty.vec2<bool>());
+    auto* idx = b.FunctionParam("idx", ty.u32());
+    auto* func = b.Function("foo", ty.bool_());
+    func->SetParams({vec, idx});
+    b.Append(func->Block(), [&] { b.Return(func, b.Access(ty.bool_(), vec, idx)); });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.vec2<bool>()), 0_u);
+        b.Return(eb);
+    });
+
+    Options options;
+    options.workarounds.polyfill_bool_vec_dynamic_load = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure().reason << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+bool foo(bvec2 vec, uint idx) {
+  return mix(vec.x, vec.y, (min(idx, 1u) == 1u));
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  foo(bvec2(false), 0u);
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

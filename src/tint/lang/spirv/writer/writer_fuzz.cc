@@ -92,6 +92,7 @@ struct FuzzedOptions {
     bool polyfill_bool_vec_dynamic_store;
     bool disable_uniform_runtime_sized_array_index_clamping;
     bool scalarize_clip_distances;
+    bool polyfill_bool_vec_dynamic_load;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(FuzzedOptions,
@@ -133,7 +134,8 @@ struct FuzzedOptions {
                  replace_unsigned_compare_zero,
                  polyfill_bool_vec_dynamic_store,
                  disable_uniform_runtime_sized_array_index_clamping,
-                 scalarize_clip_distances);
+                 scalarize_clip_distances,
+                 polyfill_bool_vec_dynamic_load);
     TINT_REFLECT_HASH_CODE(FuzzedOptions);
 };
 
@@ -406,6 +408,8 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
         fuzzed_options.replace_workgroup_atomic_store_with_exchange;
     options.workarounds.replace_unsigned_compare_zero =
         fuzzed_options.replace_unsigned_compare_zero;
+    options.workarounds.polyfill_bool_vec_dynamic_load =
+        fuzzed_options.polyfill_bool_vec_dynamic_load;
     options.workarounds.polyfill_bool_vec_dynamic_store =
         fuzzed_options.polyfill_bool_vec_dynamic_store;
     options.workarounds.scalarize_clip_distances = fuzzed_options.scalarize_clip_distances;

@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+using namespace metal;
+
+void main_inner(uint3 n) {
+  int const i = 0;
+  bool3 const v = bool3(true);
+  bool const b = !(bool3(all(v))[i]);
+  switch(i) {
+    default:
+    {
+      break;
+    }
+  }
+}
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void v_1(uint3 n [[threadgroups_per_grid]]) {
+  (main_inner(n));
+}

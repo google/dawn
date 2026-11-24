@@ -150,6 +150,10 @@ struct Options {
         /// comparisons against one.
         bool replace_unsigned_compare_zero = false;
 
+        /// Set to `true` to polyfill dynamic component loads on boolean vectors with constant
+        /// element extractions and a branchless scalar select chain.
+        bool polyfill_bool_vec_dynamic_load = false;
+
         /// Set to `true` to polyfill dynamic component stores on boolean vectors with a branchless
         /// select-based whole vector write operation.
         bool polyfill_bool_vec_dynamic_store = false;
@@ -176,6 +180,7 @@ struct Options {
                      collapse_subgroup_min_max,
                      replace_workgroup_atomic_store_with_exchange,
                      replace_unsigned_compare_zero,
+                     polyfill_bool_vec_dynamic_load,
                      polyfill_bool_vec_dynamic_store,
                      scalarize_clip_distances);
     };

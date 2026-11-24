@@ -361,6 +361,8 @@ ResultOrUnknownError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpi
         GetDevice()->IsToggleEnabled(Toggle::VulkanReplaceWorkgroupAtomicStoreWithExchange);
     req.tintOptions.workarounds.replace_unsigned_compare_zero =
         GetDevice()->IsToggleEnabled(Toggle::VulkanReplaceUnsignedCompareZero);
+    req.tintOptions.workarounds.polyfill_bool_vec_dynamic_load =
+        GetDevice()->IsToggleEnabled(Toggle::PolyfillBoolVecDynamicLoad);
     req.tintOptions.workarounds.polyfill_bool_vec_dynamic_store =
         GetDevice()->IsToggleEnabled(Toggle::PolyfillBoolVecDynamicStore);
 
