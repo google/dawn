@@ -102,6 +102,7 @@
 auto-save-list
 tramp
 .\#*
+.dir-locals.el
 
 ### Linux ###
 .fuse_hidden*
