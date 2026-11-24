@@ -107,6 +107,30 @@ class AdapterCreationTest : public TestWithParam<wgpu::CallbackMode> {
         }
     }
 
+    void ExpectDefaultAdapter() {
+        wgpu::RequestAdapterOptions options = {};
+
+        wgpu::Adapter adapter;
+        if (anyAdapterAvailable) {
+            EXPECT_CALL(mMockCb, Call(wgpu::RequestAdapterStatus::Success, _, EmptySizedString()))
+                .WillOnce(WithArg<1>([&](wgpu::Adapter result) { adapter = std::move(result); }));
+        } else {
+            EXPECT_CALL(mMockCb, Call(wgpu::RequestAdapterStatus::Unavailable, IsNull(), _))
+                .WillOnce(WithArg<1>([&](wgpu::Adapter result) { adapter = std::move(result); }));
+        }
+        RequestAdapter(instance, &options);
+
+        EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
+        // A GPU is ranked ahead of CPU adapters, so it is the default whenever one exists.
+        if (adapter != nullptr && (discreteGPUAvailable || integratedGPUAvailable)) {
+            wgpu::AdapterInfo info;
+            adapter.GetInfo(&info);
+
+            EXPECT_NE(info.adapterType, wgpu::AdapterType::CPU);
+            EXPECT_FALSE(gpu_info::IsGoogleSwiftshader(info.vendorID, info.deviceID));
+        }
+    }
+
     void ExpectFallbackAdapter() {
         wgpu::RequestAdapterOptions options = {};
         options.forceFallbackAdapter = true;
@@ -182,24 +206,19 @@ TEST_P(AdapterCreationTest, FallbackAdapter) {
 // Test that requesting the fallback adapter returns SwiftShader or nothing after an earlier
 // default request on the same instance has populated the backend's physical device cache.
 TEST_P(AdapterCreationTest, FallbackAdapterAfterDefaultAdapter) {
-    {
-        wgpu::RequestAdapterOptions options = {};
-        wgpu::Adapter defaultAdapter;
-        if (anyAdapterAvailable) {
-            EXPECT_CALL(mMockCb, Call(wgpu::RequestAdapterStatus::Success, _, EmptySizedString()))
-                .WillOnce(
-                    WithArg<1>([&](wgpu::Adapter result) { defaultAdapter = std::move(result); }));
-        } else {
-            EXPECT_CALL(mMockCb, Call(wgpu::RequestAdapterStatus::Unavailable, IsNull(), _))
-                .WillOnce(
-                    WithArg<1>([&](wgpu::Adapter result) { defaultAdapter = std::move(result); }));
-        }
-        RequestAdapter(instance, &options);
-        EXPECT_EQ(defaultAdapter != nullptr, anyAdapterAvailable);
-        testing::Mock::VerifyAndClearExpectations(&mMockCb);
-    }
+    ExpectDefaultAdapter();
+    testing::Mock::VerifyAndClearExpectations(&mMockCb);
 
     ExpectFallbackAdapter();
+}
+
+// Test that requesting the default adapter still returns a GPU when one is available after an
+// earlier fallback request on the same instance has populated the backend's physical device cache.
+TEST_P(AdapterCreationTest, DefaultAdapterAfterFallbackAdapter) {
+    ExpectFallbackAdapter();
+    testing::Mock::VerifyAndClearExpectations(&mMockCb);
+
+    ExpectDefaultAdapter();
 }
 
 // Test that requesting a high performance GPU works
