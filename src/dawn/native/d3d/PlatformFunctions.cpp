@@ -30,34 +30,9 @@
 #include <comdef.h>
 #include <versionhelpers.h>
 
-#include <vector>
-
 #include "src/dawn/common/SystemUtils.h"
-#include "src/utils/compiler.h"
-#include "src/utils/numeric.h"
 
 namespace dawn::native::d3d {
-
-namespace {
-// Referenced from base/win/registry.cc in Chromium
-uint64_t ReadFromSZRegistryKey(HKEY registerKey, const char* registerKeyName) {
-    DWORD valueType;
-    DWORD returnSize;
-    if (RegQueryValueExA(registerKey, registerKeyName, nullptr, &valueType, nullptr, &returnSize) !=
-        ERROR_SUCCESS) {
-        return 0;
-    }
-    std::vector<char> returnStringValue(returnSize);
-    auto hr = RegQueryValueExA(registerKey, registerKeyName, nullptr, &valueType,
-                               reinterpret_cast<LPBYTE>(returnStringValue.data()), &returnSize);
-    if (hr != ERROR_SUCCESS || valueType != REG_SZ) {
-        return 0;
-    }
-    constexpr int32_t kRadix = 10;
-    return DAWN_UNSAFE_TODO(sign_cast(strtol(returnStringValue.data(), nullptr, kRadix)));
-}
-
-}  // anonymous namespace
 
 PlatformFunctions::PlatformFunctions() : mCurrentBuildNumber(0) {}
 
@@ -129,19 +104,7 @@ void PlatformFunctions::InitWindowsVersion() {
         return;
     }
 
-    // Referenced from base/win/windows_version.cc in Chromium
-    constexpr wchar_t kRegKeyWindowsNTCurrentVersion[] =
-        L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion";
-
-    HKEY hKey;
-    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, kRegKeyWindowsNTCurrentVersion, 0, KEY_QUERY_VALUE,
-                      &hKey) != ERROR_SUCCESS) {
-        return;
-    }
-
-    mCurrentBuildNumber = ReadFromSZRegistryKey(hKey, "CurrentBuildNumber");
-
-    RegCloseKey(hKey);
+    mCurrentBuildNumber = GetCurrentWindowsVersion().buildNumber;
 #endif  // !DAWN_PLATFORM_IS(WINUWP)
 }
 

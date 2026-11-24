@@ -28,13 +28,14 @@
 #include "src/dawn/common/SystemUtils.h"
 
 #include "src/utils/assert.h"
-#include "src/utils/compiler.h"
 #include "src/utils/log.h"
 #include "src/utils/numeric.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
 #include "src/utils/windows_with_undefs.h"
 
+#include <charconv>
+#include <memory>
 #include <vector>
 #elif DAWN_PLATFORM_IS(LINUX)
 #include <dlfcn.h>
@@ -245,7 +246,8 @@ WindowsVersion GetCurrentWindowsVersion() {
         DWORD valueType;
         DWORD returnSize;
         if (RegQueryValueExA(registerKey, registerKeyName, nullptr, &valueType, nullptr,
-                             &returnSize) != ERROR_SUCCESS) {
+                             &returnSize) != ERROR_SUCCESS ||
+            returnSize == 0) {
             return 0;
         }
         std::vector<char> returnStringValue(returnSize);
@@ -254,9 +256,10 @@ WindowsVersion GetCurrentWindowsVersion() {
         if (hr != ERROR_SUCCESS || valueType != REG_SZ) {
             return 0;
         }
-        constexpr int32_t kRadix = 10;
-        return static_cast<uint32_t>(
-            DAWN_UNSAFE_TODO(strtol(returnStringValue.data(), nullptr, kRadix)));
+        uint32_t value = 0;
+        std::from_chars(std::to_address(returnStringValue.begin()),
+                        std::to_address(returnStringValue.end()), value);
+        return value;
     };
 
     constexpr wchar_t kRegKeyWindowsNTCurrentVersion[] =
