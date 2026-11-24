@@ -86,22 +86,33 @@ ResultOrUnknownError<Extent3D> ComputePipeline::InitializeImpl() {
                     ToBackend(programmableStage.module)
                         ->Compile(programmableStage, SingleShaderStage::Compute,
                                   ToBackend(GetLayout()), compileFlags, GetImmediateMask()));
-    {
-        TRACE_EVENT(DAWN_TRACE_CATEGORY(), "ComputePipelineD3D11::CreateComputeShader");
-        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "D3D11.CreateComputeShaderUs");
-        DAWN_TRY_ASSIGN(mComputeShader, device->GetOrCreateComputeShader(compiledShader));
+    Extent3D workgroupSize = compiledShader.workgroupSize;
+    mComputeShaderFuture = device->GetOrCreateComputeShader(std::move(compiledShader), GetLabel());
+    if (!device->IsToggleEnabled(Toggle::BackendPipelineDeferredCreation)) {
+        DAWN_TRY(EnsureShadersCreated());
+    } else {
+        SetLabelImpl();
     }
 
-    SetLabelImpl();
-
-    return {compiledShader.workgroupSize};
+    return {workgroupSize};
 }
 
 void ComputePipeline::SetLabelImpl() {
     SetDebugName(ToBackend(GetDevice()), mComputeShader.Get(), "Dawn_ComputePipeline", GetLabel());
 }
 
+MaybeError ComputePipeline::EnsureShadersCreated() {
+    if (!mComputeShader) {
+        DAWN_TRY_ASSIGN(mComputeShader, mComputeShaderFuture->TryGet());
+        SetLabelImpl();
+    }
+
+    return {};
+}
+
 void ComputePipeline::ApplyNow(PipelineStateTracker* tracker) {
+    DAWN_CHECK(mComputeShader);
+
     tracker->CSSetShader(mComputeShader.Get());
 }
 
@@ -109,8 +120,10 @@ bool ComputePipeline::UsesNumWorkgroups() const {
     return GetStage(SingleShaderStage::Compute).metadata->usesNumWorkgroups;
 }
 
-ID3D11ComputeShader* ComputePipeline::GetD3D11ComputeShaderForTesting() {
-    return mComputeShader.Get();
+ComPtr<ID3D11ComputeShader> ComputePipeline::GetD3D11ComputeShaderForTesting() {
+    ResultOrError<ComPtr<ID3D11ComputeShader>> result = mComputeShaderFuture->TryGet();
+    DAWN_ASSERT(result.IsSuccess());
+    return result.AcquireSuccess();
 }
 
 }  // namespace dawn::native::d3d11

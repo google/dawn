@@ -380,6 +380,8 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     deviceToggles->Default(
         Toggle::EnableIntegerRangeAnalysisInRobustness,
         platform->IsFeatureEnabled(platform::Features::kWebGPUEnableRangeAnalysisForRobustness));
+
+    deviceToggles->Default(Toggle::BackendPipelineDeferredCreation, true);
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(

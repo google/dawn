@@ -419,6 +419,12 @@ void RenderPassEncoder::APIExecuteBundles(Span<RenderBundleBase* const> renderBu
                 bundles[i] = renderBundles[i];
 
                 mUsageTracker.MergeResourceUsages(bundle->GetResourceUsage());
+                if (GetDevice()->IsToggleEnabled(Toggle::BackendPipelineDeferredCreation)) {
+                    for (RenderPipelineBase* pipeline :
+                         bundle->GetResourceUsage().referencedRenderPipelines) {
+                        mUsageTracker.AddReferencedRenderPipeline(pipeline);
+                    }
+                }
                 if (bundle->GetResourceUsage().usesFramebufferFetch) {
                     mUsageTracker.MarkFramebufferFetchUsed();
                 }

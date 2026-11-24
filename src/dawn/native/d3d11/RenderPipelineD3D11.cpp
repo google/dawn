@@ -268,11 +268,34 @@ MaybeUnknownError RenderPipeline::InitializeImpl() {
                     "slots because the pipeline uses %u UAVs",
                     colorAttachments, startUAVIndex, usedUAVs);
 
-    SetLabelImpl();
+    if (!GetDevice()->IsToggleEnabled(Toggle::BackendPipelineDeferredCreation)) {
+        DAWN_TRY(EnsureShadersCreated());
+    } else {
+        SetLabelImpl();
+    }
     return {};
 }
 
 RenderPipeline::~RenderPipeline() = default;
+
+MaybeError RenderPipeline::EnsureShadersCreated() {
+    bool updated = false;
+    if (!mVertexShader) {
+        DAWN_TRY_ASSIGN(mVertexShader, mVertexShaderFuture->TryGet());
+        updated = true;
+    }
+
+    if (mPixelShaderFuture && !mPixelShader) {
+        DAWN_TRY_ASSIGN(mPixelShader, mPixelShaderFuture->TryGet());
+        updated = true;
+    }
+
+    if (updated) {
+        SetLabelImpl();
+    }
+
+    return {};
+}
 
 void RenderPipeline::ApplyNow(PipelineStateTracker* tracker,
                               const std::array<float, 4>& blendColor,
@@ -280,6 +303,10 @@ void RenderPipeline::ApplyNow(PipelineStateTracker* tracker,
     tracker->IASetPrimitiveTopology(mD3DPrimitiveTopology);
     tracker->IASetInputLayout(mInputLayout.Get());
     tracker->RSSetState(mRasterizerState.Get());
+
+    DAWN_CHECK(mVertexShader);
+    DAWN_CHECK(!mPixelShaderFuture || mPixelShader);
+
     tracker->VSSetShader(mVertexShader.Get());
     tracker->PSSetShader(mPixelShader.Get());
 
@@ -491,14 +518,11 @@ MaybeError RenderPipeline::InitializeShaders() {
                           compileFlags | additionalCompileFlags, GetImmediateMask(),
                           usedInterstageVariables, {}, std::move(snorm10_10_10_2_locations)));
         const Blob& shaderBlob = compiledShader[SingleShaderStage::Vertex].shaderBlob;
-        {
-            TRACE_EVENT(DAWN_TRACE_CATEGORY(), "RenderPipelineD3D11::CreateVertexShader");
-            SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "D3D11.CreateVertexShaderUs");
 
-            DAWN_TRY_ASSIGN(mVertexShader, device->GetOrCreateVertexShader(
-                                               compiledShader[SingleShaderStage::Vertex]));
-        }
         DAWN_TRY(InitializeInputLayout(shaderBlob));
+
+        mVertexShaderFuture = device->GetOrCreateVertexShader(
+            std::move(compiledShader[SingleShaderStage::Vertex]), GetLabel());
     }
 
     std::optional<tint::hlsl::writer::PixelLocalOptions> pixelLocalOptions;
@@ -561,23 +585,23 @@ MaybeError RenderPipeline::InitializeShaders() {
                 ->Compile(programmableStage, SingleShaderStage::Fragment, ToBackend(GetLayout()),
                           compileFlags | additionalCompileFlags, GetImmediateMask(),
                           usedInterstageVariables, pixelLocalOptions));
-        {
-            TRACE_EVENT(DAWN_TRACE_CATEGORY(), "RenderPipelineD3D11::CreatePixelShader");
-            SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "D3D11.CreatePixelShaderUs");
-            DAWN_TRY_ASSIGN(mPixelShader, device->GetOrCreatePixelShader(
-                                              compiledShader[SingleShaderStage::Fragment]));
-        }
+        mPixelShaderFuture = device->GetOrCreatePixelShader(
+            std::move(compiledShader[SingleShaderStage::Fragment]), GetLabel());
     }
 
     return {};
 }
 
-ID3D11VertexShader* RenderPipeline::GetD3D11VertexShaderForTesting() {
-    return mVertexShader.Get();
+ComPtr<ID3D11VertexShader> RenderPipeline::GetD3D11VertexShaderForTesting() {
+    ResultOrError<ComPtr<ID3D11VertexShader>> result = mVertexShaderFuture->TryGet();
+    DAWN_ASSERT(result.IsSuccess());
+    return result.AcquireSuccess();
 }
 
-ID3D11PixelShader* RenderPipeline::GetD3D11PixelShaderForTesting() {
-    return mPixelShader.Get();
+ComPtr<ID3D11PixelShader> RenderPipeline::GetD3D11PixelShaderForTesting() {
+    ResultOrError<ComPtr<ID3D11PixelShader>> result = mPixelShaderFuture->TryGet();
+    DAWN_ASSERT(result.IsSuccess());
+    return result.AcquireSuccess();
 }
 
 }  // namespace dawn::native::d3d11

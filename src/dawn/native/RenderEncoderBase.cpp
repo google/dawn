@@ -571,6 +571,9 @@ void RenderEncoderBase::APISetPipeline(RenderPipelineBase* pipeline) {
             }
 
             mCommandBufferState.SetRenderPipeline(pipeline);
+            if (GetDevice()->IsToggleEnabled(Toggle::BackendPipelineDeferredCreation)) {
+                mUsageTracker.AddReferencedRenderPipeline(pipeline);
+            }
 
             if (pipeline->UsesFramebufferFetch()) {
                 mUsageTracker.MarkFramebufferFetchUsed();

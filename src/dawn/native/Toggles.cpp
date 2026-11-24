@@ -939,6 +939,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"d3d11_use_discard_view",
       "Use D3D11's DiscardView for discarding render pass' attachments having StoreOp::Discard",
       "https://crbug.com/479416037", ToggleStage::Device}},
+    {Toggle::BackendPipelineDeferredCreation,
+     {"backend_pipeline_deferred_creation",
+      "When this toggle is enabled, backend pipeline objects (such as D3D11 shader objects) can be "
+      "created asynchronously to avoid blocking command encoding. When commands using them are "
+      "submitted, a wait is triggered for the pipelines to finish creation.",
+      "https://crbug.com/439845637", ToggleStage::Device}},
     {Toggle::IgnoreImportedAHardwareBufferVulkanImageSize,
      {"ignore_imported_ahardwarebuffer_vulkan_image_size",
       "Don't validate the required VkImage size against the size of the AHardwareBuffer on import. "

@@ -46,7 +46,9 @@ namespace dawn::native {
 // "Finish". Internally the "Encoder" may use the "StateTracker" to create them.
 
 class BufferBase;
+class ComputePipelineBase;
 class QuerySetBase;
+class RenderPipelineBase;
 class TextureBase;
 class ResourceTableBase;
 
@@ -97,6 +99,7 @@ struct ComputePassResourceUsage {
     RAW_PTR_EXCLUSION absl::flat_hash_set<TextureBase*> referencedTextures;
     RAW_PTR_EXCLUSION absl::flat_hash_set<ExternalTextureBase*> referencedExternalTextures;
     RAW_PTR_EXCLUSION absl::flat_hash_set<ResourceTableBase*> referencedResourceTables;
+    RAW_PTR_EXCLUSION absl::flat_hash_set<ComputePipelineBase*> referencedComputePipelines;
 };
 
 // Contains all the resource usage data for a render pass.
@@ -108,6 +111,7 @@ struct RenderPassResourceUsage : public SyncScopeResourceUsage {
     // Storage to track the occlusion queries used during the pass.
     std::vector<raw_ptr<QuerySetBase>> querySets;
     std::vector<ityp::vector<QueryIndex, bool>> queryAvailabilities;
+    RAW_PTR_EXCLUSION absl::flat_hash_set<RenderPipelineBase*> referencedRenderPipelines;
     bool usesFramebufferFetch = false;
 };
 

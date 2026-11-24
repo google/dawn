@@ -41,8 +41,10 @@ namespace dawn::native {
 
 class BindGroupBase;
 class BufferBase;
+class ComputePipelineBase;
 class ExternalTextureBase;
 class QuerySetBase;
+class RenderPipelineBase;
 class TextureBase;
 
 using QueryAvailabilityMap = absl::flat_hash_map<QuerySetBase*, ityp::vector<QueryIndex, bool>>;
@@ -111,6 +113,7 @@ class ComputePassResourceUsageTracker {
     void AddReferencedTexture(TextureBase* texture);
     void AddResourcesReferencedByBindGroup(BindGroupBase* group);
     void AddReferencedResourceTable(ResourceTableBase* table);
+    void AddReferencedComputePipeline(ComputePipelineBase* pipeline);
 
     ComputePassResourceUsage AcquireResourceUsage();
 
@@ -138,6 +141,7 @@ class RenderPassResourceUsageTracker : public SyncScopeUsageTracker {
     const QueryAvailabilityMap& GetQueryAvailabilityMap() const;
 
     void MarkFramebufferFetchUsed();
+    void AddReferencedRenderPipeline(RenderPipelineBase* pipeline);
 
     RenderPassResourceUsage AcquireResourceUsage();
 
@@ -148,6 +152,8 @@ class RenderPassResourceUsageTracker : public SyncScopeUsageTracker {
 
     // Tracks queries used in the render pass to validate that they aren't written twice.
     QueryAvailabilityMap mQueryAvailabilities;
+
+    RAW_PTR_EXCLUSION absl::flat_hash_set<RenderPipelineBase*> mReferencedRenderPipelines;
 
     // Unique identifier for this render pass tracker used by AddBindGroup() to intrusively
     // deduplicate BindGroup usage tracking without a hash table lookup.

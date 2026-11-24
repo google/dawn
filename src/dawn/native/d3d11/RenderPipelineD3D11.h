@@ -33,6 +33,7 @@
 
 #include "src/dawn/native/RenderPipeline.h"
 #include "src/dawn/native/d3d/d3d_platform.h"
+#include "src/dawn/native/d3d11/CreateShaderTaskD3D11.h"
 
 namespace dawn::native::d3d11 {
 
@@ -47,14 +48,16 @@ class RenderPipeline final : public RenderPipelineBase {
         Device* device,
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
 
+    MaybeError EnsureShadersCreated();
+
     void ApplyNow(PipelineStateTracker* tracker,
                   const std::array<float, 4>& blendColor,
                   uint32_t stencilReference);
     void ApplyBlendState(PipelineStateTracker* tracker, const std::array<float, 4>& blendColor);
     void ApplyDepthStencilState(PipelineStateTracker* tracker, uint32_t stencilReference);
 
-    ID3D11VertexShader* GetD3D11VertexShaderForTesting();
-    ID3D11PixelShader* GetD3D11PixelShaderForTesting();
+    ComPtr<ID3D11VertexShader> GetD3D11VertexShaderForTesting();
+    ComPtr<ID3D11PixelShader> GetD3D11PixelShaderForTesting();
 
   private:
     RenderPipeline(Device* device, const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
@@ -72,6 +75,8 @@ class RenderPipeline final : public RenderPipelineBase {
     const D3D_PRIMITIVE_TOPOLOGY mD3DPrimitiveTopology;
     ComPtr<ID3D11RasterizerState> mRasterizerState;
     ComPtr<ID3D11InputLayout> mInputLayout;
+    Ref<FutureComPtr<ID3D11VertexShader>> mVertexShaderFuture;
+    Ref<FutureComPtr<ID3D11PixelShader>> mPixelShaderFuture;
     ComPtr<ID3D11VertexShader> mVertexShader;
     ComPtr<ID3D11PixelShader> mPixelShader;
     ComPtr<ID3D11BlendState> mBlendState;

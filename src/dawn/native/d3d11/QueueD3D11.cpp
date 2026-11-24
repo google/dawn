@@ -42,9 +42,11 @@
 #include "src/dawn/native/d3d/D3DError.h"
 #include "src/dawn/native/d3d11/BufferD3D11.h"
 #include "src/dawn/native/d3d11/CommandBufferD3D11.h"
+#include "src/dawn/native/d3d11/ComputePipelineD3D11.h"
 #include "src/dawn/native/d3d11/DeviceD3D11.h"
 #include "src/dawn/native/d3d11/DeviceInfoD3D11.h"
 #include "src/dawn/native/d3d11/PhysicalDeviceD3D11.h"
+#include "src/dawn/native/d3d11/RenderPipelineD3D11.h"
 #include "src/dawn/native/d3d11/SharedFenceD3D11.h"
 #include "src/dawn/native/d3d11/TextureD3D11.h"
 #include "src/dawn/platform/tracing/TraceEvent.h"
@@ -316,6 +318,25 @@ MaybeError Queue::SubmitPendingCommandsImpl() {
 }
 
 MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
+    // Finish any deferred pipeline initializations before acquiring the scoped command recording
+    // context, to avoid waiting on async shader creations while holding the D3D11 multithread
+    // lock.
+    if (GetDevice()->IsToggleEnabled(Toggle::BackendPipelineDeferredCreation)) {
+        for (CommandBufferBase* commandBuffer : commands) {
+            const CommandBufferResourceUsage& usages = commandBuffer->GetResourceUsages();
+            for (const RenderPassResourceUsage& passUsage : usages.renderPasses) {
+                for (RenderPipelineBase* pipeline : passUsage.referencedRenderPipelines) {
+                    DAWN_TRY(ToBackend(pipeline)->EnsureShadersCreated());
+                }
+            }
+            for (const ComputePassResourceUsage& passUsage : usages.computePasses) {
+                for (ComputePipelineBase* pipeline : passUsage.referencedComputePipelines) {
+                    DAWN_TRY(ToBackend(pipeline)->EnsureShadersCreated());
+                }
+            }
+        }
+    }
+
     // CommandBuffer::RecordCommands() will modify the state of the global immediate device
     // context, it may affect following usage of it.
     // TODO(dawn:1770): figure how if we need to track and restore the state of the immediate device

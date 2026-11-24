@@ -505,6 +505,9 @@ void ComputePassEncoder::APISetPipeline(ComputePipelineBase* pipeline) {
             }
 
             mCommandBufferState.SetComputePipeline(pipeline);
+            if (GetDevice()->IsToggleEnabled(Toggle::BackendPipelineDeferredCreation)) {
+                mUsageTracker.AddReferencedComputePipeline(pipeline);
+            }
 
             SetComputePipelineCmd* cmd =
                 allocator->Allocate<SetComputePipelineCmd>(Command::SetComputePipeline);
