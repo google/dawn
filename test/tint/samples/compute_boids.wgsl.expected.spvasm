@@ -240,8 +240,8 @@
      %colVel = OpVariable %_ptr_Function_v2float Function
  %cMassCount = OpVariable %_ptr_Function_int Function
   %cVelCount = OpVariable %_ptr_Function_int Function
-        %pos = OpVariable %_ptr_Function_v2float Function %53
-        %vel = OpVariable %_ptr_Function_v2float Function %53
+        %pos = OpVariable %_ptr_Function_v2float Function
+        %vel = OpVariable %_ptr_Function_v2float Function
           %i = OpVariable %_ptr_Function_uint Function
          %28 = OpCompositeExtract %uint %gl_GlobalInvocationID 0
                OpStore %index %28
@@ -267,6 +267,8 @@
                OpStore %colVel %53
                OpStore %cMassCount %int_0
                OpStore %cVelCount %int_0
+               OpStore %pos %53
+               OpStore %vel %53
                OpBranch %63
          %63 = OpLabel
                OpStore %i %uint_0

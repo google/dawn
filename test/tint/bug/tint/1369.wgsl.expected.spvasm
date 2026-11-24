@@ -30,9 +30,10 @@
           %f = OpFunction %void None %11
          %12 = OpLabel
           %v = OpVariable %_ptr_Function_bool Function
-%also_unreachable = OpVariable %_ptr_Function_bool Function %17
+%also_unreachable = OpVariable %_ptr_Function_bool Function
          %13 = OpFunctionCall %bool %call_discard
                OpStore %v %13
+               OpStore %also_unreachable %17
          %18 = OpLoad %bool %continue_execution None
          %19 = OpLogicalNot %bool %18
                OpSelectionMerge %20 None

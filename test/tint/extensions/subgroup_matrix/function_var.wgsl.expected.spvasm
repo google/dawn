@@ -68,11 +68,16 @@
 %_ptr_Function_30 = OpTypePointer Function %30
        %main = OpFunction %void None %8
           %9 = OpLabel
-          %m = OpVariable %_ptr_Function_12 Function %17
-    %m_array = OpVariable %_ptr_Function__arr_12_uint_4 Function %22
-%m_nested_array = OpVariable %_ptr_Function__arr__arr_12_uint_4_uint_4 Function %26
-   %m_struct = OpVariable %_ptr_Function_S Function %32
-%m_nested_struct = OpVariable %_ptr_Function_S_Nested Function %36
+          %m = OpVariable %_ptr_Function_12 Function
+    %m_array = OpVariable %_ptr_Function__arr_12_uint_4 Function
+%m_nested_array = OpVariable %_ptr_Function__arr__arr_12_uint_4_uint_4 Function
+   %m_struct = OpVariable %_ptr_Function_S Function
+%m_nested_struct = OpVariable %_ptr_Function_S_Nested Function
+               OpStore %m %17
+               OpStore %m_array %22
+               OpStore %m_nested_array %26
+               OpStore %m_struct %32
+               OpStore %m_nested_struct %36
          %37 = OpLoad %12 %m None
          %38 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
          %40 = OpArrayLength %uint %1 0

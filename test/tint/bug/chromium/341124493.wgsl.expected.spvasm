@@ -17,7 +17,8 @@
       %false = OpConstantFalse %bool
           %F = OpFunction %void None %3
           %4 = OpLabel
-          %b = OpVariable %_ptr_Function_bool Function %8
+          %b = OpVariable %_ptr_Function_bool Function
+               OpStore %b %8
                OpSelectionMerge %9 None
                OpBranchConditional %false %10 %9
          %10 = OpLabel

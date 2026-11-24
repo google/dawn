@@ -21,8 +21,10 @@
      %int_44 = OpConstant %int 44
           %f = OpFunction %void None %3
           %4 = OpLabel
-          %i = OpVariable %_ptr_Function_int Function %8
-     %result = OpVariable %_ptr_Function_int Function %8
+          %i = OpVariable %_ptr_Function_int Function
+     %result = OpVariable %_ptr_Function_int Function
+               OpStore %i %8
+               OpStore %result %8
          %10 = OpLoad %int %i None
                OpSelectionMerge %15 None
                OpSwitch %10 %11 0 %12 1 %13 2 %14

@@ -258,7 +258,8 @@
           %v = OpFunctionParameter %v3float
    %params_0 = OpFunctionParameter %tint_TransferFunctionParams
         %112 = OpLabel
-%return_value = OpVariable %_ptr_Function_v3float Function %115
+%return_value = OpVariable %_ptr_Function_v3float Function
+               OpStore %return_value %115
        %mode = OpCompositeExtract %uint %params_0 0
         %117 = OpIEqual %bool %mode %uint_0
                OpSelectionMerge %118 None
@@ -319,7 +320,8 @@
         %v_1 = OpFunctionParameter %float
    %params_2 = OpFunctionParameter %tint_TransferFunctionParams
         %163 = OpLabel
-%return_value_0 = OpVariable %_ptr_Function_float Function %166
+%return_value_0 = OpVariable %_ptr_Function_float Function
+               OpStore %return_value_0 %166
         %A_0 = OpCompositeExtract %float %params_2 1
         %B_0 = OpCompositeExtract %float %params_2 2
         %C_0 = OpCompositeExtract %float %params_2 3

@@ -28,8 +28,9 @@
      %int_42 = OpConstant %int 42
       %deref = OpFunction %void None %3
           %4 = OpLabel
-          %a = OpVariable %_ptr_Function_v3int Function %9
+          %a = OpVariable %_ptr_Function_v3int Function
           %b = OpVariable %_ptr_Function_int Function
+               OpStore %a %9
          %10 = OpAccessChain %_ptr_Function_int %a %uint_0
          %14 = OpLoad %int %10 None
                OpStore %b %14
@@ -39,8 +40,9 @@
                OpFunctionEnd
    %no_deref = OpFunction %void None %3
          %19 = OpLabel
-        %a_0 = OpVariable %_ptr_Function_v3int Function %9
+        %a_0 = OpVariable %_ptr_Function_v3int Function
         %b_0 = OpVariable %_ptr_Function_int Function
+               OpStore %a_0 %9
          %21 = OpAccessChain %_ptr_Function_int %a_0 %uint_0
          %22 = OpLoad %int %21 None
                OpStore %b_0 %22

@@ -69,7 +69,8 @@
          %61 = OpConstantNull %v2float
 %foo_member_initialize = OpFunction %void None %21
          %22 = OpLabel
-        %vb2 = OpVariable %_ptr_Function_v2bool Function %27
+        %vb2 = OpVariable %_ptr_Function_v2bool Function
+               OpStore %vb2 %27
          %28 = OpAccessChain %_ptr_Private_float %my_global %uint_2
          %31 = OpLoad %float %28 None
          %32 = OpFOrdNotEqual %bool %31 %float_0
@@ -104,7 +105,8 @@
                OpFunctionEnd
 %foo_default_initialize = OpFunction %void None %21
          %64 = OpLabel
-      %vb2_0 = OpVariable %_ptr_Function_v2bool Function %27
+      %vb2_0 = OpVariable %_ptr_Function_v2bool Function
+               OpStore %vb2_0 %27
          %66 = OpAccessChain %_ptr_Private_float %my_global %uint_2
          %67 = OpLoad %float %66 None
          %68 = OpFOrdNotEqual %bool %67 %float_0

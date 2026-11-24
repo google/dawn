@@ -47,15 +47,23 @@
        %true = OpConstantTrue %bool
        %main = OpFunction %void None %3
           %4 = OpLabel
-        %v2f = OpVariable %_ptr_Function_v2float Function %9
-      %v2f_2 = OpVariable %_ptr_Function_v2float Function %9
-        %v3i = OpVariable %_ptr_Function_v3int Function %15
-      %v3i_2 = OpVariable %_ptr_Function_v3int Function %15
-        %v4u = OpVariable %_ptr_Function_v4uint Function %21
-      %v4u_2 = OpVariable %_ptr_Function_v4uint Function %21
-        %v2b = OpVariable %_ptr_Function_v2bool Function %27
-      %v2b_2 = OpVariable %_ptr_Function_v2bool Function %27
+        %v2f = OpVariable %_ptr_Function_v2float Function
+      %v2f_2 = OpVariable %_ptr_Function_v2float Function
+        %v3i = OpVariable %_ptr_Function_v3int Function
+      %v3i_2 = OpVariable %_ptr_Function_v3int Function
+        %v4u = OpVariable %_ptr_Function_v4uint Function
+      %v4u_2 = OpVariable %_ptr_Function_v4uint Function
+        %v2b = OpVariable %_ptr_Function_v2bool Function
+      %v2b_2 = OpVariable %_ptr_Function_v2bool Function
           %i = OpVariable %_ptr_Function_int Function
+               OpStore %v2f %9
+               OpStore %v2f_2 %9
+               OpStore %v3i %15
+               OpStore %v3i_2 %15
+               OpStore %v4u %21
+               OpStore %v4u_2 %21
+               OpStore %v2b %27
+               OpStore %v2b_2 %27
                OpBranch %29
          %29 = OpLabel
                OpStore %i %int_0

@@ -71,11 +71,16 @@
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
        %main = OpFunction %void None %8
           %9 = OpLabel
-          %m = OpVariable %_ptr_Function_12 Function %17
-    %m_array = OpVariable %_ptr_Function__arr_12_uint_4 Function %22
-%m_nested_array = OpVariable %_ptr_Function__arr__arr_12_uint_4_uint_4 Function %26
-   %m_struct = OpVariable %_ptr_Function_S Function %32
-%m_nested_struct = OpVariable %_ptr_Function_S_Nested Function %36
+          %m = OpVariable %_ptr_Function_12 Function
+    %m_array = OpVariable %_ptr_Function__arr_12_uint_4 Function
+%m_nested_array = OpVariable %_ptr_Function__arr__arr_12_uint_4_uint_4 Function
+   %m_struct = OpVariable %_ptr_Function_S Function
+%m_nested_struct = OpVariable %_ptr_Function_S_Nested Function
+               OpStore %m %17
+               OpStore %m_array %22
+               OpStore %m_nested_array %26
+               OpStore %m_struct %32
+               OpStore %m_nested_struct %36
       %m_let = OpLoad %12 %m None
 %m_array_let = OpLoad %_arr_12_uint_4 %m_array None
 %m_nested_array_let = OpLoad %_arr__arr_12_uint_4_uint_4 %m_nested_array None

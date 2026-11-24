@@ -2851,13 +2851,14 @@ class Printer {
         switch (ptr->AddressSpace()) {
             case core::AddressSpace::kFunction: {
                 TINT_IR_ASSERT(ir_, current_function_);
+                uint32_t init = 0;
                 if (var->Initializer()) {
-                    current_function_.PushVar({ty, id, U32Operand(SpvStorageClassFunction)});
-                    current_function_.PushInst(spv::Op::OpStore, {id, Value(var->Initializer())});
+                    init = Value(var->Initializer());
                 } else {
-                    current_function_.PushVar(
-                        {ty, id, U32Operand(SpvStorageClassFunction), ConstantNull(store_ty)});
+                    init = ConstantNull(store_ty);
                 }
+                current_function_.PushVar({ty, id, U32Operand(SpvStorageClassFunction)});
+                current_function_.PushInst(spv::Op::OpStore, {id, init});
                 break;
             }
             case core::AddressSpace::kIn: {

@@ -33,7 +33,8 @@
                OpFunctionEnd
           %f = OpFunction %void None %14
          %15 = OpLabel
-          %v = OpVariable %_ptr_Function_v2float Function %12
+          %v = OpVariable %_ptr_Function_v2float Function
+               OpStore %v %12
          %18 = OpLoad %v2float %v None
          %19 = OpFunctionCall %void %X %12 %18
          %20 = OpFunctionCall %v2float %Y

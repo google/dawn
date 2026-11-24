@@ -17,7 +17,8 @@
           %9 = OpConstantNull %v3int
        %main = OpFunction %void None %3
           %4 = OpLabel
-          %v = OpVariable %_ptr_Function_v3int Function %9
+          %v = OpVariable %_ptr_Function_v3int Function
+               OpStore %v %9
          %10 = OpLoad %v3int %v None
                OpReturn
                OpFunctionEnd

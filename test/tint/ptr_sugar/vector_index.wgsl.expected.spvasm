@@ -51,8 +51,9 @@
      %uint_2 = OpConstant %uint 2
 %deref_const = OpFunction %void None %3
           %4 = OpLabel
-          %a = OpVariable %_ptr_Function_v3int Function %9
+          %a = OpVariable %_ptr_Function_v3int Function
           %b = OpVariable %_ptr_Function_int Function
+               OpStore %a %9
          %10 = OpAccessChain %_ptr_Function_int %a %uint_0
          %14 = OpLoad %int %10 None
                OpStore %b %14
@@ -62,8 +63,9 @@
                OpFunctionEnd
 %no_deref_const = OpFunction %void None %3
          %19 = OpLabel
-        %a_0 = OpVariable %_ptr_Function_v3int Function %9
+        %a_0 = OpVariable %_ptr_Function_v3int Function
         %b_0 = OpVariable %_ptr_Function_int Function
+               OpStore %a_0 %9
          %21 = OpAccessChain %_ptr_Function_int %a_0 %uint_0
          %22 = OpLoad %int %21 None
                OpStore %b_0 %22
@@ -73,8 +75,9 @@
                OpFunctionEnd
   %deref_let = OpFunction %void None %3
          %26 = OpLabel
-        %a_1 = OpVariable %_ptr_Function_v3int Function %9
+        %a_1 = OpVariable %_ptr_Function_v3int Function
         %b_1 = OpVariable %_ptr_Function_int Function
+               OpStore %a_1 %9
          %30 = OpBitcast %uint %i
          %29 = OpAccessChain %_ptr_Function_int %a_1 %30
          %31 = OpLoad %int %29 None
@@ -85,8 +88,9 @@
                OpFunctionEnd
 %no_deref_let = OpFunction %void None %3
          %35 = OpLabel
-        %a_2 = OpVariable %_ptr_Function_v3int Function %9
+        %a_2 = OpVariable %_ptr_Function_v3int Function
         %b_2 = OpVariable %_ptr_Function_int Function
+               OpStore %a_2 %9
          %38 = OpBitcast %uint %i
          %37 = OpAccessChain %_ptr_Function_int %a_2 %38
          %39 = OpLoad %int %37 None
@@ -97,9 +101,10 @@
                OpFunctionEnd
   %deref_var = OpFunction %void None %3
          %43 = OpLabel
-        %a_3 = OpVariable %_ptr_Function_v3int Function %9
+        %a_3 = OpVariable %_ptr_Function_v3int Function
         %i_0 = OpVariable %_ptr_Function_int Function
         %b_3 = OpVariable %_ptr_Function_int Function
+               OpStore %a_3 %9
                OpStore %i_0 %i
          %46 = OpLoad %int %i_0 None
          %47 = OpBitcast %uint %46
@@ -113,8 +118,9 @@
                OpFunctionEnd
 %no_deref_var = OpFunction %void None %3
          %56 = OpLabel
-        %a_4 = OpVariable %_ptr_Function_v3int Function %9
+        %a_4 = OpVariable %_ptr_Function_v3int Function
         %b_4 = OpVariable %_ptr_Function_int Function
+               OpStore %a_4 %9
          %59 = OpBitcast %uint %i
          %58 = OpAccessChain %_ptr_Function_int %a_4 %59
          %60 = OpLoad %int %58 None

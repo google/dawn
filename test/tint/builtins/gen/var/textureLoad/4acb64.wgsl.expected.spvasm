@@ -289,7 +289,8 @@
                OpFunctionEnd
 %vertex_main_inner = OpFunction %VertexOutput None %55
          %56 = OpLabel
-        %out = OpVariable %_ptr_Function_VertexOutput Function %59
+        %out = OpVariable %_ptr_Function_VertexOutput Function
+               OpStore %out %59
          %60 = OpAccessChain %_ptr_Function_v4float %out %uint_0
                OpStore %60 %61 None
          %62 = OpAccessChain %_ptr_Function_v4float %out %uint_1

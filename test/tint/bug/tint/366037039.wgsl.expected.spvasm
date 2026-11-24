@@ -283,9 +283,10 @@
 %tint_source_0 = OpFunctionParameter %_arr_v3uint_uint_4
         %163 = OpLabel
         %164 = OpVariable %_ptr_Function__arr_v3uint_uint_4 Function
-        %166 = OpVariable %_ptr_Function__arr_v3uint_uint_4_0 Function %126
+        %166 = OpVariable %_ptr_Function__arr_v3uint_uint_4_0 Function
       %idx_2 = OpVariable %_ptr_Function_uint Function
                OpStore %164 %tint_source_0
+               OpStore %166 %126
                OpBranch %167
         %167 = OpLabel
                OpStore %idx_2 %uint_0

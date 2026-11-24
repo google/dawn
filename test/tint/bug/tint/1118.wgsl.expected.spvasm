@@ -152,22 +152,38 @@
         %185 = OpTypeFunction %main_out %float %float
      %main_1 = OpFunction %void None %36
          %37 = OpLabel
-%viewDirectionW = OpVariable %_ptr_Function_v3float Function %x_38
-  %baseColor = OpVariable %_ptr_Function_v4float Function %x_74
-%diffuseColor = OpVariable %_ptr_Function_v3float Function %x_38
-      %alpha = OpVariable %_ptr_Function_float Function %4
-    %normalW = OpVariable %_ptr_Function_v3float Function %x_38
-   %uvOffset = OpVariable %_ptr_Function_v2float Function %51
-%baseAmbientColor = OpVariable %_ptr_Function_v3float Function %x_38
- %glossiness = OpVariable %_ptr_Function_float Function %4
-%diffuseBase = OpVariable %_ptr_Function_v3float Function %x_38
-     %shadow = OpVariable %_ptr_Function_float Function %4
-%refractionColor = OpVariable %_ptr_Function_v4float Function %x_74
-%reflectionColor = OpVariable %_ptr_Function_v4float Function %x_74
-%emissiveColor = OpVariable %_ptr_Function_v3float Function %x_38
-%finalDiffuse = OpVariable %_ptr_Function_v3float Function %x_38
-%finalSpecular = OpVariable %_ptr_Function_v3float Function %x_38
-      %color = OpVariable %_ptr_Function_v4float Function %x_74
+%viewDirectionW = OpVariable %_ptr_Function_v3float Function
+  %baseColor = OpVariable %_ptr_Function_v4float Function
+%diffuseColor = OpVariable %_ptr_Function_v3float Function
+      %alpha = OpVariable %_ptr_Function_float Function
+    %normalW = OpVariable %_ptr_Function_v3float Function
+   %uvOffset = OpVariable %_ptr_Function_v2float Function
+%baseAmbientColor = OpVariable %_ptr_Function_v3float Function
+ %glossiness = OpVariable %_ptr_Function_float Function
+%diffuseBase = OpVariable %_ptr_Function_v3float Function
+     %shadow = OpVariable %_ptr_Function_float Function
+%refractionColor = OpVariable %_ptr_Function_v4float Function
+%reflectionColor = OpVariable %_ptr_Function_v4float Function
+%emissiveColor = OpVariable %_ptr_Function_v3float Function
+%finalDiffuse = OpVariable %_ptr_Function_v3float Function
+%finalSpecular = OpVariable %_ptr_Function_v3float Function
+      %color = OpVariable %_ptr_Function_v4float Function
+               OpStore %viewDirectionW %x_38
+               OpStore %baseColor %x_74
+               OpStore %diffuseColor %x_38
+               OpStore %alpha %4
+               OpStore %normalW %x_38
+               OpStore %uvOffset %51
+               OpStore %baseAmbientColor %x_38
+               OpStore %glossiness %4
+               OpStore %diffuseBase %x_38
+               OpStore %shadow %4
+               OpStore %refractionColor %x_74
+               OpStore %reflectionColor %x_74
+               OpStore %emissiveColor %x_38
+               OpStore %finalDiffuse %x_38
+               OpStore %finalSpecular %x_38
+               OpStore %color %x_74
         %x_9 = OpLoad %float %fClipDistance3 None
          %63 = OpFOrdGreaterThan %bool %x_9 %float_0
                OpSelectionMerge %65 None

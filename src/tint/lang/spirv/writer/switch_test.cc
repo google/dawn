@@ -310,8 +310,9 @@ TEST_F(SpirvWriterTest, Switch_Phi_SingleValue_CaseReturn) {
     ASSERT_EQ(result, Success) << result.Failure() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
-%return_value = OpVariable %_ptr_Function_int Function %7
+%return_value = OpVariable %_ptr_Function_int Function
 %continue_execution = OpVariable %_ptr_Function_bool Function
+               OpStore %return_value %7
                OpStore %continue_execution %true
                OpSelectionMerge %15 None
                OpSwitch %int_42 %12 1 %12 2 %14

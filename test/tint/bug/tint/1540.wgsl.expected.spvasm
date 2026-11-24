@@ -22,8 +22,9 @@
 %_ptr_Function_S = OpTypePointer Function %S
        %main = OpFunction %void None %3
           %4 = OpLabel
-          %b = OpVariable %_ptr_Function_bool Function %8
+          %b = OpVariable %_ptr_Function_bool Function
           %v = OpVariable %_ptr_Function_S Function
+               OpStore %b %8
           %9 = OpLoad %bool %b None
          %10 = OpLogicalAnd %bool %true %9
          %13 = OpCompositeConstruct %S %10

@@ -57,7 +57,8 @@
                OpFunctionEnd
         %foo = OpFunction %void None %24
          %25 = OpLabel
-      %param = OpVariable %_ptr_Function_float Function %27
+      %param = OpVariable %_ptr_Function_float Function
+               OpStore %param %27
          %28 = OpFunctionCall %void %bar %param
          %29 = OpLoad %float %param None
          %30 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0

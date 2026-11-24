@@ -39,7 +39,8 @@
          %25 = OpTypeFunction %void
 %frag_main_inner = OpFunction %FragOutput None %8
           %9 = OpLabel
-     %output = OpVariable %_ptr_Function_FragOutput Function %12
+     %output = OpVariable %_ptr_Function_FragOutput Function
+               OpStore %output %12
          %13 = OpAccessChain %_ptr_Function_v4float %output %uint_0
                OpStore %13 %17 None
          %20 = OpAccessChain %_ptr_Function_v4float %output %uint_1

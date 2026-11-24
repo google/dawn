@@ -79,8 +79,9 @@
         %mat = OpFunctionParameter %9
           %s = OpFunctionParameter %float
          %39 = OpLabel
-          %v = OpVariable %_ptr_Function_9 Function %16
+          %v = OpVariable %_ptr_Function_9 Function
         %idx = OpVariable %_ptr_Function_uint Function
+               OpStore %v %16
                OpStore %v %mat None
          %41 = OpCooperativeMatrixLengthKHR %uint %9
                OpBranch %42

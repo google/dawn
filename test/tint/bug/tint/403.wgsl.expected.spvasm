@@ -87,7 +87,8 @@
  %main_inner = OpFunction %v4float None %21
 %gl_VertexIndex = OpFunctionParameter %uint
          %22 = OpLabel
-  %indexable = OpVariable %_ptr_Function__arr_v2float_uint_3 Function %28
+  %indexable = OpVariable %_ptr_Function__arr_v2float_uint_3 Function
+               OpStore %indexable %28
        %x_23 = OpFunctionCall %mat2v2float %31 %uint_0
        %x_28 = OpFunctionCall %mat2v2float %34 %uint_0
                OpStore %indexable %35 None

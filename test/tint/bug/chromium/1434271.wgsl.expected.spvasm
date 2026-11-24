@@ -238,7 +238,7 @@
          %30 = OpLabel
    %quad_pos = OpVariable %_ptr_Function_v3float Function
    %position = OpVariable %_ptr_Function_v3float Function
-        %out = OpVariable %_ptr_Function_VertexOutput Function %59
+        %out = OpVariable %_ptr_Function_VertexOutput Function
          %31 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_4
          %35 = OpLoad %v4uint %31 None
          %36 = OpVectorShuffle %v3uint %35 %35 0 1 2
@@ -256,6 +256,7 @@
          %52 = OpFAdd %v3float %51 %53
          %55 = OpFSub %v3float %50 %52
                OpStore %position %55
+               OpStore %out %59
          %60 = OpAccessChain %_ptr_Function_v4float %out %uint_0
          %62 = OpFunctionCall %mat4v4float %64 %uint_0
          %65 = OpLoad %v3float %position None

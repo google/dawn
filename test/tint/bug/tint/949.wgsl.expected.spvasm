@@ -444,15 +444,24 @@
     %uv_root = OpFunctionParameter %_ptr_Function_v2float
 %tangentSpaceParams_root = OpFunctionParameter %_ptr_Function_v2float
          %63 = OpLabel
-        %dp1 = OpVariable %_ptr_Function_v3float Function %8
-        %dp2 = OpVariable %_ptr_Function_v3float Function %8
-       %duv1 = OpVariable %_ptr_Function_v2float Function %18
-       %duv2 = OpVariable %_ptr_Function_v2float Function %18
-    %dp2perp = OpVariable %_ptr_Function_v3float Function %8
-    %dp1perp = OpVariable %_ptr_Function_v3float Function %8
-    %tangent = OpVariable %_ptr_Function_v3float Function %8
-  %bitangent = OpVariable %_ptr_Function_v3float Function %8
-     %invmax = OpVariable %_ptr_Function_float Function %4
+        %dp1 = OpVariable %_ptr_Function_v3float Function
+        %dp2 = OpVariable %_ptr_Function_v3float Function
+       %duv1 = OpVariable %_ptr_Function_v2float Function
+       %duv2 = OpVariable %_ptr_Function_v2float Function
+    %dp2perp = OpVariable %_ptr_Function_v3float Function
+    %dp1perp = OpVariable %_ptr_Function_v3float Function
+    %tangent = OpVariable %_ptr_Function_v3float Function
+  %bitangent = OpVariable %_ptr_Function_v3float Function
+     %invmax = OpVariable %_ptr_Function_float Function
+               OpStore %dp1 %8
+               OpStore %dp2 %8
+               OpStore %duv1 %18
+               OpStore %duv2 %18
+               OpStore %dp2perp %8
+               OpStore %dp1perp %8
+               OpStore %tangent %8
+               OpStore %bitangent %8
+               OpStore %invmax %4
       %x_133 = OpLoad %v3float %p_root None
          %75 = OpDPdx %v3float %x_133
                OpStore %dp1 %75 None
@@ -537,10 +546,14 @@
 %transposeMat3_mf33_ = OpFunction %mat3v3float None %148
 %inMatrix_root = OpFunctionParameter %_ptr_Function_mat3v3float
         %149 = OpLabel
-         %i0 = OpVariable %_ptr_Function_v3float Function %8
-         %i1 = OpVariable %_ptr_Function_v3float Function %8
-         %i2 = OpVariable %_ptr_Function_v3float Function %8
-  %outMatrix = OpVariable %_ptr_Function_mat3v3float Function %154
+         %i0 = OpVariable %_ptr_Function_v3float Function
+         %i1 = OpVariable %_ptr_Function_v3float Function
+         %i2 = OpVariable %_ptr_Function_v3float Function
+  %outMatrix = OpVariable %_ptr_Function_mat3v3float Function
+               OpStore %i0 %8
+               OpStore %i1 %8
+               OpStore %i2 %8
+               OpStore %outMatrix %154
         %155 = OpAccessChain %_ptr_Function_v3float %inMatrix_root %uint_0
        %x_60 = OpLoad %v3float %155 None
                OpStore %i0 %x_60 None
@@ -604,9 +617,12 @@
 %textureSample_root = OpFunctionParameter %_ptr_Function_v3float
 %scale_1_root = OpFunctionParameter %_ptr_Function_float
         %211 = OpLabel
-      %param = OpVariable %_ptr_Function_mat3v3float Function %154
-    %param_1 = OpVariable %_ptr_Function_v3float Function %8
-    %param_2 = OpVariable %_ptr_Function_float Function %4
+      %param = OpVariable %_ptr_Function_mat3v3float Function
+    %param_1 = OpVariable %_ptr_Function_v3float Function
+    %param_2 = OpVariable %_ptr_Function_float Function
+               OpStore %param %154
+               OpStore %param_1 %8
+               OpStore %param_2 %4
       %x_119 = OpLoad %v3float %textureSample_root None
       %x_125 = OpLoad %mat3v3float %cotangentFrame_1_root None
                OpStore %param %x_125 None
@@ -627,10 +643,14 @@
 %groundColor_root = OpFunctionParameter %_ptr_Function_v3float
 %glossiness_root = OpFunctionParameter %_ptr_Function_float
         %235 = OpLabel
-        %ndl = OpVariable %_ptr_Function_float Function %4
-     %result = OpVariable %_ptr_Function_lightingInfo Function %239
-     %angleW = OpVariable %_ptr_Function_v3float Function %8
-   %specComp = OpVariable %_ptr_Function_float Function %4
+        %ndl = OpVariable %_ptr_Function_float Function
+     %result = OpVariable %_ptr_Function_lightingInfo Function
+     %angleW = OpVariable %_ptr_Function_v3float Function
+   %specComp = OpVariable %_ptr_Function_float Function
+               OpStore %ndl %4
+               OpStore %result %239
+               OpStore %angleW %8
+               OpStore %specComp %4
       %x_212 = OpLoad %v3float %vNormal_root None
       %x_213 = OpLoad %v4float %lightData_root None
         %244 = OpCompositeExtract %float %x_213 0
@@ -677,60 +697,113 @@
                OpFunctionEnd
      %main_1 = OpFunction %void None %282
         %283 = OpLabel
-%tempTextureRead = OpVariable %_ptr_Function_v4float Function %x_397
-        %rgb = OpVariable %_ptr_Function_v3float Function %8
-    %output5 = OpVariable %_ptr_Function_v3float Function %8
-    %output4 = OpVariable %_ptr_Function_v4float Function %x_397
-   %uvOffset = OpVariable %_ptr_Function_v2float Function %18
-%normalScale = OpVariable %_ptr_Function_float Function %4
-      %TBNUV = OpVariable %_ptr_Function_v2float Function %18
-      %x_299 = OpVariable %_ptr_Function_v2float Function %18
-        %TBN = OpVariable %_ptr_Function_mat3v3float Function %154
-    %param_3 = OpVariable %_ptr_Function_v3float Function %8
-    %param_4 = OpVariable %_ptr_Function_v3float Function %8
-    %param_5 = OpVariable %_ptr_Function_v2float Function %18
-    %param_6 = OpVariable %_ptr_Function_v2float Function %18
-     %invTBN = OpVariable %_ptr_Function_mat3v3float Function %154
-    %param_7 = OpVariable %_ptr_Function_mat3v3float Function %154
-%parallaxLimit = OpVariable %_ptr_Function_float Function %4
- %vOffsetDir = OpVariable %_ptr_Function_v2float Function %18
- %vMaxOffset = OpVariable %_ptr_Function_v2float Function %18
- %numSamples = OpVariable %_ptr_Function_float Function %4
-   %stepSize = OpVariable %_ptr_Function_float Function %4
-%currRayHeight = OpVariable %_ptr_Function_float Function %4
-%vCurrOffset = OpVariable %_ptr_Function_v2float Function %18
-%vLastOffset = OpVariable %_ptr_Function_v2float Function %18
-%lastSampledHeight = OpVariable %_ptr_Function_float Function %4
-%currSampledHeight = OpVariable %_ptr_Function_float Function %4
-          %i = OpVariable %_ptr_Function_int Function %312
-     %delta1 = OpVariable %_ptr_Function_float Function %4
-     %delta2 = OpVariable %_ptr_Function_float Function %4
-      %ratio = OpVariable %_ptr_Function_float Function %4
-%parallaxOcclusion_0 = OpVariable %_ptr_Function_v2float Function %18
-    %param_8 = OpVariable %_ptr_Function_mat3v3float Function %154
-    %param_9 = OpVariable %_ptr_Function_v3float Function %8
-   %param_10 = OpVariable %_ptr_Function_float Function %4
-    %output6 = OpVariable %_ptr_Function_v2float Function %18
-%tempTextureRead1 = OpVariable %_ptr_Function_v4float Function %x_397
-       %rgb1 = OpVariable %_ptr_Function_v3float Function %8
-%viewDirectionW_1 = OpVariable %_ptr_Function_v3float Function %8
-     %shadow = OpVariable %_ptr_Function_float Function %4
-%glossiness_1 = OpVariable %_ptr_Function_float Function %4
-%diffuseBase = OpVariable %_ptr_Function_v3float Function %8
-%specularBase = OpVariable %_ptr_Function_v3float Function %8
-    %normalW = OpVariable %_ptr_Function_v3float Function %8
-       %info = OpVariable %_ptr_Function_lightingInfo Function %239
-   %param_11 = OpVariable %_ptr_Function_v3float Function %8
-   %param_12 = OpVariable %_ptr_Function_v3float Function %8
-   %param_13 = OpVariable %_ptr_Function_v4float Function %x_397
-   %param_14 = OpVariable %_ptr_Function_v3float Function %8
-   %param_15 = OpVariable %_ptr_Function_v3float Function %8
-   %param_16 = OpVariable %_ptr_Function_v3float Function %8
-   %param_17 = OpVariable %_ptr_Function_float Function %4
-%diffuseOutput = OpVariable %_ptr_Function_v3float Function %8
-%specularOutput = OpVariable %_ptr_Function_v3float Function %8
-    %output3 = OpVariable %_ptr_Function_v3float Function %8
+%tempTextureRead = OpVariable %_ptr_Function_v4float Function
+        %rgb = OpVariable %_ptr_Function_v3float Function
+    %output5 = OpVariable %_ptr_Function_v3float Function
+    %output4 = OpVariable %_ptr_Function_v4float Function
+   %uvOffset = OpVariable %_ptr_Function_v2float Function
+%normalScale = OpVariable %_ptr_Function_float Function
+      %TBNUV = OpVariable %_ptr_Function_v2float Function
+      %x_299 = OpVariable %_ptr_Function_v2float Function
+        %TBN = OpVariable %_ptr_Function_mat3v3float Function
+    %param_3 = OpVariable %_ptr_Function_v3float Function
+    %param_4 = OpVariable %_ptr_Function_v3float Function
+    %param_5 = OpVariable %_ptr_Function_v2float Function
+    %param_6 = OpVariable %_ptr_Function_v2float Function
+     %invTBN = OpVariable %_ptr_Function_mat3v3float Function
+    %param_7 = OpVariable %_ptr_Function_mat3v3float Function
+%parallaxLimit = OpVariable %_ptr_Function_float Function
+ %vOffsetDir = OpVariable %_ptr_Function_v2float Function
+ %vMaxOffset = OpVariable %_ptr_Function_v2float Function
+ %numSamples = OpVariable %_ptr_Function_float Function
+   %stepSize = OpVariable %_ptr_Function_float Function
+%currRayHeight = OpVariable %_ptr_Function_float Function
+%vCurrOffset = OpVariable %_ptr_Function_v2float Function
+%vLastOffset = OpVariable %_ptr_Function_v2float Function
+%lastSampledHeight = OpVariable %_ptr_Function_float Function
+%currSampledHeight = OpVariable %_ptr_Function_float Function
+          %i = OpVariable %_ptr_Function_int Function
+     %delta1 = OpVariable %_ptr_Function_float Function
+     %delta2 = OpVariable %_ptr_Function_float Function
+      %ratio = OpVariable %_ptr_Function_float Function
+%parallaxOcclusion_0 = OpVariable %_ptr_Function_v2float Function
+    %param_8 = OpVariable %_ptr_Function_mat3v3float Function
+    %param_9 = OpVariable %_ptr_Function_v3float Function
+   %param_10 = OpVariable %_ptr_Function_float Function
+    %output6 = OpVariable %_ptr_Function_v2float Function
+%tempTextureRead1 = OpVariable %_ptr_Function_v4float Function
+       %rgb1 = OpVariable %_ptr_Function_v3float Function
+%viewDirectionW_1 = OpVariable %_ptr_Function_v3float Function
+     %shadow = OpVariable %_ptr_Function_float Function
+%glossiness_1 = OpVariable %_ptr_Function_float Function
+%diffuseBase = OpVariable %_ptr_Function_v3float Function
+%specularBase = OpVariable %_ptr_Function_v3float Function
+    %normalW = OpVariable %_ptr_Function_v3float Function
+       %info = OpVariable %_ptr_Function_lightingInfo Function
+   %param_11 = OpVariable %_ptr_Function_v3float Function
+   %param_12 = OpVariable %_ptr_Function_v3float Function
+   %param_13 = OpVariable %_ptr_Function_v4float Function
+   %param_14 = OpVariable %_ptr_Function_v3float Function
+   %param_15 = OpVariable %_ptr_Function_v3float Function
+   %param_16 = OpVariable %_ptr_Function_v3float Function
+   %param_17 = OpVariable %_ptr_Function_float Function
+%diffuseOutput = OpVariable %_ptr_Function_v3float Function
+%specularOutput = OpVariable %_ptr_Function_v3float Function
+    %output3 = OpVariable %_ptr_Function_v3float Function
 %tint_loop_idx = OpVariable %_ptr_Function_v2uint Function
+               OpStore %tempTextureRead %x_397
+               OpStore %rgb %8
+               OpStore %output5 %8
+               OpStore %output4 %x_397
+               OpStore %uvOffset %18
+               OpStore %normalScale %4
+               OpStore %TBNUV %18
+               OpStore %x_299 %18
+               OpStore %TBN %154
+               OpStore %param_3 %8
+               OpStore %param_4 %8
+               OpStore %param_5 %18
+               OpStore %param_6 %18
+               OpStore %invTBN %154
+               OpStore %param_7 %154
+               OpStore %parallaxLimit %4
+               OpStore %vOffsetDir %18
+               OpStore %vMaxOffset %18
+               OpStore %numSamples %4
+               OpStore %stepSize %4
+               OpStore %currRayHeight %4
+               OpStore %vCurrOffset %18
+               OpStore %vLastOffset %18
+               OpStore %lastSampledHeight %4
+               OpStore %currSampledHeight %4
+               OpStore %i %312
+               OpStore %delta1 %4
+               OpStore %delta2 %4
+               OpStore %ratio %4
+               OpStore %parallaxOcclusion_0 %18
+               OpStore %param_8 %154
+               OpStore %param_9 %8
+               OpStore %param_10 %4
+               OpStore %output6 %18
+               OpStore %tempTextureRead1 %x_397
+               OpStore %rgb1 %8
+               OpStore %viewDirectionW_1 %8
+               OpStore %shadow %4
+               OpStore %glossiness_1 %4
+               OpStore %diffuseBase %8
+               OpStore %specularBase %8
+               OpStore %normalW %8
+               OpStore %info %239
+               OpStore %param_11 %8
+               OpStore %param_12 %8
+               OpStore %param_13 %x_397
+               OpStore %param_14 %8
+               OpStore %param_15 %8
+               OpStore %param_16 %8
+               OpStore %param_17 %4
+               OpStore %diffuseOutput %8
+               OpStore %specularOutput %8
+               OpStore %output3 %8
                OpStore %u_Float %float_100 None
                OpStore %u_Color %341 None
       %x_261 = OpLoad %v2float %vMainuv None

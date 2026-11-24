@@ -76,31 +76,36 @@
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
 %make_matrix = OpFunction %7 None %12
          %13 = OpLabel
-          %m = OpVariable %_ptr_Function_7 Function %16
+          %m = OpVariable %_ptr_Function_7 Function
+               OpStore %m %16
          %17 = OpLoad %7 %m None
                OpReturnValue %17
                OpFunctionEnd
  %make_array = OpFunction %_arr_7_uint_4 None %21
          %22 = OpLabel
-    %m_array = OpVariable %_ptr_Function__arr_7_uint_4 Function %25
+    %m_array = OpVariable %_ptr_Function__arr_7_uint_4 Function
+               OpStore %m_array %25
          %26 = OpLoad %_arr_7_uint_4 %m_array None
                OpReturnValue %26
                OpFunctionEnd
 %make_nested_array = OpFunction %_arr__arr_7_uint_4_uint_4 None %29
          %30 = OpLabel
-%m_nested_array = OpVariable %_ptr_Function__arr__arr_7_uint_4_uint_4 Function %33
+%m_nested_array = OpVariable %_ptr_Function__arr__arr_7_uint_4_uint_4 Function
+               OpStore %m_nested_array %33
          %34 = OpLoad %_arr__arr_7_uint_4_uint_4 %m_nested_array None
                OpReturnValue %34
                OpFunctionEnd
 %make_struct = OpFunction %S None %39
          %40 = OpLabel
-   %m_struct = OpVariable %_ptr_Function_S Function %43
+   %m_struct = OpVariable %_ptr_Function_S Function
+               OpStore %m_struct %43
          %44 = OpLoad %S %m_struct None
                OpReturnValue %44
                OpFunctionEnd
 %make_nested_struct = OpFunction %S_Nested None %47
          %48 = OpLabel
-%m_nested_struct = OpVariable %_ptr_Function_S_Nested Function %51
+%m_nested_struct = OpVariable %_ptr_Function_S_Nested Function
+               OpStore %m_nested_struct %51
          %52 = OpLoad %S_Nested %m_nested_struct None
                OpReturnValue %52
                OpFunctionEnd

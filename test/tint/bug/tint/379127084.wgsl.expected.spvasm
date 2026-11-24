@@ -260,12 +260,12 @@
       %_84_a = OpVariable %_ptr_Function_v4float Function
       %_94_f = OpVariable %_ptr_Function_v4float Function
 %tint_loop_idx = OpVariable %_ptr_Function_v2uint Function
-  %_skTemp18 = OpVariable %_ptr_Function_v4float Function %70
-  %_skTemp19 = OpVariable %_ptr_Function_v4float Function %70
-      %_62_f = OpVariable %_ptr_Function_v4float Function %70
+  %_skTemp18 = OpVariable %_ptr_Function_v4float Function
+  %_skTemp19 = OpVariable %_ptr_Function_v4float Function
+      %_62_f = OpVariable %_ptr_Function_v4float Function
       %_65_i = OpVariable %_ptr_Function_v2float Function
       %_66_j = OpVariable %_ptr_Function_v4float Function
-      %_71_g = OpVariable %_ptr_Function_v4float Function %70
+      %_71_g = OpVariable %_ptr_Function_v4float Function
       %_72_h = OpVariable %_ptr_Function_int Function
       %_83_q = OpVariable %_ptr_Function_v4float Function
 %tint_loop_idx_0 = OpVariable %_ptr_Function_v2uint Function
@@ -331,6 +331,7 @@
                OpSelectionMerge %178 None
                OpBranchConditional %177 %179 %180
         %179 = OpLabel
+               OpStore %_62_f %70
         %325 = OpLoad %v2float %_57_k None
    %_skTemp2 = OpExtInst %v2float %48 Floor %325
         %327 = OpLoad %v4float %_62_f None
@@ -420,6 +421,7 @@
         %396 = OpFSub %v2float %397 %394
         %398 = OpFMul %v2float %393 %396
    %_skTemp6 = OpFMul %v2float %393 %398
+               OpStore %_71_g %70
                OpStore %_72_h %int_0
                OpBranch %402
         %402 = OpLabel
@@ -643,6 +645,7 @@
                OpSelectionMerge %127 None
                OpBranchConditional %125 %128 %129
         %128 = OpLabel
+               OpStore %_skTemp18 %70
         %201 = OpAccessChain %_ptr_Function_float %_84_a %uint_1
         %202 = OpLoad %float %201 None
         %203 = OpAccessChain %_ptr_Function_float %_84_a %uint_2
@@ -664,6 +667,7 @@
                OpBranch %206
         %206 = OpLabel
       %_86_e = OpLoad %v4float %_skTemp18 None
+               OpStore %_skTemp19 %70
         %211 = OpAccessChain %_ptr_Function_float %_84_a %uint_0
         %212 = OpLoad %float %211 None
         %213 = OpCompositeExtract %float %_86_e 0
@@ -835,7 +839,8 @@
  %main_inner = OpFunction %FSOut None %582
  %_stageIn_0 = OpFunctionParameter %FSIn
         %583 = OpLabel
-  %_stageOut = OpVariable %_ptr_Function_FSOut Function %585
+  %_stageOut = OpVariable %_ptr_Function_FSOut Function
+               OpStore %_stageOut %585
         %586 = OpFunctionCall %void %_skslMain %_stageIn_0 %_stageOut
         %587 = OpLoad %FSOut %_stageOut None
                OpReturnValue %587

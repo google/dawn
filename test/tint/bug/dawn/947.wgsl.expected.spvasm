@@ -88,9 +88,10 @@
 %VertexIndex = OpFunctionParameter %uint
          %23 = OpLabel
    %texcoord = OpVariable %_ptr_Function__arr_v2float_uint_3 Function
-     %output = OpVariable %_ptr_Function_VertexOutputs Function %39
+     %output = OpVariable %_ptr_Function_VertexOutputs Function
       %flipY = OpVariable %_ptr_Function_bool Function
                OpStore %texcoord %28
+               OpStore %output %39
          %40 = OpAccessChain %_ptr_Function_v4float %output %uint_1
          %42 = OpExtInst %uint %43 UMin %VertexIndex %uint_2
          %45 = OpAccessChain %_ptr_Function_v2float %texcoord %42

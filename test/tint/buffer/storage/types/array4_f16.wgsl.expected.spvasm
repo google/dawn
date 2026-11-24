@@ -71,9 +71,10 @@
 %tint_source = OpFunctionParameter %_arr_half_uint_4
          %28 = OpLabel
          %29 = OpVariable %_ptr_Function__arr_half_uint_4 Function
-         %31 = OpVariable %_ptr_Function__arr_half_uint_4_0 Function %33
+         %31 = OpVariable %_ptr_Function__arr_half_uint_4_0 Function
         %idx = OpVariable %_ptr_Function_uint Function
                OpStore %29 %tint_source
+               OpStore %31 %33
                OpBranch %34
          %34 = OpLabel
                OpStore %idx %uint_0
@@ -107,9 +108,10 @@
 %tint_source_0 = OpFunctionParameter %_arr_half_uint_4_0
          %56 = OpLabel
          %57 = OpVariable %_ptr_Function__arr_half_uint_4_0 Function
-         %58 = OpVariable %_ptr_Function__arr_half_uint_4 Function %59
+         %58 = OpVariable %_ptr_Function__arr_half_uint_4 Function
       %idx_0 = OpVariable %_ptr_Function_uint Function
                OpStore %57 %tint_source_0
+               OpStore %58 %59
                OpBranch %60
          %60 = OpLabel
                OpStore %idx_0 %uint_0

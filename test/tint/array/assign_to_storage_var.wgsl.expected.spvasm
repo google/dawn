@@ -177,8 +177,9 @@
         %foo = OpFunction %void None %46
   %src_param = OpFunctionParameter %_arr_v4int_uint_4
          %47 = OpLabel
-%src_function = OpVariable %_ptr_Function__arr_v4int_uint_4 Function %src_let
- %src_nested = OpVariable %_ptr_Function__arr__arr__arr_int_uint_2_0_uint_3_uint_4 Function %97
+%src_function = OpVariable %_ptr_Function__arr_v4int_uint_4 Function
+ %src_nested = OpVariable %_ptr_Function__arr__arr__arr_int_uint_2_0_uint_3_uint_4 Function
+               OpStore %src_function %src_let
          %50 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4_0 %21 %uint_0 %uint_0
          %53 = OpFunctionCall %_arr_v4int_uint_4_0 %tint_convert_explicit_layout_0 %55
                OpStore %50 %53 None
@@ -219,6 +220,7 @@
          %89 = OpFunctionCall %_arr_v4int_uint_4 %tint_convert_explicit_layout %88
          %91 = OpFunctionCall %_arr_v4int_uint_4_0 %tint_convert_explicit_layout_0 %89
                OpStore %86 %91 None
+               OpStore %src_nested %97
          %98 = OpAccessChain %_ptr_StorageBuffer__arr__arr__arr_int_uint_2_uint_3_uint_4 %24 %uint_0 %uint_0
         %100 = OpLoad %_arr__arr__arr_int_uint_2_0_uint_3_uint_4 %src_nested None
         %101 = OpFunctionCall %_arr__arr__arr_int_uint_2_uint_3_uint_4 %tint_convert_explicit_layout_1 %100
@@ -306,9 +308,10 @@
 %tint_source = OpFunctionParameter %_arr_v4int_uint_4_0
         %162 = OpLabel
         %163 = OpVariable %_ptr_Function__arr_v4int_uint_4_0 Function
-        %165 = OpVariable %_ptr_Function__arr_v4int_uint_4 Function %src_let
+        %165 = OpVariable %_ptr_Function__arr_v4int_uint_4 Function
       %idx_1 = OpVariable %_ptr_Function_uint Function
                OpStore %163 %tint_source
+               OpStore %165 %src_let
                OpBranch %166
         %166 = OpLabel
                OpStore %idx_1 %uint_0
@@ -342,9 +345,10 @@
 %tint_source_0 = OpFunctionParameter %_arr_v4int_uint_4
         %184 = OpLabel
         %185 = OpVariable %_ptr_Function__arr_v4int_uint_4 Function
-        %186 = OpVariable %_ptr_Function__arr_v4int_uint_4_0 Function %187
+        %186 = OpVariable %_ptr_Function__arr_v4int_uint_4_0 Function
       %idx_2 = OpVariable %_ptr_Function_uint Function
                OpStore %185 %tint_source_0
+               OpStore %186 %187
                OpBranch %188
         %188 = OpLabel
                OpStore %idx_2 %uint_0
@@ -378,9 +382,10 @@
 %tint_source_1 = OpFunctionParameter %_arr__arr__arr_int_uint_2_0_uint_3_uint_4
         %206 = OpLabel
         %207 = OpVariable %_ptr_Function__arr__arr__arr_int_uint_2_0_uint_3_uint_4 Function
-        %208 = OpVariable %_ptr_Function__arr__arr__arr_int_uint_2_uint_3_uint_4 Function %210
+        %208 = OpVariable %_ptr_Function__arr__arr__arr_int_uint_2_uint_3_uint_4 Function
       %idx_3 = OpVariable %_ptr_Function_uint Function
                OpStore %207 %tint_source_1
+               OpStore %208 %210
                OpBranch %211
         %211 = OpLabel
                OpStore %idx_3 %uint_0
@@ -415,9 +420,10 @@
 %tint_source_2 = OpFunctionParameter %_arr__arr_int_uint_2_0_uint_3
         %233 = OpLabel
         %234 = OpVariable %_ptr_Function__arr__arr_int_uint_2_0_uint_3 Function
-        %235 = OpVariable %_ptr_Function__arr__arr_int_uint_2_uint_3 Function %236
+        %235 = OpVariable %_ptr_Function__arr__arr_int_uint_2_uint_3 Function
       %idx_4 = OpVariable %_ptr_Function_uint Function
                OpStore %234 %tint_source_2
+               OpStore %235 %236
                OpBranch %237
         %237 = OpLabel
                OpStore %idx_4 %uint_0
@@ -452,9 +458,10 @@
 %tint_source_3 = OpFunctionParameter %_arr_int_uint_2_0
         %259 = OpLabel
         %260 = OpVariable %_ptr_Function__arr_int_uint_2_0 Function
-        %261 = OpVariable %_ptr_Function__arr_int_uint_2 Function %262
+        %261 = OpVariable %_ptr_Function__arr_int_uint_2 Function
       %idx_5 = OpVariable %_ptr_Function_uint Function
                OpStore %260 %tint_source_3
+               OpStore %261 %262
                OpBranch %263
         %263 = OpLabel
                OpStore %idx_5 %uint_0

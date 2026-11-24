@@ -18,7 +18,8 @@
          %10 = OpConstantNull %mat2v3float
        %main = OpFunction %void None %3
           %4 = OpLabel
-          %v = OpVariable %_ptr_Function_mat2v3float Function %10
+          %v = OpVariable %_ptr_Function_mat2v3float Function
+               OpStore %v %10
          %11 = OpLoad %mat2v3float %v None
                OpReturn
                OpFunctionEnd

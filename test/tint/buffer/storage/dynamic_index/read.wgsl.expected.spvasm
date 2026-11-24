@@ -490,9 +490,10 @@
 %tint_source = OpFunctionParameter %_arr_v3float_uint_2
         %357 = OpLabel
         %358 = OpVariable %_ptr_Function__arr_v3float_uint_2 Function
-        %360 = OpVariable %_ptr_Function__arr_v3float_uint_2_0 Function %362
+        %360 = OpVariable %_ptr_Function__arr_v3float_uint_2_0 Function
       %idx_0 = OpVariable %_ptr_Function_uint Function
                OpStore %358 %tint_source
+               OpStore %360 %362
                OpBranch %363
         %363 = OpLabel
                OpStore %idx_0 %uint_0

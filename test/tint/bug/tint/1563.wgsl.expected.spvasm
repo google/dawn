@@ -27,10 +27,11 @@
          %23 = OpTypeFunction %void
         %foo = OpFunction %float None %3
           %4 = OpLabel
-          %v = OpVariable %_ptr_Function_v4float Function %13
+          %v = OpVariable %_ptr_Function_v4float Function
           %8 = OpBitcast %uint %oob
           %9 = OpExtInst %uint %10 UMin %8 %uint_3
           %b = OpVectorExtractDynamic %float %13 %9
+               OpStore %v %13
          %17 = OpBitcast %uint %oob
          %18 = OpExtInst %uint %10 UMin %17 %uint_3
          %19 = OpAccessChain %_ptr_Function_float %v %18

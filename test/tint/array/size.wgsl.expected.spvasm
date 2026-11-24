@@ -36,11 +36,16 @@
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
        %main = OpFunction %void None %7
           %8 = OpLabel
-%signed_literal = OpVariable %_ptr_Function__arr_float_uint_4 Function %14
-%unsigned_literal = OpVariable %_ptr_Function__arr_float_uint_4 Function %14
-%signed_constant = OpVariable %_ptr_Function__arr_float_uint_4 Function %14
-%unsigned_constant = OpVariable %_ptr_Function__arr_float_uint_4 Function %14
-%shr_const_expr = OpVariable %_ptr_Function__arr_float_uint_4 Function %14
+%signed_literal = OpVariable %_ptr_Function__arr_float_uint_4 Function
+%unsigned_literal = OpVariable %_ptr_Function__arr_float_uint_4 Function
+%signed_constant = OpVariable %_ptr_Function__arr_float_uint_4 Function
+%unsigned_constant = OpVariable %_ptr_Function__arr_float_uint_4 Function
+%shr_const_expr = OpVariable %_ptr_Function__arr_float_uint_4 Function
+               OpStore %signed_literal %14
+               OpStore %unsigned_literal %14
+               OpStore %signed_constant %14
+               OpStore %unsigned_constant %14
+               OpStore %shr_const_expr %14
          %19 = OpLoad %_arr_float_uint_4 %signed_literal None
                OpStore %unsigned_literal %19 None
          %20 = OpLoad %_arr_float_uint_4 %signed_literal None

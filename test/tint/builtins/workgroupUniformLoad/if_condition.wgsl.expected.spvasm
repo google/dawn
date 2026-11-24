@@ -39,8 +39,9 @@
          %43 = OpTypeFunction %void
         %foo = OpFunction %int None %9
          %10 = OpLabel
-%return_value = OpVariable %_ptr_Function_int Function %13
+%return_value = OpVariable %_ptr_Function_int Function
 %continue_execution = OpVariable %_ptr_Function_bool Function
+               OpStore %return_value %13
                OpStore %continue_execution %true
                OpControlBarrier %uint_2 %uint_2 %uint_264
          %21 = OpLoad %bool %v None

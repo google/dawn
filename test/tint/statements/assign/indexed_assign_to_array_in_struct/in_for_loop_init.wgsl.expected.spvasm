@@ -61,10 +61,12 @@
 %_ptr_Function_uint = OpTypePointer Function %uint
        %main = OpFunction %void None %10
          %11 = OpLabel
-          %v = OpVariable %_ptr_Function_InnerS Function %16
-         %s1 = OpVariable %_ptr_Function_OuterS Function %22
+          %v = OpVariable %_ptr_Function_InnerS Function
+         %s1 = OpVariable %_ptr_Function_OuterS Function
           %i = OpVariable %_ptr_Function_int Function
 %tint_loop_idx = OpVariable %_ptr_Function_v2uint Function
+               OpStore %v %16
+               OpStore %s1 %22
                OpStore %i %int_0
                OpBranch %26
          %26 = OpLabel

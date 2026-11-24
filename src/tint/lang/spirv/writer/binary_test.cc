@@ -1137,7 +1137,8 @@ TEST_F(SpirvWriterTest, Add_SubgroupMatrix) {
          %13 = OpConstantNull %7
 )");
     EXPECT_INST(R"(
-          %v = OpVariable %_ptr_Function_7 Function %13
+          %v = OpVariable %_ptr_Function_7 Function
+               OpStore %v %13
          %14 = OpCompositeConstruct %7 %float_2
          %16 = OpLoad %7 %v None
          %17 = OpFAdd %7 %16 %14
@@ -1174,7 +1175,8 @@ TEST_F(SpirvWriterTest, Subtract_SubgroupMatrix) {
          %13 = OpConstantNull %7
 )");
     EXPECT_INST(R"(
-          %v = OpVariable %_ptr_Function_7 Function %13
+          %v = OpVariable %_ptr_Function_7 Function
+               OpStore %v %13
          %14 = OpCompositeConstruct %7 %float_2
          %16 = OpLoad %7 %v None
          %17 = OpFSub %7 %16 %14
@@ -1211,7 +1213,8 @@ TEST_F(SpirvWriterTest, Multiply_SubgroupMatrix) {
          %13 = OpConstantNull %7
 )");
     EXPECT_INST(R"(
-          %v = OpVariable %_ptr_Function_7 Function %13
+          %v = OpVariable %_ptr_Function_7 Function
+               OpStore %v %13
          %14 = OpCompositeConstruct %7 %float_2
          %16 = OpLoad %7 %v None
          %17 = OpFMul %7 %16 %14

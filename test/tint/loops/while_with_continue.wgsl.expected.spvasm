@@ -33,8 +33,9 @@
          %52 = OpTypeFunction %void
           %f = OpFunction %int None %3
           %4 = OpLabel
-          %i = OpVariable %_ptr_Function_int Function %7
+          %i = OpVariable %_ptr_Function_int Function
 %tint_loop_idx = OpVariable %_ptr_Function_v2uint Function
+               OpStore %i %7
                OpBranch %8
           %8 = OpLabel
                OpStore %tint_loop_idx %18

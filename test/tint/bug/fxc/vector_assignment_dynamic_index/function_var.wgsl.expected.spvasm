@@ -38,7 +38,8 @@
     %float_1 = OpConstant %float 1
        %main = OpFunction %void None %10
          %11 = OpLabel
-         %v1 = OpVariable %_ptr_Function_v3float Function %16
+         %v1 = OpVariable %_ptr_Function_v3float Function
+               OpStore %v1 %16
          %17 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
          %20 = OpLoad %v4uint %17 None
          %21 = OpCompositeExtract %uint %20 0

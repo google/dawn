@@ -293,7 +293,8 @@
           %v = OpFunctionParameter %v3float
    %params_0 = OpFunctionParameter %tint_TransferFunctionParams
         %127 = OpLabel
-%return_value = OpVariable %_ptr_Function_v3float Function %130
+%return_value = OpVariable %_ptr_Function_v3float Function
+               OpStore %return_value %130
        %mode = OpCompositeExtract %uint %params_0 0
         %132 = OpIEqual %bool %mode %uint_0
                OpSelectionMerge %133 None
@@ -354,7 +355,8 @@
         %v_1 = OpFunctionParameter %float
    %params_2 = OpFunctionParameter %tint_TransferFunctionParams
         %178 = OpLabel
-%return_value_0 = OpVariable %_ptr_Function_float Function %181
+%return_value_0 = OpVariable %_ptr_Function_float Function
+               OpStore %return_value_0 %181
         %A_0 = OpCompositeExtract %float %params_2 1
         %B_0 = OpCompositeExtract %float %params_2 2
         %C_0 = OpCompositeExtract %float %params_2 3
@@ -974,7 +976,8 @@
           %v = OpFunctionParameter %v3float
    %params_0 = OpFunctionParameter %tint_TransferFunctionParams
         %127 = OpLabel
-%return_value = OpVariable %_ptr_Function_v3float Function %130
+%return_value = OpVariable %_ptr_Function_v3float Function
+               OpStore %return_value %130
        %mode = OpCompositeExtract %uint %params_0 0
         %132 = OpIEqual %bool %mode %uint_0
                OpSelectionMerge %133 None
@@ -1035,7 +1038,8 @@
         %v_1 = OpFunctionParameter %float
    %params_2 = OpFunctionParameter %tint_TransferFunctionParams
         %178 = OpLabel
-%return_value_0 = OpVariable %_ptr_Function_float Function %181
+%return_value_0 = OpVariable %_ptr_Function_float Function
+               OpStore %return_value_0 %181
         %A_0 = OpCompositeExtract %float %params_2 1
         %B_0 = OpCompositeExtract %float %params_2 2
         %C_0 = OpCompositeExtract %float %params_2 3
@@ -1579,7 +1583,8 @@
                OpFunctionEnd
 %vertex_main_inner = OpFunction %VertexOutput None %51
          %52 = OpLabel
-        %out = OpVariable %_ptr_Function_VertexOutput Function %55
+        %out = OpVariable %_ptr_Function_VertexOutput Function
+               OpStore %out %55
          %56 = OpAccessChain %_ptr_Function_v4float %out %uint_0
                OpStore %56 %57 None
          %58 = OpAccessChain %_ptr_Function_v4float %out %uint_1
@@ -1669,7 +1674,8 @@
           %v = OpFunctionParameter %v3float
    %params_0 = OpFunctionParameter %tint_TransferFunctionParams
         %134 = OpLabel
-%return_value = OpVariable %_ptr_Function_v3float Function %137
+%return_value = OpVariable %_ptr_Function_v3float Function
+               OpStore %return_value %137
        %mode = OpCompositeExtract %uint %params_0 0
         %139 = OpIEqual %bool %mode %uint_0
                OpSelectionMerge %140 None
@@ -1730,7 +1736,8 @@
         %v_1 = OpFunctionParameter %float
    %params_2 = OpFunctionParameter %tint_TransferFunctionParams
         %185 = OpLabel
-%return_value_0 = OpVariable %_ptr_Function_float Function %188
+%return_value_0 = OpVariable %_ptr_Function_float Function
+               OpStore %return_value_0 %188
         %A_0 = OpCompositeExtract %float %params_2 1
         %B_0 = OpCompositeExtract %float %params_2 2
         %C_0 = OpCompositeExtract %float %params_2 3

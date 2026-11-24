@@ -267,7 +267,8 @@
 %getFrameData_f1_ = OpFunction %mat4v4float None %55
 %frameID_root = OpFunctionParameter %_ptr_Function_float
          %56 = OpLabel
-         %fX = OpVariable %_ptr_Function_float Function %26
+         %fX = OpVariable %_ptr_Function_float Function
+               OpStore %fX %26
        %x_15 = OpLoad %float %frameID_root None
          %59 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_6
          %63 = OpLoad %v4uint %59 None
@@ -313,26 +314,44 @@
                OpFunctionEnd
      %main_1 = OpFunction %void None %107
         %108 = OpLabel
-      %color = OpVariable %_ptr_Function_v4float Function %x_217
-     %tileUV = OpVariable %_ptr_Function_v2float Function %18
-     %tileID = OpVariable %_ptr_Function_v2float Function %18
- %sheetUnits = OpVariable %_ptr_Function_v2float Function %18
-%spriteUnits = OpVariable %_ptr_Function_float Function %26
- %stageUnits = OpVariable %_ptr_Function_v2float Function %18
-          %i = OpVariable %_ptr_Function_int Function %120
-  %frameID_1 = OpVariable %_ptr_Function_float Function %26
-%animationData = OpVariable %_ptr_Function_v4float Function %x_217
-          %f = OpVariable %_ptr_Function_float Function %26
-  %frameData = OpVariable %_ptr_Function_mat4v4float Function %126
-      %param = OpVariable %_ptr_Function_float Function %26
-  %frameSize = OpVariable %_ptr_Function_v2float Function %18
-   %offset_1 = OpVariable %_ptr_Function_v2float Function %18
-      %ratio = OpVariable %_ptr_Function_v2float Function %18
-         %nc = OpVariable %_ptr_Function_v4float Function %x_217
-      %alpha = OpVariable %_ptr_Function_float Function %26
-      %mixed = OpVariable %_ptr_Function_v3float Function %39
+      %color = OpVariable %_ptr_Function_v4float Function
+     %tileUV = OpVariable %_ptr_Function_v2float Function
+     %tileID = OpVariable %_ptr_Function_v2float Function
+ %sheetUnits = OpVariable %_ptr_Function_v2float Function
+%spriteUnits = OpVariable %_ptr_Function_float Function
+ %stageUnits = OpVariable %_ptr_Function_v2float Function
+          %i = OpVariable %_ptr_Function_int Function
+  %frameID_1 = OpVariable %_ptr_Function_float Function
+%animationData = OpVariable %_ptr_Function_v4float Function
+          %f = OpVariable %_ptr_Function_float Function
+  %frameData = OpVariable %_ptr_Function_mat4v4float Function
+      %param = OpVariable %_ptr_Function_float Function
+  %frameSize = OpVariable %_ptr_Function_v2float Function
+   %offset_1 = OpVariable %_ptr_Function_v2float Function
+      %ratio = OpVariable %_ptr_Function_v2float Function
+         %nc = OpVariable %_ptr_Function_v4float Function
+      %alpha = OpVariable %_ptr_Function_float Function
+      %mixed = OpVariable %_ptr_Function_v3float Function
 %tint_loop_idx = OpVariable %_ptr_Function_v2uint Function
 %tint_loop_idx_0 = OpVariable %_ptr_Function_v2uint Function
+               OpStore %color %x_217
+               OpStore %tileUV %18
+               OpStore %tileID %18
+               OpStore %sheetUnits %18
+               OpStore %spriteUnits %26
+               OpStore %stageUnits %18
+               OpStore %i %120
+               OpStore %frameID_1 %26
+               OpStore %animationData %x_217
+               OpStore %f %26
+               OpStore %frameData %126
+               OpStore %param %26
+               OpStore %frameSize %18
+               OpStore %offset_1 %18
+               OpStore %ratio %18
+               OpStore %nc %x_217
+               OpStore %alpha %26
+               OpStore %mixed %39
                OpStore %color %x_217 None
        %x_86 = OpLoad %v2float %tUV None
         %136 = OpExtInst %v2float %137 Fract %x_86

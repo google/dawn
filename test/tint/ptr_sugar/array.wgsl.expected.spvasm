@@ -52,8 +52,9 @@
      %uint_9 = OpConstant %uint 9
 %deref_const = OpFunction %void None %3
           %4 = OpLabel
-          %a = OpVariable %_ptr_Function__arr_int_uint_10 Function %11
+          %a = OpVariable %_ptr_Function__arr_int_uint_10 Function
           %b = OpVariable %_ptr_Function_int Function
+               OpStore %a %11
          %12 = OpAccessChain %_ptr_Function_int %a %uint_0
          %15 = OpLoad %int %12 None
                OpStore %b %15
@@ -63,8 +64,9 @@
                OpFunctionEnd
 %no_deref_const = OpFunction %void None %3
          %20 = OpLabel
-        %a_0 = OpVariable %_ptr_Function__arr_int_uint_10 Function %11
+        %a_0 = OpVariable %_ptr_Function__arr_int_uint_10 Function
         %b_0 = OpVariable %_ptr_Function_int Function
+               OpStore %a_0 %11
          %22 = OpAccessChain %_ptr_Function_int %a_0 %uint_0
          %23 = OpLoad %int %22 None
                OpStore %b_0 %23
@@ -74,8 +76,9 @@
                OpFunctionEnd
   %deref_let = OpFunction %void None %3
          %27 = OpLabel
-        %a_1 = OpVariable %_ptr_Function__arr_int_uint_10 Function %11
+        %a_1 = OpVariable %_ptr_Function__arr_int_uint_10 Function
         %b_1 = OpVariable %_ptr_Function_int Function
+               OpStore %a_1 %11
          %31 = OpBitcast %uint %i
          %30 = OpAccessChain %_ptr_Function_int %a_1 %31
          %32 = OpLoad %int %30 None
@@ -86,8 +89,9 @@
                OpFunctionEnd
 %no_deref_let = OpFunction %void None %3
          %36 = OpLabel
-        %a_2 = OpVariable %_ptr_Function__arr_int_uint_10 Function %11
+        %a_2 = OpVariable %_ptr_Function__arr_int_uint_10 Function
         %b_2 = OpVariable %_ptr_Function_int Function
+               OpStore %a_2 %11
          %39 = OpBitcast %uint %i
          %38 = OpAccessChain %_ptr_Function_int %a_2 %39
          %40 = OpLoad %int %38 None
@@ -98,9 +102,10 @@
                OpFunctionEnd
   %deref_var = OpFunction %void None %3
          %44 = OpLabel
-        %a_3 = OpVariable %_ptr_Function__arr_int_uint_10 Function %11
+        %a_3 = OpVariable %_ptr_Function__arr_int_uint_10 Function
         %i_0 = OpVariable %_ptr_Function_int Function
         %b_3 = OpVariable %_ptr_Function_int Function
+               OpStore %a_3 %11
                OpStore %i_0 %i
          %47 = OpLoad %int %i_0 None
          %48 = OpBitcast %uint %47
@@ -114,9 +119,10 @@
                OpFunctionEnd
 %no_deref_var = OpFunction %void None %3
          %57 = OpLabel
-        %a_4 = OpVariable %_ptr_Function__arr_int_uint_10 Function %11
+        %a_4 = OpVariable %_ptr_Function__arr_int_uint_10 Function
         %i_1 = OpVariable %_ptr_Function_int Function
         %b_4 = OpVariable %_ptr_Function_int Function
+               OpStore %a_4 %11
                OpStore %i_1 %i
          %60 = OpLoad %int %i_1 None
          %61 = OpBitcast %uint %60

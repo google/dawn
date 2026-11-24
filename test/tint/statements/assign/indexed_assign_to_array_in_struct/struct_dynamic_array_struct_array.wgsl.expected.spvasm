@@ -61,7 +61,8 @@
 %_ptr_StorageBuffer_InnerS = OpTypePointer StorageBuffer %InnerS
        %main = OpFunction %void None %19
          %20 = OpLabel
-          %v = OpVariable %_ptr_Function_InnerS Function %23
+          %v = OpVariable %_ptr_Function_InnerS Function
+               OpStore %v %23
          %24 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
          %27 = OpLoad %v4uint %24 None
          %28 = OpCompositeExtract %uint %27 0

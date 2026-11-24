@@ -125,8 +125,9 @@
         %foo = OpFunction %void None %43
   %src_param = OpFunctionParameter %_arr_v4int_uint_4
          %44 = OpLabel
-%src_function = OpVariable %_ptr_Function__arr_v4int_uint_4 Function %src_let
- %src_nested = OpVariable %_ptr_Function__arr__arr__arr_int_uint_2_uint_3_uint_4 Function %29
+%src_function = OpVariable %_ptr_Function__arr_v4int_uint_4 Function
+ %src_nested = OpVariable %_ptr_Function__arr__arr__arr_int_uint_2_uint_3_uint_4 Function
+               OpStore %src_function %src_let
                OpStore %dst %47 None
                OpStore %dst %src_param None
          %54 = OpFunctionCall %_arr_v4int_uint_4 %ret_arr
@@ -147,6 +148,7 @@
          %65 = OpLoad %_arr_v4int_uint_4_0 %63 None
          %66 = OpFunctionCall %_arr_v4int_uint_4 %tint_convert_explicit_layout %65
                OpStore %dst %66 None
+               OpStore %src_nested %29
          %70 = OpLoad %_arr__arr__arr_int_uint_2_uint_3_uint_4 %src_nested None
                OpStore %dst_nested %70 None
                OpReturn
@@ -232,9 +234,10 @@
 %tint_source = OpFunctionParameter %_arr_v4int_uint_4_0
         %130 = OpLabel
         %131 = OpVariable %_ptr_Function__arr_v4int_uint_4_0 Function
-        %133 = OpVariable %_ptr_Function__arr_v4int_uint_4 Function %src_let
+        %133 = OpVariable %_ptr_Function__arr_v4int_uint_4 Function
       %idx_1 = OpVariable %_ptr_Function_uint Function
                OpStore %131 %tint_source
+               OpStore %133 %src_let
                OpBranch %134
         %134 = OpLabel
                OpStore %idx_1 %uint_0

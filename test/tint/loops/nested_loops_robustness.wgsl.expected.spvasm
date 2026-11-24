@@ -44,13 +44,16 @@
         %101 = OpTypeFunction %void
           %f = OpFunction %int None %3
           %4 = OpLabel
-%return_value = OpVariable %_ptr_Function_int Function %7
+%return_value = OpVariable %_ptr_Function_int Function
 %continue_execution = OpVariable %_ptr_Function_bool Function
-          %i = OpVariable %_ptr_Function_int Function %7
-          %j = OpVariable %_ptr_Function_int Function %7
+          %i = OpVariable %_ptr_Function_int Function
+          %j = OpVariable %_ptr_Function_int Function
 %tint_loop_idx = OpVariable %_ptr_Function_v2uint Function
 %tint_loop_idx_0 = OpVariable %_ptr_Function_v2uint Function
+               OpStore %return_value %7
                OpStore %continue_execution %true
+               OpStore %i %7
+               OpStore %j %7
                OpBranch %14
          %14 = OpLabel
                OpStore %tint_loop_idx %24

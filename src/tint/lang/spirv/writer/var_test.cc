@@ -897,5 +897,28 @@ TEST_F(SpirvWriterTest, WriteOnlyStorageTextureVar) {
 )");
 }
 
+TEST_F(SpirvWriterTest, UninitFunction_Loop) {
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.LoopRange(0_u, 4_u, 1_u,
+                    [&](core::ir::Value*) { b.Var("v", ty.ptr(function, ty.u32())); });
+        b.Return(eb);
+    });
+
+    auto result = Generate();
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST(R"(
+       %main = OpFunction %void None %3
+          %4 = OpLabel
+        %idx = OpVariable %_ptr_Function_uint Function
+          %v = OpVariable %_ptr_Function_uint Function
+)");
+    EXPECT_INST(R"(
+         %18 = OpLabel
+               OpStore %v %21
+               OpBranch %7
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

@@ -35,7 +35,8 @@
                OpFunctionEnd
        %main = OpFunction %void None %17
          %18 = OpLabel
-          %F = OpVariable %_ptr_Function_str Function %20
+          %F = OpVariable %_ptr_Function_str Function
+               OpStore %F %20
          %21 = OpFunctionCall %void %func %F
                OpReturn
                OpFunctionEnd

@@ -75,7 +75,8 @@
 %vtx_main_inner = OpFunction %VertexOutput None %22
       %input = OpFunctionParameter %VertexInput
          %23 = OpLabel
-     %output = OpVariable %_ptr_Function_VertexOutput Function %26
+     %output = OpVariable %_ptr_Function_VertexOutput Function
+               OpStore %output %26
          %27 = OpAccessChain %_ptr_Function_v4float %output %uint_1
          %30 = OpFunctionCall %mat4v4float %32 %uint_0
          %34 = OpCompositeExtract %v4float %input 0

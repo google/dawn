@@ -35,9 +35,11 @@
 %_ptr_Function_float = OpTypePointer Function %float
           %f = OpFunction %void None %3
           %4 = OpLabel
-          %i = OpVariable %_ptr_Function_int Function %8
-          %j = OpVariable %_ptr_Function_int Function %8
+          %i = OpVariable %_ptr_Function_int Function
+          %j = OpVariable %_ptr_Function_int Function
          %20 = OpVariable %_ptr_Function_mat2v2float Function
+               OpStore %i %8
+               OpStore %j %8
                OpStore %20 %m
          %22 = OpLoad %int %i None
          %23 = OpLoad %int %j None

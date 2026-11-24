@@ -62,9 +62,10 @@
 %tint_source = OpFunctionParameter %_arr_int_uint_4
          %26 = OpLabel
          %27 = OpVariable %_ptr_Function__arr_int_uint_4 Function
-         %29 = OpVariable %_ptr_Function__arr_int_uint_4_0 Function %31
+         %29 = OpVariable %_ptr_Function__arr_int_uint_4_0 Function
         %idx = OpVariable %_ptr_Function_uint Function
                OpStore %27 %tint_source
+               OpStore %29 %31
                OpBranch %32
          %32 = OpLabel
                OpStore %idx %uint_0

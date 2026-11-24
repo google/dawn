@@ -32,8 +32,9 @@
          %18 = OpConstantComposite %v3float %float_1 %float_2 %float_3
       %deref = OpFunction %void None %3
           %4 = OpLabel
-          %a = OpVariable %_ptr_Function_mat2v3float Function %10
+          %a = OpVariable %_ptr_Function_mat2v3float Function
           %b = OpVariable %_ptr_Function_v3float Function
+               OpStore %a %10
          %11 = OpAccessChain %_ptr_Function_v3float %a %uint_0
          %15 = OpLoad %v3float %11 None
                OpStore %b %15
@@ -43,8 +44,9 @@
                OpFunctionEnd
    %no_deref = OpFunction %void None %3
          %23 = OpLabel
-        %a_0 = OpVariable %_ptr_Function_mat2v3float Function %10
+        %a_0 = OpVariable %_ptr_Function_mat2v3float Function
         %b_0 = OpVariable %_ptr_Function_v3float Function
+               OpStore %a_0 %10
          %25 = OpAccessChain %_ptr_Function_v3float %a_0 %uint_0
          %26 = OpLoad %v3float %25 None
                OpStore %b_0 %26

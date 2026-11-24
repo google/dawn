@@ -51,7 +51,8 @@
                OpFunctionEnd
  %main_inner = OpFunction %VSOut None %26
          %27 = OpLabel
-        %out = OpVariable %_ptr_Function_VSOut Function %29
+        %out = OpVariable %_ptr_Function_VSOut Function
+               OpStore %out %29
          %30 = OpFunctionCall %void %foo %out
          %31 = OpLoad %VSOut %out None
                OpReturnValue %31

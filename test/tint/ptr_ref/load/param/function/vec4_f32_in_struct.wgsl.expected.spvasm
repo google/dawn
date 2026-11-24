@@ -34,7 +34,8 @@
                OpFunctionEnd
        %main = OpFunction %void None %16
          %17 = OpLabel
-          %F = OpVariable %_ptr_Function_str Function %19
+          %F = OpVariable %_ptr_Function_str Function
+               OpStore %F %19
           %r = OpFunctionCall %v4float %func %F
                OpReturn
                OpFunctionEnd

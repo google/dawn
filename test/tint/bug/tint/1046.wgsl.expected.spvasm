@@ -125,7 +125,8 @@
  %main_inner = OpFunction %FragmentOutput None %35
    %fragment = OpFunctionParameter %FragmentInput
          %36 = OpLabel
-     %output = OpVariable %_ptr_Function_FragmentOutput Function %39
+     %output = OpVariable %_ptr_Function_FragmentOutput Function
+               OpStore %output %39
          %40 = OpAccessChain %_ptr_Function_v4float %output %uint_0
                OpStore %40 %43 None
          %46 = OpFunctionCall %Uniforms %49 %uint_0

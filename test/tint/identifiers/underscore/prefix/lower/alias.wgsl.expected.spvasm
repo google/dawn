@@ -30,8 +30,10 @@
      %uint_0 = OpConstant %uint 0
           %f = OpFunction %void None %7
           %8 = OpLabel
-          %c = OpVariable %_ptr_Function_int Function %11
-          %d = OpVariable %_ptr_Function_int Function %11
+          %c = OpVariable %_ptr_Function_int Function
+          %d = OpVariable %_ptr_Function_int Function
+               OpStore %c %11
+               OpStore %d %11
          %13 = OpLoad %int %c None
          %14 = OpLoad %int %d None
          %16 = OpBitcast %uint %13

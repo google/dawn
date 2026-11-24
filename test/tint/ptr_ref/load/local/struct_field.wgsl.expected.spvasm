@@ -23,8 +23,9 @@
      %uint_0 = OpConstant %uint 0
        %main = OpFunction %void None %3
           %4 = OpLabel
-          %V = OpVariable %_ptr_Function_S Function %9
+          %V = OpVariable %_ptr_Function_S Function
           %i = OpVariable %_ptr_Function_int Function
+               OpStore %V %9
          %10 = OpAccessChain %_ptr_Function_int %V %uint_0
          %14 = OpLoad %int %10 None
                OpStore %i %14

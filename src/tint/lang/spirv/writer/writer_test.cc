@@ -415,7 +415,8 @@ TEST_F(SpirvWriterTest, StripAllNames) {
           %4 = OpFunction %void None %7
           %6 = OpFunctionParameter %uint
           %8 = OpLabel
-          %9 = OpVariable %_ptr_Function__struct_11 Function %14
+          %9 = OpVariable %_ptr_Function__struct_11 Function
+               OpStore %9 %14
          %15 = OpLoad %_struct_11 %9 None
                OpReturn
                OpFunctionEnd

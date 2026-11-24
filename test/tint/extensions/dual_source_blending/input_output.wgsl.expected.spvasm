@@ -49,7 +49,8 @@
 %frag_main_inner = OpFunction %FragOutput None %13
          %in = OpFunctionParameter %FragInput
          %14 = OpLabel
-     %output = OpVariable %_ptr_Function_FragOutput Function %17
+     %output = OpVariable %_ptr_Function_FragOutput Function
+               OpStore %output %17
          %18 = OpAccessChain %_ptr_Function_v4float %output %uint_0
          %22 = OpCompositeExtract %v4float %in 0
                OpStore %18 %22 None

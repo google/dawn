@@ -16,6 +16,7 @@
           %8 = OpConstantNull %int
           %f = OpFunction %void None %3
           %4 = OpLabel
-          %v = OpVariable %_ptr_Function_int Function %8
+          %v = OpVariable %_ptr_Function_int Function
+               OpStore %v %8
                OpReturn
                OpFunctionEnd

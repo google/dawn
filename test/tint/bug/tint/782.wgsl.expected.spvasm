@@ -20,8 +20,10 @@
          %11 = OpConstantNull %_arr_int_uint_2
         %foo = OpFunction %void None %3
           %4 = OpLabel
-%explicitStride = OpVariable %_ptr_Function__arr_int_uint_2 Function %11
-%implictStride = OpVariable %_ptr_Function__arr_int_uint_2 Function %11
+%explicitStride = OpVariable %_ptr_Function__arr_int_uint_2 Function
+%implictStride = OpVariable %_ptr_Function__arr_int_uint_2 Function
+               OpStore %explicitStride %11
+               OpStore %implictStride %11
          %13 = OpLoad %_arr_int_uint_2 %explicitStride None
                OpStore %implictStride %13 None
                OpReturn

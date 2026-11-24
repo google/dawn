@@ -75,19 +75,31 @@
        %true = OpConstantTrue %bool
        %main = OpFunction %void None %3
           %4 = OpLabel
-        %v2f = OpVariable %_ptr_Function_v2float Function %9
-        %v3f = OpVariable %_ptr_Function_v3float Function %13
-        %v4f = OpVariable %_ptr_Function_v4float Function %17
-        %v2i = OpVariable %_ptr_Function_v2int Function %22
-        %v3i = OpVariable %_ptr_Function_v3int Function %26
-        %v4i = OpVariable %_ptr_Function_v4int Function %30
-        %v2u = OpVariable %_ptr_Function_v2uint Function %35
-        %v3u = OpVariable %_ptr_Function_v3uint Function %39
-        %v4u = OpVariable %_ptr_Function_v4uint Function %43
-        %v2b = OpVariable %_ptr_Function_v2bool Function %48
-        %v3b = OpVariable %_ptr_Function_v3bool Function %52
-        %v4b = OpVariable %_ptr_Function_v4bool Function %56
+        %v2f = OpVariable %_ptr_Function_v2float Function
+        %v3f = OpVariable %_ptr_Function_v3float Function
+        %v4f = OpVariable %_ptr_Function_v4float Function
+        %v2i = OpVariable %_ptr_Function_v2int Function
+        %v3i = OpVariable %_ptr_Function_v3int Function
+        %v4i = OpVariable %_ptr_Function_v4int Function
+        %v2u = OpVariable %_ptr_Function_v2uint Function
+        %v3u = OpVariable %_ptr_Function_v3uint Function
+        %v4u = OpVariable %_ptr_Function_v4uint Function
+        %v2b = OpVariable %_ptr_Function_v2bool Function
+        %v3b = OpVariable %_ptr_Function_v3bool Function
+        %v4b = OpVariable %_ptr_Function_v4bool Function
           %i = OpVariable %_ptr_Function_int Function
+               OpStore %v2f %9
+               OpStore %v3f %13
+               OpStore %v4f %17
+               OpStore %v2i %22
+               OpStore %v3i %26
+               OpStore %v4i %30
+               OpStore %v2u %35
+               OpStore %v3u %39
+               OpStore %v4u %43
+               OpStore %v2b %48
+               OpStore %v3b %52
+               OpStore %v4b %56
                OpBranch %57
          %57 = OpLabel
                OpStore %i %int_0

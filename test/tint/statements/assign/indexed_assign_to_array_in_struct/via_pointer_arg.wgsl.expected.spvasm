@@ -50,7 +50,8 @@
           %f = OpFunction %void None %17
      %p_root = OpFunctionParameter %_ptr_Function_OuterS
          %18 = OpLabel
-          %v = OpVariable %_ptr_Function_InnerS Function %21
+          %v = OpVariable %_ptr_Function_InnerS Function
+               OpStore %v %21
          %22 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
          %25 = OpLoad %v4uint %22 None
          %26 = OpCompositeExtract %uint %25 0
@@ -62,7 +63,8 @@
                OpFunctionEnd
        %main = OpFunction %void None %33
          %34 = OpLabel
-         %s1 = OpVariable %_ptr_Function_OuterS Function %36
+         %s1 = OpVariable %_ptr_Function_OuterS Function
+               OpStore %s1 %36
          %37 = OpFunctionCall %void %f %s1
                OpReturn
                OpFunctionEnd

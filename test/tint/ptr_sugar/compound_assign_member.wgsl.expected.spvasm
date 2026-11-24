@@ -26,7 +26,8 @@
     %uint_42 = OpConstant %uint 42
       %deref = OpFunction %void None %3
           %4 = OpLabel
-          %a = OpVariable %_ptr_Function_v3int Function %9
+          %a = OpVariable %_ptr_Function_v3int Function
+               OpStore %a %9
          %10 = OpAccessChain %_ptr_Function_int %a %uint_0
          %14 = OpLoad %int %10 None
          %15 = OpBitcast %uint %14
@@ -38,7 +39,8 @@
                OpFunctionEnd
    %no_deref = OpFunction %void None %3
          %21 = OpLabel
-        %a_0 = OpVariable %_ptr_Function_v3int Function %9
+        %a_0 = OpVariable %_ptr_Function_v3int Function
+               OpStore %a_0 %9
          %23 = OpAccessChain %_ptr_Function_int %a_0 %uint_0
          %24 = OpLoad %int %23 None
          %25 = OpBitcast %uint %24

@@ -45,7 +45,8 @@
          %38 = OpConstantNull %v2int
        %main = OpFunction %void None %10
          %11 = OpLabel
-   %srcValue = OpVariable %_ptr_Function_v4uint Function %15
+   %srcValue = OpVariable %_ptr_Function_v4uint Function
+               OpStore %srcValue %15
          %16 = OpLoad %3 %Src None
          %17 = OpImageQueryLevels %uint %16
          %18 = OpISub %uint %17 %uint_1

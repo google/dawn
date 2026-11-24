@@ -234,8 +234,9 @@
 %_ptr_Function_S2 = OpTypePointer Function %S2
        %main = OpFunction %void None %39
          %40 = OpLabel
-          %m = OpVariable %_ptr_Function_mat3v3float Function %43
+          %m = OpVariable %_ptr_Function_mat3v3float Function
           %c = OpVariable %_ptr_Function_uint Function
+               OpStore %m %43
                OpBranch %44
          %44 = OpLabel
                OpStore %c %uint_0

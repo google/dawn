@@ -117,7 +117,7 @@
    %srcColor = OpVariable %_ptr_Function_v4float Function
    %dstColor = OpVariable %_ptr_Function_v4float Function
     %success = OpVariable %_ptr_Function_bool Function
-%srcColorBits = OpVariable %_ptr_Function_v4uint Function %76
+%srcColorBits = OpVariable %_ptr_Function_v4uint Function
 %dstColorBits = OpVariable %_ptr_Function_v4uint Function
 %outputIndex = OpVariable %_ptr_Function_uint Function
 %tint_loop_idx = OpVariable %_ptr_Function_v2uint Function
@@ -167,6 +167,7 @@
          %69 = OpImageFetch %v4float %61 %68 Lod %65
                OpStore %dstColor %69
                OpStore %success %true
+               OpStore %srcColorBits %76
          %77 = OpLoad %v4float %dstColor None
          %78 = OpFunctionCall %v4uint %tint_v4f32_to_v4u32 %77
                OpStore %dstColorBits %78

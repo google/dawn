@@ -191,7 +191,7 @@
 %lightRadius = OpVariable %_ptr_Function_float Function
      %boxMin = OpVariable %_ptr_Function_v4float Function
      %boxMax = OpVariable %_ptr_Function_v4float Function
-%frustumPlanes = OpVariable %_ptr_Function__arr_v4float_uint_6 Function %173
+%frustumPlanes = OpVariable %_ptr_Function__arr_v4float_uint_6 Function
 %tint_loop_idx = OpVariable %_ptr_Function_v2uint Function
           %y = OpVariable %_ptr_Function_int Function
 %tint_loop_idx_0 = OpVariable %_ptr_Function_v2uint Function
@@ -203,7 +203,7 @@
 %viewCeilCoord = OpVariable %_ptr_Function_v2float Function
          %dp = OpVariable %_ptr_Function_float Function
           %i = OpVariable %_ptr_Function_uint Function
-          %p = OpVariable %_ptr_Function_v4float Function %414
+          %p = OpVariable %_ptr_Function_v4float Function
      %tileId = OpVariable %_ptr_Function_uint Function
      %offset = OpVariable %_ptr_Function_uint Function
          %38 = OpCompositeExtract %uint %GlobalInvocationID 0
@@ -335,6 +335,7 @@
         %166 = OpCompositeConstruct %v4float %165 %float_0
         %167 = OpFAdd %v4float %163 %166
                OpStore %boxMax %167
+               OpStore %frustumPlanes %173
         %174 = OpAccessChain %_ptr_Function_v4float %frustumPlanes %uint_4
         %175 = OpLoad %float %viewNear None
         %176 = OpCompositeConstruct %v4float %float_0 %float_0 %float_n1 %175
@@ -539,6 +540,7 @@
         %412 = OpLabel
                OpBranch %389
         %411 = OpLabel
+               OpStore %p %414
         %415 = OpLoad %uint %i None
         %416 = OpAccessChain %_ptr_Function_v4float %frustumPlanes %415
         %417 = OpAccessChain %_ptr_Function_float %416 %uint_0

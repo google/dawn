@@ -178,9 +178,10 @@
 %tint_source = OpFunctionParameter %_arr_mat4v2half_uint_4_0
         %117 = OpLabel
         %118 = OpVariable %_ptr_Function__arr_mat4v2half_uint_4_0 Function
-        %119 = OpVariable %_ptr_Function__arr_mat4v2half_uint_4 Function %121
+        %119 = OpVariable %_ptr_Function__arr_mat4v2half_uint_4 Function
       %idx_0 = OpVariable %_ptr_Function_uint Function
                OpStore %118 %tint_source
+               OpStore %119 %121
                OpBranch %122
         %122 = OpLabel
                OpStore %idx_0 %uint_0

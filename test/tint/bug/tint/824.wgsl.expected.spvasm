@@ -79,13 +79,14 @@
 %InstanceIndex = OpFunctionParameter %uint
          %17 = OpLabel
          %30 = OpVariable %_ptr_Function__arr_v2float_uint_4 Function
-     %output = OpVariable %_ptr_Function_Output Function %43
+     %output = OpVariable %_ptr_Function_Output Function
          %56 = OpVariable %_ptr_Function__arr_v4float_uint_4 Function
                OpStore %30 %zv
          %32 = OpExtInst %uint %33 UMin %InstanceIndex %uint_3
          %35 = OpAccessChain %_ptr_Function_v2float %30 %32
          %37 = OpAccessChain %_ptr_Function_float %35 %uint_0
           %z = OpLoad %float %37 None
+               OpStore %output %43
          %44 = OpAccessChain %_ptr_Function_v4float %output %uint_0
          %46 = OpCompositeConstruct %v4float %float_0_5 %float_0_5 %z %float_1
                OpStore %44 %46 None

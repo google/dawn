@@ -194,9 +194,10 @@
 %tint_source = OpFunctionParameter %_arr_mat4v2float_uint_4_0
         %135 = OpLabel
         %136 = OpVariable %_ptr_Function__arr_mat4v2float_uint_4_0 Function
-        %137 = OpVariable %_ptr_Function__arr_mat4v2float_uint_4 Function %139
+        %137 = OpVariable %_ptr_Function__arr_mat4v2float_uint_4 Function
       %idx_0 = OpVariable %_ptr_Function_uint Function
                OpStore %136 %tint_source
+               OpStore %137 %139
                OpBranch %140
         %140 = OpLabel
                OpStore %idx_0 %uint_0

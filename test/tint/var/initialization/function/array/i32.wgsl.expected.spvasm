@@ -24,8 +24,9 @@
          %13 = OpConstantComposite %_arr_int_uint_3 %int_1 %int_2 %int_3
        %main = OpFunction %void None %3
           %4 = OpLabel
-       %zero = OpVariable %_ptr_Function__arr_int_uint_3 Function %11
+       %zero = OpVariable %_ptr_Function__arr_int_uint_3 Function
        %init = OpVariable %_ptr_Function__arr_int_uint_3 Function
+               OpStore %zero %11
                OpStore %init %13
                OpReturn
                OpFunctionEnd

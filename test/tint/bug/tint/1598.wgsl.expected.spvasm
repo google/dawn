@@ -19,6 +19,7 @@
          %11 = OpConstantNull %_arr_int_uint_5
        %main = OpFunction %void None %3
           %4 = OpLabel
-          %a = OpVariable %_ptr_Function__arr_int_uint_5 Function %11
+          %a = OpVariable %_ptr_Function__arr_int_uint_5 Function
+               OpStore %a %11
                OpReturn
                OpFunctionEnd

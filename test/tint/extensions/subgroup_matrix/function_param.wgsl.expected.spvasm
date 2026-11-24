@@ -126,11 +126,16 @@
                OpFunctionEnd
        %main = OpFunction %void None %77
          %78 = OpLabel
-        %m_0 = OpVariable %_ptr_Function_8 Function %81
-  %m_array_0 = OpVariable %_ptr_Function__arr_8_uint_4 Function %84
-%m_nested_array_0 = OpVariable %_ptr_Function__arr__arr_8_uint_4_uint_4 Function %87
- %m_struct_0 = OpVariable %_ptr_Function_S Function %90
-%m_nested_struct_0 = OpVariable %_ptr_Function_S_Nested Function %93
+        %m_0 = OpVariable %_ptr_Function_8 Function
+  %m_array_0 = OpVariable %_ptr_Function__arr_8_uint_4 Function
+%m_nested_array_0 = OpVariable %_ptr_Function__arr__arr_8_uint_4_uint_4 Function
+ %m_struct_0 = OpVariable %_ptr_Function_S Function
+%m_nested_struct_0 = OpVariable %_ptr_Function_S_Nested Function
+               OpStore %m_0 %81
+               OpStore %m_array_0 %84
+               OpStore %m_nested_array_0 %87
+               OpStore %m_struct_0 %90
+               OpStore %m_nested_struct_0 %93
          %94 = OpLoad %8 %m_0 None
          %95 = OpLoad %_arr_8_uint_4 %m_array_0 None
          %96 = OpLoad %_arr__arr_8_uint_4_uint_4 %m_nested_array_0 None

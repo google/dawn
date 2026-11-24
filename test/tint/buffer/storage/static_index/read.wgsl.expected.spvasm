@@ -426,9 +426,10 @@
 %tint_source = OpFunctionParameter %_arr_v3float_uint_2
         %282 = OpLabel
         %283 = OpVariable %_ptr_Function__arr_v3float_uint_2 Function
-        %285 = OpVariable %_ptr_Function__arr_v3float_uint_2_0 Function %287
+        %285 = OpVariable %_ptr_Function__arr_v3float_uint_2_0 Function
         %idx = OpVariable %_ptr_Function_uint Function
                OpStore %283 %tint_source
+               OpStore %285 %287
                OpBranch %288
         %288 = OpLabel
                OpStore %idx %uint_0
@@ -462,9 +463,10 @@
 %tint_source_0 = OpFunctionParameter %_arr_Inner_uint_4
         %309 = OpLabel
         %310 = OpVariable %_ptr_Function__arr_Inner_uint_4 Function
-        %312 = OpVariable %_ptr_Function__arr_Inner_uint_4_0 Function %314
+        %312 = OpVariable %_ptr_Function__arr_Inner_uint_4_0 Function
       %idx_0 = OpVariable %_ptr_Function_uint Function
                OpStore %310 %tint_source_0
+               OpStore %312 %314
                OpBranch %315
         %315 = OpLabel
                OpStore %idx_0 %uint_0

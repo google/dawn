@@ -58,12 +58,13 @@
         %106 = OpTypeFunction %void
      %func_3 = OpFunction %bool None %10
          %11 = OpLabel
-%return_value = OpVariable %_ptr_Function_bool Function %14
+%return_value = OpVariable %_ptr_Function_bool Function
 %continue_execution = OpVariable %_ptr_Function_bool Function
 %tint_loop_idx = OpVariable %_ptr_Function_v2uint Function
           %i = OpVariable %_ptr_Function_int Function
 %tint_loop_idx_0 = OpVariable %_ptr_Function_v2uint Function
           %j = OpVariable %_ptr_Function_int Function
+               OpStore %return_value %14
                OpStore %continue_execution %true
                OpBranch %17
          %17 = OpLabel
