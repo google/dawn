@@ -378,7 +378,6 @@ endif()
 
 if (DAWN_ENABLE_D3D12)
     list(APPEND whitebox_sources
-        "white_box/D3D12BufferPersistentMappingTests.cpp"
         "white_box/D3D12DescriptorHeapTests.cpp"
         "white_box/D3D12IndirectDrawBatchingTests.cpp"
         "white_box/D3D12ResidencyTests.cpp"

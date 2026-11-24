@@ -340,10 +340,6 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     // Used by OnBeginAccess() to restore the correct state for SharedBufferMemory buffers.
     bool mIsMappedAtCreation = false;
 
-    // Whether MapAtCreationImpl() mapped the backend allocation directly (i.e. no staging buffer
-    // was used), in which case Unmap() must call UnmapImpl() to release that mapping.
-    bool mBackendMappedAtCreation = false;
-
     // Mapping specific states.
     wgpu::MapMode mMapMode = wgpu::MapMode::None;
     // Offset from the start of the buffer to the start of the mapped region. In other words,

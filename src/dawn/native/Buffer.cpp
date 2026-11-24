@@ -711,7 +711,6 @@ MaybeError BufferBase::MapAtCreation() {
 ResultOrError<bool> BufferBase::MapAtCreationInternal() {
     DAWN_CHECK(mState.load(std::memory_order::acquire) == BufferState::Unmapped);
     Ref<BufferBase> stagingBuffer;
-    bool backendMapped = false;
 
     // 0-sized buffers are not supposed to be written to. Return back any non-null pointer.
     // Skip handling 0-sized buffers so we don't try to map them in the backend.
@@ -720,7 +719,6 @@ ResultOrError<bool> BufferBase::MapAtCreationInternal() {
         // MapAsync.
         if (IsCPUWritableAtCreation()) {
             DAWN_TRY(MapAtCreationImpl());
-            backendMapped = true;
         } else {
             // If any of these fail, the buffer will be deleted and replaced with an error
             // buffer. The staging buffer is used to return mappable data to initialize the
@@ -745,7 +743,6 @@ ResultOrError<bool> BufferBase::MapAtCreationInternal() {
     mMapSize = checked_cast<size_t>(mSize);
     mAllocatedMapSize = checked_cast<size_t>(GetAllocatedSize());
     mStagingBuffer = std::move(stagingBuffer);
-    mBackendMappedAtCreation = backendMapped;
     mIsMappedAtCreation = true;
     DAWN_TRY(FinalizeMap(BufferState::MappedAtCreation));
     return mStagingBuffer != nullptr;
@@ -989,13 +986,11 @@ MaybeUnknownError BufferBase::Unmap(bool forDestroy) {
                     mStagingBuffer = nullptr;
                 } else {
                     DAWN_TRY_WITH_CLEANUP(CopyFromStagingBuffer(), {
-                        mIsMappedAtCreation = true;
                         mState.store(BufferState::MappedAtCreation, std::memory_order::release);
                     });
                 }
             }
-            if (mBackendMappedAtCreation) {
-                mBackendMappedAtCreation = false;
+            if (mSize != 0 && IsCPUWritableAtCreation()) {
                 UnmapImpl(BufferState::MappedAtCreation,
                           forDestroy ? BufferState::Destroyed : BufferState::Unmapped);
             }

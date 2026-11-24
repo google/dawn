@@ -131,8 +131,7 @@ class Device final : public d3d::Device {
         uint32_t formatBytesPerBlock,
         bool forceAllocateAsCommittedResource = false);
 
-    void DeallocateMemory(ResourceHeapAllocation& allocation,
-                          Span<std::byte> persistentMappedData = {});
+    void DeallocateMemory(ResourceHeapAllocation& allocation);
 
     // Returns the shader-visible view (SRV) allocator. Not MutexProtected as it is only accessed by
     // a single thread, during command recording.

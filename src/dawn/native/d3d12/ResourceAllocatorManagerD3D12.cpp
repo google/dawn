@@ -33,7 +33,6 @@
 
 #include "src/dawn/native/Queue.h"
 #include "src/dawn/native/d3d/D3DError.h"
-#include "src/dawn/native/d3d12/BufferD3D12.h"
 #include "src/dawn/native/d3d12/DeviceD3D12.h"
 #include "src/dawn/native/d3d12/HeapAllocatorD3D12.h"
 #include "src/dawn/native/d3d12/HeapD3D12.h"
@@ -338,7 +337,6 @@ ResourceAllocatorManager::~ResourceAllocatorManager() {
 
     FreeRecycledAllocations();
 
-    DAWN_ASSERT(mPersistentMappingsToDelete.Empty());
     DAWN_ASSERT(mAllocationsToDelete.Empty());
     DAWN_ASSERT(mHeapsToDelete.Empty());
 }
@@ -411,21 +409,6 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
 }
 
 void ResourceAllocatorManager::Tick(ExecutionSerial completedSerial) {
-    // Release persistent mappings only after the GPU has finished using the resource. Zero the
-    // first bytes before unmapping, see
-    // `Toggle::D3D12PersistentlyMapBuffersAndClearBufferBeforeDestroy`. This must happen even if
-    // the frontend never unmapped the buffer because releasing a mapped resource implicitly unmaps
-    // it.
-    for (auto& mapping : mPersistentMappingsToDelete.IterateUpTo(completedSerial)) {
-        size_t bytesToClear =
-            std::min(mapping.mappedData.size(), kPersistentMappingBytesToZeroBeforeUnmap);
-        mapping.mappedData.first(bytesToClear).FillBytes(std::byte{0});
-        D3D12_RANGE writtenRange = {0, bytesToClear};
-        mapping.resource->Unmap(0, &writtenRange);
-        mDevice->GetResidencyManager()->UnlockAllocation(mapping.heap);
-    }
-    mPersistentMappingsToDelete.ClearUpTo(completedSerial);
-
     for (ResourceHeapAllocation& allocation : mAllocationsToDelete.IterateUpTo(completedSerial)) {
         if (allocation.GetInfo().mMethod == AllocationMethod::kSubAllocated) {
             FreeSubAllocatedMemory(allocation);
@@ -435,19 +418,11 @@ void ResourceAllocatorManager::Tick(ExecutionSerial completedSerial) {
     mHeapsToDelete.ClearUpTo(completedSerial);
 }
 
-void ResourceAllocatorManager::DeallocateMemory(ResourceHeapAllocation& allocation,
-                                                Span<std::byte> persistentMappedData) {
+void ResourceAllocatorManager::DeallocateMemory(ResourceHeapAllocation& allocation) {
     if (allocation.GetInfo().mMethod == AllocationMethod::kInvalid) {
         return;
     }
 
-    if (!persistentMappedData.empty()) {
-        DAWN_ASSERT(allocation.GetInfo().mMethod == AllocationMethod::kDirect);
-        mPersistentMappingsToDelete.Enqueue(
-            PersistentMapping{allocation.GetD3D12Resource(),
-                              ToBackend(allocation.GetResourceHeap()), persistentMappedData},
-            mDevice->GetQueue()->GetPendingCommandSerial());
-    }
     mAllocationsToDelete.Enqueue(allocation, mDevice->GetQueue()->GetPendingCommandSerial());
 
     // Directly allocated ResourceHeapAllocations are created with a heap object that must be

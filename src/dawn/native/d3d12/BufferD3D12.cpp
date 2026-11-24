@@ -147,27 +147,6 @@ ResourceHeapKind GetResourceHeapKind(wgpu::BufferUsage bufferUsage,
         return ResourceHeapKind::Default_OnlyBuffers;
     }
 }
-
-bool IsCPUAccessibleResourceHeapKind(ResourceHeapKind resourceHeapKind) {
-    switch (resourceHeapKind) {
-        case ResourceHeapKind::Upload_AllBuffersAndTextures:
-        case ResourceHeapKind::Upload_OnlyBuffers:
-        case ResourceHeapKind::Readback_AllBuffersAndTextures:
-        case ResourceHeapKind::Readback_OnlyBuffers:
-        case ResourceHeapKind::Custom_WriteBack_OnlyBuffers:
-        case ResourceHeapKind::Custom_WriteCombine_OnlyBuffers:
-            return true;
-        case ResourceHeapKind::Default_AllBuffersAndTextures:
-        case ResourceHeapKind::Default_OnlyBuffers:
-        case ResourceHeapKind::Default_OnlyNonRenderableOrDepthTextures:
-        case ResourceHeapKind::Default_OnlyRenderableOrDepthTextures:
-            return false;
-        case ResourceHeapKind::EnumCount:
-            break;
-    }
-    DAWN_UNREACHABLE();
-}
-
 }  // namespace
 
 // static
@@ -266,15 +245,9 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
             DAWN_UNREACHABLE();
     }
 
-    // Persistently mapped buffers are allocated as committed resources so that unmapping one of
-    // them never affects the memory of another buffer in the same heap.
-    mUsePersistentMapping = IsCPUAccessibleResourceHeapKind(resourceHeapKind) &&
-                            GetDevice()->IsToggleEnabled(
-                                Toggle::D3D12PersistentlyMapBuffersAndClearBufferBeforeDestroy);
     DAWN_TRY_ASSIGN(mResourceAllocation,
                     ToBackend(GetDevice())
-                        ->AllocateMemory(resourceHeapKind, resourceDescriptor, mLastState, 0,
-                                         mUsePersistentMapping));
+                        ->AllocateMemory(resourceHeapKind, resourceDescriptor, mLastState, 0));
 
     SetLabelImpl();
 
@@ -517,18 +490,12 @@ MaybeError Buffer::MapInternal(bool isWrite, size_t offset, size_t size, const c
     // evicted. This buffer should already have been made resident when it was created.
     TRACE_EVENT(DAWN_TRACE_CATEGORY(), "BufferD3D12::MapInternal");
 
-    // A persistently mapped buffer stays mapped and locked resident after its first map.
-    if (!mMappedData.empty()) {
-        DAWN_ASSERT(mUsePersistentMapping);
-        return {};
-    }
-
-    Heap* lockedHeap = nullptr;
     if (mResourceAllocation.GetInfo().mMethod != AllocationMethod::kExternal) {
-        lockedHeap = ToBackend(mResourceAllocation.GetResourceHeap());
-        DAWN_TRY(ToBackend(GetDevice())->GetResidencyManager()->LockAllocation(lockedHeap));
+        Heap* heap = ToBackend(mResourceAllocation.GetResourceHeap());
+        DAWN_TRY(ToBackend(GetDevice())->GetResidencyManager()->LockAllocation(heap));
     }
 
+    D3D12_RANGE range = {offset, offset + size};
     // mappedPointer is the pointer to the start of the resource, irrespective of offset.
     // MSDN says (note the weird use of "never"):
     //
@@ -536,20 +503,8 @@ MaybeError Buffer::MapInternal(bool isWrite, size_t offset, size_t size, const c
     //   pReadRange.
     //
     // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12resource-map
-    //
-    // A persistently mapped buffer may later be read in any range, so no read range is given.
-    D3D12_RANGE range = {offset, offset + size};
     void* mappedPointer = nullptr;
-    DAWN_TRY_WITH_CLEANUP(
-        CheckHRESULT(
-            GetD3D12Resource()->Map(0, mUsePersistentMapping ? nullptr : &range, &mappedPointer),
-            contextInfo),
-        {
-            // Release the residency lock taken above as the buffer is not mapped.
-            if (lockedHeap != nullptr) {
-                ToBackend(GetDevice())->GetResidencyManager()->UnlockAllocation(lockedHeap);
-            }
-        });
+    DAWN_TRY(CheckHRESULT(GetD3D12Resource()->Map(0, &range, &mappedPointer), contextInfo));
     // SAFETY: The pointer returned is for the actual memory of the resource and contains at least
     // GetAllocatedSize() bytes.
     mMappedData = DAWN_UNSAFE_BUFFERS(
@@ -596,13 +551,6 @@ MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
 }
 
 void Buffer::UnmapImpl(BufferState oldState, BufferState newState) {
-    if (mUsePersistentMapping) {
-        // The D3D12 resource stays mapped and locked resident until deferred resource destruction,
-        // so mMappedData is kept.
-        mWrittenMappedRange = {0, 0};
-        return;
-    }
-
     GetD3D12Resource()->Unmap(0, &mWrittenMappedRange);
     mMappedData = {};
     mWrittenMappedRange = {0, 0};
@@ -629,21 +577,14 @@ void Buffer::DestroyImpl(DestroyReason reason) {
     //   is implicitly destroyed. This case is thread-safe because there are no
     //   other threads using the buffer since there are no other live refs.
     if (!mMappedData.empty()) {
-        // If the buffer is currently mapped (or persistently mapped, even if unmapped by the
-        // frontend), unmap without flushing the writes to the GPU since the buffer cannot be used
-        // anymore. UnmapImpl checks mWrittenMappedRange to know which parts to flush, so we set it
-        // to an empty range to prevent flushes.
+        // If the buffer is currently mapped, unmap without flushing the writes to the GPU
+        // since the buffer cannot be used anymore. UnmapImpl checks mWrittenRange to know
+        // which parts to flush, so we set it to an empty range to prevent flushes.
         mWrittenMappedRange = {0, 0};
     }
     BufferBase::DestroyImpl(reason);
 
-    // Transfer the persistent mapping and residency lock to deferred destruction. Buffers without
-    // persistent mapping have been unmapped above, so mMappedData is empty for them.
-    DAWN_ASSERT(mUsePersistentMapping || mMappedData.empty());
-    ToBackend(GetDevice())
-        ->DeallocateMemory(mResourceAllocation,
-                           mUsePersistentMapping ? mMappedData : Span<std::byte>{});
-    mMappedData = {};
+    ToBackend(GetDevice())->DeallocateMemory(mResourceAllocation);
 
     if (mHostMappedDisposeCallback) {
         struct DisposeTask : TrackTaskCallback {

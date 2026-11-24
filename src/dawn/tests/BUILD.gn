@@ -914,7 +914,6 @@ source_set("white_box_tests_sources") {
 
   if (dawn_enable_d3d12) {
     sources += [
-      "white_box/D3D12BufferPersistentMappingTests.cpp",
       "white_box/D3D12DescriptorHeapTests.cpp",
       "white_box/D3D12IndirectDrawBatchingTests.cpp",
       "white_box/D3D12ResidencyTests.cpp",

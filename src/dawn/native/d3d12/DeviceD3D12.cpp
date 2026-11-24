@@ -623,9 +623,8 @@ uint32_t Device::GetResourceHeapTier() const {
     return IsToggleEnabled(Toggle::UseD3D12ResourceHeapTier2) ? 2u : 1u;
 }
 
-void Device::DeallocateMemory(ResourceHeapAllocation& allocation,
-                              Span<std::byte> persistentMappedData) {
-    (*mResourceAllocatorManager)->DeallocateMemory(allocation, persistentMappedData);
+void Device::DeallocateMemory(ResourceHeapAllocation& allocation) {
+    (*mResourceAllocatorManager)->DeallocateMemory(allocation);
 }
 
 ResultOrError<ResourceHeapAllocation> Device::AllocateMemory(
