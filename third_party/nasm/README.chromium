@@ -2,7 +2,7 @@ Name: Netwide Assembler
 Short Name: nasm
 URL: https://github.com/netwide-assembler/nasm
 Version: N/A
-Revision: 525a09a813be0f75b646ee93fc2a31c27b87d722
+Revision: 54b1dcf7995006337c54f6862fd6f77a01e23e4e
 Update Mechanism: Autoroll
 License: BSD-2-Clause
 License File: LICENSE

@@ -840,7 +840,7 @@ deps = {
 
   # V8 and its dependencies for standalone builds.
   'third_party/v8/src': {
-    'url': '{chromium_git}/v8/v8.git@d71eef9e48bd904bbb18d7b8a6a296e132340ebd',
+    'url': '{chromium_git}/v8/v8.git@0714f6d3af431894b7e43f3522621eff1be6aae0',
     'condition': 'dawn_standalone and checkout_v8',
   },
 
@@ -850,7 +850,7 @@ deps = {
   },
 
   'third_party/fast_float/src': {
-    'url': '{chromium_git}/external/github.com/fastfloat/fast_float.git@dbeabeeb3e6791cb96994c2a7a084c36e62ccfb2',
+    'url': '{chromium_git}/external/github.com/fastfloat/fast_float.git@517e6b8e008341fc4ebf80cc709d8b51610a888e',
     'condition': 'dawn_standalone and checkout_v8',
   },
 
@@ -875,12 +875,12 @@ deps = {
   },
 
   'third_party/boringssl/src': {
-    'url': '{boringssl_git}/boringssl.git@26584e7a10cc0ffa4df14f4eb7f90e5b44b37ffe',
+    'url': '{boringssl_git}/boringssl.git@4f3ef1e422b7cc6b880c5712feb35126ce294ce0',
     'condition': 'dawn_standalone and checkout_v8',
   },
 
   'third_party/nasm/src': {
-    'url': '{chromium_git}/chromium/deps/nasm.git@525a09a813be0f75b646ee93fc2a31c27b87d722',
+    'url': '{chromium_git}/chromium/deps/nasm.git@54b1dcf7995006337c54f6862fd6f77a01e23e4e',
     'condition': 'dawn_standalone and checkout_v8',
   },
 
