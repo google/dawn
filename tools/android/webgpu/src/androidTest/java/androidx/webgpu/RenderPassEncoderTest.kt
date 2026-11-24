@@ -591,8 +591,8 @@ class RenderPassEncoderTest {
 
         device.pushErrorScope(ErrorFilter.Validation)
         invalidEncoder.finish().close()
-        assertThrowsSuspend(ValidationException::class.java) {
-          device.popErrorScope()
+        val unusedAssert = assertThrowsSuspend(ValidationException::class.java) {
+          val unusedPop = device.popErrorScope()
         }
 
         dynamicPipeline.close()
