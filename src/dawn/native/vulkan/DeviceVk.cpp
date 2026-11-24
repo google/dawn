@@ -811,7 +811,8 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
             mDeviceInfo.bfloat16Features.shaderBFloat16CooperativeMatrix == VK_TRUE) {
             usedKnobs.bfloat16Features.shaderBFloat16Type = VK_TRUE;
             usedKnobs.bfloat16Features.shaderBFloat16CooperativeMatrix = VK_TRUE;
-            featuresChain.Add(&usedKnobs.bfloat16Features);
+            featuresChain.Add(&usedKnobs.bfloat16Features,
+                              VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_BFLOAT16_FEATURES_KHR);
         }
 
         // If robustBufferAccess2 is enabled and cooperativeMatrixRobustBufferAccess is available,
