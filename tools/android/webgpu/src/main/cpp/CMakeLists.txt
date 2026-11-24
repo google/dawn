@@ -35,6 +35,14 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 set(DAWN_BUILD_MONOLITHIC_LIBRARY STATIC)
 
+# Use ThinLTO in optimized builds (the release AAR). Turn it off for faster
+# local builds or bisecting with -DWEBGPU_THIN_LTO=OFF.
+option(WEBGPU_THIN_LTO "Use ThinLTO in optimized builds" ON)
+if (WEBGPU_THIN_LTO AND CMAKE_BUILD_TYPE MATCHES "^(Release|RelWithDebInfo|MinSizeRel)$")
+    add_compile_options(-flto=thin)
+    add_link_options(-flto=thin)
+endif()
+
 set(DAWN_DIR "${webgpu_SOURCE_DIR}/../../../../../..")
 add_subdirectory(${DAWN_DIR} dawn)
 
