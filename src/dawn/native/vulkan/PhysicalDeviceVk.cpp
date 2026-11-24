@@ -36,6 +36,7 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "src/dawn/common/Enumerator.h"
 #include "src/dawn/common/GPUInfo.h"
+#include "src/dawn/common/Math.h"
 #include "src/dawn/native/ChainUtils.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/Instance.h"
@@ -947,6 +948,8 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     } else {
         limits->v1.maxBufferSize = mDeviceInfo.maintenance3Properties.maxMemoryAllocationSize;
     }
+    // Round down so normal four-byte buffer alignment cannot exceed the advertised Vulkan limit.
+    limits->v1.maxBufferSize = AlignDown(limits->v1.maxBufferSize, 4);
 
     // OpArrayLength returns 0 for buffers >= 2GB for some NVIDIA devices.
     // There is an open bug with NVIDIA to resolve. Likely some issue with the sign bit.
