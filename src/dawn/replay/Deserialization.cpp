@@ -27,56 +27,19 @@
 
 #include "src/dawn/replay/Deserialization.h"
 
-#include <cstdint>
-#include <span>
+#include <cstddef>
 #include <string>
 
 #include "src/dawn/replay/ReadHead.h"
-#include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn::replay {
-
-MaybeError ReadBytes(ReadHead& s, void* data, size_t size) {
-    return s.ReadBytes(DAWN_UNSAFE_TODO(std::span<uint8_t>(static_cast<uint8_t*>(data), size)));
-}
-
-MaybeError Deserialize(ReadHead& s, int32_t* v) {
-    return ReadBytes(s, reinterpret_cast<char*>(v), sizeof(*v));
-}
-
-MaybeError Deserialize(ReadHead& s, uint8_t* v) {
-    return ReadBytes(s, reinterpret_cast<char*>(v), sizeof(*v));
-}
-
-MaybeError Deserialize(ReadHead& s, uint16_t* v) {
-    return ReadBytes(s, reinterpret_cast<char*>(v), sizeof(*v));
-}
-
-MaybeError Deserialize(ReadHead& s, uint32_t* v) {
-    return ReadBytes(s, reinterpret_cast<char*>(v), sizeof(*v));
-}
-
-MaybeError Deserialize(ReadHead& s, uint64_t* v) {
-    return ReadBytes(s, reinterpret_cast<char*>(v), sizeof(*v));
-}
-
-MaybeError Deserialize(ReadHead& s, float* v) {
-    return ReadBytes(s, reinterpret_cast<char*>(v), sizeof(*v));
-}
-
-MaybeError Deserialize(ReadHead& s, double* v) {
-    return ReadBytes(s, reinterpret_cast<char*>(v), sizeof(*v));
-}
-
-MaybeError Deserialize(ReadHead& s, bool* v) {
-    return ReadBytes(s, reinterpret_cast<char*>(v), sizeof(*v));
-}
 
 MaybeError Deserialize(ReadHead& s, std::string* v) {
     size_t size = 0;
     DAWN_TRY(Deserialize(s, &size));
     v->resize(size);
-    return ReadBytes(s, v->data(), size);
+    return s.ReadBytes(SpanAsWritableBytes(Span<char>(*v)));
 }
 
 }  // namespace dawn::replay

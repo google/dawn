@@ -30,6 +30,7 @@
 #include <webgpu/webgpu_cpp.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <iostream>
 #include <memory>
 #include <ranges>
@@ -49,6 +50,7 @@
 #include "src/dawn/replay/SurfaceDiscovery.h"
 #include "src/utils/numeric.h"
 #include "src/utils/platform.h"
+#include "src/utils/span.h"
 
 namespace dawn::replay {
 
@@ -448,10 +450,10 @@ MaybeError ReadContentIntoBuffer(ReadHead& readHead,
                                  wgpu::Buffer buffer,
                                  uint64_t bufferOffset,
                                  uint64_t size) {
-    const uint32_t* data;
+    Span<const std::byte> data;
     DAWN_TRY_ASSIGN(data, readHead.GetData(checked_cast<size_t>(size)));
 
-    device.GetQueue().WriteBuffer(buffer, bufferOffset, data, checked_cast<size_t>(size));
+    device.GetQueue().WriteBuffer(buffer, bufferOffset, data.data(), data.size());
     return {};
 }
 
@@ -461,14 +463,14 @@ MaybeError ReadContentIntoTexture(const DawnRootCommandVisitor& replay,
                                   const schema::RootCommandWriteTextureCmdData& cmdData) {
     const uint64_t dataSize = (cmdData.dataSize + 3) & ~3u;
 
-    const uint32_t* data;
+    Span<const std::byte> data;
     DAWN_TRY_ASSIGN(data, readHead.GetData(checked_cast<size_t>(dataSize)));
 
     wgpu::TexelCopyTextureInfo dst = ToWGPU(replay, cmdData.destination);
     wgpu::TexelCopyBufferLayout layout = ToWGPU(cmdData.layout);
     wgpu::Extent3D size = ToWGPU(cmdData.size);
-    device.GetQueue().WriteTexture(&dst, data, checked_cast<size_t>(cmdData.dataSize), &layout,
-                                   &size);
+    device.GetQueue().WriteTexture(&dst, data.data(), checked_cast<size_t>(cmdData.dataSize),
+                                   &layout, &size);
     return {};
 }
 
@@ -493,7 +495,7 @@ MaybeError InitializeTexture(const DawnRootCommandVisitor& replay,
                              const schema::RootCommandInitTextureCmdData& cmdData) {
     const uint64_t dataSize = (cmdData.dataSize + 3) & ~3u;
 
-    const uint32_t* data;
+    Span<const std::byte> data;
     DAWN_TRY_ASSIGN(data, readHead.GetData(checked_cast<size_t>(dataSize)));
 
     wgpu::TexelCopyTextureInfo dst = ToWGPU(replay, cmdData.destination);
@@ -502,10 +504,10 @@ MaybeError InitializeTexture(const DawnRootCommandVisitor& replay,
 
     if (TextureFormatNeedsBlit(dst.texture.GetFormat(), dst.aspect)) {
         DAWN_TRY(blitBufferToDepthTexture.Blit(
-            device, dst, data, checked_cast<size_t>(cmdData.dataSize), layout, size));
+            device, dst, data.data(), checked_cast<size_t>(cmdData.dataSize), layout, size));
     } else {
-        device.GetQueue().WriteTexture(&dst, data, checked_cast<size_t>(cmdData.dataSize), &layout,
-                                       &size);
+        device.GetQueue().WriteTexture(&dst, data.data(), checked_cast<size_t>(cmdData.dataSize),
+                                       &layout, &size);
     }
     return {};
 }

@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_REPLAY_CAPTURE_H_
 #define SRC_DAWN_REPLAY_CAPTURE_H_
 
+#include <cstddef>
 #include <istream>
 #include <memory>
 #include <vector>
@@ -58,10 +59,10 @@ class CaptureImpl : public Capture, public CaptureWalker {
     ReadHead GetContentReadHead() const override;
 
   private:
-    CaptureImpl(std::vector<uint8_t> commands, std::vector<uint8_t> content);
+    CaptureImpl(std::vector<std::byte> commands, std::vector<std::byte> content);
 
-    std::vector<uint8_t> mCommands;
-    std::vector<uint8_t> mContent;
+    std::vector<std::byte> mCommands;
+    std::vector<std::byte> mContent;
 };
 
 }  // namespace dawn::replay

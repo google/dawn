@@ -27,7 +27,7 @@
 
 #include "src/dawn/replay/Capture.h"
 
-#include <span>
+#include <cstddef>
 #include <sstream>
 #include <utility>
 
@@ -49,18 +49,18 @@ std::unique_ptr<CaptureImpl> CaptureImpl::Create(CaptureStream& commandStream,
                                                  size_t commandSize,
                                                  CaptureStream& contentStream,
                                                  size_t contentSize) {
-    std::vector<uint8_t> commands;
+    std::vector<std::byte> commands;
     commands.resize(commandSize);
     commandStream.read(reinterpret_cast<char*>(commands.data()), sign_cast(commandSize));
 
-    std::vector<uint8_t> content;
+    std::vector<std::byte> content;
     content.resize(contentSize);
     contentStream.read(reinterpret_cast<char*>(content.data()), sign_cast(contentSize));
 
     return std::unique_ptr<CaptureImpl>(new CaptureImpl(std::move(commands), std::move(content)));
 }
 
-CaptureImpl::CaptureImpl(std::vector<uint8_t> commands, std::vector<uint8_t> content)
+CaptureImpl::CaptureImpl(std::vector<std::byte> commands, std::vector<std::byte> content)
     : mCommands(std::move(commands)), mContent(std::move(content)) {}
 
 CaptureImpl::~CaptureImpl() {}

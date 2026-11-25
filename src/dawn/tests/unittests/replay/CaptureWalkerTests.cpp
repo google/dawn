@@ -28,7 +28,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <string>
+#include <algorithm>
+#include <cstddef>
+#include <iterator>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -161,30 +164,29 @@ class MockRootCommandVisitor : public RootCommandVisitor {
 
 class TestCaptureWalker : public CaptureWalker {
   public:
-    explicit TestCaptureWalker(std::vector<uint8_t> commands) : mCommands(std::move(commands)) {}
+    explicit TestCaptureWalker(std::vector<std::byte> commands) : mCommands(std::move(commands)) {}
 
   protected:
     ReadHead GetCommandReadHead() const override { return ReadHead(mCommands); }
     ReadHead GetContentReadHead() const override { return ReadHead(mContent); }
 
   private:
-    std::vector<uint8_t> mCommands;
-    std::vector<uint8_t> mContent;
+    std::vector<std::byte> mCommands;
+    std::vector<std::byte> mContent;
 };
 
 // Test that CaptureWalker correctly skips nested CommandBuffer commands when using
 // SurfaceDiscoveryVisitor.
 TEST(CaptureWalkerTests, SurfaceDiscoverySkipsCommandBuffer) {
-    std::vector<uint8_t> commands;
+    std::vector<std::byte> commands;
 
     auto Emit = [&](auto v) {
-        Span<const uint8_t> p = ReinterpretSpan<const uint8_t>(ByteSpanFromRef(v));
-        commands.insert(commands.end(), p.begin(), p.end());
+        std::ranges::copy(ByteSpanFromRef(v), std::back_inserter(commands));
     };
 
-    auto EmitString = [&](std::string s) {
-        Emit(static_cast<size_t>(s.size()));
-        commands.insert(commands.end(), s.begin(), s.end());
+    auto EmitString = [&](std::string_view s) {
+        Emit(s.size());
+        std::ranges::copy(SpanAsBytes(Span<const char>(s)), std::back_inserter(commands));
     };
 
     // 1. CreateResource (CommandBuffer)

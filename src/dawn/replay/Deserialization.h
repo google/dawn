@@ -31,36 +31,38 @@
 #include <webgpu/webgpu_cpp.h>
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <type_traits>
 #include <vector>
 
 #include "src/dawn/replay/Error.h"
+#include "src/dawn/replay/ReadHead.h"
+#include "src/utils/span.h"
 
 namespace dawn::replay {
 
-class ReadHead;
-
 // ----- Deserialization -----
 
-MaybeError ReadBytes(ReadHead& s, void* data, size_t size);
-MaybeError Deserialize(ReadHead& s, int32_t* v);
-MaybeError Deserialize(ReadHead& s, uint8_t* v);
-MaybeError Deserialize(ReadHead& s, uint16_t* v);
-MaybeError Deserialize(ReadHead& s, uint32_t* v);
-MaybeError Deserialize(ReadHead& s, uint64_t* v);
-MaybeError Deserialize(ReadHead& s, float* v);
-MaybeError Deserialize(ReadHead& s, double* v);
-MaybeError Deserialize(ReadHead& s, bool* v);
 MaybeError Deserialize(ReadHead& s, std::string* v);
 
+template <typename T, typename... Ts>
+concept OneOf = (std::is_same_v<T, Ts> || ...);
+
 template <typename T>
-MaybeError Deserialize(ReadHead& s, T* v)
-    requires(std::is_same_v<T, size_t> && !std::is_same_v<T, uint64_t> &&
-             !std::is_same_v<T, uint32_t>)
-{
-    return ReadBytes(s, reinterpret_cast<char*>(v), sizeof(*v));
+concept DeserializablePrimitive =
+    OneOf<T, int32_t, uint8_t, uint16_t, uint32_t, uint64_t, size_t, float, double, bool>;
+
+template <typename T>
+concept DeserializableEnum = !std::is_const_v<T> && !std::is_volatile_v<T> && std::is_enum_v<T> &&
+                             OneOf<std::underlying_type_t<T>, uint32_t, uint64_t>;
+
+// Deserialize for primitive types and enum types with uint32_t or uint64_t underlying type.
+template <typename T>
+    requires DeserializablePrimitive<T> || DeserializableEnum<T>
+MaybeError Deserialize(ReadHead& s, T* v) {
+    return s.ReadBytes(ByteSpanFromRef(*v));
 }
 
 template <typename T>
@@ -82,17 +84,9 @@ MaybeError Deserialize(ReadHead& s, std::array<T, N>* v) {
     return {};
 }
 
-// Deserialize for enum types with uint32_t or uint64_t underlying type.
-template <typename T>
-    requires(std::is_enum_v<T> && (std::is_same_v<typename std::underlying_type_t<T>, uint32_t> ||
-                                   std::is_same_v<typename std::underlying_type_t<T>, uint64_t>))
-MaybeError Deserialize(ReadHead& s, T* value) {
-    return ReadBytes(s, reinterpret_cast<char*>(value), sizeof(T));
-}
-
 // Helper to call Deserialize on a parameter pack.
 template <typename T, typename... Ts>
-    requires((sizeof...(Ts) > 0) || !std::is_enum_v<T>)
+    requires(sizeof...(Ts) > 0)
 MaybeError Deserialize(ReadHead& s, T* v, Ts*... vs) {
     DAWN_TRY(Deserialize(s, v));
     return Deserialize(s, vs...);

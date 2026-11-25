@@ -28,33 +28,28 @@
 #ifndef SRC_DAWN_REPLAY_READHEAD_H_
 #define SRC_DAWN_REPLAY_READHEAD_H_
 
-#include <cstdint>
-#include <span>
-#include <string>
+#include <cstddef>
 
 #include "src/dawn/replay/Error.h"
+#include "src/utils/span.h"
 
 namespace dawn::replay {
 
 class ReadHead {
   public:
-    explicit ReadHead(std::span<const uint8_t> data);
+    explicit ReadHead(Span<const std::byte> data);
     explicit ReadHead(const ReadHead&) = delete;
     ReadHead& operator=(const ReadHead&) = delete;
 
-    MaybeError ReadBytes(std::span<uint8_t> dest);
+    MaybeError ReadBytes(Span<std::byte> dest);
 
-    ResultOrError<const uint32_t*> GetData(size_t size);
+    ResultOrError<Span<const std::byte>> GetData(size_t size);
     bool IsBad() const;
     bool IsDone() const;
 
   private:
-    using iterator = typename std::span<const uint8_t>::iterator;
-
     bool mBad = false;
-
-    std::span<const uint8_t> mData;
-    iterator mReadHead;
+    Span<const std::byte> mRemaining;
 };
 
 }  // namespace dawn::replay

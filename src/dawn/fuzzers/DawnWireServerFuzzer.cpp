@@ -29,8 +29,10 @@
 
 #include <webgpu/webgpu_cpp.h>
 
+#include <cstddef>
 #include <fstream>
 #include <memory>
+#include <span>
 #include <vector>
 
 #include "dawn/dawn_proc.h"
@@ -57,13 +59,12 @@ class DevNull : public dawn::wire::CommandSerializer {
         if (size > buf.size()) {
             buf.resize(size);
         }
-        return DAWN_UNSAFE_TODO(
-            std::span<volatile std::byte>(reinterpret_cast<volatile std::byte*>(buf.data()), size));
+        return std::span<volatile std::byte>(buf).first(size);
     }
     bool Flush() override { return true; }
 
   private:
-    std::vector<char> buf;
+    std::vector<std::byte> buf;
 };
 
 // We need this static function pointer to make AdapterSupported accessible in

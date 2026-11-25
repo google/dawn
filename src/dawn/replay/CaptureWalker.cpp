@@ -137,19 +137,23 @@ MaybeError Deserialize(ReadHead& readHead, RenderBundleData* out) {
     return {};
 }
 
+template <typename T>
+MaybeError DeserializeResourceDataForType(ReadHead& readHead, ResourceData* out) {
+    if constexpr (!std::is_same_v<T, InvalidData> && !std::is_same_v<T, DeviceData>) {
+        T data{};
+        DAWN_TRY(Deserialize(readHead, &data));
+        *out = std::move(data);
+    } else {
+        *out = T{};
+    }
+    return {};
+}
+
 MaybeError DeserializeResourceData(ReadHead& readHead, schema::ObjectType type, ResourceData* out) {
     switch (type) {
-#define AS_DESERIALIZE_RESOURCE_DATA_CASE(NAME, TYPE)                                            \
-    case schema::ObjectType::NAME: {                                                             \
-        if constexpr (!std::is_same_v<TYPE, InvalidData> && !std::is_same_v<TYPE, DeviceData>) { \
-            TYPE data{};                                                                         \
-            DAWN_TRY(Deserialize(readHead, &data));                                              \
-            *out = std::move(data);                                                              \
-        } else {                                                                                 \
-            *out = TYPE{};                                                                       \
-        }                                                                                        \
-        return {};                                                                               \
-    }
+#define AS_DESERIALIZE_RESOURCE_DATA_CASE(NAME, TYPE) \
+    case schema::ObjectType::NAME:                    \
+        return DeserializeResourceDataForType<TYPE>(readHead, out);
         DAWN_REPLAY_RESOURCE_DATA_MAP(AS_DESERIALIZE_RESOURCE_DATA_CASE)
 #undef AS_DESERIALIZE_RESOURCE_DATA_CASE
         default:

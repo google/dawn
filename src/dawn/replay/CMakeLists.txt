@@ -68,6 +68,7 @@ dawn_add_library(
     PRIVATE_DEPENDS
         absl::flat_hash_map
         absl::str_format
+        dawn::partition_alloc
 )
 target_compile_definitions(replay PRIVATE "DAWN_REPLAY_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)

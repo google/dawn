@@ -27,40 +27,29 @@
 
 #include "src/dawn/replay/ReadHead.h"
 
-#include <algorithm>
-
-#include "src/utils/numeric.h"
-
 namespace dawn::replay {
 
-ReadHead::ReadHead(std::span<const uint8_t> data) : mData(data), mReadHead(data.begin()) {}
+ReadHead::ReadHead(Span<const std::byte> data) : mRemaining(data) {}
 
-MaybeError ReadHead::ReadBytes(std::span<uint8_t> dest) {
-    auto newHead = mReadHead + sign_cast(dest.size());
-    if (newHead <= mData.end()) {
-        std::copy_n(mReadHead, dest.size(), dest.begin());
-        mReadHead = newHead;
-        return {};
+MaybeError ReadHead::ReadBytes(Span<std::byte> dest) {
+    if (dest.size() > mRemaining.size()) {
+        mBad = true;
+        return DAWN_UNRECOVERABLE_ERROR("Read past end of data");
     }
-    mBad = true;
-    return DAWN_UNRECOVERABLE_ERROR("Read past end of data");
+    dest.CopyFrom(mRemaining.TakeFirst(dest.size()));
+    return {};
 }
 
-ResultOrError<const uint32_t*> ReadHead::GetData(size_t size) {
+ResultOrError<Span<const std::byte>> ReadHead::GetData(size_t size) {
     if (size % 4 != 0) {
         mBad = true;
         return DAWN_UNRECOVERABLE_ERROR("GetData size not multiple of 4");
     }
-    size_t alignedSize = (size + 3) & ~3u;
-    auto newHead = mReadHead + sign_cast(alignedSize);
-    if (newHead <= mData.end()) {
-        const uint32_t* data = reinterpret_cast<const uint32_t*>(&*mReadHead);
-        mReadHead = newHead;
-        return {data};
+    if (size > mRemaining.size()) {
+        mBad = true;
+        return DAWN_UNRECOVERABLE_ERROR("GetData past end of data");
     }
-
-    mBad = true;
-    return DAWN_UNRECOVERABLE_ERROR("GetData past end of data");
+    return mRemaining.TakeFirst(size);
 }
 
 bool ReadHead::IsBad() const {
@@ -68,7 +57,7 @@ bool ReadHead::IsBad() const {
 }
 
 bool ReadHead::IsDone() const {
-    return mBad || mReadHead == mData.end();
+    return mBad || mRemaining.empty();
 }
 
 }  // namespace dawn::replay
