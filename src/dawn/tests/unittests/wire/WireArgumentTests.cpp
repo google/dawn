@@ -27,26 +27,27 @@
 
 #include <array>
 #include <string>
+#include <string_view>
 
 #include "src/dawn/common/Constants.h"
+#include "src/dawn/tests/StringViewMatchers.h"
 #include "src/dawn/tests/unittests/wire/WireTest.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn::wire {
 namespace {
 
 using ::testing::_;
 using ::testing::AllOf;
+using ::testing::Args;
+using ::testing::ElementsAreArray;
 using ::testing::Eq;
 using ::testing::Field;
 using ::testing::Return;
 using ::testing::Sequence;
-
-MATCHER_P2(EqBytes, bytes, size, "") {
-    const char* dataToCheck = arg;
-    bool isMatch = (DAWN_UNSAFE_TODO(memcmp(dataToCheck, bytes, size)) == 0);
-    return isMatch;
-}
+using ::testing::SizedString;
+using ::testing::StrEq;
 
 class WireArgumentTests : public WireTest {
   public:
@@ -100,17 +101,8 @@ TEST_F(WireArgumentTests, ValueArrayArgument) {
     WGPUComputePassEncoder apiPass = api.GetNewComputePassEncoder();
     EXPECT_CALL(api, CommandEncoderBeginComputePass(apiEncoder, nullptr)).WillOnce(Return(apiPass));
 
-    DAWN_UNSAFE_TODO(
-        EXPECT_CALL(api, ComputePassEncoderSetBindGroup(
-                             apiPass, 0, apiBindGroup, testOffsets.size(),
-                             MatchesLambda([testOffsets](const uint32_t* offsets) -> bool {
-                                 for (size_t i = 0; i < testOffsets.size(); i++) {
-                                     if (offsets[i] != testOffsets[i]) {
-                                         return false;
-                                     }
-                                 }
-                                 return true;
-                             }))));
+    EXPECT_CALL(api, ComputePassEncoderSetBindGroup(apiPass, 0, apiBindGroup, _, _))
+        .With(Args<4, 3>(ElementsAreArray(testOffsets)));
 
     FlushClient();
 }
@@ -165,13 +157,11 @@ TEST_F(WireArgumentTests, CStringArgument) {
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
     WGPURenderPipeline apiPlaceholderPipeline = api.GetNewRenderPipeline();
-    EXPECT_CALL(api,
-                DeviceCreateRenderPipeline(
-                    apiDevice, MatchesLambda([](const WGPURenderPipelineDescriptor* desc) -> bool {
-                        return DAWN_UNSAFE_TODO(std::string_view(desc->vertex.entryPoint.data,
-                                                                 desc->vertex.entryPoint.length)) ==
-                               "main";
-                    })))
+    EXPECT_CALL(
+        api, DeviceCreateRenderPipeline(
+                 apiDevice, MatchesLambda([](const WGPURenderPipelineDescriptor* desc) -> bool {
+                     return std::string_view(wgpu::StringView(desc->vertex.entryPoint)) == "main";
+                 })))
         .WillOnce(Return(apiPlaceholderPipeline));
 
     FlushClient();
@@ -185,32 +175,28 @@ TEST_F(WireArgumentTests, WGPUStringView) {
     WGPUShaderModule apiVsModule = api.GetNewShaderModule();
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiVsModule));
 
-    const char* label = "null-terminated label\0more string";
-    vsModule.SetLabel(std::string_view(label));
-    EXPECT_CALL(api, ShaderModuleSetLabel(apiVsModule,
-                                          AllOf(Field(&WGPUStringView::data, EqBytes(label, 21u)),
-                                                Field(&WGPUStringView::length, Eq(21u)))));
+    const std::string labelStorage =
+        std::string("null-terminated label") + '\0' + "more string" + '\0';
+    std::string_view label = labelStorage;
+    vsModule.SetLabel(std::string_view(label.data()));
+    EXPECT_CALL(api, ShaderModuleSetLabel(apiVsModule, SizedString(label.substr(0, 21))));
     FlushClient();
 
     // Give it a longer, explicit length that contains the null-terminator.
-    vsModule.SetLabel(DAWN_UNSAFE_TODO(std::string_view(label, 34)));
-    EXPECT_CALL(api, ShaderModuleSetLabel(apiVsModule,
-                                          AllOf(Field(&WGPUStringView::data, EqBytes(label, 34u)),
-                                                Field(&WGPUStringView::length, Eq(34u)))));
+    vsModule.SetLabel(label);
+    EXPECT_CALL(api, ShaderModuleSetLabel(apiVsModule, SizedString(label)));
     FlushClient();
 
     // Give it a shorder, explicit length.
-    vsModule.SetLabel(DAWN_UNSAFE_TODO(std::string_view(label, 2)));
-    EXPECT_CALL(api, ShaderModuleSetLabel(apiVsModule,
-                                          AllOf(Field(&WGPUStringView::data, EqBytes(label, 2u)),
-                                                Field(&WGPUStringView::length, Eq(2u)))));
+    vsModule.SetLabel(label.substr(0, 2));
+    EXPECT_CALL(api, ShaderModuleSetLabel(apiVsModule, SizedString(label.substr(0, 2))));
     FlushClient();
 
     // Give it a zero length.
-    vsModule.SetLabel(DAWN_UNSAFE_TODO(std::string_view(label, 0)));
-    EXPECT_CALL(
-        api, ShaderModuleSetLabel(apiVsModule, AllOf(Field(&WGPUStringView::data, EqBytes("", 1u)),
-                                                     Field(&WGPUStringView::length, Eq(0u)))));
+    vsModule.SetLabel(label.substr(0, 0));
+    EXPECT_CALL(api,
+                ShaderModuleSetLabel(apiVsModule, AllOf(Field(&WGPUStringView::data, StrEq("")),
+                                                        Field(&WGPUStringView::length, Eq(0u)))));
     FlushClient();
 
     // Give it zero length and data.
@@ -260,16 +246,16 @@ TEST_F(WireArgumentTests, ObjectsAsPointerArgument) {
     Sequence s;
     for (int i = 0; i < 2; ++i) {
         wgpu::CommandEncoder cmdBufEncoder = device.CreateCommandEncoder();
-        DAWN_UNSAFE_TODO(cmdBufs[i]) = cmdBufEncoder.Finish();
+        cmdBufs[i] = cmdBufEncoder.Finish();
 
         WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
         EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
             .InSequence(s)
             .WillOnce(Return(apiCmdBufEncoder));
 
-        DAWN_UNSAFE_TODO(apiCmdBufs[i]) = api.GetNewCommandBuffer();
+        apiCmdBufs[i] = api.GetNewCommandBuffer();
         EXPECT_CALL(api, CommandEncoderFinish(apiCmdBufEncoder, nullptr))
-            .WillOnce(Return(DAWN_UNSAFE_TODO(apiCmdBufs[i])));
+            .WillOnce(Return(apiCmdBufs[i]));
 
         EXPECT_CALL(api, CommandEncoderRelease(apiCmdBufEncoder));
     }
@@ -277,10 +263,7 @@ TEST_F(WireArgumentTests, ObjectsAsPointerArgument) {
     // Submit command buffer and check we got a call with both API-side command buffers
     queue.Submit(2, cmdBufs.data());
 
-    DAWN_UNSAFE_TODO(EXPECT_CALL(
-        api, QueueSubmit(apiQueue, 2, MatchesLambda([=](const WGPUCommandBuffer* cmdBufs) -> bool {
-                             return cmdBufs[0] == apiCmdBufs[0] && cmdBufs[1] == apiCmdBufs[1];
-                         }))));
+    EXPECT_CALL(api, QueueSubmit(apiQueue, _, _)).With(Args<2, 1>(ElementsAreArray(apiCmdBufs)));
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _, _));
 
     FlushClient();
@@ -370,26 +353,31 @@ TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
 
     wgpu::BindGroupLayout bgl = device.CreateBindGroupLayout(&bglDescriptor);
     WGPUBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
-    DAWN_UNSAFE_TODO(
-        EXPECT_CALL(
-            api,
-            DeviceCreateBindGroupLayout(
-                apiDevice,
-                MatchesLambda([entries](const WGPUBindGroupLayoutDescriptor* desc) -> bool {
-                    for (int i = 0; i < NUM_BINDINGS; ++i) {
-                        const auto& a = desc->entries[i];
-                        const auto& b = entries[i];
-                        if (a.binding != b.binding ||
-                            a.visibility != static_cast<WGPUShaderStage>(b.visibility) ||
-                            a.buffer.type != static_cast<WGPUBufferBindingType>(b.buffer.type) ||
-                            a.sampler.type != static_cast<WGPUSamplerBindingType>(b.sampler.type) ||
-                            a.texture.sampleType !=
-                                static_cast<WGPUTextureSampleType>(b.texture.sampleType)) {
-                            return false;
-                        }
+    EXPECT_CALL(
+        api,
+        DeviceCreateBindGroupLayout(
+            apiDevice, MatchesLambda([entries](const WGPUBindGroupLayoutDescriptor* desc) -> bool {
+                auto descEntries =
+                    // SAFETY: entries points to entryCount elements.
+                    DAWN_UNSAFE_BUFFERS(
+                        Span<const WGPUBindGroupLayoutEntry>(desc->entries, desc->entryCount));
+                if (descEntries.size() != entries.size()) {
+                    return false;
+                }
+                for (size_t i = 0; i < entries.size(); ++i) {
+                    const auto& a = descEntries[i];
+                    const auto& b = entries[i];
+                    if (a.binding != b.binding ||
+                        a.visibility != static_cast<WGPUShaderStage>(b.visibility) ||
+                        a.buffer.type != static_cast<WGPUBufferBindingType>(b.buffer.type) ||
+                        a.sampler.type != static_cast<WGPUSamplerBindingType>(b.sampler.type) ||
+                        a.texture.sampleType !=
+                            static_cast<WGPUTextureSampleType>(b.texture.sampleType)) {
+                        return false;
                     }
-                    return desc->nextInChain == nullptr && desc->entryCount == 3;
-                }))))
+                }
+                return desc->nextInChain == nullptr;
+            })))
         .WillOnce(Return(apiBgl));
 
     FlushClient();

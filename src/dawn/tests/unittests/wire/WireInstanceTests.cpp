@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <array>
 #include <initializer_list>
 #include <unordered_set>
 #include <vector>
@@ -37,7 +38,9 @@
 #include "src/dawn/tests/StringViewMatchers.h"
 #include "src/dawn/tests/unittests/wire/WireFutureTest.h"
 #include "src/dawn/tests/unittests/wire/WireTest.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 #include "webgpu/webgpu_cpp.h"
 
 namespace dawn::wire {
@@ -198,8 +201,7 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
                 WGPUSupportedFeatures features = {};
                 adapter.GetFeatures(reinterpret_cast<wgpu::SupportedFeatures*>(&features));
 
-                std::vector<WGPUFeatureName> featuresList(
-                    features.features, DAWN_UNSAFE_TODO(features.features + features.featureCount));
+                auto featuresList = WGPU_SPAN(features.feature);
                 ASSERT_EQ(featuresList.size(), fakeFeaturesList.size());
                 std::unordered_set<WGPUFeatureName> featureSet(fakeFeaturesList);
                 for (WGPUFeatureName feature : featuresList) {
@@ -216,16 +218,16 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
     wgpu::RequestAdapterOptions options = {};
     RequestAdapter(&options);
 
-    WGPUMemoryHeapInfo fakeHeapInfo[3] = {
-        {WGPUHeapProperty_DeviceLocal, 64},
-        {WGPUHeapProperty_DeviceLocal | WGPUHeapProperty_HostVisible, 136},
-        {WGPUHeapProperty_HostCached | WGPUHeapProperty_HostVisible, 460},
+    std::array fakeHeapInfo = {
+        WGPUMemoryHeapInfo{WGPUHeapProperty_DeviceLocal, 64},
+        WGPUMemoryHeapInfo{WGPUHeapProperty_DeviceLocal | WGPUHeapProperty_HostVisible, 136},
+        WGPUMemoryHeapInfo{WGPUHeapProperty_HostCached | WGPUHeapProperty_HostVisible, 460},
     };
 
     WGPUAdapterPropertiesMemoryHeaps fakeMemoryHeapProperties = {};
     fakeMemoryHeapProperties.chain.sType = WGPUSType_AdapterPropertiesMemoryHeaps;
-    fakeMemoryHeapProperties.heapCount = 3;
-    fakeMemoryHeapProperties.heapInfo = fakeHeapInfo;
+    fakeMemoryHeapProperties.heapCount = fakeHeapInfo.size();
+    fakeMemoryHeapProperties.heapInfo = fakeHeapInfo.data();
 
     WGPUAdapterPropertiesD3D fakeD3DProperties = {};
     fakeD3DProperties.chain.sType = WGPUSType_AdapterPropertiesD3D;
@@ -237,19 +239,20 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
     fakeVkProperties.chain.sType = WGPUSType_AdapterPropertiesVk;
     fakeVkProperties.driverVersion = 0x801F6000;
 
-    WGPUSubgroupMatrixConfig fakeMatrixConfigs[3] = {
-        {WGPUSubgroupMatrixComponentType_F32, WGPUSubgroupMatrixComponentType_F32, 8, 4, 2,
-         kDefaultSubgroupMinSize, kDefaultSubgroupMaxSize},
-        {WGPUSubgroupMatrixComponentType_U32, WGPUSubgroupMatrixComponentType_I32, 4, 8, 16, 32,
-         32},
-        {WGPUSubgroupMatrixComponentType_F16, WGPUSubgroupMatrixComponentType_F32, 2, 16, 4, 16,
-         128},
+    std::array fakeMatrixConfigs = {
+        WGPUSubgroupMatrixConfig{WGPUSubgroupMatrixComponentType_F32,
+                                 WGPUSubgroupMatrixComponentType_F32, 8, 4, 2,
+                                 kDefaultSubgroupMinSize, kDefaultSubgroupMaxSize},
+        WGPUSubgroupMatrixConfig{WGPUSubgroupMatrixComponentType_U32,
+                                 WGPUSubgroupMatrixComponentType_I32, 4, 8, 16, 32, 32},
+        WGPUSubgroupMatrixConfig{WGPUSubgroupMatrixComponentType_F16,
+                                 WGPUSubgroupMatrixComponentType_F32, 2, 16, 4, 16, 128},
     };
 
     WGPUAdapterPropertiesSubgroupMatrixConfigs fakeSubgroupMatrixConfigs = {};
     fakeSubgroupMatrixConfigs.chain.sType = WGPUSType_AdapterPropertiesSubgroupMatrixConfigs;
-    fakeSubgroupMatrixConfigs.configCount = 3;
-    fakeSubgroupMatrixConfigs.configs = fakeMatrixConfigs;
+    fakeSubgroupMatrixConfigs.configCount = fakeMatrixConfigs.size();
+    fakeSubgroupMatrixConfigs.configs = fakeMatrixConfigs.data();
 
     WGPUDawnAdapterPropertiesPowerPreference fakePowerProperties = {};
     fakePowerProperties.chain.sType = WGPUSType_DawnAdapterPropertiesPowerPreference;
@@ -338,12 +341,15 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                 adapter.GetInfo(reinterpret_cast<wgpu::AdapterInfo*>(&info));
 
                 // Expect everything matches the fake properties returned by the server.
-                EXPECT_EQ(memoryHeapProperties.heapCount, fakeMemoryHeapProperties.heapCount);
-                for (size_t i = 0; i < fakeMemoryHeapProperties.heapCount; ++i) {
-                    DAWN_UNSAFE_TODO(EXPECT_EQ(memoryHeapProperties.heapInfo[i].properties,
-                                               fakeMemoryHeapProperties.heapInfo[i].properties));
-                    DAWN_UNSAFE_TODO(EXPECT_EQ(memoryHeapProperties.heapInfo[i].size,
-                                               fakeMemoryHeapProperties.heapInfo[i].size));
+                ASSERT_EQ(memoryHeapProperties.heapCount, fakeMemoryHeapProperties.heapCount);
+                // TODO(crbug.com/588335065): Use WGPU_SPAN once heapInfo is renamed to heaps.
+                auto heapInfo =
+                    // SAFETY: The client returns heapCount entries in heapInfo.
+                    DAWN_UNSAFE_BUFFERS(Span<const WGPUMemoryHeapInfo>(
+                        memoryHeapProperties.heapInfo, memoryHeapProperties.heapCount));
+                for (size_t i = 0; i < fakeHeapInfo.size(); ++i) {
+                    EXPECT_EQ(heapInfo[i].properties, fakeHeapInfo[i].properties);
+                    EXPECT_EQ(heapInfo[i].size, fakeHeapInfo[i].size);
                 }
 
                 // Get the D3D properties.
@@ -372,25 +378,17 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                 adapter.GetInfo(reinterpret_cast<wgpu::AdapterInfo*>(&info));
 
                 // Expect everything matches the fake properties returned by the server.
-                EXPECT_EQ(subgroupMatrixConfigs.configCount, fakeSubgroupMatrixConfigs.configCount);
-                for (size_t i = 0; i < fakeSubgroupMatrixConfigs.configCount; ++i) {
-                    DAWN_UNSAFE_TODO(EXPECT_EQ(subgroupMatrixConfigs.configs[i].componentType,
-                                               fakeSubgroupMatrixConfigs.configs[i].componentType));
-                    DAWN_UNSAFE_TODO(
-                        EXPECT_EQ(subgroupMatrixConfigs.configs[i].resultComponentType,
-                                  fakeSubgroupMatrixConfigs.configs[i].resultComponentType));
-                    DAWN_UNSAFE_TODO(EXPECT_EQ(subgroupMatrixConfigs.configs[i].M,
-                                               fakeSubgroupMatrixConfigs.configs[i].M));
-                    DAWN_UNSAFE_TODO(EXPECT_EQ(subgroupMatrixConfigs.configs[i].N,
-                                               fakeSubgroupMatrixConfigs.configs[i].N));
-                    DAWN_UNSAFE_TODO(EXPECT_EQ(subgroupMatrixConfigs.configs[i].K,
-                                               fakeSubgroupMatrixConfigs.configs[i].K));
-                    DAWN_UNSAFE_TODO(
-                        EXPECT_EQ(subgroupMatrixConfigs.configs[i].minSubgroupSize,
-                                  fakeSubgroupMatrixConfigs.configs[i].minSubgroupSize));
-                    DAWN_UNSAFE_TODO(
-                        EXPECT_EQ(subgroupMatrixConfigs.configs[i].maxSubgroupSize,
-                                  fakeSubgroupMatrixConfigs.configs[i].maxSubgroupSize));
+                ASSERT_EQ(subgroupMatrixConfigs.configCount, fakeSubgroupMatrixConfigs.configCount);
+                auto configs = WGPU_SPAN(subgroupMatrixConfigs.config);
+                for (size_t i = 0; i < fakeMatrixConfigs.size(); ++i) {
+                    EXPECT_EQ(configs[i].componentType, fakeMatrixConfigs[i].componentType);
+                    EXPECT_EQ(configs[i].resultComponentType,
+                              fakeMatrixConfigs[i].resultComponentType);
+                    EXPECT_EQ(configs[i].M, fakeMatrixConfigs[i].M);
+                    EXPECT_EQ(configs[i].N, fakeMatrixConfigs[i].N);
+                    EXPECT_EQ(configs[i].K, fakeMatrixConfigs[i].K);
+                    EXPECT_EQ(configs[i].minSubgroupSize, fakeMatrixConfigs[i].minSubgroupSize);
+                    EXPECT_EQ(configs[i].maxSubgroupSize, fakeMatrixConfigs[i].maxSubgroupSize);
                 }
 
                 // Get the power properties.

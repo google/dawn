@@ -36,7 +36,7 @@
 #include "src/dawn/tests/StringViewMatchers.h"
 #include "src/dawn/tests/unittests/wire/WireFutureTest.h"
 #include "src/dawn/tests/unittests/wire/WireTest.h"
-#include "src/utils/compiler.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 #include "webgpu/webgpu_cpp.h"
 
 namespace dawn::wire {
@@ -215,8 +215,7 @@ TEST_P(WireAdapterTests, RequestDeviceSuccess) {
                 WGPUSupportedFeatures features = {};
                 device.GetFeatures(reinterpret_cast<wgpu::SupportedFeatures*>(&features));
 
-                std::vector<WGPUFeatureName> featuresList(
-                    features.features, DAWN_UNSAFE_TODO(features.features + features.featureCount));
+                auto featuresList = WGPU_SPAN(features.feature);
                 ASSERT_EQ(featuresList.size(), fakeFeaturesList.size());
                 std::unordered_set<WGPUFeatureName> featureSet(fakeFeaturesList);
                 for (WGPUFeatureName feature : featuresList) {

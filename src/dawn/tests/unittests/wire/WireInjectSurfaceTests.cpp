@@ -26,20 +26,28 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <array>
+#include <tuple>
+#include <type_traits>
 #include <utility>
 
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
 #include "src/dawn/tests/unittests/wire/WireTest.h"
-#include "src/utils/compiler.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 
 namespace dawn::wire {
 namespace {
 
 using ::testing::_;
 using ::testing::Mock;
+using ::testing::Pointwise;
 using ::testing::Return;
 using ::testing::WithArgs;
+
+MATCHER(EqCast, "") {
+    const auto& [actual, expected] = arg;
+    return static_cast<std::remove_cvref_t<decltype(expected)>>(actual) == expected;
+}
 
 class WireInjectSurfaceTests : public WireTest {
   public:
@@ -191,23 +199,9 @@ TEST_F(WireInjectSurfaceTests, Capabilities) {
     wgpu::Status status = surface.GetCapabilities(adapter, &caps);
     EXPECT_EQ(status, wgpu::Status::Success);
 
-    EXPECT_EQ(caps.formatCount, mCapabilities.formatCount);
-    for (uint32_t i = 0; i < caps.formatCount; i++) {
-        DAWN_UNSAFE_TODO(
-            EXPECT_EQ(static_cast<WGPUTextureFormat>(caps.formats[i]), mCapabilities.formats[i]));
-    }
-
-    EXPECT_EQ(caps.presentModeCount, mCapabilities.presentModeCount);
-    for (uint32_t i = 0; i < caps.presentModeCount; i++) {
-        DAWN_UNSAFE_TODO(EXPECT_EQ(static_cast<WGPUPresentMode>(caps.presentModes[i]),
-                                   mCapabilities.presentModes[i]));
-    }
-
-    EXPECT_EQ(caps.alphaModeCount, mCapabilities.alphaModeCount);
-    for (uint32_t i = 0; i < caps.alphaModeCount; i++) {
-        DAWN_UNSAFE_TODO(EXPECT_EQ(static_cast<WGPUCompositeAlphaMode>(caps.alphaModes[i]),
-                                   mCapabilities.alphaModes[i]));
-    }
+    EXPECT_THAT(WGPU_SPAN(caps.format), Pointwise(EqCast(), mSupportedFormats));
+    EXPECT_THAT(WGPU_SPAN(caps.presentMode), Pointwise(EqCast(), mSupportedPresentModes));
+    EXPECT_THAT(WGPU_SPAN(caps.alphaMode), Pointwise(EqCast(), mSupportedAlphaModes));
 
     EXPECT_EQ(static_cast<WGPUTextureUsage>(caps.usages), mCapabilities.usages);
 }
