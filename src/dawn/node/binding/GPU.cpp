@@ -123,7 +123,7 @@ GPU::GPU(Flags flags) : flags_(std::move(flags)) {
     desc.nextInChain = &togglesDesc;
     instance_ = std::make_unique<dawn::native::Instance>(
         reinterpret_cast<const WGPUInstanceDescriptor*>(&desc));
-    async_ = AsyncRunner::Create(instance_.get());
+    async_ = AsyncRunner::Create(wgpu::Instance(instance_->Get()));
 }
 
 interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::requestAdapter(

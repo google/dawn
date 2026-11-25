@@ -5,6 +5,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { describe, it, before, after } from 'node:test';
+import { setFlagsFromString } from 'node:v8';
+import { runInNewContext } from 'node:vm';
 import { Worker, } from 'node:worker_threads';
 
 const require = createRequire(import.meta.url);
@@ -297,6 +299,25 @@ describe('tests', async () => {
       }
 
       await Promise.all(workers);
+    });
+  });
+
+  await describe('lifetime tests', async () => {
+    await it('device works after the GPU object is garbage collected', async () => {
+      setFlagsFromString('--expose-gc');
+      const gc = runInNewContext('gc');
+
+      // Create a GPU object, but don't store a reference to it. It should be
+      // deleted by garbage collection.
+      const adapter = await create(['backend=null']).requestAdapter();
+      const device = await adapter.requestDevice();
+      gc();
+      // Give the finalizer of the GPU object a chance to run.
+      await new Promise(r => setTimeout(r, 100));
+
+      const module = device.createShaderModule({ code: '@compute @workgroup_size(1) fn main() {}' });
+      await module.getCompilationInfo();
+      device.destroy();
     });
   });
 

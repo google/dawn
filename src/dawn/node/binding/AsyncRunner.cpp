@@ -28,19 +28,20 @@
 #include "src/dawn/node/binding/AsyncRunner.h"
 
 #include <limits>
+#include <utility>
 
 #include "src/utils/assert.h"
 
 namespace wgpu::binding {
 
 // static
-std::shared_ptr<AsyncRunner> AsyncRunner::Create(dawn::native::Instance* instance) {
-    auto runner = std::make_shared<AsyncRunner>(instance);
+std::shared_ptr<AsyncRunner> AsyncRunner::Create(wgpu::Instance instance) {
+    auto runner = std::make_shared<AsyncRunner>(std::move(instance));
     runner->weak_this_ = runner;
     return runner;
 }
 
-AsyncRunner::AsyncRunner(dawn::native::Instance* instance) : instance_(instance) {}
+AsyncRunner::AsyncRunner(wgpu::Instance instance) : instance_(std::move(instance)) {}
 
 void AsyncRunner::Begin(Napi::Env env) {
     DAWN_ASSERT(tasks_waiting_ != std::numeric_limits<decltype(tasks_waiting_)>::max());
@@ -79,7 +80,7 @@ void AsyncRunner::ScheduleProcessEvents(Napi::Env env) {
                                     }
 
                                     self->process_events_queued_ = false;
-                                    wgpuInstanceProcessEvents(self->instance_->Get());
+                                    self->instance_.ProcessEvents();
                                     self->ScheduleProcessEvents(env);
                                 }),
         });
