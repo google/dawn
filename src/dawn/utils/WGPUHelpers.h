@@ -31,6 +31,8 @@
 #include <webgpu/webgpu_cpp.h>
 
 #include <array>
+#include <concepts>
+#include <cstddef>
 #include <initializer_list>
 #include <string>
 #include <vector>
@@ -38,9 +40,25 @@
 #include "absl/container/flat_hash_set.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/utils/TextureUtils.h"
+#include "src/utils/compiler.h"
 #include "src/utils/platform.h"
+#include "src/utils/span.h"
 
 namespace dawn::utils {
+
+namespace detail {
+
+template <typename T, std::unsigned_integral Count>
+constexpr Span<T> MakeWgpuSpan(T* ptr, Count count) {
+    // SAFETY: Dawn C/C++ API array members are valid for their corresponding count.
+    return DAWN_UNSAFE_BUFFERS(Span<T>(ptr, static_cast<size_t>(count)));
+}
+
+}  // namespace detail
+
+// TODO(crbug.com/439062058): Temporary helper until the Dawn C++ API exposes std::span directly
+// on structs with array members.
+#define WGPU_SPAN(member) ::dawn::utils::detail::MakeWgpuSpan(member##s, member##Count)
 
 enum Expectation { Success, Failure };
 

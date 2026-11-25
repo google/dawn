@@ -29,7 +29,6 @@
 
 #include <algorithm>
 #include <cstdlib>
-#include <span>
 #include <string>
 #include <unordered_set>
 #include <utility>
@@ -40,6 +39,7 @@
 #include "src/dawn/node/binding/GPUAdapter.h"
 #include "src/dawn/node/binding/IteratorHelper.h"
 #include "src/dawn/node/binding/TogglesLoader.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
 
 #if defined(_WIN32)

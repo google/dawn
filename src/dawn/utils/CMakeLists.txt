@@ -62,6 +62,7 @@ dawn_add_library(
     webgpu_cpp
     dawn_internal_config
     dawn::dawn_common
+    dawn::partition_alloc
     absl::flat_hash_set
   PRIVATE_DEPENDS
     ${private_wgpu_depends}

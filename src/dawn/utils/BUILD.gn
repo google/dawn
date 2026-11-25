@@ -73,6 +73,7 @@ static_library("wgpu_utils") {
     "${dawn_abseil_dir}:absl",
     "${dawn_root}/include/dawn:cpp_headers",
     "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/utils",
   ]
 }
 

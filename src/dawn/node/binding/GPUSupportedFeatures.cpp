@@ -27,10 +27,9 @@
 
 #include "src/dawn/node/binding/GPUSupportedFeatures.h"
 
-#include <span>
-
 #include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/IteratorHelper.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/compiler.h"
 
 namespace wgpu::binding {

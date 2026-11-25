@@ -28,11 +28,11 @@
 #include "src/dawn/node/binding/GPUShaderModule.h"
 
 #include <memory>
-#include <span>
 #include <utility>
 #include <vector>
 
 #include "src/dawn/node/binding/Converter.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/assert.h"
 
 namespace wgpu::binding {

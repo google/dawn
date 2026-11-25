@@ -29,10 +29,9 @@
 
 #include <cctype>
 #include <iomanip>
-#include <span>
 #include <sstream>
 
-#include "src/dawn/node/binding/Converter.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/assert.h"
 #include "src/utils/compiler.h"
 
