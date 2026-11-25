@@ -86,7 +86,7 @@ function(common_compile_options target)
     if (deps MATCHES "absl")
       if (COMPILER_IS_CLANG)
         target_compile_options(${target}
-          PRIVATE
+          PUBLIC
             "-Wno-gcc-compat"
             "-Wno-unreachable-code-break"
             "-Wno-nullability-extension"
