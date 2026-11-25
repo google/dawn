@@ -258,17 +258,6 @@ def run_check(args):
                     f"than the previous maximum 'stable_version' ({old_max}).")
                 return 1
 
-    # TODO(crbug.com/577079442): Remove this allowlist once the SPIR-V removal
-    # lands; SPIR-V was marked experimental prior to Dawn's first stable ABI
-    # release.
-    pre_release_allowed_removals = {
-        "shader source SPIRV",
-        "instance feature name::shader source SPIRV",
-        "s type::shader source SPIRV",
-    }
-    for key in pre_release_allowed_removals:
-        old_addins.pop(key, None)
-
     if old_addins:
         removed_keys = ", ".join(f"'{k}'" for k in old_addins)
         print(f"Stable API entries ({removed_keys}) were removed from "
