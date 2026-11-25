@@ -36,7 +36,7 @@
 #include "dawn/dawn_proc.h"  // nogncheck
 #include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp_print.h"
-#include "src/utils/compiler.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 
 namespace {
 
@@ -239,8 +239,7 @@ void DumpAdapterFeatures(const wgpu::Adapter& adapter) {
     adapter.GetFeatures(&supportedFeatures);
     std::cout << "  Features\n";
     std::cout << "  ========\n";
-    for (uint32_t i = 0; i < supportedFeatures.featureCount; ++i) {
-        wgpu::FeatureName f = DAWN_UNSAFE_TODO(supportedFeatures.features[i]);
+    for (wgpu::FeatureName f : WGPU_SPAN(supportedFeatures.feature)) {
         auto info = dawn::native::GetFeatureInfo(f);
         std::cout << "   * " << info->name << "\n";
         std::cout << WrapString(info->description, "      ") << "\n";

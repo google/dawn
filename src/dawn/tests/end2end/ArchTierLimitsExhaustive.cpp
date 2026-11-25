@@ -35,7 +35,7 @@
 #include "dawn/utils/ComboLimits.h"
 #include "src/dawn/common/LinkedList.h"
 #include "src/dawn/tests/DawnTest.h"
-#include "src/utils/compiler.h"
+#include "src/dawn/utils/WGPUHelpers.h"
 #include "webgpu/webgpu_cpp.h"
 
 // The purpose of these tests is to prevent regressions of features and limits on architectures that
@@ -657,6 +657,7 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, SemiExhaustiveTestSubgroupMatrixConfigs
     wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
     info.nextInChain = &subgroupMatrixConfigs;
     ASSERT_EQ(adapter.GetInfo(&info), wgpu::Status::Success);
+    auto configs = WGPU_SPAN(subgroupMatrixConfigs.config);
 
     std::multimap<std::string, std::vector<wgpu::SubgroupMatrixConfig>> device_map;
 
@@ -765,7 +766,7 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, SemiExhaustiveTestSubgroupMatrixConfigs
             }
 
             for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
-                auto& config = DAWN_UNSAFE_TODO(subgroupMatrixConfigs.configs[i]);
+                auto& config = configs[i];
                 auto& expect_config = expect_configs[i];
                 if (config.componentType != expect_config.componentType ||
                     config.resultComponentType != expect_config.resultComponentType ||
@@ -793,7 +794,7 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, SemiExhaustiveTestSubgroupMatrixConfigs
             "are:\n"
             "  AddDevice({";
         for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
-            auto& config = DAWN_UNSAFE_TODO(subgroupMatrixConfigs.configs[i]);
+            auto& config = configs[i];
             expected_str += '{';
             expected_str += SubgroupMatrixComponentTypeToString(config.componentType);
             expected_str += ", ";

@@ -25,13 +25,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
+#include <array>
 #include <limits>
-#include <unordered_set>
 
 #include "src/dawn/common/FutureUtils.h"
 #include "src/dawn/tests/DawnTest.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -101,28 +101,26 @@ TEST_P(BasicTests, GetInstanceFeatures) {
     wgpu::SupportedInstanceFeatures out{};
     wgpu::GetInstanceFeatures(&out);
 
-    static const auto kKnownFeatures = std::unordered_set{
+    static constexpr std::array kKnownFeatures = {
         wgpu::InstanceFeatureName::ShaderSourceSPIRV,
         wgpu::InstanceFeatureName::MultipleDevicesPerAdapter,
         wgpu::InstanceFeatureName::TimedWaitAny,
     };
-    auto features =
-        std::unordered_set(out.features, DAWN_UNSAFE_TODO(out.features + out.featureCount));
+    auto features = WGPU_SPAN(out.feature);
 
     if (UsesWire()) {
         // Wire exposes a subset of features.
-        static const auto kWireFeatures = std::unordered_set{
-            wgpu::InstanceFeatureName::TimedWaitAny,
-        };
-        EXPECT_EQ(features, kWireFeatures);
+        EXPECT_THAT(features,
+                    testing::UnorderedElementsAre(wgpu::InstanceFeatureName::TimedWaitAny));
     } else {
         // Native (currently) exposes all known features.
-        EXPECT_EQ(features, kKnownFeatures);
+        EXPECT_THAT(features, testing::UnorderedElementsAreArray(kKnownFeatures));
     }
 
     // Check that GetInstanceFeatures and HasInstanceFeature match.
     for (auto feature : kKnownFeatures) {
-        EXPECT_EQ(features.contains(feature), wgpu::HasInstanceFeature(feature));
+        EXPECT_EQ(std::ranges::find(features, feature) != features.end(),
+                  wgpu::HasInstanceFeature(feature));
     }
     // Check some bogus feature enum values.
     EXPECT_FALSE(wgpu::HasInstanceFeature(wgpu::InstanceFeatureName(0)));

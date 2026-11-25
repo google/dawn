@@ -41,7 +41,6 @@
 #include "src/dawn/tests/StringViewMatchers.h"
 #include "src/dawn/utils/SystemUtils.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
 
 namespace dawn::native {
 namespace {
@@ -231,14 +230,7 @@ TEST_F(DeviceCreationTest, CreateDeviceRequiringExperimentalFeatures) {
 
             ASSERT_EQ(expectedFeatureCount, supportedFeatures.featureCount);
 
-            bool foundFeatureName = false;
-            for (uint32_t fi = 0; fi < supportedFeatures.featureCount; ++fi) {
-                if (featureName == DAWN_UNSAFE_TODO(supportedFeatures.features[fi])) {
-                    foundFeatureName = true;
-                    break;
-                }
-            }
-            EXPECT_TRUE(foundFeatureName);
+            EXPECT_THAT(WGPU_SPAN(supportedFeatures.feature), Contains(featureName));
         }
 
         // Test creating device with AllowUnsafeApis enabled in device toggle descriptor will
@@ -263,14 +255,7 @@ TEST_F(DeviceCreationTest, CreateDeviceRequiringExperimentalFeatures) {
 
                 ASSERT_EQ(expectedFeatureCount, supportedFeatures.featureCount);
 
-                bool foundFeatureName = false;
-                for (uint32_t fi = 0; fi < supportedFeatures.featureCount; ++fi) {
-                    if (featureName == DAWN_UNSAFE_TODO(supportedFeatures.features[fi])) {
-                        foundFeatureName = true;
-                        break;
-                    }
-                }
-                EXPECT_TRUE(foundFeatureName);
+                EXPECT_THAT(WGPU_SPAN(supportedFeatures.feature), Contains(featureName));
             }
 
             // Test on adapter with AllowUnsafeApis disabled.
@@ -286,14 +271,7 @@ TEST_F(DeviceCreationTest, CreateDeviceRequiringExperimentalFeatures) {
 
                 ASSERT_EQ(expectedFeatureCount, supportedFeatures.featureCount);
 
-                bool foundFeatureName = false;
-                for (uint32_t fi = 0; fi < supportedFeatures.featureCount; ++fi) {
-                    if (featureName == DAWN_UNSAFE_TODO(supportedFeatures.features[fi])) {
-                        foundFeatureName = true;
-                        break;
-                    }
-                }
-                EXPECT_TRUE(foundFeatureName);
+                EXPECT_THAT(WGPU_SPAN(supportedFeatures.feature), Contains(featureName));
             }
         }
 

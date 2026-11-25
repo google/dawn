@@ -38,7 +38,6 @@
 #include "src/dawn/utils/ComboRenderBundleEncoderDescriptor.h"
 #include "src/dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "src/dawn/utils/WGPUHelpers.h"
-#include "src/utils/compiler.h"
 #include "webgpu/webgpu_glfw.h"
 
 namespace dawn {
@@ -202,8 +201,8 @@ class SurfaceTests : public DawnTest {
 
     bool SupportsPresentMode(const wgpu::SurfaceCapabilities& capabilities,
                              wgpu::PresentMode mode) {
-        for (size_t i = 0; i < capabilities.presentModeCount; ++i) {
-            if (DAWN_UNSAFE_TODO(capabilities.presentModes[i]) == mode) {
+        for (wgpu::PresentMode presentMode : WGPU_SPAN(capabilities.presentMode)) {
+            if (presentMode == mode) {
                 return true;
             }
         }
@@ -826,9 +825,9 @@ TEST_P(SurfaceTests, Storage) {
     DAWN_TEST_UNSUPPORTED_IF(!(caps.usages & wgpu::TextureUsage::StorageBinding));
 
     wgpu::TextureFormat storageCapableFormat = wgpu::TextureFormat::Undefined;
-    for (uint32_t i = 0; i < caps.formatCount; i++) {
-        if (utils::TextureFormatSupportsStorageTexture(device, DAWN_UNSAFE_TODO(caps.formats[i]))) {
-            storageCapableFormat = DAWN_UNSAFE_TODO(caps.formats[i]);
+    for (wgpu::TextureFormat format : WGPU_SPAN(caps.format)) {
+        if (utils::TextureFormatSupportsStorageTexture(device, format)) {
+            storageCapableFormat = format;
             break;
         }
     }

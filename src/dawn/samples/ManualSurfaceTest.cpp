@@ -84,6 +84,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -99,7 +100,6 @@
 #include "src/dawn/utils/CommandLineParser.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 #include "src/utils/assert.h"
-#include "src/utils/compiler.h"
 #include "src/utils/log.h"
 #include "webgpu/webgpu_glfw.h"
 
@@ -231,11 +231,9 @@ void AddWindow(bool transparent = false) {
     data->currentConfig = config;
     data->targetConfig = config;
     SyncFromWindow(data.get());
-    data->presentModes.assign(caps.presentModes,
-                              DAWN_UNSAFE_TODO(caps.presentModes + caps.presentModeCount));
-    data->alphaModes.assign(caps.alphaModes,
-                            DAWN_UNSAFE_TODO(caps.alphaModes + caps.alphaModeCount));
-    data->formats.assign(caps.formats, DAWN_UNSAFE_TODO(caps.formats + caps.formatCount));
+    std::ranges::copy(WGPU_SPAN(caps.presentMode), std::back_inserter(data->presentModes));
+    std::ranges::copy(WGPU_SPAN(caps.alphaMode), std::back_inserter(data->alphaModes));
+    std::ranges::copy(WGPU_SPAN(caps.format), std::back_inserter(data->formats));
 
     windows[window] = std::move(data);
 }

@@ -31,7 +31,6 @@
 #include "src/dawn/tests/unittests/validation/ValidationTest.h"
 #include "src/dawn/utils/WGPUHelpers.h"
 #include "src/dawn/utils/WireHelper.h"
-#include "src/utils/compiler.h"
 
 namespace dawn {
 namespace {
@@ -180,17 +179,16 @@ TEST_F(WGSLFeatureValidationTest, GetFeatures) {
     wgpu::SupportedWGSLLanguageFeatures supportedFeatures = {};
     instance.GetWGSLLanguageFeatures(&supportedFeatures);
     ASSERT_NE(0u, supportedFeatures.featureCount);
-    const wgpu::WGSLLanguageFeatureName* features = supportedFeatures.features;
+    auto features = WGPU_SPAN(supportedFeatures.feature);
 
     // Exactly featureCount features should be written, and all return true in HasWGSLFeature.
-    for (size_t i = 0; i < supportedFeatures.featureCount; i++) {
-        DAWN_UNSAFE_TODO(ASSERT_TRUE(instance.HasWGSLLanguageFeature(features[i])));
+    for (wgpu::WGSLLanguageFeatureName feature : features) {
+        ASSERT_TRUE(instance.HasWGSLLanguageFeature(feature));
     }
 
     // Test the presence / absence of some known testing features.
-    const wgpu::WGSLLanguageFeatureName* begin = features;
-    const wgpu::WGSLLanguageFeatureName* end =
-        DAWN_UNSAFE_TODO(features + supportedFeatures.featureCount);
+    auto begin = features.begin();
+    auto end = features.end();
     ASSERT_NE(std::find(begin, end, wgpu::WGSLLanguageFeatureName::ChromiumTestingShipped), end);
     ASSERT_NE(
         std::find(begin, end, wgpu::WGSLLanguageFeatureName::ChromiumTestingShippedWithKillswitch),

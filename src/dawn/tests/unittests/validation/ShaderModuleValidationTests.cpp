@@ -355,8 +355,9 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
             ASSERT_EQ(wgpu::CompilationInfoRequestStatus::Success, status);
             ASSERT_NE(nullptr, info);
             ASSERT_EQ(4u, info->messageCount);
+            auto messages = WGPU_SPAN(info->message);
 
-            const wgpu::CompilationMessage* message = &info->messages[0];
+            const wgpu::CompilationMessage* message = &messages[0];
             ASSERT_EQ("Info Message", std::string_view(message->message));
             ASSERT_EQ(wgpu::CompilationMessageType::Info, message->type);
             ASSERT_EQ(0u, message->lineNum);
@@ -367,7 +368,7 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
                 reinterpret_cast<const wgpu::DawnCompilationMessageUtf16*>(message->nextInChain);
             EXPECT_EQ(0u, utf16->linePos);
 
-            message = &DAWN_UNSAFE_TODO(info->messages[1]);
+            message = &messages[1];
             ASSERT_EQ("Warning Message", std::string_view(message->message));
             ASSERT_EQ(wgpu::CompilationMessageType::Warning, message->type);
             ASSERT_EQ(0u, message->lineNum);
@@ -378,7 +379,7 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
                 reinterpret_cast<const wgpu::DawnCompilationMessageUtf16*>(message->nextInChain);
             EXPECT_EQ(0u, utf16->linePos);
 
-            message = &DAWN_UNSAFE_TODO(info->messages[2]);
+            message = &messages[2];
             ASSERT_EQ("Error Message", std::string_view(message->message));
             ASSERT_EQ(wgpu::CompilationMessageType::Error, message->type);
             ASSERT_EQ(3u, message->lineNum);
@@ -389,7 +390,7 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
                 reinterpret_cast<const wgpu::DawnCompilationMessageUtf16*>(message->nextInChain);
             EXPECT_EQ(4u, utf16->linePos);
 
-            message = &DAWN_UNSAFE_TODO(info->messages[3]);
+            message = &messages[3];
             ASSERT_EQ("Complete Message", std::string_view(message->message));
             ASSERT_EQ(wgpu::CompilationMessageType::Info, message->type);
             ASSERT_EQ(3u, message->lineNum);
@@ -749,10 +750,8 @@ class ShaderModuleMaxInterStageShaderVariablesValidationTest : public Validation
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         wgpu::SupportedFeatures supportedFeatures;
         adapter.GetFeatures(&supportedFeatures);
-        std::vector<wgpu::FeatureName> requiredFeatures(
-            supportedFeatures.features,
-            DAWN_UNSAFE_TODO(supportedFeatures.features + supportedFeatures.featureCount));
-        return requiredFeatures;
+        auto features = WGPU_SPAN(supportedFeatures.feature);
+        return {features.begin(), features.end()};
     }
 };
 
@@ -926,7 +925,7 @@ TEST_F(ShaderModuleMaxInterStageShaderVariablesValidationTest, Test) {
             bool canTest = true;
             for (uint8_t b = 0; b < std::size(builtins); ++b) {
                 if (mask & (1 << b)) {
-                    const Builtin& builtin = DAWN_UNSAFE_TODO(builtins[b]);
+                    const Builtin& builtin = builtins[b];
                     builtInDeclarations += "@builtin(" + std::string(builtin.name) + ") b_" +
                                            std::string(builtin.name) + ": " +
                                            std::string(builtin.type) + ",";
@@ -1004,12 +1003,8 @@ class ShaderModuleExtensionValidationTest : public ValidationTest {
         wgpu::SupportedFeatures supportedFeatures;
         adapter.GetFeatures(&supportedFeatures);
 
-        std::vector<wgpu::FeatureName> requiredFeatures;
-        requiredFeatures.reserve(supportedFeatures.featureCount);
-        for (uint32_t i = 0; i < supportedFeatures.featureCount; ++i) {
-            requiredFeatures.push_back(DAWN_UNSAFE_TODO(supportedFeatures.features[i]));
-        }
-        return requiredFeatures;
+        auto features = WGPU_SPAN(supportedFeatures.feature);
+        return {features.begin(), features.end()};
     }
 
     std::string EnabledExtensionsShader(const WGSLExtensionInfo& extension) {

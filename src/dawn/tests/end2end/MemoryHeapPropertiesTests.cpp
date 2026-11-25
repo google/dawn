@@ -29,6 +29,7 @@
 
 #include "src/dawn/tests/DawnTest.h"
 #include "src/utils/compiler.h"
+#include "src/utils/span.h"
 
 namespace dawn {
 namespace {
@@ -37,8 +38,12 @@ class MemoryHeapPropertiesTest : public DawnTest {
   protected:
     void CheckMemoryHeapProperties(const wgpu::AdapterPropertiesMemoryHeaps& memoryHeapProperties) {
         EXPECT_GT(memoryHeapProperties.heapCount, 0u);
-        for (size_t i = 0; i < memoryHeapProperties.heapCount; ++i) {
-            const auto& heapInfo = DAWN_UNSAFE_TODO(memoryHeapProperties.heapInfo[i]);
+        // TODO(crbug.com/588335065): Use WGPU_SPAN once heapInfo is renamed to heaps.
+        const auto heapInfos =
+            // SAFETY: GetInfo() returns heapInfo with heapCount elements.
+            DAWN_UNSAFE_BUFFERS(Span<const wgpu::MemoryHeapInfo>(memoryHeapProperties.heapInfo,
+                                                                 memoryHeapProperties.heapCount));
+        for (const auto& heapInfo : heapInfos) {
             // Check the heap is non-zero in size.
             EXPECT_GT(heapInfo.size, 0ull);
 
