@@ -25,19 +25,16 @@ macros:
 
 ## Building
 
-The `tint_wgsl_fuzzer` target can be built with either CMake or GN:
+Tint fuzzers are built with GN only (CMake and Bazel fuzzer builds are not
+supported).
 
-- CMake: Define `TINT_BUILD_FUZZERS=1` (pass `-DTINT_BUILD_FUZZERS=1`
-  to `cmake`)
-- GN: Define `use_libfuzzer = true` (or `use_centipede = true` to use
-  the [Centipede](https://github.com/google/fuzztest/tree/main/centipede)
-  fuzzing engine) in `args.gn`.
+To build `tint_wgsl_fuzzer`, define `use_libfuzzer = true` (or
+`use_centipede = true` to use the
+[Centipede](https://github.com/google/fuzztest/tree/main/centipede) fuzzing
+engine) in `args.gn`.
 
-Building `tint_ir_fuzzer` requires additional flags to be set:
-
-- CMake: Define `TINT_BUILD_IR_BINARY=1` (pass
-  `-DTINT_BUILD_IR_BINARY=1` to `cmake`)
-- GN: Define `tint_build_ir_binary = true` in `args.gn`.
+Building `tint_ir_fuzzer` additionally requires defining
+`tint_build_ir_binary = true` in `args.gn`.
 
 ### Building Mesa fuzzers
 
@@ -53,12 +50,12 @@ fuzzing pass and passing it to Mesa's software Vulkan driver
   x64 (`linux-amd64`), because the custom Mesa build rules and prebuilt
   dependencies (`third_party/llvm-dev` and `third_party/zstd`) only
   target Linux x86-64.
-- **Vulkan only:** Dawn's custom GN and CMake build rules only build
+- **Vulkan only:** Dawn's custom GN build rules only build
   Mesa's software Vulkan driver (Lavapipe). OpenGL and other Mesa
   drivers or APIs are not supported.
 - **No MSan:** Building Mesa with MemorySanitizer (`is_msan = true` in
-  GN or `DAWN_ENABLE_MSAN=1` in CMake) is not supported, as the
-  prebuilt dependencies are not instrumented for MSan.
+  GN) is not supported, as the prebuilt dependencies are not instrumented
+  for MSan.
 
 1. Add `"checkout_mesa": True` to `custom_vars` in your `.gclient` file
    (this is disabled by default, including in
@@ -80,19 +77,14 @@ fuzzing pass and passing it to Mesa's software Vulkan driver
    gclient sync
    ```
 
-2. Enable the Mesa and Vulkan fuzzer build flags in addition to the
-   base fuzzer flags above (plus the IR binary flag if building
+2. Enable the Mesa and Vulkan fuzzer build flags in `args.gn` in addition to the
+   base fuzzer flags above (plus `tint_build_ir_binary = true` if building
    `tint_ir_mesa_fuzzer`):
 
-   - CMake: Define `TINT_BUILD_MESA=1` and
-     `TINT_BUILD_FUZZER_VULKAN_SUPPORT=1` (pass
-     `-DTINT_BUILD_MESA=1 -DTINT_BUILD_FUZZER_VULKAN_SUPPORT=1` to
-     `cmake`; requires the Clang toolchain).
-   - GN: Define `tint_build_mesa = true` and
-     `tint_build_fuzzer_vulkan_support = true` in `args.gn` (in GN,
-     `tint_build_fuzzer_vulkan_support` defaults to `tint_build_mesa`,
-     but setting both explicitly is required by tools such as
-     `tools/run fuzz experiment`).
+   Define `tint_build_mesa = true` and `tint_build_fuzzer_vulkan_support = true`
+   in `args.gn` (`tint_build_fuzzer_vulkan_support` defaults to
+   `tint_build_mesa`, but setting both explicitly is required by tools such as
+   `tools/run fuzz experiment`).
 
 ### Building FuzzTest prototype fuzzers
 
@@ -103,14 +95,11 @@ ClusterFuzz.
 
 1. Ensure dependencies are synced (for example via `gclient sync`).
 
-2. Enable the FuzzTest prototype build flag in addition to the base fuzzer
-   flags above:
+2. Enable the FuzzTest prototype build flag in `args.gn` in addition to the base
+   fuzzer flags above:
 
-   - CMake: Define `TINT_BUILD_FUZZTEST=1` alongside `TINT_BUILD_FUZZERS=1`
-     (pass `-DTINT_BUILD_FUZZERS=1 -DTINT_BUILD_FUZZTEST=1` to `cmake`;
-     requires the Clang toolchain).
-   - GN: Define `tint_build_fuzztest = true` alongside `use_libfuzzer = true` or
-     `use_centipede = true` in `args.gn`.
+   Define `tint_build_fuzztest = true` alongside `use_libfuzzer = true` or
+   `use_centipede = true` in `args.gn`.
 
 3. Build and verify the prototype FuzzTest binary (`tint_stub_fuzztest`):
 
@@ -174,10 +163,7 @@ contains .wgsl files that need converting to .tirb files.
 
 See below for how to generate the corpus locally
 
-### Fuzzing with Centipede (GN only)
-
-> **Note:** Centipede support is currently GN-only; building or running Tint
-> fuzzers with Centipede in CMake is not implemented.
+### Fuzzing with Centipede
 
 In standalone GN builds, Tint fuzzers can be built and run with
 [Centipede](https://github.com/google/fuzztest/tree/main/centipede) instead of

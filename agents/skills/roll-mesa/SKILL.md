@@ -1,8 +1,8 @@
 ---
 name: roll-mesa
 description: >-
-  Roll the third_party/mesa/src dependency in Dawn and update the custom GN and
-  CMake Mesa Lavapipe build rules in third_party/mesa/. Use this skill when
+  Roll the third_party/mesa/src dependency in Dawn and update the custom GN
+  Mesa Lavapipe build rules in third_party/mesa/. Use this skill when
   asked to roll, update, or bump the Mesa dependency or fix Mesa build issues
   after a roll.
 ---
@@ -10,7 +10,7 @@ description: >-
 # Roll Mesa Dependency
 
 Use this skill to roll `third_party/mesa/src` in Dawn and update Dawn's custom
-GN and CMake build rules in `third_party/mesa/`.
+GN build rules in `third_party/mesa/`.
 
 ## Workflow
 
@@ -105,37 +105,4 @@ gclient sync
    shader cleanly:
    ```bash
    ./<gn_build_dir>/tint_wgsl_mesa_fuzzer --vk-icd=./<gn_build_dir>/lvp_icd.json --verbose test/tint/out_of_order_decls/alias/struct.wgsl
-   ```
-
-### 6. Build and Fix the CMake Mesa Build
-
-1. **Sync any GN rule changes to CMake**: If you modified
-   `third_party/mesa/mesa_sources.gni` or `third_party/mesa/BUILD.gn` in Step 5,
-   apply the corresponding updates to `third_party/mesa/mesa_sources.cmake` and
-   `third_party/mesa/CMakeLists.txt`.
-2. **Check the CMake build directory (`out/cmake` by default)**:
-   - Check `out/cmake/CMakeCache.txt` to verify that `TINT_BUILD_MESA:BOOL=ON`
-     and `TINT_BUILD_FUZZER_VULKAN_SUPPORT:BOOL=ON` (along with
-     `TINT_BUILD_FUZZERS:BOOL=ON`) are enabled.
-   - If `out/cmake` does not exist or those options are not enabled, **prompt
-     the user** to ask whether to enable them in `out/cmake` (via
-     `cmake -B out/cmake -DTINT_BUILD_MESA=ON -DTINT_BUILD_FUZZER_VULKAN_SUPPORT=ON -DTINT_BUILD_FUZZERS=ON`)
-     or use a different CMake build directory.
-3. **Run the CMake build**:
-   ```bash
-   cmake --build <cmake_build_dir> --target mesa tint_wgsl_mesa_fuzzer tint_ir_mesa_fuzzer
-   ```
-4. **Analyze CMake build results**:
-   - If the CMake build fails, determine whether the failure can be mitigated
-     with changes to `third_party/mesa/mesa_sources.cmake` or
-     `third_party/mesa/CMakeLists.txt`.
-   - **STOP CONDITION**: Just as in the GN step, if the CMake build failure
-     indicates that another dependency (`llvm-dev`, `zstd`, etc.) requires an
-     update, **inform the user with the details and do not proceed**.
-   - Re-run `cmake --build` until `mesa`, `tint_wgsl_mesa_fuzzer`, and
-     `tint_ir_mesa_fuzzer` build cleanly with zero undefined symbols.
-5. **Test the CMake build**: Run a smoke test with the CMake
-   `tint_wgsl_mesa_fuzzer` binary:
-   ```bash
-   ./<cmake_build_dir>/tint_wgsl_mesa_fuzzer --vk-icd=./<cmake_build_dir>/lvp_icd.json --verbose test/tint/out_of_order_decls/alias/struct.wgsl
    ```

@@ -74,13 +74,8 @@ function(tint_core_compile_options TARGET)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_WGSL_READER=$<BOOL:${TINT_BUILD_WGSL_READER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_WGSL_WRITER=$<BOOL:${TINT_BUILD_WGSL_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_NULL_WRITER=$<BOOL:${TINT_BUILD_NULL_WRITER}>)
-    target_compile_definitions(${TARGET} PUBLIC -DTINT_ENABLE_IR_DUMPING=$<BOOL:${TINT_ENABLE_IR_DUMPING}>)
+  target_compile_definitions(${TARGET} PUBLIC -DTINT_ENABLE_IR_DUMPING=$<BOOL:${TINT_ENABLE_IR_DUMPING}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_ENABLE_IR_VALIDATION_ASSERTS=$<BOOL:${TINT_ENABLE_IR_VALIDATION_ASSERTS}>)
-
-  if(TINT_BUILD_FUZZERS)
-    target_compile_options(${TARGET} PRIVATE "-fsanitize=fuzzer")
-    target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_FUZZER_VULKAN_SUPPORT=$<BOOL:${TINT_BUILD_FUZZER_VULKAN_SUPPORT}>)
-  endif()
 
   common_compile_options(${TARGET})
 endfunction()
@@ -274,11 +269,6 @@ function(tint_bench_compile_options TARGET)
   set_target_properties(${TARGET} PROPERTIES FOLDER "Benchmarks")
 endfunction()
 
-function(tint_fuzz_compile_options TARGET)
-  tint_core_compile_options(${TARGET})
-  set_target_properties(${TARGET} PROPERTIES FOLDER "Fuzzers")
-endfunction()
-
 function(tint_cmd_compile_options TARGET)
   tint_default_compile_options(${TARGET})
 
@@ -304,30 +294,6 @@ endfunction()
 function(tint_bench_cmd_compile_options TARGET)
   tint_bench_compile_options(${TARGET})
   target_link_libraries(${TARGET} PRIVATE benchmark::benchmark)
-endfunction()
-
-function(tint_fuzz_cmd_compile_options TARGET)
-  tint_fuzz_compile_options(${TARGET})
-
-  if(NOT "${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS}" STREQUAL "")
-    # This is set when the fuzzers are being built by OSS-Fuzz. In this case the
-    # variable provides the necessary linker flags, and OSS-Fuzz will take care
-    # of passing suitable compiler flags.
-    target_link_options(${TARGET} PUBLIC ${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS})
-  else()
-    # When the fuzzers are being built outside of OSS-Fuzz, specific libFuzzer
-    # arguments to enable fuzzing are used.
-    target_link_options(${TARGET} PUBLIC -fsanitize=fuzzer -fsanitize-coverage=trace-cmp)
-  endif()
-
-  # Link the version of tint_api with -sanitize=fuzzer enabled
-  target_link_libraries(${TARGET} PRIVATE "tint_api_sanitize_fuzzer")
-endfunction()
-
-# TODO(crbug.com/tint/2223): Remove this when fuzzers are fully migrated to gen build
-function(tint_fuzzer_compile_options TARGET)
-  tint_fuzz_cmd_compile_options(${TARGET})
-  target_link_libraries(${TARGET} PRIVATE "tint_api_sanitize_fuzzer")
 endfunction()
 
 if(TINT_ENABLE_BREAK_IN_DEBUGGER)
@@ -362,11 +328,8 @@ endif()
 #               linking against google-test.
 # 'bench'     - Translates to a CMake object library, configured for compiling and
 #               linking against google-benchmark.
-# 'fuzz'      - Translates to a CMake object library, configured for compiling and
-#               linking against libfuzzer.
 # 'test_cmd'  - Translates to a CMake executable target linked against google-test.
 # 'bench_cmd' - Translates to a CMake executable target linked against google-benchmark.
-# 'fuzz_cmd'  - Translates to a CMake executable target linked against libfuzz.
 # See also: docs/tint/gen.md
 ################################################################################
 
@@ -394,10 +357,6 @@ function(tint_check_target_is_enabled IS_ENABLED KIND)
     if(TINT_BUILD_BENCHMARKS)
       set(IS_ENABLED TRUE PARENT_SCOPE)
     endif()
-  elseif((${KIND} STREQUAL fuzz) OR (${KIND} STREQUAL fuzz_cmd))
-    if(TINT_BUILD_FUZZERS)
-      set(IS_ENABLED TRUE PARENT_SCOPE)
-    endif()
   else()
     message(FATAL_ERROR "unhandled target kind ${KIND}")
   endif()
@@ -413,7 +372,6 @@ endfunction()
 #   KIND     - The target kind
 #   SOURCES  - a list of source files, relative to this directory
 function(tint_add_target TARGET KIND)
-  set(TARGET "${TARGET}${TINT_TARGET_SUFFIX}") # Apply suffix
   set(SOURCES ${ARGN})
 
   tint_check_target_is_enabled(IS_ENABLED ${KIND})
@@ -441,18 +399,12 @@ function(tint_add_target TARGET KIND)
   elseif(${KIND} STREQUAL bench_cmd)
     add_executable(${TARGET})
     tint_bench_cmd_compile_options(${TARGET})
-  elseif(${KIND} STREQUAL fuzz_cmd)
-    add_executable(${TARGET})
-    tint_fuzz_cmd_compile_options(${TARGET})
   elseif(${KIND} STREQUAL test)
     add_library(${TARGET} OBJECT EXCLUDE_FROM_ALL)
     tint_test_compile_options(${TARGET})
   elseif(${KIND} STREQUAL bench)
     add_library(${TARGET} OBJECT EXCLUDE_FROM_ALL)
     tint_bench_compile_options(${TARGET})
-  elseif(${KIND} STREQUAL fuzz)
-    add_library(${TARGET} OBJECT EXCLUDE_FROM_ALL)
-    tint_fuzz_compile_options(${TARGET})
   else()
     message(FATAL_ERROR "unhandled target kind ${KIND}")
   endif()
@@ -470,7 +422,6 @@ endfunction()
 #   KIND     - The target kind
 #   SOURCES  - a list of source files, relative to this directory
 function(tint_target_add_sources TARGET KIND)
-  set(TARGET "${TARGET}${TINT_TARGET_SUFFIX}") # Apply suffix
   set(SOURCES ${ARGN})
 
   tint_check_target_is_enabled(IS_ENABLED ${KIND})
@@ -490,7 +441,6 @@ endfunction()
 #   KIND         - The target kind
 #   DEPENDENCIES - a list of target names
 function(tint_target_add_dependencies TARGET KIND)
-  set(TARGET "${TARGET}${TINT_TARGET_SUFFIX}") # Apply suffix
   set(DEPENDENCIES ${ARGN})
 
   tint_check_target_is_enabled(IS_ENABLED ${KIND})
@@ -498,14 +448,8 @@ function(tint_target_add_dependencies TARGET KIND)
     return() # Target is disabled via build flags
   endif()
 
-  # Apply target suffix
-  set(SUFFIXED_DEPENDENCIES "")
-  foreach(DEPENDENCY ${DEPENDENCIES})
-    list(APPEND SUFFIXED_DEPENDENCIES "${DEPENDENCY}${TINT_TARGET_SUFFIX}")
-  endforeach()
-
   # Register the dependencies
-  target_link_libraries(${TARGET} PRIVATE ${SUFFIXED_DEPENDENCIES})
+  target_link_libraries(${TARGET} PRIVATE ${DEPENDENCIES})
 endfunction()
 
 # tint_target_add_external_dependencies(TARGET KIND DEPENDENCIES...)
@@ -519,7 +463,6 @@ endfunction()
 #
 # See src/tint/externals.json for the list of external dependencies.
 function(tint_target_add_external_dependencies TARGET KIND)
-  set(TARGET "${TARGET}${TINT_TARGET_SUFFIX}") # Apply suffix
   set(DEPENDENCIES ${ARGN})
 
   tint_check_target_is_enabled(IS_ENABLED ${KIND})
@@ -546,43 +489,6 @@ function(tint_target_add_external_dependencies TARGET KIND)
       target_link_libraries(${TARGET} PRIVATE ${CMAKE_DL_LIBS})
     elseif(${DEPENDENCY} STREQUAL "dxc-include")
       target_include_directories(${TARGET} PRIVATE "${DAWN_THIRD_PARTY_DIR}/directx-shader-compiler/src/include")
-    elseif(${DEPENDENCY} STREQUAL "dxcompiler-for-fuzzer")
-      if(TINT_BUILD_FUZZERS AND DAWN_USE_BUILT_DXC) # TODO: and target arch is not x86
-        target_link_libraries(${TARGET} PRIVATE dxcompiler)
-      endif()
-    elseif(${DEPENDENCY} STREQUAL "fuzztest")
-      if(NOT TINT_BUILD_FUZZTEST)
-        message(FATAL_ERROR "unexpected external dependency ${DEPENDENCY} w/o enabling TINT_BUILD_FUZZTEST")
-      endif()
-      target_link_libraries(${TARGET} PRIVATE fuzztest)
-      if(NOT MSVC)
-        target_compile_options(${TARGET} PRIVATE
-          -Wno-global-constructors
-          -Wno-exit-time-destructors
-          -Wno-weak-vtables
-        )
-      endif()
-      if((${KIND} STREQUAL fuzz_cmd) AND ("${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS}" STREQUAL ""))
-        # FuzzTest executables define their own main() and link Clang's
-        # fuzzer_no_main runtime via the fuzztest target; replace -fsanitize=fuzzer
-        # from tint_fuzz_cmd_compile_options with -fsanitize=fuzzer-no-link so
-        # libFuzzer's FuzzerMain.cpp is not linked.
-        get_target_property(_link_opts ${TARGET} LINK_OPTIONS)
-        if(_link_opts)
-          list(TRANSFORM _link_opts REPLACE "^-fsanitize=fuzzer$" "-fsanitize=fuzzer-no-link")
-          set_target_properties(${TARGET} PROPERTIES LINK_OPTIONS "${_link_opts}")
-        endif()
-        get_target_property(_iface_link_opts ${TARGET} INTERFACE_LINK_OPTIONS)
-        if(_iface_link_opts)
-          list(TRANSFORM _iface_link_opts REPLACE "^-fsanitize=fuzzer$" "-fsanitize=fuzzer-no-link")
-          set_target_properties(${TARGET} PROPERTIES INTERFACE_LINK_OPTIONS "${_iface_link_opts}")
-        endif()
-      endif()
-    elseif(${DEPENDENCY} STREQUAL "fuzztest_wgsl_grammar")
-      if(NOT TINT_BUILD_FUZZTEST)
-        message(FATAL_ERROR "unexpected external dependency ${DEPENDENCY} w/o enabling TINT_BUILD_FUZZTEST")
-      endif()
-      target_link_libraries(${TARGET} PRIVATE fuzztest)
     elseif(${DEPENDENCY} STREQUAL "glslang")
       target_link_libraries(${TARGET} PRIVATE glslang)
       if(NOT MSVC)
@@ -603,13 +509,6 @@ function(tint_target_add_external_dependencies TARGET KIND)
     elseif(${DEPENDENCY} STREQUAL "gtest")
       target_include_directories(${TARGET} PRIVATE ${gmock_SOURCE_DIR}/include)
       target_link_libraries(${TARGET} PRIVATE gmock)
-    elseif(${DEPENDENCY} STREQUAL "libprotobuf-mutator")
-      target_link_libraries(${TARGET} PRIVATE libprotobuf-mutator)
-    elseif(${DEPENDENCY} STREQUAL "mesa")
-      if (NOT TINT_BUILD_MESA)
-        message(FATAL_ERROR "unexpected external dependency ${DEPENDENCY} w/o enabling TINT_BUILD_MESA")
-      endif()
-      add_dependencies(${TARGET} mesa)
     elseif(${DEPENDENCY} STREQUAL "metal")
       find_library(CoreGraphicsFramework CoreGraphics REQUIRED)
       find_library(FoundationFramework Foundation REQUIRED)
@@ -638,11 +537,6 @@ function(tint_target_add_external_dependencies TARGET KIND)
       target_link_libraries(${TARGET} PRIVATE Threads::Threads)
     elseif(${DEPENDENCY} STREQUAL "vulkan-headers")
       target_link_libraries(${TARGET} PRIVATE Vulkan::Headers)
-    elseif(${DEPENDENCY} STREQUAL "libvulkan")
-      if (NOT TINT_BUILD_FUZZER_VULKAN_SUPPORT)
-        message(FATAL_ERROR "unexpected external dependency ${DEPENDENCY} w/o enabling TINT_BUILD_FUZZER_VULKAN_SUPPORT")
-      endif()
-      target_link_libraries(${TARGET} PRIVATE Vulkan::Loader)
     elseif(${DEPENDENCY} STREQUAL "winsock")
       target_link_libraries(${TARGET} PRIVATE ws2_32)
     elseif(${DEPENDENCY} STREQUAL "src_utils")
@@ -666,7 +560,6 @@ endfunction()
 #   KIND        - The target kind
 #   OUTPUT_NAME - the new name for the target output
 function(tint_target_set_output_name TARGET KIND OUTPUT_NAME)
-  set(TARGET "${TARGET}${TINT_TARGET_SUFFIX}") # Apply suffix
   tint_check_target_is_enabled(IS_ENABLED ${KIND})
   if(NOT IS_ENABLED)
     return() # Target is disabled via build flags
@@ -681,15 +574,11 @@ function(tint_target_set_output_name TARGET KIND OUTPUT_NAME)
     add_library(${OUTPUT_NAME} ALIAS ${TARGET})
   elseif(${KIND} STREQUAL bench)
     add_library(${OUTPUT_NAME} ALIAS ${TARGET})
-  elseif(${KIND} STREQUAL fuzz)
-    add_library(${OUTPUT_NAME} ALIAS ${TARGET})
   elseif(${KIND} STREQUAL cmd)
     add_executable(${OUTPUT_NAME} ALIAS ${TARGET})
   elseif(${KIND} STREQUAL test_cmd)
     add_executable(${OUTPUT_NAME} ALIAS ${TARGET})
   elseif(${KIND} STREQUAL bench_cmd)
-    add_executable(${OUTPUT_NAME} ALIAS ${TARGET})
-  elseif(${KIND} STREQUAL fuzz_cmd)
     add_executable(${OUTPUT_NAME} ALIAS ${TARGET})
   else()
     message(FATAL_ERROR "unhandled target kind ${KIND}")
@@ -699,42 +588,7 @@ endfunction()
 ################################################################################
 # Include the generated build files
 ################################################################################
-if(TINT_BUILD_FUZZERS)
-  if(NOT COMPILER_IS_CLANG)
-    message(FATAL_ERROR "TINT_BUILD_FUZZERS can only be enabled with the Clang toolchain")
-  endif()
-
-  # Save the current build flags
-  set(SAVE_TINT_BUILD_CMD_TOOLS ${TINT_BUILD_CMD_TOOLS})
-  set(SAVE_TINT_BUILD_TESTS ${TINT_BUILD_TESTS})
-  set(SAVE_TINT_BUILD_BENCHMARKS ${TINT_BUILD_BENCHMARKS})
-  set(SAVE_TINT_BUILD_FUZZERS ${TINT_BUILD_FUZZERS})
-  set(SAVE_TINT_TARGET_SUFFIX ${TINT_TARGET_SUFFIX})
-
-  # Declare the targets with fuzzers disabled
-  set(TINT_BUILD_FUZZERS FALSE)
-  include("BUILD.cmake")
-
-  # Now redeclare the fuzzers targets with a '_sanitize_fuzzer' target suffix
-  # Enabling TINT_BUILD_FUZZERS will enable the -fsanitize=fuzzer compilation flag for these
-  # targets.
-  set(TINT_TARGET_SUFFIX "_sanitize_fuzzer")
-  set(TINT_BUILD_FUZZERS TRUE)
-  set(TINT_BUILD_CMD_TOOLS FALSE)
-  set(TINT_BUILD_TESTS FALSE)
-  set(TINT_BUILD_BENCHMARKS FALSE)
-  include("BUILD.cmake")
-
-  # Restore the build flags
-  set(TINT_BUILD_CMD_TOOLS ${SAVE_TINT_BUILD_CMD_TOOLS})
-  set(TINT_BUILD_TESTS ${SAVE_TINT_BUILD_TESTS})
-  set(TINT_BUILD_BENCHMARKS ${SAVE_TINT_BUILD_BENCHMARKS})
-  set(TINT_BUILD_FUZZERS ${SAVE_TINT_BUILD_FUZZERS})
-  set(TINT_TARGET_SUFFIX ${SAVE_TINT_TARGET_SUFFIX})
-else()
-  # Fuzzers not enabled. Just include BUILD.cmake with the current flags.
-  include("BUILD.cmake")
-endif(TINT_BUILD_FUZZERS)
+include("BUILD.cmake")
 
 
 ################################################################################

@@ -33,28 +33,3 @@
 #
 #                       Do not modify this file directly
 ################################################################################
-
-if(TINT_BUILD_FUZZERS AND TINT_BUILD_FUZZTEST)
-################################################################################
-# Target:    tint_cmd_fuzz_stub_fuzztest_fuzz_cmd
-# Kind:      fuzz_cmd
-# Condition: TINT_BUILD_FUZZERS AND TINT_BUILD_FUZZTEST
-################################################################################
-tint_add_target(tint_cmd_fuzz_stub_fuzztest_fuzz_cmd fuzz_cmd
-  cmd/fuzz/stub_fuzztest/main_fuzz.cc
-)
-
-tint_target_add_dependencies(tint_cmd_fuzz_stub_fuzztest_fuzz_cmd fuzz_cmd
-  tint_utils_macros
-)
-
-tint_target_add_external_dependencies(tint_cmd_fuzz_stub_fuzztest_fuzz_cmd fuzz_cmd
-  "fuzztest"
-  "fuzztest_wgsl_grammar"
-  "gtest"
-  "src_utils"
-)
-
-tint_target_set_output_name(tint_cmd_fuzz_stub_fuzztest_fuzz_cmd fuzz_cmd "tint_stub_fuzztest")
-
-endif(TINT_BUILD_FUZZERS AND TINT_BUILD_FUZZTEST)

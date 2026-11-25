@@ -321,10 +321,9 @@ The workaround for this depends on which version of XCode you are trying to use.
 
 The workaround for 16.X has been to install a fully featured version llvm onto
 your system, for example via Homebrew, `brew install llvm`, (you might have to
-use `llvm@XX` where `XX` is the major version of llvm in the XCode SDK). And
-then using environment variables, i.e. `CC=<path to Homebrew clang> cmake
--GNinja ../..`, to set up the build including the full llvm toolchain to get the
-missing libraries onto the search path. This will actually create a hybrid
+use `llvm@XX` where `XX` is the major version of llvm in the XCode SDK), and
+configure the build to use the Homebrew llvm toolchain to get the missing
+libraries onto the search path. This will actually create a hybrid
 toolchain using some elements of the XCode SDK and the llvm SDK, because there
 is some Apple specific framework stuff that isn't in mainstream llvm.
 

@@ -172,10 +172,9 @@ option(DAWN_BUILD_NODE_BINDINGS "Enables building Dawn's NodeJS bindings" OFF)
 option(DAWN_ENABLE_SWIFTSHADER "Enables building Swiftshader as part of the build and Vulkan adapter discovery" OFF)
 option(DAWN_BUILD_BENCHMARKS "Build Dawn benchmarks" OFF)
 option(DAWN_BUILD_PROTOBUF "Build the protobuf dependencies" ON)
-option(DAWN_BUILD_FUZZERS "Build Dawn fuzzers" OFF)
 
 set(ENABLE_ERROR_INJECTION_DEFAULT OFF)
-if (IS_DEBUG_BUILD OR DAWN_BUILD_FUZZERS)
+if (IS_DEBUG_BUILD)
     set(ENABLE_ERROR_INJECTION_DEFAULT ON)
 endif()
 option(DAWN_ENABLE_ERROR_INJECTION "Enable error injection for faking failures to native API calls" ${ENABLE_ERROR_INJECTION_DEFAULT})
@@ -196,9 +195,6 @@ set_if_not_defined(DAWN_MARKUPSAFE_DIR "${DAWN_THIRD_PARTY_DIR}/markupsafe" "Dir
 set_if_not_defined(DAWN_KHRONOS_DIR "${DAWN_THIRD_PARTY_DIR}/khronos" "Directory in which to find Khronos GL headers")
 set_if_not_defined(DAWN_SWIFTSHADER_DIR "${DAWN_THIRD_PARTY_DIR}/swiftshader" "Directory in which to find swiftshader")
 set_if_not_defined(DAWN_PROTOBUF_DIR "${DAWN_THIRD_PARTY_DIR}/protobuf" "Directory in which to find protobuf")
-set_if_not_defined(DAWN_LPM_DIR "${DAWN_THIRD_PARTY_DIR}/libprotobuf-mutator/src" "Directory in which to find libprotobuf")
-set_if_not_defined(DAWN_FUZZTEST_DIR "${DAWN_THIRD_PARTY_DIR}/fuzztest/src" "Directory in which to find fuzztest")
-set_if_not_defined(DAWN_RE2_DIR "${DAWN_THIRD_PARTY_DIR}/re2/src" "Directory in which to find re2")
 set_if_not_defined(DAWN_EMDAWNWEBGPU_DIR "${DAWN_THIRD_PARTY_DIR}/emdawnwebgpu" "Directory in which to find Dawn specific Emscripten bindings")
 set_if_not_defined(DAWN_GOOGLETEST_DIR "${DAWN_THIRD_PARTY_DIR}/googletest/src" "Directory in which to find googletest")
 set_if_not_defined(DAWN_EGL_REGISTRY_DIR "${DAWN_THIRD_PARTY_DIR}/EGL-Registry/src" "Directory in which to find EGL-Registry")
@@ -207,7 +203,6 @@ set_if_not_defined(DAWN_SPIRV_TOOLS_DIR "${DAWN_THIRD_PARTY_DIR}/spirv-tools/src
 set_if_not_defined(DAWN_SPIRV_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/spirv-headers/src" "Directory in which to find SPIRV-Headers")
 set_if_not_defined(DAWN_GLSLANG_DIR "${DAWN_THIRD_PARTY_DIR}/glslang/src" "Directory in which to find GLSLang")
 set_if_not_defined(DAWN_VULKAN_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-headers/src" "Directory in which to find Vulkan-Headers")
-set_if_not_defined(DAWN_VULKAN_LOADER_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-loader/src" "Directory in which to find Vulkan-Loader")
 set_if_not_defined(DAWN_VULKAN_UTILITY_LIBRARIES_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-utility-libraries/src" "Directory in which to find Vulkan-Utility-Libraries")
 set_if_not_defined(DAWN_WEBGPU_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/webgpu-headers/src" "Directory in which to find webgpu headers")
 set_if_not_defined(DAWN_AGILITY_SDK_DIR "${DAWN_THIRD_PARTY_DIR}/agility-sdk" "Directory in which to find the D3D12 Agility SDK")
@@ -260,21 +255,9 @@ option(TINT_BUILD_WGSL_WRITER "Build the WGSL output writer" ON)
 option(TINT_BUILD_NULL_WRITER "Build the NULL output writer" ${DAWN_ENABLE_NULL})
 
 option(TINT_BUILD_IR_BINARY "Build IR binary format support" ${DAWN_BUILD_PROTOBUF})
-option(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
-option(TINT_BUILD_FUZZTEST "Build prototype FuzzTest fuzzers" OFF)
-option(TINT_BUILD_FUZZER_VULKAN_SUPPORT "Build fuzzing Vulkan drivers" OFF)
 option(TINT_BUILD_BENCHMARKS "Build Tint benchmarks" OFF)
 option(TINT_BUILD_TESTS "Build tests" ON)
 option(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
-option(TINT_BUILD_MESA "Build Mesa" OFF)
-
-if (TINT_BUILD_MESA AND NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    message(FATAL_ERROR "Building Mesa is only supported on Linux")
-endif()
-
-if (TINT_BUILD_MESA AND DAWN_ENABLE_MSAN)
-    message(FATAL_ERROR "Building Mesa with MSAN is not supported, due to pre-built dependencies not being instrumented for MSAN")
-endif()
 
 if (EMSCRIPTEN)
   # Skip tint tests in emscripten build
@@ -355,9 +338,6 @@ message(STATUS "")
 message(STATUS "Tint build command line executable tools: ${TINT_BUILD_CMD_TOOLS}")
 message(STATUS "Tint install: ${TINT_ENABLE_INSTALL}")
 message(STATUS "Tint build IR binary: ${TINT_BUILD_IR_BINARY}")
-message(STATUS "Tint build fuzzers: ${TINT_BUILD_FUZZERS}")
-message(STATUS "Tint build FuzzTest fuzzers: ${TINT_BUILD_FUZZTEST}")
-message(STATUS "Tint build fuzzing vulkan drivers: ${TINT_BUILD_FUZZER_VULKAN_SUPPORT}")
 message(STATUS "Tint build benchmarks: ${TINT_BUILD_BENCHMARKS}")
 message(STATUS "Tint build tests: ${TINT_BUILD_TESTS}")
 message(STATUS "Tint enable IR dumping: ${TINT_ENABLE_IR_DUMPING}")
@@ -365,7 +345,6 @@ message(STATUS "Tint enable IR validation assertions: ${TINT_ENABLE_IR_VALIDATIO
 message(STATUS "Tint enable break in debugger: ${TINT_ENABLE_BREAK_IN_DEBUGGER}")
 message(STATUS "Tint build checking [chromium-style]: ${TINT_CHECK_CHROMIUM_STYLE}")
 message(STATUS "Tint randomize hashes: ${TINT_RANDOMIZE_HASHES}")
-message(STATUS "Tint build Mesa: ${TINT_BUILD_MESA}")
 message(STATUS "")
 
 message(STATUS "Dawn third_party dir: ${DAWN_THIRD_PARTY_DIR}")
@@ -375,7 +354,6 @@ message(STATUS "Dawn MarkupSafe dir: ${DAWN_MARKUPSAFE_DIR}")
 message(STATUS "Dawn Khronos dir: ${DAWN_KHRONOS_DIR}")
 message(STATUS "Dawn Swiftshader dir: ${DAWN_SWIFTSHADER_DIR}")
 message(STATUS "Dawn Protobuf dir: ${DAWN_PROTOBUF_DIR}")
-message(STATUS "Dawn LPM dir: ${DAWN_LPM_DIR}")
 message(STATUS "Dawn Emdawnwebgpu dir: ${DAWN_EMDAWNWEBGPU_DIR}")
 message(STATUS "Dawn Spir-Tools dir: ${DAWN_SPIRV_TOOLS_DIR}")
 message(STATUS "Dawn Spirv-Headers dir: ${DAWN_SPIRV_HEADERS_DIR}")
@@ -389,18 +367,6 @@ message(STATUS "Node API Headers dir: ${NODE_API_HEADERS_DIR}")
 message(STATUS "Webgpu IDL path: ${WEBGPU_IDL_PATH}")
 message(STATUS "Go exe: ${GO_EXECUTABLE}")
 message(STATUS "")
-
-if (TINT_BUILD_FUZZER_VULKAN_SUPPORT AND NOT TINT_BUILD_FUZZERS)
-    message(FATAL_ERROR "Cannot enable TINT_BUILD_FUZZER_VULKAN_SUPPORT without enabling TINT_BUILD_FUZZERS")
-endif()
-
-if (TINT_BUILD_FUZZTEST AND NOT TINT_BUILD_FUZZERS)
-    message(FATAL_ERROR "Cannot enable TINT_BUILD_FUZZTEST without enabling TINT_BUILD_FUZZERS")
-endif()
-
-if (TINT_BUILD_FUZZTEST AND NOT DAWN_BUILD_PROTOBUF)
-    message(FATAL_ERROR "Cannot enable TINT_BUILD_FUZZTEST without enabling DAWN_BUILD_PROTOBUF")
-endif()
 
 # Much of the backend code is shared among desktop OpenGL and OpenGL ES
 if (${DAWN_ENABLE_DESKTOP_GL} OR ${DAWN_ENABLE_OPENGLES})
@@ -440,10 +406,6 @@ include(DawnCompilerPlatformFlags)
 include(DawnCompilerWarningFlags)
 include(DawnInitializeBuildType)
 include(DawnLibrary)
-
-if (NOT ${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS} STREQUAL "")
-  message(STATUS "Using provided LIB_FUZZING_ENGINE options: ${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS}")
-endif()
 
 find_package(Python3 REQUIRED)
 message(STATUS "Dawn: using python at ${Python3_EXECUTABLE}")
@@ -499,8 +461,6 @@ endif()
 # Tint
 ################################################################################
 
-set(TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS "" CACHE STRING "Used by OSS-Fuzz to control, via link options, which fuzzing engine should be used")
-
 set(TINT_ROOT_SOURCE_DIR   ${PROJECT_SOURCE_DIR})
 set(TINT_SPIRV_HEADERS_DIR ${DAWN_SPIRV_HEADERS_DIR})
 set(TINT_SPIRV_TOOLS_DIR   ${DAWN_SPIRV_TOOLS_DIR})
@@ -527,7 +487,6 @@ if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12 OR DAWN_ENABLE_METAL OR DAWN_ENABLE_N
     # headers will be exported upwards.
     add_subdirectory(src/emdawnwebgpu)
     add_subdirectory(src/dawn)
-    add_subdirectory(src/dawn/fuzzers)
 endif()
 
 ################################################################################

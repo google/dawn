@@ -67,8 +67,8 @@ function show_usage() {
   echo "  debug         Make a debug build"
   echo " "
   echo "  fuzz[=engine], fuzzer[=engine]"
-  echo "                Build fuzzers. Forces Clang to be used. Optional engine"
-  echo "                is 'libfuzzer' (default) or 'centipede' (gn only)"
+  echo "                Build fuzzers (gn only). Optional engine is 'libfuzzer'"
+  echo "                (default) or 'centipede'"
   echo "  gccrt         Use GCC 14 runtime with clang"
   echo "  install       Install to out/install (cmake only)"
   echo "  native        Target the machine you're running on"
@@ -209,8 +209,8 @@ if [[ -n "$ANDROID_NDK" ]]; then
   fi
 fi
 
-if [[ "$FUZZER_ENGINE" == "centipede" && "$BUILD_SYSTEM" != "gn" ]]; then
-  show_usage "the centipede fuzzer engine is only supported with gn"
+if [[ -n "$FUZZER_ENGINE" && "$BUILD_SYSTEM" != "gn" ]]; then
+  show_usage "fuzzing is only supported with gn (CMake fuzzer builds are not supported)"
 fi
 
 BUILD_DIR="$BUILD_SYSTEM-$BUILD_TYPE"
@@ -312,12 +312,6 @@ case $BUILD_SYSTEM in
             exit 1
         fi
         CXX_FLAGS+=("--gcc-install-dir=$GCCRT_DIR")
-    fi
-    if [[ -n "$FUZZER_ENGINE" ]]; then
-        CMAKE_FLAGS+=("-DTINT_BUILD_FUZZERS=ON")
-        CMAKE_FLAGS+=("-DDAWN_BUILD_PROTOBUF=ON")
-        CMAKE_FLAGS+=("-DTINT_BUILD_IR_BINARY=ON")
-        CMAKE_FLAGS+=("-DDAWN_USE_BUILT_DXC=ON")  # TODO(b/348200364)
     fi
     if [[ -x $(command -v ccache) ]]; then
       CMAKE_FLAGS+=("-DCMAKE_CXX_COMPILER_LAUNCHER=ccache")

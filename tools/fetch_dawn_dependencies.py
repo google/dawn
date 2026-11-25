@@ -113,7 +113,6 @@ def main(args):
         'third_party/jinja2',
         'third_party/EGL-Registry/src',
         'third_party/OpenGL-Registry/src',
-        'third_party/libprotobuf-mutator/src',
         'third_party/protobuf',
         'third_party/markupsafe',
         'third_party/glslang/src',
@@ -122,7 +121,6 @@ def main(args):
         'third_party/spirv-headers/src',
         'third_party/spirv-tools/src',
         'third_party/vulkan-headers/src',
-        'third_party/vulkan-loader/src',
         'third_party/vulkan-utility-libraries/src',
         'third_party/webgpu-headers/src',
     ]

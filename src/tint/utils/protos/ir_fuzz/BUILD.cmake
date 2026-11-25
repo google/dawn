@@ -33,19 +33,3 @@
 #
 #                       Do not modify this file directly
 ################################################################################
-
-if(TINT_BUILD_IR_BINARY)
-################################################################################
-# Target:    tint_utils_protos_ir_fuzz_proto
-# Kind:      proto
-# Condition: TINT_BUILD_IR_BINARY
-################################################################################
-tint_add_target(tint_utils_protos_ir_fuzz_proto proto
-  utils/protos/ir_fuzz/ir_fuzz.proto
-)
-
-tint_target_add_dependencies(tint_utils_protos_ir_fuzz_proto proto
-  tint_utils_protos_ir_proto
-)
-
-endif(TINT_BUILD_IR_BINARY)

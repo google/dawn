@@ -95,7 +95,7 @@ endif()
 #   Emscripten to the minimal set, only subdirectories added within the Start
 #   and End of the Emscripten block are enabled .
 ################################################################################
-if ((DAWN_BUILD_TESTS OR TINT_BUILD_TESTS OR TINT_BUILD_FUZZTEST) AND NOT TARGET gmock)
+if ((DAWN_BUILD_TESTS OR TINT_BUILD_TESTS) AND NOT TARGET gmock)
     set(gtest_force_shared_crt ON CACHE BOOL "Controls whether a shared run-time library should be used even when Google Test is built as static library" FORCE)
     if (EMSCRIPTEN)
         # For Emscripten builds, we need to disable pthreads.
@@ -159,7 +159,7 @@ if (NOT TARGET SPIRV-Tools AND
     add_subdirectory(${DAWN_SPIRV_TOOLS_DIR} "${CMAKE_CURRENT_BINARY_DIR}/spirv-tools" EXCLUDE_FROM_ALL)
 endif()
 
-if(NOT TARGET glslang AND (((TINT_BUILD_GLSL_WRITER OR TINT_BUILD_GLSL_VALIDATOR) AND TINT_BUILD_CMD_TOOLS) OR TINT_BUILD_MESA))
+if(NOT TARGET glslang AND (TINT_BUILD_GLSL_WRITER OR TINT_BUILD_GLSL_VALIDATOR) AND TINT_BUILD_CMD_TOOLS)
     set(SKIP_GLSLANG_INSTALL ON CACHE BOOL "" FORCE)
     set(ENABLE_OPT OFF CACHE BOOL "" FORCE)
     message(STATUS "Dawn: using GLSLang at ${DAWN_GLSLANG_DIR}")
@@ -183,30 +183,6 @@ if (NOT TARGET glfw AND DAWN_USE_GLFW)
     add_subdirectory(${DAWN_GLFW_DIR} "${CMAKE_CURRENT_BINARY_DIR}/glfw3/src")
 endif()
 
-if (DAWN_BUILD_PROTOBUF AND NOT TARGET libprotobuf-mutator)
-    message(STATUS "Dawn: using LPM at ${DAWN_LPM_DIR}")
-    include("libprotobuf-mutator/BUILD.cmake")
-endif()
-
-if (TINT_BUILD_FUZZTEST)
-    if (NOT TARGET re2)
-        if (NOT EXISTS "${DAWN_RE2_DIR}/CMakeLists.txt")
-            message(FATAL_ERROR "TINT_BUILD_FUZZTEST is enabled, but re2 was not found at '${DAWN_RE2_DIR}'. Ensure 'gclient sync' has been run.")
-        endif()
-        set(RE2_BUILD_TESTING OFF CACHE BOOL "" FORCE)
-        set(RE2_INSTALL OFF CACHE BOOL "" FORCE)
-        message(STATUS "Dawn: using RE2 at ${DAWN_RE2_DIR}")
-        add_subdirectory("${DAWN_RE2_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/re2" EXCLUDE_FROM_ALL)
-    endif()
-    if (NOT TARGET fuzztest)
-        if (NOT EXISTS "${DAWN_FUZZTEST_DIR}/fuzztest/fuzztest.h")
-            message(FATAL_ERROR "TINT_BUILD_FUZZTEST is enabled, but fuzztest was not found at '${DAWN_FUZZTEST_DIR}'. Ensure 'gclient sync' has been run.")
-        endif()
-        message(STATUS "Dawn: using FuzzTest at ${DAWN_FUZZTEST_DIR}")
-        include("fuzztest/BUILD.cmake")
-    endif()
-endif()
-
 if (NOT TARGET renderdoc-api)
     add_library(RenderDocApi INTERFACE)
     target_include_directories(RenderDocApi INTERFACE "renderdoc")
@@ -225,11 +201,6 @@ if (NOT TARGET Vulkan::Headers AND DAWN_ENABLE_VULKAN)
 
     set(VULKAN_HEADERS_ENABLE_MODULE OFF)
     add_subdirectory(${DAWN_VULKAN_HEADERS_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vulkan-headers/src")
-endif()
-
-if (NOT TARGET Vulkan::Loader AND DAWN_ENABLE_VULKAN AND TINT_BUILD_FUZZER_VULKAN_SUPPORT)
-    message(STATUS "Dawn: using Vulkan::Loader at ${DAWN_VULKAN_LOADER_DIR}")
-    add_subdirectory(${DAWN_VULKAN_LOADER_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vulkan-loader/src")
 endif()
 
 if (NOT TARGET Vulkan::UtilityHeaders AND DAWN_ENABLE_VULKAN)
@@ -387,10 +358,6 @@ endfunction()
 
 if (DAWN_USE_BUILT_DXC)
     AddSubdirectoryDXC()
-endif()
-
-if (TINT_BUILD_MESA)
-    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/mesa" "${CMAKE_CURRENT_BINARY_DIR}/mesa")
 endif()
 
 if (DAWN_USE_AGILITY_SDK AND NOT TARGET agility-sdk)

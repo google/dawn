@@ -4,10 +4,8 @@
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "cmd")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "test_cmd")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "bench_cmd")}}
-{{- Eval "TargetIfNotEmpty" ($.Project.Target $ "fuzz_cmd")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "test")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "bench")}}
-{{- Eval "TargetIfNotEmpty" ($.Project.Target $ "fuzz")}}
 
 
 {{- /*
@@ -32,7 +30,9 @@ include({{$subdir.Path}}/BUILD.cmake)
 */ -}}
 {{- define "TargetIfNotEmpty"}}
 {{-   if $}}
-{{-     if len $.SourceFiles}}{{Eval "Target" $}}{{end}}
+{{-     if or (HasPrefix $.Directory.Path "cmd/fuzz") (eq $.Directory.Path "utils/protos/ir_fuzz")}}
+{{-     else if and $.Condition (or (Contains $.Condition.String "tint_build_fuzzers") (Contains $.Condition.String "tint_build_fuzztest") (Contains $.Condition.String "tint_build_mesa") (Contains $.Condition.String "tint_build_fuzzer_vulkan_support"))}}
+{{-     else if len $.SourceFiles}}{{Eval "Target" $}}{{end}}
 {{-   end}}
 {{- end}}
 
@@ -89,6 +89,7 @@ tint_target_add_external_dependencies({{$Name}} {{$Kind}}
 
 {{- /* Emit conditional source files and dependencies */}}
 {{-   range $Cond := $.Conditionals}}
+{{-     if not (or (Contains $Cond.Condition.String "tint_build_fuzzers") (Contains $Cond.Condition.String "tint_build_fuzztest") (Contains $Cond.Condition.String "tint_build_mesa") (Contains $Cond.Condition.String "tint_build_fuzzer_vulkan_support"))}}
 {{/*   newline */}}
 if({{Eval "Expression" $Cond.Condition}})
 {{-     if $Cond.SourceFiles}}
@@ -113,6 +114,7 @@ if({{Eval "Expression" $Cond.Condition}})
   )
 {{-     end}}
 endif({{Eval "Expression" $Cond.Condition}})
+{{-     end}}
 {{-   end}}
 
 {{-   if $.OutputName}}
