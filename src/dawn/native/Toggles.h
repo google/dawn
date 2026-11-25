@@ -244,6 +244,7 @@ enum class Toggle {
     ClearDepthWithDraw,
     VulkanScalarizeClipDistances,
     MetalPolyfillExtractBits,
+    D3D12PersistentlyMapBuffersAndClearBufferBeforeDestroy,
 
     EnumCount,
     InvalidEnum = EnumCount,

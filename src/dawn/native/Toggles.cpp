@@ -1030,6 +1030,15 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Use the full polyfill for extractBits() instead of clamping to work around an Apple Metal "
       "compiler bug.",
       "https://crbug.com/587021111", ToggleStage::Device}},
+    {Toggle::D3D12PersistentlyMapBuffersAndClearBufferBeforeDestroy,
+     {"d3d12_persistently_map_buffers_and_clear_buffer_before_destroy",
+      "Allocate CPU-accessible buffers as committed resources. Once such a buffer is first mapped, "
+      "keep it mapped and resident until it is destroyed: don't unmap it when the Dawn API `Unmap` "
+      "is called on the buffer. "
+      "When such a buffer is destroyed, clear its first 16 bytes before unmapping it, after the "
+      "GPU has finished using it. Enabled by default on all Intel D3D12 drivers as a workaround "
+      "of a driver issue.",
+      "https://crbug.com/583539379", ToggleStage::Device}},
 
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};

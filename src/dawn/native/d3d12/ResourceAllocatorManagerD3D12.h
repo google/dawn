@@ -37,10 +37,12 @@
 #include "src/dawn/native/IntegerTypes.h"
 #include "src/dawn/native/PooledResourceMemoryAllocator.h"
 #include "src/dawn/native/d3d12/d3d12_platform.h"
+#include "src/utils/span.h"
 
 namespace dawn::native::d3d12 {
 
 class Device;
+class Heap;
 class HeapAllocator;
 class ResourceHeapAllocation;
 
@@ -89,7 +91,9 @@ class ResourceAllocatorManager {
         uint32_t colorFormatBytesPerBlock,
         bool forceAllocateAsCommittedResource = false);
 
-    void DeallocateMemory(ResourceHeapAllocation& allocation);
+    // A nonempty mapping transfers its residency lock to deferred destruction.
+    void DeallocateMemory(ResourceHeapAllocation& allocation,
+                          Span<std::byte> persistentMappedData = {});
 
     void Tick(ExecutionSerial lastCompletedSerial);
 
@@ -131,6 +135,15 @@ class ResourceAllocatorManager {
                static_cast<size_t>(ResourceHeapKind::EnumCount)>
         mPooledHeapAllocators;
 
+    struct PersistentMapping {
+        ComPtr<ID3D12Resource> resource;
+        // Kept alive until the same serial by `mHeapsToDelete` which is processed after
+        // `mPersistentMappingsToDelete`
+        raw_ptr<Heap> heap;
+        Span<std::byte> mappedData;
+        bool isOnReadbackHeap;
+    };
+    SerialQueue<ExecutionSerial, PersistentMapping> mPersistentMappingsToDelete;
     SerialQueue<ExecutionSerial, ResourceHeapAllocation> mAllocationsToDelete;
     SerialQueue<ExecutionSerial, std::unique_ptr<ResourceHeapBase>> mHeapsToDelete;
 };

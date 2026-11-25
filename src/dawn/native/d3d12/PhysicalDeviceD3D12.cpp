@@ -258,11 +258,15 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     // Temporarily only enable SharedBufferMemoryFromWindowsHandle on UMA.
     // TODO(386255678): enable SharedBufferMemoryFromWindowsHandle on other
     // architectures.
-    if (GetDeviceInfo().supportsExistingHeap && GetDeviceInfo().isUMA) {
+    // TODO(583539379): temporarily disable this feature on Intel.
+    if (GetDeviceInfo().supportsExistingHeap && GetDeviceInfo().isUMA &&
+        !gpu_info::IsIntel(mVendorId)) {
         EnableFeature(Feature::SharedBufferMemoryFromWindowsHandle);
     }
 
-    if (GetDeviceInfo().supportsExistingHeap && GetDeviceInfo().isUMA) {
+    // TODO(583539379): temporarily disable this feature on Intel.
+    if (GetDeviceInfo().supportsExistingHeap && GetDeviceInfo().isUMA &&
+        !gpu_info::IsIntel(mVendorId)) {
         EnableFeature(Feature::SharedBufferMemoryHostPointer);
     }
 
@@ -977,7 +981,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::D3D12PolyfillReflectVec2F32, true);
     }
 
+    // TODO(crbug.com/583539379): disable this toggle on the drivers with the fix.
     if (gpu_info::IsIntel(vendorId)) {
+        deviceToggles->Default(Toggle::D3D12PersistentlyMapBuffersAndClearBufferBeforeDestroy,
+                               true);
+
         // The workaround below is needed on old Intel drivers and newer version of Windows 11.
         // See http://crbug.com/dawn/2308 for more information.
         constexpr uint64_t kAffectedMinimumWindowsBuildNumber = 25957u;
