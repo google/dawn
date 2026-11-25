@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_resource_table_metadata_struct {
+  /* 0x0000 */ uint array_length;
+  /* 0x0004 */ array<uint, 1> bindings;
+};
+
+struct tint_module_vars_struct {
+  const device tint_resource_table_metadata_struct* tint_resource_table_metadata;
+};
+
+fragment void fs(const device tint_resource_table_metadata_struct* tint_resource_table_metadata [[buffer(29)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_resource_table_metadata=tint_resource_table_metadata};
+  bool v = false;
+  if ((4u < (*tint_module_vars.tint_resource_table_metadata).array_length)) {
+    v = ((*tint_module_vars.tint_resource_table_metadata).bindings[4u] == 9u);
+  } else {
+    v = false;
+  }
+  bool const tex = v;
+}

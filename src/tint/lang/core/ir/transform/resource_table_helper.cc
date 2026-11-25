@@ -35,6 +35,8 @@
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/resource_type.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/utils/rtti/switch.h"
 
 namespace tint::core::ir::transform {
 
@@ -85,7 +87,18 @@ std::optional<ResourceTableConfig> GenerateResourceTableConfig(
         }
 
         const type::Type* ty = var->Result()->Type()->UnwrapPtr();
-        if (!ty->Is<type::Sampler>() && !ty->Is<type::Texture>()) {
+
+        // Not all types are valid in the resource table. In general, only samplers and textures are
+        // valid, but storage textures are _not_ valid until we get to Tier2 resource tables.
+        bool is_valid_in_resource_table = tint::Switch(
+            ty,  //
+            [&](const type::SampledTexture*) { return true; },
+            [&](const type::MultisampledTexture*) { return true; },
+            [&](const type::DepthMultisampledTexture*) { return true; },
+            [&](const type::DepthTexture*) { return true; },
+            [&](const type::Sampler*) { return true; },  //
+            [&](Default) { return false; });
+        if (!is_valid_in_resource_table) {
             continue;
         }
 
