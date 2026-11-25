@@ -2,7 +2,8 @@
 
 ## Overview
 
-Shared Buffer Memory refers to a superset of features that allow Dawn to import externally allocated buffers.
+Shared Buffer Memory refers to a superset of features that allow Dawn to import externally
+allocated buffers.
 
 - `wgpu::FeatureName::SharedBufferMemoryD3D12Resource`
 - `wgpu::FeatureName::SharedBufferMemoryFromWindowsHandle`
@@ -37,16 +38,21 @@ wgpu::BufferDescriptor bufferDesc = {
 wgpu::Buffer buffer = memory.CreateBuffer(&bufferDesc);
 ```
 
-A buffer can also be created from the shared buffer memory without a `wgpu::BufferDescriptor`. In this case:
+A buffer can also be created from the shared buffer memory without a `wgpu::BufferDescriptor`.
+In this case:
 - The buffer will be created with the same size as the shared buffer memory
-- The buffer will be created with the same buffer usage as the shared buffer memory without `wgpu::BufferUsage::MapRead` and `wgpu::BufferUsage::MapWrite`, which means the buffer will only contain GPU-accessible buffer usages.
+- The buffer will be created with the same buffer usage as the shared buffer memory without
+  `wgpu::BufferUsage::MapRead` and `wgpu::BufferUsage::MapWrite`, which means the buffer will only
+  contain GPU-accessible buffer usages.
 
 ```c++
 // Create a buffer from shared buffer memory without a descriptor
 wgpu::Buffer buffer = memory.CreateBuffer();
 ```
 
-A buffer created from shared buffer memory is not valid to use inside a queue operation until access to the memory is explicitly started using `BeginAccess`. Access is ended using `EndAccess`. For example:
+A buffer created from shared buffer memory is not valid to use inside a queue operation until access
+to the memory is explicitly started using `BeginAccess`. Access is ended using `EndAccess`.
+For example:
 
 ```c++
 wgpu::BufferDescriptor bufferDesc = { ... };
@@ -76,15 +82,20 @@ memory.EndAccess(buffer, &endAccessDesc);
 
 # Uniform Usage Restriction
 
-Using wgpu:BufferUsage::Uniform with a buffer created from SharedBufferMemory is not allowed due to an alignment restriction on D3D12 when creating a constant buffer view. It is possible this restriction could be removed in the future if additional alignment restrictions are placed on the provided SharedBufferMemory during import.
+Using wgpu:BufferUsage::Uniform with a buffer created from SharedBufferMemory is not allowed due to
+an alignment restriction on D3D12 when creating a constant buffer view. It is possible this
+restriction could be removed in the future if additional alignment restrictions are placed on the
+provided SharedBufferMemory during import.
 
 # Mappable Buffers
 
-A buffer created from shared buffer memory cannot be mapped until access to the memory is explicitly started using `BeginAccess`. The buffer must be unmapped before calling `EndAccess`.
+A buffer created from shared buffer memory cannot be mapped until access to the memory is explicitly
+started using `BeginAccess`. The buffer must be unmapped before calling `EndAccess`.
 
 # Concurrent Access
 
-Multiple buffers may be created from the same SharedBufferMemory, but only one buffer may have access to the memory at a time.
+Multiple buffers may be created from the same SharedBufferMemory, but only one buffer may have
+access to the memory at a time.
 
 # SharedBufferMemory Types
 
@@ -92,8 +103,12 @@ Multiple buffers may be created from the same SharedBufferMemory, but only one b
 
 # Synchronization
 
-The Begin/End access descriptors are used to pass [Shared Fences](./shared_fence.md) necessary to synchronize buffer states between Dawn and external code.
+The Begin/End access descriptors are used to pass [Shared Fences](./shared_fence.md) necessary to
+synchronize buffer states between Dawn and external code.
 
-When calling `BeginAccess`, Dawn will wait for any passed shared fences to be signaled before the buffer is used on the GPU. This will ensure any GPU work occurring outside of Dawn is finished before Dawn accesses the memory.
+When calling `BeginAccess`, Dawn will wait for any passed shared fences to be signaled before the
+buffer is used on the GPU. This will ensure any GPU work occurring outside of Dawn is finished
+before Dawn accesses the memory.
 
-When calling `EndAccess`, the shared fences for the buffer's last usages will be exported. This allows code external to Dawn to be notified when Dawn's GPU work on the shared memory is complete.
+When calling `EndAccess`, the shared fences for the buffer's last usages will be exported. This
+allows code external to Dawn to be notified when Dawn's GPU work on the shared memory is complete.

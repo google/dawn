@@ -12,7 +12,8 @@ A variety of features may be used to import externally allocated shared texture 
 - `wgpu::FeatureName::SharedTextureMemoryD3D11Texture2D`
 - `wgpu::FeatureName::SharedTextureMemoryIOSurface`
 
-Each memory type uses an extension struct chained on `wgpu::SharedTextureMemoryDescriptor` to create the memory. For example:
+Each memory type uses an extension struct chained on `wgpu::SharedTextureMemoryDescriptor` to create
+the memory. For example:
 
 ```c++
 wgpu::SharedTextureMemoryFooBarDescriptor fooBarDesc = {
@@ -50,7 +51,9 @@ textures created from SharedTextureMemory objects:
 - they must have a single mip level
 - they must have an array layer count of 1
 
-Textures created from shared texture memory are not valid to use inside a queue operation until access to the memory is explicitly started using `BeginAccess`. Access is ended using `EndAccess`. For example:
+Textures created from shared texture memory are not valid to use inside a queue operation until
+access to the memory is explicitly started using `BeginAccess`. Access is ended using `EndAccess`.
+For example:
 
 ```c++
 wgpu::TextureDescriptor textureDesc = { ... };
@@ -78,15 +81,30 @@ wgpu::SharedTextureMemoryEndAccessState endAccessDesc = { ... };
 memory.EndAccess(texture, &endAccessDesc);
 ```
 
-Multiple textures may be created from the same SharedTextureMemory, but only one texture may have access to the memory at a time.
+Multiple textures may be created from the same SharedTextureMemory, but only one texture may have
+access to the memory at a time.
 
-The Begin/End access descriptors are used to pass data necessary to update and synchronize texture state since the texture may have been externally used. Chained structs that are supported or required vary depending on the memory type. These access descriptors communicate the texture's initialized state. They are also used to pass [Shared Fences](./shared_fence.md) to synchronize access to the texture. When passed in BeginAccess, the texture will wait for the shared fences to pass before use on the GPU, and on EndAccess, the shared fences for the texture's last usage will be exported. Passing shared fences to BeginAccess allows Dawn to wait on externally-enqueued GPU work, and exporting shared fences from EndAccess then allows other external code to wait for Dawn's GPU work to complete.
+The Begin/End access descriptors are used to pass data necessary to update and synchronize texture
+state since the texture may have been externally used. Chained structs that are supported or
+required vary depending on the memory type. These access descriptors communicate the texture's
+initialized state. They are also used to pass [Shared Fences](./shared_fence.md) to synchronize
+access to the texture. When passed in BeginAccess, the texture will wait for the shared fences to
+pass before use on the GPU, and on EndAccess, the shared fences for the texture's last usage will be
+exported. Passing shared fences to BeginAccess allows Dawn to wait on externally-enqueued GPU work,
+and exporting shared fences from EndAccess then allows other external code to wait for Dawn's GPU
+work to complete.
 
 ## Y410 on D3D11
 
-`wgpu::FeatureName::SharedTextureMemoryDXGIY410` allows importing `DXGI_FORMAT_Y410` textures through `wgpu::SharedTextureMemoryD3D11Texture2DDescriptor` or `wgpu::SharedTextureMemoryDXGISharedHandleDescriptor` on the D3D11 backend.
+`wgpu::FeatureName::SharedTextureMemoryDXGIY410` allows importing `DXGI_FORMAT_Y410` textures
+through `wgpu::SharedTextureMemoryD3D11Texture2DDescriptor` or
+`wgpu::SharedTextureMemoryDXGISharedHandleDescriptor` on the D3D11 backend.
 
-Y410 can only be accessed through its `DXGI_FORMAT_R10G10B10A2_UNORM` view alias, so the memory's format is `wgpu::TextureFormat::RGB10A2Unorm`, and the U, Y, V and A components are read and written as R, G, B and A. D3D11 can't copy or resolve between Y410 and `DXGI_FORMAT_R10G10B10A2_UNORM` resources, so the memory doesn't support the `CopySrc` and `CopyDst` usages, and textures created from it can't be used as resolve targets.
+Y410 can only be accessed through its `DXGI_FORMAT_R10G10B10A2_UNORM` view alias, so the memory's
+format is `wgpu::TextureFormat::RGB10A2Unorm`, and the U, Y, V and A components are read and written
+as R, G, B and A. D3D11 can't copy or resolve between Y410 and `DXGI_FORMAT_R10G10B10A2_UNORM`
+resources, so the memory doesn't support the `CopySrc` and `CopyDst` usages, and textures created
+from it can't be used as resolve targets.
 
 TODO(crbug.com/dawn/1745): additional documentation
 
