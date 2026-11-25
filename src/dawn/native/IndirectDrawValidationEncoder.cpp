@@ -145,11 +145,11 @@ static const char sRenderValidationShaderSource[] = DAWN_MULTILINE(
     // Even though they are overlapping, we only use one for each entry point.
     @group(0) @binding(0) var<storage, read> batch: BatchInfo;
     @group(0) @binding(0) var<storage, read> drawConstants: MultiDrawConstants;
-    @group(0) @binding(1) var<storage, read_write> inputParams: IndirectParams;
+    @group(0) @binding(1) var<storage, read> inputParams: IndirectParams;
     @group(0) @binding(2) var<storage, read_write> outputParams: IndirectParams;
     // Although the drawCountBuffer only has a u32 value, it is stored in a buffer
     // to allow for offsetting the buffer in the shader.
-    @group(0) @binding(3) var<storage, read_write> indirectDrawCount : IndirectParams;
+    @group(0) @binding(3) var<storage, read> indirectDrawCount : IndirectParams;
 
     fn numIndirectParamsPerDrawCallInput(flags : u32) -> u32 {
         // Indexed Draw has an extra parameter (firstIndex)
@@ -408,7 +408,7 @@ ResultOrError<ComputePipelineBase*> GetOrCreateIndirectDrawValidationPipeline(De
                 device, "validate_single_draw",
                 {
                     {0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::ReadOnlyStorage},
-                    {1, wgpu::ShaderStage::Compute, kInternalStorageBufferBinding},
+                    {1, wgpu::ShaderStage::Compute, kInternalReadOnlyStorageBufferBinding},
                     {2, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage},
                 }));
     }
@@ -425,9 +425,9 @@ ResultOrError<ComputePipelineBase*> GetOrCreateMultiDrawValidationPipeline(Devic
                 device, "validate_multi_draw",
                 {
                     {0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::ReadOnlyStorage},
-                    {1, wgpu::ShaderStage::Compute, kInternalStorageBufferBinding},
+                    {1, wgpu::ShaderStage::Compute, kInternalReadOnlyStorageBufferBinding},
                     {2, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage},
-                    {3, wgpu::ShaderStage::Compute, kInternalStorageBufferBinding},
+                    {3, wgpu::ShaderStage::Compute, kInternalReadOnlyStorageBufferBinding},
                 }));
     }
     return store->multiDrawValidationPipeline.Get();

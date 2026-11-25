@@ -235,12 +235,13 @@ wgpu::BufferUsage ComputeInternalBufferUsages(const DeviceBase* device,
         usage |= kInternalStorageBuffer;
     }
 
-    // We also add internal storage usage for Indirect buffers for some transformations before
-    // DispatchIndirect calls on the backend (e.g. validations, support of [[num_workgroups]] on
-    // D3D12), since these transformations involve binding them as storage buffers for use in a
-    // compute pass.
+    // We also add readonly storage usage for Indirect buffers for some transformations before
+    // DrawIndirect and DispatchIndirect calls on the backend (e.g. validations, support of
+    // [[num_workgroups]] on D3D12), since these transformations involve binding them as readonly
+    // storage buffers for use in a compute pass. The indirect buffers are only read in these
+    // compute passes, so writable storage usage is not needed.
     if (usage & wgpu::BufferUsage::Indirect) {
-        usage |= kInternalStorageBuffer;
+        usage |= kReadOnlyStorageBuffer;
     }
 
     if (usage & wgpu::BufferUsage::CopyDst) {
