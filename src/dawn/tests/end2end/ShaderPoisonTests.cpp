@@ -155,18 +155,26 @@ TEST_P(ShaderPoisonTests, PoisonedWrite) {
     DAWN_SUPPRESS_TEST_IF(IsNvidia() && IsVulkan() &&
                           MatchesCase({"add_inf_neg_inf",
                                        "cross_f32_inf_input",
+                                       "cross_f32_nan_input",
                                        "determinant_2x2_inf_input",
+                                       "determinant_2x2_nan_input",
                                        "determinant_3x3_inf_input",
                                        "determinant_4x4_inf_input",
+                                       "dot_f16_vec2_inf_input",
+                                       "dot_f16_vec4_inf_input",
                                        "dot_f32_vec2_inf_input",
+                                       "dot_f32_vec2_nan_input",
                                        "dot_f32_vec2_inf_output",
                                        "dot_f32_vec2_nan_output",
                                        "dot_f32_vec3_inf_input",
                                        "dot_f32_vec4_inf_input",
                                        "mat2x2_add_mat2x2",
                                        "mat2x2_mul_mat2x2",
+                                       "mat2x2_mul_mat2x2_nan",
                                        "mat2x2_mul_scalar",
+                                       "mat2x2_mul_scalar_nan",
                                        "mat2x2_mul_vec2",
+                                       "mat2x2_mul_vec2_nan",
                                        "mat2x2_sub_mat2x2",
                                        "mat3x3_mul_vec3",
                                        "mat4x3_sub_mat4x3",
@@ -281,6 +289,48 @@ TEST_P(ShaderPoisonTests, WriteBeforeDynamicError) {
                                        "scalar_mul_mat2x2",
                                        "sub_inf_inf",
                                        "vec_mul_scalar"}));
+
+    // Suppress cases for NVIDIA Linux on a recent driver, and
+    // which cause a hang.
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan() &&
+                          MatchesCase({
+                              "add_inf_neg_inf",
+                              "mul_inf_zero",
+                              "sub_inf_inf",
+                              "mat2x2_add_mat2x2",
+                              "mat2x2_mul_mat2x2",
+                              "mat2x2_mul_mat2x2_nan",
+                              "mat2x2_mul_scalar",
+                              "mat2x2_mul_scalar_nan",
+                              "scalar_mul_mat2x2",
+                              "mat2x2_mul_vec2",
+                              "mat2x2_mul_vec2_nan",
+                              "mat3x3_mul_vec3",
+                              "mat4x4_mul_vec4",
+                              "mat2x2_sub_mat2x2",
+                              "mat4x3_sub_mat4x3",
+                              "vec_mul_scalar",
+                              "cross_f32_inf_input",
+                              "cross_f32_nan_input",
+                              "determinant_2x2_inf_input",
+                              "determinant_2x2_nan_input",
+                              "determinant_3x3_inf_input",
+                              "determinant_4x4_inf_input",
+                              "dot_f32_vec2_inf_input",
+                              "dot_f32_vec2_inf_output",
+                              "dot_f32_vec2_nan_input",
+                              "dot_f32_vec2_nan_output",
+                              "dot_f32_vec3_inf_input",
+                              "dot_f32_vec4_inf_input",
+                              "dot_f16_vec2_inf_input",
+                              "dot_f16_vec4_inf_input",
+                              "mix_f32_inf_input",
+                              "normalize_vec2_inf_input",
+                              "normalize_vec2_nan_output",
+                              "reflect_vec2_inf_input",
+                              "reflect_vec2_inf_output",
+                              "refract_vec2_f32_inf_output",
+                          }));
 
     std::ostringstream shader;
     shader << BuildPoisonPreamble(testCase);
@@ -451,6 +501,47 @@ TEST_P(ShaderPoisonTests, OutOfBoundsWorkgroupMemoryRead) {
                                        "scalar_mul_mat2x2",
                                        "sub_inf_inf",
                                        "vec_mul_scalar"}));
+
+    // Suppress cases for NVIDIA Linux on a recent driver, and
+    // which cause a hang.
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan() &&
+                          MatchesCase({
+                              "mat2x2_add_mat2x2",
+                              "mat2x2_mul_mat2x2",
+                              "mat2x2_mul_mat2x2_nan",
+                              "mat4x4_mul_mat4x4_f16_nan",
+                              "mat2x2_mul_scalar",
+                              "mat2x2_mul_scalar_nan",
+                              "scalar_mul_mat2x2",
+                              "mat2x2_mul_vec2",
+                              "mat2x2_mul_vec2_nan",
+                              "mat3x3_mul_vec3",
+                              "mat4x4_mul_vec4",
+                              "mat2x2_sub_mat2x2",
+                              "mat4x3_sub_mat4x3",
+                              "vec_mul_scalar",
+                              "cross_f32_inf_input",
+                              "cross_f32_nan_input",
+                              "determinant_2x2_inf_input",
+                              "determinant_2x2_nan_input",
+                              "determinant_3x3_inf_input",
+                              "determinant_4x4_inf_input",
+                              "dot_f32_vec2_inf_input",
+                              "dot_f32_vec2_inf_output",
+                              "dot_f32_vec2_nan_input",
+                              "dot_f32_vec3_inf_input",
+                              "dot_f32_vec4_inf_input",
+                              "dot_f16_vec2_inf_input",
+                              "dot_f16_vec2_nan_input",
+                              "dot_f16_vec4_inf_input",
+                              "mix_f32_inf_input",
+                              "mix_f32_nan_input",
+                              "normalize_vec2_inf_input",
+                              "normalize_vec2_nan_output",
+                              "reflect_vec2_inf_input",
+                              "reflect_vec2_inf_output",
+                              "refract_vec2_f32_inf_output",
+                          }));
 
     constexpr uint32_t kReadIndex = 1000;
     constexpr uint32_t kNumWorkgroups = 1024;
