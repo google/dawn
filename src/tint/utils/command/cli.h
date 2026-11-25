@@ -208,6 +208,16 @@ class OptionSet {
     Result<Unconsumed> Parse(VectorRef<std::string_view> arguments,
                              const ParseOptions& parse_options = {});
 
+    /// Parses options from @p argc / @p argv and compacts @p argv in-place to remove consumed
+    /// options while preserving `(*argv)[0]`, unknown flags (when `parse_options.ignore_unknown`
+    /// is true), and positional arguments. Trailing slots in `[new_argc, old_argc)` are set to
+    /// `nullptr` to preserve the standard `argv[argc] == nullptr` sentinel.
+    /// @param argc pointer to the argument count (updated in-place on success)
+    /// @param argv pointer to the argument vector (compacted in-place on success)
+    /// @param parse_options the optional parser options
+    /// @return Success or Failure with an error message
+    Result<SuccessType> Parse(int* argc, char*** argv, const ParseOptions& parse_options = {});
+
   private:
     /// The list of options to parse
     BlockAllocator<Option, 1024> options;

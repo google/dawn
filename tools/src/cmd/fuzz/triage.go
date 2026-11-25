@@ -83,7 +83,17 @@ type triageConfig struct {
 }
 
 func (tc *triageConfig) fuzzCmdBaseArgs() []string {
+	if tc.fuzzEngine == FuzzEngineCentipede {
+		return []string{"--verbose"}
+	}
 	return []string{fmt.Sprintf("-timeout=%d", tc.timeout), "--verbose"}
+}
+
+func (tc *triageConfig) runFuzzerForTriage(args ...string) ([]byte, error) {
+	if tc.fuzzEngine == FuzzEngineCentipede {
+		return tc.runCmdWithTimeout(tc.timeout, tc.fuzzer, args...)
+	}
+	return tc.runCmd(tc.fuzzer, args...)
 }
 
 // runTriage performs an automated triage of a fuzzer crash.
@@ -139,11 +149,11 @@ func runTriage(t *taskConfig) error {
 // If the initial run doesn't crash and execution in IR mode, it tries again with --fix-identifiers=true.
 // It returns the fuzzer output string, and any error encountered.
 func verifyReproduction(tc *triageConfig) (string, error) {
-	out, err := tc.runCmd(tc.fuzzer, append(tc.fuzzCmdBaseArgs(), tc.triageFile)...)
+	out, err := tc.runFuzzerForTriage(append(tc.fuzzCmdBaseArgs(), tc.triageFile)...)
 	if err == nil {
 		if tc.fuzzMode == FuzzModeIr {
 			fmt.Println("initial run did not crash, attempting to fix identifiers...")
-			out, err = tc.runCmd(tc.fuzzer, append(tc.fuzzCmdBaseArgs(), "--fix-identifiers=true", tc.triageFile)...)
+			out, err = tc.runFuzzerForTriage(append(tc.fuzzCmdBaseArgs(), "--fix-identifiers=true", tc.triageFile)...)
 			if err == nil {
 				return "", fmt.Errorf("issue did not reproduce even with --fix-identifiers=true")
 			}
@@ -260,7 +270,7 @@ func runSpecificPassAndLog(tc *triageConfig) error {
 	args = append(args, tc.reproFile)
 
 	// Ignore command exit status issues (command is expected to crash)
-	tc.verboseOut, _ = tc.runCmd(tc.fuzzer, args...)
+	tc.verboseOut, _ = tc.runFuzzerForTriage(args...)
 
 	if err := tc.osWrapper.WriteFile(tc.logFile, tc.verboseOut, 0644); err != nil {
 		return fmt.Errorf("failed to write log file: %w", err)

@@ -47,7 +47,14 @@ func runFuzzer(t *taskConfig) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	args := generateFuzzerArgs(t)
+	var args []string
+	var env []string
+	if t.fuzzEngine == FuzzEngineCentipede {
+		args = generateCentipedeFuzzerArgs(t)
+		env = []string{"FUZZTEST_TESTSUITE_OUT_DIR=" + t.out}
+	} else {
+		args = generateFuzzerArgs(t)
+	}
 
 	if t.verbose {
 		fmt.Println("Using fuzzing cmd: " + t.fuzzer + " " + strings.Join(args, " "))
@@ -65,6 +72,9 @@ func runFuzzer(t *taskConfig) error {
 			}
 
 			cmd := t.execWrapper.CommandContext(ctx, t.fuzzer, args...).WithStdout(stdout).WithStderr(stderr)
+			if len(env) > 0 {
+				cmd = cmd.WithEnv(env)
+			}
 
 			if err := cmd.Run(); err != nil {
 				if ctxErr := ctx.Err(); ctxErr != nil {
@@ -83,6 +93,32 @@ func runFuzzer(t *taskConfig) error {
 
 	fmt.Println("done")
 	return nil
+}
+
+// generateCentipedeFuzzerArgs constructs the CLI flags for running a fuzzer binary with FuzzTest's
+// built-in Centipede engine.
+func generateCentipedeFuzzerArgs(t *taskConfig) []string {
+	args := []string{
+		"--fuzz=LLVMFuzzer.TestOneInput",
+		"--stack_limit_kb=0",
+		"--corpus_database=",
+	}
+	if t.inputs != "" {
+		args = append(args, "--llvm_fuzzer_wrapper_corpus_dir="+t.inputs)
+	}
+	if t.dictionary != "" {
+		args = append(args, "--llvm_fuzzer_wrapper_dict_file="+t.dictionary)
+	}
+	if t.verbose {
+		args = append(args, "--verbose")
+	}
+	if t.dump {
+		args = append(args, "--dump")
+	}
+	if t.filter != "" {
+		args = append(args, "--filter="+t.filter)
+	}
+	return args
 }
 
 // generateFuzzerArgs generates the arguments that need to be passed into the fuzzer binary call

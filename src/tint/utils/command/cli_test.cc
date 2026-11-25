@@ -28,6 +28,7 @@
 #include "src/tint/utils/command/cli.h"
 
 #include <sstream>
+#include <vector>
 
 #include "gmock/gmock.h"
 #include "src/tint/utils/containers/transform.h"  // Used by ToStringList()
@@ -341,6 +342,74 @@ TEST_F(CLITest, SetValueToDefault) {
     auto res = opts.Parse(tint::Empty);
     ASSERT_EQ(res, Success);
     EXPECT_EQ(opt.value, true);
+}
+
+TEST_F(CLITest, ParseArgv_CompactsConsumedOptionsAndNullsTrailingSlots) {
+    OptionSet opts;
+    auto& opt_flag = opts.Add<BoolOption>("flag", "a bool flag");
+    auto& opt_name = opts.Add<StringOption>("name", "a string option");
+
+    std::vector<std::string> storage = {"prog", "--flag", "--name", "alice", "input.wgsl"};
+    std::vector<char*> argv_vec;
+    for (auto& s : storage) {
+        argv_vec.push_back(s.data());
+    }
+    argv_vec.push_back(nullptr);
+
+    int argc = static_cast<int>(storage.size());
+    char** argv = argv_vec.data();
+    ASSERT_EQ(opts.Parse(&argc, &argv), Success);
+    EXPECT_EQ(opt_flag.value, true);
+    EXPECT_EQ(opt_name.value, "alice");
+    ASSERT_EQ(argc, 2);
+    EXPECT_STREQ(argv_vec[0], "prog");
+    EXPECT_STREQ(argv_vec[1], "input.wgsl");
+    EXPECT_EQ(argv_vec[2], nullptr);
+    EXPECT_EQ(argv_vec[3], nullptr);
+    EXPECT_EQ(argv_vec[4], nullptr);
+}
+
+TEST_F(CLITest, ParseArgv_PreservesUnknownFlagsWhenIgnored) {
+    OptionSet opts;
+    auto& opt_flag = opts.Add<BoolOption>("flag", "a bool flag");
+
+    std::vector<std::string> storage = {"prog", "-max_len=1000", "--flag", "corpus/"};
+    std::vector<char*> argv_vec;
+    for (auto& s : storage) {
+        argv_vec.push_back(s.data());
+    }
+    argv_vec.push_back(nullptr);
+
+    int argc = static_cast<int>(storage.size());
+    char** argv = argv_vec.data();
+    ParseOptions parse_opts;
+    parse_opts.ignore_unknown = true;
+    ASSERT_EQ(opts.Parse(&argc, &argv, parse_opts), Success);
+    EXPECT_EQ(opt_flag.value, true);
+    ASSERT_EQ(argc, 3);
+    EXPECT_STREQ(argv_vec[0], "prog");
+    EXPECT_STREQ(argv_vec[1], "-max_len=1000");
+    EXPECT_STREQ(argv_vec[2], "corpus/");
+    EXPECT_EQ(argv_vec[3], nullptr);
+}
+
+TEST_F(CLITest, ParseArgv_LeavesArgvUnchangedOnFailure) {
+    OptionSet opts;
+    opts.Add<ValueOption<int>>("count", "an int option");
+
+    std::vector<std::string> storage = {"prog", "--count", "not_a_number"};
+    std::vector<char*> argv_vec;
+    for (auto& s : storage) {
+        argv_vec.push_back(s.data());
+    }
+    argv_vec.push_back(nullptr);
+
+    int argc = static_cast<int>(storage.size());
+    char** argv = argv_vec.data();
+    EXPECT_NE(opts.Parse(&argc, &argv), Success);
+    EXPECT_EQ(argc, 3);
+    EXPECT_STREQ(argv_vec[1], "--count");
+    EXPECT_STREQ(argv_vec[2], "not_a_number");
 }
 
 }  // namespace

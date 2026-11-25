@@ -224,8 +224,16 @@ template("tint_fuzzer_test") {
 
   fuzzer_test(fuzzer_name) {
     forward_variables_from(invoker, "*", [ "output_name" ])
-    exclude_main =
-        (defined(invoker.exclude_main) && invoker.exclude_main) || false
+    if (use_centipede && !build_with_chromium) {
+      exclude_main = true
+      if (!defined(deps)) {
+        deps = []
+      }
+      deps += [ "${tint_src_dir}:centipede_main" ]
+    } else {
+      exclude_main =
+          (defined(invoker.exclude_main) && invoker.exclude_main) || false
+    }
 
     # TODO(crbug.com/505034799): Determine best migration path for this.
     is_fuzztest_compatible = false

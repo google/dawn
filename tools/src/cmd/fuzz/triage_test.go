@@ -259,3 +259,57 @@ func TestGenerateTriageReportTemporaryOut(t *testing.T) {
 
 	require.Contains(t, output, "WARNING: Repro file and logs were saved to a temporary directory and will not be retained.")
 }
+
+func TestFuzzCmdBaseArgs_LibFuzzerIncludesTimeout(t *testing.T) {
+	tc := &triageConfig{
+		taskConfig: &taskConfig{
+			mainConfig: mainConfig{timeout: 45},
+			fuzzEngine: FuzzEngineLibFuzzer,
+		},
+	}
+	require.Equal(t, []string{"-timeout=45", "--verbose"}, tc.fuzzCmdBaseArgs())
+}
+
+func TestFuzzCmdBaseArgs_CentipedeOmitsTimeout(t *testing.T) {
+	tc := &triageConfig{
+		taskConfig: &taskConfig{
+			mainConfig: mainConfig{timeout: 45},
+			fuzzEngine: FuzzEngineCentipede,
+		},
+	}
+	require.Equal(t, []string{"--verbose"}, tc.fuzzCmdBaseArgs())
+}
+
+func TestGenerateTriageReport_CentipedeOmitsTimeoutInReproCmd(t *testing.T) {
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+
+	tc := &triageConfig{
+		taskConfig: &taskConfig{
+			mainConfig: mainConfig{
+				osWrapper:  wrapper,
+				triageFile: "some-crash-file",
+				fuzzMode:   FuzzModeIr,
+				timeout:    60,
+			},
+			fuzzEngine: FuzzEngineCentipede,
+			fuzzer:     "tint_ir_fuzzer",
+		},
+		inputBase:     "some-crash-file",
+		reproFile:     "some-crash-file.repro",
+		logFile:       "some-crash-file.triage.log",
+		reportFile:    "some-crash-file.triage.md",
+		reproStatus:   ReproStatusIdentical,
+		inputsDisplay: "## IR Input\n```\n$B1: { ... }\n```\n",
+		irInput:       "$B1: { ... }",
+		failingPass:   "tint::glsl::writer::IRFuzzer",
+		filterArg:     "--filter=tint::glsl::writer::IRFuzzer",
+		verboseOut:    []byte("some log"),
+	}
+
+	err := generateTriageReport(tc)
+	require.NoError(t, err)
+
+	content, err := wrapper.ReadFile("some-crash-file.triage.md")
+	require.NoError(t, err)
+	require.Contains(t, string(content), "tint_ir_fuzzer --verbose --dump-ir=true --filter=tint::glsl::writer::IRFuzzer some-crash-file.repro")
+}

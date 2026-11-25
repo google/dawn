@@ -34,7 +34,7 @@ ROOT_DIR="$( cd "$SCRIPT_DIR/.." >/dev/null 2>&1 && pwd )"
 POSSIBLE_BUILD_SYSTEMS="[gn|cmake]"
 POSSIBLE_BUILD_TYPES="[debug|release]"
 POSSIBLE_BUILD_ARCHS="[native|x86]"
-BUILD_FUZZER=""
+FUZZER_ENGINE=""
 
 BUILD_SYSTEM=""
 BUILD_TYPE=""
@@ -51,7 +51,7 @@ ANDROID_PLATFORM="android-28"
 USE_GCC_RUNTIME=0
 
 function show_usage() {
-  echo "setup-build [-f] $POSSIBLE_BUILD_SYSTEMS $POSSIBLE_BUILD_TYPES $POSSIBLE_BUILD_ARCHS [fuzz|fuzzer]"
+  echo "setup-build [-f] $POSSIBLE_BUILD_SYSTEMS $POSSIBLE_BUILD_TYPES $POSSIBLE_BUILD_ARCHS [fuzz[=engine]|fuzzer[=engine]]"
   echo
   echo "Creates a build directory in <dawn>/out using either GN or CMake, then"
   echo "updates the '<dawn>/out/active' symlink to point to the build directory."
@@ -66,7 +66,9 @@ function show_usage() {
   echo "  release       Make a release build"
   echo "  debug         Make a debug build"
   echo " "
-  echo "  fuzz, fuzzer  Build fuzzers. Forces Clang to be used"
+  echo "  fuzz[=engine], fuzzer[=engine]"
+  echo "                Build fuzzers. Forces Clang to be used. Optional engine"
+  echo "                is 'libfuzzer' (default) or 'centipede' (gn only)"
   echo "  gccrt         Use GCC 14 runtime with clang"
   echo "  install       Install to out/install (cmake only)"
   echo "  native        Target the machine you're running on"
@@ -135,7 +137,17 @@ for arg in "$@"; do
       USE_GCC_RUNTIME=1
     ;;
     "fuzz" | "fuzzer")
-      BUILD_FUZZER=1
+      FUZZER_ENGINE="libfuzzer"
+    ;;
+    fuzz=* | fuzzer=*)
+      FUZZER_ENGINE="${lowered_arg#*=}"
+      case $FUZZER_ENGINE in
+        "libfuzzer" | "centipede")
+        ;;
+        *)
+          show_usage "unknown fuzzer engine '$FUZZER_ENGINE' (expected 'libfuzzer' or 'centipede')"
+        ;;
+      esac
     ;;
     "--force" | "-f")
       FORCE=1
@@ -197,13 +209,19 @@ if [[ -n "$ANDROID_NDK" ]]; then
   fi
 fi
 
+if [[ "$FUZZER_ENGINE" == "centipede" && "$BUILD_SYSTEM" != "gn" ]]; then
+  show_usage "the centipede fuzzer engine is only supported with gn"
+fi
+
 BUILD_DIR="$BUILD_SYSTEM-$BUILD_TYPE"
 if [[ -n "$ANDROID_NDK" ]]; then
   BUILD_DIR+="-$ANDROID_ABI"
 elif [[ ! -z "$BUILD_ARCH" ]]; then
   BUILD_DIR+="-$BUILD_ARCH"
 fi
-if [[ ! -z "$BUILD_FUZZER" ]]; then
+if [[ "$FUZZER_ENGINE" == "centipede" ]]; then
+  BUILD_DIR+="-centipede"
+elif [[ -n "$FUZZER_ENGINE" ]]; then
   BUILD_DIR+="-fuzz"
 fi
 if [[ ! -z "$UBSAN" ]]; then
@@ -247,8 +265,15 @@ case $BUILD_SYSTEM in
         show_usage "invalid build architecture '$BUILD_ARCH'"
       ;;
     esac
-    if [[ -n "$BUILD_FUZZER" ]]; then
-        GN_ARGS+=" use_libfuzzer=true"
+    if [[ -n "$FUZZER_ENGINE" ]]; then
+        case $FUZZER_ENGINE in
+          "libfuzzer")
+            GN_ARGS+=" use_libfuzzer=true"
+          ;;
+          "centipede")
+            GN_ARGS+=" use_centipede=true"
+          ;;
+        esac
         GN_ARGS+=" tint_build_ir_binary=true"
     fi
     if [[ -n "$SISO" ]]; then
@@ -288,7 +313,7 @@ case $BUILD_SYSTEM in
         fi
         CXX_FLAGS+=("--gcc-install-dir=$GCCRT_DIR")
     fi
-    if [[ -n "$BUILD_FUZZER" ]]; then
+    if [[ -n "$FUZZER_ENGINE" ]]; then
         CMAKE_FLAGS+=("-DTINT_BUILD_FUZZERS=ON")
         CMAKE_FLAGS+=("-DDAWN_BUILD_PROTOBUF=ON")
         CMAKE_FLAGS+=("-DTINT_BUILD_IR_BINARY=ON")

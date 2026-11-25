@@ -265,7 +265,12 @@ func testBisectStep(t *taskConfig) (bisectStepResult, error) {
 	}
 
 	fmt.Printf("--> Running fuzzer %s against test case...\n", fuzzerName)
-	_, err := t.runCmd(t.fuzzer, fmt.Sprintf("-timeout=%d", t.timeout), t.bisectFile)
+	var err error
+	if t.fuzzEngine == FuzzEngineCentipede {
+		_, err = t.runCmdWithTimeout(t.timeout, t.fuzzer, t.bisectFile)
+	} else {
+		_, err = t.runCmd(t.fuzzer, fmt.Sprintf("-timeout=%d", t.timeout), t.bisectFile)
+	}
 	if err != nil {
 		return BisectStepFailed, nil
 	}

@@ -31,6 +31,7 @@ package execwrapper
 import (
 	"context"
 	"io"
+	"os"
 	"os/exec"
 )
 
@@ -74,6 +75,15 @@ func (e *RealCmdWrapper) WithStderr(stderr io.Writer) CmdWrapper {
 
 func (e *RealCmdWrapper) WithDir(dir string) CmdWrapper {
 	e.cmd.Dir = dir
+	return e
+}
+
+func (e *RealCmdWrapper) WithEnv(env []string) CmdWrapper {
+	if len(e.cmd.Env) == 0 {
+		e.cmd.Env = append(os.Environ(), env...)
+	} else {
+		e.cmd.Env = append(e.cmd.Env, env...)
+	}
 	return e
 }
 

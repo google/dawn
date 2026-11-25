@@ -702,3 +702,43 @@ Running: /tmp/b.tirb
 		})
 	}
 }
+
+func TestDetectFuzzEngine_CentipedeFromArgsGn(t *testing.T) {
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+	require.NoError(t, wrapper.MkdirAll("/build", 0755))
+	require.NoError(t, wrapper.WriteFile("/build/args.gn", []byte("is_asan = true\nuse_centipede = true\n"), 0644))
+
+	require.Equal(t, FuzzEngineCentipede, detectFuzzEngine("/build", wrapper))
+}
+
+func TestDetectFuzzEngine_CommentedCentipedeInArgsGnDefaultsToLibFuzzer(t *testing.T) {
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+	require.NoError(t, wrapper.MkdirAll("/build", 0755))
+	require.NoError(t, wrapper.WriteFile("/build/args.gn", []byte("# use_centipede = true\nuse_libfuzzer = true\n"), 0644))
+
+	require.Equal(t, FuzzEngineLibFuzzer, detectFuzzEngine("/build", wrapper))
+}
+
+func TestDetectFuzzEngine_DefaultsToLibFuzzer(t *testing.T) {
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+	require.NoError(t, wrapper.MkdirAll("/build", 0755))
+
+	require.Equal(t, FuzzEngineLibFuzzer, detectFuzzEngine("/build", wrapper))
+}
+
+func TestGenerateTaskConfig_CentipedeRunDoesNotRequireStandaloneCentipedeBinary(t *testing.T) {
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+	require.NoError(t, wrapper.MkdirAll("/build", 0755))
+	require.NoError(t, wrapper.WriteFile("/build/args.gn", []byte("use_centipede = true\n"), 0644))
+	require.NoError(t, wrapper.WriteFile("/build/tint_ir_fuzzer"+fileutils.ExeExt, []byte{}, 0755))
+
+	cfg := &mainConfig{
+		build:     "/build",
+		fuzzMode:  FuzzModeIr,
+		osWrapper: wrapper,
+	}
+	tc, err := generateTaskConfig(TaskModeRun, cfg)
+	require.NoError(t, err)
+	require.Equal(t, FuzzEngineCentipede, tc.fuzzEngine)
+	require.Equal(t, "/build/tint_ir_fuzzer"+fileutils.ExeExt, tc.fuzzer)
+}

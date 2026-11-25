@@ -34,6 +34,7 @@
 #include "src/tint/utils/containers/hashset.h"
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/text/styled_text.h"
+#include "src/utils/compiler.h"
 
 namespace tint::cli {
 
@@ -193,6 +194,50 @@ Result<OptionSet::Unconsumed> OptionSet::Parse(VectorRef<std::string_view> argum
     }
 
     return unconsumed;
+}
+
+Result<SuccessType> OptionSet::Parse(int* argc, char*** argv, const ParseOptions& parse_options) {
+    Vector<std::string_view, 8> arguments;
+    for (int i = 1; i < *argc; i++) {
+        // SAFETY: `i` is bounded by `[1, *argc)` and `*argv` has at least `*argc` elements.
+        std::string_view arg(DAWN_UNSAFE_BUFFERS((*argv)[i]));
+        if (!arg.empty()) {
+            arguments.Push(arg);
+        }
+    }
+
+    auto res = Parse(arguments, parse_options);
+    if (res != Success) {
+        return res.Failure();
+    }
+
+    const auto& unconsumed = res.Get();
+    int new_argc = 1;
+    size_t unconsumed_idx = 0;
+    for (int i = 1; i < *argc; i++) {
+        // SAFETY: `i` is bounded by `[1, *argc)` and `*argv` has at least `*argc` elements.
+        char* arg = DAWN_UNSAFE_BUFFERS((*argv)[i]);
+        for (size_t k = unconsumed_idx; k < unconsumed.Length(); k++) {
+            if (arg == unconsumed[k].data()) {
+                // SAFETY: `new_argc <= i < *argc` because `new_argc` increments at most once per
+                // outer-loop iteration.
+                DAWN_UNSAFE_BUFFERS((*argv)[new_argc++]) = arg;
+                unconsumed_idx = k + 1;
+                break;
+            }
+        }
+    }
+    // Per the C/C++ standard ([basic.start.main]), argv has argc + 1 elements with
+    // argv[argc] == nullptr as a sentinel that some flag parsers rely on. Null out all
+    // trailing slots in [new_argc, old_argc) to preserve argv[new_argc] == nullptr when
+    // arguments are removed, avoid stale pointers, and stay within [0, old_argc) even if
+    // a test harness passes a non-null-terminated argv.
+    for (int i = new_argc; i < *argc; i++) {
+        // SAFETY: `i` is bounded by `[new_argc, *argc)` and `*argv` has at least `*argc` elements.
+        DAWN_UNSAFE_BUFFERS((*argv)[i]) = nullptr;
+    }
+    *argc = new_argc;
+    return Success;
 }
 
 }  // namespace tint::cli

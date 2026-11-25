@@ -257,14 +257,37 @@ if (tint_build_benchmarks) {
   }
 }
 
-if (tint_build_fuzzers && tint_build_fuzztest) {
+if (tint_build_fuzzers &&
+    (tint_build_fuzztest || (use_centipede && !build_with_chromium))) {
   config("tint_fuzztest_config") {
     configs = [ "//build/config/compiler:no_exit_time_destructors" ]
     if (is_clang) {
       cflags = [ "-Wno-global-constructors" ]
     }
   }
+}
 
+if (tint_build_fuzzers && use_centipede && !build_with_chromium) {
+  source_set("centipede_main") {
+    testonly = true
+    sources = [ "${tint_src_dir}/cmd/fuzz/common/centipede_main.cc" ]
+    deps = [
+      ":gmock_and_gtest",
+      "${dawn_root}/src/utils",
+      "${tint_src_dir}/utils/command",
+      "${tint_src_dir}/utils/macros",
+      "//third_party/abseil-cpp:absl_full",
+      "//third_party/fuzztest",
+      "//third_party/fuzztest:init_fuzztest",
+    ]
+    configs += [
+      ":tint_common_config",
+      ":tint_fuzztest_config",
+    ]
+  }
+}
+
+if (tint_build_fuzzers && tint_build_fuzztest) {
   group("fuzztest") {
     testonly = true
     public_deps = [

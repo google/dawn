@@ -182,36 +182,49 @@ See below for how to generate the corpus locally
 In standalone GN builds, Tint fuzzers can be built and run with
 [Centipede](https://github.com/google/fuzztest/tree/main/centipede) instead of
 libFuzzer by setting `use_centipede = true` in `args.gn` (instead of
-`use_libfuzzer = true`). Building any fuzzer target also builds the `centipede`
-coordinator executable in the output directory:
+`use_libfuzzer = true`), or by running:
+
+```bash
+tools/setup-build gn release fuzz=centipede
+```
+
+Standalone Centipede builds embed FuzzTest's built-in Centipede engine directly
+into each Tint fuzzer binary (no separate `centipede` binary is required):
 
 ```bash
 autoninja -C out/Centipede fuzzers
 ```
 
-To fuzz out-of-process with the `centipede` coordinator:
+The `tools/run fuzz` helper (`run`, `check`, `triage`, and `bisect`)
+automatically detects Centipede build directories from `args.gn` and invokes
+the fuzzer binaries directly with the appropriate flags:
+
+```bash
+tools/run fuzz run -build out/Centipede
+tools/run fuzz check -build out/Centipede
+```
+
+To fuzz directly with the built-in Centipede engine:
 
 ```bash
 # WGSL fuzzer:
-out/Centipede/centipede \
-  --binary=out/Centipede/tint_wgsl_fuzzer \
-  --workdir=out/Centipede/workdir_wgsl \
-  --corpus_dir=out/Centipede/wgsl_corpus \
-  --dictionary=src/tint/cmd/fuzz/wgsl/dictionary.txt
+out/Centipede/tint_wgsl_fuzzer \
+  --fuzz=LLVMFuzzer.TestOneInput \
+  --stack_limit_kb=0 \
+  --llvm_fuzzer_wrapper_corpus_dir=out/Centipede/wgsl_corpus \
+  --llvm_fuzzer_wrapper_dict_file=src/tint/cmd/fuzz/wgsl/dictionary.txt
 
 # IR fuzzer:
-out/Centipede/centipede \
-  --binary=out/Centipede/tint_ir_fuzzer \
-  --workdir=out/Centipede/workdir_ir \
-  --corpus_dir=out/Centipede/ir_corpus
+out/Centipede/tint_ir_fuzzer \
+  --fuzz=LLVMFuzzer.TestOneInput \
+  --stack_limit_kb=0 \
+  --llvm_fuzzer_wrapper_corpus_dir=out/Centipede/ir_corpus
 ```
 
-Tint's custom fuzzer flags (such as `--filter=...` or `--verbose`) can be passed
-inside the `--binary` string (for example,
-`--binary="out/Centipede/tint_wgsl_fuzzer --filter=hlsl"`).
+Tint's custom fuzzer flags (such as `--filter=hlsl` or `--verbose`) can be
+passed directly alongside the FuzzTest flags.
 
-To replay individual testcase files directly without the `centipede`
-coordinator:
+To replay individual testcase files directly:
 
 ```bash
 out/Centipede/tint_wgsl_fuzzer --verbose path/to/testcase.wgsl

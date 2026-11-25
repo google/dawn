@@ -39,6 +39,7 @@ import (
 	"runtime"
 	"strings"
 	"sync/atomic"
+	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/execwrapper"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
@@ -109,6 +110,44 @@ const (
 	FuzzModeWgsl FuzzMode = iota
 	FuzzModeIr
 )
+
+type FuzzEngine int
+
+func (e FuzzEngine) String() string {
+	switch e {
+	case FuzzEngineLibFuzzer:
+		return "libfuzzer"
+	case FuzzEngineCentipede:
+		return "centipede"
+	default:
+		return fmt.Sprintf("<unknown> (%d)", e)
+	}
+}
+
+const (
+	FuzzEngineLibFuzzer FuzzEngine = iota
+	FuzzEngineCentipede
+)
+
+// detectFuzzEngine inspects the build directory's args.gn to determine which fuzzing engine is
+// configured. Defaults to FuzzEngineLibFuzzer.
+func detectFuzzEngine(buildDir string, osWrapper oswrapper.OSWrapper) FuzzEngine {
+	argsGnPath := filepath.Join(buildDir, "args.gn")
+	if data, err := osWrapper.ReadFile(argsGnPath); err == nil {
+		for _, line := range strings.Split(string(data), "\n") {
+			if idx := strings.Index(line, "#"); idx >= 0 {
+				line = line[:idx]
+			}
+			fields := strings.SplitN(line, "=", 2)
+			if len(fields) == 2 &&
+				strings.TrimSpace(fields[0]) == "use_centipede" &&
+				strings.TrimSpace(fields[1]) == "true" {
+				return FuzzEngineCentipede
+			}
+		}
+	}
+	return FuzzEngineLibFuzzer
+}
 
 // mainConfig represents the top-level configuration for the fuzz utility application.
 // It stores the command-line flags and parameters parsed during startup, serving as
@@ -504,10 +543,11 @@ func main() {
 
 type taskConfig struct {
 	mainConfig
-	taskMode   TaskMode // specific task being run at this time, may be different from mainConfig.cmdMode
-	fuzzer     string   // path to the fuzzer binary, tint_wgsl_fuzzer or tint_ir_fuzzer
-	assembler  string   // path to the test case assembler, tint_fuzz_as
-	dictionary string   // path to dictionary to use for tint_wgsl_fuzzer
+	taskMode   TaskMode   // specific task being run at this time, may be different from mainConfig.cmdMode
+	fuzzEngine FuzzEngine // fuzzing engine detected for the build directory
+	fuzzer     string     // path to the fuzzer binary, tint_wgsl_fuzzer or tint_ir_fuzzer
+	assembler  string     // path to the test case assembler, tint_fuzz_as
+	dictionary string     // path to dictionary to use for tint_wgsl_fuzzer
 }
 
 // runCmd executes a command with standardized output capturing and logging behavior.
@@ -516,6 +556,24 @@ func (t *taskConfig) runCmd(name string, args ...string) ([]byte, error) {
 		fmt.Printf("executing: %s %s\n", name, strings.Join(args, " "))
 	}
 	cmd := t.execWrapper.Command(name, args...)
+	out, err := cmd.RunWithCombinedOutput()
+	if t.verbose {
+		fmt.Printf("output:\n%s\n", string(out))
+	}
+	return out, err
+}
+
+// runCmdWithTimeout executes a command with a timeout (if timeoutSeconds > 0), capturing combined output.
+func (t *taskConfig) runCmdWithTimeout(timeoutSeconds int, name string, args ...string) ([]byte, error) {
+	if timeoutSeconds <= 0 {
+		return t.runCmd(name, args...)
+	}
+	if t.verbose {
+		fmt.Printf("executing: %s %s\n", name, strings.Join(args, " "))
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutSeconds)*time.Second)
+	defer cancel()
+	cmd := t.execWrapper.CommandContext(ctx, name, args...)
 	out, err := cmd.RunWithCombinedOutput()
 	if t.verbose {
 		fmt.Printf("output:\n%s\n", string(out))
@@ -665,6 +723,7 @@ func generateTaskConfig(tm TaskMode, c *mainConfig) (*taskConfig, error) {
 	t := taskConfig{
 		mainConfig: *c,
 		taskMode:   tm,
+		fuzzEngine: detectFuzzEngine(c.build, c.osWrapper),
 	}
 
 	type depConfig struct {
