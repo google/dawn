@@ -191,10 +191,11 @@ Checks:
   - -google-readability-avoid-underscore-in-googletest-name  # Used all the time in Tint. Doesn't add anything
   - -misc-redundant-expression  # In practice only triggers in macros and generated code.
   - -misc-unused-parameters  # Not really useful and can be handled by Clang if needed.
-  - -modernize-redundant-void-arg  # Doesn't matter, triggers once on webgpu.h
+  - -modernize-redundant-void-arg  # Doesn't matter, triggers once on webgpu.h.
   - -modernize-use-trailing-return-type  # We don't prefer trailing return types.
   - -readability-inconsistent-ifelse-braces  # Handled by clang-format instead.
   - -readability-redundant-lambda-parameter-list  # We don't prefer [] {} over []() {} for lambdas with no arguments.
+  - -readability-redundant-member-init  # Prevents making fields optional in designated initializers.
   - -readability-uppercase-literal-suffix  # Tint uses primarily lower case, so triggers a lot.
   - -readability-use-concise-preprocessor-directives  # We don't prefer #ifdef over #if defined.
   # - Zircon kernel code style checks.
@@ -229,7 +230,6 @@ Checks:
   - -readability-redundant-control-flow
   - -readability-redundant-declaration
   - -readability-redundant-inline-specifier
-  - -readability-redundant-member-init
   - -readability-redundant-parentheses
   - -readability-redundant-preprocessor
   - -readability-redundant-smartptr-get
