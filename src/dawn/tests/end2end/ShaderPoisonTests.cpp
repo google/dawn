@@ -62,9 +62,6 @@ class ShaderPoisonTests : public DawnTestWithParams<ShaderPoisonParams> {
     void SetUp() override {
         DawnTestWithParams<ShaderPoisonParams>::SetUp();
 
-        // TODO(crbug.com/587219560): Several cases fail on Apple Silicon.
-        DAWN_SUPPRESS_TEST_IF(IsApple());
-
         // TODO(crbug.com/590145733): DXC fails to compile some cases.
         DAWN_SUPPRESS_TEST_IF((IsDXC() || IsWebGPUOn(wgpu::BackendType::D3D12)) &&
                               MatchesCase({"atanh_f32_inf_output", "pow_f32_inf_input"}));
@@ -189,19 +186,6 @@ TEST_P(ShaderPoisonTests, PoisonedWrite) {
                                        "scalar_mul_mat2x2",
                                        "sub_inf_inf",
                                        "vec_mul_scalar"}));
-
-    // Suppress cases where AMD Metal eliminates the poisoned write.
-    DAWN_SUPPRESS_TEST_IF(
-        IsAMD() && IsMetal() &&
-        MatchesCase(
-            {"cross_f32_inf_input",       "cross_f32_nan_input",    "determinant_2x2_inf_input",
-             "determinant_2x2_nan_input", "mat2x2_add_mat2x2",      "mat2x2_mul_mat2x2",
-             "mat2x2_mul_mat2x2_nan",     "mat2x2_mul_scalar",      "mat2x2_mul_scalar_nan",
-             "mat2x2_mul_vec2",           "mat2x2_mul_vec2_nan",    "mat2x2_sub_mat2x2",
-             "mat2x2_sub_mat2x2_nan",     "mat3x3_mul_vec3",        "mat4x3_sub_mat4x3",
-             "mat4x4_mul_mat4x4_f16_nan", "mat4x4_mul_vec4",        "normalize_vec2_inf_input",
-             "normalize_vec2_nan_input",  "reflect_vec2_inf_input", "reflect_vec2_nan_input",
-             "scalar_mul_mat2x2",         "vec_mul_scalar"}));
 
     std::ostringstream shader;
     shader << BuildPoisonPreamble(testCase);
