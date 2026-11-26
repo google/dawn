@@ -46,9 +46,6 @@ from tools.python import cipd_deps
 BAZEL_TARGET = '//runtime/engine:litert_lm_advanced_main'
 BAZEL_BIN_SUBPATH = 'runtime/engine/litert_lm_advanced_main'
 
-# Prebuilt libraries from the CIPD package that are needed at runtime.
-RUNTIME_CIPD_PREBUILTS = ('libGemmaModelConstraintProvider', )
-
 
 def get_platform_name():
     cipd_os = cipd_deps.get_cipd_compatible_current_os()
@@ -358,7 +355,7 @@ def main():
     target_prebuilt_dir = prebuilt_cipd_dir
     if target_prebuilt_dir.exists():
         for f in target_prebuilt_dir.iterdir():
-            if f.is_file() and f.name.startswith(RUNTIME_CIPD_PREBUILTS):
+            if f.is_file():
                 dest_file = dest_path.parent / f.name
                 shutil.copy2(f, dest_file)
                 dest_file.chmod(0o755)

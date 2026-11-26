@@ -820,7 +820,7 @@ deps = {
       {
         # TODO(crbug.com/527944617): Replace experimental CIPD dependency.
         'package': 'experimental/chouinard_at_google.com/litert_lm_benchmark_data',
- 'version': 'MfFYLUhIzajgKbb0NIc_KPoe5_r8qf9dwAi_Ndgy-nMC',
+        'version': 'th6XgubZaqq-b-tOv2nxF8OUkgfpVwS_oMUBPzBJ7xwC',
       }
     ],
     'dep_type': 'cipd',

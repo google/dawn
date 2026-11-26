@@ -55,6 +55,7 @@ action("litert_lm_advanced_main") {
     inputs += [
       "$root_out_dir/webgpu_dawn.dll",
       "data/prebuilt/windows_x86_64/libGemmaModelConstraintProvider.dll",
+      "data/prebuilt/windows_x86_64/libGemmaModelConstraintProvider.lib",
     ]
   }
   deps = [ "//src/dawn/native:webgpu_dawn_shared" ]
