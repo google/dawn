@@ -60,4 +60,22 @@ Hashmap<const core::type::Type*, core::ir::Var*, 4> ResourceTableHelper::Generat
     return res;
 }
 
+core::ir::Instruction* ResourceTableHelper::LoadResource(core::ir::Builder& b,
+                                                         core::ir::Instruction* from,
+                                                         core::ir::Value* idx,
+                                                         const core::type::Type* ty) const {
+    auto* access = b.Access(b.ir.Types().ptr(handle, ty, core::Access::kRead), from->Result(), idx);
+    auto* ld = b.Load(access);
+
+    // Treat all dynamic resource table accesses as non-uniform for now. We may want to investigate
+    // using the uniformity analysis to determine if it can be uniform in the future.
+    if (!idx->Is<core::ir::Constant>()) {
+        // TODO(https://crbug.com/473444515): Revisit this as we extend resource table support,
+        // annotaton may need to be in a different spot when dealing with other types of
+        // resources.
+        ld->Result()->SetNonUniform();
+    }
+    return ld;
+}
+
 }  // namespace tint::spirv::writer::raise

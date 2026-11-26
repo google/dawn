@@ -38,7 +38,7 @@ float4 fs_inner() {
   }
   float4 v_4 = (0.0f).xxxx;
   if (v_3) {
-    v_4 = t.Sample(tint_resource_table_2[item_idx], (0.0f).xx);
+    v_4 = t.Sample(tint_resource_table_2[NonUniformResourceIndex(item_idx)], (0.0f).xx);
   } else {
     v_4 = (0.0f).xxxx;
   }

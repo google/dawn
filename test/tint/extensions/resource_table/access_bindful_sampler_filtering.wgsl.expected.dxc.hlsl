@@ -32,7 +32,7 @@ float4 fs_inner() {
   uint item_idx = v_2;
   float4 v_3 = (0.0f).xxxx;
   if ((texture_kind == 6u)) {
-    v_3 = tint_resource_table[item_idx].Sample(s, (0.0f).xx);
+    v_3 = tint_resource_table[NonUniformResourceIndex(item_idx)].Sample(s, (0.0f).xx);
   } else {
     v_3 = (0.0f).xxxx;
   }

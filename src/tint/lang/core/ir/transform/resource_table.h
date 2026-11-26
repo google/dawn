@@ -59,7 +59,7 @@ class ResourceTableHelper {
     virtual Instruction* LoadResource(core::ir::Builder& b,
                                       core::ir::Instruction* from,
                                       core::ir::Value* idx,
-                                      const core::type::Type* ty) const;
+                                      const core::type::Type* ty) const = 0;
 
     ResourceTableHelper(const ResourceTableHelper&) = delete;
     ResourceTableHelper(ResourceTableHelper&&) = delete;

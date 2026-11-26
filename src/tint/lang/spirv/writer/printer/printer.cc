@@ -1236,6 +1236,10 @@ class Printer {
                 operands.push_back(GetAccessChainIndexId(idx));
             }
             current_function_.PushInst(spv::Op::OpAccessChain, std::move(operands));
+
+            if (access->Result()->IsNonUniform()) {
+                SetNonUniform(id);
+            }
             return;
         }
 
@@ -2556,12 +2560,23 @@ class Printer {
         return mask;
     }
 
+    void SetNonUniform(uint32_t id) {
+        module_.PushCapability(SpvCapabilityShaderNonUniform);
+        module_.PushCapability(SpvCapabilitySampledImageArrayNonUniformIndexing);
+        module_.PushAnnot(spv::Op::OpDecorate, {id, U32Operand(SpvDecorationNonUniform)});
+    }
+
     /// Emit a load instruction.
     /// @param load the load instruction to emit
     void EmitLoad(core::ir::Load* load) {
         auto* ptr_ty = load->From()->Type()->As<core::type::Pointer>();
         auto memory_mask = MemoryAccessMaskForPointer(ptr_ty, load->Alignment());
-        OperandList operands = {Type(load->Result()->Type()), Value(load), Value(load->From()),
+
+        uint32_t load_id = Value(load);
+        if (load->Result()->IsNonUniform()) {
+            SetNonUniform(load_id);
+        }
+        OperandList operands = {Type(load->Result()->Type()), load_id, Value(load->From()),
                                 U32Operand(memory_mask)};
         if (ExplicitLayoutStorageClass(ptr_ty->AddressSpace()) && load->Alignment().has_value()) {
             operands.push_back(U32Operand(load->Alignment().value()));

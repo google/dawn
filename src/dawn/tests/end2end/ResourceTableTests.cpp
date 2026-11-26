@@ -3528,6 +3528,92 @@ TEST_P(ResourceTableTests, SetResourceUsage_ComputePassEncoder) {
     EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), resultBuffer, 0, expected.size());
 }
 
+TEST_P(ResourceTableTests, NonUniformResourceTableAccess) {
+    // TODO(473444514): Re-enable when compute shaders support ResourceTable on metal
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
+
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_resource_table;
+
+        @group(0) @binding(0) var<storage, read_write> results : array<u32>;
+
+        @compute @workgroup_size(4) fn main(@builtin(local_invocation_id) id: vec3u) {
+            let tex = getResource<texture_2d<u32>>(id.x);
+            results[id.x] = textureLoad(tex, vec2(0), 0).r;
+        }
+    )");
+
+    wgpu::ComputePipelineDescriptor csDesc = {.compute = {
+                                                  .module = module,
+                                              }};
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    // Create textures.
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst,
+        .size = {1, 1, 1},
+        .format = wgpu::TextureFormat::R32Uint,
+    };
+    std::vector<wgpu::Texture> textures = {
+        device.CreateTexture(&tDesc), device.CreateTexture(&tDesc), device.CreateTexture(&tDesc),
+        device.CreateTexture(&tDesc)};
+
+    std::vector<wgpu::Buffer> uploadBuffers;
+    uploadBuffers.reserve(4);
+
+    for (uint32_t i = 0; i < textures.size(); ++i) {
+        std::array textureData = {4 + uint32_t{i}, 4 + uint32_t{i}, 4 + uint32_t{i},
+                                  4 + uint32_t{i}};
+        uploadBuffers.push_back(utils::CreateBufferFromData(device, textureData.data(),
+                                                            textureData.size() * sizeof(uint32_t),
+                                                            wgpu::BufferUsage::CopySrc));
+    }
+
+    // Create result buffer (4 elements, one result per invocation)
+    wgpu::BufferDescriptor bDesc = {
+        .usage =
+            wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst,
+        .size = 4 * sizeof(uint32_t),
+    };
+    wgpu::Buffer resultBuffer = device.CreateBuffer(&bDesc);
+
+    wgpu::BindGroup resultBG =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, resultBuffer}});
+
+    // Create resource table containing the 4 textures.
+    wgpu::ResourceTable table =
+        MakeResourceTable(4, {
+                                 {0, {.textureView = CreateViewForTable(textures[0])}},
+                                 {1, {.textureView = CreateViewForTable(textures[1])}},
+                                 {2, {.textureView = CreateViewForTable(textures[2])}},
+                                 {3, {.textureView = CreateViewForTable(textures[3])}},
+                             });
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+    for (size_t i = 0; i < textures.size(); ++i) {
+        wgpu::TexelCopyBufferInfo bufferView =
+            utils::CreateTexelCopyBufferInfo(uploadBuffers[i], 0, 256);
+        wgpu::TexelCopyTextureInfo textureView =
+            utils::CreateTexelCopyTextureInfo(textures[i], 0, {0, 0, 0});
+        wgpu::Extent3D extent{1, 1, 1};
+        encoder.CopyBufferToTexture(&bufferView, &textureView, &extent);
+    }
+
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, resultBG);
+    pass.SetResourceTable(table);
+    pass.DispatchWorkgroups(1);
+
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    uint32_t expected[] = {4, 5, 6, 7};
+    EXPECT_BUFFER_U32_RANGE_EQ(expected, resultBuffer, 0, 4);
+}
+
 DAWN_INSTANTIATE_TEST(ResourceTableTests, D3D12Backend(), MetalBackend(), VulkanBackend());
 
 // Test that a resource used in a bindful way outside of a usage scope will get correctly barriered

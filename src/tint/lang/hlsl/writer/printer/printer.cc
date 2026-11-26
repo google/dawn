@@ -409,8 +409,16 @@ class Printer : public tint::TextGenerator {
         }
     }
 
-    void EmitIndexAccess(StringStream& out, const core::ir::Value* index, uint32_t count) {
+    void EmitIndexAccess(StringStream& out,
+                         const core::ir::Value* result,
+                         const core::ir::Value* index,
+                         uint32_t count) {
         out << "[";
+
+        if (result->IsNonUniform()) {
+            out << "NonUniformResourceIndex(";
+        }
+
         if (auto* cnst = index->As<core::ir::Constant>()) {
             // Clamping for when robustness is disabled
             bool is_neg =
@@ -425,6 +433,10 @@ class Printer : public tint::TextGenerator {
             }
         } else {
             EmitValue(out, index);
+        }
+
+        if (result->IsNonUniform()) {
+            out << ")";
         }
         out << "]";
     }
@@ -1114,7 +1126,7 @@ class Printer : public tint::TextGenerator {
                 },
                 [&](Default) {
                     auto elements = current_type->Elements();
-                    EmitIndexAccess(out, index, elements.count);
+                    EmitIndexAccess(out, a->Result(), index, elements.count);
                     current_type = elements.type;
                 });
         }

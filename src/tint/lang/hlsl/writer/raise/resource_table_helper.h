@@ -44,6 +44,10 @@ class ResourceTableHelper : public core::ir::transform::ResourceTableHelper {
         core::ir::Builder& b,
         const BindingPoint& bp,
         const std::vector<ResourceType>& types) const override;
+    core::ir::Instruction* LoadResource(core::ir::Builder& b,
+                                        core::ir::Instruction* from,
+                                        core::ir::Value* idx,
+                                        const core::type::Type* ty) const override;
 };
 
 }  // namespace tint::hlsl::writer::raise

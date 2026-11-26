@@ -29,7 +29,7 @@ float4 fs_inner() {
     v_2 = (4u + tint_resource_table_metadata.Load(0u));
   }
   uint item_idx = v_2;
-  return t.Sample(tint_resource_table_2[item_idx], (0.0f).xx);
+  return t.Sample(tint_resource_table_2[NonUniformResourceIndex(item_idx)], (0.0f).xx);
 }
 
 fs_outputs fs() {

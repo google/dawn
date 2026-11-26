@@ -58,7 +58,7 @@ float4 fs_inner() {
   }
   float4 v_7 = (0.0f).xxxx;
   if (v_6) {
-    v_7 = tint_resource_table[item_idx].Sample(tint_resource_table_2[item_idx_1], (0.0f).xx);
+    v_7 = tint_resource_table[NonUniformResourceIndex(item_idx)].Sample(tint_resource_table_2[NonUniformResourceIndex(item_idx_1)], (0.0f).xx);
   } else {
     v_7 = (0.0f).xxxx;
   }

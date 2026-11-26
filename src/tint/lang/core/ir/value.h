@@ -98,6 +98,11 @@ class Value : public Castable<Value> {
     /// @returns true if the Value has not been destroyed with Destroy()
     bool Alive() const { return !flags_.Contains(Flag::kDead); }
 
+    /// @returns true if the value is uniform
+    bool IsNonUniform() const { return flags_.Contains(Flag::kNonUniform); }
+    /// Sets the value to be non-unifrom
+    void SetNonUniform() { flags_.Add(Flag::kNonUniform); }
+
     /// Adds a usage of this value.
     /// @param u the usage
     void AddUsage(Usage u) { uses_.Add(u); }
@@ -170,6 +175,8 @@ class Value : public Castable<Value> {
     enum class Flag {
         /// The value has been destroyed
         kDead,
+        /// The value is non-uniform
+        kNonUniform,
     };
 
     const core::type::Type* type_ = nullptr;

@@ -15,6 +15,6 @@ void fs() {
     v_1 = (0u + tint_resource_table_metadata.Load(0u));
   }
   uint item_idx = v_1;
-  float4 texture_load = tint_resource_table[item_idx].Load((int(0)).xx);
+  float4 texture_load = tint_resource_table[NonUniformResourceIndex(item_idx)].Load((int(0)).xx);
 }
 

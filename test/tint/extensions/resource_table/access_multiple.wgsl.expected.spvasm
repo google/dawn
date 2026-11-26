@@ -6,6 +6,8 @@
                OpCapability Shader
                OpCapability RuntimeDescriptorArray
                OpCapability Sampled1D
+               OpCapability ShaderNonUniform
+               OpCapability SampledImageArrayNonUniformIndexing
                OpCapability ImageQuery
                OpExtension "SPV_EXT_descriptor_indexing"
          %78 = OpExtInstImport "GLSL.std.450"
@@ -54,6 +56,15 @@
                OpDecorate %tint_resource_table_metadata DescriptorSet 5
                OpDecorate %tint_resource_table_metadata Binding 29
                OpDecorate %tint_resource_table_metadata NonWritable
+               OpDecorate %43 NonUniform
+               OpDecorate %58 NonUniform
+               OpDecorate %73 NonUniform
+               OpDecorate %99 NonUniform
+               OpDecorate %114 NonUniform
+               OpDecorate %129 NonUniform
+               OpDecorate %157 NonUniform
+               OpDecorate %172 NonUniform
+               OpDecorate %187 NonUniform
       %float = OpTypeFloat 32
           %4 = OpTypeImage %float 1D 0 0 0 1 Unknown
 %_runtimearr_4 = OpTypeRuntimeArray %4

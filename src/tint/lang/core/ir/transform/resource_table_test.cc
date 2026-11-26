@@ -68,6 +68,14 @@ class Helper : public ResourceTableHelper {
 
         return res;
     }
+    core::ir::Instruction* LoadResource(core::ir::Builder& b,
+                                        core::ir::Instruction* from,
+                                        core::ir::Value* idx,
+                                        const core::type::Type* ty) const override {
+        auto* access =
+            b.Access(b.ir.Types().ptr(handle, ty, core::Access::kRead), from->Result(), idx);
+        return b.Load(access);
+    }
 
     Helper(const Helper&) = delete;
     Helper(Helper&&) = delete;

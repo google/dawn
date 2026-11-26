@@ -650,12 +650,4 @@ Result<SuccessType> ResourceTable(core::ir::Module& ir,
     return State{config, ir, helper}.Process();
 }
 
-Instruction* ResourceTableHelper::LoadResource(core::ir::Builder& b,
-                                               core::ir::Instruction* from,
-                                               core::ir::Value* idx,
-                                               const core::type::Type* ty) const {
-    auto* access = b.Access(b.ir.Types().ptr(handle, ty, read), from->Result(), idx);
-    return b.Load(access);
-}
-
 }  // namespace tint::core::ir::transform
