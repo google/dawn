@@ -26,6 +26,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
@@ -122,5 +123,25 @@ class FeaturesTest {
     initLibrary()
     assertFalse(GPU.hasInstanceFeature(0))
     assertFalse(GPU.hasInstanceFeature(-1))
+    assertFalse(GPU.hasInstanceFeature(Int.MIN_VALUE))
+    assertFalse(GPU.hasInstanceFeature(Int.MAX_VALUE))
+  }
+
+  @SuppressLint("WrongConstant")
+  @Test
+  fun createInstanceInvalidFeatureArrayTest() {
+    initLibrary()
+    val instance = GPU.createGPUInstance(
+      GPUInstanceDescriptor(
+        requiredFeatures = intArrayOf(-1, Int.MIN_VALUE),
+      )
+    )
+    try {
+      assertEquals(0L, instance.handle)
+    } finally {
+      if (instance.handle != 0L) {
+        instance.close()
+      }
+    }
   }
 }

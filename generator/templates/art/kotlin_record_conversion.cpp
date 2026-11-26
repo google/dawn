@@ -279,6 +279,17 @@
                                     return;
                                 }
                                 env->GetIntArrayRegion(in, 0, length, reinterpret_cast<jint*>(array));
+                                {% if member.type.category == 'enum' %}
+                                    //* Clamp negative jint elements to *_Force32 without loading them
+                                    //* as an unscoped C WGPU enum first (avoids -fsanitize=enum UB).
+                                    for (jsize i = 0; i < length; ++i) {
+                                        jint value;
+                                        std::memcpy(&value, &array[i], sizeof(value));
+                                        if (value < 0) {
+                                            array[i] = {{as_cEnum(member.type.name, Name("force32"))}};
+                                        }
+                                    }
+                                {% endif %}
                                 out = array;
                                 outLength = length;
                             }
@@ -391,7 +402,13 @@
                     //* of this, we should have manually written method that directly creates the
                     //* wgpu::Surface from the Java Surface.
                     out = reinterpret_cast<{{as_cType(member.type.name)}}>(static_cast<uintptr_t>(in));
-                {% elif member.type.category in ["native", "enum", "bitmask"] %}
+                {% elif member.type.category == "enum" %}
+                    //* C WGPU enums are unscoped with values in [0, 0x7FFFFFFF]. Negative jint
+                    //* values are UB under -fsanitize=enum, so map them to *_Force32 (0x7FFFFFFF),
+                    //* which is in range and never a valid enumerator.
+                    out = in < 0 ? {{as_cEnum(member.type.name, Name("force32"))}}
+                                 : static_cast<{{as_cType(member.type.name)}}>(in);
+                {% elif member.type.category in ["native", "bitmask"] %}
                     out = static_cast<{{as_cType(member.type.name)}}>(in);
                 {% elif member.type.category != 'kotlin type' %}
                     {{ unreachable_code() }}
