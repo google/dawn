@@ -63,6 +63,7 @@ class RenderPassEncoder final : public RenderEncoderBase {
     // locked, use End() instead.
     void APIEnd();
 
+    void APISetPipeline(RenderPipelineBase* pipeline);
     void APISetStencilReference(uint32_t reference);
     void APISetBlendConstant(const Color* color);
     void APISetViewport(float x,

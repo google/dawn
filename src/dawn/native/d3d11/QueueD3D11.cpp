@@ -324,15 +324,11 @@ MaybeError Queue::SubmitImpl(Span<CommandBufferBase* const> commands) {
     if (GetDevice()->IsToggleEnabled(Toggle::BackendPipelineDeferredCreation)) {
         for (CommandBufferBase* commandBuffer : commands) {
             const CommandBufferResourceUsage& usages = commandBuffer->GetResourceUsages();
-            for (const RenderPassResourceUsage& passUsage : usages.renderPasses) {
-                for (RenderPipelineBase* pipeline : passUsage.referencedRenderPipelines) {
-                    DAWN_TRY(ToBackend(pipeline)->EnsureShadersCreated());
-                }
+            for (RenderPipelineBase* pipeline : usages.usedRenderPipelines) {
+                DAWN_TRY(ToBackend(pipeline)->EnsureShadersCreated());
             }
-            for (const ComputePassResourceUsage& passUsage : usages.computePasses) {
-                for (ComputePipelineBase* pipeline : passUsage.referencedComputePipelines) {
-                    DAWN_TRY(ToBackend(pipeline)->EnsureShadersCreated());
-                }
+            for (ComputePipelineBase* pipeline : usages.usedComputePipelines) {
+                DAWN_TRY(ToBackend(pipeline)->EnsureShadersCreated());
             }
         }
     }

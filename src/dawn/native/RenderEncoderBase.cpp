@@ -548,8 +548,8 @@ void RenderEncoderBase::APIMultiDrawIndexedIndirect(BufferBase* indirectBuffer,
         indirectOffset, maxDrawCount, drawCountBuffer, drawCountBufferOffset);
 }
 
-void RenderEncoderBase::APISetPipeline(RenderPipelineBase* pipeline) {
-    mEncodingContext->TryEncode(
+bool RenderEncoderBase::SetPipelineCommon(RenderPipelineBase* pipeline) {
+    return mEncodingContext->TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeValError {
             if (IsValidationEnabled()) {
@@ -571,9 +571,6 @@ void RenderEncoderBase::APISetPipeline(RenderPipelineBase* pipeline) {
             }
 
             mCommandBufferState.SetRenderPipeline(pipeline);
-            if (GetDevice()->IsToggleEnabled(Toggle::BackendPipelineDeferredCreation)) {
-                mUsageTracker.AddReferencedRenderPipeline(pipeline);
-            }
 
             if (pipeline->UsesFramebufferFetch()) {
                 mUsageTracker.MarkFramebufferFetchUsed();

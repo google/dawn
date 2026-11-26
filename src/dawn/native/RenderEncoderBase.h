@@ -74,8 +74,6 @@ class RenderEncoderBase : public ProgrammableEncoder {
                                      BufferBase* drawCountBuffer = nullptr,
                                      uint64_t drawCountBufferOffset = 0);
 
-    void APISetPipeline(RenderPipelineBase* pipeline);
-
     void APISetVertexBuffer(uint32_t slot, BufferBase* buffer, uint64_t offset, uint64_t size);
     void APISetIndexBuffer(BufferBase* buffer,
                            wgpu::IndexFormat format,
@@ -102,6 +100,8 @@ class RenderEncoderBase : public ProgrammableEncoder {
                       StringView label);
 
     void DestroyImpl(DestroyReason reason) override;
+
+    bool SetPipelineCommon(RenderPipelineBase* pipeline);
 
     CommandBufferStateTracker mCommandBufferState;
     RenderPassResourceUsageTracker mUsageTracker;

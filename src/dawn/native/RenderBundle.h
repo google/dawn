@@ -30,7 +30,9 @@
 
 #include <bitset>
 #include <string>
+#include <vector>
 
+#include "partition_alloc/pointers/raw_ptr_exclusion.h"
 #include "src/dawn/common/Constants.h"
 #include "src/dawn/native/AttachmentState.h"
 #include "src/dawn/native/CommandAllocator.h"
@@ -74,6 +76,7 @@ class RenderBundleBase : public ApiObjectBase {
     uint64_t GetDrawCount() const;
     const RenderPassResourceUsage& GetResourceUsage() const;
     const IndirectDrawMetadata& GetIndirectDrawMetadata();
+    const std::vector<RenderPipelineBase*>& GetUsedRenderPipelines() const;
 
   protected:
     void DestroyImpl(DestroyReason reason) override;
@@ -89,6 +92,10 @@ class RenderBundleBase : public ApiObjectBase {
     bool mUsesResourceTable = false;
     uint64_t mDrawCount = 0;
     RenderPassResourceUsage mResourceUsage;
+    // Pipelines used in this render bundle (tracked when BackendPipelineDeferredCreation is
+    // enabled). Intentionally left as raw pointers instead of raw_ptr<T> since they are kept alive
+    // by Ref<...> in mCommands and cleared before FreeCommands(&mCommands) in DestroyImpl().
+    RAW_PTR_EXCLUSION std::vector<RenderPipelineBase*> mUsedRenderPipelines;
     std::string mEncoderLabel;
 };
 

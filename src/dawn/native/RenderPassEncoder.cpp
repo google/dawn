@@ -195,6 +195,13 @@ void RenderPassEncoder::End() {
         "encoding %s.End().", this);
 }
 
+void RenderPassEncoder::APISetPipeline(RenderPipelineBase* pipeline) {
+    if (SetPipelineCommon(pipeline) &&
+        GetDevice()->IsToggleEnabled(Toggle::BackendPipelineDeferredCreation)) {
+        mCommandEncoder->TrackUsedRenderPipeline(pipeline);
+    }
+}
+
 void RenderPassEncoder::APISetStencilReference(uint32_t reference) {
     mEncodingContext->TryEncode(
         this,
@@ -420,9 +427,8 @@ void RenderPassEncoder::APIExecuteBundles(Span<RenderBundleBase* const> renderBu
 
                 mUsageTracker.MergeResourceUsages(bundle->GetResourceUsage());
                 if (GetDevice()->IsToggleEnabled(Toggle::BackendPipelineDeferredCreation)) {
-                    for (RenderPipelineBase* pipeline :
-                         bundle->GetResourceUsage().referencedRenderPipelines) {
-                        mUsageTracker.AddReferencedRenderPipeline(pipeline);
+                    for (RenderPipelineBase* pipeline : bundle->GetUsedRenderPipelines()) {
+                        mCommandEncoder->TrackUsedRenderPipeline(pipeline);
                     }
                 }
                 if (bundle->GetResourceUsage().usesFramebufferFetch) {

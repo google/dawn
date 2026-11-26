@@ -28,6 +28,10 @@
 #ifndef SRC_DAWN_NATIVE_RENDERBUNDLEENCODER_H_
 #define SRC_DAWN_NATIVE_RENDERBUNDLEENCODER_H_
 
+#include <vector>
+
+#include "absl/container/flat_hash_set.h"
+#include "partition_alloc/pointers/raw_ptr_exclusion.h"
 #include "src/dawn/native/EncodingContext.h"
 #include "src/dawn/native/Error.h"
 #include "src/dawn/native/Forward.h"
@@ -51,12 +55,14 @@ class RenderBundleEncoder final : public RenderEncoderBase {
 
     ObjectType GetType() const override;
 
+    void APISetPipeline(RenderPipelineBase* pipeline);
     RenderBundleBase* APIFinish(const RenderBundleDescriptor* descriptor);
 
     CommandIterator AcquireCommands();
 
     RenderPassResourceUsage AcquireRenderPassUsages();
     IndirectDrawMetadata AcquireIndirectDrawMetadata();
+    std::vector<RenderPipelineBase*> AcquireUsedRenderPipelines();
 
     bool UsesResourceTable() const;
 
@@ -74,6 +80,10 @@ class RenderBundleEncoder final : public RenderEncoderBase {
 
     // Temporarily store for validation and will be moved to RenderBundle afterwards.
     RenderPassResourceUsage mUsages;
+    // NOTE: populated on every SetPipeline, so intentionally left as raw pointers instead of
+    // raw_ptr<T>. Kept alive by Ref<...> in mBundleEncodingContext's commands and cleared before
+    // mBundleEncodingContext.Destroy() in DestroyImpl().
+    RAW_PTR_EXCLUSION absl::flat_hash_set<RenderPipelineBase*> mUsedRenderPipelines;
 
     bool mUsesResourceTable = false;
 };

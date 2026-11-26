@@ -65,6 +65,8 @@ class CommandEncoder final : public ApiObjectBase {
     ityp::vector<PassIndex, IndirectDrawMetadata> AcquireIndirectDrawMetadata();
 
     void TrackUsedQuerySet(QuerySetBase* querySet);
+    void TrackUsedRenderPipeline(RenderPipelineBase* pipeline);
+    void TrackUsedComputePipeline(ComputePipelineBase* pipeline);
 
     // Dawn API
     ComputePassEncoder* APIBeginComputePass(const ComputePassDescriptor* descriptor);
@@ -148,6 +150,11 @@ class CommandEncoder final : public ApiObjectBase {
     RAW_PTR_EXCLUSION absl::flat_hash_set<TextureBase*> mTopLevelTextures;
     RAW_PTR_EXCLUSION absl::flat_hash_set<QuerySetBase*> mUsedQuerySets;
     RAW_PTR_EXCLUSION absl::flat_hash_set<ResourceTableBase*> mTopLevelResourceTables;
+    // NOTE: these are hot (populated on every SetPipeline), so they are intentionally left as raw
+    // pointers instead of raw_ptr<T>. The pipelines are kept alive by Ref<...> in
+    // mEncodingContext's commands and cleared before mEncodingContext.Destroy() in DestroyImpl().
+    RAW_PTR_EXCLUSION absl::flat_hash_set<RenderPipelineBase*> mUsedRenderPipelines;
+    RAW_PTR_EXCLUSION absl::flat_hash_set<ComputePipelineBase*> mUsedComputePipelines;
 
     uint64_t mDebugGroupStackSize = 0;
 

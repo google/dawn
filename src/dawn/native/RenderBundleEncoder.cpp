@@ -159,9 +159,17 @@ void RenderBundleEncoder::DestroyImpl(DestroyReason reason) {
     // Resource usages contain raw_ptrs to resources held by recorded commands. Clear them
     // before releasing references in mIndirectDrawMetadata or commands to avoid dangling raw_ptrs.
     mUsages = {};
+    mUsedRenderPipelines.clear();
     mIndirectDrawMetadata.ClearIndexedIndirectBufferValidationInfo();
     mBundleEncodingContext.Destroy();
     RenderEncoderBase::DestroyImpl(reason);
+}
+
+void RenderBundleEncoder::APISetPipeline(RenderPipelineBase* pipeline) {
+    if (SetPipelineCommon(pipeline) &&
+        GetDevice()->IsToggleEnabled(Toggle::BackendPipelineDeferredCreation)) {
+        mUsedRenderPipelines.insert(pipeline);
+    }
 }
 
 // static
@@ -190,6 +198,17 @@ RenderPassResourceUsage RenderBundleEncoder::AcquireRenderPassUsages() {
 
 IndirectDrawMetadata RenderBundleEncoder::AcquireIndirectDrawMetadata() {
     return std::move(mIndirectDrawMetadata);
+}
+
+std::vector<RenderPipelineBase*> RenderBundleEncoder::AcquireUsedRenderPipelines() {
+    // Convert to a compact vector since a RenderBundle is immutable and may be executed many times.
+    std::vector<RenderPipelineBase*> result;
+    result.reserve(mUsedRenderPipelines.size());
+    for (RenderPipelineBase* pipeline : mUsedRenderPipelines) {
+        result.push_back(pipeline);
+    }
+    mUsedRenderPipelines.clear();
+    return result;
 }
 
 RenderBundleBase* RenderBundleEncoder::APIFinish(const RenderBundleDescriptor* descriptor) {

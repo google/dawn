@@ -54,6 +54,7 @@ RenderBundleBase::RenderBundleBase(RenderBundleEncoder* encoder,
       mUsesResourceTable(usesResourceTable),
       mDrawCount(encoder->GetDrawCount()),
       mResourceUsage(std::move(resourceUsage)),
+      mUsedRenderPipelines(encoder->AcquireUsedRenderPipelines()),
       mEncoderLabel(encoder->GetLabel()) {
     GetObjectTrackingList()->Track(this);
 }
@@ -62,6 +63,7 @@ void RenderBundleBase::DestroyImpl(DestroyReason reason) {
     // Resource usages contain raw_ptrs to resources (buffers, textures). Clear them before
     // releasing references in mIndirectDrawMetadata or commands to avoid dangling raw_ptrs.
     mResourceUsage = {};
+    mUsedRenderPipelines.clear();
 
     mIndirectDrawMetadata.ClearIndexedIndirectBufferValidationInfo();
     FreeCommands(&mCommands);
@@ -141,6 +143,11 @@ const RenderPassResourceUsage& RenderBundleBase::GetResourceUsage() const {
 
 const IndirectDrawMetadata& RenderBundleBase::GetIndirectDrawMetadata() {
     return mIndirectDrawMetadata;
+}
+
+const std::vector<RenderPipelineBase*>& RenderBundleBase::GetUsedRenderPipelines() const {
+    DAWN_CHECK(!IsError());
+    return mUsedRenderPipelines;
 }
 
 }  // namespace dawn::native

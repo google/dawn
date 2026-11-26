@@ -99,7 +99,6 @@ struct ComputePassResourceUsage {
     RAW_PTR_EXCLUSION absl::flat_hash_set<TextureBase*> referencedTextures;
     RAW_PTR_EXCLUSION absl::flat_hash_set<ExternalTextureBase*> referencedExternalTextures;
     RAW_PTR_EXCLUSION absl::flat_hash_set<ResourceTableBase*> referencedResourceTables;
-    RAW_PTR_EXCLUSION absl::flat_hash_set<ComputePipelineBase*> referencedComputePipelines;
 };
 
 // Contains all the resource usage data for a render pass.
@@ -111,7 +110,6 @@ struct RenderPassResourceUsage : public SyncScopeResourceUsage {
     // Storage to track the occlusion queries used during the pass.
     std::vector<raw_ptr<QuerySetBase>> querySets;
     std::vector<ityp::vector<QueryIndex, bool>> queryAvailabilities;
-    RAW_PTR_EXCLUSION absl::flat_hash_set<RenderPipelineBase*> referencedRenderPipelines;
     bool usesFramebufferFetch = false;
 };
 
@@ -131,6 +129,13 @@ struct CommandBufferResourceUsage {
     RAW_PTR_EXCLUSION absl::flat_hash_set<TextureBase*> topLevelTextures;
     RAW_PTR_EXCLUSION absl::flat_hash_set<QuerySetBase*> usedQuerySets;
     RAW_PTR_EXCLUSION absl::flat_hash_set<ResourceTableBase*> topLevelResourceTables;
+
+    // Pipelines used across all passes in the command buffer (tracked when
+    // BackendPipelineDeferredCreation is enabled). Intentionally left as raw pointers instead of
+    // raw_ptr<T> since they are kept alive by Ref<...> in the command buffer's commands and
+    // cleared before commands are freed in DestroyImpl().
+    RAW_PTR_EXCLUSION absl::flat_hash_set<RenderPipelineBase*> usedRenderPipelines;
+    RAW_PTR_EXCLUSION absl::flat_hash_set<ComputePipelineBase*> usedComputePipelines;
 };
 
 // Returns a set of writable textures from scope.textures

@@ -294,10 +294,6 @@ void ComputePassResourceUsageTracker::AddReferencedResourceTable(ResourceTableBa
     mUsage.referencedResourceTables.insert(table);
 }
 
-void ComputePassResourceUsageTracker::AddReferencedComputePipeline(ComputePipelineBase* pipeline) {
-    mUsage.referencedComputePipelines.insert(pipeline);
-}
-
 void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGroupBase* group) {
     DAWN_ASSERT(mPassTrackerID != kInvalidPassTrackerID);
     // The referenced resources only depend on the bind group, so they only need to be added once
@@ -361,10 +357,6 @@ void RenderPassResourceUsageTracker::MarkFramebufferFetchUsed() {
     mFramebufferFetchUsed = true;
 }
 
-void RenderPassResourceUsageTracker::AddReferencedRenderPipeline(RenderPipelineBase* pipeline) {
-    mReferencedRenderPipelines.insert(pipeline);
-}
-
 RenderPassResourceUsage RenderPassResourceUsageTracker::AcquireResourceUsage() {
     RenderPassResourceUsage result;
     static_cast<SyncScopeResourceUsage&>(result) = AcquireSyncScopeUsage();
@@ -379,9 +371,6 @@ RenderPassResourceUsage RenderPassResourceUsageTracker::AcquireResourceUsage() {
 
     mQueryAvailabilities.clear();
     mPassTrackerID = kInvalidPassTrackerID;
-
-    result.referencedRenderPipelines = std::move(mReferencedRenderPipelines);
-    mReferencedRenderPipelines.clear();
 
     result.usesFramebufferFetch = mFramebufferFetchUsed;
 

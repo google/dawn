@@ -1369,6 +1369,12 @@ ObjectType CommandEncoder::GetType() const {
 }
 
 void CommandEncoder::DestroyImpl(DestroyReason reason) {
+    mTopLevelBuffers.clear();
+    mTopLevelTextures.clear();
+    mUsedQuerySets.clear();
+    mTopLevelResourceTables.clear();
+    mUsedRenderPipelines.clear();
+    mUsedComputePipelines.clear();
     mEncodingContext.Destroy();
 }
 
@@ -1380,6 +1386,8 @@ CommandBufferResourceUsage CommandEncoder::AcquireResourceUsages() {
         std::move(mTopLevelTextures),
         std::move(mUsedQuerySets),
         std::move(mTopLevelResourceTables),
+        std::move(mUsedRenderPipelines),
+        std::move(mUsedComputePipelines),
     };
 }
 
@@ -1389,6 +1397,14 @@ CommandIterator CommandEncoder::AcquireCommands() {
 
 void CommandEncoder::TrackUsedQuerySet(QuerySetBase* querySet) {
     mUsedQuerySets.insert(querySet);
+}
+
+void CommandEncoder::TrackUsedRenderPipeline(RenderPipelineBase* pipeline) {
+    mUsedRenderPipelines.insert(pipeline);
+}
+
+void CommandEncoder::TrackUsedComputePipeline(ComputePipelineBase* pipeline) {
+    mUsedComputePipelines.insert(pipeline);
 }
 
 ityp::vector<PassIndex, IndirectDrawMetadata> CommandEncoder::AcquireIndirectDrawMetadata() {
