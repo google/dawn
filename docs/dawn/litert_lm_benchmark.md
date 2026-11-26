@@ -64,7 +64,7 @@ Two machine settings are also required:
 
 ## 1. Fetch dependencies
 
-LiteRT-LM sources, prebuilt accelerators, and benchmark model weights are managed conditionally
+LiteRT-LM sources, prebuilt libraries, and benchmark model weights are managed conditionally
 in [`DEPS`](../../DEPS) to keep checkout sizes small for developers who do not need them.
 
 To enable LiteRT-LM, add `"checkout_litert_lm": True` to `custom_vars` in your `.gclient` file:
@@ -91,7 +91,7 @@ gclient sync
 
 This fetches Bazel (`tools/bazelisk/`), the LiteRT-LM source tree (`third_party/litert-lm/src/`),
 and the CIPD package containing `model.litertlm` and precompiled platform
-accelerators (`third_party/litert-lm/data/`).
+libraries (`third_party/litert-lm/data/`).
 
 ## 2. Build
 
@@ -124,7 +124,8 @@ autoninja -C out/active litert_lm
    - Configures Bazelisk with the hermetic Clang/LLVM toolchain from Dawn's
      `third_party/llvm-build` (on Linux/macOS) or Visual Studio toolchain (on Windows).
    - Links against the newly compiled local `libwebgpu_dawn` and platform prebuilts.
-   - Builds the Bazel target `//runtime/engine:litert_lm_advanced_main`.
+   - Builds the Bazel target `//runtime/engine:litert_lm_advanced_main`, which statically links
+     the LiteRT runtime and WebGPU accelerator built from source.
    - Copies the resulting `litert_lm_advanced_main` binary and required shared libraries into
      `out/active/`.
 
@@ -166,11 +167,11 @@ DYLD_LIBRARY_PATH=out/active ./out/active/litert_lm_advanced_main \
 Ensure `"checkout_litert_lm": True` is present under `custom_vars` in your `.gclient` file, then run
 `gclient sync`.
 
-### GPU accelerator could not be loaded and registered
+### Shared libraries not found
 
-The prebuilt `libLiteRtWebGpuAccelerator` cannot find `libwebgpu_dawn`. Ensure that
-`LD_LIBRARY_PATH=out/active` (Linux) or `DYLD_LIBRARY_PATH=out/active` (macOS) is set when running
-the command.
+`litert_lm_advanced_main` dynamically links `libwebgpu_dawn` and the prebuilt
+`libGemmaModelConstraintProvider`. Ensure that `LD_LIBRARY_PATH=out/active` (Linux) or
+`DYLD_LIBRARY_PATH=out/active` (macOS) is set when running the command.
 
 ### Symbol lookup errors or sanitizer crashes
 

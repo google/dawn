@@ -46,6 +46,9 @@ from tools.python import cipd_deps
 BAZEL_TARGET = '//runtime/engine:litert_lm_advanced_main'
 BAZEL_BIN_SUBPATH = 'runtime/engine/litert_lm_advanced_main'
 
+# Prebuilt libraries from the CIPD package that are needed at runtime.
+RUNTIME_CIPD_PREBUILTS = ('libGemmaModelConstraintProvider', )
+
 
 def get_platform_name():
     cipd_os = cipd_deps.get_cipd_compatible_current_os()
@@ -227,8 +230,6 @@ def main():
             '--nowatchfs',
             '--keep_going',
             '--compilation_mode=opt',
-            '--define=litert_runtime_link_mode=dynamic',
-            '--define=resolve_symbols_in_exec=false',
             BAZEL_TARGET,
         ]
 
@@ -293,6 +294,14 @@ def main():
             env['CC'] = str(llvm_bin_dir / 'clang')
             env['CXX'] = str(llvm_bin_dir / 'clang++')
 
+            # Highway 1.3.0 targets the `evex512` feature for its AVX-512
+            # targets, which was removed in Clang 22, so those targets fail to
+            # compile with the hermetic Clang. Disable them. This can be
+            # removed once LiteRT-LM depends on Highway 1.4.0 or later.
+            build_cmd.append(
+                '--copt=-DHWY_DISABLED_TARGETS=(HWY_AVX3|HWY_AVX3_DL|'
+                'HWY_AVX3_ZEN4|HWY_AVX3_SPR|HWY_AVX10_2)')
+
         # On Windows, a Bazel server left running after the build keeps open
         # handles in its working directory (the LiteRT-LM checkout) and in
         # TMP. That blocks Swarming from deleting the task directory, which
@@ -349,7 +358,7 @@ def main():
     target_prebuilt_dir = prebuilt_cipd_dir
     if target_prebuilt_dir.exists():
         for f in target_prebuilt_dir.iterdir():
-            if f.is_file():
+            if f.is_file() and f.name.startswith(RUNTIME_CIPD_PREBUILTS):
                 dest_file = dest_path.parent / f.name
                 shutil.copy2(f, dest_file)
                 dest_file.chmod(0o755)

@@ -38,37 +38,23 @@ action("litert_lm_advanced_main") {
   if (is_linux) {
     inputs += [ "$root_out_dir/libwebgpu_dawn.so" ]
     if (target_cpu == "x64") {
-      inputs += [
-        "data/prebuilt/linux_x86_64/libGemmaModelConstraintProvider.so",
-        "data/prebuilt/linux_x86_64/libLiteRt.so",
-        "data/prebuilt/linux_x86_64/libLiteRtTopKWebGpuSampler.so",
-        "data/prebuilt/linux_x86_64/libLiteRtWebGpuAccelerator.so",
-      ]
+      inputs +=
+          [ "data/prebuilt/linux_x86_64/libGemmaModelConstraintProvider.so" ]
     } else if (target_cpu == "arm64") {
-      inputs += [
-        "data/prebuilt/linux_arm64/libGemmaModelConstraintProvider.so",
-        "data/prebuilt/linux_arm64/libLiteRt.so",
-        "data/prebuilt/linux_arm64/libLiteRtTopKWebGpuSampler.so",
-        "data/prebuilt/linux_arm64/libLiteRtWebGpuAccelerator.so",
-      ]
+      inputs +=
+          [ "data/prebuilt/linux_arm64/libGemmaModelConstraintProvider.so" ]
     }
   }
   if (is_mac) {
     inputs += [
       "$root_out_dir/libwebgpu_dawn.dylib",
       "data/prebuilt/macos_arm64/libGemmaModelConstraintProvider.dylib",
-      "data/prebuilt/macos_arm64/libLiteRt.dylib",
-      "data/prebuilt/macos_arm64/libLiteRtTopKWebGpuSampler.dylib",
-      "data/prebuilt/macos_arm64/libLiteRtWebGpuAccelerator.dylib",
     ]
   }
   if (is_win) {
     inputs += [
       "$root_out_dir/webgpu_dawn.dll",
       "data/prebuilt/windows_x86_64/libGemmaModelConstraintProvider.dll",
-      "data/prebuilt/windows_x86_64/libLiteRt.dll",
-      "data/prebuilt/windows_x86_64/libLiteRtTopKWebGpuSampler.dll",
-      "data/prebuilt/windows_x86_64/libLiteRtWebGpuAccelerator.dll",
     ]
   }
   deps = [ "//src/dawn/native:webgpu_dawn_shared" ]
@@ -86,47 +72,15 @@ action("litert_lm_advanced_main") {
     "$root_out_dir/$_output_name",
   ]
   if (is_linux) {
-    outputs += [
-      "$root_out_dir/libGemmaModelConstraintProvider.so",
-      "$root_out_dir/libLiteRt.so",
-      "$root_out_dir/libLiteRtTopKWebGpuSampler.so",
-      "$root_out_dir/libLiteRtWebGpuAccelerator.so",
-    ]
-    data += [
-      "$root_out_dir/libGemmaModelConstraintProvider.so",
-      "$root_out_dir/libLiteRt.so",
-      "$root_out_dir/libLiteRtTopKWebGpuSampler.so",
-      "$root_out_dir/libLiteRtWebGpuAccelerator.so",
-    ]
+    outputs += [ "$root_out_dir/libGemmaModelConstraintProvider.so" ]
+    data += [ "$root_out_dir/libGemmaModelConstraintProvider.so" ]
   } else if (is_mac) {
-    outputs += [
-      "$root_out_dir/libGemmaModelConstraintProvider.dylib",
-      "$root_out_dir/libLiteRt.dylib",
-      "$root_out_dir/libLiteRtMetalAccelerator.dylib",
-      "$root_out_dir/libLiteRtTopKMetalSampler.dylib",
-      "$root_out_dir/libLiteRtTopKWebGpuSampler.dylib",
-      "$root_out_dir/libLiteRtWebGpuAccelerator.dylib",
-    ]
-    data += [
-      "$root_out_dir/libGemmaModelConstraintProvider.dylib",
-      "$root_out_dir/libLiteRt.dylib",
-      "$root_out_dir/libLiteRtMetalAccelerator.dylib",
-      "$root_out_dir/libLiteRtTopKMetalSampler.dylib",
-      "$root_out_dir/libLiteRtTopKWebGpuSampler.dylib",
-      "$root_out_dir/libLiteRtWebGpuAccelerator.dylib",
-    ]
+    outputs += [ "$root_out_dir/libGemmaModelConstraintProvider.dylib" ]
+    data += [ "$root_out_dir/libGemmaModelConstraintProvider.dylib" ]
   } else if (is_win) {
-    outputs += [
-      "$root_out_dir/libGemmaModelConstraintProvider.dll",
-      "$root_out_dir/libLiteRt.dll",
-      "$root_out_dir/libLiteRtTopKWebGpuSampler.dll",
-      "$root_out_dir/libLiteRtWebGpuAccelerator.dll",
-    ]
+    outputs += [ "$root_out_dir/libGemmaModelConstraintProvider.dll" ]
     data += [
       "$root_out_dir/libGemmaModelConstraintProvider.dll",
-      "$root_out_dir/libLiteRt.dll",
-      "$root_out_dir/libLiteRtTopKWebGpuSampler.dll",
-      "$root_out_dir/libLiteRtWebGpuAccelerator.dll",
       "$root_out_dir/msvcp140.dll",
       "$root_out_dir/msvcp140_atomic_wait.dll",
       "$root_out_dir/vcruntime140.dll",
