@@ -350,6 +350,8 @@ if (checkout_v8 && dawn_node) {
       "ManualConstructors.h",
       "Module.cpp",
       "Module.h",
+      "standalone/RenderDocCapture.cpp",
+      "standalone/RenderDocCapture.h",
       "standalone/main.cpp",
     ]
     public_configs = [

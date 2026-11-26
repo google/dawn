@@ -64,6 +64,10 @@ class GPUDevice final : public interop::GPUDevice, EventTarget {
 
     void ForceLoss(wgpu::DeviceLostReason reason, const char* message);
 
+    // Implicit cast operator to Dawn GPU object
+    // NOLINTNEXTLINE(google-explicit-constructor)
+    inline operator const wgpu::Device&() const { return device_; }
+
     // interop::GPUDevice interface compliance
     interop::Interface<interop::GPUSupportedFeatures> getFeatures(Napi::Env) override;
     interop::Interface<interop::GPUSupportedLimits> getLimits(Napi::Env) override;

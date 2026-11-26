@@ -41,6 +41,7 @@
 #include "src/dawn/node/standalone/EventLoop.h"
 #include "src/dawn/node/standalone/FileBundle.h"
 #include "src/dawn/node/standalone/Polyfills.h"
+#include "src/dawn/node/standalone/RenderDocCapture.h"
 #include "src/dawn/utils/CommandLineParser.h"
 
 #if defined(DAWN_ENABLE_PARTITION_ALLOC)
@@ -342,6 +343,21 @@ class StandaloneRunner {
         }
     }
 
+    // Returns whether a `--dawn-flag` enables the enable_renderdoc_process_injection toggle.
+    bool RenderDocToggleEnabled() {
+        // CommandLineParser::StringListOption splits on ',', so a toggle is the end of a token.
+        bool enabling = false;
+        for (const std::string& token : dawn_flags_opt_.GetValue()) {
+            if (token.find('=') != std::string::npos) {
+                enabling = token.starts_with("enable-dawn-features=");
+            }
+            if (enabling && token.ends_with("enable_renderdoc_process_injection")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Sets up the Node-API environment, loads the CTS command-line entry point, and runs the event
     // loop to completion.
     int RunCts() {
@@ -362,7 +378,10 @@ class StandaloneRunner {
             InitializePolyfills(env, loop);
             InitializeWebGPU(env);
 
-            loop.PostTask([env] {
+            loop.PostTask([this, env] {
+                if (!list_opt_.GetValue() && RenderDocToggleEnabled()) {
+                    renderdoc_capture_.Configure(env);
+                }
                 Napi::Function require_fn = env.Global().Get("require").As<Napi::Function>();
                 require_fn.Call({Napi::String::New(env, kCmdlineScript)});
             });
@@ -426,6 +445,7 @@ class StandaloneRunner {
 
     // The `--query` values followed by the lines of `--query-file`.
     std::vector<std::string> queries_;
+    dawn::node::standalone::RenderDocCapture renderdoc_capture_;
     std::unique_ptr<v8::Platform> platform_;
     std::unique_ptr<v8::ArrayBuffer::Allocator> allocator_;
     v8::Isolate* isolate_ = nullptr;

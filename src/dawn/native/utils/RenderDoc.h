@@ -36,10 +36,17 @@
 namespace dawn::native::utils {
 
 // Keep these versions in sync.
-using RenderDocApiType = RENDERDOC_API_1_1_2;
-constexpr auto kRenderDocApiVersion = eRENDERDOC_API_Version_1_1_2;
+using RenderDocApiType = RENDERDOC_API_1_2_0;
+constexpr auto kRenderDocApiVersion = eRENDERDOC_API_Version_1_2_0;
 
 RenderDocApiType* GetRenderDocApi(DeviceBase* device);
+
+// Starts a RenderDoc capture of `device`. Returns false if GetRenderDocApi() has no API for it.
+bool StartRenderDocCapture(DeviceBase* device);
+
+// Ends the RenderDoc capture of `device` and stores `comments` in the capture file. Returns whether
+// a capture was saved.
+bool EndRenderDocCapture(DeviceBase* device, const char* comments);
 
 }  // namespace dawn::native::utils
 

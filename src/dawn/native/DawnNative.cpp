@@ -37,6 +37,7 @@
 #include "src/dawn/native/Device.h"
 #include "src/dawn/native/Instance.h"
 #include "src/dawn/native/Texture.h"
+#include "src/dawn/native/utils/RenderDoc.h"
 #include "src/utils/log.h"
 #include "tint/tint.h"
 
@@ -334,6 +335,22 @@ void PerformIdleTasks(const wgpu::Device& device) {
 
 bool IsDeviceLost(WGPUDevice device) {
     return FromAPI(device)->IsLost();
+}
+
+bool StartRenderDocCapture(WGPUDevice device) {
+#if defined(DAWN_ENABLE_RENDERDOC)
+    return utils::StartRenderDocCapture(FromAPI(device));
+#else
+    return false;
+#endif
+}
+
+bool EndRenderDocCapture(WGPUDevice device, const char* comments) {
+#if defined(DAWN_ENABLE_RENDERDOC)
+    return utils::EndRenderDocCapture(FromAPI(device), comments);
+#else
+    return false;
+#endif
 }
 
 }  // namespace dawn::native

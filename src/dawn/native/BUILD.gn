@@ -1090,6 +1090,13 @@ dawn_component("native") {
   configs = [ ":internal" ]
   public_configs = [ ":vulkan_rpath" ]
 
+  # DawnNative.cpp includes utils/RenderDoc.h for the RenderDoc capture
+  # functions.
+  if (dawn_enable_d3d12 || (dawn_enable_vulkan && !is_fuchsia)) {
+    defines = [ "DAWN_ENABLE_RENDERDOC" ]
+    include_dirs = [ "$dawn_root/third_party/renderdoc" ]
+  }
+
   if (dawn_enable_d3d11 || dawn_enable_d3d12) {
     sources += [ "d3d/D3DBackend.cpp" ]
   }

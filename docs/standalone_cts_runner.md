@@ -219,6 +219,34 @@ adb shell "$DEV/dawn_standalone_cts_runner --cts-zip $DEV/cts.zip \
     -q 'webgpu:api,operation,queue,*'"
 ```
 
+### Capturing in RenderDoc
+
+When the runner is launched from [RenderDoc](https://renderdoc.org/docs) with
+the `enable_renderdoc_process_injection` Dawn toggle, it saves one capture for
+each test case. `renderdoccmd` does not start the runner in the current
+directory, so give absolute paths. From the Dawn root:
+
+```sh
+renderdoccmd capture -w -c /tmp/cts \
+    "$PWD/out/Release/dawn_standalone_cts_runner" \
+    --cts-dir "$PWD/third_party/webgpu-cts" --verbose \
+    --dawn-flag enable-dawn-features=enable_renderdoc_process_injection \
+    -q 'webgpu:api,operation,compute,basic:memcpy:*'
+```
+
+The captures are `/tmp/cts_capture.rdc`, `/tmp/cts_capture_2.rdc` and so on, in
+the order that `--verbose` prints the test cases, and each one has its test case
+as its comments, which RenderDoc shows when the capture is opened. The runner
+prints `[renderdoc] failed to capture <test case>` for a test case that it could
+not capture, and `renderdoccmd` exits with 0 even when the runner fails.
+
+A script can read a capture's test case with
+`renderdoccmd extract -s renderdoc/ui/notes -f <file> <capture>`, which writes
+the comments to `<file>` as JSON.
+
+On Vulkan, RenderDoc's layer has to be registered first.
+`renderdoccmd vulkanlayer --explain` reports whether it is.
+
 ## Dawn flags
 
 `run-cts standalone -flag` and the runner's `--dawn-flag` take a `key=value` for

@@ -392,6 +392,14 @@ DAWN_NATIVE_EXPORT void PerformIdleTasks(const wgpu::Device& device);
 
 DAWN_NATIVE_EXPORT bool IsDeviceLost(WGPUDevice device);
 
+// Starts a RenderDoc capture of `device`. Returns false unless RenderDoc was injected into this
+// process and `device` has the enable_renderdoc_process_injection toggle.
+DAWN_NATIVE_EXPORT bool StartRenderDocCapture(WGPUDevice device);
+
+// Ends the RenderDoc capture of `device` and stores `comments` in the capture file. Returns whether
+// a capture was saved.
+DAWN_NATIVE_EXPORT bool EndRenderDocCapture(WGPUDevice device, const char* comments);
+
 }  // namespace dawn::native
 
 #endif  // INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_

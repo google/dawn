@@ -64,6 +64,7 @@ src:*src{/,\\}tint{/,\\}lang{/,\\}hlsl{/,\\}validate{/,\\}validate.cc
 [old-style-cast]
 # For C-Style casts used by RenderDoc macros
 src:*src{/,\\}dawn{/,\\}native{/,\\}vulkan{/,\\}TextureVk.cpp
+src:*src{/,\\}dawn{/,\\}native{/,\\}utils{/,\\}RenderDoc.cpp
 # For C-Style casts in Vulkan macros from vulkan/ vulkan_core.h
 src:*src{/,\\}dawn{/,\\}native{/,\\}vulkan{/,\\}BackendVk.h
 src:*src{/,\\}dawn{/,\\}native{/,\\}vulkan{/,\\}PhysicalDeviceVk.cpp

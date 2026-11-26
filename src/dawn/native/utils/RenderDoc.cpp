@@ -32,7 +32,20 @@
 #include <string>
 
 #include "src/dawn/common/DynamicLib.h"
+#include "src/dawn/native/PhysicalDevice.h"
 #include "src/utils/log.h"
+
+#if defined(DAWN_ENABLE_BACKEND_VULKAN)
+// Must precede VulkanBackend.h so vulkan.h is wrapped with vulkan_platform.h.
+#include "src/dawn/common/vulkan_platform.h"
+
+// After vulkan_platform.h.
+#include "dawn/native/VulkanBackend.h"
+#endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
+
+#if defined(DAWN_ENABLE_BACKEND_D3D12)
+#include "dawn/native/D3D12Backend.h"
+#endif  // defined(DAWN_ENABLE_BACKEND_D3D12)
 
 namespace dawn::native::utils {
 
@@ -71,6 +84,44 @@ RenderDocApiType* GetRenderDocApi(DeviceBase* device) {
     }();
 
     return renderDocApi;
+}
+
+namespace {
+
+// Returns the handle RenderDoc identifies `device` by, or nullptr to match any device.
+RENDERDOC_DevicePointer GetRenderDocDevicePointer(DeviceBase* device) {
+    switch (device->GetPhysicalDevice()->GetBackendType()) {
+#if defined(DAWN_ENABLE_BACKEND_D3D12)
+        case wgpu::BackendType::D3D12:
+            return d3d12::GetD3D12Device(ToAPI(device)).Get();
+#endif
+#if defined(DAWN_ENABLE_BACKEND_VULKAN)
+        case wgpu::BackendType::Vulkan:
+            return RENDERDOC_DEVICEPOINTER_FROM_VKINSTANCE(vulkan::GetInstance(ToAPI(device)));
+#endif
+        default:
+            return nullptr;
+    }
+}
+
+}  // namespace
+
+bool StartRenderDocCapture(DeviceBase* device) {
+    RenderDocApiType* api = GetRenderDocApi(device);
+    if (api == nullptr) {
+        return false;
+    }
+    api->StartFrameCapture(GetRenderDocDevicePointer(device), nullptr);
+    return true;
+}
+
+bool EndRenderDocCapture(DeviceBase* device, const char* comments) {
+    RenderDocApiType* api = GetRenderDocApi(device);
+    if (api == nullptr || api->EndFrameCapture(GetRenderDocDevicePointer(device), nullptr) != 1) {
+        return false;
+    }
+    api->SetCaptureFileComments(nullptr, comments);
+    return true;
 }
 
 }  // namespace dawn::native::utils
