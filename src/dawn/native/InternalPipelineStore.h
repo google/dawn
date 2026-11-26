@@ -83,7 +83,8 @@ struct InternalPipelineStore {
     // for the metal backend's multi-draw converter compute pass.
     Ref<RefCounted> multidrawICBConverterPipeline;
 
-    Ref<RenderPipelineBase> blitRG8ToDepth16UnormPipeline;
+    absl::flat_hash_map<wgpu::TextureViewDimension, Ref<RenderPipelineBase>>
+        blitRG8ToDepth16UnormPipelines;
 
     using TextureFormatAndViewDimensionKeyType =
         std::pair<wgpu::TextureFormat, wgpu::TextureViewDimension>;

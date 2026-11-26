@@ -998,6 +998,56 @@ TEST_P(DepthCopyFromBufferTests, BufferToRenderableDepthAspectAtNonZeroOffset) {
     }
 }
 
+// Test copying the depth-only aspect from a buffer into multiple array layers.
+TEST_P(DepthCopyFromBufferTests, BufferToDepthAspectMultipleLayers) {
+    constexpr wgpu::Extent3D kCopySize = {4, 2, 2};
+    constexpr uint32_t kBytesPerRow = kTextureBytesPerRowAlignment;
+    constexpr uint32_t kRowsPerImage = kCopySize.height;
+
+    wgpu::Texture destTexture = CreateTexture(
+        kCopySize.width, kCopySize.height,
+        wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc, 1, kCopySize.depthOrArrayLayers);
+
+    wgpu::BufferDescriptor descriptor = {};
+    descriptor.size = utils::RequiredBytesInCopy(kBytesPerRow, kRowsPerImage, kCopySize,
+                                                 GetParam().mTextureFormat);
+    descriptor.usage = wgpu::BufferUsage::CopySrc;
+    descriptor.mappedAtCreation = true;
+    wgpu::Buffer srcBuffer = device.CreateBuffer(&descriptor);
+
+    std::array<std::vector<uint16_t>, kCopySize.depthOrArrayLayers> expectedData;
+    uint8_t* mappedPtr = static_cast<uint8_t*>(srcBuffer.GetMappedRange());
+    for (uint32_t z = 0; z < kCopySize.depthOrArrayLayers; ++z) {
+        expectedData[z].resize(kCopySize.width * kCopySize.height);
+        for (uint32_t y = 0; y < kCopySize.height; ++y) {
+            for (uint32_t x = 0; x < kCopySize.width; ++x) {
+                expectedData[z][y * kCopySize.width + x] =
+                    static_cast<uint16_t>(0x1021u + z * 0x4107u + y * 0x1305u + x * 0x0503u);
+            }
+            const size_t dstOffset = (size_t{z} * kRowsPerImage + y) * kBytesPerRow;
+            memcpy(mappedPtr + dstOffset, expectedData[z].data() + y * kCopySize.width,
+                   kCopySize.width * sizeof(uint16_t));
+        }
+    }
+    srcBuffer.Unmap();
+
+    wgpu::TexelCopyBufferInfo src =
+        utils::CreateTexelCopyBufferInfo(srcBuffer, 0, kBytesPerRow, kRowsPerImage);
+    wgpu::TexelCopyTextureInfo dst = utils::CreateTexelCopyTextureInfo(
+        destTexture, 0, {0, 0, 0}, wgpu::TextureAspect::DepthOnly);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyBufferToTexture(&src, &dst, &kCopySize);
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    for (uint32_t z = 0; z < kCopySize.depthOrArrayLayers; ++z) {
+        EXPECT_TEXTURE_EQ(expectedData[z].data(), destTexture, {0, 0, z},
+                          {kCopySize.width, kCopySize.height, 1}, 0, wgpu::TextureAspect::DepthOnly,
+                          0, uint16_t{1});
+    }
+}
+
 class StencilCopyTests : public DepthStencilCopyTests {
   public:
     void DoCopyFromStencilTest(
@@ -1409,6 +1459,59 @@ TEST_P(StencilCopyTests, ToStencilAspectAtNonZeroOffset) {
     }
 }
 
+// Test copying to the stencil-aspect of a multi-layer texture.
+TEST_P(StencilCopyTests, ToStencilAspectMultipleLayers) {
+    // TODO(crbug.com/40238674): Fails on Pixel 10.
+    DAWN_SUPPRESS_TEST_IF(IsImgTec());
+
+    constexpr wgpu::Extent3D kCopySize = {4, 2, 2};
+    constexpr uint32_t kBytesPerRow = kTextureBytesPerRowAlignment;
+    constexpr uint32_t kRowsPerImage = kCopySize.height;
+
+    wgpu::Texture destTexture = CreateTexture(
+        kCopySize.width, kCopySize.height,
+        wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc, 1, kCopySize.depthOrArrayLayers);
+
+    wgpu::BufferDescriptor descriptor = {};
+    descriptor.size = utils::RequiredBytesInCopy(kBytesPerRow, kRowsPerImage, kCopySize,
+                                                 wgpu::TextureFormat::Stencil8);
+    descriptor.usage = wgpu::BufferUsage::CopySrc;
+    descriptor.mappedAtCreation = true;
+    wgpu::Buffer srcBuffer = device.CreateBuffer(&descriptor);
+
+    std::array<std::vector<uint8_t>, kCopySize.depthOrArrayLayers> expectedData;
+    uint8_t* mappedPtr = static_cast<uint8_t*>(srcBuffer.GetMappedRange());
+    for (uint32_t z = 0; z < kCopySize.depthOrArrayLayers; ++z) {
+        expectedData[z].resize(kCopySize.width * kCopySize.height);
+        for (uint32_t y = 0; y < kCopySize.height; ++y) {
+            for (uint32_t x = 0; x < kCopySize.width; ++x) {
+                expectedData[z][y * kCopySize.width + x] =
+                    static_cast<uint8_t>(1u + z * 40u + y * 10u + x * 3u);
+            }
+            const size_t dstOffset = (size_t{z} * kRowsPerImage + y) * kBytesPerRow;
+            memcpy(mappedPtr + dstOffset, expectedData[z].data() + y * kCopySize.width,
+                   kCopySize.width);
+        }
+    }
+    srcBuffer.Unmap();
+
+    wgpu::TexelCopyBufferInfo src =
+        utils::CreateTexelCopyBufferInfo(srcBuffer, 0, kBytesPerRow, kRowsPerImage);
+    wgpu::TexelCopyTextureInfo dst = utils::CreateTexelCopyTextureInfo(
+        destTexture, 0, {0, 0, 0}, wgpu::TextureAspect::StencilOnly);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyBufferToTexture(&src, &dst, &kCopySize);
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    for (uint32_t z = 0; z < kCopySize.depthOrArrayLayers; ++z) {
+        EXPECT_TEXTURE_EQ(expectedData[z].data(), destTexture, {0, 0, z},
+                          {kCopySize.width, kCopySize.height, 1}, 0,
+                          wgpu::TextureAspect::StencilOnly);
+    }
+}
+
 // Test uploading to the non-zero mip, stencil-only aspect of a texture,
 // and then checking the contents with a stencil test.
 TEST_P(StencilCopyTests, CopyNonzeroMipThenReadWithStencilTest) {
@@ -1682,15 +1785,17 @@ DAWN_INSTANTIATE_TEST_P(DepthCopyTests_Compat,
                         std::vector<wgpu::TextureFormat>(kValidDepthCopyFromBufferFormats.begin(),
                                                          kValidDepthCopyFromBufferFormats.end()));
 
-DAWN_INSTANTIATE_TEST_P(DepthCopyFromBufferTests,
-                        {D3D11Backend(), D3D12Backend(),
-                         D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
-                                       "copy_with_non_zero_buffer_offset"}),
-                         MetalBackend(),
-                         MetalBackend({"use_blit_for_buffer_to_depth_texture_copy"}),
-                         OpenGLBackend(), OpenGLESBackend(), VulkanBackend(), WebGPUBackend()},
-                        std::vector<wgpu::TextureFormat>(kValidDepthCopyFromBufferFormats.begin(),
-                                                         kValidDepthCopyFromBufferFormats.end()));
+DAWN_INSTANTIATE_TEST_P(
+    DepthCopyFromBufferTests,
+    {D3D11Backend(), D3D12Backend(),
+     D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
+                   "copy_with_non_zero_buffer_offset"}),
+     MetalBackend(), MetalBackend({"use_blit_for_buffer_to_depth_texture_copy"}), OpenGLBackend(),
+     OpenGLBackend({"use_blit_for_buffer_to_depth_texture_copy"}), OpenGLESBackend(),
+     OpenGLESBackend({"use_blit_for_buffer_to_depth_texture_copy"}), VulkanBackend(),
+     WebGPUBackend()},
+    std::vector<wgpu::TextureFormat>(kValidDepthCopyFromBufferFormats.begin(),
+                                     kValidDepthCopyFromBufferFormats.end()));
 
 DAWN_INSTANTIATE_TEST_P(
     StencilCopyTests,

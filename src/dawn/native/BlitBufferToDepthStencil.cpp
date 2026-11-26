@@ -27,6 +27,7 @@
 
 #include "src/dawn/native/BlitBufferToDepthStencil.h"
 
+#include <cstddef>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -51,9 +52,12 @@ namespace {
 // Keep in sync with the WGSL structure below.
 struct BlitRG8ToDepthParams {
     math::Vec2u origin;
+    uint32_t layer;
 };
+static_assert(sizeof(BlitRG8ToDepthParams) == 4 * sizeof(uint32_t));
+static_assert(offsetof(BlitRG8ToDepthParams, layer) == 2 * sizeof(uint32_t));
 
-constexpr char kBlitRG8ToDepthShaders[] = DAWN_MULTILINE(
+constexpr std::string_view kBlitRG8ToDepthShaderCommon = DAWN_MULTILINE(
     @vertex fn vert_fullscreen_quad(
         @builtin(vertex_index) vertex_index : u32
     ) -> @builtin(position) vec4f {
@@ -66,17 +70,17 @@ constexpr char kBlitRG8ToDepthShaders[] = DAWN_MULTILINE(
 
     // Keep in sync with the C++ struct above.
     struct BlitRG8ToDepthParams {
-        origin : vec2u
+        origin : vec2u,
+        layer : u32,
     };
 
-    @group(0) @binding(0) var src_tex : texture_2d<u32>;
     @group(0) @binding(1) var<uniform> params : BlitRG8ToDepthParams;
 
     @fragment fn blit_to_depth(
         @builtin(position) position : vec4f
     ) -> @builtin(frag_depth) f32 {
         // Load the source texel.
-        let src_texel = textureLoad(
+        let src_texel = textureLoadGeneral(
             src_tex, vec2u(position.xy) - params.origin, 0u);
 
         let depth_u16_val = (src_texel.y << 8u) + src_texel.x;
@@ -107,6 +111,8 @@ struct BlitStencilParams {
     math::Vec2u origin;
     uint32_t layer;
 };
+static_assert(sizeof(BlitStencilParams) == 4 * sizeof(uint32_t));
+static_assert(offsetof(BlitStencilParams, layer) == 2 * sizeof(uint32_t));
 
 constexpr std::string_view kBlitStencilShaderCommon = DAWN_MULTILINE(
     // Keep in sync with the C++ struct above.
@@ -158,16 +164,32 @@ constexpr std::string_view kBlitStencilShaderCommon = DAWN_MULTILINE(
     }
 );
 
-ResultOrError<Ref<RenderPipelineBase>> GetOrCreateRG8ToDepth16UnormPipeline(DeviceBase* device) {
+ResultOrError<Ref<RenderPipelineBase>> GetOrCreateRG8ToDepth16UnormPipeline(
+    DeviceBase* device,
+    wgpu::TextureViewDimension viewDimension) {
     InternalPipelineStore* store = device->GetInternalPipelineStore();
-    if (store->blitRG8ToDepth16UnormPipeline != nullptr) {
-        return store->blitRG8ToDepth16UnormPipeline;
+    if (auto it = store->blitRG8ToDepth16UnormPipelines.find(viewDimension);
+        it != store->blitRG8ToDepth16UnormPipelines.end()) {
+        return it->second;
     }
 
     ShaderSourceWGSL wgslDesc = {};
     ShaderModuleDescriptor shaderModuleDesc = {};
     shaderModuleDesc.nextInChain = &wgslDesc;
-    wgslDesc.code = kBlitRG8ToDepthShaders;
+
+    std::string shader;
+    switch (viewDimension) {
+        case wgpu::TextureViewDimension::e2D:
+            shader = kTexture2DHead;
+            break;
+        case wgpu::TextureViewDimension::e2DArray:
+            shader = kTexture2DArrayHead;
+            break;
+        default:
+            DAWN_UNREACHABLE();
+    }
+    shader += kBlitRG8ToDepthShaderCommon;
+    wgslDesc.code = shader.c_str();
 
     Ref<ShaderModuleBase> shaderModule;
     DAWN_TRY_ASSIGN(shaderModule, device->CreateShaderModule(&shaderModuleDesc));
@@ -190,7 +212,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateRG8ToDepth16UnormPipeline(Devi
     Ref<RenderPipelineBase> pipeline;
     DAWN_TRY_ASSIGN(pipeline, device->CreateRenderPipeline(&renderPipelineDesc));
 
-    store->blitRG8ToDepth16UnormPipeline = pipeline;
+    store->blitRG8ToDepth16UnormPipelines.emplace(viewDimension, pipeline);
     return pipeline;
 }
 
@@ -286,21 +308,67 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
     // as a render attachment.
     auto scope = commandEncoder->MakeInternalUsageScope();
 
+    // In compat mode view dimension needs to match texture binding view dimension.
+    wgpu::TextureViewDimension textureViewDimension;
+    if (!device->HasFlexibleTextureViews()) {
+        textureViewDimension = dataTexture->GetCompatibilityTextureBindingViewDimension();
+    } else {
+        textureViewDimension = wgpu::TextureViewDimension::e2DArray;
+    }
+
     Ref<RenderPipelineBase> pipeline;
-    DAWN_TRY_ASSIGN(pipeline, GetOrCreateRG8ToDepth16UnormPipeline(device));
+    DAWN_TRY_ASSIGN(pipeline, GetOrCreateRG8ToDepth16UnormPipeline(device, textureViewDimension));
 
     Ref<BindGroupLayoutBase> bgl;
     DAWN_TRY_ASSIGN(bgl, pipeline->GetBindGroupLayout(0));
 
+    Ref<BufferBase> paramsBuffer;
+    {
+        BufferDescriptor bufferDesc = {};
+        bufferDesc.size = sizeof(BlitRG8ToDepthParams);
+        bufferDesc.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
+        bufferDesc.mappedAtCreation = true;
+        DAWN_TRY_ASSIGN(paramsBuffer, device->CreateBuffer(&bufferDesc));
+
+        BlitRG8ToDepthParams* params = paramsBuffer->GetMappedDataAs<BlitRG8ToDepthParams>();
+        params->origin = {
+            dchecked_cast<uint32_t>(dst.origin.x),
+            dchecked_cast<uint32_t>(dst.origin.y),
+        };
+        params->layer = 0;
+        DAWN_TRY(paramsBuffer->Unmap());
+    }
+
+    Ref<TextureViewBase> srcView;
+    {
+        TextureViewDescriptor viewDesc = {};
+        viewDesc.dimension = textureViewDimension;
+        // Array layer in texture views used in bind groups must consist of the entire array.
+        viewDesc.baseArrayLayer = 0;
+        viewDesc.arrayLayerCount = dataTexture->GetArrayLayers();
+        viewDesc.mipLevelCount = 1;
+        DAWN_TRY_ASSIGN(srcView, dataTexture->CreateView(&viewDesc));
+    }
+
+    Ref<BindGroupBase> bindGroup;
+    {
+        std::array<BindGroupEntry, 2> bgEntries = {};
+        bgEntries[0].binding = 0;
+        bgEntries[0].textureView = srcView.Get();
+        bgEntries[1].binding = 1;
+        bgEntries[1].buffer = paramsBuffer.Get();
+
+        BindGroupDescriptor bgDesc = {};
+        bgDesc.layout = bgl.Get();
+        bgDesc.entries = bgEntries;
+        DAWN_TRY_ASSIGN(bindGroup, device->CreateBindGroup(&bgDesc, UsageValidationMode::Internal));
+    }
+
     for (TexelCount z{0u}; z < copyExtent.depthOrArrayLayers; ++z) {
-        Ref<TextureViewBase> srcView;
-        {
-            TextureViewDescriptor viewDesc = {};
-            viewDesc.dimension = wgpu::TextureViewDimension::e2D;
-            viewDesc.baseArrayLayer = dchecked_cast<uint32_t>(z);
-            viewDesc.arrayLayerCount = 1;
-            viewDesc.mipLevelCount = 1;
-            DAWN_TRY_ASSIGN(srcView, dataTexture->CreateView(&viewDesc));
+        if (z >= TexelCount{1u}) {
+            uint32_t layer = dchecked_cast<uint32_t>(z);
+            commandEncoder->APIWriteBuffer(
+                paramsBuffer.Get(), offsetof(BlitRG8ToDepthParams, layer), ByteSpanFromRef(layer));
         }
 
         Ref<TextureViewBase> dstView;
@@ -312,36 +380,6 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
             viewDesc.baseMipLevel = dst.mipLevel;
             viewDesc.mipLevelCount = 1;
             DAWN_TRY_ASSIGN(dstView, dst.texture->CreateView(&viewDesc));
-        }
-
-        Ref<BufferBase> paramsBuffer;
-        {
-            BufferDescriptor bufferDesc = {};
-            bufferDesc.size = sizeof(BlitRG8ToDepthParams);
-            bufferDesc.usage = wgpu::BufferUsage::Uniform;
-            bufferDesc.mappedAtCreation = true;
-            DAWN_TRY_ASSIGN(paramsBuffer, device->CreateBuffer(&bufferDesc));
-
-            BlitRG8ToDepthParams* params = paramsBuffer->GetMappedDataAs<BlitRG8ToDepthParams>();
-            params->origin = {
-                dchecked_cast<uint32_t>(dst.origin.x),
-                dchecked_cast<uint32_t>(dst.origin.y),
-            };
-            DAWN_TRY(paramsBuffer->Unmap());
-        }
-
-        Ref<BindGroupBase> bindGroup;
-        {
-            std::array<BindGroupEntry, 2> bgEntries = {};
-            bgEntries[0].binding = 0;
-            bgEntries[0].textureView = srcView.Get();
-            bgEntries[1].binding = 1;
-            bgEntries[1].buffer = paramsBuffer.Get();
-
-            BindGroupDescriptor bgDesc = {};
-            bgDesc.layout = bgl.Get();
-            bgDesc.entries = bgEntries;
-            DAWN_TRY_ASSIGN(bindGroup, device->CreateBindGroup(&bgDesc));
         }
 
         RenderPassDepthStencilAttachment dsAttachment;
@@ -434,6 +472,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
             dchecked_cast<uint32_t>(dst.origin.x),
             dchecked_cast<uint32_t>(dst.origin.y),
         };
+        params->layer = 0;
         DAWN_TRY(paramsBuffer->Unmap());
     }
 
@@ -448,38 +487,37 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
         DAWN_TRY_ASSIGN(srcView, dataTexture->CreateView(&viewDesc));
     }
 
+    Ref<BindGroupBase> bindGroup;
+    {
+        std::array<BindGroupEntry, 2> bgEntries = {};
+        bgEntries[0].binding = 0;
+        bgEntries[0].textureView = srcView.Get();
+        bgEntries[1].binding = 1;
+        bgEntries[1].buffer = paramsBuffer.Get();
+
+        BindGroupDescriptor bgDesc = {};
+        bgDesc.layout = bgl.Get();
+        bgDesc.entries = bgEntries;
+        DAWN_TRY_ASSIGN(bindGroup, device->CreateBindGroup(&bgDesc, UsageValidationMode::Internal));
+    }
+
     // For each layer, blit the stencil data.
     for (uint32_t z = 0; z < copyExtent.depthOrArrayLayers; ++z) {
         if (z >= 1) {
             // Pass the array layer info via the uniform buffer.
-            commandEncoder->APIWriteBuffer(paramsBuffer.Get(), sizeof(uint32_t) * 2,
+            commandEncoder->APIWriteBuffer(paramsBuffer.Get(), offsetof(BlitStencilParams, layer),
                                            ByteSpanFromRef(z));
         }
 
         Ref<TextureViewBase> dstView;
         {
             TextureViewDescriptor viewDesc = {};
-            viewDesc.dimension = textureViewDimension;
+            viewDesc.dimension = wgpu::TextureViewDimension::e2D;
             viewDesc.baseArrayLayer = dchecked_cast<uint32_t>(dst.origin.z) + z;
             viewDesc.arrayLayerCount = 1;
             viewDesc.baseMipLevel = dst.mipLevel;
             viewDesc.mipLevelCount = 1;
             DAWN_TRY_ASSIGN(dstView, dst.texture->CreateView(&viewDesc));
-        }
-
-        Ref<BindGroupBase> bindGroup;
-        {
-            std::array<BindGroupEntry, 2> bgEntries = {};
-            bgEntries[0].binding = 0;
-            bgEntries[0].textureView = srcView.Get();
-            bgEntries[1].binding = 1;
-            bgEntries[1].buffer = paramsBuffer.Get();
-
-            BindGroupDescriptor bgDesc = {};
-            bgDesc.layout = bgl.Get();
-            bgDesc.entries = bgEntries;
-            DAWN_TRY_ASSIGN(bindGroup,
-                            device->CreateBindGroup(&bgDesc, UsageValidationMode::Internal));
         }
 
         RenderPassDepthStencilAttachment dsAttachment;
