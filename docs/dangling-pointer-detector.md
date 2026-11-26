@@ -83,7 +83,7 @@ DanglingPointerDetector: A pointer was dangling!
 
 To debug you can:
 - **remotely**: Find a failing bot on the CQ running tests inside Chrome. You
-  will find useful debugging informations.
+  will find useful debugging information.
 - **locally**: Use a debugger to display the StackTrace. Dawn is configured to crash when the
   dangling raw_ptr is released. If needed, you can also understand where the memory was freed by
   replacing `SetDanglingRawPtrReleasedFn` by `SetDanglingRawPtrDetectedFn` in
