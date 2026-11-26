@@ -672,10 +672,13 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, SemiExhaustiveTestSubgroupMatrixConfigs
             {I8, I32, 8, 8, 32, 8, 32},
             {U8, U32, 8, 8, 32, 8, 32},
             }, "Vulkan_Intel_R__Iris_R__Xe_Graphics__TGL_GT2");
-  AddDevice({{F32, F32, 8, 8, 8, 32, 32},
-            {F16, F16, 8, 8, 8, 32, 32},
-            {Bf16, Bf16, 8, 8, 8, 32, 32},
-            }, "Metal_Apple_M2");
+  for (const char* metalDevice : {"Metal_Apple_M1", "Metal_Apple_M2"}) {
+    AddDevice({{F32, F32, 8, 8, 8, 32, 32},
+              {F16, F16, 8, 8, 8, 32, 32},
+              {Bf16, Bf16, 8, 8, 8, 32, 32},
+              {F16, F32, 8, 8, 8, 32, 32},
+              }, metalDevice);
+  }
   AddDevice({{F16, F32, 16, 16, 16, 32, 64},
             {F16, F16, 16, 16, 16, 32, 64},
             {U8, I32, 16, 16, 16, 32, 64},

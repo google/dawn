@@ -848,7 +848,8 @@ if sgid != 0 {
     void TestSubgroupMatrixConfig(const wgpu::SubgroupMatrixConfig& config,
                                   MatrixOp op,
                                   uint32_t subgroupMaxSize,
-                                  bool columnMajor) {
+                                  bool columnMajor,
+                                  bool checkF32Precision = false) {
         uint32_t resultComponentByteSize = ComponentTypeToByteSize(config.resultComponentType);
 
         // Generate a compute pipeline that performs a matrix multiplication that matches the
@@ -868,6 +869,30 @@ if sgid != 0 {
         } else {
             // If we are not accumulating then treat it as if the accumulator is zero.
             acc.FillWithZero();
+        }
+
+        if (checkF32Precision) {
+            // These f16 inputs produce a result that cannot be represented in f16. The
+            // accumulator also contains bits that would be lost if converted to f16.
+            // Use one nonzero product per result so the f32 sum is exact for any K and
+            // does not depend on the implementation's reduction order.
+            for (uint32_t r = 0; r < config.M; r++) {
+                for (uint32_t c = 0; c < config.K; c++) {
+                    inputLHS.SetFloat(c == 0 ? 1.0f + 0x1p-10f : 0.0f, c, r);
+                }
+            }
+            for (uint32_t r = 0; r < config.K; r++) {
+                for (uint32_t c = 0; c < config.N; c++) {
+                    inputRHS.SetFloat(r == 0 ? 1.0f + 0x1p-10f : 0.0f, c, r);
+                }
+            }
+            if (op == MatrixMultiplyAccumulate) {
+                for (uint32_t r = 0; r < config.M; r++) {
+                    for (uint32_t c = 0; c < config.N; c++) {
+                        acc.SetFloat(1.0f + 0x1p-20f, c, r);
+                    }
+                }
+            }
         }
 
         // Create the input buffer and copy the input matrices to it.
@@ -938,6 +963,32 @@ TEST_P(SubgroupMatrix_MatrixMatrixArithmeticTest, MatrixMultiply) {
 
         TestSubgroupMatrixConfig(config, op, info.subgroupMaxSize, columnMajor);
     }
+}
+
+// Check that mixed precision retains f32 result and accumulator precision, instead of
+// performing an f16 operation followed by a conversion to f32.
+TEST_P(SubgroupMatrix_MatrixMatrixArithmeticTest, MixedPrecisionPreservesF32Precision) {
+    DAWN_TEST_UNSUPPORTED_IF(
+        !adapter.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix));
+    DAWN_SUPPRESS_TEST_IF(IsWindows11() && IsAMD() && IsVulkan());
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
+    wgpu::AdapterInfo info;
+    wgpu::AdapterPropertiesSubgroupMatrixConfigs configs;
+    info.nextInChain = &configs;
+    ASSERT_EQ(adapter.GetInfo(&info), wgpu::Status::Success);
+
+    bool tested = false;
+    for (const auto& config :
+         dawn::Span<const wgpu::SubgroupMatrixConfig>(configs.configs, configs.configCount)) {
+        if (config.componentType == wgpu::SubgroupMatrixComponentType::F16 &&
+            config.resultComponentType == wgpu::SubgroupMatrixComponentType::F32) {
+            TestSubgroupMatrixConfig(config, GetParam().mMatrixOp, info.subgroupMaxSize,
+                                     GetParam().mColumnMajor, true);
+            tested = true;
+        }
+    }
+    DAWN_TEST_UNSUPPORTED_IF(!tested);
 }
 
 DAWN_INSTANTIATE_TEST_P(SubgroupMatrix_MatrixMatrixArithmeticTest,

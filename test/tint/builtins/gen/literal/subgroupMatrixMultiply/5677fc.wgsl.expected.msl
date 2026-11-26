@@ -1,60 +1,19 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-../../src/tint/lang/core/ir/validator.cc:111 internal compiler error: 
-=========================================================
-== IR validation failed before ir.SignedIntegerPolyfill:
-=========================================================
-:11:15 error: msl.simdgroup_multiply: no matching call to 'msl.simdgroup_multiply(subgroup_matrix_result<f32, 8, 8>, subgroup_matrix_left<f16, 8, 8>, subgroup_matrix_right<f16, 8, 8>)'
+struct tint_module_vars_struct {
+  device array<float, 1024>* prevent_dce;
+};
 
-1 candidate function:
- • 'msl.simdgroup_multiply(subgroup_matrix<result, S, C, R>  ✓ , subgroup_matrix<left, S, K, R>  ✗ , subgroup_matrix<right, S, C, K>  ✗ )' where:
-      ✓  'S' is 'f32' or 'f16'
-
-    %6:void = msl.simdgroup_multiply %5, %2, %3
-              ^^^^^^^^^^^^^^^^^^^^^^
-
-:6:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-tint_module_vars_struct = struct @align(1) {
-  prevent_dce:ptr<storage, array<f32, 1024>, read_write> @offset(0)
+simdgroup_float8x8 subgroupMatrixMultiply_5677fc() {
+  simdgroup_float8x8 v = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+  (simdgroup_multiply(v, make_filled_simdgroup_matrix<half, 8, 8>(0.0h), make_filled_simdgroup_matrix<half, 8, 8>(0.0h)));
+  simdgroup_float8x8 res = v;
+  return res;
 }
 
-%subgroupMatrixMultiply_5677fc = func():subgroup_matrix_result<f32, 8, 8> {
-  $B1: {
-    %2:subgroup_matrix_left<f16, 8, 8> = msl.make_filled_simdgroup_matrix<subgroup_matrix_left<f16, 8, 8>> 0.0h
-    %3:subgroup_matrix_right<f16, 8, 8> = msl.make_filled_simdgroup_matrix<subgroup_matrix_right<f16, 8, 8>> 0.0h
-    %4:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
-    %5:subgroup_matrix_result<f32, 8, 8> = load %4
-    %6:void = msl.simdgroup_multiply %5, %2, %3
-    %7:subgroup_matrix_result<f32, 8, 8> = load %4
-    %res:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var %7
-    %9:subgroup_matrix_result<f32, 8, 8> = load %res
-    ret %9
-  }
+[[max_total_threads_per_threadgroup(1)]]
+kernel void compute_main(device array<float, 1024>* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (simdgroup_store(subgroupMatrixMultiply_5677fc(), (&(*tint_module_vars.prevent_dce)[0]), ulong(16u), ulong2(0ul), false));
 }
-%compute_main = @compute @workgroup_size(1i, 1i, 1i) func(%prevent_dce:ptr<storage, array<f32, 1024>, read_write> [@binding_point(0, 0)]):void {
-  $B2: {
-    %12:tint_module_vars_struct = construct %prevent_dce
-    %tint_module_vars:tint_module_vars_struct = let %12
-    %14:subgroup_matrix_result<f32, 8, 8> = call %subgroupMatrixMultiply_5677fc
-    %15:ptr<storage, array<f32, 1024>, read_write> = access %tint_module_vars, 0u
-    %16:u32 = bitcast<u32> 8i
-    %17:ptr<storage, f32, read_write> = access %15, 0i
-    %18:u64 = msl.convert %16
-    %19:void = msl.simdgroup_store %14, %17, %18, vec2<u64>(0u64), false
-    ret
-  }
-}
-
-
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: trace/BPT trap

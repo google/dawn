@@ -1127,7 +1127,7 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
         } else {
             DAWN_ASSERT([*mDevice supportsFamily:MTLGPUFamilyApple7]);
 
-            auto configs = HeapArray<SubgroupMatrixConfig>(3);
+            auto configs = HeapArray<SubgroupMatrixConfig>(4);
 
             configs[0].componentType = wgpu::SubgroupMatrixComponentType::F32;
             configs[0].resultComponentType = wgpu::SubgroupMatrixComponentType::F32;
@@ -1152,6 +1152,9 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
             configs[2].K = 8;
             configs[2].minSubgroupSize = GetSubgroupMinSize();
             configs[2].maxSubgroupSize = GetSubgroupMaxSize();
+
+            configs[3] = configs[1];
+            configs[3].resultComponentType = wgpu::SubgroupMatrixComponentType::F32;
 
             subgroupMatrixConfigs->configs = std::move(configs).MoveToSpan();
         }

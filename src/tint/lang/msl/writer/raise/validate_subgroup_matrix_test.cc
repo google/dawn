@@ -646,7 +646,7 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, Tensors_Multiply_16x16x16) {
         R"(error: Pipeline uses subgroup matrix multiply shape that is not supported by the device (16x16x16))");
 }
 
-TEST_F(MslWriter_ValidateSubgroupMatrixTest, MixedPrecisionRejected) {
+TEST_F(MslWriter_ValidateSubgroupMatrixTest, MixedPrecisionMultiplyAccumulateAccepted) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {  //
         auto* lhs = b.Var("lhs", ty.ptr(function, ty.subgroup_matrix_left(ty.f16(), 8u, 8u)));
@@ -670,6 +670,72 @@ TEST_F(MslWriter_ValidateSubgroupMatrixTest, MixedPrecisionRejected) {
     %6:subgroup_matrix_right<f16, 8, 8> = load %rhs
     %7:subgroup_matrix_result<f32, 8, 8> = load %acc
     %8:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixMultiplyAccumulate %5, %6, %7
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    Run(ValidateSubgroupMatrix, false);
+}
+
+TEST_F(MslWriter_ValidateSubgroupMatrixTest, MixedPrecisionMultiplyAccepted) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* lhs = b.Var("lhs", ty.ptr(function, ty.subgroup_matrix_left(ty.f16(), 8u, 8u)));
+        auto* rhs = b.Var("rhs", ty.ptr(function, ty.subgroup_matrix_right(ty.f16(), 8u, 8u)));
+        auto* lhs_load = b.Load(lhs);
+        auto* rhs_load = b.Load(rhs);
+        b.CallExplicit(ty.subgroup_matrix_result(ty.f32(), 8u, 8u),
+                       core::BuiltinFn::kSubgroupMatrixMultiply,
+                       Vector<core::ir::TemplateParameter, 1>{ty.f32()}, lhs_load, rhs_load);
+        b.Return(func);
+    });
+
+    Run(ValidateSubgroupMatrix, false);
+}
+
+TEST_F(MslWriter_ValidateSubgroupMatrixTest, CooperativeTensorMixedPrecisionAccepted) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* lhs = b.Var("lhs", ty.ptr(function, ty.subgroup_matrix_left(ty.f16(), 32u, 32u)));
+        auto* rhs = b.Var("rhs", ty.ptr(function, ty.subgroup_matrix_right(ty.f16(), 32u, 32u)));
+        auto* acc = b.Var("acc", ty.ptr(function, ty.subgroup_matrix_result(ty.f32(), 32u, 32u)));
+        auto* lhs_load = b.Load(lhs);
+        auto* rhs_load = b.Load(rhs);
+        auto* acc_load = b.Load(acc);
+        b.Call(ty.subgroup_matrix_result(ty.f32(), 32u, 32u),
+               core::BuiltinFn::kSubgroupMatrixMultiplyAccumulate, lhs_load, rhs_load, acc_load);
+        b.Return(func);
+    });
+
+    Run(ValidateSubgroupMatrix, true);
+}
+
+TEST_F(MslWriter_ValidateSubgroupMatrixTest, ReverseMixedPrecisionRejected) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {  //
+        auto* lhs = b.Var("lhs", ty.ptr(function, ty.subgroup_matrix_left(ty.f32(), 8u, 8u)));
+        auto* rhs = b.Var("rhs", ty.ptr(function, ty.subgroup_matrix_right(ty.f32(), 8u, 8u)));
+        auto* acc = b.Var("acc", ty.ptr(function, ty.subgroup_matrix_result(ty.f16(), 8u, 8u)));
+        auto* lhs_load = b.Load(lhs);
+        auto* rhs_load = b.Load(rhs);
+        auto* acc_load = b.Load(acc);
+        b.Call(acc_load->Result()->Type(), core::BuiltinFn::kSubgroupMatrixMultiplyAccumulate,
+               lhs_load, rhs_load, acc_load);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %lhs:ptr<function, subgroup_matrix_left<f32, 8, 8>, read_write> = var
+    %rhs:ptr<function, subgroup_matrix_right<f32, 8, 8>, read_write> = var
+    %acc:ptr<function, subgroup_matrix_result<f16, 8, 8>, read_write> = var
+    %5:subgroup_matrix_left<f32, 8, 8> = load %lhs
+    %6:subgroup_matrix_right<f32, 8, 8> = load %rhs
+    %7:subgroup_matrix_result<f16, 8, 8> = load %acc
+    %8:subgroup_matrix_result<f16, 8, 8> = subgroupMatrixMultiplyAccumulate %5, %6, %7
     ret
   }
 }

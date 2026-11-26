@@ -82,7 +82,9 @@ struct State {
         }
 
         for (auto& i : info.multiplies) {
-            if (!enable_tensors && i.input_type != i.output_type) {
+            const bool mixed_f16_f32 = i.input_type == SubgroupMatrixType::kF16 &&
+                                       i.output_type == SubgroupMatrixType::kF32;
+            if (!enable_tensors && i.input_type != i.output_type && !mixed_f16_f32) {
                 diagnostics_.AddError(Source{})
                     << "Mixed precision subgroup matrix multiply is not supported by the device";
                 break;
