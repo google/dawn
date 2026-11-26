@@ -33,14 +33,9 @@
 
 #include "src/tint/cmd/fuzz/common/init.h"
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
-#include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/utils/compiler.h"
 
 #if TINT_BUILD_IR_BINARY
-
-#include "src/tint/lang/core/ir/binary/decode.h"
-#include "src/tint/utils/macros/defer.h"
 
 TINT_BEGIN_DISABLE_PROTOBUF_WARNINGS();
 #include "src/libfuzzer/libfuzzer_macro.h"
@@ -55,38 +50,7 @@ tint::fuzz::ir::Options options;
 }  // namespace
 
 DEFINE_BINARY_PROTO_FUZZER(const tint::cmd::fuzz::ir::pb::Root& pb) {
-    /// As the fuzzers are free to mutate the module, we need to deserialize a new module for each
-    /// sub-fuzzer. Because the protobuf may error when deserializing and the module may be invalid,
-    /// we early deserialize. If this fails, then we do not call Run().
-    thread_local std::optional<tint::core::ir::Module> module;
-    tint::core::ir::binary::DecoderOptions decoder_options{
-        .strip_invalid_identifiers = options.strip_invalid_identifiers,
-    };
-
-    {
-        auto decoded = tint::core::ir::binary::Decode(pb.module(), decoder_options);
-        if (decoded != tint::Success) {
-            return;  // Failed to decode
-        }
-        module = std::move(decoded.Move());
-    }
-    auto acquire_module = [&] {
-        if (!module) {
-            auto decoded = tint::core::ir::binary::Decode(pb.module(), decoder_options);
-            TINT_ASSERT(decoded == tint::Success)
-                << "module successfully decoded once, then failed a subsequent time\n"
-                << decoded.Failure();
-
-            module = std::move(decoded.Move());
-        }
-
-        auto out = std::move(module.value());
-        module.reset();
-        return out;
-    };
-
-    auto data = std::as_bytes(std::span(pb.data()));
-    tint::fuzz::ir::Run(acquire_module, options, data);
+    tint::fuzz::ir::DecodeAndRun(pb.module(), options, std::as_bytes(std::span(pb.data())));
 }
 
 // Explicitly specify the visibility to prevent the linker from stripping the function on macOS, as

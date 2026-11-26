@@ -54,7 +54,6 @@ if (tint_build_fuzzer_vulkan_support && tint_build_fuzzers &&
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/ir",
-      "${tint_src_dir}/lang/core/ir/binary",
       "${tint_src_dir}/lang/core/ir/validator",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/utils",

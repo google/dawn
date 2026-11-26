@@ -42,14 +42,15 @@
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/macros/defer.h"
 
+#if TINT_BUILD_IR_BINARY
+#include "src/tint/lang/core/ir/binary/decode.h"
+#endif
+
 #if TINT_BUILD_WGSL_READER
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
 #include "src/tint/lang/core/ir/validator/validate.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
-#if TINT_BUILD_IR_BINARY
-#include "src/tint/lang/core/ir/binary/decode.h"
-#endif
 #endif
 
 namespace tint::fuzz::ir {
@@ -165,6 +166,35 @@ void Register(const IRFuzzer& fuzzer) {
 }
 
 #if TINT_BUILD_IR_BINARY
+void DecodeAndRun(const tint::core::ir::binary::pb::Module& pb_module,
+                  const Options& options,
+                  std::span<const std::byte> data) {
+    tint::core::ir::binary::DecoderOptions decoder_options{
+        .strip_invalid_identifiers = options.strip_invalid_identifiers,
+    };
+
+    auto initial = tint::core::ir::binary::Decode(pb_module, decoder_options);
+    if (initial != tint::Success) {
+        return;
+    }
+
+    std::optional<tint::core::ir::Module> cached_initial(std::move(initial.Move()));
+    auto acquire_module = [&] {
+        if (cached_initial.has_value()) {
+            auto out = std::move(*cached_initial);
+            cached_initial.reset();
+            return out;
+        }
+        auto decoded = tint::core::ir::binary::Decode(pb_module, decoder_options);
+        TINT_ASSERT(decoded == tint::Success)
+            << "module successfully decoded once, then failed a subsequent time\n"
+            << decoded.Failure();
+        return decoded.Move();
+    };
+
+    Run(acquire_module, options, data);
+}
+
 void Run(const std::function<tint::core::ir::Module()>& acquire_module,
          const Options& options,
          std::span<const std::byte> data) {

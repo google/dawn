@@ -30,14 +30,28 @@
 
 #include "src/tint/cmd/fuzz/common/ir_fuzzer.h"
 
+#if TINT_BUILD_IR_BINARY
+namespace tint::core::ir::binary::pb {
+class Module;
+}  // namespace tint::core::ir::binary::pb
+#endif  // TINT_BUILD_IR_BINARY
+
 namespace tint::fuzz::ir {
 
 /// Options for Run()
 using tint::fuzz::common::Options;
 
 #if TINT_BUILD_IR_BINARY
+/// Decodes a protobuf-encoded IR module and runs all via Run()
+/// @param pb_module protobuf-encoded IR module
+/// @param options the options for running the fuzzers
+/// @param data additional data used for fuzzing
+void DecodeAndRun(const tint::core::ir::binary::pb::Module& pb_module,
+                  const Options& options,
+                  std::span<const std::byte> data);
+
 /// Runs all the registered IR fuzzers with the supplied IR module
-/// @param acquire_module a function to obtain an IR module
+/// @param acquire_module a function to obtain an IR module per fuzzer
 /// @param options the options for running the fuzzers
 /// @param data additional data used for fuzzing
 void Run(const std::function<tint::core::ir::Module()>& acquire_module,
