@@ -85989,6 +85989,14 @@ webgpu:shader,execution,expression,call,builtin,subgroupShuffle:shuffle,id:case=
 webgpu:shader,execution,expression,call,builtin,subgroupShuffle:shuffle,id:case="rotate_2_down"
 webgpu:shader,execution,expression,call,builtin,subgroupShuffle:shuffle,id:case="reversed"
 webgpu:shader,execution,expression,call,builtin,subgroupShuffle:shuffle,id:case="clamped"
+webgpu:shader,execution,expression,call,builtin,subgroupShuffle:shuffle,out_of_bounds:oob_id=32
+webgpu:shader,execution,expression,call,builtin,subgroupShuffle:shuffle,out_of_bounds:oob_id=33
+webgpu:shader,execution,expression,call,builtin,subgroupShuffle:shuffle,out_of_bounds:oob_id=64
+webgpu:shader,execution,expression,call,builtin,subgroupShuffle:shuffle,out_of_bounds:oob_id=65
+webgpu:shader,execution,expression,call,builtin,subgroupShuffle:shuffle,out_of_bounds:oob_id=127
+webgpu:shader,execution,expression,call,builtin,subgroupShuffle:shuffle,out_of_bounds:oob_id=128
+webgpu:shader,execution,expression,call,builtin,subgroupShuffle:shuffle,out_of_bounds:oob_id=1000
+webgpu:shader,execution,expression,call,builtin,subgroupShuffle:shuffle,out_of_bounds:oob_id=4294967295
 webgpu:shader,execution,expression,call,builtin,subgroupShuffle:shuffleUpDown,delta:op="subgroupShuffleUp";case="no_shuffle"
 webgpu:shader,execution,expression,call,builtin,subgroupShuffle:shuffleUpDown,delta:op="subgroupShuffleUp";case="dynamic_1"
 webgpu:shader,execution,expression,call,builtin,subgroupShuffle:shuffleUpDown,delta:op="subgroupShuffleUp";case="override_2"
@@ -236806,6 +236814,11 @@ webgpu:shader,execution,memory_model,weak:store_buffer:memType="atomic_workgroup
 webgpu:shader,execution,memory_model,weak:store_buffer:memType="atomic_storage"
 webgpu:shader,execution,memory_model,weak:2_plus_2_write:memType="atomic_workgroup"
 webgpu:shader,execution,memory_model,weak:2_plus_2_write:memType="atomic_storage"
+webgpu:shader,execution,mutation,mesa,no_input:no_input:case="shader_101299f4"
+webgpu:shader,execution,mutation,mesa,no_input:no_input:case="shader_10c2ef9c"
+webgpu:shader,execution,mutation,mesa,uniform_input:uniform_input:case="shader_429a8325"
+webgpu:shader,execution,mutation,mesa,uniform_input:uniform_input:case="shader_7be24930"
+webgpu:shader,execution,mutation,mesa,uniform_input:uniform_input:case="shader_7ea91b04"
 webgpu:shader,execution,override:logical:case="logical_lhs_override"
 webgpu:shader,execution,override:logical:case="logical_rhs_override"
 webgpu:shader,execution,override:logical:case="logical_both_override"
