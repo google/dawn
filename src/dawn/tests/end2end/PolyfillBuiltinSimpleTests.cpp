@@ -572,6 +572,98 @@ TEST_P(PolyfillBuiltinSimpleTests, BoolVectorDynamicIndexLoad) {
     EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), outputBuffer, 0, 4);
 }
 
+// Regression test for crbug.com/590462414.
+TEST_P(PolyfillBuiltinSimpleTests, TextureSampleCompareLevelDepthCubeArrayCompute) {
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
+    // TODO(crbug.com/590821495): Test fails on SwiftShader.
+    DAWN_SUPPRESS_TEST_IF(IsSwiftshader());
+
+    wgpu::TextureDescriptor depthDesc;
+    depthDesc.format = wgpu::TextureFormat::Depth32Float;
+    depthDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding;
+    depthDesc.size = {4, 4, 12};
+    wgpu::Texture depthTexture = device.CreateTexture(&depthDesc);
+
+    // Clear cube layer 0 (array layers 0..5) to 0.25 and cube layer 1 (array layers 6..11) to 0.75.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        for (uint32_t layer = 0; layer < 12; ++layer) {
+            wgpu::TextureViewDescriptor viewDesc;
+            viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+            viewDesc.baseArrayLayer = layer;
+            viewDesc.arrayLayerCount = 1;
+
+            utils::ComboRenderPassDescriptor renderPass({}, depthTexture.CreateView(&viewDesc));
+            renderPass.UnsetDepthStencilLoadStoreOpsForFormat(wgpu::TextureFormat::Depth32Float);
+            renderPass.cDepthStencilAttachmentInfo.depthClearValue = layer < 6 ? 0.25f : 0.75f;
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+            pass.End();
+        }
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+    }
+
+    wgpu::TextureViewDescriptor cubeArrayViewDesc;
+    cubeArrayViewDesc.dimension = wgpu::TextureViewDimension::CubeArray;
+    cubeArrayViewDesc.baseArrayLayer = 0;
+    cubeArrayViewDesc.arrayLayerCount = 12;
+    wgpu::TextureView cubeArrayView = depthTexture.CreateView(&cubeArrayViewDesc);
+
+    wgpu::SamplerDescriptor samplerDesc;
+    samplerDesc.minFilter = wgpu::FilterMode::Linear;
+    samplerDesc.magFilter = wgpu::FilterMode::Linear;
+    samplerDesc.compare = wgpu::CompareFunction::Less;
+    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+
+    std::string shader = R"(
+        @group(0) @binding(0) var<storage, read_write> output : array<f32, 2>;
+        @group(0) @binding(1) var tex : texture_depth_cube_array;
+        @group(0) @binding(2) var samp : sampler_comparison;
+
+        fn sample_with_loop(layer : u32) -> f32 {
+            let sampled = textureSampleCompareLevel(tex, samp, vec3f(1.0), layer, 0.5);
+            var branch_value = 3.25;
+            var i = 0u;
+            let iterations = min(u32(abs(sampled)), 5u);
+            loop {
+                if (i >= iterations) { break; }
+                branch_value += f32(i) + 1.0;
+                i += 1u;
+            }
+            return sampled + branch_value;
+        }
+
+        @compute @workgroup_size(1) fn main() {
+            output[0] = sample_with_loop(0u);
+            output[1] = sample_with_loop(1u);
+        }
+    )";
+
+    wgpu::ComputePipeline pipeline = CreateComputePipeline(shader, "main");
+    wgpu::Buffer outputBuffer = CreateBuffer(std::vector<float>{0.0f, 0.0f});
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                             {{0, outputBuffer}, {1, cubeArrayView}, {2, sampler}});
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+        commands = encoder.Finish();
+    }
+    queue.Submit(1, &commands);
+
+    // Layer 0 (0.5 < 0.25 -> 0.0): 0.0 + 3.25 = 3.25.
+    // Layer 1 (0.5 < 0.75 -> 1.0): 1.0 + (3.25 + 1.0) = 5.25.
+    std::vector<float> expected = {3.25f, 5.25f};
+    EXPECT_BUFFER_FLOAT_RANGE_EQ(expected.data(), outputBuffer, 0, expected.size());
+}
+
 DAWN_INSTANTIATE_TEST(PolyfillBuiltinSimpleTests,
                       D3D12Backend(),
                       D3D11Backend(),
@@ -585,6 +677,7 @@ DAWN_INSTANTIATE_TEST(PolyfillBuiltinSimpleTests,
                       VulkanBackend({"polyfill_bool_vec_dynamic_load"}),
                       VulkanBackend({"polyfill_bool_vec_dynamic_store"}),
                       VulkanBackend({"vulkan_polyfill_switch_with_if"}),
+                      VulkanBackend({"vulkan_sample_compare_depth_cube_array_workaround"}),
                       VulkanBackend({"spirv_polyfill_float_negation", "spirv_polyfill_float_abs"}),
                       D3D11Backend({"scalarize_max_min_clamp"}),
                       OpenGLESBackend(),

@@ -1091,11 +1091,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // passed by argument to functions.
         deviceToggles->Default(Toggle::VulkanDirectVariableAccessTransformHandle, true);
 
-        // Qualcomm has compiler error only in 32 bit. Modern devices (64 bit, adreno 8xx) do not
-        // exhibit this compiler error.
-#if DAWN_PLATFORM_IS(32_BIT)
+        // crbug.com/465179684, crbug.com/590462414: Qualcomm's shader compiler fails on
+        // textureSampleCompare(Level) with texture_depth_cube_array on multiple devices.
+        // TODO(crbug.com/590462414): Narrow this by driver version once the affected range and a
+        // fixed driver are confirmed.
         deviceToggles->Default(Toggle::VulkanSampleCompareDepthCubeArrayWorkaround, true);
-#endif
         // crbug.com/469328925
         deviceToggles->Default(Toggle::VulkanSampleCompare2DWorkaround, true);
 
