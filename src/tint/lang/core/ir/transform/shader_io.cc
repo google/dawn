@@ -163,6 +163,8 @@ struct State {
         // Return the new result.
         wrapper.Return(wrapper_ep, backend->MakeReturnValue(wrapper));
 
+        backend->FinalizeWrapper(wrapper_ep);
+
         return Success;
     }
 

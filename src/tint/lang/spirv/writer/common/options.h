@@ -162,6 +162,10 @@ struct Options {
         /// Works around a shader linking bug in Qualcomm's proprietary Adreno 7xx driver.
         bool scalarize_clip_distances = false;
 
+        /// Set to `true` to wrap sample-rate fragment shader entry points in a sample_index
+        /// branch. Works around a sample-rate splitting bug in Imagination/PowerVR drivers.
+        bool guard_sample_rate_fragment_shaders = false;
+
         TINT_REFLECT(Workarounds,
                      polyfill_case_switch,
                      scalarize_max_min_clamp,
@@ -182,7 +186,8 @@ struct Options {
                      replace_unsigned_compare_zero,
                      polyfill_bool_vec_dynamic_load,
                      polyfill_bool_vec_dynamic_store,
-                     scalarize_clip_distances);
+                     scalarize_clip_distances,
+                     guard_sample_rate_fragment_shaders);
     };
 
     /// Any options which are controlled by the presence/absence of a vulkan extension.

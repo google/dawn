@@ -1039,6 +1039,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "GPU has finished using it. Enabled by default on all Intel D3D12 drivers as a workaround "
       "of a driver issue.",
       "https://crbug.com/583539379", ToggleStage::Device}},
+    {Toggle::VulkanGuardSampleRateFragmentShaders,
+     {"vulkan_guard_sample_rate_fragment_shaders",
+      "Wrap sample-rate fragment shader entry points in a sample_index branch to work around a "
+      "sample-rate splitting bug in Imagination/PowerVR drivers.",
+      "https://crbug.com/589728740", ToggleStage::Device}},
 
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};

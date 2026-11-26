@@ -1116,6 +1116,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // crbug.com/497202432 - Driver bug in when POT-rounded 3D texture footprint is >= 4 GiB.
         // TODO(https://crbug.com/497202432): Limit this to old drivers once there's a driver fix.
         deviceToggles->Default(Toggle::Limit3DTexturePotFootprintTo4GB, true);
+
+        // crbug.com/589728740 - Driver bug in SplitSampleRateCalc / LivenessDF when splitting
+        // multisampled sample-rate fragment shaders.
+        // TODO(https://crbug.com/589728740): Limit this to old drivers once there's a driver fix.
+        deviceToggles->Default(Toggle::VulkanGuardSampleRateFragmentShaders, true);
     }
 
     // AMD Mesa front end optimizer bug for unary negation and abs.

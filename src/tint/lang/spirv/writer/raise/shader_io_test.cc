@@ -2106,5 +2106,262 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_ShaderIOTest, GuardSampleRateFragmentShaders_WithSampleIndex) {
+    auto* color = b.FunctionParam("color", ty.f32());
+    color->SetLocation(0);
+    auto* sid = b.FunctionParam("sid", ty.u32());
+    sid->SetBuiltin(core::BuiltinValue::kSampleIndex);
+
+    auto* ep = b.Function("foo", ty.vec4f());
+    ep->SetParams({color, sid});
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+    ep->SetReturnLocation(0);
+
+    b.Append(ep->Block(), [&] {
+        auto* f = b.Convert(ty.f32(), sid);
+        b.Return(ep, b.Construct(ty.vec4f(), color, f, 0_f, 1_f));
+    });
+
+    auto* src = R"(
+%foo = @fragment func(%color:f32 [@location(0)], %sid:u32 [@sample_index]):vec4<f32> [@location(0)] {
+  $B1: {
+    %4:f32 = convert %sid
+    %5:vec4<f32> = construct %color, %4, 0.0f, 1.0f
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %foo_loc0_Input:ptr<__in, f32, read> = var @location(0)
+  %foo_sample_index_Input:ptr<__in, u32, read> = var @interpolate(flat) @builtin(sample_index)
+  %foo_loc0_Output:ptr<__out, vec4<f32>, write> = var @location(0)
+}
+
+%foo_inner = func(%color:f32, %sid:u32):vec4<f32> {
+  $B2: {
+    %7:f32 = convert %sid
+    %8:vec4<f32> = construct %color, %7, 0.0f, 1.0f
+    ret %8
+  }
+}
+%foo = @fragment func():void {
+  $B3: {
+    %10:u32 = load %foo_sample_index_Input
+    %11:bool = neq %10, 4042322160u
+    if %11 [t: $B4] {  # if_1
+      $B4: {  # true
+        %12:f32 = load %foo_loc0_Input
+        %13:u32 = load %foo_sample_index_Input
+        %14:vec4<f32> = call %foo_inner, %12, %13
+        store %foo_loc0_Output, %14
+        ret
+      }
+    }
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.guard_sample_rate_fragment_shaders = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ShaderIOTest, GuardSampleRateFragmentShaders_WithSampleInterpolation) {
+    auto* color = b.FunctionParam("color", ty.f32());
+    color->SetLocation(0);
+    color->SetInterpolation(core::Interpolation{core::InterpolationType::kLinear,
+                                                core::InterpolationSampling::kSample});
+
+    auto* ep = b.Function("foo", ty.vec4f());
+    ep->SetParams({color});
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+    ep->SetReturnLocation(0);
+
+    b.Append(ep->Block(), [&] { b.Return(ep, b.Construct(ty.vec4f(), color, 0_f, 0_f, 1_f)); });
+
+    auto* src = R"(
+%foo = @fragment func(%color:f32 [@location(0), @interpolate(linear, sample)]):vec4<f32> [@location(0)] {
+  $B1: {
+    %3:vec4<f32> = construct %color, 0.0f, 0.0f, 1.0f
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %foo_loc0_Input:ptr<__in, f32, read> = var @location(0) @interpolate(linear, sample)
+  %foo_sample_index_Input:ptr<__in, u32, read> = var @interpolate(flat) @builtin(sample_index)
+  %foo_loc0_Output:ptr<__out, vec4<f32>, write> = var @location(0)
+}
+
+%foo_inner = func(%color:f32):vec4<f32> {
+  $B2: {
+    %6:vec4<f32> = construct %color, 0.0f, 0.0f, 1.0f
+    ret %6
+  }
+}
+%foo = @fragment func():void {
+  $B3: {
+    %8:u32 = load %foo_sample_index_Input
+    %9:bool = neq %8, 4042322160u
+    if %9 [t: $B4] {  # if_1
+      $B4: {  # true
+        %10:f32 = load %foo_loc0_Input
+        %11:vec4<f32> = call %foo_inner, %10
+        store %foo_loc0_Output, %11
+        ret
+      }
+    }
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.guard_sample_rate_fragment_shaders = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ShaderIOTest, GuardSampleRateFragmentShaders_WithMultisampledFramebufferFetch) {
+    mod.properties.Add(core::ir::Property::kAllowNonCoreTypes);
+
+    auto* color = b.FunctionParam("color", ty.vec4f());
+    color->SetColor(0);
+
+    auto* ep = b.Function("foo", ty.vec4f());
+    ep->SetParams({color});
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+    ep->SetReturnLocation(0);
+
+    b.Append(ep->Block(), [&] { b.Return(ep, color); });
+
+    auto* expect = R"(
+$B1: {  # root
+  %foo_Input:ptr<handle, spirv.image<f32, subpass_data, not_depth, non_arrayed, multi_sampled, rw_op_compatible, undefined, read>, read> = var @binding_point(0, 1) @input_attachment_index(0)
+  %foo_sample_index_Input:ptr<__in, u32, read> = var @interpolate(flat) @builtin(sample_index)
+  %foo_loc0_Output:ptr<__out, vec4<f32>, write> = var @location(0)
+}
+
+%foo_inner = func(%color:vec4<f32>):vec4<f32> {
+  $B2: {
+    ret %color
+  }
+}
+%foo = @fragment func():void {
+  $B3: {
+    %7:u32 = load %foo_sample_index_Input
+    %8:bool = neq %7, 4042322160u
+    if %8 [t: $B4] {  # if_1
+      $B4: {  # true
+        %9:spirv.image<f32, subpass_data, not_depth, non_arrayed, multi_sampled, rw_op_compatible, undefined, read> = load %foo_Input
+        %10:u32 = load %foo_sample_index_Input
+        %11:vec4<f32> = spirv.image_read %9, vec2<i32>(0i), 64u, %10
+        %12:vec4<f32> = call %foo_inner, %11
+        store %foo_loc0_Output, %12
+        ret
+      }
+    }
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.colour_index_to_binding_point[0] = BindingPoint{0, 1};
+    config.multisampled_framebuffer_fetch = true;
+    config.guard_sample_rate_fragment_shaders = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ShaderIOTest, GuardSampleRateFragmentShaders_NoSampleRateInputs) {
+    auto* color = b.FunctionParam("color", ty.f32());
+    color->SetLocation(0);
+
+    auto* ep = b.Function("foo", ty.vec4f());
+    ep->SetParams({color});
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+    ep->SetReturnLocation(0);
+
+    b.Append(ep->Block(), [&] { b.Return(ep, b.Construct(ty.vec4f(), color, 0_f, 0_f, 1_f)); });
+
+    auto* expect = R"(
+$B1: {  # root
+  %foo_loc0_Input:ptr<__in, f32, read> = var @location(0)
+  %foo_loc0_Output:ptr<__out, vec4<f32>, write> = var @location(0)
+}
+
+%foo_inner = func(%color:f32):vec4<f32> {
+  $B2: {
+    %5:vec4<f32> = construct %color, 0.0f, 0.0f, 1.0f
+    ret %5
+  }
+}
+%foo = @fragment func():void {
+  $B3: {
+    %7:f32 = load %foo_loc0_Input
+    %8:vec4<f32> = call %foo_inner, %7
+    store %foo_loc0_Output, %8
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.guard_sample_rate_fragment_shaders = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ShaderIOTest, GuardSampleRateFragmentShaders_NonFragmentIgnored) {
+    auto* ep = b.Function("foo", ty.vec4f());
+    ep->SetStage(core::ir::Function::PipelineStage::kVertex);
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
+
+    b.Append(ep->Block(), [&] { b.Return(ep, b.Splat(ty.vec4f(), 0_f)); });
+
+    auto* expect = R"(
+$B1: {  # root
+  %foo_position_Output:ptr<__out, vec4<f32>, write> = var @builtin(position)
+}
+
+%foo_inner = func():vec4<f32> {
+  $B2: {
+    ret vec4<f32>(0.0f)
+  }
+}
+%foo = @vertex func():void {
+  $B3: {
+    %4:vec4<f32> = call %foo_inner
+    store %foo_position_Output, %4
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.guard_sample_rate_fragment_shaders = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer::raise

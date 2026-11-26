@@ -93,6 +93,7 @@ struct FuzzedOptions {
     bool disable_uniform_runtime_sized_array_index_clamping;
     bool scalarize_clip_distances;
     bool polyfill_bool_vec_dynamic_load;
+    bool guard_sample_rate_fragment_shaders;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(FuzzedOptions,
@@ -135,7 +136,8 @@ struct FuzzedOptions {
                  polyfill_bool_vec_dynamic_store,
                  disable_uniform_runtime_sized_array_index_clamping,
                  scalarize_clip_distances,
-                 polyfill_bool_vec_dynamic_load);
+                 polyfill_bool_vec_dynamic_load,
+                 guard_sample_rate_fragment_shaders);
     TINT_REFLECT_HASH_CODE(FuzzedOptions);
 };
 
@@ -413,6 +415,8 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.workarounds.polyfill_bool_vec_dynamic_store =
         fuzzed_options.polyfill_bool_vec_dynamic_store;
     options.workarounds.scalarize_clip_distances = fuzzed_options.scalarize_clip_distances;
+    options.workarounds.guard_sample_rate_fragment_shaders =
+        fuzzed_options.guard_sample_rate_fragment_shaders;
     options.multisampled_framebuffer_fetch = fuzzed_options.multisampled_framebuffer_fetch;
 
     TINT_CHECK_RESULT_UNWRAP(output, Generate(module, options));

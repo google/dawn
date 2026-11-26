@@ -245,6 +245,7 @@ enum class Toggle {
     VulkanScalarizeClipDistances,
     MetalPolyfillExtractBits,
     D3D12PersistentlyMapBuffersAndClearBufferBeforeDestroy,
+    VulkanGuardSampleRateFragmentShaders,
 
     EnumCount,
     InvalidEnum = EnumCount,

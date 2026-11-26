@@ -97,6 +97,10 @@ struct ShaderIOBackendState {
     /// Sets the backend specific outputs
     virtual void SetBackendOutputs(Builder&, Value*) {}
 
+    /// Finalize the entry point wrapper function after its body and return have been emitted.
+    /// @param wrapper_ep the newly created entry point wrapper function
+    virtual void FinalizeWrapper([[maybe_unused]] Function* wrapper_ep) {}
+
     /// Create the return value for the entry point, based on the output values that have been set.
     /// @param builder the IR builder for new instructions
     /// @returns the return value for the new entry point

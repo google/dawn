@@ -3916,6 +3916,82 @@ fn main(@builtin(global_invocation_id) gid : vec3u) {
     ASSERT_DEVICE_ERROR(CreateComputePipeline(shader, "main"));
 }
 
+// Regression test for crbug.com/589728740 where splitting a multisampled fragment shader with
+// @builtin(sample_index) into pixel-rate and sample-rate programs leaves a cross-program call that
+// causes a use-of-uninitialized-value in the PowerVR shader compiler's liveness analysis.
+TEST_P(ShaderTests, SampleRateSplitLiveness) {
+    // Compat mode does not support sample_index.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
+    std::string big;
+    for (uint32_t j = 0; j < 4; ++j) {
+        big += "  for (var i = 0; i < ub.n; i++) { acc = sin(acc + k + " + std::to_string(j) +
+               ".0) + cos(acc * 2.0); if (acc > k) { acc *= 0.5; } }\n";
+    }
+
+    std::string ifs;
+    for (uint32_t i = 0; i < 50; ++i) {
+        ifs += "  if (acc > " + std::to_string(i) + ".0) { acc += 1.0; }\n";
+    }
+
+    std::string dots;
+    for (uint32_t i = 0; i < 7; ++i) {
+        dots += "  acc = dot(vec4f(acc, v, K, 1.0), vec4f(v, K, acc, 2.0));\n";
+    }
+
+    std::string shader = R"(
+struct U { n: i32 }
+@group(0) @binding(0) var<uniform> ub: U;
+
+fn G(k: f32, v: f32) -> f32 { var acc = v;
+)" + big + R"(  return acc; }
+
+fn H(k: f32, v: f32) -> f32 { var acc = v;
+)" + ifs + R"(  return acc; }
+
+fn F(k: f32, v: f32) -> f32 { var acc = v;
+)" + big + R"(  acc += G(k * 3.0, acc);
+  return acc; }
+
+fn C(K: f32, v: f32) -> vec2f {
+  var acc = v; var x: f32;
+  if (v > 0.5) { for (var i = 0; i < ub.n; i++) { acc += sin(acc); } x = 1.0; } else { acc += cos(v * 2.0); x = 2.0; }
+)" + dots + R"(  return vec2f(x, acc);
+}
+
+struct VO { @builtin(position) pos: vec4f, @location(0) @interpolate(flat) fl: f32 }
+@vertex fn vs(@builtin(vertex_index) vi: u32) -> VO {
+  let p = vec2f(f32((vi << 1u) & 2u), f32(vi & 2u));
+  return VO(vec4f(p * 2.0 - 1.0, 0.0, 1.0), f32(vi));
+}
+
+@fragment fn fs(@location(0) @interpolate(flat) fl: f32, @builtin(sample_index) sid: u32) -> @location(0) vec4f {
+  var a = 0.0; var b = 0.0;
+  let r1 = C(fl, fl + 0.25);
+  let r2 = C(fl * 2.0, fl + 0.75);
+  a += r1.y + r2.y + r2.x;
+  let p = fl + a; let h1 = H(fl, p); let h2 = H(p, fl); let f = F(fl, p); a += f + h1 + h2;
+  if (r1.x > 3.0) { a += F(a, fl + a); }
+  b += G(a, a + f32(sid));
+  b += G(b, a + 1.0 + f32(sid));
+  return vec4f(a, b, 0.0, 1.0);
+}
+)";
+
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, shader.c_str());
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = module;
+    descriptor.vertex.entryPoint = "vs";
+    descriptor.cFragment.module = module;
+    descriptor.cFragment.entryPoint = "fs";
+    descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    descriptor.multisample.count = 4;
+
+    device.CreateRenderPipeline(&descriptor);
+    WaitForAllOperations();
+}
+
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D11Backend(),
                       D3D12Backend(),

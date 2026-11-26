@@ -278,6 +278,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
                     .polyfill_pixel_center = options.polyfill_pixel_center,
                     .multisampled_framebuffer_fetch = options.multisampled_framebuffer_fetch,
                     .scalarize_clip_distances = options.workarounds.scalarize_clip_distances,
+                    .guard_sample_rate_fragment_shaders =
+                        options.workarounds.guard_sample_rate_fragment_shaders,
                 }));
 
     // Immediate data is decomposed after ShaderIO because ShaderIO can introduce new accesses

@@ -59,6 +59,8 @@ struct ShaderIOConfig {
     bool multisampled_framebuffer_fetch = false;
     /// true if clip_distances output stores should be scalarized to work around a driver bug
     bool scalarize_clip_distances = false;
+    /// true if sample-rate fragment shader entry points should be wrapped in a sample_index branch
+    bool guard_sample_rate_fragment_shaders = false;
 };
 
 /// ShaderIO is a transform that moves each entry point function's parameters and return value to

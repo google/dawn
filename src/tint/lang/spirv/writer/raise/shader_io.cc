@@ -80,6 +80,9 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     // IO index for sample_index
     std::optional<uint32_t> sample_index_idx = std::nullopt;
 
+    // True if this entry point should be wrapped in a sample_index guard.
+    bool guard_sample_rate_shader = false;
+
     std::optional<uint32_t> global_invocation_index_index;
     std::optional<uint32_t> global_invocation_id_index;
     std::optional<uint32_t> workgroup_index_index;
@@ -251,7 +254,17 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
     /// @copydoc ShaderIO::BackendState::FinalizeInputs
     Result<Vector<core::ir::FunctionParam*, 4>> FinalizeInputs() override {
-        if (config.multisampled_framebuffer_fetch) {
+        const bool uses_sample_rate_shading =
+            func->IsFragment() &&
+            (config.multisampled_framebuffer_fetch ||
+             HasBuiltinInput(core::BuiltinValue::kSampleIndex) || inputs.Any([](const auto& io) {
+                 return io.attributes.interpolation && io.attributes.interpolation->sampling ==
+                                                           core::InterpolationSampling::kSample;
+             }));
+        guard_sample_rate_shader =
+            config.guard_sample_rate_fragment_shaders && uses_sample_rate_shading;
+
+        if (config.multisampled_framebuffer_fetch || guard_sample_rate_shader) {
             sample_index_idx =
                 RequireBuiltinInput(core::BuiltinValue::kSampleIndex, ty.u32(), "sample_idx");
         }
@@ -490,6 +503,30 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         auto* max =
             config.immediate_data_layout.GetValue(builder, core::InternalImmediate::kFragDepthMax);
         return builder.Clamp(frag_depth, min, max);
+    }
+
+    /// @copydoc ShaderIO::BackendState::FinalizeWrapper
+    void FinalizeWrapper(core::ir::Function* wrapper_ep) override {
+        if (!guard_sample_rate_shader) {
+            return;
+        }
+
+        TINT_IR_ASSERT(ir, sample_index_idx);
+        auto* sample_index_var = input_vars[input_indices[sample_index_idx.value()]];
+
+        auto* old_body = wrapper_ep->Block();
+        auto* new_body = b.Block();
+        wrapper_ep->SetBlock(new_body);
+
+        // Wrap the body of the wrapper function in an `if (sample_index != 0xF0F0F0F0u)` guard.
+        // At runtime this condition is always true.
+        // See crbug.com/589728740.
+        b.Append(new_body, [&] {
+            auto* cond = b.NotEqual(b.Load(sample_index_var), 0xF0F0F0F0_u);
+            auto* ifelse = b.If(cond);
+            ifelse->SetTrue(old_body);
+            b.Return(wrapper_ep);
+        });
     }
 
     /// @copydoc ShaderIO::BackendState::NeedsVertexPointSize

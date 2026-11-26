@@ -779,5 +779,94 @@ TEST_F(SpirvWriterTest, WorkgroupStorageSizeStructAlignment) {
     EXPECT_EQ(1024u, workgroup_info.storage_size);
 }
 
+TEST_F(SpirvWriterTest, Function_ShaderIO_GuardSampleRateFragmentShaders_SampleIndex) {
+    auto* sid = b.FunctionParam("sid", ty.u32());
+    sid->SetBuiltin(core::BuiltinValue::kSampleIndex);
+    auto* func = b.Function("main", ty.vec4f(), core::ir::Function::PipelineStage::kFragment);
+    func->SetReturnLocation(0);
+    func->SetParams({sid});
+    b.Append(func->Block(), [&] {
+        auto* f = b.Convert(ty.f32(), sid);
+        b.Return(func, b.Construct(ty.vec4f(), f, 0_f, 0_f, 1_f));
+    });
+
+    Options options;
+    options.workarounds.guard_sample_rate_fragment_shaders = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("OpCapability SampleRateShading");
+    EXPECT_INST("OpDecorate %main_sample_index_Input BuiltIn SampleId");
+    EXPECT_INST("OpDecorate %main_sample_index_Input Flat");
+    EXPECT_INST(R"(
+       %main = OpFunction %void None %18
+         %19 = OpLabel
+         %20 = OpLoad %uint %main_sample_index_Input None
+         %21 = OpINotEqual %bool %20 %uint_4042322160
+               OpSelectionMerge %24 None
+               OpBranchConditional %21 %25 %24
+         %25 = OpLabel
+         %26 = OpLoad %uint %main_sample_index_Input None
+         %27 = OpFunctionCall %v4float %main_inner %26
+               OpStore %main_loc0_Output %27 None
+               OpReturn
+         %24 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)");
+}
+
+TEST_F(SpirvWriterTest, Function_ShaderIO_GuardSampleRateFragmentShaders_SampleInterpolation) {
+    auto* color = b.FunctionParam("color", ty.vec4f());
+    color->SetLocation(0);
+    color->SetInterpolation(core::Interpolation{core::InterpolationType::kPerspective,
+                                                core::InterpolationSampling::kSample});
+    auto* func = b.Function("main", ty.vec4f(), core::ir::Function::PipelineStage::kFragment);
+    func->SetReturnLocation(0);
+    func->SetParams({color});
+    b.Append(func->Block(), [&] { b.Return(func, color); });
+
+    Options options;
+    options.workarounds.guard_sample_rate_fragment_shaders = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("OpCapability SampleRateShading");
+    EXPECT_INST("OpDecorate %main_loc0_Input Sample");
+    EXPECT_INST("OpDecorate %main_sample_index_Input BuiltIn SampleId");
+    EXPECT_INST("OpDecorate %main_sample_index_Input Flat");
+    EXPECT_INST(R"(
+       %main = OpFunction %void None %16
+         %17 = OpLabel
+         %18 = OpLoad %uint %main_sample_index_Input None
+         %19 = OpINotEqual %bool %18 %uint_4042322160
+               OpSelectionMerge %22 None
+               OpBranchConditional %19 %23 %22
+         %23 = OpLabel
+         %24 = OpLoad %v4float %main_loc0_Input None
+         %25 = OpFunctionCall %v4float %main_inner %24
+               OpStore %main_loc0_Output %25 None
+               OpReturn
+         %22 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)");
+}
+
+TEST_F(SpirvWriterTest, Function_ShaderIO_GuardSampleRateFragmentShaders_PixelRateUnchanged) {
+    auto* color = b.FunctionParam("color", ty.vec4f());
+    color->SetLocation(0);
+    auto* func = b.Function("main", ty.vec4f(), core::ir::Function::PipelineStage::kFragment);
+    func->SetReturnLocation(0);
+    func->SetParams({color});
+    b.Append(func->Block(), [&] { b.Return(func, color); });
+
+    Options options;
+    options.workarounds.guard_sample_rate_fragment_shaders = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_THAT(output_, testing::Not(testing::HasSubstr("SampleRateShading")));
+    EXPECT_THAT(output_, testing::Not(testing::HasSubstr("SampleId")));
+    EXPECT_THAT(output_, testing::Not(testing::HasSubstr("OpBranchConditional")));
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

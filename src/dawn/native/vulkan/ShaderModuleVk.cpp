@@ -345,6 +345,8 @@ ResultOrUnknownError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpi
         GetDevice()->IsToggleEnabled(Toggle::ScalarizeMaxMinClamp);
     req.tintOptions.workarounds.scalarize_clip_distances =
         GetDevice()->IsToggleEnabled(Toggle::VulkanScalarizeClipDistances);
+    req.tintOptions.workarounds.guard_sample_rate_fragment_shaders =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanGuardSampleRateFragmentShaders);
 
     req.tintOptions.workarounds.polyfill_saturate_as_min_max_f16 =
         GetDevice()->IsToggleEnabled(Toggle::SaturateAsMinMaxF16);
