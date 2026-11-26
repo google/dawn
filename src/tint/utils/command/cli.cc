@@ -166,7 +166,7 @@ Result<OptionSet::Unconsumed> OptionSet::Parse(VectorRef<std::string_view> argum
         }
 
         auto name = TrimLeft(flag_part, [](char c) { return c == '-'; });
-        if (flag_part == name || name.length() == 0) {
+        if (flag_part == name || name.empty()) {
             unconsumed.Push(arg);
             continue;
         }

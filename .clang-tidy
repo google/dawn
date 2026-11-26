@@ -213,7 +213,6 @@ Checks:
   - -readability-const-return-type
   - -readability-container-contains
   - -readability-container-data-pointer
-  - -readability-container-size-empty
   - -readability-convert-member-functions-to-static
   - -readability-enum-initial-value
   - -readability-fn_size

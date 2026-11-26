@@ -133,7 +133,7 @@ std::string GetCWD() {
 }
 
 std::string FindExecutable(const std::string& name) {
-    if (name.length() >= 1 && name[0] != '/') {
+    if (!name.empty() && name[0] != '/') {
         auto in_cwd = GetCWD() + "/" + name;
         if (ExecutableExists(in_cwd)) {
             return in_cwd;

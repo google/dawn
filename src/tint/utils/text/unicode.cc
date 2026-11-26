@@ -468,7 +468,7 @@ std::pair<CodePoint, size_t> Decode(std::string_view utf8_string) {
 
 size_t Encode(CodePoint code_point, std::span<uint8_t> buffer) {
     if (code_point <= 0x7f) {
-        if (buffer.size() >= 1) {
+        if (!buffer.empty()) {
             buffer.first<1>()[0] = static_cast<uint8_t>(code_point);
         }
         return 1;
@@ -613,7 +613,7 @@ std::pair<CodePoint, size_t> Decode(std::string_view utf16_string) {
 
 size_t Encode(CodePoint code_point, std::span<uint16_t> buffer) {
     if (code_point <= 0xd7ff || (code_point >= 0xe000 && code_point <= 0xffff)) {
-        if (buffer.size() >= 1) {
+        if (!buffer.empty()) {
             buffer.first<1>()[0] = static_cast<uint16_t>(code_point);
         }
         return 1;
