@@ -287,8 +287,8 @@ ResultOrError<SwapChain::Config> SwapChain::ChooseConfig(
     }
 
     // Choose the target usage or do a blit.
-    VkImageUsageFlags targetUsages =
-        VulkanImageUsage(GetDevice(), GetUsage(), GetDevice()->GetValidInternalFormat(GetFormat()));
+    const Format& internalFormat = GetDevice()->GetValidInternalFormat(GetFormat());
+    VkImageUsageFlags targetUsages = VulkanImageUsage(GetDevice(), GetUsage(), internalFormat);
     VkImageUsageFlags supportedUsages = surfaceInfo.capabilities.supportedUsageFlags;
     // The swapchain images support the configuration's viewFormats only if they are created
     // with VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT, which requires VK_KHR_swapchain_mutable_format.
@@ -296,7 +296,17 @@ ResultOrError<SwapChain::Config> SwapChain::ChooseConfig(
     const bool viewFormatsSupported =
         GetViewFormats().empty() ||
         ToBackend(GetDevice())->GetDeviceInfo().HasExt(DeviceExt::SwapchainMutableFormat);
-    if (IsSubset(targetUsages, supportedUsages) && viewFormatsSupported) {
+    // A regular texture with this usage is created with these VkImageCreateFlags, in particular
+    // VK_IMAGE_CREATE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_BIT_EXT when the
+    // MSAARenderToSingleSampled feature is enabled, which render passes with an implicit sample
+    // count require on all their attachments. vkCreateSwapchainKHR has no equivalent of that flag
+    // so, when it is needed, the blit texture is used to make such passes valid.
+    // TODO(crbug.com/571594984): Create the swapchain with
+    // VK_SWAPCHAIN_CREATE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_BIT_EXT instead when the device
+    // supports VK_EXT_multisampled_render_to_swapchain, to avoid the blit.
+    const bool createFlagsSupported =
+        VulkanImageCreateFlags(GetDevice(), GetUsage(), internalFormat, /*sampleCount=*/1) == 0;
+    if (IsSubset(targetUsages, supportedUsages) && viewFormatsSupported && createFlagsSupported) {
         config.usage = targetUsages;
         config.wgpuUsage = GetUsage();
         // The swapchain will be created with VK_SWAPCHAIN_CREATE_MUTABLE_FORMAT_BIT_KHR so the
