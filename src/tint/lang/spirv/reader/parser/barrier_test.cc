@@ -239,6 +239,37 @@ TEST_F(SpirvParserTest, ControlBarrier_ErrBarrierSemanticsMissingAcquireRelease)
                 testing::HasSubstr("control barrier semantics requires acquire and release"));
 }
 
+TEST_F(SpirvParserTest, ControlBarrier_SubgroupMemoryScope) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %uint_2 = OpConstant %uint 2
+     %uint_3 = OpConstant %uint 3
+  %uint_2376 = OpConstant %uint 2376
+       %main = OpFunction %void None %1
+          %4 = OpLabel
+               OpControlBarrier %uint_2 %uint_3 %uint_2376
+               OpReturn
+               OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:void = workgroupBarrier
+    %3:void = storageBarrier
+    %4:void = textureBarrier
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, ControlBarrier_ErrStorageBarrierInvalidMemory) {
     auto* src = R"(
                OpCapability Shader
@@ -261,7 +292,7 @@ TEST_F(SpirvParserTest, ControlBarrier_ErrStorageBarrierInvalidMemory) {
     auto result = Run(src);
     EXPECT_NE(result, Success);
     EXPECT_THAT(result.Failure().reason,
-                testing::HasSubstr("control barrier requires workgroup memory scope"));
+                testing::HasSubstr("unsupported control barrier memory scope: Device"));
 }
 
 TEST_F(SpirvParserTest, ControlBarrier_ErrTextureBarrierInvalidMemory) {
@@ -286,7 +317,34 @@ TEST_F(SpirvParserTest, ControlBarrier_ErrTextureBarrierInvalidMemory) {
     auto result = Run(src);
     EXPECT_NE(result, Success);
     EXPECT_THAT(result.Failure().reason,
-                testing::HasSubstr("control barrier requires workgroup memory scope"));
+                testing::HasSubstr("unsupported control barrier memory scope: Device"));
+}
+
+TEST_F(SpirvParserTest, ControlBarrier_ErrQueueFamilyMemoryScope) {
+    auto* src = R"(
+               OpCapability Shader
+               OpCapability VulkanMemoryModel
+               OpExtension "SPV_KHR_vulkan_memory_model"
+               OpMemoryModel Logical Vulkan
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %uint_2 = OpConstant %uint 2
+     %uint_5 = OpConstant %uint 5
+    %uint_72 = OpConstant %uint 72
+       %main = OpFunction %void None %1
+          %4 = OpLabel
+               OpControlBarrier %uint_2 %uint_5 %uint_72
+               OpReturn
+               OpFunctionEnd
+  )";
+    auto result = Run(src, SPV_ENV_UNIVERSAL_1_3);
+    EXPECT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("unsupported control barrier memory scope: QueueFamily"));
 }
 
 TEST_F(SpirvParserTest, ControlBarrier_ErrUnsupportedSemantics) {

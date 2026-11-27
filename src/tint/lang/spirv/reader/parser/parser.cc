@@ -3768,8 +3768,11 @@ class Parser {
             return Failure("control barrier semantics requires acquire and release");
         }
 
-        if (memory != dawn::to_underlying(spv::Scope::Workgroup)) {
-            return Failure("control barrier requires workgroup memory scope");
+        // Subgroup memory scope is narrower than Workgroup and is safely strengthened to Workgroup.
+        if (memory != dawn::to_underlying(spv::Scope::Workgroup) &&
+            memory != dawn::to_underlying(spv::Scope::Subgroup)) {
+            return Failure("unsupported control barrier memory scope: " +
+                           std::string(spv::ScopeToString(spv::Scope(memory))));
         }
 
         if (semantics & dawn::to_underlying(spv::MemorySemanticsMask::WorkgroupMemory)) {
