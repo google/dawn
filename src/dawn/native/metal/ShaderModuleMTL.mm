@@ -426,6 +426,17 @@ ResultOrUnknownError<CacheResult<MslCompilation>> TranslateToMSL(
             }
 
             auto msl = std::move(result->msl);
+            // Metal supports math_mode as both compiler option and as a pragma. We add the
+            // math_mode here as a string conditional on OSx version as the compiler option only
+            // exists for MacOS after 15. See the Metal 4 spec for more information.
+            // Note: this math_mode takes precedence over global flags provide to the compiler
+            // (including the deprecated fastMathEnabled compiler option).
+            std::string math_mode_heading;
+            if (@available(macOS 15.0, iOS 18.0, *)) {
+                math_mode_heading = "\n#pragma METAL fp math_mode(";
+                math_mode_heading += r.useStrictMath ? "safe" : "relaxed";
+                math_mode_heading += +")\n";
+            }
             // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall
             // category. -Wunused-variable in particular comes up a lot in generated code, and
             // some (old?) Metal drivers accidentally treat it as a MTLLibraryErrorCompileError
@@ -433,7 +444,8 @@ ResultOrUnknownError<CacheResult<MslCompilation>> TranslateToMSL(
             msl = R"(#ifdef __clang__
 #pragma clang diagnostic ignored "-Wall"
 #endif
-)" + msl;
+)" + math_mode_heading +
+                  msl;
 
             return MslCompilation{{
                 std::move(msl),
@@ -505,21 +517,18 @@ MaybeUnknownError ShaderModule::CreateFunction(SingleShaderStage stage,
     }
 #endif
 
+    // If possible we will use relaxed math as a pragma in the source rather than this fast math
+    // global compiler option. See crbug.com/425650181
     if (@available(macOS 15.0, iOS 18.0, *)) {
-        // Default to relaxed math unless strict math is requested.
-        // Using fast math can cause security issues due to assumptions about Inf/NaN.
-        if (GetStrictMath().value_or(false)) {
-            (*compileOptions).mathMode = MTLMathModeSafe;
-        } else {
-            (*compileOptions).mathMode = MTLMathModeRelaxed;
-        }
+        // This empty bock is intentional due to the mechanism to support @available.
+        // (the @available must be in a plain 'if' statement)
+        // Without this empty block one would get '-Wunsupported-availability-guard'
     } else {
-// Always disable fast math on older OS versions since there is no way to enable relaxed math.
 // Silence the warning that fastMathEnabled is deprecated since we cannot remove it until the
 // minimum support macOS version is macOS 15.0.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        (*compileOptions).fastMathEnabled = false;
+        (*compileOptions).fastMathEnabled = !GetStrictMath().value_or(false);
 #pragma clang diagnostic pop
     }
 
