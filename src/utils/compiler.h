@@ -142,6 +142,16 @@
 #endif
 #endif
 
+// DAWN_COVERAGE_ENABLED()
+//
+// Checks whether the code is instrumented for coverage. Clang defines
+// __LLVM_INSTR_PROFILE_GENERATE when it instruments the code.
+#if defined(DAWN_EMIT_COVERAGE) || defined(__LLVM_INSTR_PROFILE_GENERATE)
+#define DAWN_COVERAGE_ENABLED() 1
+#else
+#define DAWN_COVERAGE_ENABLED() 0
+#endif
+
 // DAWN_TSAN_RELEASE(addr)/DAWN_TSAN_ACQUIRE(addr)
 //
 // Emits a __tsan_release(addr)/__tsan_acquire(addr) if TSan is enabled, and nothing otherwise.

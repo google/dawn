@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <iostream>
 #include <string>
 #include <unordered_set>
 #include <utility>
@@ -99,6 +100,29 @@ const char* BackendName(wgpu::BackendType backend) {
         }
     }
     return "<unknown>";
+}
+
+// Prints a JSON object with the member `dawn-run-info`, which says how this binary was built and
+// describes the selected adapter.
+void PrintRunInfo(const wgpu::AdapterInfo& info) {
+    const char* asan = DAWN_ASAN_ENABLED() ? "true" : "false";
+    const char* clangCoverage = DAWN_COVERAGE_ENABLED() ? "true" : "false";
+    std::cout << "{\n"                                                         //
+              << "  \"dawn-run-info\": {\n"                                    //
+              << "    \"asan\": " << asan << ",\n"                             //
+              << "    \"clangCoverage\": " << clangCoverage << ",\n"           //
+              << "    \"adapter\": {\n"                                        //
+              << "      \"vendorID\": " << info.vendorID << ",\n"              //
+              << "      \"deviceID\": " << info.deviceID << ",\n"              //
+              << "      \"vendor\": \"" << info.vendor << "\",\n"              //
+              << "      \"architecture\": \"" << info.architecture << "\",\n"  //
+              << "      \"device\": \"" << info.device << "\",\n"              //
+              << "      \"description\": \"" << info.description << "\",\n"    //
+              << "      \"backendType\": \"" << info.backendType << "\",\n"    //
+              << "      \"adapterType\": \"" << info.adapterType << "\"\n"     //
+              << "    }\n"                                                     //
+              << "  }\n"                                                       //
+              << "}" << std::endl;
 }
 
 }  // namespace
@@ -264,6 +288,9 @@ interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::re
 
     if (flags_.Get("verbose")) {
         std::cout << "using GPU adapter: " << adapterInfo.device << "\n";
+    }
+    if (flags_.Get("print-run-info")) {
+        PrintRunInfo(adapterInfo);
     }
 
     auto gpuAdapter = GPUAdapter::Create<GPUAdapter>(env, *adapter, flags_, async_);

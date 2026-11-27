@@ -121,7 +121,7 @@ class StandaloneRunner {
             }
         }
 
-        if (queries_.empty()) {
+        if (queries_.empty() && !print_run_info_opt_.GetValue()) {
             std::cerr << "Error: --query (-q) or --query-file must be specified.\n\n";
             std::cerr << "Usage: " << argv[0] << " [options] --query <query>\n\nOptions:\n";
             parser_.PrintHelp(std::cerr);
@@ -205,6 +205,21 @@ class StandaloneRunner {
         return true;
     }
 
+    // Returns the `--dawn-flag` values as <key>=<value> flags.
+    std::vector<std::string> DawnFlags() const {
+        // CommandLineParser::StringListOption splits on ',', so rejoin comma-separated values that
+        // belong to the preceding <key>=<value> flag.
+        std::vector<std::string> dawn_flags;
+        for (const std::string& token : dawn_flags_opt_.GetValue()) {
+            if (token.find('=') != std::string::npos || dawn_flags.empty()) {
+                dawn_flags.push_back(token);
+            } else {
+                dawn_flags.back() += "," + token;
+            }
+        }
+        return dawn_flags;
+    }
+
     // Builds the `process.argv` array expected by the CTS `cmdline.js` script from the parsed
     // command-line options.
     std::vector<std::string> BuildJsArgs() const {
@@ -231,17 +246,7 @@ class StandaloneRunner {
             }
         }
 
-        // CommandLineParser::StringListOption splits on ',', so rejoin comma-separated values that
-        // belong to the preceding <key>=<value> flag.
-        std::vector<std::string> dawn_flags;
-        for (const std::string& token : dawn_flags_opt_.GetValue()) {
-            if (token.find('=') != std::string::npos || dawn_flags.empty()) {
-                dawn_flags.push_back(token);
-            } else {
-                dawn_flags.back() += "," + token;
-            }
-        }
-        for (const std::string& flag : dawn_flags) {
+        for (const std::string& flag : DawnFlags()) {
             js_args.push_back("--gpu-provider-flag");
             js_args.push_back(flag);
         }
@@ -358,6 +363,31 @@ class StandaloneRunner {
         return false;
     }
 
+    // Requests the adapter that the CTS gets by default, from a GPU created with the Dawn flags
+    // and `print-run-info`, which makes dawn.node print the JSON that describes the build and the
+    // adapter. Returns false if dawn.node rejects the Dawn flags.
+    bool PrintRunInfo(Napi::Env env) {
+        Napi::Array flags = Napi::Array::New(env);
+        for (const std::string& flag : DawnFlags()) {
+            flags.Set(flags.Length(), Napi::String::New(env, flag));
+        }
+        flags.Set(flags.Length(), Napi::String::New(env, "print-run-info=1"));
+
+        Napi::Object module = env.Global().Get("_webgpu_module").As<Napi::Object>();
+        Napi::Value gpu = module.Get("create").As<Napi::Function>().Call({flags});
+        if (env.IsExceptionPending()) {
+            std::cerr << "Error: " << env.GetAndClearPendingException().Message() << "\n";
+            return false;
+        }
+
+        Napi::Object options = Napi::Object::New(env);
+        if (compat_opt_.GetValue()) {
+            options.Set("featureLevel", Napi::String::New(env, "compatibility"));
+        }
+        gpu.As<Napi::Object>().Get("requestAdapter").As<Napi::Function>().Call(gpu, {options});
+        return true;
+    }
+
     // Sets up the Node-API environment, loads the CTS command-line entry point, and runs the event
     // loop to completion.
     int RunCts() {
@@ -378,7 +408,11 @@ class StandaloneRunner {
             InitializePolyfills(env, loop);
             InitializeWebGPU(env);
 
-            loop.PostTask([this, env] {
+            loop.PostTask([this, env, &loop] {
+                if (print_run_info_opt_.GetValue()) {
+                    loop.Stop(PrintRunInfo(env) ? 0 : 1);
+                    return;
+                }
                 if (!list_opt_.GetValue() && RenderDocToggleEnabled()) {
                     renderdoc_capture_.Configure(env);
                 }
@@ -427,6 +461,10 @@ class StandaloneRunner {
         parser_.AddBool("quiet", "Suppress summary information in output");
     dawn::utils::CommandLineParser::BoolOption& list_opt_ =
         parser_.AddBool("list", "Print all testcase names that match the given query and exit");
+    dawn::utils::CommandLineParser::BoolOption& print_run_info_opt_ =
+        parser_.AddBool("print-run-info",
+                        "Print a JSON object whose 'dawn-run-info' member describes the build "
+                        "and the adapter the CTS gets by default, and exit");
     dawn::utils::CommandLineParser::BoolOption& debug_opt_ =
         parser_.AddBool("debug", "Include debug messages in logging");
     dawn::utils::CommandLineParser::BoolOption& compat_opt_ =
