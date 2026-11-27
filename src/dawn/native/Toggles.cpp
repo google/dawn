@@ -1056,6 +1056,13 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"spirv_float_controls_16bit",
       "Use SPV_KHR_float_controls to preserve INF/NAN for 16-bit floating point.",
       "https://crbug.com/587219560", ToggleStage::Device}},
+    {Toggle::MetalMaximizeConcurrentCompilation,
+     {"metal_maximize_concurrent_compilation",
+      "Allow more concurrent Metal compilation tasks on macOS 13.3 and later. This can "
+      "increase memory use and affects all users of the same MTLDevice.",
+      "https://developer.apple.com/documentation/metal/mtldevice/"
+      "shouldmaximizeconcurrentcompilation",
+      ToggleStage::Instance}},
 
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};

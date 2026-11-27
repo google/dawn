@@ -306,6 +306,13 @@ PhysicalDevice::PhysicalDevice(InstanceBase* instance,
     mAdapterType = wgpu::AdapterType::IntegratedGPU;
     const char* systemName = "iOS ";
 #elif DAWN_PLATFORM_IS(MACOS)
+    // Preserve any existing opt-in on a shared MTLDevice.
+    if (instance->GetTogglesState().IsEnabled(Toggle::MetalMaximizeConcurrentCompilation)) {
+        if (@available(macOS 13.3, *)) {
+            [*mDevice setShouldMaximizeConcurrentCompilation:YES];
+        }
+    }
+
     if ([*mDevice hasUnifiedMemory]) {
         mAdapterType = wgpu::AdapterType::IntegratedGPU;
     } else {

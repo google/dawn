@@ -249,6 +249,7 @@ enum class Toggle {
     SpirvFloatControls2,
     SpirvFloatControls32bit,
     SpirvFloatControls16bit,
+    MetalMaximizeConcurrentCompilation,
 
     EnumCount,
     InvalidEnum = EnumCount,
