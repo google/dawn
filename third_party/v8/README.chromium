@@ -1,7 +1,7 @@
 Name: V8
 URL: https://chromium.googlesource.com/v8/v8
 Version: N/A
-Revision: 83863cf1fade8a0c0200943084d1a85ee7d7a27e
+Revision: 41c9dc867df2d2b1350eb5a71cb4d0699cb986a7
 Update Mechanism: Autoroll
 License: BSD-3-Clause
 License File: LICENSE

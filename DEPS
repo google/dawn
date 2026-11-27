@@ -840,7 +840,7 @@ deps = {
 
   # V8 and its dependencies for standalone builds.
   'third_party/v8/src': {
-    'url': '{chromium_git}/v8/v8.git@83863cf1fade8a0c0200943084d1a85ee7d7a27e',
+    'url': '{chromium_git}/v8/v8.git@41c9dc867df2d2b1350eb5a71cb4d0699cb986a7',
     'condition': 'dawn_standalone and checkout_v8',
   },
 
@@ -875,7 +875,7 @@ deps = {
   },
 
   'third_party/boringssl/src': {
-    'url': '{boringssl_git}/boringssl.git@2e33b24cdb5b021c07990dc6d0191ae4a1480cfb',
+    'url': '{boringssl_git}/boringssl.git@a003590712db258f80de823b660ee788589c98cf',
     'condition': 'dawn_standalone and checkout_v8',
   },
 
