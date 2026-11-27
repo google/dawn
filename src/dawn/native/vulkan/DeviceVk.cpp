@@ -689,7 +689,10 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::FloatControls2)) {
-        usedKnobs.floatControls2Features.shaderFloatControls2 = VK_TRUE;
+        DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::FloatControls2));
+
+        usedKnobs.floatControls2Features = mDeviceInfo.floatControls2Features;
+        featuresChain.Add(&usedKnobs.floatControls2Features);
     }
 
     if (mDeviceInfo.features.samplerAnisotropy == VK_TRUE) {
