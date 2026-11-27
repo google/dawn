@@ -273,7 +273,7 @@ func TestStreamResultsWithExpectationsFile(t *testing.T) {
 			stream <- results[i]
 		}
 		close(stream)
-		_, err := StreamResults(context.Background(), false, false, State{Stdout: stdout, expectFile: expectFile}, false, nil, len(results), stream, nil)
+		_, err := StreamResults(context.Background(), false, false, State{Stdout: stdout, expectFile: expectFile}, VerboseUnexpected, nil, len(results), stream, nil)
 		return stdout.String(), err
 	}
 	expected := []Result{

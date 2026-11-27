@@ -91,7 +91,7 @@ func StreamResults(
 	colors bool,
 	failuresOnly bool,
 	state State,
-	verbose bool,
+	verbosity Verbosity,
 	coverage *Coverage, // Optional coverage generation info
 	numTestCases int, // Total number of test cases
 	stream <-chan Result,
@@ -116,7 +116,7 @@ func StreamResults(
 	}
 
 	// Pull test results as they become available.
-	// Update the status counts, and print any failures (or all test results if --verbose)
+	// Update the status counts, and print the results that verbosity selects.
 	progressUpdateRate := time.Millisecond * 10
 	if !colors {
 		// No colors == no cursor control. Reduce progress updates so that
@@ -135,10 +135,15 @@ func StreamResults(
 	for res := range stream {
 		state.Log.logResults(res, failuresOnly)
 		results[res.TestCase] = res
-		expected := state.Expectations[res.TestCase]
+		// Without expectations, a test case is expected not to fail.
+		expected := Status("")
 		exStatus := expectedStatus{
 			status:   res.Status,
-			expected: expected == res.Status,
+			expected: !res.Status.failedOrTimedOut(),
+		}
+		if state.Expectations != nil {
+			expected = state.Expectations[res.TestCase]
+			exStatus.expected = expected == res.Status
 		}
 		if state.HasExpectationsFile() {
 			expectation := state.expectFile.lookup(res.TestCase)
@@ -150,10 +155,7 @@ func StreamResults(
 			lists.add(res)
 		}
 		name := res.TestCase
-		if verbose ||
-			res.Error != nil ||
-			(exStatus.status != Pass && exStatus.status != Skip && !exStatus.expected) ||
-			(state.HasExpectationsFile() && !exStatus.expected) {
+		if verbosity.printsOutput(res, !exStatus.expected) {
 			buf := &bytes.Buffer{}
 			fmt.Fprint(buf, statusColor[res.Status])
 			if res.Message != "" {

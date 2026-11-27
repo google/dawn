@@ -44,7 +44,7 @@ import (
 
 // Flags holds the common flags for all CTS runners
 type Flags struct {
-	Verbose          bool
+	Verbose          Verbosity
 	Colors           bool
 	FailuresOnly     bool
 	NumRunners       int
@@ -62,7 +62,7 @@ type Flags struct {
 var ErrNodeNotFound = errors.New("cannot find path to node. Specify with --node")
 
 func (f *Flags) Register(fsReader oswrapper.FilesystemReader) {
-	flag.BoolVar(&f.Verbose, "verbose", false, "print extra information while testing")
+	flag.Var(&f.Verbose, "verbose", "how much to print, as -verbose=`level`: summary (the default: the lists of unexpected results and the counts), unexpected (also the output of each test case with an unexpected result), all (also the output of every other test case) or debug (also the commands that run-cts runs and Dawn's verbose output). -verbose without a level is -verbose=debug")
 	flag.BoolVar(&f.Colors, "colors", term.CanUseAnsiEscapeSequences(), "enable / disable colors")
 	flag.BoolVar(&f.FailuresOnly, "failures-only", false, "output only failures to log file")
 	flag.IntVar(&f.NumRunners, "j", runtime.NumCPU()/2, "number of concurrent runners. 0 runs serially")

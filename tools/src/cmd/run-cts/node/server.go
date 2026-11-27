@@ -118,7 +118,7 @@ func (c *cmd) runServer(
 		if c.coverage != nil {
 			args = append(args, "--coverage")
 		}
-		if c.flags.Verbose {
+		if c.flags.Verbose.Debug() {
 			args = append(args,
 				"--verbose",
 				"--gpu-provider-flag", "verbose=1")
@@ -145,7 +145,7 @@ func (c *cmd) runServer(
 		cmd := exec.CommandContext(ctx, c.flags.Node, args...)
 
 		writer := io.Writer(testCaseLog)
-		if c.flags.Verbose {
+		if c.flags.Verbose.Debug() {
 			pw := &utils.PrefixWriter{
 				Prefix: fmt.Sprintf("[%d] ", id),
 				Writer: os.Stdout,
@@ -159,7 +159,7 @@ func (c *cmd) runServer(
 		cmd.Stdout = &pl
 		cmd.Stderr = &pl
 
-		if c.flags.Verbose {
+		if c.flags.Verbose.Debug() {
 			PrintCommand(cmd, c.flags.skipVSCodeInfo)
 		}
 		err := cmd.Start()

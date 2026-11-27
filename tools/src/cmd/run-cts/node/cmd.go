@@ -193,7 +193,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	defer stop()
 
 	if c.flags.build {
-		if err := c.state.CTS.Node.BuildIfRequired(c.flags.Verbose, cfg.OsWrapper); err != nil {
+		if err := c.state.CTS.Node.BuildIfRequired(c.flags.Verbose.Debug(), cfg.OsWrapper); err != nil {
 			return err
 		}
 	}
@@ -275,7 +275,7 @@ func (c *cmd) target() (target, []string) {
 			adb:       c.adbPath,
 			serial:    c.flags.adbSerial,
 			deviceDir: c.flags.deviceDir,
-			verbose:   c.flags.Verbose,
+			verbose:   c.flags.Verbose.Debug(),
 		}
 		return t, []string{"--cts-zip", t.devicePath(deviceCTS)}
 	}
@@ -291,7 +291,7 @@ func (c *cmd) target() (target, []string) {
 	return &localTarget{
 		runner:  runner,
 		dir:     dir,
-		verbose: c.flags.Verbose,
+		verbose: c.flags.Verbose.Debug(),
 		// The VS Code launch.json output does not work for the standalone runner,
 		// which reads its test cases from stdin.
 		skipVSCodeInfo: c.flags.skipVSCodeInfo || c.standalone,
@@ -402,11 +402,8 @@ func (c *cmd) processFlags(fsReaderWriter oswrapper.FilesystemReaderWriter) erro
 		UseFXC:            c.flags.fxc,
 	})
 
-	if c.flags.dumpShaders {
-		c.flags.Verbose = true
-	}
-	if c.flags.dumpShadersPretty {
-		c.flags.Verbose = true
+	if c.flags.dumpShaders || c.flags.dumpShadersPretty {
+		c.flags.Verbose = common.VerboseDebug
 	}
 
 	state, err := c.flags.Process(fsReaderWriter)
@@ -453,7 +450,7 @@ func (c *cmd) queryTestCases() ([]common.TestCase, error) {
 		if c.standalone {
 			cases, err = c.listTestCases(query)
 		} else {
-			cases, err = c.state.CTS.QueryTestCases(c.flags.Verbose, query)
+			cases, err = c.state.CTS.QueryTestCases(c.flags.Verbose.Debug(), query)
 		}
 		if err != nil {
 			return nil, fmt.Errorf("failed to gather tests: %w", err)

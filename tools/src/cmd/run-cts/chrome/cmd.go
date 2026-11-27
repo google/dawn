@@ -102,15 +102,15 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		return fmt.Errorf("only a single query can be provided")
 	}
 
-	if err := c.state.CTS.Node.BuildIfRequired(c.flags.Verbose, cfg.OsWrapper); err != nil {
+	if err := c.state.CTS.Node.BuildIfRequired(c.flags.Verbose.Debug(), cfg.OsWrapper); err != nil {
 		return err
 	}
-	if err := c.state.CTS.Standalone.BuildIfRequired(c.flags.Verbose, cfg.OsWrapper); err != nil {
+	if err := c.state.CTS.Standalone.BuildIfRequired(c.flags.Verbose.Debug(), cfg.OsWrapper); err != nil {
 		return err
 	}
 
 	// Find all the test cases that match r.query.
-	testCases, err := c.state.CTS.QueryTestCases(c.flags.Verbose, c.query)
+	testCases, err := c.state.CTS.QueryTestCases(c.flags.Verbose.Debug(), c.query)
 	if err != nil {
 		return fmt.Errorf("failed to gather tests: %w", err)
 	}
@@ -249,7 +249,7 @@ func (c *cmd) runChromeInstance(
 	}
 
 	go func() {
-		if c.flags.Verbose {
+		if c.flags.Verbose.Debug() {
 			fmt.Fprintf(c.state.Stdout, "[%v] listening on port %v\n", id, port)
 		}
 		if err := server.Serve(ln); err != nil {
@@ -278,7 +278,7 @@ func (c *cmd) runChromeInstance(
 		chromedp.WithErrorf(log.Printf))
 	defer cancel()
 
-	if c.flags.Verbose {
+	if c.flags.Verbose.Debug() {
 		chromedp.ListenTarget(runCtx, func(ev interface{}) {
 			switch ev := ev.(type) {
 			case *runtime.EventConsoleAPICalled:
@@ -302,7 +302,7 @@ func (c *cmd) runChromeInstance(
 nextTestCase:
 	for idx := range testCaseIndices {
 		res := common.Result{Index: idx, TestCase: testCases[idx]}
-		if c.flags.Verbose {
+		if c.flags.Verbose.Debug() {
 			fmt.Println("Starting", res.TestCase)
 		}
 		requests <- Request{Query: string(res.TestCase)}
@@ -313,7 +313,7 @@ nextTestCase:
 			case response := <-responses:
 				switch response.Type {
 				case "CONNECTION_ACK":
-					if c.flags.Verbose {
+					if c.flags.Verbose.Debug() {
 						fmt.Fprintf(c.state.Stdout, "[%v] connected\n", id)
 					}
 				case "TEST_STARTED":

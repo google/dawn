@@ -103,7 +103,7 @@ func (c *cmd) runnerArgs(ctsArgs []string) []string {
 		}
 		dawnFlag = "--gpu-provider-flag"
 	}
-	if c.flags.Verbose {
+	if c.flags.Verbose.Debug() {
 		args = append(args, dawnFlag, "verbose=1")
 	}
 	if c.coverage != nil {
