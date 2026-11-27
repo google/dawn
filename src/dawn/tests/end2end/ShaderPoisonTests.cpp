@@ -140,52 +140,9 @@ TEST_P(ShaderPoisonTests, PoisonedWrite) {
     DAWN_TEST_UNSUPPORTED_IF(testCase.requiresF16 &&
                              !device.HasFeature(wgpu::FeatureName::ShaderF16));
 
-    // Suppress cases where Android PowerVR Vulkan eliminates the poisoned write.
-    DAWN_SUPPRESS_TEST_IF(
-        IsAndroid() && IsImgTec() && IsVulkan() &&
-        MatchesCase({"cross_f32_nan_input", "determinant_2x2_nan_input", "dot_f32_vec2_nan_input",
-                     "mat2x2_mul_mat2x2_nan", "mat2x2_mul_scalar_nan", "mat2x2_mul_vec2_nan",
-                     "mat2x2_sub_mat2x2_nan", "normalize_vec2_nan_input",
-                     "reflect_vec2_nan_input"}));
-
-    // Suppress cases where NVIDIA Vulkan eliminates the poisoned write.
-    DAWN_SUPPRESS_TEST_IF(IsNvidia() && IsVulkan() &&
-                          MatchesCase({"add_inf_neg_inf",
-                                       "cross_f32_inf_input",
-                                       "cross_f32_nan_input",
-                                       "determinant_2x2_inf_input",
-                                       "determinant_2x2_nan_input",
-                                       "determinant_3x3_inf_input",
-                                       "determinant_4x4_inf_input",
-                                       "dot_f16_vec2_inf_input",
-                                       "dot_f16_vec4_inf_input",
-                                       "dot_f32_vec2_inf_input",
-                                       "dot_f32_vec2_nan_input",
-                                       "dot_f32_vec2_inf_output",
-                                       "dot_f32_vec2_nan_output",
-                                       "dot_f32_vec3_inf_input",
-                                       "dot_f32_vec4_inf_input",
-                                       "mat2x2_add_mat2x2",
-                                       "mat2x2_mul_mat2x2",
-                                       "mat2x2_mul_mat2x2_nan",
-                                       "mat2x2_mul_scalar",
-                                       "mat2x2_mul_scalar_nan",
-                                       "mat2x2_mul_vec2",
-                                       "mat2x2_mul_vec2_nan",
-                                       "mat2x2_sub_mat2x2",
-                                       "mat3x3_mul_vec3",
-                                       "mat4x3_sub_mat4x3",
-                                       "mat4x4_mul_vec4",
-                                       "mix_f32_inf_input",
-                                       "mul_inf_zero",
-                                       "normalize_vec2_inf_input",
-                                       "normalize_vec2_nan_output",
-                                       "reflect_vec2_inf_input",
-                                       "reflect_vec2_inf_output",
-                                       "refract_vec2_f32_inf_output",
-                                       "scalar_mul_mat2x2",
-                                       "sub_inf_inf",
-                                       "vec_mul_scalar"}));
+    // TODO(590225562): Fails on Android PowerVR Vulkan for several NaN-input cases.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan() &&
+                          MatchesCase({"mat2x2_mul_mat2x2_nan", "mat2x2_mul_scalar_nan"}));
 
     std::ostringstream shader;
     shader << BuildPoisonPreamble(testCase);
@@ -234,87 +191,9 @@ TEST_P(ShaderPoisonTests, WriteBeforeDynamicError) {
     DAWN_TEST_UNSUPPORTED_IF(testCase.requiresF16 &&
                              !device.HasFeature(wgpu::FeatureName::ShaderF16));
 
-    // Suppress cases where Android PowerVR Vulkan eliminates a write before a dynamic error.
-    DAWN_SUPPRESS_TEST_IF(
-        IsAndroid() && IsImgTec() && IsVulkan() &&
-        MatchesCase({"cross_f32_nan_input", "determinant_2x2_nan_input", "dot_f32_vec2_nan_input",
-                     "mat2x2_mul_mat2x2_nan", "mat2x2_mul_scalar_nan", "mat2x2_mul_vec2_nan",
-                     "mat2x2_sub_mat2x2_nan", "normalize_vec2_nan_input",
-                     "reflect_vec2_nan_input"}));
-
-    // Suppress cases where NVIDIA Vulkan eliminates a write before a dynamic error.
-    // These only fail on Windows and put the driver in a bad state, causing cascading failures.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsNvidia() && IsVulkan() &&
-                          MatchesCase({"add_inf_neg_inf",
-                                       "cross_f32_inf_input",
-                                       "determinant_2x2_inf_input",
-                                       "determinant_3x3_inf_input",
-                                       "determinant_4x4_inf_input",
-                                       "dot_f32_vec2_inf_input",
-                                       "dot_f32_vec2_inf_output",
-                                       "dot_f32_vec2_nan_output",
-                                       "dot_f32_vec3_inf_input",
-                                       "dot_f32_vec4_inf_input",
-                                       "mat2x2_add_mat2x2",
-                                       "mat2x2_mul_mat2x2",
-                                       "mat2x2_mul_scalar",
-                                       "mat2x2_mul_vec2",
-                                       "mat2x2_sub_mat2x2",
-                                       "mat3x3_mul_vec3",
-                                       "mat4x3_sub_mat4x3",
-                                       "mat4x4_mul_vec4",
-                                       "mix_f32_inf_input",
-                                       "mul_inf_zero",
-                                       "normalize_vec2_inf_input",
-                                       "normalize_vec2_nan_output",
-                                       "reflect_vec2_inf_input",
-                                       "reflect_vec2_inf_output",
-                                       "refract_vec2_f32_inf_output",
-                                       "scalar_mul_mat2x2",
-                                       "sub_inf_inf",
-                                       "vec_mul_scalar"}));
-
-    // Suppress cases for NVIDIA Linux on a recent driver, and
-    // which cause a hang.
-    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan() &&
-                          MatchesCase({
-                              "add_inf_neg_inf",
-                              "mul_inf_zero",
-                              "sub_inf_inf",
-                              "mat2x2_add_mat2x2",
-                              "mat2x2_mul_mat2x2",
-                              "mat2x2_mul_mat2x2_nan",
-                              "mat2x2_mul_scalar",
-                              "mat2x2_mul_scalar_nan",
-                              "scalar_mul_mat2x2",
-                              "mat2x2_mul_vec2",
-                              "mat2x2_mul_vec2_nan",
-                              "mat3x3_mul_vec3",
-                              "mat4x4_mul_vec4",
-                              "mat2x2_sub_mat2x2",
-                              "mat4x3_sub_mat4x3",
-                              "vec_mul_scalar",
-                              "cross_f32_inf_input",
-                              "cross_f32_nan_input",
-                              "determinant_2x2_inf_input",
-                              "determinant_2x2_nan_input",
-                              "determinant_3x3_inf_input",
-                              "determinant_4x4_inf_input",
-                              "dot_f32_vec2_inf_input",
-                              "dot_f32_vec2_inf_output",
-                              "dot_f32_vec2_nan_input",
-                              "dot_f32_vec2_nan_output",
-                              "dot_f32_vec3_inf_input",
-                              "dot_f32_vec4_inf_input",
-                              "dot_f16_vec2_inf_input",
-                              "dot_f16_vec4_inf_input",
-                              "mix_f32_inf_input",
-                              "normalize_vec2_inf_input",
-                              "normalize_vec2_nan_output",
-                              "reflect_vec2_inf_input",
-                              "reflect_vec2_inf_output",
-                              "refract_vec2_f32_inf_output",
-                          }));
+    // TODO(590225562): Fails on Android PowerVR Vulkan for several NaN-input cases.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan() &&
+                          MatchesCase({"mat2x2_mul_mat2x2_nan", "mat2x2_mul_scalar_nan"}));
 
     std::ostringstream shader;
     shader << BuildPoisonPreamble(testCase);
@@ -359,38 +238,6 @@ TEST_P(ShaderPoisonTests, OutOfBoundsStorageBufferWrite) {
     const ShaderPoisonCase& testCase = GetParam().mShaderPoisonCase;
     DAWN_TEST_UNSUPPORTED_IF(testCase.requiresF16 &&
                              !device.HasFeature(wgpu::FeatureName::ShaderF16));
-
-    // Suppress cases that fail on Windows NVIDIA Vulkan.
-    // These only fail on Windows and put the driver in a bad state, causing cascading failures.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsNvidia() && IsVulkan() &&
-                          MatchesCase({"add_inf_neg_inf",
-                                       "cross_f32_inf_input",
-                                       "determinant_2x2_inf_input",
-                                       "determinant_3x3_inf_input",
-                                       "determinant_4x4_inf_input",
-                                       "dot_f32_vec2_inf_input",
-                                       "dot_f32_vec2_inf_output",
-                                       "dot_f32_vec2_nan_output",
-                                       "dot_f32_vec3_inf_input",
-                                       "dot_f32_vec4_inf_input",
-                                       "mat2x2_add_mat2x2",
-                                       "mat2x2_mul_mat2x2",
-                                       "mat2x2_mul_scalar",
-                                       "mat2x2_mul_vec2",
-                                       "mat2x2_sub_mat2x2",
-                                       "mat3x3_mul_vec3",
-                                       "mat4x3_sub_mat4x3",
-                                       "mat4x4_mul_vec4",
-                                       "mix_f32_inf_input",
-                                       "mul_inf_zero",
-                                       "normalize_vec2_inf_input",
-                                       "normalize_vec2_nan_output",
-                                       "reflect_vec2_inf_input",
-                                       "reflect_vec2_inf_output",
-                                       "refract_vec2_f32_inf_output",
-                                       "scalar_mul_mat2x2",
-                                       "sub_inf_inf",
-                                       "vec_mul_scalar"}));
 
     constexpr uint32_t kWriteIndex = 16;
     constexpr uint32_t kWriteVal = 0xE7E7E7E7u;
@@ -446,86 +293,12 @@ TEST_P(ShaderPoisonTests, OutOfBoundsWorkgroupMemoryRead) {
     DAWN_TEST_UNSUPPORTED_IF(testCase.requiresF16 &&
                              !device.HasFeature(wgpu::FeatureName::ShaderF16));
 
+    // TODO(590225562): Fails on Android PowerVR Vulkan for several NaN-input cases.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan() &&
+                          MatchesCase({"mat2x2_mul_mat2x2_nan", "mat2x2_mul_scalar_nan"}));
+
     // These tests are exceptionally slow on Swiftshader, even with just a single workgroup.
     DAWN_TEST_UNSUPPORTED_IF(IsSwiftshader());
-
-    // TODO(crbug.com/590141753): Fails on Android PowerVR Vulkan for several NaN-input cases.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsImgTec() && IsVulkan() &&
-                          MatchesCase({"determinant_2x2_nan_input", "dot_f32_vec2_nan_input",
-                                       "mat2x2_mul_mat2x2_nan", "mat2x2_mul_scalar_nan"}));
-
-    // Suppress cases that fail on Windows NVIDIA Vulkan.
-    // These only fail on Windows and put the driver in a bad state, causing cascading failures.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsNvidia() && IsVulkan() &&
-                          MatchesCase({"add_inf_neg_inf",
-                                       "cross_f32_inf_input",
-                                       "determinant_2x2_inf_input",
-                                       "determinant_3x3_inf_input",
-                                       "determinant_4x4_inf_input",
-                                       "dot_f32_vec2_inf_input",
-                                       "dot_f32_vec2_inf_output",
-                                       "dot_f32_vec2_nan_output",
-                                       "dot_f32_vec3_inf_input",
-                                       "dot_f32_vec4_inf_input",
-                                       "mat2x2_add_mat2x2",
-                                       "mat2x2_mul_mat2x2",
-                                       "mat2x2_mul_scalar",
-                                       "mat2x2_mul_vec2",
-                                       "mat2x2_sub_mat2x2",
-                                       "mat3x3_mul_vec3",
-                                       "mat4x3_sub_mat4x3",
-                                       "mat4x4_mul_vec4",
-                                       "mix_f32_inf_input",
-                                       "mul_inf_zero",
-                                       "normalize_vec2_inf_input",
-                                       "normalize_vec2_nan_output",
-                                       "reflect_vec2_inf_input",
-                                       "reflect_vec2_inf_output",
-                                       "refract_vec2_f32_inf_output",
-                                       "scalar_mul_mat2x2",
-                                       "sub_inf_inf",
-                                       "vec_mul_scalar"}));
-
-    // Suppress cases for NVIDIA Linux on a recent driver, and
-    // which cause a hang.
-    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan() &&
-                          MatchesCase({
-                              "mat2x2_add_mat2x2",
-                              "mat2x2_mul_mat2x2",
-                              "mat2x2_mul_mat2x2_nan",
-                              "mat4x4_mul_mat4x4_f16_nan",
-                              "mat2x2_mul_scalar",
-                              "mat2x2_mul_scalar_nan",
-                              "scalar_mul_mat2x2",
-                              "mat2x2_mul_vec2",
-                              "mat2x2_mul_vec2_nan",
-                              "mat3x3_mul_vec3",
-                              "mat4x4_mul_vec4",
-                              "mat2x2_sub_mat2x2",
-                              "mat4x3_sub_mat4x3",
-                              "vec_mul_scalar",
-                              "cross_f32_inf_input",
-                              "cross_f32_nan_input",
-                              "determinant_2x2_inf_input",
-                              "determinant_2x2_nan_input",
-                              "determinant_3x3_inf_input",
-                              "determinant_4x4_inf_input",
-                              "dot_f32_vec2_inf_input",
-                              "dot_f32_vec2_inf_output",
-                              "dot_f32_vec2_nan_input",
-                              "dot_f32_vec3_inf_input",
-                              "dot_f32_vec4_inf_input",
-                              "dot_f16_vec2_inf_input",
-                              "dot_f16_vec2_nan_input",
-                              "dot_f16_vec4_inf_input",
-                              "mix_f32_inf_input",
-                              "mix_f32_nan_input",
-                              "normalize_vec2_inf_input",
-                              "normalize_vec2_nan_output",
-                              "reflect_vec2_inf_input",
-                              "reflect_vec2_inf_output",
-                              "refract_vec2_f32_inf_output",
-                          }));
 
     constexpr uint32_t kReadIndex = 1000;
     constexpr uint32_t kNumWorkgroups = 1024;
@@ -663,6 +436,8 @@ DAWN_INSTANTIATE_TEST_P(
         OpenGLBackend(),
         OpenGLESBackend(),
         VulkanBackend(),
+        VulkanBackend({"spirv_float_controls_32bit", "spirv_float_controls_16bit"},
+                      {"spirv_float_controls2"}),
         WebGPUBackend(),
     },
     {
@@ -685,6 +460,8 @@ DAWN_INSTANTIATE_TEST_P(
                          "(mat2x2<f32>(inf, x, x, x) * mat2x2<f32>(x, x, x, x))[0].x == 123.0f"},
         ShaderPoisonCase{"mat2x2_mul_mat2x2_nan",
                          "(mat2x2<f32>(nan, x, x, x) * mat2x2<f32>(x, x, x, x))[0].x == 123.0f"},
+        ShaderPoisonCase{"mat2x2_mul_mat2x2_nan_2",
+                         "(mat2x2<f32>(x, x, x, nan) * mat2x2<f32>(x, x, x, x))[1].y == 123.0f"},
         ShaderPoisonCase{"mat4x4_mul_mat4x4_f16_nan",
                          "(mat4x4<f16>(nanh, xh, xh, xh, xh, xh, xh, xh, xh, xh, xh, xh, xh, "
                          "xh, xh, xh) * mat4x4<f16>(xh, xh, xh, xh, xh, xh, xh, xh, xh, xh, xh, "
@@ -694,6 +471,12 @@ DAWN_INSTANTIATE_TEST_P(
                          "(mat2x2<f32>(inf, 1.0f, 2.0f, 3.0f) * x)[0].x == 123.0f"},
         ShaderPoisonCase{"mat2x2_mul_scalar_nan",
                          "(mat2x2<f32>(nan, 1.0f, 2.0f, 3.0f) * x)[0].x == 123.0f"},
+        ShaderPoisonCase{"mat2x2_mul_scalar_nan_2",
+                         "(mat2x2<f32>(1.0f, 1.0f, 2.0f, nan) * x)[1].y == 123.0f"},
+        ShaderPoisonCase{"mat2x2_mul_scalar_nan_3",
+                         "(mat2x2<f32>(1.0f, nan, 2.0f, 3.0f) * x)[0].y == 123.0f"},
+        ShaderPoisonCase{"mat2x2_mul_scalar_nan_4",
+                         "(mat2x2<f32>(1.0f, 1.0f, nan, 3.0f) * x)[1].x == 123.0f"},
         ShaderPoisonCase{"scalar_mul_mat2x2",
                          "(x * mat2x2<f32>(inf, 1.0f, 2.0f, 3.0f))[0].x == 123.0f"},
         ShaderPoisonCase{"mat2x2_mul_vec2",

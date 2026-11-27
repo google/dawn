@@ -1044,6 +1044,18 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Wrap sample-rate fragment shader entry points in a sample_index branch to work around a "
       "sample-rate splitting bug in Imagination/PowerVR drivers.",
       "https://crbug.com/589728740", ToggleStage::Device}},
+    {Toggle::SpirvFloatControls2,
+     {"spirv_float_controls2",
+      "Use SPV_KHR_float_controls2 to preserve INF/NAN for floating point.",
+      "https://crbug.com/587219560", ToggleStage::Device}},
+    {Toggle::SpirvFloatControls32bit,
+     {"spirv_float_controls_32bit",
+      "Use SPV_KHR_float_controls to preserve INF/NAN for 32-bit floating point.",
+      "https://crbug.com/587219560", ToggleStage::Device}},
+    {Toggle::SpirvFloatControls16bit,
+     {"spirv_float_controls_16bit",
+      "Use SPV_KHR_float_controls to preserve INF/NAN for 16-bit floating point.",
+      "https://crbug.com/587219560", ToggleStage::Device}},
 
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};

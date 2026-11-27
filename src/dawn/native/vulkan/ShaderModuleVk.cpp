@@ -333,6 +333,13 @@ ResultOrUnknownError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpi
     req.tintOptions.extensions.use_subgroup_uniform_control_flow =
         GetDevice()->IsToggleEnabled(Toggle::UseSpirvSubgroupUniformControlFlow);
 
+    req.tintOptions.extensions.use_float_controls2 =
+        GetDevice()->IsToggleEnabled(Toggle::SpirvFloatControls2);
+    req.tintOptions.extensions.use_float_controls_32bit =
+        GetDevice()->IsToggleEnabled(Toggle::SpirvFloatControls32bit);
+    req.tintOptions.extensions.use_float_controls_16bit =
+        GetDevice()->IsToggleEnabled(Toggle::SpirvFloatControls16bit);
+
     req.tintOptions.workarounds.texture_sample_compare_depth_cube_array =
         GetDevice()->IsToggleEnabled(Toggle::VulkanSampleCompareDepthCubeArrayWorkaround);
     req.tintOptions.workarounds.texture_sample_compare_2d_polyfill =

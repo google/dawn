@@ -74,6 +74,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool IsSwiftshader() const;
     static bool IsWindows();
     bool IsWindowsAMD() const;
+    bool IsNvidia() const;
 
     // Check using VkDriverId, which is available in Vk 1.2 or an extension.
     bool IsIntelMesa() const;

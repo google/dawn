@@ -235,6 +235,7 @@ class Printer {
     Options options_;
     writer::Module module_;
     BinaryWriter writer_;
+    core::type::Manager& ty_{ir_.Types()};
 
     Output output_;
 
@@ -298,6 +299,8 @@ class Printer {
     /// The current function that is being emitted.
     Function current_function_;
 
+    uint32_t entry_point_id_ = 0;
+
     bool zero_init_workgroup_memory_ = false;
 
     /// Builds the SPIR-V from the IR
@@ -341,7 +344,62 @@ class Printer {
             }
         }
 
+        // Inf/Nan preservation.
+        // These are not done with the other execution modes because we may not have seen all the
+        // necessary types by then.
+        PreserveInfNan();
+
         return Success;
+    }
+
+    /// Preserves inf/nan in the shader if the options are set.
+    /// Prefers SPV_KHR_float_controls2 to SPV_KHR_float_controls.
+    /// For SPV_KHR_float_controls, 32-bit and 16-bit are separate options.
+    void PreserveInfNan() {
+        // Allow all flags except NotNan and NotInf to preserve inf and nan (otherwise poison values
+        // are generated which can lead to UB).
+        const uint32_t flags = SpvFPFastMathModeNSZMask | SpvFPFastMathModeAllowRecipMask |
+                               SpvFPFastMathModeAllowContractMask |
+                               SpvFPFastMathModeAllowReassocMask |
+                               SpvFPFastMathModeAllowTransformMask;
+        if (options_.extensions.use_float_controls2) {
+            module_.PushExtension("SPV_KHR_float_controls2");
+            module_.PushCapability(SpvCapabilityFloatControls2);
+            uint32_t flags_id = module_.NextId();
+            module_.PushType(spv::Op::OpConstant, {Type(ty_.u32()), flags_id, U32Operand(flags)});
+            // Add the default fast math execution mode for f32 and f16 if they are used.
+            if (auto f32_id = types_.Get(ty_.f32())) {
+                module_.PushExecutionMode(
+                    spv::Op::OpExecutionModeId,
+                    {entry_point_id_, U32Operand(SpvExecutionModeFPFastMathDefault), *f32_id,
+                     flags_id});
+            }
+            if (auto f16_id = types_.Get(ty_.f16())) {
+                module_.PushExecutionMode(
+                    spv::Op::OpExecutionModeId,
+                    {entry_point_id_, U32Operand(SpvExecutionModeFPFastMathDefault), *f16_id,
+                     flags_id});
+            }
+        } else {
+            // If float_controls2 is not supported, but float_controls is,
+            // preserve inf and nan for f32 and f16 if they are used.
+            if (options_.extensions.use_float_controls_32bit && types_.Contains(ty_.f32())) {
+                module_.PushExtension("SPV_KHR_float_controls");
+                module_.PushCapability(SpvCapabilitySignedZeroInfNanPreserve);
+                module_.PushExecutionMode(
+                    spv::Op::OpExecutionMode,
+                    {entry_point_id_, U32Operand(SpvExecutionModeSignedZeroInfNanPreserve),
+                     U32Operand(32)});
+            }
+            if (options_.extensions.use_float_controls_16bit && (types_.Contains(ty_.f16()))) {
+                module_.PushExtension("SPV_KHR_float_controls");
+                module_.PushCapability(SpvCapabilitySignedZeroInfNanPreserve);
+                module_.PushExecutionMode(
+                    spv::Op::OpExecutionMode,
+                    {entry_point_id_, U32Operand(SpvExecutionModeSignedZeroInfNanPreserve),
+                     U32Operand(16)});
+            }
+        }
     }
 
     /// Convert a builtin to the corresponding SPIR-V enum value, taking into account the target
@@ -861,6 +919,7 @@ class Printer {
     /// @param func the function to emit entry point declarations for
     /// @param id the result ID of the function declaration
     void EmitEntryPoint(core::ir::Function* func, uint32_t id) {
+        entry_point_id_ = id;
         SpvExecutionModel stage = SpvExecutionModelMax;
         switch (func->Stage()) {
             case core::ir::Function::PipelineStage::kCompute: {

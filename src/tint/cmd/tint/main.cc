@@ -170,6 +170,9 @@ struct Options {
 
 #if TINT_BUILD_SPV_WRITER
     bool use_storage_input_output_16 = true;
+    bool use_float_controls2 = false;
+    bool use_float_controls_32bit = false;
+    bool use_float_controls_16bit = false;
     tint::spirv::writer::SpvVersion spirv_version = tint::spirv::writer::SpvVersion::kSpv13;
 
     std::unordered_set<tint::BindingPoint> ycbcr_bindings;
@@ -497,6 +500,21 @@ subgroup uniformity violations that may be produced)",
         options.Add<BoolOption>("use-storage-input-output-16",
                                 "Use the StorageInputOutput16 SPIR-V capability", Default{true});
     TINT_DEFER(opts->use_storage_input_output_16 = *use_storage_input_output_16.value);
+    auto& use_float_controls2 = options.Add<BoolOption>(
+        "use-float-controls2", "Use SPV_KHR_float_controls2 to preserve inf/nan", Default(false));
+    TINT_DEFER(opts->use_float_controls2 = *use_float_controls2.value);
+    auto& use_float_controls_32bit =
+        options.Add<BoolOption>("use-float-controls-32bit",
+                                "Use SPV_KHR_float_controls to preserve inf/nan for 32-bit floats, "
+                                "unless --use-float-controls2 is specified",
+                                Default(false));
+    TINT_DEFER(opts->use_float_controls_32bit = *use_float_controls_32bit.value);
+    auto& use_float_controls_16bit =
+        options.Add<BoolOption>("use-float-controls-16bit",
+                                "Use SPV_KHR_float_controls to preserve inf/nan for 16-bit floats, "
+                                "unless --use-float-controls2 is specified",
+                                Default(false));
+    TINT_DEFER(opts->use_float_controls_16bit = *use_float_controls_16bit.value);
 
     tint::Vector<EnumName<tint::spirv::writer::SpvVersion>, 2> version_enum_names{
         EnumName(tint::spirv::writer::SpvVersion::kSpv13, "1.3"),
@@ -1143,6 +1161,9 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.extensions.use_storage_input_output_16 = options.use_storage_input_output_16;
+    gen_options.extensions.use_float_controls2 = options.use_float_controls2;
+    gen_options.extensions.use_float_controls_32bit = options.use_float_controls_32bit;
+    gen_options.extensions.use_float_controls_16bit = options.use_float_controls_16bit;
     gen_options.spirv_version = options.spirv_version;
     gen_options.workarounds.polyfill_bool_vec_dynamic_load = options.polyfill_bool_vec_dynamic_load;
 

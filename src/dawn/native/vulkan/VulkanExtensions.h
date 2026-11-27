@@ -104,6 +104,7 @@ enum class DeviceExt : uint32_t {
     PipelineRobustness,
     Maintenance5,
     LoadStoreOpNone,
+    FloatControls2,
 
     // Others
     Maintenance9,

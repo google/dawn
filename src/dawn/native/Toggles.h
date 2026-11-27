@@ -246,6 +246,9 @@ enum class Toggle {
     MetalPolyfillExtractBits,
     D3D12PersistentlyMapBuffersAndClearBufferBeforeDestroy,
     VulkanGuardSampleRateFragmentShaders,
+    SpirvFloatControls2,
+    SpirvFloatControls32bit,
+    SpirvFloatControls16bit,
 
     EnumCount,
     InvalidEnum = EnumCount,

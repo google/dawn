@@ -1427,6 +1427,35 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         }
     }
 
+    // Enable float controls2 over float controls, except on Imagination and Nvidia.
+    // TODO(590533194): re-enable IMG when the bug is fixed.
+    // TODO(590821313): re-enable Nvidia when the bug is fixed.
+    if (GetDeviceInfo().HasExt(DeviceExt::FloatControls2) &&
+        GetDeviceInfo().floatControls2Features.shaderFloatControls2 == VK_TRUE &&
+        !(IsAndroidImgTec() || IsNvidia())) {
+        deviceToggles->Default(Toggle::SpirvFloatControls2, true);
+    } else {
+        deviceToggles->ForceSet(Toggle::SpirvFloatControls2, false);
+        if (GetDeviceInfo().HasExt(DeviceExt::ShaderFloatControls)) {
+            if (GetDeviceInfo().floatControlsProperties.shaderSignedZeroInfNanPreserveFloat32 ==
+                    VK_TRUE &&
+                !IsSwiftshader()) {
+                deviceToggles->Default(Toggle::SpirvFloatControls32bit, true);
+            } else {
+                deviceToggles->ForceSet(Toggle::SpirvFloatControls32bit, false);
+            }
+            if (GetDeviceInfo().floatControlsProperties.shaderSignedZeroInfNanPreserveFloat16 ==
+                VK_TRUE) {
+                deviceToggles->Default(Toggle::SpirvFloatControls16bit, true);
+            } else {
+                deviceToggles->ForceSet(Toggle::SpirvFloatControls16bit, false);
+            }
+        } else {
+            deviceToggles->ForceSet(Toggle::SpirvFloatControls32bit, false);
+            deviceToggles->ForceSet(Toggle::SpirvFloatControls16bit, false);
+        }
+    }
+
     // Vulkan waiting is already thread safe.
     deviceToggles->Default(Toggle::WaitIsThreadSafe, true);
 
@@ -1567,6 +1596,10 @@ bool PhysicalDevice::IsAdreno7xx() const {
 bool PhysicalDevice::IsPixel10() const {
     // Pixel 10 is the only device seen with PowerVR D-Series DXT-48-1536 so far.
     return IsAndroidImgTec() && GetDeviceId() == 0x71061212;
+}
+
+bool PhysicalDevice::IsNvidia() const {
+    return gpu_info::IsNvidia(GetVendorId());
 }
 
 bool PhysicalDevice::IsIntelMesa() const {

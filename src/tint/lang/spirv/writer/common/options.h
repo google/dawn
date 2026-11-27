@@ -238,6 +238,15 @@ struct Options {
         /// points.
         bool use_subgroup_uniform_control_flow = false;
 
+        /// Set to `true` to preserve Inf/Nan using SPV_KHR_float_controls2.
+        bool use_float_controls2 = false;
+
+        /// Set to `true` to preserve Inf/Nan for f32 using SPV_KHR_float_controls.
+        bool use_float_controls_32bit = false;
+
+        /// Set to `true` to preserve Inf/Nan for f16 using SPV_KHR_float_controls.
+        bool use_float_controls_16bit = false;
+
         TINT_REFLECT(Extensions,
                      use_demote_to_helper_invocation,
                      use_storage_input_output_16,
@@ -249,7 +258,10 @@ struct Options {
                      disable_storage_subgroup_matrix_clamping,
                      dot_4x8_packed,
                      use_maximal_reconvergence,
-                     use_subgroup_uniform_control_flow);
+                     use_subgroup_uniform_control_flow,
+                     use_float_controls2,
+                     use_float_controls_32bit,
+                     use_float_controls_16bit);
     };
 
     ///////////////////////////////////////////////////////////////////////////////////////////

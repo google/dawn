@@ -757,5 +757,49 @@ TEST_F(SpirvWriterTest, Alignment_CooperativeMatrixStore) {
     EXPECT_INST("OpCooperativeMatrixStoreKHR %25 %10 %uint_0 %23 Aligned|NonPrivatePointer 64");
 }
 
+TEST_F(SpirvWriterTest, FloatControls_f32) {
+    auto* ep = b.ComputeFunction("main", 1_u, 1_u, 1_u);
+    b.Append(ep->Block(), [&] {
+        b.Let("l", 0_f);
+        b.Return(ep);
+    });
+
+    Options options;
+    options.extensions.use_float_controls_32bit = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("OpExecutionMode %main SignedZeroInfNanPreserve 32");
+}
+
+TEST_F(SpirvWriterTest, FloatControls_f16) {
+    auto* ep = b.ComputeFunction("main", 1_u, 1_u, 1_u);
+    b.Append(ep->Block(), [&] {
+        b.Let("l", 0_h);
+        b.Return(ep);
+    });
+
+    Options options;
+    options.extensions.use_float_controls_16bit = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("OpExecutionMode %main SignedZeroInfNanPreserve 16");
+}
+
+TEST_F(SpirvWriterTest, FloatControls2) {
+    auto* ep = b.ComputeFunction("main", 1_u, 1_u, 1_u);
+    b.Append(ep->Block(), [&] {
+        b.Let("f", 0_f);
+        b.Let("h", 0_h);
+        b.Return(ep);
+    });
+
+    Options options;
+    options.extensions.use_float_controls2 = true;
+    auto result = Generate(options);
+    ASSERT_EQ(result, Success) << result.Failure() << output_;
+    EXPECT_INST("OpExecutionModeId %main FPFastMathDefault %float %uint_458764");
+    EXPECT_INST("OpExecutionModeId %main FPFastMathDefault %half %uint_458764");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

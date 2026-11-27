@@ -145,6 +145,7 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
     {DeviceExt::PipelineRobustness, "VK_EXT_pipeline_robustness"},
     {DeviceExt::Maintenance5, "VK_KHR_maintenance5"},
     {DeviceExt::LoadStoreOpNone, "VK_KHR_load_store_op_none"},
+    {DeviceExt::FloatControls2, "VK_KHR_shader_float_controls2"},
 
     // Not promoted to core in any version
     {DeviceExt::Maintenance9, "VK_KHR_maintenance9"},
@@ -249,6 +250,7 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
             case DeviceExt::MaximalReconvergence:
             case DeviceExt::SubgroupUniformControlFlow:
             case DeviceExt::ShaderBfloat16:
+            case DeviceExt::FloatControls2:
                 hasDependencies = true;
                 break;
 
