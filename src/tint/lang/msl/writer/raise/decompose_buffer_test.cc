@@ -782,5 +782,36 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_DecomposeBufferTest, UnrelatedArrayLength) {
+    auto* v = b.Var("v", ty.ptr(storage, ty.runtime_array(ty.u32())));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Call(ty.u32(), core::BuiltinFn::kArrayLength, v);
+        b.Return(f);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
+}
+
+%f = func():void {
+  $B2: {
+    %3:u32 = arrayLength %v
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    Run(DecomposeBuffer);
+
+    EXPECT_EQ(src, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise

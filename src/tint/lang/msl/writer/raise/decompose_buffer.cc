@@ -108,7 +108,6 @@ struct State {
                     inst,
                     [&](core::ir::CoreBuiltinCall* call) {
                         TINT_IR_ASSERT(ir, call->Func() != core::BuiltinFn::kBufferLength);
-                        TINT_IR_ASSERT(ir, call->Func() != core::BuiltinFn::kArrayLength);
 
                         if (call->Func() == core::BuiltinFn::kBufferView ||
                             call->Func() == core::BuiltinFn::kBufferArrayView) {
