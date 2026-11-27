@@ -76,6 +76,15 @@ func (t *adbTarget) shell(command string) (string, error) {
 	return string(out), nil
 }
 
+func (t *adbTarget) stdout(args []string) ([]byte, error) {
+	words := append([]string{t.devicePath(deviceRunner)}, args...)
+	cmd := t.command("shell", shellQuoteAll(words))
+	if t.verbose {
+		fmt.Println("Running", strings.Join(cmd.Args, " "))
+	}
+	return stdoutOf(cmd)
+}
+
 func (t *adbTarget) start(args []string, stdin string) (process, error) {
 	// `echo PID:$$` gets the shell's PID. `exec` will replace the shell with the
 	// device runner. The device runner will have the same PID that the shell had.

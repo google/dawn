@@ -40,6 +40,9 @@ import (
 type target interface {
 	// start runs the runner with args, feeding it stdin.
 	start(args []string, stdin string) (process, error)
+	// stdout runs the runner with args until it exits, and returns what it
+	// wrote to stdout.
+	stdout(args []string) ([]byte, error)
 }
 
 // process is a running command-line runner process.
@@ -66,7 +69,9 @@ type localTarget struct {
 	skipVSCodeInfo bool   // skip VS Code launch.json output when dir is set
 }
 
-func (t *localTarget) start(args []string, stdin string) (process, error) {
+// command returns the command that runs the runner with args, and prints it
+// if t.verbose is set.
+func (t *localTarget) command(args []string) *exec.Cmd {
 	cmd := exec.Command(t.runner, args...)
 	cmd.Dir = t.dir
 	if t.verbose {
@@ -76,7 +81,26 @@ func (t *localTarget) start(args []string, stdin string) (process, error) {
 			fmt.Println("Running", strings.Join(cmd.Args, " "))
 		}
 	}
-	return startWithPipe(cmd, stdin)
+	return cmd
+}
+
+func (t *localTarget) start(args []string, stdin string) (process, error) {
+	return startWithPipe(t.command(args), stdin)
+}
+
+func (t *localTarget) stdout(args []string) ([]byte, error) {
+	return stdoutOf(t.command(args))
+}
+
+// stdoutOf runs cmd until it exits and returns what it wrote to stdout. The
+// error of a command that fails holds what it wrote to stderr.
+func stdoutOf(cmd *exec.Cmd) ([]byte, error) {
+	output, err := cmd.Output()
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) {
+		return nil, fmt.Errorf("%w:\n%s", err, exitErr.Stderr)
+	}
+	return output, err
 }
 
 // localProcess is a process started by exec.

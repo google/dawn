@@ -212,6 +212,11 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	if err != nil {
 		return err
 	}
+	if c.worksOutTags() {
+		if err := c.addAutomaticTags(cfg.OsWrapper); err != nil {
+			return err
+		}
+	}
 	if c.flags.shardCount > 1 {
 		all := len(testCases)
 		testCases = shardCases(testCases, c.flags.shardIndex, c.flags.shardCount)

@@ -49,6 +49,7 @@ type expectationsFile struct {
 	path         string
 	lines        []expectationLine              // every line of the file
 	declaredTags result.Tags                    // the tags that the tag header declares, in lower case
+	runTags      result.Tags                    // the tags of the run, which select the lines that apply
 	exact        map[TestCase]*queryExpectation // the queries without wildcards
 	wildcards    []*queryExpectation            // sorted by query length (longest first), then by their position in the file.
 }
@@ -266,10 +267,13 @@ func (e *queryExpectation) add(line expectationLine) {
 	}
 }
 
-// selectLines builds exact and wildcards from the lines whose tags are all in
-// runTags, the tags of the run. A query without such a line is left out.
+// selectLines sets the tags of the run to runTags and rebuilds exact and
+// wildcards from the lines whose tags are all in runTags. A query without such
+// a line is left out.
 func (f *expectationsFile) selectLines(runTags result.Tags) {
+	f.runTags = runTags
 	f.exact = map[TestCase]*queryExpectation{}
+	f.wildcards = nil
 	for _, expectation := range groupByQuery(f.lines, runTags) {
 		if expectation.results == 0 {
 			continue
@@ -374,4 +378,19 @@ func (s *State) RemoveSkipped(testCases []TestCase) ([]TestCase, []Result) {
 // webgpu-cts/expectations.txt.
 func (s *State) HasExpectationsFile() bool {
 	return s.expectFile != nil
+}
+
+// AddAutomaticTags adds automaticTags to the tags of the run, except for those
+// that the expectations file does not declare, and selects the lines of the
+// file again. It returns the tags of the run.
+func (s *State) AddAutomaticTags(automaticTags []string) result.Tags {
+	runTags := s.expectFile.runTags.Clone()
+	for _, tag := range automaticTags {
+		tag = strings.ToLower(tag)
+		if s.expectFile.declares(tag) {
+			runTags.Add(tag)
+		}
+	}
+	s.expectFile.selectLines(runTags)
+	return runTags
 }

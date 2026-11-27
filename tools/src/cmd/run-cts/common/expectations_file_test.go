@@ -117,6 +117,20 @@ func TestExpectationUndeclaredTags(t *testing.T) {
 	require.Equal(t, expectSkip, expectFile.lookup("suite:a:").results)
 }
 
+// An automatic tag that the file does not declare is left out of the run's
+// tags, and one of -expect-tags is an error.
+func TestAddAutomaticTags(t *testing.T) {
+	lines := tagHeader + "[ linux intel ] suite:a:* [ Failure ]"
+	state := &State{expectFile: parseLines(t, []string{"intel"}, lines)}
+
+	tags := state.AddAutomaticTags([]string{"Linux", "ubuntu", "intel-0x9bc5"})
+	require.Equal(t, result.NewTags("intel", "linux"), tags)
+	require.Equal(t, expectFailure, state.expectFile.lookup("suite:a:").results)
+
+	_, err := parseExpectationsFile("expectations.txt", lines, result.NewTags("ubuntu"))
+	require.ErrorContains(t, err, "-expect-tags: expectations.txt does not declare the tag 'ubuntu'")
+}
+
 // Only Failure, RetryOnFailure, Skip and Slow are results, and a line needs
 // one.
 func TestExpectationResults(t *testing.T) {

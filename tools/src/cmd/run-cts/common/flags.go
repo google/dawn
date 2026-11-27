@@ -69,7 +69,7 @@ func (f *Flags) Register(fsReader oswrapper.FilesystemReader) {
 	flag.StringVar(&f.Log, "log", "", "path to log file of tests run and result")
 	flag.StringVar(&f.ResultsPath, "output", "", "path to write test results file")
 	flag.StringVar(&f.ExpectationsPath, "expect", "", "path to expectations file: a results file written by -output, or a file in the format of webgpu-cts/expectations.txt")
-	flag.StringVar(&f.ExpectationsTags, "expect-tags", "", "comma-separated tags of this run, which select the lines of an expectations.txt file")
+	flag.StringVar(&f.ExpectationsTags, "expect-tags", "", "comma-separated tags that select the lines of an expectations.txt file. 'run-cts standalone' adds them to the tags that it works out from the OS, the GPU and the build")
 	flag.StringVar(&f.CTS, "cts", DefaultCtsPath(fsReader), "root directory of WebGPU CTS")
 	flag.StringVar(&f.Node, "node", fileutils.NodePath(fsReader), "path to node executable")
 	flag.StringVar(&f.Npx, "npx", DefaultNpxPath(), "path to npx executable")
