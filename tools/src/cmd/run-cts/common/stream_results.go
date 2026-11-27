@@ -129,6 +129,8 @@ func StreamResults(
 		covTree = &cov.Tree{}
 	}
 
+	lists := resultLists{withExpectationsFile: state.HasExpectationsFile()}
+
 	start := time.Now()
 	for res := range stream {
 		state.Log.logResults(res, failuresOnly)
@@ -144,6 +146,9 @@ func StreamResults(
 			exStatus.expected = !expectation.results.unexpected(res.Status)
 		}
 		numByExpectedStatus[exStatus] = numByExpectedStatus[exStatus] + 1
+		if !exStatus.expected {
+			lists.add(res)
+		}
 		name := res.TestCase
 		if verbose ||
 			res.Error != nil ||
@@ -182,6 +187,8 @@ func StreamResults(
 
 	// All done. Print final stats.
 	fmt.Fprintf(stdout, "\nCompleted in %v\n", timeTaken)
+
+	lists.print(stdout)
 
 	var numExpectedByStatus map[Status]int
 	if state.Expectations != nil {
