@@ -111,9 +111,14 @@ change. Flags for `-adb`:
   enable backend validation
 - `-flag <key>=<value>` sets any other [Dawn flag](#dawn-flags), and may be
   repeated
-- `-verbose` prints the runner command lines and all of the test output
-- `-output <file>` writes the results as JSON, `-expect <file>` compares a run
-  with such a file, and `-log <file>` records every test and its result
+- `-verbose=<level>` sets how much is printed:
+  - `-verbose=unexpected` prints the output of the test cases that failed, to
+    see why they failed
+  - `-verbose=all` prints the output of every test case
+  - `-verbose` also prints the runner command lines
+- `-output <file>` writes the results as JSON, `-expect <file>` says which
+  results are [expected](#expectations), and `-log <file>` records every test
+  and its result
 - `-build=false` skips building the CTS JavaScript
 - `-shard-count <n>` with `-shard-index <i>` runs only shard `i` of `n` of the
   test cases, from 0 to `n` - 1, so that several machines can each run one
@@ -121,6 +126,62 @@ change. Flags for `-adb`:
   `-cts <zip>` a [CTS zip](#running-from-a-zip)
 
 `./tools/run run-cts standalone -help` lists the rest.
+
+### Expectations
+
+`-expect <file>` says which results are expected, so that only new problems
+fail the run. The file is either in the format of
+[`webgpu-cts/expectations.txt`](../webgpu-cts/expectations.txt), which Chromium
+uses to run the CTS, or a results file that `-output` wrote, which makes that
+earlier run the baseline:
+
+```sh
+./tools/run run-cts standalone -bin out/Release \
+    -expect webgpu-cts/expectations.txt 'webgpu:api,operation,*'
+```
+
+With a baseline, the second run fails only for a failure or crash that the
+first run did not have:
+
+```sh
+./tools/run run-cts standalone -bin out/Release \
+    -output baseline.json 'webgpu:api,operation,*'
+./tools/run run-cts standalone -bin out/Release \
+    -expect baseline.json 'webgpu:api,operation,*'
+```
+
+Chromium's
+[expectation files documentation](https://chromium.googlesource.com/chromium/src/+/main/docs/testing/expectation_files.md)
+describes the format of `expectations.txt`. `run-cts` treats the results of a
+line as follows:
+
+- `Skip`: the test case is not run, and is reported as skipped
+- `Failure`: the test case is expected to fail, crash or time out
+- `RetryOnFailure`: the test case may have any result; it is not run again
+- `Slow`: the test case may time out
+
+In a results file, the test cases recorded as `skip` are skipped, whether an
+expectation or the CTS itself skipped them in that run, and those recorded as
+`fail`, `xfail`, `crash` or `timeout` are expected to fail. A test case that
+the CTS skipped is therefore not run again: write the baseline again without
+`-expect` to find out whether it now runs. A results file records only what
+happened in its run, so `RetryOnFailure` and `Slow` do not carry over from the
+expectations of that run.
+
+#### Tags
+
+`run-cts standalone` works out the tags of the run from the OS, the device, its
+own flags, and the build and adapter that the runner reports with
+`--print-run-info`. It spells them as Chromium does and prints them before the
+run:
+
+```
+Expectation tags: arch-x86_64,dawn-no-backend-validation,desktop,linux,...
+```
+
+If you want to use your own tags, the tags given to `-expect-tags` are added to
+the ones that `run-cts` works out. This might be useful when working on internal
+versions of a driver.
 
 ## Running from a zip
 
@@ -185,10 +246,8 @@ out/Release/dawn_standalone_cts_runner --cts-zip cts.zip \
     -q 'webgpu:api,operation,queue,*'
 ```
 
-`-q` may be repeated. `--query-file <file>` reads queries or test cases, one per
-line, from a file, or from stdin when the file is `-`, and `--list` prints the
-matching test cases instead of running them. `--help` lists the other flags, and
-`--dawn-flag <key>=<value>` sets a [Dawn flag](#dawn-flags).
+`--help` lists the options. `--dawn-flag <key>=<value>` sets a
+[Dawn flag](#dawn-flags).
 
 ### Making the zip without Go
 
@@ -261,5 +320,5 @@ the Dawn provider, and may be repeated. The keys are:
 - `validate=<1|true>` — enable full backend validation layers
 - `verbose=1` — print the selected GPU adapter name
 - `enable-dawn-features=<toggles>` — comma-separated list of
-  [Dawn toggles](https://dawn.googlesource.com/dawn/+/refs/heads/main/src/dawn/native/Toggles.cpp)
+  [Dawn toggles](../src/dawn/native/Toggles.cpp)
 - `disable-dawn-features=<toggles>` — comma-separated list of Dawn toggles
