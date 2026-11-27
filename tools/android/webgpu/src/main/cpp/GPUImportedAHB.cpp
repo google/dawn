@@ -405,6 +405,7 @@ Java_androidx_webgpu_helper_GPUAndroidHardwareBufferUtil_createExternalTextureNa
     extDesc.srcTransferFunctionParameters = params.srcTransferFunction.data();
     extDesc.dstTransferFunctionParameters = params.dstTransferFunction.data();
     extDesc.gamutConversionMatrix = params.gamutConversionMatrix.data();
+    extDesc.doYuvToRgbConversionOnly = params.doYuvToRgbConversionOnly;
 
     jobject originObj =
         env->CallObjectMethod(descriptorObj, classes->externalTextureDescriptorGetCropOrigin);

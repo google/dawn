@@ -162,28 +162,42 @@ wgpu::Status ComputeExternalTextureParams(const wgpu::ColorSpaceDawn& srcColorSp
             return wgpu::Status::Error;
     }
 
+    // dstPrimaries and dstTransfer describe the same destination as dstXYZToRGB and dstOETF. Keep
+    // them in the same case so the no-op check below stays in sync with the conversion parameters.
     math::Mat3x3f dstXYZToRGB;
     TransferFunction dstOETF;
+    wgpu::ColorSpacePrimariesDawn dstPrimaries;
+    wgpu::ColorSpaceTransferDawn dstTransfer;
     switch (dstColorSpace) {
         case wgpu::PredefinedColorSpace::SRGB:
             dstXYZToRGB = kXYZToRGB_sRGB;
             dstOETF = kEOTFInverse_sRGB;
+            dstPrimaries = wgpu::ColorSpacePrimariesDawn::SRGB;
+            dstTransfer = wgpu::ColorSpaceTransferDawn::SRGB;
             break;
         case wgpu::PredefinedColorSpace::DisplayP3:
             dstXYZToRGB = kXYZToRGB_DisplayP3;
             dstOETF = kEOTFInverse_DisplayP3;
+            dstPrimaries = wgpu::ColorSpacePrimariesDawn::DisplayP3;
+            dstTransfer = wgpu::ColorSpaceTransferDawn::DisplayP3;
             break;
         case wgpu::PredefinedColorSpace::SRGBLinear:
             dstXYZToRGB = kXYZToRGB_sRGB;
             dstOETF = kEOTF_Identity;
+            dstPrimaries = wgpu::ColorSpacePrimariesDawn::SRGB;
+            dstTransfer = wgpu::ColorSpaceTransferDawn::Identity;
             break;
         case wgpu::PredefinedColorSpace::DisplayP3Linear:
             dstXYZToRGB = kXYZToRGB_DisplayP3;
             dstOETF = kEOTF_Identity;
+            dstPrimaries = wgpu::ColorSpacePrimariesDawn::DisplayP3;
+            dstTransfer = wgpu::ColorSpaceTransferDawn::Identity;
             break;
         case wgpu::PredefinedColorSpace::Rec2020Linear:
             dstXYZToRGB = kXYZToRGB_Rec2020;
             dstOETF = kEOTF_Identity;
+            dstPrimaries = wgpu::ColorSpacePrimariesDawn::Rec2020;
+            dstTransfer = wgpu::ColorSpaceTransferDawn::Identity;
             break;
         default:
             return wgpu::Status::Error;
@@ -217,6 +231,14 @@ wgpu::Status ComputeExternalTextureParams(const wgpu::ColorSpaceDawn& srcColorSp
     };
     out->srcTransferFunction = TransferFunctionToArray(srcEOTF);
     out->dstTransferFunction = TransferFunctionToArray(dstOETF);
+
+    // The color conversion is a no-op when the source already uses the destination's primaries and
+    // transfer function at unit luminance, so shaders can skip it. Current PredefinedColorSpace
+    // destinations are all SDR/linear (so luminanceAdjustment is 1.0f when transfers match). The
+    // luminanceAdjustment check guards future HDR destinations.
+    out->doYuvToRgbConversionOnly = luminanceAdjustment == 1.0f &&
+                                    srcColorSpace.primaries == dstPrimaries &&
+                                    srcColorSpace.transfer == dstTransfer;
 
     return wgpu::Status::Success;
 }

@@ -579,6 +579,7 @@ set(unittest_sources
     "unittests/EnumMaskIteratorTests.cpp"
     "unittests/EnumeratorTests.cpp"
     "unittests/ErrorTests.cpp"
+    "unittests/ExternalTextureParamsTests.cpp"
     "unittests/FeatureTests.cpp"
     "unittests/GPUInfoTests.cpp"
     "unittests/GetProcAddressTests.cpp"

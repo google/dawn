@@ -290,6 +290,7 @@ dawn_test("dawn_unittests") {
     "unittests/EnumMaskIteratorTests.cpp",
     "unittests/EnumeratorTests.cpp",
     "unittests/ErrorTests.cpp",
+    "unittests/ExternalTextureParamsTests.cpp",
     "unittests/FeatureTests.cpp",
     "unittests/FutureResultTests.cpp",
     "unittests/GPUInfoTests.cpp",

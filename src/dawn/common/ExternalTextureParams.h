@@ -44,6 +44,7 @@ struct ExternalTextureColorSpaceParams {
     std::array<float, 7> dstTransferFunction = {};  // Really the inverse transfer function.
     // Stored column major to match WGSL. (so one full column after another)
     std::array<float, 9> gamutConversionMatrix{};
+    bool doYuvToRgbConversionOnly = false;
 };
 
 // Helper function to make parameters for an ExternalTextureDescriptor

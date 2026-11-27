@@ -74,6 +74,7 @@ wgpu::ExternalTexture CreateExternalTexture(wgpu::Device device, uint32_t width,
     // Create an ExternalTextureDescriptor from the texture view
     wgpu::ExternalTextureDescriptor externalDesc;
     ExternalTextureColorSpaceParams params = GetNoopColorSpaceParams();
+    externalDesc.doYuvToRgbConversionOnly = params.doYuvToRgbConversionOnly;
     externalDesc.yuvToRgbConversionMatrix = params.yuvToRgbConversionMatrix.data();
     externalDesc.gamutConversionMatrix = params.gamutConversionMatrix.data();
     externalDesc.srcTransferFunctionParameters = params.srcTransferFunction.data();

@@ -125,6 +125,7 @@ class ExternalTextureTestsBase : public Parent {
 
         const auto& params = plane1 == nullptr ? noopRGBColorSpaceParams : bt709ColorSpaceParams;
 
+        desc.doYuvToRgbConversionOnly = params.doYuvToRgbConversionOnly;
         desc.yuvToRgbConversionMatrix = params.yuvToRgbConversionMatrix.data();
         desc.gamutConversionMatrix = params.gamutConversionMatrix.data();
         desc.srcTransferFunctionParameters = params.srcTransferFunction.data();
@@ -263,6 +264,7 @@ class ExternalTextureTestsBase : public Parent {
 
         wgpu::ExternalTextureDescriptor etDesc;
         etDesc.plane0 = srcTexture.CreateView();
+        etDesc.doYuvToRgbConversionOnly = colorSpaceParams.doYuvToRgbConversionOnly;
         etDesc.yuvToRgbConversionMatrix = colorSpaceParams.yuvToRgbConversionMatrix.data();
         etDesc.gamutConversionMatrix = colorSpaceParams.gamutConversionMatrix.data();
         etDesc.srcTransferFunctionParameters = colorSpaceParams.srcTransferFunction.data();
@@ -270,6 +272,19 @@ class ExternalTextureTestsBase : public Parent {
         etDesc.cropOrigin = {0, 0};
         etDesc.cropSize = {srcTexture.GetWidth(), srcTexture.GetHeight()};
         etDesc.apparentSize = {srcTexture.GetWidth(), srcTexture.GetHeight()};
+        CheckExternalTextureLoad(etDesc, expectedColor);
+
+        // When doYuvToRgbConversionOnly is set, also run with it disabled so the shader
+        // color-space conversion path (e.g. identity transfer) is still exercised.
+        if (etDesc.doYuvToRgbConversionOnly) {
+            etDesc.doYuvToRgbConversionOnly = false;
+            CheckExternalTextureLoad(etDesc, expectedColor);
+        }
+    }
+
+    // Load the single texel of an ExternalTexture created from etDesc and check its value.
+    void CheckExternalTextureLoad(const wgpu::ExternalTextureDescriptor& etDesc,
+                                  std::array<float, 3> expectedColor) {
         wgpu::ExternalTexture externalTexture = this->device.CreateExternalTexture(&etDesc);
 
         // Create the test pipeline that will just load the single texel of the ExternalTexture.
@@ -2215,6 +2230,30 @@ TEST_P(ExternalTextureTests, ColorSpaceConversion_BT1886) {
         },
         wgpu::PredefinedColorSpace::Rec2020Linear, {0.04, 0.02, 0.01, 1},
         {G(0.04), G(0.02), G(0.01)});
+}
+
+// Test that doYuvToRgbConversionOnly skips the gamut conversion and transfer functions. They are
+// all zeros, so the texel only comes back unchanged if the shader does not apply them.
+TEST_P(ExternalTextureTests, DoYuvToRgbConversionOnlySkipsColorSpaceConversion) {
+    wgpu::Texture srcTexture =
+        MakeTestTexture(wgpu::TextureFormat::RGBA16Float, 1, 1, {0.4, 0.2, 0.1, 1.0});
+
+    // Row-major 3x4 identity.
+    std::array<float, 12> yuvToRgbIdentity = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0};
+    std::array<float, 9> zeroGamut = {};
+    std::array<float, 7> zeroTransfer = {};
+
+    wgpu::ExternalTextureDescriptor etDesc;
+    etDesc.plane0 = srcTexture.CreateView();
+    etDesc.doYuvToRgbConversionOnly = true;
+    etDesc.yuvToRgbConversionMatrix = yuvToRgbIdentity.data();
+    etDesc.gamutConversionMatrix = zeroGamut.data();
+    etDesc.srcTransferFunctionParameters = zeroTransfer.data();
+    etDesc.dstTransferFunctionParameters = zeroTransfer.data();
+    etDesc.cropOrigin = {0, 0};
+    etDesc.cropSize = {1, 1};
+    etDesc.apparentSize = {1, 1};
+    CheckExternalTextureLoad(etDesc, {0.4, 0.2, 0.1});
 }
 
 // TODO(https://crbug.com/468988322): Add tests of ExternalTextures being used with a resource table

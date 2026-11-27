@@ -164,6 +164,7 @@ class CopyExternalTextureForBrowserTests : public Parent {
         DAWN_ASSERT(status == wgpu::Status::Success);
 
         wgpu::ExternalTextureDescriptor externalDesc;
+        externalDesc.doYuvToRgbConversionOnly = params.doYuvToRgbConversionOnly;
         externalDesc.yuvToRgbConversionMatrix = params.yuvToRgbConversionMatrix.data();
         externalDesc.gamutConversionMatrix = params.gamutConversionMatrix.data();
         externalDesc.srcTransferFunctionParameters = params.srcTransferFunction.data();
