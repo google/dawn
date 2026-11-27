@@ -48,6 +48,10 @@ func (e *Expectations) parse(text []byte) error {
 
 	*e = make(Expectations, len(statuses))
 	for _, s := range statuses {
+		// A results file does not say how an expected failure failed.
+		if s.Status == XFail {
+			s.Status = Fail
+		}
 		(*e)[s.TestCase] = s.Status
 	}
 	return nil

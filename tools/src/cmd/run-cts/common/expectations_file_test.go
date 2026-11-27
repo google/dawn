@@ -30,6 +30,8 @@ package common
 import (
 	"bytes"
 	"context"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -250,6 +252,54 @@ func TestRemoveSkipped(t *testing.T) {
 		{Index: 4, TestCase: "suite:both:", Status: Skip, Message: "skipped by expectations.txt:4\n"},
 		{Index: 5, TestCase: "suite:hang:x=2", Status: Skip, Message: "skipped by expectations.txt:1\n"},
 	}, skipped)
+}
+
+// A results file given to -expect skips the test cases that it records as
+// skipped, and expects those that it records as failed, crashed, timed out or
+// expected to fail to fail. -output records an expected failure as xfail.
+func TestResultsFileAsExpectations(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "results.json")
+	require.NoError(t, Expectations{
+		"suite:skip:":        Skip,
+		"suite:fail:":        Fail,
+		"suite:xfail:":       XFail,
+		"suite:crash:":       Crash,
+		"suite:timeout:":     Timeout,
+		"suite:pass:":        Pass,
+		`suite:star:op="*"`:  Fail,
+		`suite:star:op="**"`: Pass,
+	}.Save(path))
+	text, err := os.ReadFile(path)
+	require.NoError(t, err)
+	expectFile, err := parseResultsFile(path, text)
+	require.NoError(t, err)
+	state := State{expectFile: expectFile}
+	require.True(t, state.HasExpectationsFile())
+	require.False(t, state.HasTaggedExpectationsFile())
+
+	for testCase, results := range map[TestCase]expectedResults{
+		"suite:skip:":        expectSkip,
+		"suite:fail:":        expectFailure,
+		"suite:xfail:":       expectFailure,
+		"suite:crash:":       expectFailure,
+		"suite:timeout:":     expectFailure,
+		"suite:pass:":        0,
+		`suite:star:op="*"`:  expectFailure,
+		`suite:star:op="**"`: 0,
+		`suite:star:op="+"`:  0,
+		"suite:new:":         0,
+	} {
+		require.Equal(t, results, state.expectation(testCase).results, testCase)
+	}
+
+	remaining, skipped := state.RemoveSkipped([]TestCase{"suite:skip:", "suite:fail:"})
+	require.Equal(t, []TestCase{"suite:fail:"}, remaining)
+	require.Equal(t, []Result{{Index: 1, TestCase: "suite:skip:", Status: Skip, Message: "skipped by " + path + "\n"}}, skipped)
+
+	require.Equal(t, XFail, state.resultsFileStatus("suite:fail:", Crash))
+	require.Equal(t, Pass, state.resultsFileStatus("suite:fail:", Pass))
+	require.Equal(t, Fail, state.resultsFileStatus("suite:pass:", Fail))
+	require.Equal(t, Fail, (&State{}).resultsFileStatus("suite:pass:", Fail))
 }
 
 // stdoutBuffer is a State.Stdout that keeps what is written to it.

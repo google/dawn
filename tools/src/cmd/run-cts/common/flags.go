@@ -67,8 +67,8 @@ func (f *Flags) Register(fsReader oswrapper.FilesystemReader) {
 	flag.BoolVar(&f.FailuresOnly, "failures-only", false, "output only failures to log file")
 	flag.IntVar(&f.NumRunners, "j", runtime.NumCPU()/2, "number of concurrent runners. 0 runs serially")
 	flag.StringVar(&f.Log, "log", "", "path to log file of tests run and result")
-	flag.StringVar(&f.ResultsPath, "output", "", "path to write test results file")
-	flag.StringVar(&f.ExpectationsPath, "expect", "", "path to expectations file: a results file written by -output, or a file in the format of webgpu-cts/expectations.txt")
+	flag.StringVar(&f.ResultsPath, "output", "", "path to write the results to, as JSON: the status of each test case, xfail for a failure that the -expect file expects")
+	flag.StringVar(&f.ExpectationsPath, "expect", "", "path to expectations file: a results file written by -output, or a file in the format of webgpu-cts/expectations.txt. The test cases that it skips are not run, and the failures that it expects do not fail the run")
 	flag.StringVar(&f.ExpectationsTags, "expect-tags", "", "comma-separated tags that select the lines of an expectations.txt file. 'run-cts standalone' adds them to the tags that it works out from the OS, the GPU and the build")
 	flag.StringVar(&f.CTS, "cts", DefaultCtsPath(fsReader), "root directory of WebGPU CTS")
 	flag.StringVar(&f.Node, "node", fileutils.NodePath(fsReader), "path to node executable")
@@ -127,12 +127,11 @@ func (f *Flags) Process(fsReaderWriter oswrapper.FilesystemReaderWriter) (*State
 type State struct {
 	Stdout       io.WriteCloser
 	Log          Logger
-	Expectations Expectations
 	CTS          CTS
 	resultsPath  string
 	failuresOnly bool
 	logWriter    io.WriteCloser
-	expectFile   *expectationsFile // -expect file in the format of expectations.txt
+	expectFile   *expectationsFile // the -expect file
 }
 
 // Close closes s.Stdout and saves the results to the results path (if set)
@@ -143,14 +142,14 @@ func (s *State) Close(results Results) error {
 
 	// If an result file was specified, save results to it.
 	if s.resultsPath != "" {
-		expectations := Expectations{}
+		statuses := Expectations{}
 		for testCase, result := range results {
 			if !s.failuresOnly || result.Status.isFailure() {
-				expectations[testCase] = result.Status
+				statuses[testCase] = s.resultsFileStatus(testCase, result.Status)
 			}
 		}
 
-		if err := expectations.Save(s.resultsPath); err != nil {
+		if err := statuses.Save(s.resultsPath); err != nil {
 			return err
 		}
 	}

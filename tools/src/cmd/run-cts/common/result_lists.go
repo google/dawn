@@ -40,7 +40,7 @@ import (
 // failed, crashed or timed out unexpectedly and, with an expectations file,
 // those that unexpectedly did not.
 type resultLists struct {
-	withExpectationsFile                bool // lists the passes, and the headings say "Unexpected"
+	withExpectationsFile                bool // the headings say "Unexpected"
 	failures, crashes, timeouts, passes []Result
 }
 
@@ -54,9 +54,7 @@ func (l *resultLists) add(result Result) {
 	case Timeout:
 		l.timeouts = append(l.timeouts, result)
 	default:
-		if l.withExpectationsFile {
-			l.passes = append(l.passes, result)
-		}
+		l.passes = append(l.passes, result)
 	}
 }
 

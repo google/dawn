@@ -42,16 +42,18 @@ import (
 )
 
 // expectationsFile holds what a file in the format of
-// webgpu-cts/expectations.txt expects of the test cases of a run. The query
-// that names a test case decides for it, else the longest wildcard query that
-// matches it, and among those of the same length the first one in the file.
+// webgpu-cts/expectations.txt, or a results file written by -output, expects
+// of the test cases of a run. The query that names a test case decides for it,
+// else the longest wildcard query that matches it, and among those of the same
+// length the first one in the file.
 type expectationsFile struct {
-	path         string
-	lines        []expectationLine              // every line of the file
-	declaredTags result.Tags                    // the tags that the tag header declares, in lower case
-	runTags      result.Tags                    // the tags of the run, which select the lines that apply
-	exact        map[TestCase]*queryExpectation // the queries without wildcards
-	wildcards    []*queryExpectation            // sorted by query length (longest first), then by their position in the file.
+	path            string
+	fromResultsFile bool                           // the file is a results file written by -output: its lines have no tags and no line numbers
+	lines           []expectationLine              // every line of the file
+	declaredTags    result.Tags                    // the tags that the tag header declares, in lower case
+	runTags         result.Tags                    // the tags of the run, which select the lines that apply
+	exact           map[TestCase]*queryExpectation // the queries without wildcards
+	wildcards       []*queryExpectation            // sorted by query length (longest first), then by their position in the file.
 }
 
 // queryExpectation is what the lines with one query that apply to the run
@@ -109,10 +111,45 @@ func (s *State) loadExpectations(path, commaSeparatedTags string, fsReader oswra
 		return fmt.Errorf("failed to open expectations file: %w", err)
 	}
 	if isResultsFile(text) {
-		return s.Expectations.parse(text)
+		s.expectFile, err = parseResultsFile(path, text)
+		return err
 	}
 	s.expectFile, err = parseExpectationsFile(path, string(text), parseRunTags(commaSeparatedTags))
 	return err
+}
+
+// parseResultsFile parses text, the contents of the results file at path, as
+// expectations: each of its test cases is a line without tags, except for those
+// that it records as passed, which expect nothing.
+func parseResultsFile(path string, text []byte) (*expectationsFile, error) {
+	statuses := Expectations{}
+	if err := statuses.parse(text); err != nil {
+		return nil, err
+	}
+	expectFile := &expectationsFile{path: path, fromResultsFile: true}
+	for testCase, status := range statuses {
+		results := resultsOfStatus(status)
+		if results == 0 {
+			continue
+		}
+		parsed := &expectations.Expectation{Query: queryOfTestCase(testCase)}
+		expectFile.lines = append(expectFile.lines, expectationLine{parsed: parsed, results: results})
+	}
+	expectFile.selectLines(result.NewTags())
+	return expectFile, nil
+}
+
+// resultsOfStatus returns what a results file that records status for a test
+// case expects of it: a skipped one is skipped, and one that failed, crashed or
+// timed out fails.
+func resultsOfStatus(status Status) expectedResults {
+	switch {
+	case status == Skip:
+		return expectSkip
+	case status.failedOrTimedOut():
+		return expectFailure
+	}
+	return 0
 }
 
 // parseRunTags returns the tags in commaSeparatedTags, in lower case. Spaces
@@ -291,6 +328,13 @@ func (f *expectationsFile) selectLines(runTags result.Tags) {
 	slices.SortStableFunc(f.wildcards, compareQueryLength)
 }
 
+// queryOfTestCase returns the query without wildcards that names testCase, a
+// name as it is written in a results JSON file. A '*' in the name is '\*' in
+// the query.
+func queryOfTestCase(testCase TestCase) string {
+	return strings.ReplaceAll(string(testCase), reducedglob.UNESCAPED_WILDCARD, reducedglob.ESCAPED_WILDCARD)
+}
+
 // testCaseOfQuery returns the test case that query, which has no wildcards,
 // names. A '\*' in a query stands for a '*' in the name.
 func testCaseOfQuery(query string) TestCase {
@@ -350,13 +394,10 @@ func (r expectedResults) unexpected(status Status) bool {
 // RemoveSkipped returns the test cases that the expectations file does not
 // skip, and a skip result for each of the others.
 func (s *State) RemoveSkipped(testCases []TestCase) ([]TestCase, []Result) {
-	if !s.HasExpectationsFile() {
-		return testCases, nil
-	}
 	remaining := make([]TestCase, 0, len(testCases))
 	var skipped []Result
 	for _, testCase := range testCases {
-		expectation := s.expectFile.lookup(testCase)
+		expectation := s.expectation(testCase)
 		if !expectation.results.has(expectSkip) {
 			remaining = append(remaining, testCase)
 			continue
@@ -364,7 +405,7 @@ func (s *State) RemoveSkipped(testCases []TestCase) ([]TestCase, []Result) {
 		skipped = append(skipped, Result{
 			TestCase: testCase,
 			Status:   Skip,
-			Message:  fmt.Sprintf("skipped by %v:%v\n", s.expectFile.path, expectation.skipLine),
+			Message:  fmt.Sprintf("skipped by %v\n", s.expectFile.skippedBy(expectation)),
 		})
 	}
 	// The runners give the results of the remaining test cases the indices from 0.
@@ -374,10 +415,44 @@ func (s *State) RemoveSkipped(testCases []TestCase) ([]TestCase, []Result) {
 	return remaining, skipped
 }
 
-// HasExpectationsFile returns true if -expect names a file in the format of
-// webgpu-cts/expectations.txt.
+// skippedBy returns where the file skips the test cases of expectation: the
+// line with Skip, or just the file for a results file, which has no line
+// numbers.
+func (f *expectationsFile) skippedBy(expectation queryExpectation) string {
+	if f.fromResultsFile {
+		return f.path
+	}
+	return fmt.Sprintf("%v:%v", f.path, expectation.skipLine)
+}
+
+// HasExpectationsFile returns true if -expect names a file.
 func (s *State) HasExpectationsFile() bool {
 	return s.expectFile != nil
+}
+
+// HasTaggedExpectationsFile returns true if -expect names a file in the format
+// of webgpu-cts/expectations.txt, whose lines the tags of the run select. A
+// results file has no tags.
+func (s *State) HasTaggedExpectationsFile() bool {
+	return s.expectFile != nil && !s.expectFile.fromResultsFile
+}
+
+// expectation returns what the -expect file expects of testCase. Without one
+// it is the zero expectation, which expects a test case not to fail.
+func (s *State) expectation(testCase TestCase) queryExpectation {
+	if !s.HasExpectationsFile() {
+		return queryExpectation{}
+	}
+	return s.expectFile.lookup(testCase)
+}
+
+// resultsFileStatus returns the status that -output records for testCase,
+// which had status: XFail for a failure that is expected, else status.
+func (s *State) resultsFileStatus(testCase TestCase, status Status) Status {
+	if status.failedOrTimedOut() && !s.expectation(testCase).results.unexpected(status) {
+		return XFail
+	}
+	return status
 }
 
 // AddAutomaticTags adds automaticTags to the tags of the run, except for those

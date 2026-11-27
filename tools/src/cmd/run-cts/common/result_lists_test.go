@@ -69,15 +69,10 @@ func TestResultLists(t *testing.T) {
 		stdout.String())
 }
 
-// Without an expectations file the headings do not say "Unexpected", and the
-// results that are no failures are not listed.
+// Without an expectations file the headings do not say "Unexpected".
 func TestResultListsWithoutExpectationsFile(t *testing.T) {
 	stdout := &bytes.Buffer{}
 	lists := resultLists{}
-	lists.add(Result{Index: 0, TestCase: "suite:a:", Status: Pass})
-	lists.print(stdout)
-	require.Empty(t, stdout.String())
-
 	lists.add(Result{Index: 1, TestCase: "suite:b:", Status: Fail})
 	lists.print(stdout)
 	require.Equal(t, listHeading(Fail, "Failures (1)")+"  suite:b:\n\n", stdout.String())

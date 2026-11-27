@@ -37,6 +37,7 @@ const (
 	Crash   Status = "crash" // the runner process ended before the test case reported a result
 	Skip    Status = "skip"
 	Timeout Status = "timeout"
+	XFail   Status = "xfail" // only in a results file: a failure that the -expect file expects, which Load reads as Fail
 )
 
 // All the status types

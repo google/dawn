@@ -135,20 +135,10 @@ func StreamResults(
 	for res := range stream {
 		state.Log.logResults(res, failuresOnly)
 		results[res.TestCase] = res
-		// Without expectations, a test case is expected not to fail.
-		expected := Status("")
+		expectation := state.expectation(res.TestCase)
 		exStatus := expectedStatus{
 			status:   res.Status,
-			expected: !res.Status.failedOrTimedOut(),
-		}
-		if state.Expectations != nil {
-			expected = state.Expectations[res.TestCase]
-			exStatus.expected = expected == res.Status
-		}
-		if state.HasExpectationsFile() {
-			expectation := state.expectFile.lookup(res.TestCase)
-			expected = expectation.results.displayStatus()
-			exStatus.expected = !expectation.results.unexpected(res.Status)
+			expected: !expectation.results.unexpected(res.Status),
 		}
 		numByExpectedStatus[exStatus] = numByExpectedStatus[exStatus] + 1
 		if !exStatus.expected {
@@ -165,7 +155,7 @@ func StreamResults(
 			} else {
 				fmt.Fprintf(buf, "%v - %v", name, res.Status)
 			}
-			if expected != "" {
+			if expected := expectation.results.displayStatus(); expected != "" {
 				fmt.Fprintf(buf, " [%v -> %v]", expected, res.Status)
 			}
 			fmt.Fprintln(buf)
@@ -192,46 +182,25 @@ func StreamResults(
 
 	lists.print(stdout)
 
-	var numExpectedByStatus map[Status]int
-	if state.Expectations != nil {
-		// The status of each testcase that was run
-		numExpectedByStatus = map[Status]int{}
-		for t, s := range state.Expectations {
-			if _, wasTested := results[t]; wasTested {
-				numExpectedByStatus[s] = numExpectedByStatus[s] + 1
-			}
-		}
-	}
-
 	unexpectedFailures := 0
 	expectedFailures := 0
 	for _, s := range AllStatuses {
 		// number of tests, just run, that resulted in the given status
 		numByStatus := numByExpectedStatus[expectedStatus{s, true}] +
 			numByExpectedStatus[expectedStatus{s, false}]
-		// With an expectations file, the failures it expects are counted as XFAIL.
+		// The failures that the -expect file expects are counted as XFAIL.
 		failed := s.failedOrTimedOut()
-		if state.HasExpectationsFile() && failed {
+		if failed {
 			expectedFailures += numByExpectedStatus[expectedStatus{s, true}]
 			numByStatus = numByExpectedStatus[expectedStatus{s, false}]
 		}
-		// difference in number of tests that had the given status from the
-		// expected number (taken from the expectations file)
-		diffFromExpected := 0
-		if numExpectedByStatus != nil {
-			diffFromExpected = numByStatus - numExpectedByStatus[s]
-		}
-		if numByStatus == 0 && diffFromExpected == 0 {
+		if numByStatus == 0 {
 			continue
 		}
 
 		numUnexpected := numByExpectedStatus[expectedStatus{s, false}]
 		if s.isFailure() {
-			if !state.HasExpectationsFile() {
-				unexpectedFailures += numByStatus
-			} else {
-				unexpectedFailures += numUnexpected
-			}
+			unexpectedFailures += numUnexpected
 		}
 
 		fmt.Fprint(stdout, term.Bold, statusColor[s])
@@ -244,12 +213,7 @@ func StreamResults(
 		fmt.Fprint(stdout, term.Reset)
 		fmt.Fprint(stdout, alignRight("("+percentage(numByStatus, numTestCases)+")", 6))
 
-		if diffFromExpected != 0 {
-			fmt.Fprint(stdout, term.Bold, " [")
-			fmt.Fprintf(stdout, "%+d", diffFromExpected)
-			fmt.Fprint(stdout, term.Reset, "]")
-		}
-		if state.HasExpectationsFile() && !failed && numUnexpected > 0 {
+		if !failed && numUnexpected > 0 {
 			fmt.Fprint(stdout, term.Bold, " [", numUnexpected, " unexpected]", term.Reset)
 		}
 		fmt.Fprintln(stdout)

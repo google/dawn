@@ -64,7 +64,7 @@ type adapterInfo struct {
 
 // worksOutTags returns true if the run works out its expectation tags.
 func (c *cmd) worksOutTags() bool {
-	return c.standalone && c.state.HasExpectationsFile()
+	return c.standalone && c.state.HasTaggedExpectationsFile()
 }
 
 // readRunInfo returns the run info that the standalone runner prints for
