@@ -138,11 +138,17 @@ func StreamResults(
 			status:   res.Status,
 			expected: expected == res.Status,
 		}
+		if state.HasExpectationsFile() {
+			expectation := state.expectFile.lookup(res.TestCase)
+			expected = expectation.results.displayStatus()
+			exStatus.expected = !expectation.results.unexpected(res.Status)
+		}
 		numByExpectedStatus[exStatus] = numByExpectedStatus[exStatus] + 1
 		name := res.TestCase
 		if verbose ||
 			res.Error != nil ||
-			(exStatus.status != Pass && exStatus.status != Skip && !exStatus.expected) {
+			(exStatus.status != Pass && exStatus.status != Skip && !exStatus.expected) ||
+			(state.HasExpectationsFile() && !exStatus.expected) {
 			buf := &bytes.Buffer{}
 			fmt.Fprint(buf, statusColor[res.Status])
 			if res.Message != "" {
@@ -189,10 +195,17 @@ func StreamResults(
 	}
 
 	unexpectedFailures := 0
+	expectedFailures := 0
 	for _, s := range AllStatuses {
 		// number of tests, just run, that resulted in the given status
 		numByStatus := numByExpectedStatus[expectedStatus{s, true}] +
 			numByExpectedStatus[expectedStatus{s, false}]
+		// With an expectations file, the failures it expects are counted as XFAIL.
+		failed := s.failedOrTimedOut()
+		if state.HasExpectationsFile() && failed {
+			expectedFailures += numByExpectedStatus[expectedStatus{s, true}]
+			numByStatus = numByExpectedStatus[expectedStatus{s, false}]
+		}
 		// difference in number of tests that had the given status from the
 		// expected number (taken from the expectations file)
 		diffFromExpected := 0
@@ -203,8 +216,13 @@ func StreamResults(
 			continue
 		}
 
+		numUnexpected := numByExpectedStatus[expectedStatus{s, false}]
 		if s.isFailure() {
-			unexpectedFailures += 1
+			if !state.HasExpectationsFile() {
+				unexpectedFailures += numByStatus
+			} else {
+				unexpectedFailures += numUnexpected
+			}
 		}
 
 		fmt.Fprint(stdout, term.Bold, statusColor[s])
@@ -222,7 +240,15 @@ func StreamResults(
 			fmt.Fprintf(stdout, "%+d", diffFromExpected)
 			fmt.Fprint(stdout, term.Reset, "]")
 		}
+		if state.HasExpectationsFile() && !failed && numUnexpected > 0 {
+			fmt.Fprint(stdout, term.Bold, " [", numUnexpected, " unexpected]", term.Reset)
+		}
 		fmt.Fprintln(stdout)
+	}
+	if expectedFailures > 0 {
+		fmt.Fprint(stdout, term.Bold, term.Yellow, alignRight("XFAIL: ", 10), term.Reset)
+		fmt.Fprint(stdout, term.Bold, alignLeft(expectedFailures, 10), term.Reset)
+		fmt.Fprintln(stdout, alignRight("("+percentage(expectedFailures, numTestCases)+")", 6))
 	}
 
 	if coverage != nil {

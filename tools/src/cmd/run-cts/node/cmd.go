@@ -230,6 +230,10 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 
 	resultStream := make(chan common.Result, 256)
 	go func() {
+		testCases, skipped := c.state.RemoveSkipped(testCases)
+		for _, result := range skipped {
+			resultStream <- result
+		}
 		runner(ctx, testCases, resultStream, cfg.OsWrapper)
 		close(resultStream)
 	}()

@@ -37,22 +37,11 @@ import (
 // Expectations is a map of test to status
 type Expectations map[TestCase]Status
 
-// Load loads the results from path
-func (e *Expectations) Load(path string) error {
-	f, err := os.Open(path)
-	if err != nil {
-		return fmt.Errorf("failed to open expectations file: %w", err)
-	}
-	defer f.Close()
-
-	stat, err := f.Stat() // Handle empty file
-	if err != nil {
-		return fmt.Errorf("failed to stat file: %w", err)
-	}
-
+// parse sets e to the results in text, the contents of a results file.
+func (e *Expectations) parse(text []byte) error {
 	statuses := []testcaseStatus{}
-	if stat.Size() > 0 {
-		if err := json.NewDecoder(f).Decode(&statuses); err != nil {
+	if len(text) > 0 {
+		if err := json.Unmarshal(text, &statuses); err != nil {
 			return fmt.Errorf("failed to read expectations file: %w", err)
 		}
 	}

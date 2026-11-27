@@ -51,6 +51,7 @@ type Flags struct {
 	Log              string
 	ResultsPath      string
 	ExpectationsPath string
+	ExpectationsTags string
 	CTS              string // Path to the CTS directory or CTS zip
 	Node             string // Path to the Node executable
 	Npx              string // Path to the npx executable
@@ -67,7 +68,8 @@ func (f *Flags) Register(fsReader oswrapper.FilesystemReader) {
 	flag.IntVar(&f.NumRunners, "j", runtime.NumCPU()/2, "number of concurrent runners. 0 runs serially")
 	flag.StringVar(&f.Log, "log", "", "path to log file of tests run and result")
 	flag.StringVar(&f.ResultsPath, "output", "", "path to write test results file")
-	flag.StringVar(&f.ExpectationsPath, "expect", "", "path to expectations file")
+	flag.StringVar(&f.ExpectationsPath, "expect", "", "path to expectations file: a results file written by -output, or a file in the format of webgpu-cts/expectations.txt")
+	flag.StringVar(&f.ExpectationsTags, "expect-tags", "", "comma-separated tags of this run, which select the lines of an expectations.txt file")
 	flag.StringVar(&f.CTS, "cts", DefaultCtsPath(fsReader), "root directory of WebGPU CTS")
 	flag.StringVar(&f.Node, "node", fileutils.NodePath(fsReader), "path to node executable")
 	flag.StringVar(&f.Npx, "npx", DefaultNpxPath(), "path to npx executable")
@@ -109,9 +111,11 @@ func (f *Flags) Process(fsReaderWriter oswrapper.FilesystemReaderWriter) (*State
 
 	// If an expectations file was specified, load it.
 	if f.ExpectationsPath != "" {
-		if err := s.Expectations.Load(f.ExpectationsPath); err != nil {
+		if err := s.loadExpectations(f.ExpectationsPath, f.ExpectationsTags, fsReaderWriter); err != nil {
 			return nil, err
 		}
+	} else if f.ExpectationsTags != "" {
+		return nil, fmt.Errorf("-expect-tags needs -expect")
 	}
 
 	s.CTS = NewCTS(f.CTS, f.Npx, f.Node)
@@ -128,6 +132,7 @@ type State struct {
 	resultsPath  string
 	failuresOnly bool
 	logWriter    io.WriteCloser
+	expectFile   *expectationsFile // -expect file in the format of expectations.txt
 }
 
 // Close closes s.Stdout and saves the results to the results path (if set)

@@ -47,3 +47,9 @@ var AllStatuses = []Status{Pass, Warn, Fail, Crash, Skip, Timeout}
 func (s Status) isFailure() bool {
 	return s == Fail || s == Crash
 }
+
+// failedOrTimedOut returns true for the statuses of a test case that did not
+// pass: fail, crash and timeout.
+func (s Status) failedOrTimedOut() bool {
+	return s == Fail || s == Crash || s == Timeout
+}
