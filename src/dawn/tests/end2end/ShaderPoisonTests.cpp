@@ -151,14 +151,15 @@ TEST_P(ShaderPoisonTests, PoisonedWrite) {
     DAWN_SUPPRESS_TEST_IF(
         IsAMD() && IsMetal() &&
         MatchesCase(
-            {"cross_f32_inf_input",       "cross_f32_nan_input",    "determinant_2x2_inf_input",
-             "determinant_2x2_nan_input", "mat2x2_add_mat2x2",      "mat2x2_mul_mat2x2",
-             "mat2x2_mul_mat2x2_nan",     "mat2x2_mul_scalar",      "mat2x2_mul_scalar_nan",
-             "mat2x2_mul_vec2",           "mat2x2_mul_vec2_nan",    "mat2x2_sub_mat2x2",
-             "mat2x2_sub_mat2x2_nan",     "mat3x3_mul_vec3",        "mat4x3_sub_mat4x3",
-             "mat4x4_mul_mat4x4_f16_nan", "mat4x4_mul_vec4",        "normalize_vec2_inf_input",
-             "normalize_vec2_nan_input",  "reflect_vec2_inf_input", "reflect_vec2_nan_input",
-             "scalar_mul_mat2x2",         "vec_mul_scalar"}));
+            {"cross_f32_inf_input",       "cross_f32_nan_input",       "determinant_2x2_inf_input",
+             "determinant_2x2_nan_input", "mat2x2_add_mat2x2",         "mat2x2_mul_mat2x2",
+             "mat2x2_mul_mat2x2_nan",     "mat2x2_mul_mat2x2_nan_2",   "mat2x2_mul_scalar",
+             "mat2x2_mul_scalar_nan",     "mat2x2_mul_scalar_nan_2",   "mat2x2_mul_scalar_nan_3",
+             "mat2x2_mul_scalar_nan_4",   "mat2x2_mul_vec2",           "mat2x2_mul_vec2_nan",
+             "mat2x2_sub_mat2x2",         "mat2x2_sub_mat2x2_nan",     "mat3x3_mul_vec3",
+             "mat4x3_sub_mat4x3",         "mat4x4_mul_mat4x4_f16_nan", "mat4x4_mul_vec4",
+             "normalize_vec2_inf_input",  "normalize_vec2_nan_input",  "reflect_vec2_inf_input",
+             "reflect_vec2_nan_input",    "scalar_mul_mat2x2",         "vec_mul_scalar"}));
 
     std::ostringstream shader;
     shader << BuildPoisonPreamble(testCase);
