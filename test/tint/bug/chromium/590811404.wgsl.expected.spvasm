@@ -1,0 +1,99 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 54
+; Schema: 0
+               OpCapability Shader
+         %44 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %main_global_invocation_id_Input
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main_global_invocation_id_Input "main_global_invocation_id_Input"
+               OpName %main_inner "main_inner"
+               OpMemberName %In 0 "gid"
+               OpName %In "In"
+               OpName %inp "inp"
+               OpMemberName %S 0 "a"
+               OpMemberName %S 1 "b"
+               OpMemberName %S 2 "c"
+               OpName %S "S"
+               OpName %s "s"
+               OpName %v "v"
+               OpName %k "k"
+               OpName %t "t"
+               OpMemberName %T 0 "x"
+               OpMemberName %T 1 "y"
+               OpMemberName %T 2 "z"
+               OpName %T "T"
+               OpName %u "u"
+               OpName %tint_f32_to_i32 "tint_f32_to_i32"
+               OpName %value "value"
+               OpName %main "main"
+               OpDecorate %main_global_invocation_id_Input BuiltIn GlobalInvocationId
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%main_global_invocation_id_Input = OpVariable %_ptr_Input_v3uint Input
+       %void = OpTypeVoid
+         %In = OpTypeStruct %v3uint
+          %9 = OpTypeFunction %void %In
+          %S = OpTypeStruct %uint %uint %uint
+%_ptr_Function_S = OpTypePointer Function %S
+         %14 = OpConstantNull %S
+      %float = OpTypeFloat 32
+        %int = OpTypeInt 32 1
+          %T = OpTypeStruct %S %S %S
+%_ptr_Function_T = OpTypePointer Function %T
+         %32 = OpConstantNull %T
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+         %41 = OpTypeFunction %int %float
+%float_n2_14748365e_09 = OpConstant %float -2.14748365e+09
+%float_2_14748352e_09 = OpConstant %float 2.14748352e+09
+         %49 = OpTypeFunction %void
+ %main_inner = OpFunction %void None %9
+        %inp = OpFunctionParameter %In
+         %10 = OpLabel
+          %s = OpVariable %_ptr_Function_S Function
+         %29 = OpVariable %_ptr_Function_T Function
+               OpStore %s %14
+          %v = OpLoad %S %s None
+         %16 = OpCompositeExtract %uint %v 0
+         %18 = OpConvertUToF %float %16
+          %k = OpFunctionCall %int %tint_f32_to_i32 %18
+               OpSelectionMerge %24 None
+               OpSwitch %k %22 2144158127 %23
+         %22 = OpLabel
+               OpBranch %24
+         %23 = OpLabel
+         %25 = OpCompositeExtract %uint %v 0
+         %26 = OpCompositeExtract %uint %v 0
+         %27 = OpCompositeExtract %uint %v 0
+          %t = OpCompositeConstruct %S %25 %26 %27
+               OpStore %29 %32
+         %33 = OpAccessChain %_ptr_Function_S %29 %uint_0
+               OpStore %33 %t None
+         %35 = OpAccessChain %_ptr_Function_S %29 %uint_1
+               OpStore %35 %t None
+         %37 = OpAccessChain %_ptr_Function_S %29 %uint_2
+               OpStore %37 %t None
+          %u = OpLoad %T %29 None
+               OpBranch %24
+         %24 = OpLabel
+               OpReturn
+               OpFunctionEnd
+%tint_f32_to_i32 = OpFunction %int None %41
+      %value = OpFunctionParameter %float
+         %42 = OpLabel
+         %43 = OpExtInst %float %44 NClamp %value %float_n2_14748365e_09 %float_2_14748352e_09
+         %47 = OpConvertFToS %int %43
+               OpReturnValue %47
+               OpFunctionEnd
+       %main = OpFunction %void None %49
+         %50 = OpLabel
+         %51 = OpLoad %v3uint %main_global_invocation_id_Input None
+         %52 = OpCompositeConstruct %In %51
+         %53 = OpFunctionCall %void %main_inner %52
+               OpReturn
+               OpFunctionEnd

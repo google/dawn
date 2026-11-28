@@ -173,6 +173,7 @@ struct Options {
     bool use_float_controls2 = false;
     bool use_float_controls_32bit = false;
     bool use_float_controls_16bit = false;
+    bool polyfill_nested_aggregate_construct = false;
     tint::spirv::writer::SpvVersion spirv_version = tint::spirv::writer::SpvVersion::kSpv13;
 
     std::unordered_set<tint::BindingPoint> ycbcr_bindings;
@@ -515,6 +516,14 @@ subgroup uniformity violations that may be produced)",
                                 "unless --use-float-controls2 is specified",
                                 Default(false));
     TINT_DEFER(opts->use_float_controls_16bit = *use_float_controls_16bit.value);
+
+    auto& polyfill_nested_aggregate_construct = options.Add<BoolOption>(
+        "polyfill-nested-aggregate-construct",
+        "Build nested structs and arrays in a local variable instead of OpCompositeConstruct "
+        "(SPIR-V only)",
+        Default{false});
+    TINT_DEFER(opts->polyfill_nested_aggregate_construct =
+                   *polyfill_nested_aggregate_construct.value);
 
     tint::Vector<EnumName<tint::spirv::writer::SpvVersion>, 2> version_enum_names{
         EnumName(tint::spirv::writer::SpvVersion::kSpv13, "1.3"),
@@ -1166,6 +1175,8 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
     gen_options.extensions.use_float_controls_16bit = options.use_float_controls_16bit;
     gen_options.spirv_version = options.spirv_version;
     gen_options.workarounds.polyfill_bool_vec_dynamic_load = options.polyfill_bool_vec_dynamic_load;
+    gen_options.workarounds.polyfill_nested_aggregate_construct =
+        options.polyfill_nested_aggregate_construct;
 
     auto entry_point = inspector.GetEntryPoint(options.ep_name);
 

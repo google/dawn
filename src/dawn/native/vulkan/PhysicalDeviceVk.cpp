@@ -1103,6 +1103,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // of boolean vectors.
         // TODO(crbug.com/587337006): Gate this on driver version once a fixed driver is available.
         deviceToggles->Default(Toggle::PolyfillBoolVecDynamicLoad, true);
+
+        // crbug.com/590811404: Qualcomm's shader compiler fails when optimizing nested aggregate
+        // OpCompositeConstruct instructions.
+        // TODO(crbug.com/590811404): Gate this on driver version once a fixed driver is available.
+        deviceToggles->Default(Toggle::VulkanPolyfillNestedAggregateConstruct, true);
     }
 
     if (MayBeImaginationProprietary()) {

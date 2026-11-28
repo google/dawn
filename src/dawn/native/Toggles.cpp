@@ -1056,6 +1056,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"spirv_float_controls_16bit",
       "Use SPV_KHR_float_controls to preserve INF/NAN for 16-bit floating point.",
       "https://crbug.com/587219560", ToggleStage::Device}},
+    {Toggle::VulkanPolyfillNestedAggregateConstruct,
+     {"vulkan_polyfill_nested_aggregate_construct",
+      "Build nested structs and arrays in a local variable one member at a time instead of "
+      "emitting OpCompositeConstruct. Works around a shader compiler bug in Qualcomm's "
+      "proprietary Adreno Vulkan driver.",
+      "https://crbug.com/590811404", ToggleStage::Device}},
 
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};

@@ -64,6 +64,7 @@
 #include "src/tint/lang/spirv/writer/raise/keep_binding_array_as_pointer.h"
 #include "src/tint/lang/spirv/writer/raise/merge_return.h"
 #include "src/tint/lang/spirv/writer/raise/pass_matrix_by_pointer.h"
+#include "src/tint/lang/spirv/writer/raise/polyfill_nested_aggregate_construct.h"
 #include "src/tint/lang/spirv/writer/raise/remove_unreachable_in_loop_continuing.h"
 #include "src/tint/lang/spirv/writer/raise/replace_unsigned_compare_zero.h"
 #include "src/tint/lang/spirv/writer/raise/resource_table_helper.h"
@@ -302,6 +303,13 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // struct, as SPIR-V requires push constant variables to be typed as a struct. Storage and
     // uniform variables already carry a block struct from the earlier run and are left untouched.
     TINT_CHECK_RESULT(core::ir::transform::BlockDecoratedStructs(module));
+
+    // PolyfillNestedAggregateConstruct must come before ForkExplicitLayoutTypes so any newly
+    // created function-scope variables are considered when deciding whether types need to be
+    // forked without explicit layout decorations.
+    if (options.workarounds.polyfill_nested_aggregate_construct) {
+        TINT_CHECK_RESULT(raise::PolyfillNestedAggregateConstruct(module));
+    }
 
     // ForkExplicitLayoutTypes must come after DecomposeAccess, since it rewrites
     // host-shareable array types to use the explicitly laid array type defined by the SPIR-V

@@ -57,6 +57,8 @@ tint_add_target(tint_lang_spirv_writer_raise lib
   lang/spirv/writer/raise/merge_return.h
   lang/spirv/writer/raise/pass_matrix_by_pointer.cc
   lang/spirv/writer/raise/pass_matrix_by_pointer.h
+  lang/spirv/writer/raise/polyfill_nested_aggregate_construct.cc
+  lang/spirv/writer/raise/polyfill_nested_aggregate_construct.h
   lang/spirv/writer/raise/raise.cc
   lang/spirv/writer/raise/raise.h
   lang/spirv/writer/raise/remove_unreachable_in_loop_continuing.cc
@@ -121,6 +123,7 @@ tint_add_target(tint_lang_spirv_writer_raise_test test
   lang/spirv/writer/raise/keep_binding_array_as_pointer_test.cc
   lang/spirv/writer/raise/merge_return_test.cc
   lang/spirv/writer/raise/pass_matrix_by_pointer_test.cc
+  lang/spirv/writer/raise/polyfill_nested_aggregate_construct_test.cc
   lang/spirv/writer/raise/remove_unreachable_in_loop_continuing_test.cc
   lang/spirv/writer/raise/replace_unsigned_compare_zero_test.cc
   lang/spirv/writer/raise/shader_io_test.cc

@@ -374,6 +374,8 @@ ResultOrUnknownError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpi
         GetDevice()->IsToggleEnabled(Toggle::PolyfillBoolVecDynamicLoad);
     req.tintOptions.workarounds.polyfill_bool_vec_dynamic_store =
         GetDevice()->IsToggleEnabled(Toggle::PolyfillBoolVecDynamicStore);
+    req.tintOptions.workarounds.polyfill_nested_aggregate_construct =
+        GetDevice()->IsToggleEnabled(Toggle::VulkanPolyfillNestedAggregateConstruct);
 
     // Pass matrices to user functions by pointer on Qualcomm devices to workaround a known bug.
     // See crbug.com/tint/2045.

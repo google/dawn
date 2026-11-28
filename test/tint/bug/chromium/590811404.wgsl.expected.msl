@@ -1,0 +1,45 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct In {
+  uint3 gid;
+};
+
+struct S {
+  uint a;
+  uint b;
+  uint c;
+};
+
+struct T {
+  S x;
+  S y;
+  S z;
+};
+
+int tint_f32_to_i32(float value) {
+  return int(clamp(value, -2147483648.0f, 2147483520.0f));
+}
+
+void main_inner(In inp) {
+  S s = {};
+  S const v = s;
+  int const k = tint_f32_to_i32(float(v.a));
+  switch(k) {
+    case 2144158127:
+    {
+      S const t = S{.a=v.a, .b=v.a, .c=v.a};
+      T const u = T{.x=t, .y=t, .z=t};
+      break;
+    }
+    default:
+    {
+      break;
+    }
+  }
+}
+
+[[max_total_threads_per_threadgroup(1)]]
+kernel void v_1(uint3 In_gid [[thread_position_in_grid]]) {
+  (main_inner(In{.gid=In_gid}));
+}

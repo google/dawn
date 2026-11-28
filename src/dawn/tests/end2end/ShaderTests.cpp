@@ -3992,6 +3992,49 @@ struct VO { @builtin(position) pos: vec4f, @location(0) @interpolate(flat) fl: f
     WaitForAllOperations();
 }
 
+// Regression test for crbug.com/590811404.
+TEST_P(ShaderTests, NestedStructConstructInSwitch) {
+    std::string shader = R"(
+struct S {
+    a : u32,
+    b : u32,
+    c : u32,
+}
+struct T {
+    x : S,
+    y : S,
+    z : S,
+}
+struct In {
+    @builtin(global_invocation_id) gid : vec3<u32>,
+}
+
+@compute @workgroup_size(1)
+fn main(inp : In) {
+    var s : S;
+    let v = s;
+    let k = i32(f32(v.a));
+    switch k {
+        case 2144158127: {
+            let t = S(v.a, v.a, v.a);
+            let u = T(t, t, t);
+        }
+        default: {}
+    }
+}
+)";
+
+    wgpu::ComputePipeline pipeline = CreateComputePipeline(shader, "main");
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.DispatchWorkgroups(1);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+}
+
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D11Backend(),
                       D3D12Backend(),

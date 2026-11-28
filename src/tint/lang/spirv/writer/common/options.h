@@ -166,6 +166,11 @@ struct Options {
         /// branch. Works around a sample-rate splitting bug in Imagination/PowerVR drivers.
         bool guard_sample_rate_fragment_shaders = false;
 
+        /// Set to `true` to build nested structs and arrays in a local variable one member at a
+        /// time instead of emitting `OpCompositeConstruct`.
+        /// Works around a shader compiler bug in Qualcomm's proprietary Adreno driver.
+        bool polyfill_nested_aggregate_construct = false;
+
         TINT_REFLECT(Workarounds,
                      polyfill_case_switch,
                      scalarize_max_min_clamp,
@@ -187,7 +192,8 @@ struct Options {
                      polyfill_bool_vec_dynamic_load,
                      polyfill_bool_vec_dynamic_store,
                      scalarize_clip_distances,
-                     guard_sample_rate_fragment_shaders);
+                     guard_sample_rate_fragment_shaders,
+                     polyfill_nested_aggregate_construct);
     };
 
     /// Any options which are controlled by the presence/absence of a vulkan extension.
