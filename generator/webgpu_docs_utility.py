@@ -87,6 +87,28 @@ def log_warning(log_file, message):
         log_file.write(f"WARNING: {message}\n")
 
 
+def is_documentable_part(part):
+    """Returns whether a member or argument can carry documentation.
+
+    The Kotlin generator structurally omits or renames certain parts (see
+    ``kotlin_record_members_unsorted`` in ``dawn_json_generator.py``), so these
+    never appear in the generated API under their source name and checking them
+    produces false "missing documentation" warnings:
+
+    * length parameters, omitted because Kotlin containers carry their own
+      length.
+    * userdata, omitted because Kotlin clients achieve the same with closures.
+    * callback info, replaced with an executor and a callback function.
+    """
+    if part.is_length:
+        return False
+    if part.name.get() == 'userdata':
+        return False
+    if part.type.category == 'callback info':
+        return False
+    return True
+
+
 def check_and_log_incomplete_docs(log_file,
                                   item_name,
                                   item_type,
@@ -473,20 +495,24 @@ def log_incomplete_documentation(log_file, doc_map, by_category_lookups):
                 )
 
             # Check for documentation of item parts (members, arguments, etc.).
+            # Skip parts that the Kotlin generator omits or renames, since those
+            # can never have documentation entries (see is_documentable_part).
             if data_category == 'structs':
-                check_and_log_incomplete_docs(log_file,
-                                              item_name,
-                                              data_category,
-                                              item_obj.members,
-                                              doc_node.get("members", {}),
-                                              part_type='members')
+                check_and_log_incomplete_docs(
+                    log_file,
+                    item_name,
+                    data_category,
+                    [m for m in item_obj.members if is_documentable_part(m)],
+                    doc_node.get("members", {}),
+                    part_type='members')
             elif data_category in ['callbacks', 'functions']:
-                check_and_log_incomplete_docs(log_file,
-                                              item_name,
-                                              data_category,
-                                              item_obj.arguments,
-                                              doc_node.get("args", {}),
-                                              part_type='arguments')
+                check_and_log_incomplete_docs(
+                    log_file,
+                    item_name,
+                    data_category,
+                    [a for a in item_obj.arguments if is_documentable_part(a)],
+                    doc_node.get("args", {}),
+                    part_type='arguments')
             elif data_category == 'objects':
                 method_docs = doc_node.get("methods", {})
                 if not method_docs and item_obj.methods:
@@ -511,13 +537,14 @@ def log_incomplete_documentation(log_file, doc_map, by_category_lookups):
                         )
 
                     if doc_for_method:
-                        check_and_log_incomplete_docs(log_file,
-                                                      method_full_name,
-                                                      "method",
-                                                      method_obj.arguments,
-                                                      doc_for_method.get(
-                                                          "args", {}),
-                                                      part_type='arguments')
+                        check_and_log_incomplete_docs(
+                            log_file,
+                            method_full_name,
+                            "method",
+                            [a for a in method_obj.arguments
+                             if is_documentable_part(a)],
+                            doc_for_method.get("args", {}),
+                            part_type='arguments')
 
 
 def cleanup_doc_map(doc_map, by_category, params):
